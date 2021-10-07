@@ -1,3 +1,41 @@
+diff --git .github/mistaken-pull-closer.yml .github/mistaken-pull-closer.yml
+deleted file mode 100644
+index 8114fa479..000000000
+--- .github/mistaken-pull-closer.yml
++++ /dev/null
+@@ -1,10 +0,0 @@
+-filters:
+-  - true
+-
+-commentBody: |
+-  Thanks for your contribution!  Unfortunately, we don't use GitHub pull
+-  requests to manage code contributions to this repository.  Instead, please
+-  see https://spdk.io/development which provides instructions on how to
+-  submit patches to the SPDK Gerrit instance.
+-
+-addLabel: false
+diff --git .gitignore .gitignore
+index 59c9c6305..c9c85b925 100644
+--- .gitignore
++++ .gitignore
+@@ -2,17 +2,12 @@
+ *.a
+ *.cmd
+ *.d
+-*.dll
+-*.exe
+ *.gcda
+ *.gcno
+ *.kdev4
+ *.ko
+-*.lib
+ *.log
+ *.o
+-*.obj
+-*.pdb
+ *.pyc
+ *.so
+ *.so.*
 diff --git CONFIG CONFIG
 index 8c49c7d2b..fb6bf0eb3 100644
 --- CONFIG
@@ -279,14 +317,14 @@ index 000000000..16bd942f3
 +#endif /* SPDK_POS_NVMF_H_ */
 diff --git include/spdk/pos_thread.h include/spdk/pos_thread.h
 new file mode 100644
-index 000000000..7cb7ab4a2
+index 000000000..71e3e0611
 --- /dev/null
 +++ include/spdk/pos_thread.h
 @@ -0,0 +1,58 @@
 +/*-
 + *   BSD LICENSE
 + *
-+ *   Copyright (c) Intel Corporation.
++ *   Copyright (c) Samsung Corporation.
 + *   All rights reserved.
 + *
 + *   Redistribution and use in source and binary forms, with or without
@@ -299,7 +337,7 @@ index 000000000..7cb7ab4a2
 + *       notice, this list of conditions and the following disclaimer in
 + *       the documentation and/or other materials provided with the
 + *       distribution.
-+ *     * Neither the name of Intel Corporation nor the names of its
++ *     * Neither the name of Samsung Corporation nor the names of its
 + *       contributors may be used to endorse or promote products derived
 + *       from this software without specific prior written permission.
 + *
@@ -343,10 +381,10 @@ index 000000000..7cb7ab4a2
 +#endif /* SPDK_POS_THREAD_H_ */
 diff --git include/spdk/pos_volume.h include/spdk/pos_volume.h
 new file mode 100644
-index 000000000..63d4fdb9e
+index 000000000..843bc01b2
 --- /dev/null
 +++ include/spdk/pos_volume.h
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,123 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -401,12 +439,9 @@ index 000000000..63d4fdb9e
 +enum IO_TYPE {
 +	READ = 0,
 +	WRITE,
-+	FLUSH
-+#ifdef _ADMIN_ENABLED
-+	,
++	FLUSH,
 +	ADMIN = 100,
 +	GET_LOG_PAGE
-+#endif
 +};
 +/*
 + * register the IO submit/compete callback that links uNVMf pos_bdev and Frontend
@@ -436,7 +471,7 @@ index 000000000..63d4fdb9e
 +	char name[VOLUME_NAME_MAX_LEN + 1];
 +	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
 +	char array_name[ARRAY_NAME_MAX_LEN + 1];
-+    char uuid[SPDK_UUID_STRING_LEN];
++	char uuid[SPDK_UUID_STRING_LEN];
 +	uint32_t nqn_id;
 +	uint64_t size_mb;
 +	uint64_t iops_limit;
@@ -445,10 +480,8 @@ index 000000000..63d4fdb9e
 +	pos_bdev_io_handler pos_bdev_io;
 +	/* handler between spdk bdev and pos bdev for NVMe flush command handling */
 +	pos_bdev_io_handler pos_bdev_flush;
-+#ifdef _ADMIN_ENABLED
 +	/* handler between spdk bdev and pos bdev for admin commands */
 +	pos_bdev_io_handler pos_bdev_admin;
-+#endif
 +
 +	/* handler between pos bdev and unvmf */
 +	unvmf_io_handler unvmf_io;
@@ -591,7 +624,7 @@ index 3eb31da30..f0d23886e 100644
  	memset(&g_spdk_app, 0, sizeof(g_spdk_app));
 diff --git lib/event/pos_app.c lib/event/pos_app.c
 new file mode 100644
-index 000000000..4a186ff40
+index 000000000..e2179a85d
 --- /dev/null
 +++ lib/event/pos_app.c
 @@ -0,0 +1,57 @@
@@ -610,7 +643,7 @@ index 000000000..4a186ff40
 + *       notice, this list of conditions and the following disclaimer in
 + *       the documentation and/or other materials provided with the
 + *       distribution.
-+ *     * Neither the name of Intel Corporation nor the names of its
++ *     * Neither the name of Samsung Corporation nor the names of its
 + *       contributors may be used to endorse or promote products derived
 + *       from this software without specific prior written permission.
 + *
@@ -1397,7 +1430,7 @@ index 050502d18..cda5c32b6 100644
  #endif /* SPDK_ACCEL_ENGINE_IOAT_H */
 diff --git module/accel/ioat/pos_accel_engine_ioat.c module/accel/ioat/pos_accel_engine_ioat.c
 new file mode 100644
-index 000000000..86822da00
+index 000000000..488d07532
 --- /dev/null
 +++ module/accel/ioat/pos_accel_engine_ioat.c
 @@ -0,0 +1,94 @@
@@ -1416,7 +1449,7 @@ index 000000000..86822da00
 + *       notice, this list of conditions and the following disclaimer in
 + *       the documentation and/or other materials provided with the
 + *       distribution.
-+ *     * Neither the name of Intel Corporation nor the names of its
++ *     * Neither the name of Samsung Corporation nor the names of its
 + *       contributors may be used to endorse or promote products derived
 + *       from this software without specific prior written permission.
 + *
@@ -1497,7 +1530,7 @@ index 000000000..86822da00
 +}
 diff --git module/accel/ioat/pos_accel_engine_ioat.h module/accel/ioat/pos_accel_engine_ioat.h
 new file mode 100644
-index 000000000..51b894328
+index 000000000..d040c43d3
 --- /dev/null
 +++ module/accel/ioat/pos_accel_engine_ioat.h
 @@ -0,0 +1,46 @@
@@ -1516,7 +1549,7 @@ index 000000000..51b894328
 + *       notice, this list of conditions and the following disclaimer in
 + *       the documentation and/or other materials provided with the
 + *       distribution.
-+ *     * Neither the name of Intel Corporation nor the names of its
++ *     * Neither the name of Samsung Corporation nor the names of its
 + *       contributors may be used to endorse or promote products derived
 + *       from this software without specific prior written permission.
 + *
@@ -1883,14 +1916,14 @@ index 000000000..cca38696d
 +#endif /* POS_BDEV_MALLOC_H */
 diff --git module/bdev/pos/Makefile module/bdev/pos/Makefile
 new file mode 100644
-index 000000000..35f1946bd
+index 000000000..0045180cb
 --- /dev/null
 +++ module/bdev/pos/Makefile
 @@ -0,0 +1,46 @@
 +#
 +#  BSD LICENSE
 +#
-+#  Copyright (c) Intel Corporation.
++#  Copyright (c) Samsung Corporation.
 +#  All rights reserved.
 +#
 +#  Redistribution and use in source and binary forms, with or without
@@ -1903,7 +1936,7 @@ index 000000000..35f1946bd
 +#      notice, this list of conditions and the following disclaimer in
 +#      the documentation and/or other materials provided with the
 +#      distribution.
-+#    * Neither the name of Intel Corporation nor the names of its
++#    * Neither the name of Samsung Corporation nor the names of its
 +#      contributors may be used to endorse or promote products derived
 +#      from this software without specific prior written permission.
 +#
@@ -1935,10 +1968,10 @@ index 000000000..35f1946bd
 +include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
 diff --git module/bdev/pos/bdev_pos.c module/bdev/pos/bdev_pos.c
 new file mode 100644
-index 000000000..268140d3a
+index 000000000..9353cf067
 --- /dev/null
 +++ module/bdev/pos/bdev_pos.c
-@@ -0,0 +1,1050 @@
+@@ -0,0 +1,1040 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -1992,9 +2025,7 @@ index 000000000..268140d3a
 +#include "spdk/pos_nvmf.h"
 +#include "spdk/event.h"
 +#include "spdk/ioat.h"
-+#ifdef _ADMIN_ENABLED
 +#include "spdk/nvmf_transport.h"
-+#endif
 +#include <air/Air_c.h>
 +
 +#include "string.h"
@@ -2088,9 +2119,7 @@ index 000000000..268140d3a
 +	case SPDK_BDEV_IO_TYPE_READ:
 +	case SPDK_BDEV_IO_TYPE_WRITE:
 +	case SPDK_BDEV_IO_TYPE_FLUSH:
-+#ifdef _ADMIN_ENABLED
 +	case SPDK_BDEV_IO_TYPE_NVME_ADMIN:
-+#endif
 +		return true;
 +	/*
 +	case SPDK_BDEV_IO_TYPE_RESET:
@@ -2123,19 +2152,19 @@ index 000000000..268140d3a
 +	if (num_pos_volume > 0) {
 +		spdk_json_write_object_begin(w);
 +		spdk_json_write_named_string_fmt(w, "method",
-+			"\n"
-+			"# Users may change this section to create a different number or volume size of\n"
-+			"# pos volume.\n"
-+			"# This will generate %d Volumes with a pos-allocated backend. Each Volume\n"
-+			"# is mapped with POS volume 1:1 and \n"
-+			"# will has %" PRIu64 "MB in size buffer and these will be named Volume0 through Volume%d.\n"
-+			"# Not all Volumes defined here are necessarily used below.\n"
-+			"[Volume]\n"
-+			"  NumberOfVolume %d\n"
-+			"  VolumeBufferInMB %" PRIu64 "\n",
-+			num_pos_volume, pos_buffer_size,
-+			num_pos_volume - 1, num_pos_volume,
-+			pos_buffer_size);
++						 "\n"
++						 "# Users may change this section to create a different number or volume size of\n"
++						 "# pos volume.\n"
++						 "# This will generate %d Volumes with a pos-allocated backend. Each Volume\n"
++						 "# is mapped with POS volume 1:1 and \n"
++						 "# will has %" PRIu64 "MB in size buffer and these will be named Volume0 through Volume%d.\n"
++						 "# Not all Volumes defined here are necessarily used below.\n"
++						 "[Volume]\n"
++						 "  NumberOfVolume %d\n"
++						 "  VolumeBufferInMB %" PRIu64 "\n",
++						 num_pos_volume, pos_buffer_size,
++						 num_pos_volume - 1, num_pos_volume,
++						 pos_buffer_size);
 +		spdk_json_write_object_end(w);
 +		spdk_json_write_object_end(w);
 +	}
@@ -2430,7 +2459,6 @@ index 000000000..268140d3a
 +	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
 +	return 0;
 +}
-+#ifdef _ADMIN_ENABLED
 +static int bdev_pos_eventq_get_smart_log_page(struct pos_disk *ibdev, struct spdk_io_channel *ch,
 +		struct spdk_nvme_cmd *cmd, struct spdk_bdev_io *bio)
 +{
@@ -2441,6 +2469,8 @@ index 000000000..268140d3a
 +			io->ioType = GET_LOG_PAGE;
 +			io->volume_id = ibdev->volume.id;
 +			io->context = (void *)bio;
++			io->arrayName = ibdev->volume.array_name;
++			io->array_id = ibdev->volume.array_id;
 +			io->complete_cb = bdev_pos_io_complete;
 +			return submit(io);
 +		}
@@ -2484,7 +2514,6 @@ index 000000000..268140d3a
 +	return -EINVAL;
 +}
 +
-+#endif
 +
 +static void bdev_pos_get_buf_cb(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io,
 +				bool success)
@@ -2517,7 +2546,7 @@ index 000000000..268140d3a
 +	uint32_t block_size = bdev_io->bdev->blocklen;
 +
 +	struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
-+	struct pos_volume_info* volume = &(disk->volume);
++	struct pos_volume_info *volume = &(disk->volume);
 +	uint32_t arr_vol_id = volume->id + (volume->array_id << 8);
 +
 +	switch (bdev_io->type) {
@@ -2548,14 +2577,12 @@ index 000000000..268140d3a
 +				     ch,
 +				     bdev_io);
 +}
-+#ifdef _ADMIN_ENABLED
 +static int _bdev_pos_eventq_admin(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
 +{
 +	return bdev_pos_eventq_admin((struct pos_disk *)bdev_io->bdev->ctxt,
 +				     ch,
 +				     bdev_io);
 +}
-+#endif
 +
 +static int _bdev_pos_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
 +{
@@ -2599,7 +2626,6 @@ index 000000000..268140d3a
 +				      (struct pos_task *)bdev_io->driver_ctx,
 +				      bdev_io->u.bdev.offset_blocks * block_size,
 +				      bdev_io->u.bdev.num_blocks * block_size);
-+#ifdef _ADMIN_ENABLED
 +	case SPDK_BDEV_IO_TYPE_NVME_ADMIN: {
 +		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
 +		if (disk->volume.pos_bdev_admin) {
@@ -2608,7 +2634,6 @@ index 000000000..268140d3a
 +			return -1;
 +		}
 +	}
-+#endif
 +	default:
 +		return -1;
 +	}
@@ -2699,9 +2724,7 @@ index 000000000..268140d3a
 +		uint64_t volume_buffer_size = 2 * MB;
 +		mdisk->volume.pos_bdev_io = _bdev_pos_eventq_rw;
 +		mdisk->volume.pos_bdev_flush = _bdev_pos_eventq_flush;
-+#ifdef _ADMIN_ENABLED
 +		mdisk->volume.pos_bdev_admin = _bdev_pos_eventq_admin;
-+#endif
 +		mdisk->pos_buf = spdk_dma_zmalloc(volume_buffer_size, 2 * MB, NULL);
 +	}
 +	if (!mdisk->pos_buf) {
@@ -3241,21 +3264,19 @@ index 000000000..ab8ac8e2d
 +SPDK_RPC_REGISTER("bdev_pos_delete", spdk_rpc_bdev_pos_delete, SPDK_RPC_RUNTIME)
 +SPDK_RPC_REGISTER_ALIAS_DEPRECATED(bdev_pos_delete, delete_pos_bdev)
 diff --git module/event/subsystems/nvmf/event_nvmf.h module/event/subsystems/nvmf/event_nvmf.h
-index b22927ffc..c7e80ef2f 100644
+index b22927ffc..d9352111d 100644
 --- module/event/subsystems/nvmf/event_nvmf.h
 +++ module/event/subsystems/nvmf/event_nvmf.h
-@@ -46,6 +46,9 @@
+@@ -46,6 +46,7 @@
  
  struct spdk_nvmf_admin_passthru_conf {
  	bool identify_ctrlr;
-+#ifdef _ADMIN_ENABLED
 +	bool get_smart_log_page;
-+#endif
  };
  
  struct spdk_nvmf_tgt_conf {
 diff --git module/event/subsystems/nvmf/nvmf_tgt.c module/event/subsystems/nvmf/nvmf_tgt.c
-index 5f5ea5dbd..08b748240 100644
+index 5f5ea5dbd..a24b070d0 100644
 --- module/event/subsystems/nvmf/nvmf_tgt.c
 +++ module/event/subsystems/nvmf/nvmf_tgt.c
 @@ -35,6 +35,7 @@
@@ -3266,18 +3287,17 @@ index 5f5ea5dbd..08b748240 100644
  #include "spdk/log.h"
  #include "spdk/nvme.h"
  #include "spdk/nvmf_cmd.h"
-@@ -62,6 +63,10 @@ struct nvmf_tgt_poll_group {
+@@ -61,7 +62,8 @@ struct nvmf_tgt_poll_group {
+ 
  struct spdk_nvmf_tgt_conf g_spdk_nvmf_tgt_conf = {
  	.acceptor_poll_rate = ACCEPT_TIMEOUT_US,
- 	.admin_passthru.identify_ctrlr = false
-+#ifdef _ADMIN_ENABLED
-+	,
+-	.admin_passthru.identify_ctrlr = false
++	.admin_passthru.identify_ctrlr = false,
 +	.admin_passthru.get_smart_log_page = true
-+#endif
  };
  
  struct spdk_nvmf_tgt *g_spdk_nvmf_tgt = NULL;
-@@ -123,7 +128,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
+@@ -123,7 +125,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
  	free(pg);
  
  	spdk_thread_send_msg(g_tgt_fini_thread, _nvmf_tgt_destroy_poll_group_done, NULL);
@@ -3286,7 +3306,7 @@ index 5f5ea5dbd..08b748240 100644
  	spdk_thread_exit(spdk_get_thread());
  }
  
-@@ -201,7 +206,7 @@ nvmf_tgt_create_poll_groups(void)
+@@ -201,7 +203,7 @@ nvmf_tgt_create_poll_groups(void)
  
  		thread = spdk_thread_create(thread_name, &tmp_cpumask);
  		assert(thread != NULL);
@@ -3295,11 +3315,10 @@ index 5f5ea5dbd..08b748240 100644
  		spdk_thread_send_msg(thread, nvmf_tgt_create_poll_group, NULL);
  	}
  }
-@@ -331,7 +336,38 @@ fixup_identify_ctrlr(struct spdk_nvmf_request *req)
+@@ -331,7 +333,36 @@ fixup_identify_ctrlr(struct spdk_nvmf_request *req)
  	/* Copy the fixed up data back to the response */
  	memcpy(nvme_cdata, &nvmf_cdata, length);
  }
-+#ifdef _ADMIN_ENABLED
 +static int
 +nvmf_custom_smart_log_handler(struct spdk_nvmf_request *req)
 +{
@@ -3330,20 +3349,17 @@ index 5f5ea5dbd..08b748240 100644
 +	}
 +	return spdk_nvmf_bdev_ctrlr_nvme_passthru_admin(bdev, desc, ch, req, NULL);
 +}
-+#endif
  static int
  nvmf_custom_identify_hdlr(struct spdk_nvmf_request *req)
  {
-@@ -394,6 +430,12 @@ nvmf_tgt_advance_state(void)
+@@ -394,6 +425,10 @@ nvmf_tgt_advance_state(void)
  				SPDK_NOTICELOG("Custom identify ctrlr handler enabled\n");
  				spdk_nvmf_set_custom_admin_cmd_hdlr(SPDK_NVME_OPC_IDENTIFY, nvmf_custom_identify_hdlr);
  			}
-+#ifdef _ADMIN_ENABLED
 +			if (g_spdk_nvmf_tgt_conf.admin_passthru.get_smart_log_page) {
 +				SPDK_NOTICELOG("Custom smart log handler enabled\n");
 +				spdk_nvmf_set_custom_admin_cmd_hdlr(SPDK_NVME_OPC_GET_LOG_PAGE, nvmf_custom_smart_log_handler);
 +			}
-+#endif
  			/* Create poll group threads, and send a message to each thread
  			 * and create a poll group.
  			 */
@@ -3426,6 +3442,3480 @@ index 83cb1eb60..12c47996f 100644
  
  @deprecated_alias('delete_null_bdev')
  def bdev_null_delete(client, name):
+diff --git spdk-21.04.patch spdk-21.04.patch
+new file mode 100644
+index 000000000..f918f94fc
+--- /dev/null
++++ spdk-21.04.patch
+@@ -0,0 +1,3468 @@
++diff --git a/.github/mistaken-pull-closer.yml b/.github/mistaken-pull-closer.yml
++deleted file mode 100644
++index 8114fa479..000000000
++--- a/.github/mistaken-pull-closer.yml
+++++ /dev/null
++@@ -1,10 +0,0 @@
++-filters:
++-  - true
++-
++-commentBody: |
++-  Thanks for your contribution!  Unfortunately, we don't use GitHub pull
++-  requests to manage code contributions to this repository.  Instead, please
++-  see https://spdk.io/development which provides instructions on how to
++-  submit patches to the SPDK Gerrit instance.
++-
++-addLabel: false
++diff --git a/.gitignore b/.gitignore
++index 59c9c6305..c9c85b925 100644
++--- a/.gitignore
+++++ b/.gitignore
++@@ -2,17 +2,12 @@
++ *.a
++ *.cmd
++ *.d
++-*.dll
++-*.exe
++ *.gcda
++ *.gcno
++ *.kdev4
++ *.ko
++-*.lib
++ *.log
++ *.o
++-*.obj
++-*.pdb
++ *.pyc
++ *.so
++ *.so.*
++diff --git a/CONFIG b/CONFIG
++index 8c49c7d2b..fb6bf0eb3 100644
++--- a/CONFIG
+++++ b/CONFIG
++@@ -31,6 +31,9 @@
++ #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ #
++ 
+++ # Build config POS
+++CONFIG_POS=n
+++
++ # Installation prefix
++ CONFIG_PREFIX="/usr/local"
++ 
++@@ -92,7 +95,7 @@ CONFIG_WPDK_DIR=
++ 
++ # Build SPDK FIO plugin. Requires CONFIG_FIO_SOURCE_DIR set to a valid
++ # fio source code directory.
++-CONFIG_FIO_PLUGIN=n
+++CONFIG_FIO_PLUGIN=y
++ 
++ # This directory should contain the source code directory for fio
++ # which is required for building the SPDK FIO plugin.
++diff --git a/configure b/configure
++index 3a785ce94..7649bdebb 100755
++--- a/configure
+++++ b/configure
++@@ -452,6 +452,9 @@ for i in "$@"; do
++ 		--without-idxd)
++ 			CONFIG[IDXD]=n
++ 			;;
+++		--with-pos)
+++			CONFIG[POS]=y
+++			;;
++ 		--)
++ 			break
++ 			;;
++diff --git a/include/spdk/nvme.h b/include/spdk/nvme.h
++index f5a8f73c9..0a0b31893 100644
++--- a/include/spdk/nvme.h
+++++ b/include/spdk/nvme.h
++@@ -1028,6 +1028,8 @@ int spdk_nvme_ctrlr_reset_subsystem(struct spdk_nvme_ctrlr *ctrlr);
++  */
++ void spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr);
++ 
+++void spdk_nvme_ctrlr_fail_and_remove(struct spdk_nvme_ctrlr *ctrlr);
+++
++ /**
++  * This function returns the failed status of a given controller.
++  *
++diff --git a/include/spdk/pos.h b/include/spdk/pos.h
++new file mode 100644
++index 000000000..158d85250
++--- /dev/null
+++++ b/include/spdk/pos.h
++@@ -0,0 +1,57 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_POS_H_
+++#define SPDK_POS_H_
+++
+++#include "spdk/stdinc.h"
+++#include "nvmf_spec.h"
+++
+++struct pos_io;
+++
+++#include "pos_nvmf.h"
+++#include "pos_volume.h"
+++
+++#ifdef __cplusplus
+++extern "C" {
+++#endif
+++
+++#define KB (1024)
+++#define MB ((1024)*KB)
+++#define GB ((1024)*MB)
+++
+++#ifdef __cplusplus
+++}
+++#endif
+++
+++#endif /* SPDK_POS_H_ */
++diff --git a/include/spdk/pos_app.h b/include/spdk/pos_app.h
++new file mode 100644
++index 000000000..35b3df73b
++--- /dev/null
+++++ b/include/spdk/pos_app.h
++@@ -0,0 +1,46 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_POS_APP_H_
+++#define SPDK_POS_APP_H_
+++
+++#ifdef __cplusplus
+++extern "C" {
+++#endif
+++
+++void spdk_app_set_rlimit(bool enable_coredump);
+++
+++#ifdef __cplusplus
+++}
+++#endif
+++
+++#endif /* SPDK_POS_APP_H_ */
++diff --git a/include/spdk/pos_nvmf.h b/include/spdk/pos_nvmf.h
++new file mode 100644
++index 000000000..16bd942f3
++--- /dev/null
+++++ b/include/spdk/pos_nvmf.h
++@@ -0,0 +1,108 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_POS_NVMF_H_
+++#define SPDK_POS_NVMF_H_
+++
+++#include "spdk/stdinc.h"
+++#include "nvmf_spec.h"
+++#include "pos.h"
+++
+++#ifdef __cplusplus
+++extern "C" {
+++#endif
+++
+++#define NR_MAX_NAMESPACE 128
+++#define NR_MAX_TRANSPORT 4
+++
+++typedef void (*pos_bdev_delete_callback)(void *cb_arg, int bdeverrno);
+++
+++/*
+++ * create pos_bdev disk that will be attached on uNVMf
+++ */
+++struct spdk_bdev *spdk_bdev_create_pos_disk(const char *volume_name, uint32_t volume_id,
+++		const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+++		bool volume_type_in_memory, const char *array_name, uint32_t array_id);
+++
+++/*
+++ * delete pos_bdev disk
+++ */
+++void spdk_bdev_delete_pos_disk(struct spdk_bdev *bdev, pos_bdev_delete_callback cb_fn,
+++			       void *cb_arg);
+++
+++/**
+++ * Get the NQN ID of the specified subsystem.
+++ *
+++ * \param subsystem Subsystem to query.
+++ *
+++ * \return NQN ID of the specified subsystem.
+++ */
+++uint32_t spdk_nvmf_subsystem_get_id(struct spdk_nvmf_subsystem *subsystem);
+++
+++/**
+++ * This fn is used by POS QOS for initializing
+++ * the subsystem reactor Mapping
+++ *
+++ */
+++void spdk_nvmf_initialize_reactor_subsystem_mapping(void);
+++/**
+++ * This fn is used by POS QOS for getting
+++ * the subsystem reactor Mapping
+++ *
+++ */
+++uint32_t spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactorId, uint32_t subsystemId);
+++
+++void spdk_nvmf_update_reactor_subsystem_mapping(struct spdk_nvmf_qpair* qpair);
+++
+++/**
+++ *
+++ */
+++void spdk_nvmf_configure_pos_qos(bool value);
+++
+++struct spdk_nvmf_ctrlr *
+++spdk_nvmf_subsystem_get_first_ctrlr(struct spdk_nvmf_subsystem *subsystem);
+++
+++struct spdk_nvmf_ctrlr *
+++spdk_nvmf_subsystem_get_next_ctrlr(struct spdk_nvmf_subsystem *subsystem,
+++				   struct spdk_nvmf_ctrlr *prev_ctrlr);
+++
+++char *
+++spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr);
+++
+++int spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem *subsystem);
+++
+++#ifdef __cplusplus
+++}
+++#endif
+++
+++#endif /* SPDK_POS_NVMF_H_ */
++diff --git a/include/spdk/pos_thread.h b/include/spdk/pos_thread.h
++new file mode 100644
++index 000000000..71e3e0611
++--- /dev/null
+++++ b/include/spdk/pos_thread.h
++@@ -0,0 +1,58 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++/** \file
+++ * Thread
+++ */
+++
+++#ifndef SPDK_POS_THREAD_H_
+++#define SPDK_POS_THREAD_H_
+++
+++#include "spdk/stdinc.h"
+++
+++#include "spdk/cpuset.h"
+++#include "spdk/queue.h"
+++
+++#ifdef __cplusplus
+++extern "C" {
+++#endif
+++
+++void set_tls_thread_to_reactor(int reactor, struct spdk_thread *thread);
+++void clear_thread_to_reactor(void);
+++struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
+++
+++#ifdef __cplusplus
+++}
+++#endif
+++
+++#endif /* SPDK_POS_THREAD_H_ */
++diff --git a/include/spdk/pos_volume.h b/include/spdk/pos_volume.h
++new file mode 100644
++index 000000000..843bc01b2
++--- /dev/null
+++++ b/include/spdk/pos_volume.h
++@@ -0,0 +1,123 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_POS_VOLUME_H_
+++#define SPDK_POS_VOLUME_H_
+++
+++#include "spdk/stdinc.h"
+++#include "nvmf_spec.h"
+++#include "pos.h"
+++#include "uuid.h"
+++
+++#ifdef __cplusplus
+++extern "C" {
+++#endif
+++
+++#define POS_IO_STATUS_SUCCESS (0)
+++#define POS_IO_STATUS_FAIL (-1)
+++
+++#define VOLUME_NAME_MAX_LEN (255)
+++#define NR_MAX_VOLUME (256)
+++#define ARRAY_NAME_MAX_LEN (63)
+++
+++enum IO_TYPE {
+++	READ = 0,
+++	WRITE,
+++	FLUSH,
+++	ADMIN = 100,
+++	GET_LOG_PAGE
+++};
+++/*
+++ * register the IO submit/compete callback that links uNVMf pos_bdev and Frontend
+++ */
+++typedef int (*unvmf_submit_handler)(struct pos_io *io);
+++typedef void (*unvmf_complete_handler)(void);
+++typedef struct unvmf_io_handler {
+++	unvmf_submit_handler submit;
+++	unvmf_complete_handler complete;
+++} unvmf_io_handler;
+++uint32_t get_attached_subsystem_id(const char *bdev_name);
+++void spdk_bdev_pos_register_io_handler(const char *bdev_name, unvmf_io_handler handler);
+++
+++struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
+++void spdk_bdev_pos_unregister_io_handler(const char *bdev_name);
+++
+++void set_pos_volume_info(const char *bdev_name, const char *nqn, int nqn_id);
+++void reset_pos_volume_info(const char *bdev_name);
+++void send_msg_to_all_nvmf_thread(uint32_t current_core, void *fn, void *arg1);
+++const char *get_attached_subsystem_nqn(const char *bdev_name);
+++
+++/* uNVMf to pos volume information */
+++typedef int (*pos_bdev_io_handler)(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io);
+++struct pos_volume_info {
+++	uint32_t id;
+++	uint32_t array_id;
+++	char name[VOLUME_NAME_MAX_LEN + 1];
+++	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
+++	char array_name[ARRAY_NAME_MAX_LEN + 1];
+++	char uuid[SPDK_UUID_STRING_LEN];
+++	uint32_t nqn_id;
+++	uint64_t size_mb;
+++	uint64_t iops_limit;
+++	uint64_t bw_limit;
+++	/* handler between spdk bdev and pos bdev */
+++	pos_bdev_io_handler pos_bdev_io;
+++	/* handler between spdk bdev and pos bdev for NVMe flush command handling */
+++	pos_bdev_io_handler pos_bdev_flush;
+++	/* handler between spdk bdev and pos bdev for admin commands */
+++	pos_bdev_io_handler pos_bdev_admin;
+++
+++	/* handler between pos bdev and unvmf */
+++	unvmf_io_handler unvmf_io;
+++};
+++
+++/* uNVMf to pos IO descriptor */
+++typedef void (*pos_bdev_io_complete_callback)(struct pos_io *io, int status);
+++struct pos_io {
+++	int ioType;
+++	uint32_t volume_id;
+++	uint32_t array_id;
+++	struct iovec *iov;
+++	int iovcnt;
+++	uint64_t length;
+++	uint64_t offset;
+++	void *context;
+++	char *arrayName;
+++	pos_bdev_io_complete_callback complete_cb;
+++};
+++
+++
+++#ifdef __cplusplus
+++}
+++#endif
+++
+++#endif /* SPDK_POS_H_ */
++diff --git a/include/spdk_internal/sock.h b/include/spdk_internal/sock.h
++index 841b1cf5c..ba32baf42 100644
++--- a/include/spdk_internal/sock.h
+++++ b/include/spdk_internal/sock.h
++@@ -47,7 +47,7 @@
++ extern "C" {
++ #endif
++ 
++-#define MAX_EVENTS_PER_POLL 32
+++#define MAX_EVENTS_PER_POLL 1025
++ #define DEFAULT_SOCK_PRIORITY 0
++ #define MIN_SOCK_PIPE_SIZE 1024
++ #define MIN_SO_RCVBUF_SIZE (2 * 1024 * 1024)
++diff --git a/lib/accel/accel_engine.c b/lib/accel/accel_engine.c
++index 450595120..6924f80d0 100644
++--- a/lib/accel/accel_engine.c
+++++ b/lib/accel/accel_engine.c
++@@ -805,17 +805,20 @@ accel_engine_create_cb(void *io_device, void *ctx_buf)
++ 		batch++;
++ 	}
++ 
+++	accel_ch->engine_ch = NULL;
+++
++ 	if (g_hw_accel_engine != NULL) {
++ 		accel_ch->engine_ch = g_hw_accel_engine->get_io_channel();
++ 		accel_ch->engine = g_hw_accel_engine;
+++	}
+++
+++	if (accel_ch->engine_ch != NULL) {
+++		accel_ch->engine->capabilities = accel_ch->engine->get_capabilities();
++ 	} else {
++ 		/* No hw engine enabled, use sw. */
++ 		accel_ch->engine_ch = g_sw_accel_engine->get_io_channel();
++ 		accel_ch->engine = g_sw_accel_engine;
++ 	}
++-	assert(accel_ch->engine_ch != NULL);
++-	accel_ch->engine->capabilities = accel_ch->engine->get_capabilities();
++-
++ 	return 0;
++ }
++ 
++diff --git a/lib/bdev/bdev.c b/lib/bdev/bdev.c
++index 9c741d001..e041ca477 100644
++--- a/lib/bdev/bdev.c
+++++ b/lib/bdev/bdev.c
++@@ -6167,7 +6167,7 @@ spdk_bdev_set_qos_rate_limits(struct spdk_bdev *bdev, uint64_t *limits,
++ 	bool				disable_rate_limit = true;
++ 
++ 	for (i = 0; i < SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES; i++) {
++-		if (limits[i] == SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
+++		if (limits[i] >= SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
++ 			continue;
++ 		}
++ 
++@@ -6183,13 +6183,20 @@ spdk_bdev_set_qos_rate_limits(struct spdk_bdev *bdev, uint64_t *limits,
++ 			min_limit_per_sec = SPDK_BDEV_QOS_MIN_BYTES_PER_SEC;
++ 		}
++ 
+++		if (limits[i] < min_limit_per_sec && limits[i] > 0) {
+++			limits[i] = 0;
+++			disable_rate_limit = true;
+++			continue;
+++		}
+++
++ 		limit_set_complement = limits[i] % min_limit_per_sec;
++ 		if (limit_set_complement) {
++-			SPDK_ERRLOG("Requested rate limit %" PRIu64 " is not a multiple of %" PRIu64 "\n",
+++			SPDK_NOTICELOG("Requested rate limit %" PRIu64 " is not a multiple of %" PRIu64 "\n",
++ 				    limits[i], min_limit_per_sec);
++ 			limits[i] += min_limit_per_sec - limit_set_complement;
++-			SPDK_ERRLOG("Round up the rate limit to %" PRIu64 "\n", limits[i]);
+++			SPDK_NOTICELOG("Round up the rate limit to %" PRIu64 "\n", limits[i]);
++ 		}
+++
++ 	}
++ 
++ 	ctx = calloc(1, sizeof(*ctx));
++diff --git a/lib/event/Makefile b/lib/event/Makefile
++index 359bfe81f..9c3805879 100644
++--- a/lib/event/Makefile
+++++ b/lib/event/Makefile
++@@ -41,7 +41,7 @@ CFLAGS += $(ENV_CFLAGS)
++ 
++ LIBNAME = event
++ C_SRCS = app.c reactor.c rpc.c subsystem.c json_config.c log_rpc.c \
++-	 app_rpc.c subsystem_rpc.c scheduler_static.c
+++	 app_rpc.c subsystem_rpc.c scheduler_static.c pos_app.c
++ 
++ # Do not compile schedulers and governors based on DPDK env
++ # if non-DPDK env is used.
++diff --git a/lib/event/app.c b/lib/event/app.c
++index 3eb31da30..f0d23886e 100644
++--- a/lib/event/app.c
+++++ b/lib/event/app.c
++@@ -44,6 +44,7 @@
++ #include "spdk/string.h"
++ #include "spdk/rpc.h"
++ #include "spdk/util.h"
+++#include "spdk/pos_app.h"
++ 
++ #define SPDK_APP_DEFAULT_LOG_LEVEL		SPDK_LOG_NOTICE
++ #define SPDK_APP_DEFAULT_LOG_PRINT_LEVEL	SPDK_LOG_INFO
++@@ -507,10 +508,10 @@ spdk_app_start(struct spdk_app_opts *opts_user, spdk_msg_fn start_fn,
++ #ifndef SPDK_NO_RLIMIT
++ 	if (opts->enable_coredump) {
++ 		struct rlimit core_limits;
++-
++ 		core_limits.rlim_cur = core_limits.rlim_max = SPDK_APP_DEFAULT_CORE_LIMIT;
++ 		setrlimit(RLIMIT_CORE, &core_limits);
++ 	}
+++	spdk_app_set_rlimit(opts->enable_coredump);
++ #endif
++ 
++ 	memset(&g_spdk_app, 0, sizeof(g_spdk_app));
++diff --git a/lib/event/pos_app.c b/lib/event/pos_app.c
++new file mode 100644
++index 000000000..e2179a85d
++--- /dev/null
+++++ b/lib/event/pos_app.c
++@@ -0,0 +1,57 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "spdk/stdinc.h"
+++#include "spdk/pos_app.h"
+++
+++#define SPDK_APP_DEFAULT_CORE_FILTER_CMD_LENGTH 60
+++#define SPDK_APP_DEFAULT_CORE_FILTER 0x73 /*5, 6 bits are hugepage bit*/
+++#define SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR 65536
+++
+++void spdk_app_set_rlimit(bool enable_coredump)
+++{
+++	struct rlimit limits;
+++	if (enable_coredump) {
+++		limits.rlim_cur = limits.rlim_max = RLIM_INFINITY; /* unlimited */
+++		setrlimit(RLIMIT_CORE, &limits);
+++		setrlimit(RLIMIT_FSIZE, &limits);
+++		int process_id = getpid();
+++		char coredump_filter_string[SPDK_APP_DEFAULT_CORE_FILTER_CMD_LENGTH];
+++		sprintf(coredump_filter_string, "echo 0x%x > /proc/%d/coredump_filter", \
+++			SPDK_APP_DEFAULT_CORE_FILTER, process_id);
+++		system(coredump_filter_string);
+++	}
+++	// rlimit for number of file descriptors cannot be set as "unlimited" when I tested.
+++	// so, we just set temporary value.
+++	limits.rlim_cur = limits.rlim_max = SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR;
+++	setrlimit(RLIMIT_NOFILE, &limits);
+++}
++diff --git a/lib/event/reactor.c b/lib/event/reactor.c
++index 4b058ab32..0cac0a658 100644
++--- a/lib/event/reactor.c
+++++ b/lib/event/reactor.c
++@@ -52,7 +52,7 @@
++ #include <pthread_np.h>
++ #endif
++ 
++-#define SPDK_EVENT_BATCH_SIZE		8
+++#define SPDK_EVENT_BATCH_SIZE		64
++ 
++ static struct spdk_reactor *g_reactors;
++ static uint32_t g_reactor_count;
++diff --git a/lib/nvme/nvme_ctrlr.c b/lib/nvme/nvme_ctrlr.c
++index d15ebdd73..ffc7d4c61 100644
++--- a/lib/nvme/nvme_ctrlr.c
+++++ b/lib/nvme/nvme_ctrlr.c
++@@ -926,6 +926,15 @@ nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr, bool hot_remove)
++  * Any private functions being called from a thread already holding
++  * the ctrlr lock should call nvme_ctrlr_fail directly.
++  */
+++
+++void
+++spdk_nvme_ctrlr_fail_and_remove(struct spdk_nvme_ctrlr *ctrlr)
+++{
+++	nvme_robust_mutex_lock(&ctrlr->ctrlr_lock);
+++	nvme_ctrlr_fail(ctrlr, true);
+++	nvme_robust_mutex_unlock(&ctrlr->ctrlr_lock);
+++}
+++
++ void
++ spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr)
++ {
++@@ -967,9 +976,10 @@ nvme_ctrlr_shutdown_async(struct spdk_nvme_ctrlr *ctrlr,
++ 	 *  10 seconds as a reasonable amount of time to
++ 	 *  wait before proceeding.
++ 	 */
+++	uint32_t max_shutdown_timeout_max = 5000;
++ 	NVME_CTRLR_DEBUGLOG(ctrlr, "RTD3E = %" PRIu32 " us\n", ctrlr->cdata.rtd3e);
++ 	ctx->shutdown_timeout_ms = SPDK_CEIL_DIV(ctrlr->cdata.rtd3e, 1000);
++-	ctx->shutdown_timeout_ms = spdk_max(ctx->shutdown_timeout_ms, 10000);
+++	ctx->shutdown_timeout_ms = spdk_max(ctx->shutdown_timeout_ms, max_shutdown_timeout_max);
++ 	NVME_CTRLR_DEBUGLOG(ctrlr, "shutdown timeout = %" PRIu32 " ms\n", ctx->shutdown_timeout_ms);
++ 
++ 	ctx->shutdown_start_tsc = spdk_get_ticks();
++diff --git a/lib/nvme/nvme_ctrlr_cmd.c b/lib/nvme/nvme_ctrlr_cmd.c
++index 29d76f333..dcd28d5b7 100644
++--- a/lib/nvme/nvme_ctrlr_cmd.c
+++++ b/lib/nvme/nvme_ctrlr_cmd.c
++@@ -600,8 +600,10 @@ _nvme_ctrlr_submit_abort_request(struct spdk_nvme_ctrlr *ctrlr,
++ {
++ 	/* ACL is a 0's based value. */
++ 	if (ctrlr->outstanding_aborts >= ctrlr->cdata.acl + 1U) {
++-		STAILQ_INSERT_TAIL(&ctrlr->queued_aborts, req, stailq);
++-		return 0;
+++		// PoseidonOS will process for excced acl case.
+++		// Abort cmd may be completed when spdk_nvme_detach in 20.07
+++		// But, that does not sync up with unvme_drv. so, unvme_drv handles the abort retry.
+++		return -ENOMEM;
++ 	} else {
++ 		ctrlr->outstanding_aborts++;
++ 		return nvme_ctrlr_submit_admin_request(ctrlr, req);
++diff --git a/lib/nvmf/Makefile b/lib/nvmf/Makefile
++index e7eab45b9..b5d7bd790 100644
++--- a/lib/nvmf/Makefile
+++++ b/lib/nvmf/Makefile
++@@ -38,7 +38,7 @@ SO_VER := 8
++ SO_MINOR := 0
++ 
++ C_SRCS = ctrlr.c ctrlr_discovery.c ctrlr_bdev.c \
++-	 subsystem.c nvmf.c nvmf_rpc.c transport.c tcp.c
+++	 subsystem.c nvmf.c nvmf_rpc.c transport.c tcp.c pos_nvmf.c
++ 
++ C_SRCS-$(CONFIG_RDMA) += rdma.c
++ LIBNAME = nvmf
++diff --git a/lib/nvmf/ctrlr.c b/lib/nvmf/ctrlr.c
++index 4fe815d06..cfcfc4a84 100644
++--- a/lib/nvmf/ctrlr.c
+++++ b/lib/nvmf/ctrlr.c
++@@ -42,6 +42,7 @@
++ #include "spdk/trace.h"
++ #include "spdk/nvme_spec.h"
++ #include "spdk/nvmf_cmd.h"
+++#include "spdk/pos_nvmf.h"
++ #include "spdk/string.h"
++ #include "spdk/util.h"
++ #include "spdk/version.h"
++@@ -52,6 +53,7 @@
++ #define NVMF_DISC_KATO_IN_MS 120000
++ #define KAS_TIME_UNIT_IN_MS 100
++ #define KAS_DEFAULT_VALUE (MIN_KEEP_ALIVE_TIMEOUT_IN_MS / KAS_TIME_UNIT_IN_MS)
+++#define ADMIN_QID (0)
++ 
++ /*
++  * Report the SPDK version as the firmware revision.
++@@ -499,7 +501,15 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
++ 	  */
++ 	qpair->ctrlr = NULL;
++ 
+++	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
+++	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
+++		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
+++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
+++		goto end;
+++	}
+++
++ 	/* Make sure the controller is not being destroyed. */
+++
++ 	if (ctrlr->in_destruct) {
++ 		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
++ 		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
++@@ -542,6 +552,8 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
++ 	}
++ 
++ 	ctrlr_add_qpair_and_update_rsp(qpair, ctrlr, rsp);
+++
+++	spdk_nvmf_update_reactor_subsystem_mapping(qpair);
++ end:
++ 	spdk_nvmf_request_complete(req);
++ }
++@@ -574,6 +586,14 @@ _nvmf_ctrlr_add_io_qpair(void *ctx)
++ 		return;
++ 	}
++ 
+++	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
+++	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
+++		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
+++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
+++		spdk_nvmf_request_complete(req);
+++		return;
+++	}
+++
++ 	/* fail before passing a message to the controller thread. */
++ 	if (ctrlr->in_destruct) {
++ 		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
++@@ -781,7 +801,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
++ 		goto out;
++ 	}
++ 
++-	sgroup->mgmt_io_outstanding++;
+++	spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
++ 	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
++ 
++ 	status = _nvmf_ctrlr_connect(req);
++@@ -1683,7 +1703,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
++ 	/* AER cmd is an exception */
++ 	sgroup = &req->qpair->group->sgroups[ctrlr->subsys->id];
++ 	assert(sgroup != NULL);
++-	sgroup->mgmt_io_outstanding--;
++ 
++ 	/* Four asynchronous events are supported for now */
++ 	if (ctrlr->nr_aer_reqs >= NVMF_MAX_ASYNC_EVENTS) {
++@@ -3571,7 +3590,7 @@ spdk_nvmf_request_exec_fabrics(struct spdk_nvmf_request *req)
++ 	}
++ 
++ 	assert(sgroup != NULL);
++-	sgroup->mgmt_io_outstanding++;
+++	spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
++ 
++ 	/* Place the request on the outstanding list so we can keep track of it */
++ 	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
++@@ -3609,7 +3628,7 @@ spdk_nvmf_request_exec(struct spdk_nvmf_request *req)
++ 				TAILQ_INSERT_TAIL(&sgroup->queued, req, link);
++ 				return;
++ 			}
++-			sgroup->mgmt_io_outstanding++;
+++			spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
++ 		} else {
++ 			nsid = req->cmd->nvme_cmd.nsid;
++ 
++diff --git a/lib/nvmf/nvmf.c b/lib/nvmf/nvmf.c
++index 05aaff048..ac750daa8 100644
++--- a/lib/nvmf/nvmf.c
+++++ b/lib/nvmf/nvmf.c
++@@ -1055,7 +1055,10 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
++ 
++ 	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
++ 	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
++-
+++	if (qpair->qid != 0) {
+++		spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
+++							M_INVALID_SUBSYSTEM);
+++	}
++ 	qpair_ctx = calloc(1, sizeof(struct nvmf_qpair_disconnect_ctx));
++ 	if (!qpair_ctx) {
++ 		SPDK_ERRLOG("Unable to allocate context for nvmf_qpair_disconnect\n");
++diff --git a/lib/nvmf/nvmf_internal.h b/lib/nvmf/nvmf_internal.h
++index d76b742a3..7a9fb03a9 100644
++--- a/lib/nvmf/nvmf_internal.h
+++++ b/lib/nvmf/nvmf_internal.h
++@@ -49,6 +49,9 @@
++ 
++ #define NVMF_MAX_ASYNC_EVENTS	(4)
++ 
+++#define M_INVALID_SUBSYSTEM (0)
+++#define M_VALID_SUBSYSTEM (1)
+++
++ enum spdk_nvmf_subsystem_state {
++ 	SPDK_NVMF_SUBSYSTEM_INACTIVE = 0,
++ 	SPDK_NVMF_SUBSYSTEM_ACTIVATING,
++@@ -361,6 +364,8 @@ void nvmf_subsystem_remove_all_listeners(struct spdk_nvmf_subsystem *subsystem,
++ 		bool stop);
++ struct spdk_nvmf_ctrlr *nvmf_subsystem_get_ctrlr(struct spdk_nvmf_subsystem *subsystem,
++ 		uint16_t cntlid);
+++int nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
+++			 enum spdk_nvmf_subsystem_state state);
++ struct spdk_nvmf_subsystem_listener *nvmf_subsystem_find_listener(
++ 	struct spdk_nvmf_subsystem *subsystem,
++ 	const struct spdk_nvme_transport_id *trid);
++diff --git a/lib/nvmf/pos_nvmf.c b/lib/nvmf/pos_nvmf.c
++new file mode 100644
++index 000000000..446c5450a
++--- /dev/null
+++++ b/lib/nvmf/pos_nvmf.c
++@@ -0,0 +1,159 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "spdk/stdinc.h"
+++
+++#include "nvmf_internal.h"
+++#include "transport.h"
+++
+++#include "spdk/bit_array.h"
+++#include "spdk/endian.h"
+++#include "spdk/thread.h"
+++#include "spdk/trace.h"
+++#include "spdk/nvme_spec.h"
+++#include "spdk/nvmf_cmd.h"
+++#include "spdk/pos_nvmf.h"
+++#include "spdk/string.h"
+++#include "spdk/util.h"
+++#include "spdk/version.h"
+++
+++#include "spdk/log.h"
+++
+++//This will be Changed to getting info from POS reactor info
+++#define M_MAX_REACTOR (128)
+++#define M_MAX_SUBSYSTEM (1024)
+++#define NVMF_CONNECT (0)
+++#define NVMF_DISCONNECT (1)
+++
+++volatile bool pos_qos_enable = false;
+++
+++uint32_t reactorSubsystemIdMap[M_MAX_REACTOR][M_MAX_SUBSYSTEM] = {M_INVALID_SUBSYSTEM};
+++
+++struct spdk_nvmf_ctrlr *
+++spdk_nvmf_subsystem_get_first_ctrlr(struct spdk_nvmf_subsystem *subsystem)
+++{
+++	return TAILQ_FIRST(&subsystem->ctrlrs);
+++}
+++
+++struct spdk_nvmf_ctrlr *
+++spdk_nvmf_subsystem_get_next_ctrlr(struct spdk_nvmf_subsystem *subsystem,
+++				   struct spdk_nvmf_ctrlr *prev_ctrlr)
+++{
+++	return TAILQ_NEXT(prev_ctrlr, link);
+++}
+++
+++void spdk_nvmf_configure_pos_qos(bool value)
+++{
+++	pos_qos_enable = value;
+++}
+++
+++char *
+++spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr)
+++{
+++	return ctrlr->hostnqn;
+++}
+++
+++uint32_t
+++spdk_nvmf_subsystem_get_id(struct spdk_nvmf_subsystem *subsystem)
+++{
+++	return subsystem->id;
+++}
+++
+++void
+++spdk_nvmf_initialize_reactor_subsystem_mapping(void)
+++{
+++	for (uint32_t reactor = 0; reactor < M_MAX_REACTOR; reactor++) {
+++		for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEM; subsys++) {
+++			reactorSubsystemIdMap[reactor][subsys] = M_INVALID_SUBSYSTEM;
+++		}
+++	}
+++}
+++
+++uint32_t
+++spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactor, uint32_t id)
+++{
+++	return (reactorSubsystemIdMap[reactor][id]);
+++}
+++
+++void
+++spdk_nvmf_set_reactor_subsystem_mapping(uint32_t reactor, uint32_t id, uint32_t value)
+++{
+++	if (false == pos_qos_enable) {
+++		return;
+++	}
+++	if (M_VALID_SUBSYSTEM == value) {
+++		reactorSubsystemIdMap[reactor][id] += 1;
+++	} else {
+++		reactorSubsystemIdMap[reactor][id] -= 1;
+++	}
+++}
+++
+++static void
+++_nvmf_update_reactor_subsystem_mapping(void *ctx)
+++{
+++	struct spdk_nvmf_qpair *qpair = ctx;
+++	if (qpair->ctrlr->subsys != NULL) {
+++		if (qpair->qid != 0) {
+++			spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
+++								M_VALID_SUBSYSTEM);
+++		}
+++	}
+++}
+++
+++void
+++spdk_nvmf_update_reactor_subsystem_mapping(struct spdk_nvmf_qpair* qpair)
+++{
+++    if (spdk_likely(qpair->group->thread != spdk_get_thread())) {
+++        spdk_thread_send_msg(qpair->group->thread, _nvmf_update_reactor_subsystem_mapping, qpair);
+++        return;
+++    } else {
+++        _nvmf_update_reactor_subsystem_mapping(qpair);
+++        return;
+++    }
+++}
+++
+++void
+++spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(struct spdk_nvmf_request *req,
+++		struct spdk_nvmf_subsystem_poll_group *sgroup)
+++{
+++	struct spdk_nvme_cmd *cmd = &req->cmd->nvme_cmd;
+++	if (cmd->opc == SPDK_NVME_OPC_ASYNC_EVENT_REQUEST) {
+++		return;
+++	}
+++	sgroup->mgmt_io_outstanding++;
+++}
+++
+++int
+++spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem *subsystem)
+++{
+++	return nvmf_subsystem_set_state(subsystem, SPDK_NVMF_SUBSYSTEM_PAUSED);
+++}
++diff --git a/lib/nvmf/rdma.c b/lib/nvmf/rdma.c
++index e7f3f8ea6..9b154437c 100644
++--- a/lib/nvmf/rdma.c
+++++ b/lib/nvmf/rdma.c
++@@ -3774,7 +3774,8 @@ static int
++ nvmf_rdma_poller_poll(struct spdk_nvmf_rdma_transport *rtransport,
++ 		      struct spdk_nvmf_rdma_poller *rpoller)
++ {
++-	struct ibv_wc wc[32];
+++	const int NUM_POLL_ENTRIES = 128;
+++	struct ibv_wc wc[NUM_POLL_ENTRIES];
++ 	struct spdk_nvmf_rdma_wr	*rdma_wr;
++ 	struct spdk_nvmf_rdma_request	*rdma_req;
++ 	struct spdk_nvmf_rdma_recv	*rdma_recv;
++@@ -3785,7 +3786,7 @@ nvmf_rdma_poller_poll(struct spdk_nvmf_rdma_transport *rtransport,
++ 	uint64_t poll_tsc = spdk_get_ticks();
++ 
++ 	/* Poll for completing operations. */
++-	reaped = ibv_poll_cq(rpoller->cq, 32, wc);
+++	reaped = ibv_poll_cq(rpoller->cq, NUM_POLL_ENTRIES, wc);
++ 	if (reaped < 0) {
++ 		SPDK_ERRLOG("Error polling CQ! (%d): %s\n",
++ 			    errno, spdk_strerror(errno));
++diff --git a/lib/nvmf/subsystem.c b/lib/nvmf/subsystem.c
++index 457fa64d6..1b9a2a084 100644
++--- a/lib/nvmf/subsystem.c
+++++ b/lib/nvmf/subsystem.c
++@@ -410,7 +410,7 @@ nvmf_subsystem_get_intermediate_state(enum spdk_nvmf_subsystem_state current_sta
++ 	}
++ }
++ 
++-static int
+++int
++ nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
++ 			 enum spdk_nvmf_subsystem_state state)
++ {
++@@ -466,7 +466,6 @@ nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
++ 		__atomic_compare_exchange_n(&subsystem->state, &actual_old_state, state, false,
++ 					    __ATOMIC_RELAXED, __ATOMIC_RELAXED);
++ 	}
++-	assert(actual_old_state == expected_old_state);
++ 	return actual_old_state - expected_old_state;
++ }
++ 
++@@ -1366,7 +1365,9 @@ spdk_nvmf_subsystem_add_ns_ext(struct spdk_nvmf_subsystem *subsystem, const char
++ 	int rc;
++ 
++ 	if (!(subsystem->state == SPDK_NVMF_SUBSYSTEM_INACTIVE ||
++-	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED)) {
+++	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED ||
+++	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSING)) {
+++		SPDK_ERRLOG("invalid subsystem state : %d\n", subsystem->state);
++ 		return 0;
++ 	}
++ 
++diff --git a/lib/nvmf/tcp.c b/lib/nvmf/tcp.c
++index b16ed22a4..05c8661bb 100644
++--- a/lib/nvmf/tcp.c
+++++ b/lib/nvmf/tcp.c
++@@ -2628,14 +2628,6 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
++ 	tgroup = SPDK_CONTAINEROF(group, struct spdk_nvmf_tcp_poll_group, group);
++ 	tqpair = SPDK_CONTAINEROF(qpair, struct spdk_nvmf_tcp_qpair, qpair);
++ 
++-	rc = spdk_sock_group_add_sock(tgroup->sock_group, tqpair->sock,
++-				      nvmf_tcp_sock_cb, tqpair);
++-	if (rc != 0) {
++-		SPDK_ERRLOG("Could not add sock to sock_group: %s (%d)\n",
++-			    spdk_strerror(errno), errno);
++-		return -1;
++-	}
++-
++ 	rc =  nvmf_tcp_qpair_sock_init(tqpair);
++ 	if (rc != 0) {
++ 		SPDK_ERRLOG("Cannot set sock opt for tqpair=%p\n", tqpair);
++@@ -2654,6 +2646,14 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
++ 		return -1;
++ 	}
++ 
+++	rc = spdk_sock_group_add_sock(tgroup->sock_group, tqpair->sock,
+++				      nvmf_tcp_sock_cb, tqpair);
+++	if (rc != 0) {
+++		SPDK_ERRLOG("Could not add sock to sock_group: %s (%d)\n",
+++			    spdk_strerror(errno), errno);
+++		return -1;
+++	}
+++
++ 	tqpair->group = tgroup;
++ 	tqpair->state = NVME_TCP_QPAIR_STATE_INVALID;
++ 	TAILQ_INSERT_TAIL(&tgroup->qpairs, tqpair, link);
++diff --git a/lib/thread/Makefile b/lib/thread/Makefile
++index de4a09d85..27fc6e50e 100644
++--- a/lib/thread/Makefile
+++++ b/lib/thread/Makefile
++@@ -37,7 +37,7 @@ include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
++ SO_VER := 5
++ SO_MINOR := 0
++ 
++-C_SRCS = thread.c
+++C_SRCS = thread.c pos_thread.c
++ LIBNAME = thread
++ 
++ SPDK_MAP_FILE = $(abspath $(CURDIR)/spdk_thread.map)
++diff --git a/lib/thread/pos_thread.c b/lib/thread/pos_thread.c
++new file mode 100644
++index 000000000..f91cb6b9d
++--- /dev/null
+++++ b/lib/thread/pos_thread.c
++@@ -0,0 +1,75 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "spdk/stdinc.h"
+++
+++#include "spdk/env.h"
+++#include "spdk/likely.h"
+++#include "spdk/queue.h"
+++#include "spdk/string.h"
+++#include "spdk/thread.h"
+++#include "spdk/pos_thread.h"
+++#include "spdk/util.h"
+++#include "spdk/fd_group.h"
+++
+++#include "spdk/log.h"
+++#include "spdk_internal/thread.h"
+++
+++#ifdef __linux__
+++#include <sys/timerfd.h>
+++#include <sys/eventfd.h>
+++#endif
+++
+++#define MAX_CORES 128
+++static struct spdk_thread *reactor_to_nvmf_poll_thread[MAX_CORES] = {NULL, };
+++
+++__attribute__((used))
+++void
+++set_tls_thread_to_reactor(int reactor, struct spdk_thread *thread)
+++{
+++	reactor_to_nvmf_poll_thread[reactor] = thread;
+++}
+++
+++__attribute__((used))
+++void
+++clear_thread_to_reactor(void)
+++{
+++	int reactor = spdk_env_get_current_core();
+++	reactor_to_nvmf_poll_thread[reactor] = NULL;
+++}
+++
+++__attribute__((used))
+++struct spdk_thread *
+++get_nvmf_thread_from_reactor(int reactor)
+++{
+++	return reactor_to_nvmf_poll_thread[reactor];
+++}
++diff --git a/lib/thread/thread.c b/lib/thread/thread.c
++index 4c4b5da5a..4fd5799a8 100644
++--- a/lib/thread/thread.c
+++++ b/lib/thread/thread.c
++@@ -49,7 +49,7 @@
++ #include <sys/eventfd.h>
++ #endif
++ 
++-#define SPDK_MSG_BATCH_SIZE		8
+++#define SPDK_MSG_BATCH_SIZE		64
++ #define SPDK_MAX_DEVICE_NAME_LEN	256
++ #define SPDK_THREAD_EXIT_TIMEOUT_SEC	5
++ 
++@@ -950,7 +950,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
++ 	if (msg == NULL) {
++ 		msg = spdk_mempool_get(g_spdk_msg_mempool);
++ 		if (!msg) {
++-			SPDK_ERRLOG("msg could not be allocated\n");
+++			// It can be handled by caller
+++			SPDK_WARNLOG("msg could not be allocated\n");
++ 			return -ENOMEM;
++ 		}
++ 	}
++@@ -960,7 +961,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
++ 
++ 	rc = spdk_ring_enqueue(thread->messages, (void **)&msg, 1, NULL);
++ 	if (rc != 1) {
++-		SPDK_ERRLOG("msg could not be enqueued\n");
+++		// It can be handled by caller
+++		SPDK_WARNLOG("msg could not be enqueued\n");
++ 		spdk_mempool_put(g_spdk_msg_mempool, msg);
++ 		return -EIO;
++ 	}
++diff --git a/mk/spdk.common.mk b/mk/spdk.common.mk
++index 897be4d21..85f8dfc8e 100644
++--- a/mk/spdk.common.mk
+++++ b/mk/spdk.common.mk
++@@ -299,6 +299,13 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
++ SYS_LIBS += -l:libssp.a
++ endif
++ 
+++ifeq ($(CONFIG_POS),y)
+++SYS_LIBS += -ltcmalloc
+++endif
+++
+++SYS_LIBS += -lair -lstdc++
+++COMMON_CFLAGS += -I$(SPDK_ROOT_DIR)/../air
+++
++ MAKEFLAGS += --no-print-directory
++ 
++ C_SRCS += $(C_SRCS-y)
++diff --git a/mk/spdk.lib_deps.mk b/mk/spdk.lib_deps.mk
++index ece8233ff..e9c773df6 100644
++--- a/mk/spdk.lib_deps.mk
+++++ b/mk/spdk.lib_deps.mk
++@@ -81,7 +81,7 @@ DEPDIRS-net := log util $(JSON_LIBS)
++ DEPDIRS-notify := log util $(JSON_LIBS)
++ DEPDIRS-trace := log util $(JSON_LIBS)
++ 
++-DEPDIRS-bdev := log util thread $(JSON_LIBS) notify trace
+++DEPDIRS-bdev := log util thread conf $(JSON_LIBS) notify trace
++ DEPDIRS-blobfs := log thread blob trace
++ DEPDIRS-event := log util thread $(JSON_LIBS) trace
++ 
++diff --git a/mk/spdk.modules.mk b/mk/spdk.modules.mk
++index 415a3b2d7..c703b9583 100644
++--- a/mk/spdk.modules.mk
+++++ b/mk/spdk.modules.mk
++@@ -101,6 +101,10 @@ BLOCKDEV_MODULES_LIST += bdev_pmem
++ BLOCKDEV_MODULES_PRIVATE_LIBS += -lpmemblk -lpmem
++ endif
++ 
+++ifeq ($(CONFIG_POS),y)
+++BLOCKDEV_MODULES_LIST += bdev_pos
+++endif
+++
++ SOCK_MODULES_LIST = sock_posix
++ 
++ ifeq ($(OS), Linux)
++diff --git a/module/accel/ioat/Makefile b/module/accel/ioat/Makefile
++index 3f3d735e3..e85b66d9b 100644
++--- a/module/accel/ioat/Makefile
+++++ b/module/accel/ioat/Makefile
++@@ -38,7 +38,7 @@ SO_VER := 3
++ SO_MINOR := 0
++ 
++ LIBNAME = accel_ioat
++-C_SRCS = accel_engine_ioat.c accel_engine_ioat_rpc.c
+++C_SRCS = accel_engine_ioat.c accel_engine_ioat_rpc.c pos_accel_engine_ioat.c
++ 
++ SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_blank.map
++ 
++diff --git a/module/accel/ioat/accel_engine_ioat.c b/module/accel/ioat/accel_engine_ioat.c
++index 8d46dde27..f66c043bd 100644
++--- a/module/accel/ioat/accel_engine_ioat.c
+++++ b/module/accel/ioat/accel_engine_ioat.c
++@@ -32,6 +32,7 @@
++  */
++ 
++ #include "accel_engine_ioat.h"
+++#include "pos_accel_engine_ioat.h"
++ 
++ #include "spdk/stdinc.h"
++ 
++@@ -43,7 +44,7 @@
++ #include "spdk/thread.h"
++ #include "spdk/ioat.h"
++ 
++-static bool g_ioat_enable = false;
+++bool g_ioat_enable = false;
++ static bool g_ioat_initialized = false;
++ 
++ struct ioat_device {
++@@ -95,7 +96,6 @@ ioat_free_device(struct ioat_device *dev)
++ 	pthread_mutex_unlock(&g_ioat_mutex);
++ }
++ 
++-static int accel_engine_ioat_init(void);
++ static void accel_engine_ioat_exit(void *ctx);
++ 
++ static size_t
++@@ -124,8 +124,6 @@ ioat_poll(void *arg)
++ 	       SPDK_POLLER_IDLE;
++ }
++ 
++-static struct spdk_io_channel *ioat_get_io_channel(void);
++-
++ static uint64_t
++ ioat_get_capabilities(void)
++ {
++@@ -211,7 +209,7 @@ ioat_destroy_cb(void *io_device, void *ctx_buf)
++ 	spdk_poller_unregister(&ch->poller);
++ }
++ 
++-static struct spdk_io_channel *
+++struct spdk_io_channel *
++ ioat_get_io_channel(void)
++ {
++ 	return spdk_get_io_channel(&ioat_accel_engine);
++@@ -244,6 +242,8 @@ probe_cb(void *cb_ctx, struct spdk_pci_device *pci_dev)
++ 		return false;
++ 	}
++ 
+++	add_ioat_per_numa(pci_dev->socket_id);
+++
++ 	return true;
++ }
++ 
++@@ -262,13 +262,14 @@ attach_cb(void *cb_ctx, struct spdk_pci_device *pci_dev, struct spdk_ioat_chan *
++ 	TAILQ_INSERT_TAIL(&g_devices, dev, tailq);
++ }
++ 
+++__attribute__((used))
++ void
++ accel_engine_ioat_enable_probe(void)
++ {
++ 	g_ioat_enable = true;
++ }
++ 
++-static int
+++int
++ accel_engine_ioat_init(void)
++ {
++ 	if (!g_ioat_enable) {
++@@ -281,7 +282,7 @@ accel_engine_ioat_init(void)
++ 	}
++ 
++ 	g_ioat_initialized = true;
++-	SPDK_NOTICELOG("Accel engine updated to use IOAT engine.\n");
+++
++ 	spdk_accel_hw_engine_register(&ioat_accel_engine);
++ 	spdk_io_device_register(&ioat_accel_engine, ioat_create_cb, ioat_destroy_cb,
++ 				sizeof(struct ioat_io_channel), "ioat_accel_engine");
++diff --git a/module/accel/ioat/accel_engine_ioat.h b/module/accel/ioat/accel_engine_ioat.h
++index 050502d18..cda5c32b6 100644
++--- a/module/accel/ioat/accel_engine_ioat.h
+++++ b/module/accel/ioat/accel_engine_ioat.h
++@@ -38,6 +38,8 @@
++ 
++ #define IOAT_MAX_CHANNELS	64
++ 
+++int accel_engine_ioat_init(void);
++ void accel_engine_ioat_enable_probe(void);
+++struct spdk_io_channel * ioat_get_io_channel(void);
++ 
++ #endif /* SPDK_ACCEL_ENGINE_IOAT_H */
++diff --git a/module/accel/ioat/pos_accel_engine_ioat.c b/module/accel/ioat/pos_accel_engine_ioat.c
++new file mode 100644
++index 000000000..488d07532
++--- /dev/null
+++++ b/module/accel/ioat/pos_accel_engine_ioat.c
++@@ -0,0 +1,94 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "accel_engine_ioat.h"
+++#include "pos_accel_engine_ioat.h"
+++
+++#include "spdk/stdinc.h"
+++
+++#include "spdk_internal/accel_engine.h"
+++#include "spdk/log.h"
+++
+++#include "spdk/env.h"
+++#include "spdk/event.h"
+++#include "spdk/thread.h"
+++#include "spdk/ioat.h"
+++
+++extern bool g_ioat_enable;
+++
+++__attribute__((used))
+++struct spdk_io_channel *
+++spdk_accel_ioat_get_io_channel(void)
+++{
+++	return ioat_get_io_channel();
+++}
+++
+++#define MAX_NUMA_NODES 8
+++
+++int num_ioat_per_numa[MAX_NUMA_NODES] = {0,};
+++
+++__attribute__((used))
+++int
+++get_ioat_count_per_numa(int numa)
+++{
+++	if (numa >= MAX_NUMA_NODES) {
+++		return -1;
+++	}
+++	return num_ioat_per_numa[numa];
+++}
+++
+++void
+++add_ioat_per_numa(int numa)
+++{
+++	num_ioat_per_numa[numa]++;
+++}
+++
+++__attribute__((used))
+++int spdk_ioat_init(void)
+++{
+++	g_ioat_enable = true;
+++	if (0 != accel_engine_ioat_init())
+++    {
+++	    return -1;
+++    }
+++
+++	struct spdk_io_channel *ioat_chan = ioat_get_io_channel();
+++	if (NULL == ioat_chan) {
+++		g_ioat_enable = false;
+++		SPDK_NOTICELOG("Accel engine falls back to use software engine.\n");
+++		return -1;
+++	}
+++	spdk_put_io_channel(ioat_chan);
+++
+++	SPDK_NOTICELOG("Accel engine updated to use IOAT engine.\n");
+++	return 0;
+++}
++diff --git a/module/accel/ioat/pos_accel_engine_ioat.h b/module/accel/ioat/pos_accel_engine_ioat.h
++new file mode 100644
++index 000000000..d040c43d3
++--- /dev/null
+++++ b/module/accel/ioat/pos_accel_engine_ioat.h
++@@ -0,0 +1,46 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_POS_ACCEL_ENGINE_IOAT_H
+++#define SPDK_POS_ACCEL_ENGINE_IOAT_H
+++
+++#include "spdk/stdinc.h"
+++
+++struct spdk_io_channel;
+++
+++int get_ioat_count_per_numa(int);
+++void add_ioat_per_numa(int);
+++
+++int spdk_ioat_init(void);
+++struct spdk_io_channel *spdk_accel_ioat_get_io_channel(void);
+++
+++#endif /* SPDK_POS_ACCEL_ENGINE_IOAT_H */
++diff --git a/module/bdev/Makefile b/module/bdev/Makefile
++index bbf33fdfe..9b7f254c9 100644
++--- a/module/bdev/Makefile
+++++ b/module/bdev/Makefile
++@@ -49,6 +49,7 @@ DIRS-y += aio ftl
++ DIRS-$(CONFIG_ISCSI_INITIATOR) += iscsi
++ DIRS-$(CONFIG_VIRTIO) += virtio
++ DIRS-$(CONFIG_PMDK) += pmem
+++DIRS-$(CONFIG_POS) += pos
++ endif
++ 
++ DIRS-$(CONFIG_RBD) += rbd
++diff --git a/module/bdev/malloc/Makefile b/module/bdev/malloc/Makefile
++index 4db73241a..982ccd965 100644
++--- a/module/bdev/malloc/Makefile
+++++ b/module/bdev/malloc/Makefile
++@@ -37,7 +37,7 @@ include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
++ SO_VER := 3
++ SO_MINOR := 0
++ 
++-C_SRCS = bdev_malloc.c bdev_malloc_rpc.c
+++C_SRCS = bdev_malloc.c bdev_malloc_rpc.c pos_bdev_malloc.c
++ LIBNAME = bdev_malloc
++ 
++ SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_blank.map
++diff --git a/module/bdev/malloc/bdev_malloc.c b/module/bdev/malloc/bdev_malloc.c
++index 3f5f65e59..b8683373b 100644
++--- a/module/bdev/malloc/bdev_malloc.c
+++++ b/module/bdev/malloc/bdev_malloc.c
++@@ -34,6 +34,7 @@
++ #include "spdk/stdinc.h"
++ 
++ #include "bdev_malloc.h"
+++#include "pos_bdev_malloc.h"
++ #include "spdk/bdev.h"
++ #include "spdk/endian.h"
++ #include "spdk/env.h"
++@@ -46,12 +47,6 @@
++ #include "spdk/bdev_module.h"
++ #include "spdk/log.h"
++ 
++-struct malloc_disk {
++-	struct spdk_bdev		disk;
++-	void				*malloc_buf;
++-	TAILQ_ENTRY(malloc_disk)	link;
++-};
++-
++ struct malloc_task {
++ 	int				num_outstanding;
++ 	enum spdk_bdev_io_status	status;
++@@ -96,7 +91,7 @@ static struct spdk_bdev_module malloc_if = {
++ 
++ SPDK_BDEV_MODULE_REGISTER(malloc, &malloc_if)
++ 
++-static void
+++void
++ malloc_disk_free(struct malloc_disk *malloc_disk)
++ {
++ 	if (!malloc_disk) {
++@@ -377,7 +372,7 @@ static const struct spdk_bdev_fn_table malloc_fn_table = {
++ 
++ int
++ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
++-		   uint64_t num_blocks, uint32_t block_size)
+++		   uint64_t num_blocks, uint32_t block_size, uint32_t numa)
++ {
++ 	struct malloc_disk	*mdisk;
++ 	int rc;
++@@ -405,7 +400,8 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
++ 	 *  from on multi-socket systems.
++ 	 */
++ 	mdisk->malloc_buf = spdk_zmalloc(num_blocks * block_size, 2 * 1024 * 1024, NULL,
++-					 SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
+++					 numa, SPDK_MALLOC_DMA);
+++	// TODO: Multi Array Optimization is necessary.
++ 	if (!mdisk->malloc_buf) {
++ 		SPDK_ERRLOG("malloc_buf spdk_zmalloc() failed\n");
++ 		malloc_disk_free(mdisk);
++@@ -424,7 +420,7 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
++ 		return -ENOMEM;
++ 	}
++ 	mdisk->disk.product_name = "Malloc disk";
++-
+++	mdisk->numa = numa;
++ 	mdisk->disk.write_cache = 1;
++ 	mdisk->disk.blocklen = block_size;
++ 	mdisk->disk.blockcnt = num_blocks;
++@@ -444,6 +440,11 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
++ 		return rc;
++ 	}
++ 
+++	rc = backup_disk_info_for_restore(mdisk);
+++	if (rc != 0) {
+++		return rc;
+++	}
+++
++ 	*bdev = &(mdisk->disk);
++ 
++ 	TAILQ_INSERT_TAIL(&g_malloc_disks, mdisk, link);
++diff --git a/module/bdev/malloc/bdev_malloc.h b/module/bdev/malloc/bdev_malloc.h
++index b683b1062..d263e5efd 100644
++--- a/module/bdev/malloc/bdev_malloc.h
+++++ b/module/bdev/malloc/bdev_malloc.h
++@@ -35,13 +35,21 @@
++ #define SPDK_BDEV_MALLOC_H
++ 
++ #include "spdk/stdinc.h"
+++#include "spdk/bdev_module.h"
++ 
++-#include "spdk/bdev.h"
+++struct malloc_disk {
+++	struct spdk_bdev		disk;
+++	void				*malloc_buf;
+++	TAILQ_ENTRY(malloc_disk)	link;
+++	uint32_t numa;
+++};
++ 
++ typedef void (*spdk_delete_malloc_complete)(void *cb_arg, int bdeverrno);
++ 
+++void malloc_disk_free(struct malloc_disk *malloc_disk);
+++
++ int create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
++-		       uint64_t num_blocks, uint32_t block_size);
+++				uint64_t num_blocks, uint32_t block_size, uint32_t numa);
++ 
++ void delete_malloc_disk(struct spdk_bdev *bdev, spdk_delete_malloc_complete cb_fn, void *cb_arg);
++ 
++diff --git a/module/bdev/malloc/bdev_malloc_rpc.c b/module/bdev/malloc/bdev_malloc_rpc.c
++index 940f9ca11..528e66adb 100644
++--- a/module/bdev/malloc/bdev_malloc_rpc.c
+++++ b/module/bdev/malloc/bdev_malloc_rpc.c
++@@ -43,6 +43,7 @@ struct rpc_construct_malloc {
++ 	char *uuid;
++ 	uint64_t num_blocks;
++ 	uint32_t block_size;
+++	uint32_t numa;
++ };
++ 
++ static void
++@@ -57,6 +58,7 @@ static const struct spdk_json_object_decoder rpc_construct_malloc_decoders[] = {
++ 	{"uuid", offsetof(struct rpc_construct_malloc, uuid), spdk_json_decode_string, true},
++ 	{"num_blocks", offsetof(struct rpc_construct_malloc, num_blocks), spdk_json_decode_uint64},
++ 	{"block_size", offsetof(struct rpc_construct_malloc, block_size), spdk_json_decode_uint32},
+++	{"numa", offsetof(struct rpc_construct_malloc, numa), spdk_json_decode_uint32, true},
++ };
++ 
++ static void
++@@ -94,7 +96,7 @@ rpc_bdev_malloc_create(struct spdk_jsonrpc_request *request,
++ 		uuid = &decoded_uuid;
++ 	}
++ 
++-	rc = create_malloc_disk(&bdev, req.name, uuid, req.num_blocks, req.block_size);
+++	rc = create_malloc_disk(&bdev, req.name, uuid, req.num_blocks, req.block_size, req.numa);
++ 	if (rc) {
++ 		spdk_jsonrpc_send_error_response(request, rc, spdk_strerror(-rc));
++ 		goto cleanup;
++diff --git a/module/bdev/malloc/pos_bdev_malloc.c b/module/bdev/malloc/pos_bdev_malloc.c
++new file mode 100644
++index 000000000..0dc48859c
++--- /dev/null
+++++ b/module/bdev/malloc/pos_bdev_malloc.c
++@@ -0,0 +1,123 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Intel Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "spdk/stdinc.h"
+++
+++#include "bdev_malloc.h"
+++#include "pos_bdev_malloc.h"
+++#include "spdk/bdev.h"
+++#include "spdk/endian.h"
+++#include "spdk/env.h"
+++#include "spdk/accel_engine.h"
+++#include "spdk/json.h"
+++#include "spdk/thread.h"
+++#include "spdk/queue.h"
+++#include "spdk/string.h"
+++
+++#include "spdk/bdev_module.h"
+++#include "spdk/log.h"
+++
+++__attribute__((used))
+++uint32_t
+++spdk_pos_malloc_bdev_get_numa(struct spdk_bdev* bdev)
+++{
+++	struct malloc_disk* mdisk = (struct malloc_disk*)bdev;
+++	return mdisk->numa;
+++}
+++
+++int
+++backup_disk_info_for_restore(struct malloc_disk *mdisk)
+++{
+++	struct spdk_bdev* bdev = &mdisk->disk;
+++	const char *name = spdk_bdev_get_name(bdev);
+++	uint64_t num_blocks = spdk_bdev_get_num_blocks(bdev);
+++	uint64_t block_size = spdk_bdev_get_block_size(bdev);
+++
+++	int rc = 0;
+++	char *file_name;
+++	const char *backup_dir = "/tmp/";
+++	const char *backup_file_postfix = ".uram.info";
+++	int fd = -1;
+++	int pid = getpid();
+++	const uint64_t baseAddr = 0x200000000000ULL;
+++	const uint32_t bytesPerHugepage = 2 * 1024 * 1024;
+++	uint64_t bufAddr = (uint64_t)mdisk->malloc_buf;
+++	uint64_t startPage = (bufAddr - baseAddr) / bytesPerHugepage - 1;
+++	uint64_t pageCount = (num_blocks * block_size) / bytesPerHugepage;
+++	char writeBuf[256] = {
+++		0,
+++	};
+++	uint32_t strLength;
+++
+++	if (!name) {
+++		return -EINVAL;
+++	}
+++
+++	file_name = calloc(strlen(backup_dir) + strlen(name) + strlen(backup_file_postfix) + 1,
+++			   sizeof(char));
+++	if (!file_name) {
+++		SPDK_ERRLOG("mdisk calloc() failed\n");
+++		return -ENOMEM;
+++	}
+++	strncat(file_name, backup_dir, strlen(backup_dir));
+++	strncat(file_name, name, strlen(name));
+++	strncat(file_name, backup_file_postfix, strlen(backup_file_postfix));
+++
+++	SPDK_INFOLOG(bdev_malloc,
+++		     "Current PID: %d, buffer v address: %p, size: %lu\n",
+++		     pid, mdisk->malloc_buf, num_blocks * block_size);
+++
+++	fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR,
+++		  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+++	if (0 > fd) {
+++		SPDK_ERRLOG("Could not open %s.\n", file_name);
+++		malloc_disk_free(mdisk);
+++		return -EINVAL;
+++	}
+++
+++	sprintf(writeBuf, "%d %lu %lu %lu", pid, bufAddr, startPage, pageCount);
+++	strLength = strlen(writeBuf);
+++
+++	rc = write(fd, writeBuf, strLength);
+++	if (0 > rc) {
+++		SPDK_ERRLOG("Could not write on %s: %s\n", file_name, strerror(errno));
+++		close(fd);
+++		malloc_disk_free(mdisk);
+++		return -EINVAL;
+++	}
+++
+++	close(fd);
+++	SPDK_INFOLOG(bdev_malloc,
+++		     "Successfully written to \"%s\" about information of \"%s\"\n",
+++		     file_name, name);
+++	return 0;
+++}
++diff --git a/module/bdev/malloc/pos_bdev_malloc.h b/module/bdev/malloc/pos_bdev_malloc.h
++new file mode 100644
++index 000000000..cca38696d
++--- /dev/null
+++++ b/module/bdev/malloc/pos_bdev_malloc.h
++@@ -0,0 +1,43 @@
+++/*
+++ *   BSD LICENSE
+++ *   Copyright (c) 2021 Samsung Electronics Corporation
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Intel Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef POS_BDEV_MALLOC_H
+++#define POS_BDEV_MALLOC_H
+++
+++#include "spdk/bdev.h"
+++#include "spdk/stdinc.h"
+++
+++int backup_disk_info_for_restore(struct malloc_disk *mdisk);
+++
+++uint32_t spdk_pos_malloc_bdev_get_numa(struct spdk_bdev* bdev);
+++
+++#endif /* POS_BDEV_MALLOC_H */
++diff --git a/module/bdev/pos/Makefile b/module/bdev/pos/Makefile
++new file mode 100644
++index 000000000..0045180cb
++--- /dev/null
+++++ b/module/bdev/pos/Makefile
++@@ -0,0 +1,46 @@
+++#
+++#  BSD LICENSE
+++#
+++#  Copyright (c) Samsung Corporation.
+++#  All rights reserved.
+++#
+++#  Redistribution and use in source and binary forms, with or without
+++#  modification, are permitted provided that the following conditions
+++#  are met:
+++#
+++#    * Redistributions of source code must retain the above copyright
+++#      notice, this list of conditions and the following disclaimer.
+++#    * Redistributions in binary form must reproduce the above copyright
+++#      notice, this list of conditions and the following disclaimer in
+++#      the documentation and/or other materials provided with the
+++#      distribution.
+++#    * Neither the name of Samsung Corporation nor the names of its
+++#      contributors may be used to endorse or promote products derived
+++#      from this software without specific prior written permission.
+++#
+++#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++#
+++
+++SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
+++include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
+++
+++C_SRCS = bdev_pos.c bdev_pos_rpc.c
+++LIBNAME = bdev_pos
+++LOCAL_SYS_LIBS = -luuid
+++
+++SO_VER := 2
+++SO_MINOR := 0
+++
+++SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/module/bdev/pos/spdk_pos.map
+++
+++include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
++diff --git a/module/bdev/pos/bdev_pos.c b/module/bdev/pos/bdev_pos.c
++new file mode 100644
++index 000000000..9353cf067
++--- /dev/null
+++++ b/module/bdev/pos/bdev_pos.c
++@@ -0,0 +1,1040 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "spdk/stdinc.h"
+++
+++#include "bdev_pos.h"
+++#include "spdk/bdev.h"
+++#include "spdk/conf.h"
+++#include "spdk/endian.h"
+++#include "spdk/env.h"
+++#include "spdk/json.h"
+++#include "spdk/thread.h"
+++#include "spdk/queue.h"
+++#include "spdk/string.h"
+++#include "spdk/likely.h"
+++
+++#include "spdk/bdev_module.h"
+++#include "spdk/log.h"
+++#include "spdk/pos.h"
+++#include "spdk/pos_volume.h"
+++#include "spdk/pos_nvmf.h"
+++#include "spdk/event.h"
+++#include "spdk/ioat.h"
+++#include "spdk/nvmf_transport.h"
+++#include <air/Air_c.h>
+++
+++#include "string.h"
+++
+++struct pos_disk {
+++	struct spdk_bdev		disk;
+++	struct pos_volume_info		volume;
+++	void				*pos_buf;
+++	TAILQ_ENTRY(pos_disk)	link;
+++};
+++
+++struct pos_task {
+++	int				num_outstanding;
+++	enum spdk_bdev_io_status	status;
+++};
+++
+++struct pos_io_channel {
+++	struct spdk_poller		*poller;
+++	TAILQ_HEAD(, spdk_bdev_io)	io;
+++};
+++
+++//struct pos_io_channel {
+++//}
+++
+++struct ioat_io_channel {
+++	struct spdk_ioat_chan	*ioat_ch;
+++	struct ioat_device	*ioat_dev;
+++	struct spdk_poller	*poller;
+++};
+++
+++__thread __typeof__(struct spdk_poller *) per_lcore_pos_poller;
+++
+++__thread __typeof__(unsigned int) per_lcore_poller_ref_count;
+++/*
+++static struct pos_task *
+++__pos_task_from_copy_task(struct spdk_copy_task *ct)
+++{
+++	return (struct pos_task *)((uintptr_t)ct - sizeof(struct pos_task));
+++}
+++
+++static struct spdk_copy_task *
+++__copy_task_from_pos_task(struct pos_task *mt)
+++{
+++	return (struct spdk_copy_task *)((uintptr_t)mt + sizeof(struct pos_task));
+++}
+++*/
+++static void
+++pos_done(void *ref, int status)
+++{
+++	struct pos_task *task = (struct pos_task *)ref;
+++
+++	if (status != 0) {
+++		if (status == -ENOMEM) {
+++			task->status = SPDK_BDEV_IO_STATUS_NOMEM;
+++		} else {
+++			task->status = SPDK_BDEV_IO_STATUS_FAILED;
+++		}
+++	}
+++	if (--task->num_outstanding == 0) {
+++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), task->status);
+++	}
+++}
+++
+++static TAILQ_HEAD(, pos_disk) g_pos_disks = TAILQ_HEAD_INITIALIZER(g_pos_disks);
+++
+++static uint32_t pos_disk_count = 0;
+++
+++static int bdev_pos_initialize(void);
+++static int bdev_pos_get_spdk_running_config(struct spdk_json_write_ctx *w);
+++
+++static int
+++bdev_pos_get_ctx_size(void)
+++{
+++	return sizeof(struct pos_task);
+++}
+++
+++static struct spdk_bdev_module pos_if = {
+++	.name = "pos",
+++	.module_init = bdev_pos_initialize,
+++	.config_json = bdev_pos_get_spdk_running_config,
+++	.get_ctx_size = bdev_pos_get_ctx_size,
+++
+++};
+++
+++SPDK_BDEV_MODULE_REGISTER(pos, &pos_if)
+++
+++static bool
+++bdev_pos_io_type_supported(void *ctx, enum spdk_bdev_io_type io_type)
+++{
+++	switch (io_type) {
+++	case SPDK_BDEV_IO_TYPE_READ:
+++	case SPDK_BDEV_IO_TYPE_WRITE:
+++	case SPDK_BDEV_IO_TYPE_FLUSH:
+++	case SPDK_BDEV_IO_TYPE_NVME_ADMIN:
+++		return true;
+++	/*
+++	case SPDK_BDEV_IO_TYPE_RESET:
+++	case SPDK_BDEV_IO_TYPE_UNMAP:
+++	case SPDK_BDEV_IO_TYPE_WRITE_ZEROES:
+++		return true;
+++	*/
+++
+++	default:
+++		return false;
+++	}
+++}
+++
+++static int
+++bdev_pos_get_spdk_running_config(struct spdk_json_write_ctx *w)
+++{
+++	int num_pos_volume = 0;
+++	uint64_t pos_buffer_size = 0;
+++	struct pos_disk *mdisk;
+++
+++	/* count number of pos volumes, get volume buffer size */
+++	TAILQ_FOREACH(mdisk, &g_pos_disks, link) {
+++		if (0 == pos_buffer_size) {
+++			/* assume all pos luns the same size */
+++			pos_buffer_size = (mdisk->disk.blocklen * mdisk->disk.blockcnt) / (1024 * 1024);
+++		}
+++		num_pos_volume++;
+++	}
+++
+++	if (num_pos_volume > 0) {
+++		spdk_json_write_object_begin(w);
+++		spdk_json_write_named_string_fmt(w, "method",
+++						 "\n"
+++						 "# Users may change this section to create a different number or volume size of\n"
+++						 "# pos volume.\n"
+++						 "# This will generate %d Volumes with a pos-allocated backend. Each Volume\n"
+++						 "# is mapped with POS volume 1:1 and \n"
+++						 "# will has %" PRIu64 "MB in size buffer and these will be named Volume0 through Volume%d.\n"
+++						 "# Not all Volumes defined here are necessarily used below.\n"
+++						 "[Volume]\n"
+++						 "  NumberOfVolume %d\n"
+++						 "  VolumeBufferInMB %" PRIu64 "\n",
+++						 num_pos_volume, pos_buffer_size,
+++						 num_pos_volume - 1, num_pos_volume,
+++						 pos_buffer_size);
+++		spdk_json_write_object_end(w);
+++		spdk_json_write_object_end(w);
+++	}
+++	return 0;
+++}
+++
+++
+++static void
+++pos_disk_free(struct pos_disk *pos_disk)
+++{
+++	if (!pos_disk) {
+++		return;
+++	}
+++
+++	free(pos_disk->disk.name);
+++	spdk_dma_free(pos_disk->pos_buf);
+++	spdk_dma_free(pos_disk);
+++}
+++
+++static int
+++bdev_pos_destruct(void *ctx)
+++{
+++	struct pos_disk *pos_disk = ctx;
+++
+++	TAILQ_REMOVE(&g_pos_disks, pos_disk, link);
+++	pos_disk_free(pos_disk);
+++	return 0;
+++}
+++
+++static int
+++bdev_pos_check_iov_len(struct iovec *iovs, int iovcnt, size_t nbytes)
+++{
+++	int i;
+++
+++	for (i = 0; i < iovcnt; i++) {
+++		if (nbytes < iovs[i].iov_len) {
+++			return 0;
+++		}
+++
+++		nbytes -= iovs[i].iov_len;
+++	}
+++
+++	return nbytes != 0;
+++}
+++
+++static void
+++bdev_pos_ramdisk_readv(struct pos_disk *mdisk, struct spdk_io_channel *ch,
+++		       struct pos_task *task,
+++		       struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
+++{
+++	int64_t res = 0;
+++	void *src = mdisk->pos_buf + offset;
+++	int i;
+++
+++	if (bdev_pos_check_iov_len(iov, iovcnt, len)) {
+++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
+++				      SPDK_BDEV_IO_STATUS_FAILED);
+++		return;
+++	}
+++
+++	SPDK_DEBUGLOG(bdev_pos, "read %lu bytes from offset %#lx\n",
+++		      len, offset);
+++
+++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+++	task->num_outstanding = iovcnt;
+++
+++	for (i = 0; i < iovcnt; i++) {
+++		res = spdk_accel_submit_copy(ch, iov[i].iov_base,
+++					     src, iov[i].iov_len, pos_done, task);
+++
+++		if (res != 0) {
+++			pos_done(task, res);
+++		}
+++
+++		src += iov[i].iov_len;
+++		len -= iov[i].iov_len;
+++	}
+++}
+++
+++static void
+++bdev_pos_ramdisk_writev(struct pos_disk *mdisk, struct spdk_io_channel *ch,
+++			struct pos_task *task,
+++			struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
+++{
+++
+++	int64_t res = 0;
+++	void *dst = mdisk->pos_buf + offset;
+++	int i;
+++
+++	if (bdev_pos_check_iov_len(iov, iovcnt, len)) {
+++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
+++				      SPDK_BDEV_IO_STATUS_FAILED);
+++		return;
+++	}
+++
+++	SPDK_DEBUGLOG(bdev_pos, "wrote %lu bytes to offset %#lx\n",
+++		      len, offset);
+++
+++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+++	task->num_outstanding = iovcnt;
+++
+++	for (i = 0; i < iovcnt; i++) {
+++		res = spdk_accel_submit_copy(ch, dst, iov[i].iov_base,
+++					     iov[i].iov_len, pos_done, task);
+++
+++		if (res != 0) {
+++			pos_done(task, res);
+++		}
+++
+++		dst += iov[i].iov_len;
+++	}
+++}
+++
+++static int
+++bdev_pos_unmap(struct pos_disk *mdisk,
+++	       struct spdk_io_channel *ch,
+++	       struct pos_task *task,
+++	       uint64_t offset,
+++	       uint64_t byte_count)
+++{
+++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+++	task->num_outstanding = 1;
+++
+++	return spdk_accel_submit_fill(ch, mdisk->pos_buf + offset, 0,
+++				      byte_count, pos_done, task);
+++}
+++
+++static int64_t
+++bdev_pos_flush(struct pos_disk *mdisk, struct pos_task *task,
+++	       uint64_t offset, uint64_t nbytes)
+++{
+++	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
+++
+++	return 0;
+++}
+++
+++static int
+++bdev_pos_reset(struct pos_disk *mdisk, struct pos_task *task)
+++{
+++	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
+++
+++	return 0;
+++}
+++
+++static int _bdev_pos_ramdisk_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	uint32_t block_size = bdev_io->bdev->blocklen;
+++
+++	switch (bdev_io->type) {
+++	case SPDK_BDEV_IO_TYPE_READ:
+++		if (bdev_io->u.bdev.iovs[0].iov_base == NULL) {
+++			assert(bdev_io->u.bdev.iovcnt == 1);
+++			bdev_io->u.bdev.iovs[0].iov_base =
+++				((struct pos_disk *)bdev_io->bdev->ctxt)->pos_buf +
+++				bdev_io->u.bdev.offset_blocks * block_size;
+++			bdev_io->u.bdev.iovs[0].iov_len = bdev_io->u.bdev.num_blocks * block_size;
+++			spdk_bdev_io_complete(spdk_bdev_io_from_ctx(bdev_io->driver_ctx),
+++					      SPDK_BDEV_IO_STATUS_SUCCESS);
+++			return 0;
+++		}
+++
+++		bdev_pos_ramdisk_readv((struct pos_disk *)bdev_io->bdev->ctxt,
+++				       ch,
+++				       (struct pos_task *)bdev_io->driver_ctx,
+++				       bdev_io->u.bdev.iovs,
+++				       bdev_io->u.bdev.iovcnt,
+++				       bdev_io->u.bdev.num_blocks * block_size,
+++				       bdev_io->u.bdev.offset_blocks * block_size);
+++		return 0;
+++
+++	case SPDK_BDEV_IO_TYPE_WRITE:
+++		bdev_pos_ramdisk_writev((struct pos_disk *)bdev_io->bdev->ctxt,
+++					ch,
+++					(struct pos_task *)bdev_io->driver_ctx,
+++					bdev_io->u.bdev.iovs,
+++					bdev_io->u.bdev.iovcnt,
+++					bdev_io->u.bdev.num_blocks * block_size,
+++					bdev_io->u.bdev.offset_blocks * block_size);
+++		return 0;
+++	}
+++	return 0;
+++}
+++
+++static void bdev_pos_io_complete(struct pos_io *io, int status)
+++{
+++	if (io->context) {
+++		struct spdk_bdev_io *bio = (struct spdk_bdev_io *)io->context;
+++		int ret = (status == POS_IO_STATUS_SUCCESS) ? SPDK_BDEV_IO_STATUS_SUCCESS :
+++			  SPDK_BDEV_IO_STATUS_FAILED;
+++		spdk_bdev_io_complete(bio, ret);
+++	}
+++
+++	uint32_t arr_vol_id = io->volume_id + (io->array_id << 8);
+++	if (READ == io->ioType) {
+++		AIRLOG(LAT_ARR_VOL_READ, AIR_END, arr_vol_id, (uint64_t)io->context);
+++	} else if (WRITE == io->ioType) {
+++		AIRLOG(LAT_ARR_VOL_WRITE, AIR_END, arr_vol_id, (uint64_t)io->context);
+++	}
+++
+++	free(io);
+++}
+++
+++static int bdev_pos_eventq_readv(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++				 struct spdk_bdev_io *bio,
+++				 struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
+++{
+++	SPDK_DEBUGLOG(bdev_pos, "read %lu blocks with offset %#lx (vid=%d)\n",
+++		      byte_length, byte_offset, ibdev->volume.id);
+++
+++
+++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
+++	if (submit) {
+++		struct pos_io *io = (struct pos_io *)malloc(sizeof(struct pos_io));
+++		if (io) {
+++			io->ioType = READ;
+++			io->volume_id = ibdev->volume.id;
+++			io->iov = iov;
+++			io->iovcnt = iovcnt;
+++			io->length = byte_length;
+++			io->offset = byte_offset;
+++			io->context = (void *)bio;
+++			io->arrayName = ibdev->volume.array_name;
+++			io->array_id = ibdev->volume.array_id;
+++			io->complete_cb = bdev_pos_io_complete;
+++			struct spdk_bdev_io *bdev_io = (struct spdk_bdev_io *)io->context;
+++			assert(spdk_get_thread() == spdk_bdev_io_get_thread(bdev_io));
+++			return submit(io);
+++		}
+++	} else {
+++		SPDK_NOTICELOG("READ no submit handler %s\n", ibdev->disk.name);
+++	}
+++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
+++	return 0;
+++}
+++
+++static int bdev_pos_eventq_writev(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++				  struct spdk_bdev_io *bio,
+++				  struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
+++{
+++	SPDK_DEBUGLOG(bdev_pos, "write %lu blocks with offset %#lx (vid=%d)\n",
+++		      byte_length, byte_offset, ibdev->volume.id);
+++
+++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
+++	if (submit) {
+++		struct pos_io *io = (struct pos_io *)malloc(sizeof(struct pos_io));
+++		if (io) {
+++			io->ioType = WRITE;
+++			io->volume_id = ibdev->volume.id;
+++			io->iov = iov;
+++			io->iovcnt = iovcnt;
+++			io->length = byte_length;
+++			io->offset = byte_offset;
+++			io->context = (void *)bio;
+++			io->arrayName = ibdev->volume.array_name;
+++			io->array_id = ibdev->volume.array_id;
+++			io->complete_cb = bdev_pos_io_complete;
+++			struct spdk_bdev_io *bdev_io = (struct spdk_bdev_io *)io->context;
+++			assert(spdk_get_thread() == spdk_bdev_io_get_thread(bdev_io));
+++			return submit(io);
+++		}
+++	} else {
+++		SPDK_NOTICELOG("WRITE no submit handler %s\n", ibdev->disk.name);
+++	}
+++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
+++	return 0;
+++}
+++
+++static int bdev_pos_eventq_flush(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++				 struct spdk_bdev_io *bio)
+++{
+++	SPDK_DEBUGLOG(bdev_pos, "flush with (vid=%d)\n", ibdev->volume.id);
+++
+++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
+++	if (submit) {
+++		struct pos_io *io = (struct pos_io *)malloc(sizeof(struct pos_io));
+++		if (io) {
+++			io->ioType = FLUSH;
+++			io->volume_id = ibdev->volume.id;
+++			io->iov = NULL;
+++			io->iovcnt = 0;
+++			io->length = 0;
+++			io->offset = 0;
+++			io->context = (void *)bio;
+++			io->arrayName = ibdev->volume.array_name;
+++			io->array_id = ibdev->volume.array_id;
+++			io->complete_cb = bdev_pos_io_complete;
+++			return submit(io);
+++		}
+++	} else {
+++		SPDK_NOTICELOG("FLUSH no submit handler %s\n", ibdev->disk.name);
+++	}
+++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
+++	return 0;
+++}
+++static int bdev_pos_eventq_get_smart_log_page(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++		struct spdk_nvme_cmd *cmd, struct spdk_bdev_io *bio)
+++{
+++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
+++	if (submit) {
+++		struct pos_io *io = (struct pos_io *)malloc(sizeof(struct pos_io));
+++		if (io) {
+++			io->ioType = GET_LOG_PAGE;
+++			io->volume_id = ibdev->volume.id;
+++			io->context = (void *)bio;
+++			io->arrayName = ibdev->volume.array_name;
+++			io->array_id = ibdev->volume.array_id;
+++			io->complete_cb = bdev_pos_io_complete;
+++			return submit(io);
+++		}
+++	} else {
+++		SPDK_NOTICELOG("ADMIN no submit handler %s\n", ibdev->disk.name);
+++	}
+++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
+++	return 0;
+++}
+++static int bdev_pos_eventq_get_log_page(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++					struct spdk_nvme_cmd *cmd, struct spdk_bdev_io *bio)
+++{
+++	uint8_t lid;
+++	lid = cmd->cdw10 & 0xFF;
+++	switch (lid) {
+++	case SPDK_NVME_LOG_HEALTH_INFORMATION:
+++		bdev_pos_eventq_get_smart_log_page(ibdev, ch, cmd, bio);
+++		return 0;
+++	default:
+++		spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_SUCCESS);
+++		return 0;
+++	}
+++	return -EINVAL;
+++}
+++static int bdev_pos_eventq_admin(struct pos_disk *ibdev, struct spdk_io_channel *ch,
+++				 struct spdk_bdev_io *bio)
+++{
+++	SPDK_DEBUGLOG(bdev_pos, "admin command handling (vid=%d)\n",
+++		      ibdev->volume.id);
+++
+++	void *caller_context = (bio->internal.caller_ctx);
+++	struct spdk_nvmf_request *req = (struct spdk_nvmf_request *)caller_context;
+++	struct spdk_nvme_cmd cmd = (struct spdk_nvme_cmd)(req->cmd->nvme_cmd);
+++	switch (cmd.opc) {
+++	case SPDK_NVME_OPC_GET_LOG_PAGE:
+++		bdev_pos_eventq_get_log_page(ibdev, ch, &cmd, bio);
+++		return 0;
+++	default:
+++		return 0;
+++	}
+++	return -EINVAL;
+++}
+++
+++
+++static void bdev_pos_get_buf_cb(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io,
+++				bool success)
+++{
+++	if (!success) {
+++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
+++	}
+++
+++	int ret;
+++	uint32_t block_size = bdev_io->bdev->blocklen;
+++
+++	ret = bdev_pos_eventq_readv((struct pos_disk *)bdev_io->bdev->ctxt,
+++				    ch,
+++				    bdev_io,
+++				    bdev_io->u.bdev.iovs,
+++				    bdev_io->u.bdev.iovcnt,
+++				    bdev_io->u.bdev.num_blocks * block_size,
+++				    bdev_io->u.bdev.offset_blocks * block_size);
+++	if (spdk_likely(ret == 0)) {
+++		return;
+++	} else if (ret == -ENOMEM) {
+++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_NOMEM);
+++	} else {
+++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
+++	}
+++}
+++
+++static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	uint32_t block_size = bdev_io->bdev->blocklen;
+++
+++	struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
+++	struct pos_volume_info *volume = &(disk->volume);
+++	uint32_t arr_vol_id = volume->id + (volume->array_id << 8);
+++
+++	switch (bdev_io->type) {
+++	case SPDK_BDEV_IO_TYPE_READ: {
+++		AIRLOG(LAT_ARR_VOL_READ, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
+++		spdk_bdev_io_get_buf(bdev_io, bdev_pos_get_buf_cb,
+++				     bdev_io->u.bdev.num_blocks * block_size);
+++		return 0;
+++	}
+++
+++	case SPDK_BDEV_IO_TYPE_WRITE: {
+++		AIRLOG(LAT_ARR_VOL_WRITE, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
+++		return bdev_pos_eventq_writev(disk,
+++					      ch,
+++					      bdev_io,
+++					      bdev_io->u.bdev.iovs,
+++					      bdev_io->u.bdev.iovcnt,
+++					      bdev_io->u.bdev.num_blocks * block_size,
+++					      bdev_io->u.bdev.offset_blocks * block_size);
+++	}
+++	}
+++	return -EINVAL;
+++}
+++
+++static int _bdev_pos_eventq_flush(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	return bdev_pos_eventq_flush((struct pos_disk *)bdev_io->bdev->ctxt,
+++				     ch,
+++				     bdev_io);
+++}
+++static int _bdev_pos_eventq_admin(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	return bdev_pos_eventq_admin((struct pos_disk *)bdev_io->bdev->ctxt,
+++				     ch,
+++				     bdev_io);
+++}
+++
+++static int _bdev_pos_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	uint32_t block_size = bdev_io->bdev->blocklen;
+++
+++	switch (bdev_io->type) {
+++	case SPDK_BDEV_IO_TYPE_READ:
+++	case SPDK_BDEV_IO_TYPE_WRITE: {
+++		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
+++		if (disk->volume.pos_bdev_io) {
+++			return disk->volume.pos_bdev_io(ch, bdev_io);
+++		} else {
+++			return -1;
+++		}
+++	}
+++	case SPDK_BDEV_IO_TYPE_RESET:
+++		return bdev_pos_reset((struct pos_disk *)bdev_io->bdev->ctxt,
+++				      (struct pos_task *)bdev_io->driver_ctx);
+++	case SPDK_BDEV_IO_TYPE_FLUSH: {
+++		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
+++		if (disk->volume.pos_bdev_flush) {
+++			return disk->volume.pos_bdev_flush(ch, bdev_io);
+++		} else {
+++			return bdev_pos_flush((struct pos_disk *)bdev_io->bdev->ctxt,
+++					      (struct pos_task *)bdev_io->driver_ctx,
+++					      bdev_io->u.bdev.offset_blocks * block_size,
+++					      bdev_io->u.bdev.num_blocks * block_size);
+++		}
+++	}
+++	case SPDK_BDEV_IO_TYPE_UNMAP:
+++		return bdev_pos_unmap((struct pos_disk *)bdev_io->bdev->ctxt,
+++				      ch,
+++				      (struct pos_task *)bdev_io->driver_ctx,
+++				      bdev_io->u.bdev.offset_blocks * block_size,
+++				      bdev_io->u.bdev.num_blocks * block_size);
+++
+++	case SPDK_BDEV_IO_TYPE_WRITE_ZEROES:
+++		/* bdev_pos_unmap is implemented with a call to mem_cpy_fill which zeroes out all of the requested bytes. */
+++		return bdev_pos_unmap((struct pos_disk *)bdev_io->bdev->ctxt,
+++				      ch,
+++				      (struct pos_task *)bdev_io->driver_ctx,
+++				      bdev_io->u.bdev.offset_blocks * block_size,
+++				      bdev_io->u.bdev.num_blocks * block_size);
+++	case SPDK_BDEV_IO_TYPE_NVME_ADMIN: {
+++		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
+++		if (disk->volume.pos_bdev_admin) {
+++			return disk->volume.pos_bdev_admin(ch, bdev_io);
+++		} else {
+++			return -1;
+++		}
+++	}
+++	default:
+++		return -1;
+++	}
+++	return 0;
+++}
+++
+++static void bdev_pos_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+++{
+++	if (_bdev_pos_submit_request(ch, bdev_io) != 0) {
+++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
+++	}
+++}
+++
+++static struct spdk_io_channel *
+++bdev_pos_get_io_channel(void *ctx)
+++{
+++	return spdk_get_io_channel(&g_pos_disks);
+++}
+++
+++static void
+++bdev_pos_write_json_config(struct spdk_bdev *bdev, struct spdk_json_write_ctx *w)
+++{
+++	char uuid_str[SPDK_UUID_STRING_LEN];
+++
+++	spdk_json_write_object_begin(w);
+++
+++	spdk_json_write_named_string(w, "method", "construct_pos_bdev");
+++
+++	spdk_json_write_named_object_begin(w, "params");
+++	spdk_json_write_named_string(w, "name", bdev->name);
+++	spdk_json_write_named_uint64(w, "num_blocks", bdev->blockcnt);
+++	spdk_json_write_named_uint32(w, "block_size", bdev->blocklen);
+++	spdk_uuid_fmt_lower(uuid_str, sizeof(uuid_str), &bdev->uuid);
+++	spdk_json_write_named_string(w, "uuid", uuid_str);
+++
+++	spdk_json_write_object_end(w);
+++	spdk_json_write_object_end(w);
+++}
+++
+++static int
+++bdev_pos_poll(void *arg)
+++{
+++	unvmf_complete_handler complete = (unvmf_complete_handler)arg;
+++	if (complete) {
+++		complete();
+++	} else {
+++		SPDK_ERRLOG("uNVMf Complete Handler does not exist\n");
+++	}
+++	return 0;
+++}
+++
+++static const struct spdk_bdev_fn_table pos_fn_table = {
+++	.destruct		= bdev_pos_destruct,
+++	.submit_request		= bdev_pos_submit_request,
+++	.io_type_supported	= bdev_pos_io_type_supported,
+++	.get_io_channel		= bdev_pos_get_io_channel,
+++	.write_config_json	= bdev_pos_write_json_config,
+++};
+++
+++
+++static int pos_bdev_create_cb(void *io_device, void *ctx_buf);
+++static void pos_bdev_destroy_cb(void *io_device, void *ctx_buf);
+++
+++struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
+++				  const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+++				  bool volume_type_in_memory, const char *array_name, const uint32_t array_id)
+++{
+++	struct pos_disk	*mdisk;
+++	int			rc;
+++
+++	if (num_blocks == 0) {
+++		SPDK_ERRLOG("Disk must be more than 0 blocks\n");
+++		return NULL;
+++	}
+++
+++	mdisk = spdk_dma_zmalloc(sizeof(*mdisk), 0, NULL);
+++	if (!mdisk) {
+++		SPDK_ERRLOG("mdisk spdk_dma_zpos() failed\n");
+++		return NULL;
+++	}
+++
+++	// NOTE: VolumeTypeInMemory in configuration will make nvmf target work as debug mode.
+++	if (volume_type_in_memory) {
+++		SPDK_NOTICELOG("Initialize ramdisk using COPY engine, Please setting accel configuration in spdk\n");
+++		mdisk->volume.pos_bdev_io = _bdev_pos_ramdisk_rw;
+++		mdisk->pos_buf = spdk_dma_zmalloc(num_blocks * block_size, 2 * MB, NULL);
+++	} else {
+++		uint64_t volume_buffer_size = 2 * MB;
+++		mdisk->volume.pos_bdev_io = _bdev_pos_eventq_rw;
+++		mdisk->volume.pos_bdev_flush = _bdev_pos_eventq_flush;
+++		mdisk->volume.pos_bdev_admin = _bdev_pos_eventq_admin;
+++		mdisk->pos_buf = spdk_dma_zmalloc(volume_buffer_size, 2 * MB, NULL);
+++	}
+++	if (!mdisk->pos_buf) {
+++		SPDK_ERRLOG("pos_buf buffer: spdk_dma_zmalloc() failed\n");
+++		pos_disk_free(mdisk);
+++		return NULL;
+++	}
+++
+++	if (volume_name) {
+++		mdisk->disk.name = strdup(volume_name);
+++	} else {
+++		mdisk->disk.name = spdk_sprintf_alloc("Volume%d", pos_disk_count);
+++	}
+++	if (!mdisk->disk.name) {
+++		pos_disk_free(mdisk);
+++		return NULL;
+++	}
+++	mdisk->disk.product_name = "pos Volume";
+++	strncpy(mdisk->volume.name, mdisk->disk.name, strlen(mdisk->disk.name));
+++	uint32_t array_length = strlen(array_name);
+++	strncpy(mdisk->volume.array_name, array_name, array_length);
+++	mdisk->volume.array_name[array_length] = '\0';
+++	mdisk->volume.array_id = array_id;
+++	mdisk->volume.id = volume_id;
+++	mdisk->volume.size_mb = (num_blocks * block_size) / MB;
+++	mdisk->disk.write_cache = 1;
+++	mdisk->disk.blocklen = block_size;
+++	mdisk->disk.blockcnt = num_blocks;
+++	if (bdev_uuid) {
+++		mdisk->disk.uuid = *bdev_uuid;
+++	} else {
+++		spdk_uuid_generate(&mdisk->disk.uuid);
+++	}
+++	mdisk->disk.ctxt = mdisk;
+++	mdisk->disk.fn_table = &pos_fn_table;
+++	mdisk->disk.module = &pos_if;
+++
+++	rc = spdk_bdev_register(&mdisk->disk);
+++	if (rc) {
+++		pos_disk_free(mdisk);
+++		return NULL;
+++	}
+++
+++	TAILQ_INSERT_TAIL(&g_pos_disks, mdisk, link);
+++	pos_disk_count++;
+++
+++	SPDK_NOTICELOG("pos_Volume(volume_id=%u, size_mb=%ld) has created. volume_type_in_memory=%d\n",
+++		       mdisk->volume.id, mdisk->volume.size_mb, volume_type_in_memory);
+++	return &mdisk->disk;
+++}
+++int get_pos_volume_id(struct spdk_bdev *bdev)
+++{
+++	return ((struct pos_disk *)bdev->ctxt)->volume.id;
+++}
+++
+++void
+++delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn, void *cb_arg)
+++{
+++	if (!bdev || bdev->module != &pos_if) {
+++		cb_fn(cb_arg, -ENODEV);
+++		return;
+++	}
+++
+++	SPDK_NOTICELOG("pos_volume(%s) has deleted", spdk_bdev_get_name(bdev));
+++	spdk_bdev_unregister(bdev, cb_fn, cb_arg);
+++	pos_disk_count--;
+++}
+++
+++static void bdev_pos_register_poller(void *arg1);
+++
+++static int
+++pos_bdev_create_cb(void *io_device, void *ctx_buf)
+++{
+++	return 0;
+++}
+++
+++static void bdev_pos_unregister_poller(void *arg1);
+++
+++static void
+++pos_bdev_destroy_cb(void *io_device, void *ctx_buf)
+++{
+++}
+++
+++static int bdev_pos_initialize(void)
+++{
+++	struct spdk_conf_section *sp = spdk_conf_find_section(NULL, "Volume");
+++	int rc = 0;
+++	struct spdk_bdev *bdev = NULL;
+++	spdk_io_device_register(&g_pos_disks, pos_bdev_create_cb, pos_bdev_destroy_cb,
+++				sizeof(struct pos_io_channel),
+++				"pos_bdev");
+++
+++	if (sp != NULL) {
+++		int block_size = 0;
+++		uint32_t volume_id = spdk_conf_section_get_intval(sp, "VolumeID");
+++		uint64_t volume_size_mb = spdk_conf_section_get_intval(sp, "VolumeSizeInMB");
+++		bool volume_type_in_memory = spdk_conf_section_get_boolval(sp, "VolumeTypeInMemory", false);
+++
+++		if ((volume_size_mb < 1)) {
+++			SPDK_ERRLOG("Volume section present, but no devices specified\n");
+++			goto end;
+++		}
+++		if (volume_id > NR_MAX_VOLUME) {
+++			volume_id = 0;
+++		}
+++		volume_size_mb *= MB;
+++		block_size = 512;
+++		bdev = create_pos_disk(NULL, volume_id, NULL, volume_size_mb / block_size, block_size,
+++				       volume_type_in_memory, NULL, 0);
+++		if (bdev == NULL) {
+++			SPDK_ERRLOG("Could not create pos disk\n");
+++			rc = EINVAL;
+++			goto end;
+++		}
+++	}
+++
+++end:
+++	return rc;
+++}
+++
+++static void bdev_pos_register_poller(void *arg1)
+++{
+++	SPDK_NOTICELOG("%s: current_core=%d \n", __FUNCTION__,
+++		       spdk_env_get_current_core());
+++
+++	uint32_t current_core = spdk_env_get_current_core();
+++	if (NULL == per_lcore_pos_poller) {
+++		per_lcore_pos_poller = spdk_poller_register(bdev_pos_poll, arg1, 0);
+++		if (spdk_likely(NULL != per_lcore_pos_poller)) {
+++			SPDK_NOTICELOG("Registered unvmf bdev_pos poller to "\
+++				       "frontend io handler(#%u)\n", current_core);
+++		} else {
+++			SPDK_ERRLOG("Failed to register unvmf bdev_pos poller "\
+++				    "to frontend io handler(#%u)\n", current_core);
+++		}
+++	}
+++	if (current_core != spdk_env_get_last_core()) {
+++		send_msg_to_all_nvmf_thread(current_core, bdev_pos_register_poller, arg1);
+++	}
+++	per_lcore_poller_ref_count++;
+++}
+++
+++void spdk_bdev_pos_register_io_handler(const char *bdev_name,
+++				       unvmf_io_handler handler)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev) {
+++		struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++		if (disk) {
+++			if (disk->volume.unvmf_io.submit) {
+++				if (disk->volume.unvmf_io.submit != handler.submit) {
+++					SPDK_ERRLOG("overwriting io submit handler with "\
+++						    "0x%lx for bdev=%s\n",
+++						    (uint64_t)handler.submit, bdev_name);
+++				}
+++			} else {
+++				disk->volume.unvmf_io.submit = handler.submit;
+++			}
+++
+++			if (disk->volume.unvmf_io.complete) {
+++				if (disk->volume.unvmf_io.complete != handler.complete) {
+++					SPDK_ERRLOG("overwriting io complete handler with "\
+++						    "0x%lx for bdev=%s\n",
+++						    (uint64_t)handler.complete, bdev_name);
+++				}
+++			} else {
+++				disk->volume.unvmf_io.complete = handler.complete;
+++			}
+++			bdev_pos_register_poller(handler.complete);
+++		}
+++	} else {
+++		SPDK_ERRLOG("fail to find bdev(%s)\n", bdev_name);
+++	}
+++}
+++
+++static void bdev_pos_unregister_poller(void *arg1)
+++{
+++	struct pos_disk *disk = (struct pos_disk *)arg1;
+++	uint32_t current_core = spdk_env_get_current_core();
+++
+++	if (NULL != per_lcore_pos_poller) {
+++		per_lcore_poller_ref_count--;
+++		if (0 == per_lcore_poller_ref_count) {
+++			spdk_poller_unregister(&per_lcore_pos_poller);
+++			SPDK_NOTICELOG("Unregistered unvmf bdev_pos poller from "\
+++				       "frontend io handler(#%u)\n", current_core);
+++		}
+++	}
+++
+++	if (current_core != spdk_env_get_last_core()) {
+++		send_msg_to_all_nvmf_thread(current_core, bdev_pos_unregister_poller, arg1);
+++	} else if (0 == per_lcore_poller_ref_count) {
+++		if (disk) {
+++			disk->volume.unvmf_io.submit = NULL;
+++			disk->volume.unvmf_io.complete = NULL;
+++		}
+++	}
+++}
+++
+++void spdk_bdev_pos_unregister_io_handler(const char *bdev_name)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev) {
+++		struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++		if (disk) {
+++			bdev_pos_unregister_poller(disk);
+++		}
+++	}
+++}
+++
+++void set_pos_volume_info(const char *bdev_name, const char *nqn, int nqn_id)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev) {
+++		struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++		if (disk) {
+++			if (nqn) {
+++				strncpy(disk->volume.nqn, nqn, sizeof(disk->volume.nqn));
+++				disk->volume.nqn[sizeof(disk->volume.nqn) - 1] = '\0';
+++				disk->volume.nqn_id = nqn_id;
+++			}
+++		}
+++	}
+++}
+++
+++void reset_pos_volume_info(const char *bdev_name)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev) {
+++		struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++		if (disk) {
+++			memset(disk->volume.nqn, 0, sizeof(disk->volume.nqn));
+++		}
+++	}
+++}
+++
+++struct spdk_bdev *spdk_bdev_create_pos_disk(const char *volume_name, uint32_t volume_id,
+++		const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+++		bool volume_type_in_memory, const char *array_name, const uint32_t array_id)
+++{
+++	return create_pos_disk(volume_name, volume_id, bdev_uuid, num_blocks, block_size,
+++			       volume_type_in_memory, array_name, array_id);
+++}
+++
+++void spdk_bdev_delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn,
+++			       void *cb_arg)
+++{
+++	return delete_pos_disk(bdev, cb_fn, cb_arg);
+++}
+++
+++void send_msg_to_all_nvmf_thread(uint32_t current_core, void *fn, void *arg1)
+++{
+++	uint32_t next_core = spdk_env_get_next_core(current_core);
+++	struct spdk_thread *thread = get_nvmf_thread_from_reactor(next_core);
+++	if (thread == NULL) {
+++		SPDK_ERRLOG("Failed to get nvmf thread from reactor(#%u)\n", current_core);
+++	}
+++
+++	int success = spdk_thread_send_msg(thread, fn, arg1);
+++	if (0 != success) {
+++		SPDK_ERRLOG("Failed to send messag\n");
+++	}
+++}
+++
+++const char *get_attached_subsystem_nqn(const char *bdev_name)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev == NULL) {
+++		SPDK_ERRLOG("Failed to get bdev(%s)'s nqn : bdev does not exist\n", bdev_name);
+++		return NULL;
+++	}
+++	struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++	return disk->volume.nqn;
+++}
+++
+++uint32_t get_attached_subsystem_id(const char *bdev_name)
+++{
+++	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
+++	if (bdev == NULL) {
+++		SPDK_ERRLOG("Failed to get bdev(%s)'s nqn : bdev does not exist\n", bdev_name);
+++		return 0;
+++	}
+++	struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
+++	return disk->volume.nqn_id;
+++}
+++
+++SPDK_LOG_REGISTER_COMPONENT(bdev_pos)
++diff --git a/module/bdev/pos/bdev_pos.h b/module/bdev/pos/bdev_pos.h
++new file mode 100644
++index 000000000..2fd210824
++--- /dev/null
+++++ b/module/bdev/pos/bdev_pos.h
++@@ -0,0 +1,51 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#ifndef SPDK_BDEV_POS_H
+++#define SPDK_BDEV_POS_H
+++
+++#include "spdk/stdinc.h"
+++
+++#include "spdk/bdev.h"
+++
+++typedef void (*spdk_delete_pos_complete)(void *cb_arg, int bdeverrno);
+++
+++struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
+++				  const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+++				  bool volume_type_in_memory, const char *array_name, const uint32_t array_id);
+++
+++void delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn, void *cb_arg);
+++int get_pos_volume_id(struct spdk_bdev *bdev);
+++struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
+++
+++#endif /* SPDK_BDEV_POS_H */
++diff --git a/module/bdev/pos/bdev_pos_rpc.c b/module/bdev/pos/bdev_pos_rpc.c
++new file mode 100644
++index 000000000..ab8ac8e2d
++--- /dev/null
+++++ b/module/bdev/pos/bdev_pos_rpc.c
++@@ -0,0 +1,188 @@
+++/*-
+++ *   BSD LICENSE
+++ *
+++ *   Copyright (c) Samsung Corporation.
+++ *   All rights reserved.
+++ *
+++ *   Redistribution and use in source and binary forms, with or without
+++ *   modification, are permitted provided that the following conditions
+++ *   are met:
+++ *
+++ *     * Redistributions of source code must retain the above copyright
+++ *       notice, this list of conditions and the following disclaimer.
+++ *     * Redistributions in binary form must reproduce the above copyright
+++ *       notice, this list of conditions and the following disclaimer in
+++ *       the documentation and/or other materials provided with the
+++ *       distribution.
+++ *     * Neither the name of Samsung Corporation nor the names of its
+++ *       contributors may be used to endorse or promote products derived
+++ *       from this software without specific prior written permission.
+++ *
+++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "bdev_pos.h"
+++#include "spdk/rpc.h"
+++#include "spdk/util.h"
+++#include "spdk/uuid.h"
+++#include "spdk/string.h"
+++#include "spdk/log.h"
+++
+++struct rpc_construct_pos {
+++	char *name;
+++	char *uuid;
+++	char *array_name;
+++	uint32_t volume_id;
+++	uint32_t array_id;
+++	uint64_t volume_size_mb;
+++	uint32_t volume_type_in_memory;
+++};
+++
+++static void
+++free_rpc_construct_pos(struct rpc_construct_pos *r)
+++{
+++	if (r->name) { free(r->name); }
+++	if (r->uuid) { free(r->uuid); }
+++	if (r->array_name) { free(r->array_name); }
+++}
+++
+++static const struct spdk_json_object_decoder rpc_construct_pos_decoders[] = {
+++	{"name", offsetof(struct rpc_construct_pos, name), spdk_json_decode_string, true},
+++	{"volume_id", offsetof(struct rpc_construct_pos, volume_id), spdk_json_decode_uint32},
+++	{"uuid", offsetof(struct rpc_construct_pos, uuid), spdk_json_decode_string, true},
+++	{"volume_size_mb", offsetof(struct rpc_construct_pos, volume_size_mb), spdk_json_decode_uint64},
+++	{"volume_type_in_memory", offsetof(struct rpc_construct_pos, volume_type_in_memory), spdk_json_decode_uint32},
+++	{"array_name", offsetof(struct rpc_construct_pos, array_name), spdk_json_decode_string, true},
+++	{"array_id", offsetof(struct rpc_construct_pos, array_id), spdk_json_decode_uint32},
+++};
+++
+++static void
+++spdk_rpc_bdev_pos_create(struct spdk_jsonrpc_request *request,
+++			 const struct spdk_json_val *params)
+++{
+++	struct rpc_construct_pos req = {NULL};
+++	struct spdk_json_write_ctx *w;
+++	struct spdk_uuid *uuid = NULL;
+++	struct spdk_uuid decoded_uuid;
+++	struct spdk_bdev *bdev;
+++	uint32_t block_size = 512;
+++	uint32_t volume_id = 0;
+++	uint64_t volume_size_mb = (1024 * 1024);
+++	bool volume_type_in_memory = false;
+++
+++	if (spdk_json_decode_object(params, rpc_construct_pos_decoders,
+++				    SPDK_COUNTOF(rpc_construct_pos_decoders),
+++				    &req)) {
+++		SPDK_DEBUGLOG(bdev_pos, "spdk_json_decode_object failed\n");
+++		goto invalid;
+++	}
+++
+++	if (req.uuid) {
+++		if (spdk_uuid_parse(&decoded_uuid, req.uuid)) {
+++			goto invalid;
+++		}
+++		uuid = &decoded_uuid;
+++	}
+++
+++	volume_id = req.volume_id;
+++	volume_size_mb *= req.volume_size_mb;
+++	volume_type_in_memory = (req.volume_type_in_memory == 0) ? false : true;
+++	bdev = create_pos_disk(req.name, volume_id, uuid, volume_size_mb / block_size, block_size,
+++			       volume_type_in_memory, req.array_name, req.array_id);
+++	if (bdev == NULL) {
+++		SPDK_ERRLOG("Could not create pos disk\n");
+++		goto invalid;
+++	}
+++
+++	free_rpc_construct_pos(&req);
+++
+++	w = spdk_jsonrpc_begin_result(request);
+++	if (w == NULL) {
+++		goto invalid;
+++	}
+++
+++	spdk_json_write_string(w, spdk_bdev_get_name(bdev));
+++	spdk_jsonrpc_end_result(request, w);
+++	return;
+++
+++invalid:
+++	free_rpc_construct_pos(&req);
+++	spdk_jsonrpc_send_error_response(request, SPDK_JSONRPC_ERROR_INVALID_PARAMS, "Invalid parameters");
+++}
+++SPDK_RPC_REGISTER("bdev_pos_create", spdk_rpc_bdev_pos_create, SPDK_RPC_RUNTIME)
+++SPDK_RPC_REGISTER_ALIAS_DEPRECATED(bdev_pos_create, construct_pos_bdev)
+++
+++struct rpc_delete_pos {
+++	char *name;
+++};
+++
+++static void
+++free_rpc_delete_pos(struct rpc_delete_pos *r)
+++{
+++	if (r->name) { free(r->name); }
+++}
+++
+++static const struct spdk_json_object_decoder rpc_delete_pos_decoders[] = {
+++	{"name", offsetof(struct rpc_delete_pos, name), spdk_json_decode_string},
+++};
+++
+++static void
+++_spdk_rpc_bdev_pos_delete_cb(void *cb_arg, int bdeverrno)
+++{
+++	struct spdk_jsonrpc_request *request = cb_arg;
+++	struct spdk_json_write_ctx *w;
+++
+++	w = spdk_jsonrpc_begin_result(request);
+++	if (w == NULL) {
+++		return;
+++	}
+++
+++	spdk_json_write_bool(w, bdeverrno == 0);
+++	spdk_jsonrpc_end_result(request, w);
+++}
+++
+++static void
+++spdk_rpc_bdev_pos_delete(struct spdk_jsonrpc_request *request,
+++			 const struct spdk_json_val *params)
+++{
+++	int rc;
+++	struct rpc_delete_pos req = {NULL};
+++	struct spdk_bdev *bdev;
+++
+++	if (spdk_json_decode_object(params, rpc_delete_pos_decoders,
+++				    SPDK_COUNTOF(rpc_delete_pos_decoders),
+++				    &req)) {
+++		SPDK_DEBUGLOG(bdev_pos, "spdk_json_decode_object failed\n");
+++		rc = -EINVAL;
+++		goto invalid;
+++	}
+++
+++	bdev = spdk_bdev_get_by_name(req.name);
+++	if (bdev == NULL) {
+++		SPDK_INFOLOG(bdev_pos, "bdev '%s' does not exist\n", req.name);
+++		rc = -ENODEV;
+++		goto invalid;
+++	}
+++
+++	delete_pos_disk(bdev, _spdk_rpc_bdev_pos_delete_cb, request);
+++
+++	free_rpc_delete_pos(&req);
+++
+++	return;
+++
+++invalid:
+++	free_rpc_delete_pos(&req);
+++	spdk_jsonrpc_send_error_response(request, SPDK_JSONRPC_ERROR_INVALID_PARAMS, spdk_strerror(-rc));
+++}
+++SPDK_RPC_REGISTER("bdev_pos_delete", spdk_rpc_bdev_pos_delete, SPDK_RPC_RUNTIME)
+++SPDK_RPC_REGISTER_ALIAS_DEPRECATED(bdev_pos_delete, delete_pos_bdev)
++diff --git a/module/event/subsystems/nvmf/event_nvmf.h b/module/event/subsystems/nvmf/event_nvmf.h
++index b22927ffc..d9352111d 100644
++--- a/module/event/subsystems/nvmf/event_nvmf.h
+++++ b/module/event/subsystems/nvmf/event_nvmf.h
++@@ -46,6 +46,7 @@
++ 
++ struct spdk_nvmf_admin_passthru_conf {
++ 	bool identify_ctrlr;
+++	bool get_smart_log_page;
++ };
++ 
++ struct spdk_nvmf_tgt_conf {
++diff --git a/module/event/subsystems/nvmf/nvmf_tgt.c b/module/event/subsystems/nvmf/nvmf_tgt.c
++index 5f5ea5dbd..a24b070d0 100644
++--- a/module/event/subsystems/nvmf/nvmf_tgt.c
+++++ b/module/event/subsystems/nvmf/nvmf_tgt.c
++@@ -35,6 +35,7 @@
++ 
++ #include "spdk/bdev.h"
++ #include "spdk/thread.h"
+++#include "spdk/pos_thread.h"
++ #include "spdk/log.h"
++ #include "spdk/nvme.h"
++ #include "spdk/nvmf_cmd.h"
++@@ -61,7 +62,8 @@ struct nvmf_tgt_poll_group {
++ 
++ struct spdk_nvmf_tgt_conf g_spdk_nvmf_tgt_conf = {
++ 	.acceptor_poll_rate = ACCEPT_TIMEOUT_US,
++-	.admin_passthru.identify_ctrlr = false
+++	.admin_passthru.identify_ctrlr = false,
+++	.admin_passthru.get_smart_log_page = true
++ };
++ 
++ struct spdk_nvmf_tgt *g_spdk_nvmf_tgt = NULL;
++@@ -123,7 +125,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
++ 	free(pg);
++ 
++ 	spdk_thread_send_msg(g_tgt_fini_thread, _nvmf_tgt_destroy_poll_group_done, NULL);
++-
+++	clear_thread_to_reactor();
++ 	spdk_thread_exit(spdk_get_thread());
++ }
++ 
++@@ -201,7 +203,7 @@ nvmf_tgt_create_poll_groups(void)
++ 
++ 		thread = spdk_thread_create(thread_name, &tmp_cpumask);
++ 		assert(thread != NULL);
++-
+++		set_tls_thread_to_reactor(i, thread);
++ 		spdk_thread_send_msg(thread, nvmf_tgt_create_poll_group, NULL);
++ 	}
++ }
++@@ -331,7 +333,36 @@ fixup_identify_ctrlr(struct spdk_nvmf_request *req)
++ 	/* Copy the fixed up data back to the response */
++ 	memcpy(nvme_cdata, &nvmf_cdata, length);
++ }
+++static int
+++nvmf_custom_smart_log_handler(struct spdk_nvmf_request *req)
+++{
+++	struct spdk_nvme_cmd *cmd = spdk_nvmf_request_get_cmd(req);
+++	struct spdk_bdev *bdev;
+++	struct spdk_bdev_desc *desc;
+++	struct spdk_io_channel *ch;
+++	struct spdk_nvmf_subsystem *subsys;
+++	int rc;
+++	if (cmd->cdw10_bits.get_log_page.lid != SPDK_NVME_LOG_HEALTH_INFORMATION) {
+++		return -1;
+++	}
+++	subsys = spdk_nvmf_request_get_subsystem(req);
+++	if (subsys == NULL) {
+++		return -1;
+++	}
+++	uint32_t nsid = cmd->nsid;
+++	if (nsid == 0xFFFFFFFF) {
+++		return -1;
+++	}
+++	rc = spdk_nvmf_request_get_bdev(nsid, req, &bdev, &desc, &ch);
+++	if (rc) {
+++		return -1;
+++	}
++ 
+++	if (!spdk_bdev_io_type_supported(bdev, SPDK_BDEV_IO_TYPE_NVME_ADMIN)) {
+++		return -1;
+++	}
+++	return spdk_nvmf_bdev_ctrlr_nvme_passthru_admin(bdev, desc, ch, req, NULL);
+++}
++ static int
++ nvmf_custom_identify_hdlr(struct spdk_nvmf_request *req)
++ {
++@@ -394,6 +425,10 @@ nvmf_tgt_advance_state(void)
++ 				SPDK_NOTICELOG("Custom identify ctrlr handler enabled\n");
++ 				spdk_nvmf_set_custom_admin_cmd_hdlr(SPDK_NVME_OPC_IDENTIFY, nvmf_custom_identify_hdlr);
++ 			}
+++			if (g_spdk_nvmf_tgt_conf.admin_passthru.get_smart_log_page) {
+++				SPDK_NOTICELOG("Custom smart log handler enabled\n");
+++				spdk_nvmf_set_custom_admin_cmd_hdlr(SPDK_NVME_OPC_GET_LOG_PAGE, nvmf_custom_smart_log_handler);
+++			}
++ 			/* Create poll group threads, and send a message to each thread
++ 			 * and create a poll group.
++ 			 */
++diff --git a/scripts/rpc.py b/scripts/rpc.py
++index f60863cb0..f14adc9fb 100755
++--- a/scripts/rpc.py
+++++ b/scripts/rpc.py
++@@ -452,6 +452,32 @@ if __name__ == "__main__":
++     p.add_argument('name', help='uring bdev name')
++     p.set_defaults(func=bdev_uring_delete)
++ 
+++
+++    def bdev_pos_create(args):
+++        print(rpc.bdev.bdev_pos_create(args.client,
+++                                             volume_id=int(args.volume_id),
+++                                             volume_size_mb=int(args.volume_size_mb),
+++                                             volume_type_in_memory=args.volume_type_in_memory,
+++                                             name=args.name,
+++                                             uuid=args.uuid))
+++    p = subparsers.add_parser('bdev_pos_create',
+++                              help='Create a bdev supporting Pos Volume')
+++    p.add_argument('-b', '--name', help="Name of the bdev")
+++    p.add_argument('-u', '--uuid', help="UUID of the bdev")
+++    p.add_argument(
+++        'volume_size_mb', help='Pos Volume Size in MB (int > 0)', type=int)
+++    p.add_argument('volume_id', help='volume id', type=int)
+++    p.add_argument('volume_type_in_memory', help='Volume type (1=in-memory or 0=not) for this bdev. This is for debugging purpose', type=int)
+++    p.set_defaults(func=bdev_pos_create)
+++
+++    def bdev_pos_delete(args):
+++        rpc.bdev.bdev_pos_delete(args.client,
+++                                 name=args.name)
+++
+++    p = subparsers.add_parser('bdev_pos_delete', help='Delete a Pos bdev')
+++    p.add_argument('name', help='Pos bdev name')
+++    p.set_defaults(func=bdev_pos_delete)
+++
++     def bdev_nvme_set_options(args):
++         rpc.bdev.bdev_nvme_set_options(args.client,
++                                        action_on_timeout=args.action_on_timeout,
++diff --git a/scripts/rpc/bdev.py b/scripts/rpc/bdev.py
++index 83cb1eb60..12c47996f 100644
++--- a/scripts/rpc/bdev.py
+++++ b/scripts/rpc/bdev.py
++@@ -283,6 +283,37 @@ def bdev_null_create(client, num_blocks, block_size, name, uuid=None, md_size=No
++         params['dif_is_head_of_md'] = dif_is_head_of_md
++     return client.call('bdev_null_create', params)
++ 
+++@deprecated_alias('construct_pos_bdev')
+++def bdev_pos_create(client, volume_id, volume_size_mb, volume_type_in_memory, name=None, uuid=None):
+++    """Construct a bdev supporting Pos volume.
+++
+++    Args:
+++        volume_id : volume_id
+++        volume_size_mb : volume_size_mb
+++        volume_type_in_memory : volume_type_in_memory, 1 is in-memory type for debugging purpose
+++        name: name of block device (optional)
+++        uuid: UUID of block device (optional)
+++
+++    Returns:
+++        Name of created block device.
+++    """
+++    params = {'volume_id': volume_id, 'volume_size_mb': volume_size_mb, 'volume_type_in_memory': volume_type_in_memory}
+++    if name:
+++        params['name'] = name
+++    if uuid:
+++        params['uuid'] = uuid
+++    return client.call('bdev_pos_create', params)
+++
+++
+++@deprecated_alias('delete_pos_delete')
+++def bdev_pos_delete(client, name):
+++    """Delete an Pos bdev.
+++
+++    Args:
+++        bdev_name: name of pos bdev to delete
+++    """
+++    params = {'name': name}
+++    return client.call('bdev_pos_delete', params)
++ 
++ @deprecated_alias('delete_null_bdev')
++ def bdev_null_delete(client, name):
++diff --git a/test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c b/test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
++index aa2912f6f..8115872c5 100644
++--- a/test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
+++++ b/test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
++@@ -38,6 +38,7 @@
++ 
++ #include "common/lib/ut_multithread.c"
++ #include "nvmf/ctrlr.c"
+++#include "nvmf/pos_nvmf.c"
++ 
++ SPDK_LOG_REGISTER_COMPONENT(nvmf)
++ 
++diff --git a/test/unit/lib/nvmf/tcp.c/tcp_ut.c b/test/unit/lib/nvmf/tcp.c/tcp_ut.c
++index b96f9e854..eea41ae51 100644
++--- a/test/unit/lib/nvmf/tcp.c/tcp_ut.c
+++++ b/test/unit/lib/nvmf/tcp.c/tcp_ut.c
++@@ -41,6 +41,7 @@
++ #include "common/lib/test_sock.c"
++ 
++ #include "nvmf/ctrlr.c"
+++#include "nvmf/pos_nvmf.c"
++ #include "nvmf/tcp.c"
++ 
++ #define UT_IPV4_ADDR "192.168.0.1"
 diff --git test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
 index aa2912f6f..8115872c5 100644
 --- test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
