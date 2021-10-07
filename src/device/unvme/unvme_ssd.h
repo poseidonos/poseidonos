@@ -38,6 +38,8 @@
 
 #include "spdk/nvme.h"
 #include "src/device/base/ublock_device.h"
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
+#include "src/spdk_wrapper/caller/spdk_pci_caller.h"
 
 namespace pos
 {
@@ -51,17 +53,12 @@ public:
         uint64_t size,
         UnvmeDrv* driverToUse,
         struct spdk_nvme_ns* namespaceToUse,
-        std::string addr);
-    ~UnvmeSsd() override;
+        std::string addr,
+        SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller(),
+        SpdkPciCaller* spdkPciCaller = new SpdkPciCaller());
+    virtual ~UnvmeSsd() override;
 
-    struct spdk_nvme_ns*
-    GetNs(void)
-    {
-        return ns;
-    }
-
-    int PassThroughNvmeAdminCommand(struct spdk_nvme_cmd* cmd,
-        void* buffer, uint32_t bufferSizeInBytes);
+    struct spdk_nvme_ns* GetNs(void);
 
     void DecreaseOutstandingAdminCount(void);
 
@@ -69,15 +66,13 @@ private:
     DeviceContext* _AllocateDeviceContext(void) override;
     void _ReleaseDeviceContext(DeviceContext* deviceContextToRelease) override;
 
-    static void
-    _CallbackAdminCommand(void* arg, const struct spdk_nvme_cpl* cpl);
-
     std::string _GetSN();
     std::string _GetMN();
     int _GetNuma();
 
     spdk_nvme_ns* ns;
-    std::atomic<uint32_t> outstandingAdminCommands;
+    SpdkNvmeCaller* spdkNvmeCaller;
+    SpdkPciCaller* spdkPciCaller;
 };
 } // namespace pos
 

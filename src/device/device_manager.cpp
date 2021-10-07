@@ -436,26 +436,6 @@ DeviceManager::ListDevs()
     return devs;
 }
 
-int
-DeviceManager::PassThroughNvmeAdminCommand(std::string& deviceName,
-    struct spdk_nvme_cmd* cmd, void* buffer, uint32_t bufferSizeInBytes)
-{
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    int errorCode = -1;
-    for (UblockSharedPtr dev : devices)
-    {
-        if (0 == static_cast<string>(dev->GetName()).compare(deviceName))
-        {
-            UnvmeSsdSharedPtr unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);
-            errorCode = unvmeSsd->PassThroughNvmeAdminCommand(cmd,
-                buffer, bufferSizeInBytes);
-            break;
-        }
-    }
-
-    return errorCode;
-}
-
 struct spdk_nvme_ctrlr*
 DeviceManager::GetNvmeCtrlr(std::string& deviceName)
 {

@@ -32,39 +32,16 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
-
-#include "spdk/nvme.h"
-#include "src/include/smart_ptr_type.h"
-#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
-
-#define DEVICE_NAME_PREFIX "unvme-ns-"
+#include "spdk/env.h"
 
 namespace pos
 {
-class DeviceContext;
-class Nvme;
-class NsEntry;
-class UnvmeDrv;
-class UBlockDevice;
 
-class UnvmeMgmt
+class SpdkPciCaller
 {
 public:
-    UnvmeMgmt(SpdkNvmeCaller* spdkCaller = new SpdkNvmeCaller(),
-        bool spdkInitDone = false);
-    ~UnvmeMgmt(void);
-    int ScanDevs(std::vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv);
-
-    bool Open(DeviceContext* deviceContext);
-    bool Close(DeviceContext* deviceContext);
-
-private:
-    int _CheckConstraints(const NsEntry* nsEntry);
-
-    bool spdkInitDone;
-    SpdkNvmeCaller* spdkCaller;
+    virtual ~SpdkPciCaller() {}
+    virtual int SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev);
 };
 
 } // namespace pos

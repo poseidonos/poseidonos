@@ -117,7 +117,7 @@ public:
         const spdk_nvme_transport_id* trid);
     typedef void (*SpdkDetachEvent)(string sn);
 
-    std::list<NsEntry*>* InitController(void);
+    virtual std::list<NsEntry*>* InitController(void);
 
     void Start(void) override;
     void Stop(void) override;

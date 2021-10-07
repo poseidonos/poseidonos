@@ -82,8 +82,6 @@ public:
     virtual int DetachDevice(DevUid sn);
     virtual int RemoveDevice(UblockSharedPtr dev);
     virtual struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
-    virtual int PassThroughNvmeAdminCommand(std::string& deviceName,
-        struct spdk_nvme_cmd* cmd, void* buffer, uint32_t bufferSizeInBytes);
 
     virtual void StartMonitoring(void);
     virtual void StopMonitoring(void);

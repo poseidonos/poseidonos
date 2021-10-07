@@ -175,3 +175,35 @@ SpdkNvmeCaller::SpdkNvmeNsGetSize(struct spdk_nvme_ns* ns)
 {
     return spdk_nvme_ns_get_size(ns);
 }
+
+struct spdk_nvme_qpair*
+SpdkNvmeCaller::SpdkNvmeCtrlrAllocIoQpair(
+    struct spdk_nvme_ctrlr* ctrlr,
+    const struct spdk_nvme_io_qpair_opts* user_opts,
+    size_t opts_size)
+{
+    return spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, user_opts, opts_size);
+}
+
+int
+SpdkNvmeCaller::SpdkNvmeCtrlrFreeIoQpair(struct spdk_nvme_qpair* qpair)
+{
+    return spdk_nvme_ctrlr_free_io_qpair(qpair);
+}
+
+uint32_t
+SpdkNvmeCaller::SpdkNvmeNsGetSectorSize(struct spdk_nvme_ns* ns)
+{
+    return spdk_nvme_ns_get_sector_size(ns);
+}
+const struct spdk_nvme_ctrlr_data*
+SpdkNvmeCaller::SpdkNvmeCtrlrGetData(struct spdk_nvme_ctrlr* ctrlr)
+{
+    return spdk_nvme_ctrlr_get_data(ctrlr);
+}
+
+struct spdk_pci_device*
+SpdkNvmeCaller::SpdkNvmeCtrlrGetPciDevice(struct spdk_nvme_ctrlr* ctrlr)
+{
+    return spdk_nvme_ctrlr_get_pci_device(ctrlr);
+}

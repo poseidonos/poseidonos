@@ -4,20 +4,33 @@
 
 namespace pos
 {
-TEST(UnvmeDeviceContext, UnvmeDeviceContext_)
+
+TEST(UnvmeDeviceContext, IncAdminCommandCount_testIfIncreasedSuccessfully)
 {
+    // Given
+    UnvmeDeviceContext devCtx;
+
+    // When
+    devCtx.IncAdminCommandCount();
+    bool ret = devCtx.IsAdminCommandPendingZero();
+
+    // Then
+    EXPECT_FALSE(ret);
+
 }
 
-TEST(UnvmeDeviceContext, IncAdminCommandCount_)
+TEST(UnvmeDeviceContext, DecAdminCommandCount_testIfDecreasedSuccessfully)
 {
-}
+    // Given
+    UnvmeDeviceContext devCtx;
+    devCtx.IncAdminCommandCount();
 
-TEST(UnvmeDeviceContext, DecAdminCommandCount_)
-{
-}
+    // When
+    devCtx.DecAdminCommandCount();
+    bool ret = devCtx.IsAdminCommandPendingZero();
 
-TEST(UnvmeDeviceContext, IsAdminCommandPendingZero_)
-{
+    // Then
+    EXPECT_TRUE(ret);
 }
 
 } // namespace pos

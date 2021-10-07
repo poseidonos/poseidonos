@@ -52,6 +52,10 @@ public:
     MOCK_METHOD(int32_t, SpdkNvmeCtrlrProcessAdminCompletions, (struct spdk_nvme_ctrlr * ctrlr), (override));
     MOCK_METHOD(int32_t, SpdkNvmeQpairProcessCompletions, (struct spdk_nvme_qpair * qpair, uint32_t max_completions), (override));
     MOCK_METHOD(uint64_t, SpdkNvmeNsGetSize, (struct spdk_nvme_ns * ns), (override));
+    MOCK_METHOD(struct spdk_nvme_qpair*, SpdkNvmeCtrlrAllocIoQpair, (struct spdk_nvme_ctrlr *ctrlr, const struct spdk_nvme_io_qpair_opts *user_opts, size_t opts_size), (override));
+    MOCK_METHOD(int, SpdkNvmeCtrlrFreeIoQpair, (struct spdk_nvme_qpair* qpair), (override));
+    MOCK_METHOD(uint32_t, SpdkNvmeNsGetSectorSize, (struct spdk_nvme_ns* ns), (override));
+    MOCK_METHOD(const struct spdk_nvme_ctrlr_data*, SpdkNvmeCtrlrGetData, (struct spdk_nvme_ctrlr* ctrlr), (override));
 };
 
 } // namespace pos

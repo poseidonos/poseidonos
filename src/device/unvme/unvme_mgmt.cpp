@@ -57,9 +57,18 @@ CompareNamespaceEntry(struct NsEntry* first, struct NsEntry* second)
     return firstLess;
 }
 
-UnvmeMgmt::UnvmeMgmt(void)
+UnvmeMgmt::UnvmeMgmt(SpdkNvmeCaller* spdkCaller, bool spdkInitDone)
+: spdkInitDone(spdkInitDone),
+  spdkCaller(spdkCaller)
 {
-    spdkInitDone = false;
+}
+
+UnvmeMgmt::~UnvmeMgmt(void)
+{
+    if (spdkCaller != nullptr)
+    {
+        delete spdkCaller;
+    }
 }
 
 int
@@ -109,7 +118,8 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
 
                 if (it == devs->end())
                 {
-                    uint64_t diskSize = spdk_nvme_ns_get_size(nsEntry->u.nvme.ns);
+                    uint64_t diskSize =
+                        spdkCaller->SpdkNvmeNsGetSize(nsEntry->u.nvme.ns);
                     UblockSharedPtr dev = make_shared<UnvmeSsd>(name, diskSize, drv,
                         nsEntry->u.nvme.ns, nsEntry->trAddr);
 
@@ -147,15 +157,15 @@ UnvmeMgmt::Open(DeviceContext* deviceContext)
             if (nullptr == devCtx->ioQPair)
             {
                 struct spdk_nvme_ctrlr* ctrlr =
-                    spdk_nvme_ns_get_ctrlr(devCtx->ns);
+                    spdkCaller->SpdkNvmeNsGetCtrlr(devCtx->ns);
                 struct spdk_nvme_qpair* qpair =
-                    spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, NULL, 0);
+                    spdkCaller->SpdkNvmeCtrlrAllocIoQpair(ctrlr, NULL, 0);
 
                 if (nullptr == qpair)
                 {
                     POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_OPEN_FAILED,
                         PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_OPEN_FAILED),
-                        spdk_nvme_ns_get_id(devCtx->ns));
+                        spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
                 }
                 else
                 {
@@ -179,14 +189,13 @@ UnvmeMgmt::Close(DeviceContext* deviceContext)
             static_cast<UnvmeDeviceContext*>(deviceContext);
         if (nullptr != devCtx->ioQPair)
         {
-            int retError = spdk_nvme_ctrlr_free_io_qpair(devCtx->ioQPair);
+            int retError = spdkCaller->SpdkNvmeCtrlrFreeIoQpair(devCtx->ioQPair);
             if (0 != retError)
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_CLOSE_FAILED;
                 POS_TRACE_ERROR(static_cast<int>(eventId),
                     PosEventId::GetString(eventId),
-                    spdk_nvme_ns_get_id(devCtx->ns));
-
+                    spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
                 closeSuccessful = false;
             }
             else
@@ -205,7 +214,7 @@ UnvmeMgmt::_CheckConstraints(const NsEntry* nsEntry)
     const uint32_t ALLOWED_DEVICE_SECTOR_SIZE = 512;
 
     struct spdk_nvme_ns* ns = nsEntry->u.nvme.ns;
-    if (spdk_nvme_ns_get_sector_size(ns) != ALLOWED_DEVICE_SECTOR_SIZE)
+    if (spdkCaller->SpdkNvmeNsGetSectorSize(ns) != ALLOWED_DEVICE_SECTOR_SIZE)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_NOT_SUPPORTED_DEVICE;
         POS_TRACE_WARN(eventId,

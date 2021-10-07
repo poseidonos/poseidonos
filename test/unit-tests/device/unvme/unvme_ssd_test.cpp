@@ -2,46 +2,34 @@
 
 #include <gtest/gtest.h>
 
-namespace pos
-{
-TEST(UnvmeSsd, UnvmeSsd_)
-{
-}
+#include "test/unit-tests/spdk_wrapper/caller/spdk_nvme_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_pci_caller_mock.h"
+#include "lib/spdk/lib/nvme/nvme_internal.h"
 
-TEST(UnvmeSsd, GetNs_)
-{
-}
+using testing::_;
+using testing::NiceMock;
+using testing::Return;
+using namespace pos;
 
-TEST(UnvmeSsd, PassThroughNvmeAdminCommand_)
+TEST(UnvmeSsd, testIfGetNsProperly)
 {
-}
+    // Given
+    NiceMock<MockSpdkNvmeCaller>* mockSpdkNvmeCaller =
+        new NiceMock<MockSpdkNvmeCaller>();
+    NiceMock<MockSpdkPciCaller>* mockSpdkPciCaller =
+        new NiceMock<MockSpdkPciCaller>();
+    struct spdk_nvme_ns* ns = nullptr;
+    struct spdk_nvme_ctrlr_data data;
+    data.mn[0] = 0;
+    data.sn[0] = 0;
+    EXPECT_CALL(*mockSpdkNvmeCaller, SpdkNvmeCtrlrGetData)
+        .Times(2).WillRepeatedly(Return(&data));
+    UnvmeSsd unvmeSsd(
+        "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkPciCaller);
 
-TEST(UnvmeSsd, DecreaseOutstandingAdminCount_)
-{
-}
+    // When
+    struct spdk_nvme_ns* expected = unvmeSsd.GetNs();
 
-TEST(UnvmeSsd, _AllocateDeviceContext_)
-{
-}
-
-TEST(UnvmeSsd, _ReleaseDeviceContext_)
-{
-}
-
-TEST(UnvmeSsd, _CallbackAdminCommand_)
-{
-}
-
-TEST(UnvmeSsd, _GetSN_)
-{
-}
-
-TEST(UnvmeSsd, _GetMN_)
-{
-}
-
-TEST(UnvmeSsd, _GetNuma_)
-{
-}
-
+    // Then
+    EXPECT_EQ(expected, ns);
 } // namespace pos

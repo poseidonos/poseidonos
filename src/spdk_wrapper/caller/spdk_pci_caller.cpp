@@ -30,41 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "spdk_pci_caller.h"
 
-#include <cstdint>
-#include <vector>
+using namespace pos;
 
-#include "spdk/nvme.h"
-#include "src/include/smart_ptr_type.h"
-#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
-
-#define DEVICE_NAME_PREFIX "unvme-ns-"
-
-namespace pos
+int
+SpdkPciCaller::SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev)
 {
-class DeviceContext;
-class Nvme;
-class NsEntry;
-class UnvmeDrv;
-class UBlockDevice;
-
-class UnvmeMgmt
-{
-public:
-    UnvmeMgmt(SpdkNvmeCaller* spdkCaller = new SpdkNvmeCaller(),
-        bool spdkInitDone = false);
-    ~UnvmeMgmt(void);
-    int ScanDevs(std::vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv);
-
-    bool Open(DeviceContext* deviceContext);
-    bool Close(DeviceContext* deviceContext);
-
-private:
-    int _CheckConstraints(const NsEntry* nsEntry);
-
-    bool spdkInitDone;
-    SpdkNvmeCaller* spdkCaller;
-};
-
-} // namespace pos
+    return spdk_pci_device_get_socket_id(dev);
+}

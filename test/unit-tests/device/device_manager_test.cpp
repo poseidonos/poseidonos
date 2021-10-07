@@ -44,10 +44,6 @@ TEST(DeviceManager, GetNvmeCtrlr_)
 {
 }
 
-TEST(DeviceManager, PassThroughNvmeAdminCommand_)
-{
-}
-
 TEST(DeviceManager, StartMonitoring_)
 {
 }

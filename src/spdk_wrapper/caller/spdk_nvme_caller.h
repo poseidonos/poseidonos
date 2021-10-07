@@ -108,6 +108,16 @@ public:
     virtual int32_t SpdkNvmeQpairProcessCompletions(
         struct spdk_nvme_qpair* qpair, uint32_t max_completions);
     virtual uint64_t SpdkNvmeNsGetSize(struct spdk_nvme_ns* ns);
+    virtual struct spdk_nvme_qpair * SpdkNvmeCtrlrAllocIoQpair(
+        struct spdk_nvme_ctrlr *ctrlr,
+        const struct spdk_nvme_io_qpair_opts *user_opts,
+        size_t opts_size);
+    virtual int SpdkNvmeCtrlrFreeIoQpair(struct spdk_nvme_qpair* qpair);
+    virtual uint32_t SpdkNvmeNsGetSectorSize(struct spdk_nvme_ns* ns);
+    virtual const struct spdk_nvme_ctrlr_data* SpdkNvmeCtrlrGetData(
+        struct spdk_nvme_ctrlr* ctrlr);
+    virtual struct spdk_pci_device* SpdkNvmeCtrlrGetPciDevice(
+        struct spdk_nvme_ctrlr* ctrlr);
 };
 
 } // namespace pos
