@@ -39,7 +39,7 @@
 #include "src/mapper/mapper.h"
 #include "src/meta_service/meta_service.h"
 #include "src/metadata/meta_updater.h"
-#include "src/event_scheduler/event_scheduler.h"
+#include "src/metadata/meta_volume_event_handler.h"
 
 namespace pos
 {
