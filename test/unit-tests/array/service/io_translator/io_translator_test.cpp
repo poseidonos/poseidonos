@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/array/ft/raid1.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/array/partition/stripe_partition_mock.h"
 
 using ::testing::Return;
@@ -99,6 +100,24 @@ TEST(IOTranslator, Translate_testIfArgumentsAreValid)
 
     // Then
     ASSERT_EQ(TRANSLATE_SUCCESS, actual);
+}
+
+TEST(IOTranslator, Translate_testIfThereIsNoTranslator)
+{
+    // Given
+    IOTranslator ioTranslator;
+    unsigned int mockArrayIndex = 0;
+    string mockArrayName = "mockArray";
+    PartitionType mockPartitionType = PartitionType::USER_DATA;
+    int NO_TRANSLATOR = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+
+    // When
+    LogicalBlkAddr src;
+    PhysicalBlkAddr dst;
+    int actual = ioTranslator.Translate(mockArrayIndex, mockPartitionType, dst, src);
+
+    // Then
+    ASSERT_EQ(NO_TRANSLATOR, actual);
 }
 
 TEST(IOTranslator, Convert_testIfArgumentsAreValid)

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ibof_root="/home/psd/"
 while getopts "i:t:f:" opt
 do
     case "$opt" in
@@ -89,7 +89,7 @@ cleanServer()
 
 network_module_check()
 {
-    texecc /home/ibof/ibofos/test/regression/network_module_check.sh
+    texecc /home/psd/ibofos/test/regression/network_module_check.sh
 }
 
 setup

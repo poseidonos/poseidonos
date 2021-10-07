@@ -46,7 +46,6 @@ class IArrayDevMgr
 {
 public:
     explicit IArrayDevMgr(DeviceManager* sysDevMgr);
-    virtual ~IArrayDevMgr(void);
     virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(UblockSharedPtr uBlock) = 0;
 };
 } // namespace pos

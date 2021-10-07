@@ -39,8 +39,5 @@ namespace pos
 IArrayDevMgr::IArrayDevMgr(DeviceManager* sysDevMgr)
 {
 }
-IArrayDevMgr::~IArrayDevMgr(void)
-{
-}
 } // namespace pos
 #endif
