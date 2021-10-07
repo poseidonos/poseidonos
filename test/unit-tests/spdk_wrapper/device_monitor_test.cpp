@@ -1,4 +1,4 @@
-#include "src/spdk_wrapper/device_monitor.h"
+#include "src/device/device_monitor.h"
 
 #include <gtest/gtest.h>
 

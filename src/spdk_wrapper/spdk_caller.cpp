@@ -45,42 +45,6 @@ SpdkCaller::~SpdkCaller(void)
 {
 }
 
-struct spdk_nvmf_tgt*
-SpdkCaller::SpdkNvmfGetTgt(const char* name)
-{
-    return spdk_nvmf_get_tgt(name);
-}
-
-struct spdk_nvmf_subsystem*
-SpdkCaller::SpdkNvmfTgtFindSubsystem(struct spdk_nvmf_tgt* tgt, const char* subnqn)
-{
-    return spdk_nvmf_tgt_find_subsystem(tgt, subnqn);
-}
-
-enum spdk_nvmf_subtype
-SpdkCaller::SpdkNvmfSubsystemGetType(struct spdk_nvmf_subsystem* subsystem)
-{
-    return spdk_nvmf_subsystem_get_type(subsystem);
-}
-
-const char*
-SpdkCaller::SpdkNvmfSubsystemGetNqn(const struct spdk_nvmf_subsystem* subsystem)
-{
-    return spdk_nvmf_subsystem_get_nqn(subsystem);
-}
-
-struct spdk_nvmf_subsystem*
-SpdkCaller::SpdkNvmfSubsystemGetFirst(struct spdk_nvmf_tgt* tgt)
-{
-    return spdk_nvmf_subsystem_get_first(tgt);
-}
-
-struct spdk_nvmf_subsystem*
-SpdkCaller::SpdkNvmfSubsystemGetNext(struct spdk_nvmf_subsystem* subsystem)
-{
-    return spdk_nvmf_subsystem_get_next(subsystem);
-}
-
 char*
 SpdkCaller::SpdkNvmfSubsystemGetCtrlrHostnqn(struct spdk_nvmf_ctrlr* ctrlr)
 {
@@ -100,69 +64,10 @@ SpdkCaller::SpdkNvmfSubsystemGetNextCtrlr(struct spdk_nvmf_subsystem* subsystem,
     return spdk_nvmf_subsystem_get_next_ctrlr(subsystem, prevCtrlr);
 }
 
-struct spdk_nvmf_ns *
-SpdkCaller::SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem *subsystem, uint32_t nsid)
-{
-    return spdk_nvmf_subsystem_get_ns(subsystem, nsid);
-}
-
-struct spdk_nvmf_ns*
-SpdkCaller::SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem)
-{
-    return spdk_nvmf_subsystem_get_first_ns(subsystem);
-}
-
-struct spdk_nvmf_ns*
-SpdkCaller::SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
-    struct spdk_nvmf_ns* prevNs)
-{
-    return spdk_nvmf_subsystem_get_next_ns(subsystem, prevNs);
-}
-
-uint32_t
-SpdkCaller::SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem *subsystem, const char* bdevName,
-   const struct spdk_nvmf_ns_opts *user_opts, size_t opts_size, const char *ptpl_file)
-{
-    return spdk_nvmf_subsystem_add_ns_ext(subsystem, bdevName, user_opts, opts_size, ptpl_file);
-}
-
-int
-SpdkCaller::SpdkNvmfSubsystemRemoveNs(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid)
-{
-    return spdk_nvmf_subsystem_remove_ns(subsystem, nsid);
-}
-
-int
-SpdkCaller::SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem,
-    uint32_t nsid,
-    spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
-{
-    return spdk_nvmf_subsystem_pause(subsystem, nsid, cbFunc, cbArg);
-}
-
-int
-SpdkCaller::SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem,
-    spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
-{
-    return spdk_nvmf_subsystem_resume(subsystem, cbFunc, cbArg);
-}
-
 int
 SpdkCaller::SpdkNvmfSubsystemSetPauseDirectly(struct spdk_nvmf_subsystem *subsystem)
 {
     return spdk_nvmf_subsystem_set_pause_state_directly(subsystem);
-}
-
-struct spdk_bdev*
-SpdkCaller::SpdkNvmfNsGetBdev(struct spdk_nvmf_ns* ns)
-{
-    return spdk_nvmf_ns_get_bdev(ns);
-}
-
-uint32_t
-SpdkCaller::SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns)
-{
-    return spdk_nvmf_ns_get_id(ns);
 }
 
 uint32_t

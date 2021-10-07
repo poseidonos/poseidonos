@@ -38,11 +38,17 @@
 #include <queue>
 #include <tuple>
 #include <string>
+#include <cstdarg>
 
 #include "src/lib/singleton.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 namespace pos
 {
+class EventFrameworkApi;
+class SpdkNvmfCaller;
 using EventFuncTwoParams = void (*)(void*, void*);
+using EventFuncFourParams = void (*)(void*, void*, EventFrameworkApi*, SpdkNvmfCaller*);
 using EventFuncOneParam = void (*)(void*);
 
 struct EventWrapper
@@ -58,6 +64,8 @@ public:
     EventFrameworkApi(void);
     virtual ~EventFrameworkApi(void);
     virtual bool SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
+            void* arg2);
+    virtual bool SendSpdkEvent(uint32_t core, EventFuncFourParams func, void* arg1,
             void* arg2);
     virtual bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
     void CompleteEvents(void);

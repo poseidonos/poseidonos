@@ -64,16 +64,25 @@ NvmfTarget::NvmfTarget(void)
 {
 }
 
-NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi)
+NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* inputSpdkNvmfCaller)
 : spdkCaller(spdkCaller),
   feQosEnable(feQosEnable),
-  eventFrameworkApi(eventFrameworkApi)
+  eventFrameworkApi(eventFrameworkApi),
+  spdkNvmfCaller(inputSpdkNvmfCaller)
 {
+    if (nullptr == spdkNvmfCaller)
+    {
+        spdkNvmfCaller = new SpdkNvmfCaller();
+    }
     InitNvmfCallbacks(&nvmfCallbacks);
 }
 
 NvmfTarget::~NvmfTarget(void)
 {
+    if (nullptr != spdkNvmfCaller)
+    {
+        delete spdkNvmfCaller;
+    }
 }
 
 bool
@@ -220,18 +229,26 @@ NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
 
 bool
 NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
-    uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg)
+    uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg, SpdkNvmfCaller* spdkNvmfCaller)
 {
     if (!_IsTargetExist())
     {
         SPDK_ERRLOG("fail to attach namespace: target does not exist\n");
         return false;
     }
+    if (spdkNvmfCaller == nullptr)
+    {
+        spdkNvmfCaller = new SpdkNvmfCaller();
+    }
     struct spdk_nvmf_subsystem* subsystem =
-        SpdkCallerSingleton::Instance()->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
+        spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
     if (subsystem == nullptr)
     {
         SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
+        if (spdkNvmfCaller != nullptr)
+        {
+            delete spdkNvmfCaller;
+        }
         return false;
     }
 
@@ -239,27 +256,48 @@ NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
         strdup(bdevName.c_str()), spdk_sprintf_alloc("%u", nsid));
     if (ctx == nullptr)
     {
+        if (spdkNvmfCaller != nullptr)
+        {
+            delete spdkNvmfCaller;
+        }
         return false;
     }
 
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.attachNamespacePauseDone, ctx);
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.attachNamespacePauseDone, ctx);
     if (ret != 0)
     {
         _AttachNamespaceWithPause(subsystem, ctx);
     }
 
+    if (spdkNvmfCaller != nullptr)
+    {
+        delete spdkNvmfCaller;
+    }
     return true;
 }
 
 void
-NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2)
+NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
 {
+    if (nullptr == spdkNvmfCaller)
+    {
+        spdkNvmfCaller = new SpdkNvmfCaller();
+    }
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(), _AttachNamespaceWithPause, subsystem, arg2);
+        if (nullptr == eventFrameworkApi)
+        {
+            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+        }
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), _AttachNamespaceWithPause, subsystem, arg2);
+    }
+
+    if (nullptr != spdkNvmfCaller)
+    {
+        delete spdkNvmfCaller;
     }
 }
 
@@ -274,15 +312,15 @@ NvmfTarget::GetNamespace(
         SPDK_ERRLOG("failed to get namespace : bdev(%s) does not exist\n", bdevName.c_str());
         return nullptr;
     }
-    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
+    struct spdk_nvmf_ns* ns = spdkNvmfCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
     while (ns != nullptr)
     {
-        bdev = spdkCaller->SpdkNvmfNsGetBdev(ns);
+        bdev = spdkNvmfCaller->SpdkNvmfNsGetBdev(ns);
         if (bdev == targetBdev)
         {
             return ns;
         }
-        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
+        ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return nullptr;
 }
@@ -318,7 +356,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
             SPDK_ERRLOG("failed to detach namespace : could not get namespace\n");
             return false;
         }
-        nsid = spdkCaller->SpdkNvmfNsGetId(ns);
+        nsid = spdkNvmfCaller->SpdkNvmfNsGetId(ns);
     }
 
     struct EventContext* ctx = _CreateEventContext(callback, arg,
@@ -328,7 +366,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
         return false;
     }
 
-    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.detachNamespacePauseDone, ctx);
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.detachNamespacePauseDone, ctx);
     if (ret != 0)
     {
         _DetachNamespaceWithPause(subsystem, ctx);
@@ -342,30 +380,43 @@ NvmfTarget::CheckSubsystemExistance(void)
 {
     struct spdk_nvmf_tgt* nvmf_tgt;
     struct spdk_nvmf_subsystem* subsystem;
-    nvmf_tgt = spdkCaller->SpdkNvmfGetTgt("nvmf_tgt");
-    subsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(nvmf_tgt);
+    nvmf_tgt = spdkNvmfCaller->SpdkNvmfGetTgt("nvmf_tgt");
+    subsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetFirst(nvmf_tgt);
     while (subsystem != NULL)
     {
-        if (spdkCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
+        if (spdkNvmfCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
             return true;
         }
-        subsystem = spdkCaller->SpdkNvmfSubsystemGetNext(subsystem);
+        subsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetNext(subsystem);
     }
     return false;
 }
 
 void
-NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
+NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
+    if (nullptr == spdkNvmfCaller)
+    {
+        spdkNvmfCaller = new SpdkNvmfCaller();
+    }
 
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0,
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
         nvmfCallbacks.detachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
+        if (nullptr == eventFrameworkApi)
+        {
+            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+        }
         SPDK_NOTICELOG("failed to pause subsystem during detaching namespace : retrying \n");
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(), _DetachNamespaceWithPause, subsystem, arg2);
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), _DetachNamespaceWithPause, subsystem, arg2);
+    }
+
+    if (nullptr != spdkNvmfCaller)
+    {
+        delete spdkNvmfCaller;
     }
 }
 
@@ -391,7 +442,7 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
         return false;
     }
 
-    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
     if (ret != 0)
     {
         _DetachNamespaceAllWithPause(subsystem, ctx);
@@ -401,19 +452,34 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
 }
 
 void
-NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2)
+NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
 
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0,
+    if (nullptr == spdkNvmfCaller)
+    {
+        spdkNvmfCaller = new SpdkNvmfCaller();
+    }
+
+    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
         nvmfCallbacks.detachNamespaceAllPauseDone, (void*)arg2);
 
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem(%s) during detaching ns :retrying \n",
-            spdk_nvmf_subsystem_get_nqn(subsystem));
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+            spdkNvmfCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+
+        if (nullptr == eventFrameworkApi)
+        {
+            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+        }
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _DetachNamespaceAllWithPause, subsystem, arg2);
+    }
+
+    if (nullptr != spdkNvmfCaller)
+    {
+        delete spdkNvmfCaller;
     }
 }
 
@@ -421,11 +487,11 @@ uint32_t
 NvmfTarget::GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem)
 {
     uint32_t nsCnt = 0;
-    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
+    struct spdk_nvmf_ns* ns = spdkNvmfCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
     while (ns != nullptr)
     {
         nsCnt++;
-        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
+        ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return nsCnt;
 }
@@ -440,7 +506,7 @@ NvmfTarget::AllocateSubsystem(string& arrayName, uint64_t arrayId)
         allowedNsCnt[i] = nrVolumePerSubsystem;
     }
 
-    struct spdk_nvmf_subsystem* subsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
+    struct spdk_nvmf_subsystem* subsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
     while (subsystem != nullptr)
     {
         string subnqn = GetVolumeNqn(subsystem);
@@ -450,7 +516,7 @@ NvmfTarget::AllocateSubsystem(string& arrayName, uint64_t arrayId)
             subsystemExist = true;
         }
 
-        if (spdkCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
+        if (spdkNvmfCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
             uint32_t nsCnt = GetSubsystemNsCnt(subsystem);
             bool suitableArrayName = (("" == subnqnArrayName) || (subnqnArrayName == arrayName));
@@ -459,7 +525,7 @@ NvmfTarget::AllocateSubsystem(string& arrayName, uint64_t arrayId)
                 return subsystem;
             }
         }
-        struct spdk_nvmf_subsystem* nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetNext(subsystem);
+        struct spdk_nvmf_subsystem* nextSubsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetNext(subsystem);
         if (nextSubsystem == nullptr)
         {
             if (false == subsystemExist)
@@ -467,7 +533,7 @@ NvmfTarget::AllocateSubsystem(string& arrayName, uint64_t arrayId)
                 SPDK_ERRLOG("failed to allocate subsystem : next subsystem does not exist\n");
                 return nullptr;
             }
-            nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
+            nextSubsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
             allowedNsCnt[arrayId] += nrVolumePerSubsystem;
         }
         subsystem = nextSubsystem;
@@ -484,7 +550,7 @@ NvmfTarget::GetBdevName(uint32_t id, string arrayName)
 string
 NvmfTarget::GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem)
 {
-    return spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem);
+    return spdkNvmfCaller->SpdkNvmfSubsystemGetNqn(subsystem);
 }
 
 int32_t
@@ -502,7 +568,7 @@ struct spdk_nvmf_subsystem*
 NvmfTarget::FindSubsystem(const string& subnqn)
 {
     struct spdk_nvmf_subsystem* subsystem =
-        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
+        spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
     if (nullptr == subsystem)
     {
         SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", subnqn.c_str());
@@ -616,11 +682,11 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
     {
         return volList;
     }
-    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
+    struct spdk_nvmf_ns* ns = spdkNvmfCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
 
     while (ns != nullptr)
     {
-        struct spdk_bdev* bdev = spdkCaller->SpdkNvmfNsGetBdev(ns);
+        struct spdk_bdev* bdev = spdkNvmfCaller->SpdkNvmfNsGetBdev(ns);
         string bdevName = spdkCaller->SpdkBdevGetName(bdev);
         size_t volIdIdx = bdevName.find("_");
         if (volIdIdx == string::npos)
@@ -628,7 +694,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
-            ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
+            ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
         size_t arrayNameIdx = bdevName.find("_", volIdIdx + 1);
@@ -637,7 +703,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
-            ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
+            ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
         arrayNameIdx += 1;
@@ -646,7 +712,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         string arrayName = bdevName.substr(arrayNameIdx, bdevName.length() - arrayNameIdx);
         volList.push_back(make_pair(volId, arrayName));
 
-        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
+        ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return volList;
 }

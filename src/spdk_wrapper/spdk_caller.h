@@ -44,27 +44,11 @@ class SpdkCaller
 public:
     SpdkCaller(void);
     virtual ~SpdkCaller(void);
-    virtual struct spdk_nvmf_tgt* SpdkNvmfGetTgt(const char* name);
-    virtual struct spdk_nvmf_subsystem* SpdkNvmfTgtFindSubsystem(struct spdk_nvmf_tgt* tgt, const char* subnqn);
-    virtual enum spdk_nvmf_subtype SpdkNvmfSubsystemGetType(struct spdk_nvmf_subsystem* subsystem);
-    virtual const char* SpdkNvmfSubsystemGetNqn(const struct spdk_nvmf_subsystem* subsystem);
-    virtual struct spdk_nvmf_subsystem* SpdkNvmfSubsystemGetFirst(struct spdk_nvmf_tgt* tgt);
-    virtual struct spdk_nvmf_subsystem* SpdkNvmfSubsystemGetNext(struct spdk_nvmf_subsystem* subsystem);
     virtual char* SpdkNvmfSubsystemGetCtrlrHostnqn(struct spdk_nvmf_ctrlr* ctrlr);
     virtual struct spdk_nvmf_ctrlr* SpdkNvmfSubsystemGetFirstCtrlr(struct spdk_nvmf_subsystem* subsystem);
     virtual struct spdk_nvmf_ctrlr* SpdkNvmfSubsystemGetNextCtrlr(struct spdk_nvmf_subsystem* subsystem,
         struct spdk_nvmf_ctrlr* prevCtrlr);
-    virtual struct spdk_nvmf_ns *SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem *subsystem, uint32_t nsid);
-    virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem);
-    virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
-        struct spdk_nvmf_ns* prevNs);
-    virtual uint32_t SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem* subsystem, const char* bdevName,  const struct spdk_nvmf_ns_opts* user_opts, size_t opts_size, const char* ptpl_file);
-    virtual int SpdkNvmfSubsystemRemoveNs(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid);
-    virtual int SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
-    virtual int SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
     virtual int SpdkNvmfSubsystemSetPauseDirectly(struct spdk_nvmf_subsystem *subsystem);
-    virtual struct spdk_bdev* SpdkNvmfNsGetBdev(struct spdk_nvmf_ns* ns);
-    virtual uint32_t SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns);
     virtual uint32_t SpdkNvmfSubsystemGetId(spdk_nvmf_subsystem* subsystem);
     virtual struct spdk_bdev* SpdkBdevCreatePosDisk(const char* volumeName, uint32_t volumeId,
         const struct spdk_uuid* bdevUuid, uint64_t numBlocks, uint32_t blockSize,

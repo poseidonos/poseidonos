@@ -44,6 +44,7 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/network/nvmf_target.h"
 #include "src/network/nvmf_volume_pos.h"
+#include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.hpp"
 
@@ -124,30 +125,31 @@ ActivateSubsystem(void* arg1)
     }
 
     SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     ret = spdkCaller->SpdkNvmfSubsystemSetPauseDirectly(subsystem);
     if (ret != 0)
     {
         SPDK_NOTICELOG("Failed to pause subsystem(%s) during activating subsystem : Retrying\n",
-            spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+            spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
         EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
             ActivateSubsystem, subsystem);
     }
-    ret = spdkCaller->SpdkNvmfSubsystemResume(subsystem, nullptr, nullptr);
+    ret = spdkNvmfCaller.SpdkNvmfSubsystemResume(subsystem, nullptr, nullptr);
     if (ret != 0)
     {
         SPDK_ERRLOG("Failed to resume subsystem(%s) during activating subsystem \n",
-            spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+            spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
     }
 }
 
 static void
 AttachNamespaceResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
 {
-    SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     if (status != NvmfCallbackStatus::SUCCESS)
     {
         SPDK_ERRLOG("Failed to resume subsystem(%s)\n",
-            spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+            spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
     }
 
     struct EventContext* ctx = (struct EventContext*)arg;
@@ -170,6 +172,7 @@ AttachNamespaceResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int 
 static void
 AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
 {
+    SpdkNvmfCaller spdkNvmfCaller;
     SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
     struct EventContext* ctx = (struct EventContext*)arg;
     if (status == NvmfCallbackStatus::SUCCESS)
@@ -185,7 +188,7 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
             uint32_t newNsid = 0;
             memset((char*)&opt, 0, sizeof(struct spdk_nvmf_ns_opts));
             opt.nsid = atoi(nsid);
-            newNsid = spdkCaller->SpdkNvmfSubsystemAddNs(subsystem, bdevName, &opt, sizeof(opt), NULL);
+            newNsid = spdkNvmfCaller.SpdkNvmfSubsystemAddNs(subsystem, bdevName, &opt, sizeof(opt), NULL);
             free(ctx->eventArg2);
             ctx->eventArg2 = spdk_sprintf_alloc("%u", newNsid);
             if (newNsid > 0)
@@ -202,11 +205,11 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
             SPDK_ERRLOG("No bdev with name %s\n", bdevName);
         }
 
-        ret = spdkCaller->SpdkNvmfSubsystemResume(subsystem, AttachNamespaceResumeDone, ctx);
+        ret = spdkNvmfCaller.SpdkNvmfSubsystemResume(subsystem, AttachNamespaceResumeDone, ctx);
         if (ret != 0)
         {
             SPDK_ERRLOG("fail to resume subsystem(%s) during attach ns\n",
-                spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+                spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
         }
     }
     else
@@ -219,17 +222,17 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
 static void
 DetachNamespaceResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
 {
-    SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     if (status != NvmfCallbackStatus::SUCCESS)
     {
         SPDK_ERRLOG("Failed to resume subsystem(%s)\n",
-            spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+            spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
     }
 
     struct EventContext* ctx = (struct EventContext*)arg;
     uint32_t nsid = 0;
     sscanf((char*)ctx->eventArg1, "%u", &nsid);
-    if (spdkCaller->SpdkNvmfSubsystemGetNs(subsystem, nsid) == nullptr)
+    if (spdkNvmfCaller.SpdkNvmfSubsystemGetNs(subsystem, nsid) == nullptr)
     {
         status = NvmfCallbackStatus::SUCCESS;
     }
@@ -243,24 +246,24 @@ DetachNamespaceResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int 
 static void
 DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
 {
-    SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     struct EventContext* ctx = (struct EventContext*)arg;
     if (status == NvmfCallbackStatus::SUCCESS)
     {
         int ret = 0;
         uint32_t nsid = 0;
         sscanf((char*)ctx->eventArg1, "%u", &nsid);
-        ret = spdkCaller->SpdkNvmfSubsystemRemoveNs(subsystem, nsid);
+        ret = spdkNvmfCaller.SpdkNvmfSubsystemRemoveNs(subsystem, nsid);
         if (ret < 0)
         {
             SPDK_ERRLOG("Failed to detach namespace from subsystem(%s) nsid=%d\n",
-                spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem), nsid);
+                spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem), nsid);
         }
-        ret = spdkCaller->SpdkNvmfSubsystemResume(subsystem, DetachNamespaceResumeDone, arg);
+        ret = spdkNvmfCaller.SpdkNvmfSubsystemResume(subsystem, DetachNamespaceResumeDone, arg);
         if (ret != 0)
         {
             SPDK_ERRLOG("fail to resume subsystem(%s) during detach ns\n",
-                spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+                spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
         }
     }
     else
@@ -273,11 +276,11 @@ DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
 static void
 DetachNamespaceAllResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
 {
-    SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     if (status != NvmfCallbackStatus::SUCCESS)
     {
         SPDK_ERRLOG("Failed to resume subsystem(%s)\n",
-            spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+            spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
         status = NvmfCallbackStatus::PARTIAL_FAILED;
     }
     GenericCallback(__FUNCTION__, arg, status);
@@ -287,7 +290,7 @@ static void
 DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
     void* arg, int status)
 {
-    SpdkCaller* spdkCaller = SpdkCallerSingleton::Instance();
+    SpdkNvmfCaller spdkNvmfCaller;
     int result = 0;
     struct EventContext* ctx = (struct EventContext*)arg;
     if (status == NvmfCallbackStatus::SUCCESS)
@@ -304,19 +307,19 @@ DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
                 SPDK_ERRLOG("Failed to find namespace(%s)\n", bdevName.c_str());
                 continue;
             }
-            nsid = spdkCaller->SpdkNvmfNsGetId(ns);
-            int ret = spdkCaller->SpdkNvmfSubsystemRemoveNs(subsystem, nsid);
+            nsid = spdkNvmfCaller.SpdkNvmfNsGetId(ns);
+            int ret = spdkNvmfCaller.SpdkNvmfSubsystemRemoveNs(subsystem, nsid);
             if (ret < 0)
             {
                 SPDK_ERRLOG("Failed to remove subsystem(%s) nsid = %d\n",
-                    spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem), nsid);
+                    spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem), nsid);
             }
         }
-        result = spdkCaller->SpdkNvmfSubsystemResume(subsystem, DetachNamespaceAllResumeDone, arg);
+        result = spdkNvmfCaller.SpdkNvmfSubsystemResume(subsystem, DetachNamespaceAllResumeDone, arg);
         if (result != 0)
         {
             SPDK_ERRLOG("Fail to resume subsystem(%s) during detach all ns\n",
-                spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+                spdkNvmfCaller.SpdkNvmfSubsystemGetNqn(subsystem));
         }
         return;
     }

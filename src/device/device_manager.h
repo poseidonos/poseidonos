@@ -44,7 +44,7 @@
 #include "spdk/nvme.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_driver.h"
-#include "src/spdk_wrapper/device_monitor.h"
+#include "src/device/device_monitor.h"
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
 #include "src/device/i_dev_info.h"

@@ -47,7 +47,7 @@
 #include "spdk/nvme.h"
 #include "spdk/nvme_intel.h"
 #include "spdk/thread.h"
-#include "src/spdk_wrapper/device_monitor.h"
+#include "src/device/device_monitor.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/include/smart_ptr_type.h"
 

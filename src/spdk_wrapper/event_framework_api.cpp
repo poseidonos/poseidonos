@@ -73,6 +73,18 @@ EventFrameworkApi::~EventFrameworkApi(void)
 }
 
 bool
+EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncFourParams func, void* arg1,
+    void* arg2)
+{
+    EventWrapper* eventWrapper = new EventWrapper;
+    eventWrapper->func = (EventFuncTwoParams)func;
+    eventWrapper->arg1 = arg1;
+    eventWrapper->arg2 = arg2;
+    bool success = SendSpdkEvent(core, EventFuncWrapper, eventWrapper);
+    return success;
+}
+
+bool
 EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
     void* arg2)
 {
