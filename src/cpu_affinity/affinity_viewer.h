@@ -34,7 +34,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "src/include/core_const.h"
 
 namespace pos
 {
@@ -96,7 +95,6 @@ private:
     class Numa
     {
     public:
-        Numa(void);
         explicit Numa(AffinityManager* affinityManager);
         void Print(void);
         void RegisterEveryCpuRole(void);

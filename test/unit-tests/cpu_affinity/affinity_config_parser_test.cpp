@@ -32,7 +32,7 @@ TEST(AffinityConfigParser, AffinityConfigParser_Stack_Success)
     // Then :  Do nothing
 }
 
-TEST(AffinityConfigParser, AffinityConfigParser_Stack_Fail)
+TEST(AffinityConfigParser, AffinityConfigParser_Stack_NotUseConfig)
 {
     // Given
     MockConfigManager mockConfigManager;
@@ -45,6 +45,29 @@ TEST(AffinityConfigParser, AffinityConfigParser_Stack_Fail)
     // Then :  Do nothing
 }
 
+TEST(AffinityConfigParser, AffinityConfigParser_Stack_ConfigFail)
+{
+    // Given
+    MockConfigManager mockConfigManager;
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault([&mockConfigManager](string module, string key, void* value, ConfigType type)
+    {
+        if (key == "use_config")
+        {
+            *(static_cast<bool*>(value)) = true;
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    });
+
+    // When : Create AffinityConfigParser in stack
+    EXPECT_CALL(mockConfigManager, GetValue(_, _, _, _)).Times(AtLeast(2));
+    AffinityConfigParser affinityConfigParser(mockConfigManager);
+
+    // Then :  Do nothing
+}
 TEST(AffinityConfigParser, AffinityConfigParser_Heap)
 {
     // Given

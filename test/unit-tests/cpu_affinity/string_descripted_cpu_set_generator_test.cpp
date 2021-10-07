@@ -44,6 +44,7 @@ TEST(StringDescriptedCpuSetGenerator, StringDescriptedCpuSetGenerator_Heap_Mask)
     StringDescriptedCpuSetGenerator* stringDescriptedCpuSetGenerator = new StringDescriptedCpuSetGenerator(TEST_CORE_DESCRIPTIONS, false);
 
     // Then : Release memory
+    delete stringDescriptedCpuSetGenerator;
 }
 
 } // namespace pos

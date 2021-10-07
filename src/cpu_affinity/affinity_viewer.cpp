@@ -128,6 +128,7 @@ AffinityViewer::Socket::RegisterRole(int coreId, Role role)
 {
     cpus[coreId].Register(coreId, role);
 }
+
 void
 AffinityViewer::Numa::Print(void)
 {
@@ -141,11 +142,6 @@ AffinityViewer::Numa::Print(void)
     uint32_t eventWorkerSocket = affinityManager.GetEventWorkerSocket();
     cout << "Event Worker Socket: " << eventWorkerSocket << endl;
     cout << "===============================\n";
-}
-
-AffinityViewer::Numa::Numa(void)
-: AffinityViewer::Numa::Numa(AffinityManagerSingleton::Instance())
-{
 }
 
 AffinityViewer::Numa::Numa(AffinityManager* affinityManager)
