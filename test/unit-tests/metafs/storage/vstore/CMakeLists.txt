@@ -1,2 +1,0 @@
-POS_ADD_UNIT_TEST(mss_ramdisk_ut mss_ramdisk_test.cpp)
-POS_ADD_UNIT_TEST(mss_ramdisk_handler_ut mss_ramdisk_handler_test.cpp)
