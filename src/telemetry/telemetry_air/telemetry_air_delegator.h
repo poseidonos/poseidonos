@@ -32,27 +32,33 @@
 
 #pragma once
 
+#include <functional>
 #include <mutex>
+
+#include "Air.h"
 
 namespace pos
 {
-class TelemetryClient;
 class TelemetryPublisher;
 
 class TelemetryAirDelegator
 {
 public:
-    TelemetryAirDelegator(TelemetryClient* telClient, TelemetryPublisher* telPub);
+    enum State: int
+    {
+        RUN = 0,
+        END,
+        ERR_DATA
+    };
+    explicit TelemetryAirDelegator(TelemetryPublisher* telPub);
     virtual ~TelemetryAirDelegator(void);
-    void StartDelegation(void);
-    void StopDelegation(void);
+    void SetState(State state);
+    void RegisterAirEvent(void);
+    std::function<int(const air::JSONdoc& data)> dataHandler;
 
 private:
-    TelemetryClient* telClient{nullptr};
     TelemetryPublisher* telPub{nullptr};
-    const int stateRun{0};
-    const int stateEnd{1};
-    int returnState{0};
+    int returnState{State::RUN};
     std::mutex mutex;
 };
 } // namespace pos

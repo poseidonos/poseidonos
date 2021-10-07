@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(telemetry_air_delegator_ut telemetry_air_delegator_test.cpp)

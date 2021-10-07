@@ -21,23 +21,23 @@ Poseidon Unit/Integration/System Tests
     ```bash
     make -j 4
     ```
-4. Run unit tests
+5. Run unit tests
     ```bash
     make run_ut
     ```
 
-5. Run integration tests
+6. Run integration tests
     ```bash
     make run_it
     ```
 
-6. Generate a code coverage report under build/coverage-html
+7. Generate a code coverage report under build/coverage-html
     ```bash
     make run_cov
     # Please check out build/coverage-html/index.html with your browser 
     ```
 
-7. Clean up existing code coverage profiles
+8. Clean up existing code coverage profiles
     ```bash
     make clean_cov
     ```

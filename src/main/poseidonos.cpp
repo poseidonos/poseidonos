@@ -130,7 +130,7 @@ Poseidonos::Terminate(void)
     air_finalize();
     if (nullptr != telemetryAirDelegator)
     {
-        telemetryAirDelegator->StopDelegation();
+        telemetryAirDelegator->SetState(TelemetryAirDelegator::State::END);
         delete telemetryAirDelegator;
         telemetryAirDelegator = nullptr;
     }
@@ -169,8 +169,8 @@ Poseidonos::_InitAIR(void)
     }
     if (nullptr == telemetryAirDelegator)
     {
-        telemetryAirDelegator = new TelemetryAirDelegator{TelemetryClientSingleton::Instance(), telemtryPublisherForAir};
-        telemetryAirDelegator->StartDelegation();
+        telemetryAirDelegator = new TelemetryAirDelegator {telemtryPublisherForAir};
+        telemetryAirDelegator->RegisterAirEvent();
     }
 }
 

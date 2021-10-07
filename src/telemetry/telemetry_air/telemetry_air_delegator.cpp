@@ -29,6 +29,7 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 
 #include <exception>
@@ -36,16 +37,52 @@
 #include <sstream>
 #include <string>
 
-#include "Air.h"
 #include "src/telemetry/telemetry_id.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-TelemetryAirDelegator::TelemetryAirDelegator(TelemetryClient* telClient, TelemetryPublisher* telPub)
-: telClient(telClient),
-  telPub(telPub)
+TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
+: telPub(telPub)
 {
+    dataHandler = [this](const air::JSONdoc& data) -> int
+    {
+        const std::lock_guard<std::mutex> lock(this->mutex);
+        try
+        {
+            if (State::RUN == this->returnState)
+            {
+                auto& objs = data["PERF_ARR_VOL"]["objs"];
+                for (auto& obj_it : objs)
+                {
+                    auto& obj = objs[obj_it.first];
+                    std::stringstream stream_filter;
+                    stream_filter << obj["filter"];
+                    std::string str_filter = stream_filter.str();
+                    if (0 == str_filter.compare("\"AIR_READ\""))
+                    {
+                        std::stringstream stream_iops;
+                        stream_iops << obj["iops"];
+                        uint32_t iops = 0;
+                        stream_iops >> iops;
+                        this->telPub->PublishData(TEL005_VOLUME_IOPS_READ, iops);
+                        /* TODO: Need more params in PublishData not only iops
+                        but thread id, array id and volume id
+                        obj["index"] => 0x0104 (array id = 1, volume id = 4)
+                        obj["target_id"] => thread id
+                        obj["target_name"] => thread name
+                        */
+                    }
+                }
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cout << e.what() << std::endl;
+            this->returnState = State::ERR_DATA;
+        }
+        return this->returnState;
+    };
 }
 
 TelemetryAirDelegator::~TelemetryAirDelegator(void)
@@ -53,60 +90,16 @@ TelemetryAirDelegator::~TelemetryAirDelegator(void)
 }
 
 void
-TelemetryAirDelegator::StartDelegation(void)
+TelemetryAirDelegator::SetState(State state)
 {
-    {
-        const std::lock_guard<std::mutex> lock(mutex);
-        returnState = stateRun;
-    }
-
-#ifdef TELEMETRY_FOR_AIR_IS_ENABLED
-    air_request_data({"PERF_ARR_VOL"},
-        [this](const air::JSONdoc& data) -> int {
-            const std::lock_guard<std::mutex> lock(this->mutex);
-            try
-            {
-                if (data.HasKey("PERF_ARR_VOL"))
-                {
-                    auto& objs = data["PERF_ARR_VOL"]["objs"];
-                    for (auto& obj_it: objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-                        std::stringstream stream_filter;
-                        stream_filter << obj["filter"];
-                        std::string str_filter = stream_filter.str();
-                        if (0 == str_filter.compare("\"AIR_READ\""))
-                        {
-                            std::stringstream stream_iops;
-                            stream_iops << obj["iops"];
-                            uint32_t iops = 0;
-                            stream_iops >> iops;
-                            this->telPub->PublishData(TEL_VOLUME_IOPS_READ, iops);
-                            /* TODO: Need more params in PublishData not only iops
-                            but thread id, array id and volume id
-                            obj["index"] => 0x0104 (array id = 1, volume id = 4)
-                            obj["target_id"] => thread id
-                            obj["target_name"] => thread name
-                            */
-                        }
-                    }
-                }
-            }
-            catch (std::exception& e)
-            {
-                std::cout << e.what() << std::endl;
-                this->returnState = this->stateEnd;
-            }
-            return this->returnState;
-        });
-#endif
+    const std::lock_guard<std::mutex> lock(mutex);
+    returnState = state;
 }
 
 void
-TelemetryAirDelegator::StopDelegation(void)
+TelemetryAirDelegator::RegisterAirEvent(void)
 {
-    const std::lock_guard<std::mutex> lock(mutex);
-    returnState = stateEnd;
+    air_request_data({"PERF_ARR_VOL"}, std::move(dataHandler));
 }
 
 } // namespace pos
