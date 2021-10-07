@@ -72,7 +72,7 @@ ApplicationName = "poseidonos-cli" ;
 Cmd = ApplicationName ,
   ( ArrayCmd  | VolumeCmd    | DeviceCmd
   | SystemCmd | LoggerCmd    | SubsystemCmd
-  | QosCmd    | TelemetryCmd
+  | QosCmd    | TelemetryCmd | DevelCmd
   ) ;
 
 ArrayCmd = "array" ,
@@ -130,10 +130,10 @@ VolumeDeleteCmd = "delete" , ( "--volume-name" | "-v" ) ,
 
 VolumeMountCmd = "mount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
-  [ "--subnqn" , TargetNVMSubsystemNVMeQualifiedName ],
-  [ ( "--trtype" | "-t" ) , TransportType ],
-  [ ( "--traddr" | "-i" ) , TargetAddress ],
-  [ ( "--trsvcid" | "-p" ) , TransportServiceId ],
+  [ "--subnqn" , TargetNVMSubsystemNVMeQualifiedName ] ,
+  [ ( "--trtype" | "-t" ) , TransportType ] ,
+  [ ( "--traddr" | "-i" ) , TargetAddress ] ,
+  [ ( "--trsvcid" | "-p" ) , TransportServiceId ] ,
   [ "--force" ] ;
 
 VolumeMountWithSubsystemCmd = "mount" , ( "--volume-name" | "-v" ) ,
@@ -264,3 +264,23 @@ TelemetryCmd = "telemetry" , ( TelemetryStartCmd | TelemetryStopCmd ) ;
 TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
 TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
+
+DevelCmd = "devel" ,
+  ( ResetMbrCmd
+  | StopRebuildingCmd
+  | UpdateEventWrrCmd
+  | ResetEventWrrCmd
+  ) ;
+
+ResetMbrCmd = "resetmbr" ;
+
+StopRebuildingCmd = "stop-rebuilding" ;
+
+UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
+  ( "flush"
+  | "fe_rebuild"
+  | "rebuild"
+  | "gc"
+  ) , "--weight" , ( "1" | "2" | "3" ) ;
+
+ResetEventWrrCmd = "reset-event-wrr" ;

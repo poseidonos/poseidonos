@@ -74,11 +74,13 @@
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_command.h"
-#include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
 #include "src/cli/start_telemetry_command.h"
 #include "src/cli/stop_telemetry_command.h"
+#include "src/cli/stop_rebuilding_command.h"
+#include "src/cli/reset_event_wrr_policy_command.h"
+#include "src/cli/update_event_wrr_policy_command.h"
 
 namespace pos_cli
 {
@@ -119,7 +121,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();
     cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["STOPPOS"] = new StopPosCommand();
-    cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();
     cmdDictionary["SETLOGLEVEL"] = new SetLogLevelCommand();
@@ -130,7 +131,9 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CREATEQOSVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
     cmdDictionary["RESETQOSVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
     cmdDictionary["STARTTELEMETRY"] = new StartTelemetryCommand();
-    cmdDictionary["STOPTELEMETRY"] = new StopTelemetryCommand();
+    cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
+    cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
+    cmdDictionary["RESETEVENTWRRPOLICY"] = new ResetEventWrrPolicyCommand();
 }
 
 RequestHandler::~RequestHandler(void)

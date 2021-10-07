@@ -168,3 +168,12 @@ type CreateTransportParam struct {
 	BUFCACHESIZE  int    `json:"buf_cache_size,omitempty"`
 	NUMSHAREDBUF  int    `json:"num_shared_buf,omitempty"`
 }
+
+type StopRebuildingParam struct {
+	ARRAYNAME string `json:"name"`
+}
+
+type UpdateEventWrrParam struct {
+	NAME   string `json:"name"`
+	WEIGHT int    `json:"weight"`
+}
