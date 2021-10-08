@@ -139,7 +139,7 @@ TEST(EventScheduler, EnqueueEvent_FrontendIO)
         }
         return BackendEvent_FrontendIO;
     });
-    EXPECT_CALL(*mockEventSharedPtr.get(), GetEventType()).Times(3);
+    EXPECT_CALL(*mockEventSharedPtr.get(), GetEventType()).Times(4);
     EXPECT_CALL(*mockEventSharedPtr.get(), SetEventType(_)).Times(1);
     EXPECT_CALL(*mockEventSharedPtr.get(), IsFrontEnd()).Times(AtLeast(1));
 
@@ -157,6 +157,7 @@ TEST(EventScheduler, EnqueueEvent_NotFrontendTypes)
     // Given: Set EventScheduler, MockEvents
     NiceMock<MockQosManager> mockQosManager;
     EventScheduler eventScheduler{&mockQosManager};
+    ON_CALL(mockQosManager, GetNoContentionCycles()).WillByDefault(Return(20));
     ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
     ON_CALL(mockQosManager, IsFeQosEnabled()).WillByDefault(Return(false));
     ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
@@ -186,10 +187,18 @@ TEST(EventScheduler, EnqueueEvent_NotFrontendTypes)
     EXPECT_CALL(*mockEventSharedPtr5.get(), GetEventType()).Times(AtLeast(3));
     EXPECT_CALL(*mockEventSharedPtr5.get(), IsFrontEnd()).Times(AtLeast(1));
     auto mockEventSharedPtr6 = std::make_shared<MockEvent>();
+    int eventTypeCount = 0;
+    ON_CALL(*mockEventSharedPtr6.get(), GetEventType()).WillByDefault([&eventTypeCount]()
+    {
+        eventTypeCount++;
+        if (1 == eventTypeCount)
+        {
+            return BackendEvent_Unknown;
+        }
+        return BackendEvent_FrontendIO;
+    });
     ON_CALL(*mockEventSharedPtr6.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr6.get(), GetEventType()).WillByDefault(Return(BackendEvent_Unknown));
     EXPECT_CALL(*mockEventSharedPtr6.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr6.get(), SetEventType(_)).Times(1);
     EXPECT_CALL(*mockEventSharedPtr6.get(), IsFrontEnd()).Times(AtLeast(1));
     auto mockEventSharedPtrErr = std::make_shared<MockEvent>();
     ON_CALL(*mockEventSharedPtrErr.get(), GetEventType()).WillByDefault(Return(BackendEvent_End));
