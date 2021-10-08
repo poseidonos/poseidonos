@@ -36,11 +36,13 @@
 #include <functional>
 
 #include "spdk/pos.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_mgmt/interface/i_array_mgmt.h"
 #include "src/bio/flush_io.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
-#include "src/volume/volume_service.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/volume/volume_service.h"
 namespace pos
 {
 struct IOCtx
@@ -84,7 +86,7 @@ public:
     void SubmitAsyncIO(pos_io& posIo);
     void CompleteIOs(void);
     VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
-    void SubmitAsyncAdmin(pos_io& io);
+    void SubmitAsyncAdmin(pos_io& io, IArrayMgmt* arrayManager = ArrayMgr());
 
 private:
     static thread_local IOCtx ioContext;

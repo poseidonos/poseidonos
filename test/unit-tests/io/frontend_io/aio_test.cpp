@@ -3,11 +3,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "spdk/nvmf_transport.h"
 #include "spdk/pos.h"
 #include "src/bio/flush_io.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/io/frontend_io/flush_command_handler.h"
+#include "src/spdk_wrapper/spdk.hpp"
+#include "test/unit-tests/array_components/components_info_mock.h"
+#include "test/unit-tests/array_mgmt/array_manager_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/flush_io_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
@@ -209,6 +214,81 @@ TEST(AIO, AIO_CompleteIOs_CompleteIOs)
     aio.CompleteIOs();
 
     // Then : do nothing
+}
+
+TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
+{
+    // Given
+    AIO aio;
+    pos_io posIo;
+    spdk_bdev_io bio;
+    spdk_nvmf_request nvmfRequest;
+    nvmf_h2c_msg nvmfMsg;
+    spdk_nvme_cmd nvmeCmd;
+    NiceMock<MockArrayManager>* mockArrayManager = new NiceMock<MockArrayManager>();
+    NiceMock<MockIArrayInfo>* mockArrayInfo = new NiceMock<MockIArrayInfo>();
+    MockComponentsInfo mockComponentsInfo{mockArrayInfo, nullptr};
+
+    // When : Call SubmitAsyncAdmin
+    posIo.ioType = IO_TYPE::GET_LOG_PAGE;
+    nvmeCmd.cdw10 = SPDK_NVME_LOG_ERROR;
+    nvmfMsg.nvme_cmd = nvmeCmd;
+    nvmfRequest.cmd = &nvmfMsg;
+    bio.internal.caller_ctx = &nvmfRequest;
+    posIo.context = &bio;
+    ON_CALL(*mockArrayManager, GetInfo(_)).WillByDefault(Return(&mockComponentsInfo));
+    ON_CALL(*mockArrayInfo, GetArrayManager()).WillByDefault(Return(nullptr));
+    EventSchedulerSingleton::Instance()->DequeueEvents();
+    aio.SubmitAsyncAdmin(posIo, mockArrayManager);
+
+    // Then : check eventscheduler queue
+    std::queue<EventSmartPtr> queueList = EventSchedulerSingleton::Instance()->DequeueEvents();
+    ASSERT_EQ(1, queueList.size());
+
+    EventSchedulerSingleton::Instance()->DequeueEvents();
+    delete mockArrayManager;
+    delete mockArrayInfo;
+}
+
+TEST(AdminCompletion, AdminCompletion_Stack)
+{
+    // Given
+    pos_io posIo;
+    IOCtx ioContext;
+
+    // When : Create adminComplition on stack
+    AdminCompletion adminCompletion(&posIo, ioContext, 0);
+
+    // Then : do nothing
+}
+
+TEST(AdminCompletion, AdminCompletion_Heap)
+{
+    // Given
+    pos_io posIo;
+    IOCtx ioContext;
+
+    // When : Create adminComplition on heap
+    AdminCompletion* adminCompletion = new AdminCompletion(&posIo, ioContext, 0);
+
+    // Then : Release adminComplition
+    delete adminCompletion;
+}
+
+TEST(AdminCompletion, AdminCompletion_DoSpecificJob)
+{
+    // Given
+    pos_io posIo;
+    IOCtx ioContext;
+    bool expected;
+
+    // When : Call DoSpecificJob
+    AdminCompletion adminCompletion(&posIo, ioContext, EventFrameworkApiSingleton::Instance()->GetCurrentReactor());
+    posIo.complete_cb = [](struct pos_io* io, int status) { return; };
+    expected = adminCompletion.Execute();
+
+    // Then : check function works
+    ASSERT_EQ(true, expected);
 }
 
 } // namespace pos

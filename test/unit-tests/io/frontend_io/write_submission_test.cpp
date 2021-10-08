@@ -10,9 +10,8 @@
 #include "test/unit-tests/allocator_service/allocator_service_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
-#include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/gc/flow_control/flow_control_mock.h"
-
+#include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -21,23 +20,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace pos
 {
-TEST(WriteSubmission, WriteSubmission_Constructor_One)
-{
-    // Given
-    char buf[1024];
-    std::string arr_name = "";
-
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, 0);
-    volumeIo->SetSectorRba(2048);
-    volumeIo->SetVolumeId(1);
-
-    // when
-    //WriteSubmission writeSubmission(volumeIo);
-
-    // Then : do noting
-}
-
-TEST(WriteSubmission, WriteSubmission_Constructor_Three)
+TEST(WriteSubmission, WriteSubmission_Stack)
 {
     // Given
     char buf[1024];
@@ -56,6 +39,28 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
 
     // Then : do noting
+}
+
+TEST(WriteSubmission, WriteSubmission_Heap)
+{
+    // Given
+    char buf[1024];
+    std::string arr_name = "";
+
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, 0);
+    volumeIo->SetSectorRba(0);
+    volumeIo->SetVolumeId(0);
+
+    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
+    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
+    NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    // when : create write submission
+    WriteSubmission* writeSubmission = new WriteSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
+
+    // Then : delete write submission
+    delete writeSubmission;
 }
 
 TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
