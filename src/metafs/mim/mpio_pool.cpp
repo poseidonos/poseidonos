@@ -58,21 +58,18 @@ MpioPool::MpioPool(uint32_t poolSize)
         {
             Mpio* mpio;
             void* mdPageBuf = mdPageBufPool->PopNewBuf();
-            switch ((MpioType)idx)
+
+            // read
+            if (MpioType::Read == (MpioType)idx)
             {
-                case MpioType::Read:
-                {
-                    mpio = new ReadMpio(mdPageBuf);
-                }
-                break;
-                case MpioType::Write:
-                {
-                    mpio = new WriteMpio(mdPageBuf);
-                }
-                break;
-                default:
-                    assert(false);
+                mpio = new ReadMpio(mdPageBuf);
             }
+            // write
+            else
+            {
+                mpio = new WriteMpio(mdPageBuf);
+            }
+
             mpio->InitStateHandler();
             mpioList[idx].push_back(mpio);
         }
