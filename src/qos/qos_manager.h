@@ -42,13 +42,14 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "src/qos/exit_handler.h"
+
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
 #include "src/include/backend_event.h"
 #include "src/include/event_priority.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/lib/singleton.h"
+#include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
 #include "submission_adapter.h"
@@ -87,6 +88,7 @@ public:
     bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
     virtual int64_t GetEventWeightWRR(BackendEvent event);
+    virtual int64_t GetDefaultEventWeightWRR(BackendEvent event);
     uint32_t GetUsedStripeCnt(uint32_t arrayId);
     void IncreaseUsedStripeCnt(uint32_t arrayId);
     void DecreaseUsedStripeCnt(std::string arrayName);
@@ -115,6 +117,7 @@ public:
     uint32_t GetNumberOfArrays(void);
     void UpdateArrayMap(string arrayName);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
+    uint32_t GetNoContentionCycles(void);
 
 private:
     virtual void _Finalize(void);

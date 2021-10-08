@@ -32,15 +32,16 @@
 
 #pragma once
 
-#include <sched.h>
 #include <rte_config.h>
+#include <sched.h>
 
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <queue>
 #include <thread>
 #include <vector>
-#include <queue>
+
 #include "src/include/backend_event.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/lib/singleton.h"
@@ -63,7 +64,7 @@ class EventScheduler
 public:
     EventScheduler(QosManager* qosManager = nullptr);
     void Initialize(uint32_t workerCountInput, cpu_set_t schedulerCPUInput,
-            cpu_set_t eventCPUSetInput);
+        cpu_set_t eventCPUSetInput);
     virtual ~EventScheduler(void);
 
     void Initialize(void);
@@ -75,6 +76,12 @@ public:
 
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
+    bool _CheckContention(void);
+    void _CheckAndSetQueueOccupancy(BackendEvent eventId);
+    bool _GetQueueOccupancy(BackendEvent eventId);
+    bool _NoContentionCycleDone(uint32_t cycles);
+    void _IncrementCycles(void);
+    int32_t _GetEventWeight(BackendEvent eventId);
     ISchedulerPolicy* policy;
     std::atomic<bool> exit;
     uint32_t workerCount;
@@ -89,7 +96,9 @@ private:
     SchedulerQueue* eventQueue[BackendEvent_Count];
     int32_t oldWeight[BackendEvent_Count] = {0};
     int32_t runningWeight[BackendEvent_Count] = {0};
+    bool queueOccupied[BackendEvent_Count] = {false};
     bool numaDedicatedSchedulingPolicy;
+    uint32_t cyclesElapsed = 0;
     QosManager* qosManager;
 };
 

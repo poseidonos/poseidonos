@@ -334,7 +334,18 @@ QosManager::SetEventWeightWRR(BackendEvent eventId, int64_t weight)
 {
     qosEventManager->SetEventWeightWRR(eventId, weight);
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+int64_t
+QosManager::GetDefaultEventWeightWRR(BackendEvent eventId)
+{
+    return qosEventManager->GetDefaultEventWeightWRR(eventId);
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -760,5 +771,17 @@ void
 QosManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId)
 {
     qosArrayManager[arrayId]->GetSubsystemVolumeMap(subsysVolMap);
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+uint32_t
+QosManager::GetNoContentionCycles(void)
+{
+    return NO_CONTENTION_CYCLES;
 }
 } // namespace pos

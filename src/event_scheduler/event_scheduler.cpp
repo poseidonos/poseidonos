@@ -36,14 +36,14 @@
 #include <unistd.h>
 
 #include "src/cpu_affinity/affinity_manager.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/minimum_job_policy.h"
 #include "src/event_scheduler/scheduler_queue.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_manager.h"
 
@@ -75,12 +75,14 @@ EventScheduler::EventScheduler(QosManager* qosManager_)
          event++)
     {
         eventQueue[event] = new SchedulerQueue{qosManager};
+        queueOccupied[event] = false;
     }
     for (uint32_t numa = 0; numa < MAX_NUMA; numa++)
     {
         workerIDPerNumaVector[numa].clear();
     }
     totalWorkerIDVector.clear();
+    cyclesElapsed = 0;
 }
 
 uint32_t
@@ -189,7 +191,123 @@ EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
         cpuIndex = cpuIndex + 1;
     }
 }
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Check Contention between frontend IO and backend events
 
+    //  contention is between backend and frontend.
+    //  two backend events with no frontend are not contentions.
+    //  to be changed when weight application happens on all backend events.
+*/
+/* --------------------------------------------------------------------------*/
+bool
+EventScheduler::_CheckContention(void)
+{
+    bool frontendQueueOccupied = false;
+    bool backendQueueOccupied = false;
+    bool contention = false;
+
+    for (uint32_t eventType = BackendEvent_Start; (BackendEvent)eventType < BackendEvent_Count; eventType++)
+    {
+        if (eventType == BackendEvent_FrontendIO)
+        {
+            frontendQueueOccupied = _GetQueueOccupancy(BackendEvent_FrontendIO);
+        }
+        else
+        {
+            // if any of the backendQueus is occupied
+            backendQueueOccupied = backendQueueOccupied || _GetQueueOccupancy((BackendEvent)eventType);
+        }
+    }
+    contention = frontendQueueOccupied && backendQueueOccupied;
+    return contention;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Gets the queue status
+ */
+/* --------------------------------------------------------------------------*/
+bool
+EventScheduler::_GetQueueOccupancy(BackendEvent eventId)
+{
+    return queueOccupied[eventId];
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Sets the queue status
+ */
+/* --------------------------------------------------------------------------*/
+void
+EventScheduler::_CheckAndSetQueueOccupancy(BackendEvent eventId)
+{
+    if (eventQueue[eventId]->GetQueueSize() == 0)
+        queueOccupied[eventId] = false;
+    else
+        queueOccupied[eventId] = true;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis checks for no contention Period
+ */
+/* --------------------------------------------------------------------------*/
+bool
+EventScheduler::_NoContentionCycleDone(uint32_t cycles)
+{
+    bool cycleDone = false;
+
+    // Check how many cycles have passed with no contention;
+    if (cyclesElapsed / cycles >= 1)
+    {
+        cycleDone = true;
+    }
+
+    return cycleDone;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis checks for no contention Period
+   if cycles have completed, keep it at that stage till contention happens.
+   then it will be refreshed and cycle count will restart
+*/
+/* --------------------------------------------------------------------------*/
+void
+EventScheduler::_IncrementCycles(void)
+{
+    cyclesElapsed++;
+    uint32_t cycles = qosManager->GetNoContentionCycles();
+    if (cyclesElapsed / cycles >= 1)
+    {
+        cyclesElapsed = cycles;
+    }
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Gets the event weight according to contention conditions
+   N consecutive cycles are checked for no contention
+   then only default weight is applied.
+ */
+/* --------------------------------------------------------------------------*/
+int32_t
+EventScheduler::_GetEventWeight(BackendEvent eventId)
+{
+    int32_t eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
+
+    if (_CheckContention() == true)
+    {
+        eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
+        cyclesElapsed = 0;
+    }
+    else
+    {
+        uint32_t noContentionCycles = qosManager->GetNoContentionCycles();
+        if (_NoContentionCycleDone(noContentionCycles) == true)
+        {
+            eventWeight = qosManager->GetDefaultEventWeightWRR((BackendEvent)eventId);
+        }
+    }
+    return eventWeight;
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Big loop of EvntScheduler
@@ -282,6 +400,7 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
                 break;
         }
     }
+    _CheckAndSetQueueOccupancy(input->GetEventType());
 }
 
 /* --------------------------------------------------------------------------*/
@@ -311,10 +430,11 @@ EventScheduler::DequeueEvents(void)
                         eventList.push(event);
                     }
                 } while (nullptr != event);
+                _CheckAndSetQueueOccupancy(BackendEvent_FrontendIO);
             }
             else
             {
-                eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventType);
+                eventWeight = _GetEventWeight((BackendEvent)eventType);
                 if (eventWeight < 0)
                 {
                     if (eventWeight != oldWeight[(BackendEvent)eventType])
@@ -348,9 +468,11 @@ EventScheduler::DequeueEvents(void)
                     }
                 } while ((nullptr != event) && (currentWeight < eventWeight));
                 runningWeight[(BackendEvent)eventType] = oldWeight[(BackendEvent)eventType];
+                _CheckAndSetQueueOccupancy((BackendEvent)eventType);
             }
         }
     }
+    _IncrementCycles();
     return eventList;
 }
 } // namespace pos

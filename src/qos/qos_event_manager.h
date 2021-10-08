@@ -37,7 +37,6 @@
 
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
-#include "src/qos/exit_handler.h"
 
 namespace pos
 {
@@ -57,6 +56,7 @@ public:
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
     bw_iops_parameter DequeueParams(uint32_t workerId, BackendEvent event);
     int64_t GetEventWeightWRR(BackendEvent eventId);
+    int64_t GetDefaultEventWeightWRR(BackendEvent eventId);
     void SetEventWeightWRR(BackendEvent eventId, int64_t weight);
 
 private:

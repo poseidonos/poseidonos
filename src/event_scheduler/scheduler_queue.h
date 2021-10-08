@@ -56,10 +56,10 @@ public:
 
     EventSmartPtr DequeueEvent(void);
     void EnqueueEvent(EventSmartPtr input);
+    uint32_t GetQueueSize(void);
 
 private:
     std::queue<EventSmartPtr> queue;
     QosManager* qosManager;
 };
 } // namespace pos
-

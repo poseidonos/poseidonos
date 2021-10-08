@@ -32,12 +32,12 @@
 
 #include "src/qos/qos_event_manager.h"
 
-#include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/connection_management.h"
-#include "src/qos/rate_limit.h"
-#include "src/qos/parameter_queue.h"
 #include "src/qos/io_queue.h"
+#include "src/qos/parameter_queue.h"
+#include "src/qos/qos_manager.h"
+#include "src/qos/rate_limit.h"
+#include "src/spdk_wrapper/connection_management.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -70,7 +70,7 @@ QosEventManager::QosEventManager(void)
         parameterQueue = new ParameterQueue;
         ioQueue = new IoQueue<UbioSmartPtr>;
     }
-    catch(std::bad_alloc& ex)
+    catch (std::bad_alloc& ex)
     {
         assert(0);
     }
@@ -247,7 +247,18 @@ QosEventManager::GetEventWeightWRR(BackendEvent eventId)
 {
     return eventWeightWRR[eventId];
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+int64_t
+QosEventManager::GetDefaultEventWeightWRR(BackendEvent eventId)
+{
+    return M_DEFAULT_WEIGHT;
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

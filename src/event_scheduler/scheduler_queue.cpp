@@ -34,10 +34,10 @@
 
 #include <assert.h>
 
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -112,5 +112,17 @@ SchedulerQueue::EnqueueEvent(EventSmartPtr input)
         }
     }
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Push new entry to queue
+ *           Lock can be optimized with Boost library
+ *
+ * @Param    input
+ */
+/* --------------------------------------------------------------------------*/
+uint32_t
+SchedulerQueue::GetQueueSize(void)
+{
+    return queue.size();
+}
 } // namespace pos
