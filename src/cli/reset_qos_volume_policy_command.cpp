@@ -33,6 +33,7 @@
 #include "src/cli/reset_qos_volume_policy_command.h"
 
 #include <utility>
+#include <vector>
 
 #include "src/cli/cli_event_code.h"
 #include "src/qos/qos_common.h"

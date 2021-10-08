@@ -43,6 +43,8 @@
 #include "src/meta_service/meta_service.h"
 #include "src/io/frontend_io/block_map_update_completion.h"
 
+#include <memory>
+
 namespace pos
 {
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback)

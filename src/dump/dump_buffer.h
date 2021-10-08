@@ -35,6 +35,8 @@
 
 #include "dump_module.h"
 
+#include <memory>
+
 namespace pos
 {
 class AbstractDumpModule;

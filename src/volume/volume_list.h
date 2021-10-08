@@ -75,8 +75,6 @@ private:
 
     std::atomic<bool> possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
     std::atomic<uint32_t> pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
- 
-
 };
 
 } // namespace pos

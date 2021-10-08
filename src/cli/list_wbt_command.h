@@ -39,7 +39,8 @@
 namespace pos
 {
 class WbtCmdHandler;
-}
+}  // namespace pos
+
 namespace pos_cli
 {
 class ListWbtCommand : public Command

@@ -32,6 +32,7 @@
 
 #include "stripe_map_update_request.h"
 
+#include <memory>
 #include <sstream>
 
 #include "flush_completion.h"

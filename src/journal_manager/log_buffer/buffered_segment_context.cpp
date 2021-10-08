@@ -32,6 +32,8 @@
 
 #include "buffered_segment_context.h"
 
+#include <unordered_map>
+
 namespace pos
 {
 BufferedSegmentContext::BufferedSegmentContext(void)

@@ -31,6 +31,8 @@
  */
 
 #pragma once
+
+#include <memory>
 #include <string>
 
 #include "src/bio/ubio.h"

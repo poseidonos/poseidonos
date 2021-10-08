@@ -433,7 +433,7 @@ void
 ContextManager::_RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
     CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
-    assert (header->sig == RebuildCtx::SIG_REBUILD_CTX);
+    assert(header->sig == RebuildCtx::SIG_REBUILD_CTX);
     rebuildCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     assert(numRebuildFlushIoIssued > 0);
     numRebuildFlushIoIssued--;

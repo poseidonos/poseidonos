@@ -50,7 +50,7 @@ class AllocatorFileIoManager
         ContextSection(void) : addr(nullptr), size(0), offset(0) {}
         void Set(char* addrIn, int sizeIn, int offsetIn)
         {
-            addr = addrIn, size = sizeIn, offset = offsetIn; 
+            addr = addrIn, size = sizeIn, offset = offsetIn;
         }
 
         char* addr;

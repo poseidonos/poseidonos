@@ -56,15 +56,15 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
 {
     if (nullptr == blockAlignment)
     {
-        blockAlignment = new BlockAlignment{ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()};
+        blockAlignment = new BlockAlignment {ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()};
     }
     if (nullptr == merger)
     {
-        merger = new Merger{volumeIo, &readCompletionFactory};
+        merger = new Merger {volumeIo, &readCompletionFactory};
     }
     if (nullptr == translator)
     {
-        translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
+        translator = new Translator {volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
     }
 }
 

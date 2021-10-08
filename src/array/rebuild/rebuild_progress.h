@@ -40,7 +40,8 @@ namespace pos
 {
 using namespace std;
 
-struct PartitionProgress{
+struct PartitionProgress
+{
     uint32_t total = 0;
     uint32_t done = 0;
 };

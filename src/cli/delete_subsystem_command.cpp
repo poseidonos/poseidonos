@@ -33,6 +33,7 @@
 #include "src/cli/delete_subsystem_command.h"
 
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "src/cli/cli_event_code.h"

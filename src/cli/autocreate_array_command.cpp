@@ -38,6 +38,8 @@
 #include "src/device/device_manager.h"
 #include "src/qos/qos_manager.h"
 
+#include <vector>
+
 namespace pos_cli
 {
 AutocreateArrayCommand::AutocreateArrayCommand(void)

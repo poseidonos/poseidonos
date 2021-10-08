@@ -34,6 +34,7 @@
 #define LOGGER_H_
 
 #include <iostream>
+#include <memory>
 #include <set>
 #include <string>
 

@@ -37,6 +37,8 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/io/frontend_io/flush_command_handler.h"
 
+#include <memory>
+
 namespace pos
 {
 static const uint64_t MAX_THRESHOLD = 100;

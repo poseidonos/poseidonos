@@ -38,6 +38,9 @@
 #include "src/io/frontend_io/write_completion.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+
+#include <memory>
+
 namespace pos
 {
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(

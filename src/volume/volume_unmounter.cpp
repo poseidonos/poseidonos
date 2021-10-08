@@ -41,8 +41,7 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/network/nvmf_volume_pos.h"
+
 namespace pos
 {
 

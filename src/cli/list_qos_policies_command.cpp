@@ -38,6 +38,8 @@
 #include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
 
+#include <vector>
+
 namespace pos_cli
 {
 QosListPoliciesCommand::QosListPoliciesCommand(void)

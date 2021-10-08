@@ -31,6 +31,9 @@
  */
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 
+#include <list>
+#include <string>
+
 namespace pos
 {
 TelemetryDataPool::TelemetryDataPool(void)

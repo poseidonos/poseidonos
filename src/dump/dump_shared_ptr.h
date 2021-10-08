@@ -42,6 +42,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "src/dump/dump_module.h"

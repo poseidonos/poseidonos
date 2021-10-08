@@ -33,6 +33,7 @@
 #include "gc_flush_submission.h"
 
 #include <list>
+#include <memory>
 #include <string>
 #include <memory>
 

@@ -32,6 +32,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <memory>
 
 #include "stripe_partition.h"
 #include "src/helper/query.h"

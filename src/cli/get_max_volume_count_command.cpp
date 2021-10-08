@@ -64,7 +64,7 @@ GetMaxVolumeCountCommand::Execute(json& doc, string rid)
     {
         arrayCnt = abrList.size();
     }
-    
+
     int totalvolcnt = arrayCnt * MAX_VOLUME_COUNT;
 
     data.SetAttribute(JsonAttribute("current array count", "\"" + to_string(arrayCnt) + "\""));

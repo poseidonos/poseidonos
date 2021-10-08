@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <future>
+#include <memory>
 
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"

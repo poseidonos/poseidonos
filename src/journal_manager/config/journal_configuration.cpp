@@ -42,7 +42,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
-#include "src/master_context/config_manager.h"
 #ifndef IBOF_CONFIG_USE_MOCK_FS
 #include "src/metafs/metafs_file_intf.h"
 #endif

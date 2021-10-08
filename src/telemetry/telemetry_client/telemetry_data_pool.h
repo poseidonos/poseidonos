@@ -37,6 +37,10 @@
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 #include "src/telemetry/telemetry_client/telemetry_metrics.h"
 
+#include <list>
+#include <map>
+#include <string>
+
 namespace pos
 {
 class TelemetryDataPool

@@ -73,7 +73,7 @@ ScanDeviceCommand::Execute(json& doc, string rid)
 
         if (result == (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND)
         {
-            POS_TRACE_ERROR(result, "array loading failed : " + failedArrayString + 
+            POS_TRACE_ERROR(result, "array loading failed : " + failedArrayString +
             + ", check if uram is created or pmem is working normally");
         }
         else

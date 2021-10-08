@@ -40,7 +40,7 @@
 namespace std
 {
 class thread;
-}
+}   // namespace std
 
 namespace pos
 {

@@ -177,7 +177,8 @@ TryProcessing(char* msg)
     mutex m;
     notifyDone = false;
 
-    thread t([&msg]() {
+    thread t([&msg]()
+    {
         string res = reqHandler->ProcessCommand(msg);
 
         if (!notifyDone)

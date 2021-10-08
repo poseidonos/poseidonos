@@ -67,7 +67,7 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
         return -1;
     }
     string arrayName = argv["name"].get<std::string>();
-    
+
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (nullptr == info)
     {

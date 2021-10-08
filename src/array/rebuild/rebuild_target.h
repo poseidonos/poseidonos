@@ -35,6 +35,8 @@
 #include "rebuild_context.h"
 #include "src/include/partition_type.h"
 
+#include <memory>
+
 namespace pos
 {
 class ArrayDevice;

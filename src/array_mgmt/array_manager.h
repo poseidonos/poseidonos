@@ -52,7 +52,7 @@ using namespace std;
 namespace pos_cli
 {
 class StopRebuildingCommand;
-}
+}  // namespace pos_cli
 
 namespace pos
 {

@@ -36,8 +36,6 @@
 #include <vector>
 #include "src/include/core_const.h"
 
-#include "src/include/core_const.h"
-
 namespace pos
 {
 class AffinityManager;

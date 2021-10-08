@@ -32,6 +32,7 @@
 
 #include "unvme_drv.h"
 
+#include <memory>
 #include <utility>
 
 #include "Air.h"

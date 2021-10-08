@@ -234,7 +234,7 @@ error:
 int
 Array::Init(void)
 {
-    // TODO_MOUNTSEQUENCE: rollback sequence for array mount
+    // TODO(hsung.yang) MOUNTSEQUENCE: rollback sequence for array mount
     // pthread_rwlock_wrlock(&stateLock);
     POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Array {} Init", name_);
 

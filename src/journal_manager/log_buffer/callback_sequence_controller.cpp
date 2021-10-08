@@ -57,7 +57,6 @@ CallbackSequenceController::GetCallbackExecutionApproval(void)
     // Assume checkpoint trigger is completed in short time
     while (checkpointTriggerInProgress == true)
     {
-        ;
     }
 
     numCallbacksInExecution++;
@@ -77,7 +76,6 @@ CallbackSequenceController::GetCheckpointExecutionApproval(void)
     // Assume callback execution is completed in short time
     while (numCallbacksInExecution != 0)
     {
-        ;
     }
 
     checkpointTriggerInProgress = true;

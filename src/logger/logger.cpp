@@ -32,6 +32,7 @@
 
 #include "logger.h"
 
+#include <memory>
 #include <vector>
 
 #include "spdlog/sinks/rotating_file_sink.h"

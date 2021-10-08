@@ -34,6 +34,7 @@
 #define STRIPE_PARTITION_H_
 
 #include <list>
+#include <memory>
 #include <string>
 #include <vector>
 

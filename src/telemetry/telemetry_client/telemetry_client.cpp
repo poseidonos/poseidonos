@@ -33,6 +33,8 @@
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
+#include <memory>
+
 namespace pos
 {
 

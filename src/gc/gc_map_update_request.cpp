@@ -33,6 +33,7 @@
 #include "src/gc/gc_map_update_request.h"
 
 #include <list>
+#include <memory>
 #include <string>
 #include <memory>
 

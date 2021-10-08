@@ -57,11 +57,13 @@ ArrayDeviceList::ExportNames()
     unique_lock<mutex> lock(*mtx);
     DeviceSet<string> devices;
 
-    for_each(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev) {
+    for_each(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev)
+    {
         devices.nvm.push_back(dev->GetUblock()->GetName());
     });
 
-    for_each(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev) {
+    for_each(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev)
+    {
         const string faultyDevName = "Faulty Device";
         if (ArrayDeviceState::FAULT == dev->GetState())
         {
@@ -73,7 +75,8 @@ ArrayDeviceList::ExportNames()
         }
     });
 
-    for_each(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev) {
+    for_each(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev)
+    {
         devices.spares.push_back(dev->GetUblock()->GetName());
     });
 

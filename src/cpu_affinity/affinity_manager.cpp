@@ -34,9 +34,7 @@
 
 #include <numa.h>
 #include <sched.h>
-
 #include <iomanip>
-#include <sched.h>
 
 #include "count_descripted_cpu_set_generator.h"
 #include "poverty_cpu_set_generator.h"

@@ -81,7 +81,7 @@ GcCtx::GetCurrentGcMode(int numFreeSegments)
     }
     else if (normalGcthreshold >= numFreeSegments)
     {
-        if (curGcMode != MODE_NORMAL_GC )
+        if (curGcMode != MODE_NORMAL_GC)
         {
             POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
         }

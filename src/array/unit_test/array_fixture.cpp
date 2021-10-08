@@ -99,7 +99,7 @@ protected:
     const uint32_t DATA_DEVICE_COUNT = 3;
     const uint32_t SPARE_DEVICE_COUNT = 1;
     const uint64_t NVM_SIZE = 2 * 1024 * 256;  // 2GB(4K BlockCount)
-    const uint64_t SSD_SIZE = 32 * 1024 * 256; //32GB(4K BlockCount)
+    const uint64_t SSD_SIZE = 32 * 1024 * 256; // 32GB(4K BlockCount)
 
     Array* sysArray;
 
@@ -131,7 +131,7 @@ TEST_F(ArrayFixture, Load)
     EXPECT_EQ(0, ret);
 }
 
-//TEST_F(ArrayFixture, Create)
+// TEST_F(ArrayFixture, Create)
 //{
 //    sysArray->Unmount();
 //    sysArray->Delete();
@@ -139,27 +139,27 @@ TEST_F(ArrayFixture, Load)
 //    EXPECT_EQ(0, ret);
 //}
 //
-//TEST_F(ArrayFixture, Mount)
+// TEST_F(ArrayFixture, Mount)
 //{
 //    sysArray->Unmount();
 //    int ret = sysArray->Mount();
 //    EXPECT_EQ(0, ret);
 //}
 //
-//TEST_F(ArrayFixture, Unmount)
+// TEST_F(ArrayFixture, Unmount)
 //{
 //    int ret = sysArray->Unmount();
 //    EXPECT_EQ(0,ret);
 //}
 //
-//TEST_F(ArrayFixture, Delete)
+// TEST_F(ArrayFixture, Delete)
 //{
 //    sysArray->Unmount();
 //    int ret = sysArray->Delete();
 //    EXPECT_EQ(0,ret);
 //}
 //
-//TEST_F(ArrayFixture, AddSpare)
+// TEST_F(ArrayFixture, AddSpare)
 //{
 //    UblockSharedPtr spare1 = new MockUBlockDevice("SPARE_1", SSD_SIZE);
 //    int ret = sysArray->AddSpare(spare1);
@@ -170,7 +170,7 @@ TEST_F(ArrayFixture, Load)
 //    EXPECT_EQ(0, ret);
 //}
 //
-//TEST_F(ArrayFixture, GetStatus)
+// TEST_F(ArrayFixture, GetStatus)
 //{
 //    ArrayStatus status = sysArray->GetStatus();
 //    EXPECT_EQ(ArrayStatus::MOUNTED, status);
@@ -183,7 +183,7 @@ TEST_F(ArrayFixture, Load)
 //}
 //
 //
-//TEST_F(ArrayFixture, GetSizeInfo)
+// TEST_F(ArrayFixture, GetSizeInfo)
 //{
 //    const PartitionLogicalSize* size =
 //        sysArray->GetSizeInfo(PartitionType::WRITE_BUFFER);
@@ -219,7 +219,7 @@ TEST_F(ArrayFixture, Load)
 //    EXPECT_EQ(1, size->totalSegments);
 //}
 //
-//TEST_F(ArrayFixture, Translate)
+// TEST_F(ArrayFixture, Translate)
 //{
 //    //META_NVM
 //    LogicalBlkAddr lsa = { .stripeId = 0, .offset = 0 };
@@ -254,7 +254,7 @@ TEST_F(ArrayFixture, Load)
 //    EXPECT_EQ(lba, psa.lba);
 //}
 //
-//TEST_F(ArrayFixture, ConvertMetaNVM)
+// TEST_F(ArrayFixture, ConvertMetaNVM)
 //{
 //    uint32_t mnBlkCnt = 1;
 //    LogicalBlkAddr lsa = { .stripeId = 0, .offset = 0};
@@ -281,7 +281,7 @@ TEST_F(ArrayFixture, Load)
 //    free(memInput);
 //}
 //
-//TEST_F(ArrayFixture, ConvertWriteBuffer)
+// TEST_F(ArrayFixture, ConvertWriteBuffer)
 //{
 //    uint32_t wbBlkCnt = 2;
 //    uint32_t wbMemSize = 8192;
@@ -313,7 +313,7 @@ TEST_F(ArrayFixture, Load)
 //    free(memInput);
 //}
 //
-//TEST_F(ArrayFixture, ConvertMetaSSD)
+// TEST_F(ArrayFixture, ConvertMetaSSD)
 //{
 //    uint32_t msBlkCnt = 1;
 //    uint32_t msMemSize = 4096;
@@ -347,7 +347,7 @@ TEST_F(ArrayFixture, Load)
 //    free(memInput);
 //}
 //
-//TEST_F(ArrayFixture, ConvertUserData)
+// TEST_F(ArrayFixture, ConvertUserData)
 //{
 //    uint32_t chunkCnt = 2;
 //    uint32_t udBlksPerChunk = 64;

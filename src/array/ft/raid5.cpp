@@ -38,6 +38,8 @@
 #include "src/resource_manager/buffer_pool.h"
 #include "src/helper/query.h"
 
+#include <string>
+
 namespace pos
 {
 Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
@@ -259,9 +261,9 @@ Raid5::AllocParityPools()
 void
 Raid5::ClearParityPools()
 {
-    for(unsigned int i = 0; i < parityPools.size(); i++)
+    for (unsigned int i = 0; i < parityPools.size(); i++)
     {
-        if(parityPools[i] != nullptr)
+        if (parityPools[i] != nullptr)
         {
             memoryManager->DeleteBufferPool(parityPools[i]);
             parityPools[i] = nullptr;

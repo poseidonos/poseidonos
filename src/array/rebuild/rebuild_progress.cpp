@@ -35,6 +35,8 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
+#include <utility>
+
 namespace pos
 {
 RebuildProgress::RebuildProgress(string name)
