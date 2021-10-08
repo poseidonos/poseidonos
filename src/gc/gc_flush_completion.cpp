@@ -32,6 +32,10 @@
 
 #include "src/gc/gc_flush_completion.h"
 
+#include <list>
+#include <string>
+#include <memory>
+
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/logger/logger.h"
 #include "src/include/backend_event.h"
@@ -49,9 +53,6 @@
 #include "src/gc/gc_map_update_request.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "Air.h"
-
-#include <list>
-#include <string>
 
 namespace pos
 {

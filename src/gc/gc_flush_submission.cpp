@@ -34,6 +34,7 @@
 
 #include <list>
 #include <string>
+#include <memory>
 
 #include "src/allocator/allocator.h"
 #include "src/allocator/stripe/stripe.h"

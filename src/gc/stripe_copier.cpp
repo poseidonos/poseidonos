@@ -32,14 +32,15 @@
 
 #include "src/gc/stripe_copier.h"
 
+#include <string>
+#include <memory>
+
 #include "Air.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_read_completion.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/logger/logger.h"
 #include "src/include/backend_event.h"
-
-#include <string>
 
 namespace pos
 {

@@ -33,6 +33,7 @@
 #include "src/gc/stripe_copy_submission.h"
 
 #include <list>
+#include <memory>
 
 #include "Air.h"
 #include "src/gc/stripe_copier.h"

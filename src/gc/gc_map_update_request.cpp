@@ -34,6 +34,7 @@
 
 #include <list>
 #include <string>
+#include <memory>
 
 #include "Air.h"
 #include "src/allocator/allocator.h"

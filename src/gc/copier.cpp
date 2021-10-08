@@ -33,6 +33,7 @@
 #include "src/gc/copier.h"
 
 #include <list>
+#include <memory>
 
 #include "Air.h"
 #include "src/allocator_service/allocator_service.h"

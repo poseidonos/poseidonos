@@ -32,6 +32,9 @@
 
 #include "src/gc/copier_read_completion.h"
 
+#include <vector>
+#include <memory>
+
 #include "Air.h"
 #include "src/include/backend_event.h"
 #include "src/gc/gc_flush_submission.h"
@@ -42,7 +45,6 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io/general_io/translator.h"
 #include "src/io/backend_io/flush_submission.h"
-#include "src/gc/gc_flush_submission.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
