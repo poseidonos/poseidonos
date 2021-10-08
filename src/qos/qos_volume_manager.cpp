@@ -43,8 +43,8 @@
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
 #include "src/spdk_wrapper/connection_management.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {
@@ -62,6 +62,8 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
 {
     arrayId = arrayIndex;
     qosArrayManager = qosArrayMgr;
+    volumeOperationDone = false;
+    eventFrameworkApi = EventFrameworkApiSingleton::Instance();
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
         for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
@@ -350,11 +352,60 @@ QosVolumeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* 
 int
 QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    string bdevName = _GetBdevName(volEventBase->volId, volArrayInfo->arrayName);
-    uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
-    UpdateSubsystemToVolumeMap(nqnId, volEventBase->volId);
-    _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
+    struct pos_volume_info *vInfo = new (struct pos_volume_info);
+    _CopyVolumeInfo(vInfo->array_name, (volArrayInfo->arrayName).c_str(), (volArrayInfo->arrayName).size());
+    vInfo->id = volEventBase->volId;
+    vInfo->iops_limit = volEventPerf->maxiops;
+    vInfo->bw_limit = volEventPerf->maxbw;
+    _SetVolumeOperationDone(false);
+
+    // enqueue in same reactor as NvmfVolumePos::VolumeMounted so that pos_disk structure is populated with correct values before qos tries to access it.
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
+            _VolumeMountHandler, vInfo, this);
+
+    while (_GetVolumeOperationDone() == false)
+    {
+        if (_GetVolumeOperationDone() == true)
+        {
+            break;
+        }
+    }
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager:: _VolumeMountHandler(void *arg1, void *arg2)
+{
+    struct pos_volume_info* volInfo = static_cast<pos_volume_info*>(arg1);
+    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager *>(arg2);
+    qosVolumeManager->_InternalVolMountHandlerQos(volInfo);
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info *volMountInfo)
+{
+    if (volMountInfo)
+    {
+        string bdevName = _GetBdevName(volMountInfo->id, volMountInfo->array_name);
+        uint32_t nqnId = 0;
+        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        UpdateSubsystemToVolumeMap(nqnId, volMountInfo->id);
+        _UpdateVolumeMaxQos(volMountInfo->id, volMountInfo->iops_limit, volMountInfo->bw_limit, volMountInfo->array_name);
+        _SetVolumeOperationDone(true);
+        delete (volMountInfo);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -371,17 +422,64 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
     {
         return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    string bdevName = _GetBdevName(volEventBase->volId, volArrayInfo->arrayName);
-    uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
-    std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volEventBase->volId);
-    if (position != nqnVolumeMap[nqnId].end())
+    struct pos_volume_info* vInfo = new (struct pos_volume_info);
+    _CopyVolumeInfo(vInfo->array_name, (volArrayInfo->arrayName).c_str(), (volArrayInfo->arrayName).size());
+    vInfo->id = volEventBase->volId;
+    vInfo->iops_limit = 0;
+    vInfo->bw_limit = 0;
+    _SetVolumeOperationDone(false);
+
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
+            _VolumeUnmountHandler, vInfo, this);
+
+    while (_GetVolumeOperationDone() == false)
     {
-        nqnVolumeMap[nqnId].erase(position);
+        if (_GetVolumeOperationDone() == true)
+        {
+            break;
+        }
     }
-    _ClearVolumeParameters(volEventBase->volId);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_VolumeUnmountHandler(void *arg1, void *arg2)
+{
+    struct pos_volume_info *volUnmountInfo = static_cast <struct pos_volume_info*>(arg1);
+    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager *>(arg2);
+    qosVolumeManager->_InternalVolUnmountHandlerQos(volUnmountInfo);
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmountInfo)
+{
+    if (volUnmountInfo)
+    {
+        string bdevName = _GetBdevName(volUnmountInfo->id, volUnmountInfo->array_name);
+        uint32_t nqnId = 0;
+        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volUnmountInfo->id);
+        if (position != nqnVolumeMap[nqnId].end())
+        {
+            nqnVolumeMap[nqnId].erase(position);
+        }
+        _ClearVolumeParameters(volUnmountInfo->id);
+        _SetVolumeOperationDone(true);
+        delete(volUnmountInfo);
+    }
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -431,20 +529,65 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
 {
     for (auto volId : volList)
     {
-        string bdevName = _GetBdevName(volId, arrayName);
-        uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
-        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId);
+        struct pos_volume_info* vInfo = new (struct pos_volume_info);
+        _CopyVolumeInfo(vInfo->array_name, (volArrayInfo->arrayName).c_str(), (volArrayInfo->arrayName).size());
+        vInfo->id = volId;
+        vInfo->iops_limit = 0;
+        vInfo->bw_limit = 0;
+        _SetVolumeOperationDone(false);
+
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
+            _VolumeDetachHandler, vInfo, this);
+
+        while (_GetVolumeOperationDone() == false)
+        {
+            if (_GetVolumeOperationDone() == true)
+            {
+                break;
+            }
+        }
+    }
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_VolumeDetachHandler(void *arg1, void *arg2)
+{
+    struct pos_volume_info *volDetachInfo = static_cast <struct pos_volume_info*>(arg1);
+    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager*>(arg2);
+    qosVolumeManager->_InternalVolDetachHandlerQos(volDetachInfo);
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo)
+{
+    if (volDetachInfo)
+    {
+        string bdevName = _GetBdevName(volDetachInfo->id, volDetachInfo->array_name);
+        uint32_t nqnId = 0;
+        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volDetachInfo->id);
         if (position != nqnVolumeMap[nqnId].end())
         {
             nqnVolumeMap[nqnId].erase(position);
         }
-
-        _ClearVolumeParameters(volId);
+        _ClearVolumeParameters(volDetachInfo->id);
+        _SetVolumeOperationDone(true);
+        delete(volDetachInfo);
     }
-
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -459,7 +602,6 @@ QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
     int64_t setIopsLimit = GetVolumeLimit(reactor, volId, true);
     bwIopsRateLimit->ResetRateLimit(reactor, volId, offset, setBwLimit, setIopsLimit);
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -627,5 +769,42 @@ string
 QosVolumeManager::_GetBdevName(uint32_t volId, string arrayName)
 {
     return BDEV_NAME_PREFIX + to_string(volId) + "_" + arrayName;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_CopyVolumeInfo(char* destInfo, const char* srcInfo, int len)
+{
+    strncpy(destInfo, srcInfo, len);
+    destInfo[len] = '\0';
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_SetVolumeOperationDone(bool value)
+{
+    volumeOperationDone = value;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosVolumeManager::_GetVolumeOperationDone(void)
+{
+    return volumeOperationDone;
 }
 } // namespace pos

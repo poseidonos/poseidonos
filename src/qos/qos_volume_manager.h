@@ -38,9 +38,12 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "spdk/pos.h"
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event.h"
 
 namespace pos
@@ -75,6 +78,12 @@ public:
     std::string GetArrayName(void);
     void SetArrayName(std::string arrayName);
 
+protected:
+    EventFrameworkApi* eventFrameworkApi;
+    static void _VolumeMountHandler(void* arg1, void* arg2);
+    static void _VolumeUnmountHandler(void* arg1, void* arg2);
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
+
 private:
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
     bool _RateLimit(uint32_t reactor, int volId);
@@ -84,6 +93,14 @@ private:
     pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
     void _ClearVolumeParameters(uint32_t volId);
+
+    void _InternalVolMountHandlerQos(struct pos_volume_info* volMountInfo);
+    void _InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmountInfo);
+    void _InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo);
+    void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
+    void _SetVolumeOperationDone(bool value);
+    bool _GetVolumeOperationDone(void);
+
     std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
@@ -99,5 +116,6 @@ private:
     QosArrayManager* qosArrayManager;
     std::mutex subsysVolMapLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
+    std::atomic<bool> volumeOperationDone;
 };
 } // namespace pos
