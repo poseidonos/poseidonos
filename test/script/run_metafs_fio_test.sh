@@ -14,24 +14,12 @@ pause()
     read -rsn1
 }
 
-while getopts "f:t:i:s:c:p:a:r:" opt
+while getopts "f:w:" opt
 do
     case "$opt" in
         f) ip="$OPTARG"
             ;;
-        t) test_time="$OPTARG"
-            ;;
-        i) test_iteration="$OPTARG"
-            ;;
-        s) totalsize="$OPTARG"
-            ;;
-        c) cpusallowed="$OPTARG"
-            ;;
-        p) shutdowntype="$OPTARG"
-            ;;
-        a) arraymode="$OPTARG"
-            ;;
-        r) rebuild="$OPTARG"
+        w) wbt="$OPTARG"
     esac
 done
 
@@ -85,7 +73,7 @@ do
     volIndex=`expr $i - 1`
     sudo ${ROOT_DIR}/bin/poseidonos-cli volume mount -v ${volname}$volIndex -a POSArray
 
-    sudo nvme connect -t tcp -n nqn.2019-04.pos:subsystem$i -a ${ip} -s 1158
+    # sudo nvme connect -t tcp -n nqn.2019-04.pos:subsystem$i -a ${ip} -s 1158
 done
 
 sleep 3
@@ -94,8 +82,15 @@ sudo ./fio_meta_bench.py -t TCP -i ${ip} -p ${port} -n ${NR_VOLUME}
 
 for i in `seq 1 $NR_VOLUME`
 do
-    sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i
+    volIndex=`expr $i - 1`
+    sudo ${ROOT_DIR}/bin/poseidonos-cli volume unmount -v ${volname}$volIndex -a POSArray --force
+
+    # sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i
 done
+
+if [ $wbt -eq 1 ]; then
+    sudo ${ROOT_DIR}/bin/poseidonos-cli wbt flush_gcov
+fi
 
 sudo ${ROOT_DIR}/bin/poseidonos-cli array unmount -a POSArray --force
 sudo ${ROOT_DIR}/bin/poseidonos-cli system stop --force

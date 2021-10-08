@@ -482,7 +482,7 @@ ${BIN_DIR}/poseidonos-cli system stop --force
 
 echo "------------[MetaFs Performance Test Starts]----------------------------------"
 sleep 5
-${ROOT_DIR}/test/script/run_metafs_fio_test.sh -f ${ip}
+${ROOT_DIR}/test/script/run_metafs_fio_test.sh -f ${ip} -w 1
 echo "------------[MetaFs Performance Test Done]----------------------------------"
 
 if [ $exit_result -eq 0 ]; then
