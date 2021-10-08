@@ -91,7 +91,6 @@ public:
     VolumeBase* GetVolume(int volId) override;
     void StateChanged(StateContext* prev, StateContext* next) override;
     std::string GetArrayName(void) override;
-    int GetArrayId(void) override;
 
 private:
     int _LoadVolumes(void);

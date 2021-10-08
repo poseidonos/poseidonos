@@ -395,10 +395,4 @@ VolumeManager::GetArrayName(void)
     return arrayInfo->GetName();
 }
 
-int
-VolumeManager::GetArrayId(void)
-{
-    return arrayInfo->GetIndex();
-}
-
 } // namespace pos

@@ -69,7 +69,6 @@ public:
     virtual VolumeBase* GetVolume(int volId) = 0;
 
     virtual std::string GetArrayName(void) = 0;
-    virtual int GetArrayId(void) = 0;
 };
 
 } // namespace pos
