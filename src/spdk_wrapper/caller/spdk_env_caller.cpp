@@ -1,4 +1,3 @@
-
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -14,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -31,16 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "spdk_env_caller.h"
 
-#include "src/spdk_wrapper/caller/spdk_pci_caller.h"
+using namespace pos;
 
-namespace pos
+int
+SpdkEnvCaller::SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev)
 {
-class MockSpdkPciCaller : public SpdkPciCaller
-{
-public:
-    MOCK_METHOD(int, SpdkPciDeviceGetSocketId, (struct spdk_pci_device* dev), (override));
-};
-
-} // namespace pos
+    return spdk_pci_device_get_socket_id(dev);
+}

@@ -45,39 +45,31 @@
 #include "src/include/memory.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "uram.h"
 #include "uram_device_context.h"
 #include "uram_io_context.h"
 
-#define BDEV_NAME "uram"
-
-namespace pos
-{
-static void
-BdevOpenComplete(enum spdk_bdev_event_type type, struct spdk_bdev* bdev,
-    void* event_ctx)
-{
-    SPDK_NOTICELOG("Unsupported bdev event: type %d\n", type);
-}
+using namespace pos;
 
 static void
 AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
 {
     UramIOContext* ioCtx = static_cast<UramIOContext*>(cb_arg);
+    SpdkBdevCaller* spdkBdevCaller = ioCtx->GetBdevCaller();
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     devCtx->ioCompleCnt++;
 
     if (nullptr != bdev_io)
     {
-        spdk_bdev_free_io(bdev_io);
+        spdkBdevCaller->SpdkBdevFreeIo(bdev_io);
     }
 
     IOErrorType IOErrorType = IOErrorType::SUCCESS;
     if (unlikely(false == success))
     {
         IOErrorType = IOErrorType::GENERIC_ERROR;
-        SPDK_ERRLOG("Async I/O failed\n");
+        POS_TRACE_ERROR(POS_EVENT_ID::URAM_COMPLETION_FAILED,
+            "URAM Async IO Failed");
     }
 
     devCtx->DecreasePendingIO();
@@ -86,84 +78,54 @@ AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     delete ioCtx;
 }
 
-static void
-RetryIO(void* arg)
-{
-    try
-    {
-        UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);
-        UramDrvSingleton::Instance()->SubmitIO(ioCtx);
-    }
-    catch (POS_EVENT_ID eventId)
-    {
-        std::string message(" at RetryIO");
-        PosEventId::Print(eventId, EventLevel::WARNING, message);
-    }
-}
-
-UramDrv::UramDrv(SpdkBdevCaller* bdevCaller)
-: bdevCaller(bdevCaller)
+UramDrv::UramDrv(SpdkBdevCaller* spdkBdevCaller,
+    SpdkThreadCaller* spdkThreadCaller,
+    EventFrameworkApi* eventFrameworkApi)
+: spdkBdevCaller(spdkBdevCaller),
+  spdkThreadCaller(spdkThreadCaller),
+  eventFrameworkApi(eventFrameworkApi)
 {
     name = "UramDrv";
 }
 
 UramDrv::~UramDrv(void)
 {
-    if (bdevCaller != nullptr)
+    if (spdkBdevCaller != nullptr)
     {
-        delete bdevCaller;
+        delete spdkBdevCaller;
+    }
+
+    if (spdkThreadCaller != nullptr)
+    {
+        delete spdkThreadCaller;
     }
 }
 
 int
 UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 {
+    const string URAM_PRODUCT_NAME("Malloc disk");
+
     uint32_t addedDeviceCount = 0;
-    struct spdk_bdev* bdev = bdevCaller->SpdkBdevFirst();
-    string ssd_prefix = "unvme-ns-";
 
-    while (nullptr != bdev)
+    for (struct spdk_bdev* bdev = spdkBdevCaller->SpdkBdevFirst();
+        bdev != nullptr;
+        bdev = spdkBdevCaller->SpdkBdevNext(bdev))
     {
-        string bdev_name(bdev->name);
-        if (bdev_name.compare(0, ssd_prefix.length(), ssd_prefix) == 0)
+        if (bdev->product_name != URAM_PRODUCT_NAME)
         {
-            POS_TRACE_WARN((uint32_t)POS_EVENT_ID::ARRAY_DEVICE_WRONG_NAME, "URAM's name does not conform to the naming rule\n");
-            bdev = bdevCaller->SpdkBdevNext(bdev);
             continue;
         }
 
-        string bdev_product_name(bdev->product_name);
-        if (bdev_product_name.compare("Malloc disk") != 0)
-        {
-            bdev = bdevCaller->SpdkBdevNext(bdev);
-            continue;
-        }
+        uint32_t blockSize = spdkBdevCaller->SpdkBdevGetBlockSize(bdev);
+        uint64_t blockCount = spdkBdevCaller->SpdkBdevGetNumBlocks(bdev);
+        uint64_t bdevSize = blockSize * blockCount;
+        uint32_t numa = spdkBdevCaller->SpdkPosMallocBdevGetNuma(bdev);
 
-        bool isExist = false; // check if in devs
-        for (UblockSharedPtr dev : *devs)
-        {
-            if (dev->GetName() == bdev->name)
-            {
-                isExist = true;
-                break;
-            }
-        }
-
-        if (false == isExist)
-        {
-            uint32_t blockSize = bdevCaller->SpdkBdevGetBlockSize(bdev);
-            uint64_t blockCount = bdevCaller->SpdkBdevGetNumBlocks(bdev);
-            uint64_t bdevSize = blockSize * blockCount;
-            uint32_t numa = bdevCaller->SpdkPosMallocBdevGetNuma(bdev);
-
-            UblockSharedPtr dev =
-                make_shared<Uram>(bdev->name, bdevSize, this, numa);
-            std::cout << "name: " << dev->GetName() << std::endl;
-            devs->push_back(dev);
-            addedDeviceCount++;
-        }
-
-        bdev = bdevCaller->SpdkBdevNext(bdev);
+        UblockSharedPtr dev =
+            make_shared<Uram>(bdev->name, bdevSize, this, numa);
+        devs->push_back(dev);
+        addedDeviceCount++;
     }
 
     return addedDeviceCount;
@@ -172,33 +134,42 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 bool
 UramDrv::_OpenBdev(UramDeviceContext* devCtx)
 {
-    if (false == EventFrameworkApiSingleton::Instance()->IsReactorNow())
-    {
-        return true;
-    }
     spdk_bdev_desc* bdev_desc = nullptr;
 
-    devCtx->bdev = bdevCaller->SpdkBdevGetByName(devCtx->name);
+    devCtx->bdev = spdkBdevCaller->SpdkBdevGetByName(devCtx->name);
     if (NULL == devCtx->bdev)
     {
-        SPDK_ERRLOG("Could not find the bdev: %s\n", devCtx->name);
+        POS_TRACE_ERROR(POS_EVENT_ID::DEVICE_OPEN_FAILED,
+            "Could not find the bdev: {}", devCtx->name);
         return false;
     }
-    SPDK_NOTICELOG("Opening the bdev %s\n", devCtx->name);
-    int rc = bdevCaller->SpdkBdevOpenExt(
-        devCtx->name, true, BdevOpenComplete, NULL, &bdev_desc);
-    if (rc)
+    POS_TRACE_INFO(POS_EVENT_ID::DEVICE_INFO_MSG,
+        "Opening the bdev {}", devCtx->name);
+    spdk_bdev_event_cb_t cb =
+        [](enum spdk_bdev_event_type type,
+            struct spdk_bdev* bdev,
+            void* event_ctx)
+        {
+            POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
+                "Unsupported bdev event: type {}", type);
+        };
+
+    int rc = spdkBdevCaller->SpdkBdevOpenExt(
+        devCtx->name, true, cb, NULL, &bdev_desc);
+    if (rc < 0)
     {
-        SPDK_ERRLOG("Could not open bdev: %s\n", devCtx->name);
+        POS_TRACE_ERROR(POS_EVENT_ID::DEVICE_OPEN_FAILED,
+            "Could not open bdev: {}", devCtx->name);
         return false;
     }
 
     devCtx->bdev_desc = bdev_desc;
-    devCtx->bdev_io_channel = bdevCaller->SpdkBdevGetIoChannel(devCtx->bdev_desc);
+    devCtx->bdev_io_channel = spdkBdevCaller->SpdkBdevGetIoChannel(devCtx->bdev_desc);
     if (devCtx->bdev_io_channel == NULL)
     {
-        SPDK_NOTICELOG("Bdev opened, but not enough io channel\n");
-        bdevCaller->SpdkBdevClose(devCtx->bdev_desc);
+        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
+            "Bdev opened, but not enough io channel");
+        spdkBdevCaller->SpdkBdevClose(devCtx->bdev_desc);
         devCtx->bdev_desc = nullptr;
     }
     devCtx->opened = true;
@@ -209,23 +180,20 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
 void
 UramDrv::_CloseBdev(UramDeviceContext* devCtx)
 {
-    if (nullptr != devCtx)
+    if (nullptr != devCtx->bdev_io_channel)
     {
-        if (nullptr != devCtx->bdev_io_channel)
-        {
-            spdk_put_io_channel(devCtx->bdev_io_channel);
-            devCtx->bdev_io_channel = nullptr;
-        }
-
-        if (nullptr != devCtx->bdev_desc)
-        {
-            bdevCaller->SpdkBdevClose(devCtx->bdev_desc);
-            devCtx->bdev_desc = nullptr;
-        }
-
-        devCtx->ioCompleCnt = 0;
-        devCtx->opened = false;
+        spdkThreadCaller->SpdkPutIoChannel(devCtx->bdev_io_channel);
+        devCtx->bdev_io_channel = nullptr;
     }
+
+    if (nullptr != devCtx->bdev_desc)
+    {
+        spdkBdevCaller->SpdkBdevClose(devCtx->bdev_desc);
+        devCtx->bdev_desc = nullptr;
+    }
+
+    devCtx->ioCompleCnt = 0;
+    devCtx->opened = false;
 }
 
 bool
@@ -239,7 +207,7 @@ UramDrv::Open(DeviceContext* deviceContext)
 
         if (devCtx->opened == false)
         {
-            if (EventFrameworkApiSingleton::Instance()->IsReactorNow())
+            if (eventFrameworkApi->IsReactorNow())
             {
                 openSuccessful = _OpenBdev(devCtx);
             }
@@ -287,6 +255,7 @@ UramDrv::SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio)
 int
 UramDrv::SubmitIO(UramIOContext* ioCtx)
 {
+    const int RETRYLIMIT = 1;
     int retValue = 0;
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     spdk_bdev_io_completion_cb callbackFunc;
@@ -294,28 +263,39 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
     callbackFunc = &AsyncIOComplete;
 
     retValue = _RequestIO(devCtx, callbackFunc, ioCtx);
+    auto retryFunc = [](void* arg)
+    {
+        UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);
+        UramDrvSingleton::Instance()->SubmitIO(ioCtx);
+    };
 
     if (unlikely(-ENOMEM == retValue))
     {
         if (ioCtx->GetRetryCount() < RETRYLIMIT)
         {
             ioCtx->AddRetryCount();
-            if (unlikely(false == ioCtx->RequestRetry(&RetryIO)))
+            if (unlikely(false == ioCtx->RequestRetry(retryFunc)))
             {
                 callbackFunc(nullptr, false, ioCtx);
-                throw POS_EVENT_ID::URAM_FAIL_TO_RETRY_IO;
+                POS_EVENT_ID eventId = POS_EVENT_ID::URAM_FAIL_TO_RETRY_IO;
+                PosEventId::Print(eventId, EventLevel::WARNING);
             }
+            return 0;
         }
         else
         {
             callbackFunc(nullptr, false, ioCtx);
-            throw POS_EVENT_ID::URAM_SUBMISSION_TIMEOUT;
+            POS_EVENT_ID eventId = POS_EVENT_ID::URAM_SUBMISSION_TIMEOUT;
+            PosEventId::Print(eventId, EventLevel::WARNING);
+            return 0;
         }
     }
     else if (unlikely(retValue))
     {
         callbackFunc(nullptr, false, ioCtx);
-        throw POS_EVENT_ID::URAM_SUBMISSION_FAILED;
+        POS_EVENT_ID eventId = POS_EVENT_ID::URAM_SUBMISSION_FAILED;
+        PosEventId::Print(eventId, EventLevel::WARNING);
+        return 0;
     }
 
     return retValue;
@@ -341,7 +321,7 @@ UramDrv::_RequestIO(UramDeviceContext* devCtx,
 
     if (unlikely(!ioChannel))
     {
-        ioChannel = spdk_bdev_get_io_channel(devCtx->bdev_desc);
+        ioChannel = spdkBdevCaller->SpdkBdevGetIoChannel(devCtx->bdev_desc);
         devCtx->bdev_io_channel = ioChannel;
     }
     UbioDir dir = ioCtx->GetOpcode();
@@ -353,18 +333,19 @@ UramDrv::_RequestIO(UramDeviceContext* devCtx,
     switch (dir)
     {
         case UbioDir::Read:
-            ret = spdk_bdev_read(desc, ioChannel, data, offset, sizeInBytes,
+            ret = spdkBdevCaller->SpdkBdevRead(
+                desc, ioChannel, data, offset, sizeInBytes,
                 callbackFunc, static_cast<void*>(ioCtx));
             break;
         case UbioDir::Write:
-            ret = spdk_bdev_write(desc, ioChannel, data, offset, sizeInBytes,
+            ret = spdkBdevCaller->SpdkBdevWrite(
+                desc, ioChannel, data, offset, sizeInBytes,
                 callbackFunc, static_cast<void*>(ioCtx));
             break;
         default:
-            std::cout << "Neither Read Nor Write " << static_cast<int>(dir)
-                      << std::endl;
+            POS_TRACE_INFO(POS_EVENT_ID::DEVICE_INFO_MSG,
+                "Neither Read Nor Write {}", static_cast<int>(dir));
             break;
     }
     return ret;
 }
-} // namespace pos

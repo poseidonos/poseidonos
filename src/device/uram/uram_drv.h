@@ -37,9 +37,9 @@
 #include "spdk/bdev.h"
 #include "src/device/base/device_driver.h"
 #include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
+#include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 #include "src/lib/singleton.h"
-
-#define RETRYLIMIT (1)
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -52,29 +52,30 @@ class UramIOContext;
 class UramDrv : public DeviceDriver
 {
 public:
-    UramDrv(SpdkBdevCaller* bdevCaller = new SpdkBdevCaller());
+    UramDrv(SpdkBdevCaller* spdkBdevCaller = new SpdkBdevCaller(),
+        SpdkThreadCaller* spdkThreadCaller = new SpdkThreadCaller(),
+        EventFrameworkApi* eventFrameworkApi =
+            EventFrameworkApiSingleton::Instance());
     ~UramDrv() override;
-    int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
 
+    int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
     bool Open(DeviceContext* deviceContext) override;
     bool Close(DeviceContext* deviceContext) override;
 
     int CompleteIOs(DeviceContext* deviceContext) override;
-
     int SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio) override;
-
     int SubmitIO(UramIOContext* ioCtx);
 
 private:
-    using EventFunc = void (*)(void*, void*);
-
     int _RequestIO(UramDeviceContext* deviceContext,
         spdk_bdev_io_completion_cb callbackFunc,
         UramIOContext* ioCtx);
     bool _OpenBdev(UramDeviceContext* bdevCtx);
     void _CloseBdev(UramDeviceContext* bdevCtx);
 
-    SpdkBdevCaller* bdevCaller;
+    SpdkBdevCaller* spdkBdevCaller;
+    SpdkThreadCaller* spdkThreadCaller;
+    EventFrameworkApi* eventFrameworkApi;
 };
 
 using UramDrvSingleton = Singleton<UramDrv>;

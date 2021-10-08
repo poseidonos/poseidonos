@@ -56,8 +56,25 @@ public:
     virtual void SpdkBdevClose(struct spdk_bdev_desc* desc);
     virtual uint32_t SpdkBdevGetBlockSize(const struct spdk_bdev* bdev);
     virtual uint64_t SpdkBdevGetNumBlocks(const struct spdk_bdev* bdev);
-
     virtual uint32_t SpdkPosMallocBdevGetNuma(struct spdk_bdev* bdev);
+    virtual int SpdkBdevQueueIoWait(struct spdk_bdev *bdev,
+        struct spdk_io_channel *ch,
+        struct spdk_bdev_io_wait_entry *entry);
+    virtual int SpdkBdevRead(struct spdk_bdev_desc *desc,
+        struct spdk_io_channel *ch,
+        void *buf,
+        uint64_t offset,
+        uint64_t nbytes,
+        spdk_bdev_io_completion_cb cb,
+        void *cb_arg);
+    virtual int SpdkBdevWrite(struct spdk_bdev_desc *desc,
+        struct spdk_io_channel *ch,
+        void *buf,
+        uint64_t offset,
+        uint64_t nbytes,
+        spdk_bdev_io_completion_cb cb,
+        void *cb_arg);
+    virtual void SpdkBdevFreeIo(struct spdk_bdev_io* bdev_io);
 };
 
 } // namespace pos

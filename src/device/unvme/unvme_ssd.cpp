@@ -50,11 +50,11 @@ UnvmeSsd::UnvmeSsd(
     struct spdk_nvme_ns* namespaceToUse,
     std::string addr,
     SpdkNvmeCaller* spdkNvmeCaller,
-    SpdkPciCaller* spdkPciCaller)
+    SpdkEnvCaller* spdkEnvCaller)
 : UBlockDevice(name, size, driverToUse),
   ns(namespaceToUse),
   spdkNvmeCaller(spdkNvmeCaller),
-  spdkPciCaller(spdkPciCaller)
+  spdkEnvCaller(spdkEnvCaller)
 {
     property.bdf = addr;
     property.type = DeviceType::SSD;
@@ -63,17 +63,20 @@ UnvmeSsd::UnvmeSsd(
     property.numa = _GetNuma();
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 UnvmeSsd::~UnvmeSsd(void)
 {
     if (spdkNvmeCaller != nullptr)
     {
         delete spdkNvmeCaller;
     }
-    if (spdkPciCaller != nullptr)
+    if (spdkEnvCaller != nullptr)
     {
-        delete spdkPciCaller;
+        delete spdkEnvCaller;
     }
 }
+// LCOV_EXCL_STOP
 
 DeviceContext*
 UnvmeSsd::_AllocateDeviceContext(void)
@@ -122,7 +125,7 @@ UnvmeSsd::_GetNuma()
 {
     spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(ns);
     spdk_pci_device* pciDev = spdkNvmeCaller->SpdkNvmeCtrlrGetPciDevice(ctrlr);
-    int numa = spdkPciCaller->SpdkPciDeviceGetSocketId(pciDev);
+    int numa = spdkEnvCaller->SpdkPciDeviceGetSocketId(pciDev);
     return numa;
 }
 

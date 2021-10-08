@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,12 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "spdk_pci_caller.h"
+#include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 
 using namespace pos;
 
-int
-SpdkPciCaller::SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev)
+void
+SpdkThreadCaller::SpdkPutIoChannel(struct spdk_io_channel* ch)
 {
-    return spdk_pci_device_get_socket_id(dev);
+    spdk_put_io_channel(ch);
 }

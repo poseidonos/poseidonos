@@ -34,13 +34,16 @@
 
 #include "uram_device_context.h"
 
-namespace pos
-{
+using namespace pos;
+
 UramIOContext::UramIOContext(UramDeviceContext* inputDeviceContext,
-    UbioSmartPtr inputUbio, uint32_t inputRetry)
+    UbioSmartPtr inputUbio,
+    uint32_t inputRetry,
+    SpdkBdevCaller* spdkBdevCaller)
 : IOContext(inputUbio, inputRetry),
   devCtx(inputDeviceContext),
-  retryCnt(inputRetry)
+  retryCnt(inputRetry),
+  spdkBdevCaller(spdkBdevCaller)
 {
     retryCtx.bdev = nullptr;
     retryCtx.cb_arg = nullptr;
@@ -51,6 +54,10 @@ UramIOContext::UramIOContext(UramDeviceContext* inputDeviceContext,
 
 UramIOContext::~UramIOContext(void)
 {
+    if (spdkBdevCaller != nullptr)
+    {
+        delete spdkBdevCaller;
+    }
 }
 
 UramDeviceContext*
@@ -84,9 +91,14 @@ UramIOContext::RequestRetry(spdk_bdev_io_wait_cb callbackFunc)
 {
     _PrepareRetryContext(callbackFunc);
 
-    int errorCode = spdk_bdev_queue_io_wait(devCtx->bdev,
-        devCtx->bdev_io_channel, &retryCtx);
+    int errorCode = spdkBdevCaller->SpdkBdevQueueIoWait(devCtx->bdev,
+        devCtx->bdev_io_channel,
+        &retryCtx);
     return (0 == errorCode);
 }
 
-} // namespace pos
+SpdkBdevCaller*
+UramIOContext::GetBdevCaller(void)
+{
+    return spdkBdevCaller;
+}

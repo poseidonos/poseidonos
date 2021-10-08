@@ -37,10 +37,10 @@
 namespace pos
 {
 
-class SpdkPciCaller
+class SpdkEnvCaller
 {
 public:
-    virtual ~SpdkPciCaller() {}
+    virtual ~SpdkEnvCaller() {}
     virtual int SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev);
 };
 

@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,50 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOFOS_UNVME_SSD_H__
-#define __IBOFOS_UNVME_SSD_H__
+#include <gmock/gmock.h>
 
-#include <cstdint>
-#include <string>
-
-#include "spdk/nvme.h"
-#include "src/device/base/ublock_device.h"
-#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
-#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 
 namespace pos
 {
-class DeviceContext;
-class UnvmeDrv;
-
-class UnvmeSsd : public UBlockDevice
+class MockSpdkBdevCaller : public SpdkBdevCaller
 {
 public:
-    explicit UnvmeSsd(std::string name,
-        uint64_t size,
-        UnvmeDrv* driverToUse,
-        struct spdk_nvme_ns* namespaceToUse,
-        std::string addr,
-        SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller(),
-        SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
-    virtual ~UnvmeSsd() override;
-
-    struct spdk_nvme_ns* GetNs(void);
-
-    void DecreaseOutstandingAdminCount(void);
-
-private:
-    DeviceContext* _AllocateDeviceContext(void) override;
-    void _ReleaseDeviceContext(DeviceContext* deviceContextToRelease) override;
-
-    std::string _GetSN();
-    std::string _GetMN();
-    int _GetNuma();
-
-    spdk_nvme_ns* ns;
-    SpdkNvmeCaller* spdkNvmeCaller;
-    SpdkEnvCaller* spdkEnvCaller;
+    MOCK_METHOD(int, SpdkBdevQueueIoWait, (struct spdk_bdev *bdev, struct spdk_io_channel *ch, struct spdk_bdev_io_wait_entry *entry), (override));
+    MOCK_METHOD(struct spdk_bdev*, SpdkBdevFirst, ());
+    MOCK_METHOD(struct spdk_bdev*, SpdkBdevNext, (struct spdk_bdev* bdev));
+    MOCK_METHOD(struct spdk_bdev*, SpdkBdevGetByName, (const char* name));
+    MOCK_METHOD(int, SpdkBdevOpenExt, (const char* bdev_name, bool write, spdk_bdev_event_cb_t event_cb, void* event_ctx, struct spdk_bdev_desc** desc));
+    MOCK_METHOD(struct spdk_io_channel*, SpdkBdevGetIoChannel, (struct spdk_bdev_desc* desc));
+    MOCK_METHOD(void, SpdkBdevClose, (struct spdk_bdev_desc* desc));
+    MOCK_METHOD(int, SpdkBdevRead, (struct spdk_bdev_desc *desc, struct spdk_io_channel *ch, void *buf, uint64_t offset, uint64_t nbytes, spdk_bdev_io_completion_cb cb, void *cb_arg));
+    MOCK_METHOD(int, SpdkBdevWrite, (struct spdk_bdev_desc *desc, struct spdk_io_channel *ch, void *buf, uint64_t offset, uint64_t nbytes, spdk_bdev_io_completion_cb cb, void *cb_arg));
 };
-} // namespace pos
 
-#endif // __IBOFOS_UNVME_SSD_H__
+} // namespace pos

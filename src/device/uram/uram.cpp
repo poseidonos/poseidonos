@@ -85,9 +85,12 @@ Uram::Uram(std::string name,
     ioatReactorCountNuma1 = AccelEngineApi::GetIoatReactorCountPerNode(1);
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 Uram::~Uram(void)
 {
 }
+// LCOV_EXCL_STOP
 
 bool
 Uram::_RecoverBackup(DeviceContext* deviceContext)

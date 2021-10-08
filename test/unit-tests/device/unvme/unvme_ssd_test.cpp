@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/spdk_wrapper/caller/spdk_nvme_caller_mock.h"
-#include "test/unit-tests/spdk_wrapper/caller/spdk_pci_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_env_caller_mock.h"
 #include "lib/spdk/lib/nvme/nvme_internal.h"
 
 using testing::_;
@@ -16,8 +16,8 @@ TEST(UnvmeSsd, testIfGetNsProperly)
     // Given
     NiceMock<MockSpdkNvmeCaller>* mockSpdkNvmeCaller =
         new NiceMock<MockSpdkNvmeCaller>();
-    NiceMock<MockSpdkPciCaller>* mockSpdkPciCaller =
-        new NiceMock<MockSpdkPciCaller>();
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
     struct spdk_nvme_ns* ns = nullptr;
     struct spdk_nvme_ctrlr_data data;
     data.mn[0] = 0;
@@ -25,7 +25,7 @@ TEST(UnvmeSsd, testIfGetNsProperly)
     EXPECT_CALL(*mockSpdkNvmeCaller, SpdkNvmeCtrlrGetData)
         .Times(2).WillRepeatedly(Return(&data));
     UnvmeSsd unvmeSsd(
-        "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkPciCaller);
+        "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkEnvCaller);
 
     // When
     struct spdk_nvme_ns* expected = unvmeSsd.GetNs();

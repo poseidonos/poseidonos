@@ -34,6 +34,7 @@
 
 #include "spdk/bdev.h"
 #include "src/device/base/io_context.h"
+#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 
 namespace pos
 {
@@ -43,16 +44,19 @@ class UramDeviceContext;
 class UramIOContext : public IOContext
 {
 public:
-    UramIOContext(void) = delete;
+    UramIOContext(void) {} // For MockClass
     explicit UramIOContext(UramDeviceContext* inputDeviceContext,
-        UbioSmartPtr inputUbio, uint32_t inputRetry = 0);
+        UbioSmartPtr inputUbio,
+        uint32_t inputRetry = 0,
+        SpdkBdevCaller* spdkBdevCaller = new SpdkBdevCaller());
 
     virtual ~UramIOContext(void);
 
-    UramDeviceContext* GetDeviceContext(void);
-    uint32_t GetRetryCount(void);
-    void AddRetryCount(void);
-    bool RequestRetry(spdk_bdev_io_wait_cb callbackFunc);
+    virtual UramDeviceContext* GetDeviceContext(void);
+    virtual uint32_t GetRetryCount(void);
+    virtual void AddRetryCount(void);
+    virtual bool RequestRetry(spdk_bdev_io_wait_cb callbackFunc);
+    virtual SpdkBdevCaller* GetBdevCaller(void);
 
 private:
     void _PrepareRetryContext(spdk_bdev_io_wait_cb callbackFunc);
@@ -60,5 +64,6 @@ private:
     UramDeviceContext* devCtx;
     uint32_t retryCnt;
     spdk_bdev_io_wait_entry retryCtx;
+    SpdkBdevCaller* spdkBdevCaller;
 };
 } // namespace pos

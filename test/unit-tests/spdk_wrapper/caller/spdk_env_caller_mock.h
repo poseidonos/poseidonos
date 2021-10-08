@@ -1,3 +1,4 @@
+
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -13,8 +14,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,50 +31,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOFOS_UNVME_SSD_H__
-#define __IBOFOS_UNVME_SSD_H__
+#include <gmock/gmock.h>
 
-#include <cstdint>
-#include <string>
-
-#include "spdk/nvme.h"
-#include "src/device/base/ublock_device.h"
-#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 #include "src/spdk_wrapper/caller/spdk_env_caller.h"
 
 namespace pos
 {
-class DeviceContext;
-class UnvmeDrv;
-
-class UnvmeSsd : public UBlockDevice
+class MockSpdkEnvCaller : public SpdkEnvCaller
 {
 public:
-    explicit UnvmeSsd(std::string name,
-        uint64_t size,
-        UnvmeDrv* driverToUse,
-        struct spdk_nvme_ns* namespaceToUse,
-        std::string addr,
-        SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller(),
-        SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
-    virtual ~UnvmeSsd() override;
-
-    struct spdk_nvme_ns* GetNs(void);
-
-    void DecreaseOutstandingAdminCount(void);
-
-private:
-    DeviceContext* _AllocateDeviceContext(void) override;
-    void _ReleaseDeviceContext(DeviceContext* deviceContextToRelease) override;
-
-    std::string _GetSN();
-    std::string _GetMN();
-    int _GetNuma();
-
-    spdk_nvme_ns* ns;
-    SpdkNvmeCaller* spdkNvmeCaller;
-    SpdkEnvCaller* spdkEnvCaller;
+    MOCK_METHOD(int, SpdkPciDeviceGetSocketId, (struct spdk_pci_device* dev), (override));
 };
-} // namespace pos
 
-#endif // __IBOFOS_UNVME_SSD_H__
+} // namespace pos

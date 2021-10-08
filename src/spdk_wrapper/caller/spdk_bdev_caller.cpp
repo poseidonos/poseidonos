@@ -98,4 +98,32 @@ SpdkBdevCaller::SpdkBdevOpenExt(const char* bdev_name,
     return spdk_bdev_open_ext(bdev_name, write, event_cb, event_ctx, desc);
 }
 
+int
+SpdkBdevCaller::SpdkBdevQueueIoWait(struct spdk_bdev *bdev,
+    struct spdk_io_channel *ch,
+    struct spdk_bdev_io_wait_entry *entry)
+{
+    return spdk_bdev_queue_io_wait(bdev, ch, entry);
+}
 
+int
+SpdkBdevCaller::SpdkBdevRead(struct spdk_bdev_desc *desc, struct spdk_io_channel *ch,
+           void *buf, uint64_t offset, uint64_t nbytes,
+           spdk_bdev_io_completion_cb cb, void *cb_arg)
+{
+    return spdk_bdev_read(desc, ch, buf, offset, nbytes, cb, cb_arg);
+}
+
+int
+SpdkBdevCaller::SpdkBdevWrite(struct spdk_bdev_desc *desc, struct spdk_io_channel *ch,
+        void *buf, uint64_t offset, uint64_t nbytes,
+        spdk_bdev_io_completion_cb cb, void *cb_arg)
+{
+    return spdk_bdev_write(desc, ch, buf, offset, nbytes, cb, cb_arg);
+}
+
+void
+SpdkBdevCaller::SpdkBdevFreeIo(struct spdk_bdev_io* bdev_io)
+{
+    spdk_bdev_free_io(bdev_io);
+}
