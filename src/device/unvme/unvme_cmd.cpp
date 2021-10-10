@@ -46,10 +46,6 @@ namespace pos
 UnvmeCmd::UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller)
 : spdkNvmeCaller(spdkNvmeCaller)
 {
-    if (this->spdkNvmeCaller == nullptr)
-    {
-        this->spdkNvmeCaller = new SpdkNvmeCaller();
-    }
 }
 
 UnvmeCmd::~UnvmeCmd(void)
@@ -121,11 +117,20 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             GetLogPageContext* pageContext = static_cast<GetLogPageContext*>(data);
             if (pageContext->lid == SPDK_NVME_LOG_HEALTH_INFORMATION)
             {
-                struct spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
-                ret = spdkNvmeCaller->SpdkNvmeCtrlrCmdGetLogPage(ctrlr, pageContext->lid,
-                    SPDK_NVME_GLOBAL_NS_TAG, pageContext->payload,
+                struct spdk_nvme_ctrlr* ctrlr =
+                    spdkNvmeCaller->SpdkNvmeNsGetCtrlr(deviceContext->ns);
+                ret = spdkNvmeCaller->SpdkNvmeCtrlrCmdGetLogPage(ctrlr,
+                    pageContext->lid,
+                    SPDK_NVME_GLOBAL_NS_TAG,
+                    pageContext->payload,
                     sizeof(struct spdk_nvme_health_information_page),
-                    0, callbackFunc, ioCtx);
+                    0,
+                    callbackFunc,
+                    ioCtx);
+            }
+            else
+            {
+                ret = -1;
             }
             break;
         }

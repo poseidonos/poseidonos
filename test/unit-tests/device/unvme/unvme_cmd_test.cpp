@@ -6,6 +6,7 @@
 #include "test/unit-tests/device/unvme/unvme_device_context_mock.h"
 #include "test/unit-tests/device/unvme/unvme_io_context_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_nvme_caller_mock.h"
+#include "src/admin/disk_query_manager.h"
 
 using testing::_;
 using testing::NiceMock;
@@ -143,5 +144,63 @@ TEST(UnvmeCmd, RequestIO_testIfUbioDirIsDeallocateAndSectorCountIsNotAligned)
     // Then
     EXPECT_EQ(ret, -EFAULT);
 }
+
+TEST(UnvmeCmd, RequestIO_testIfUbioDirIsGetLogPageAndWorksProperly)
+{
+    // Given
+    NiceMock<MockUnvmeDeviceContext> mockDevContext;
+
+    GetLogPageContext ctx(nullptr, SPDK_NVME_LOG_HEALTH_INFORMATION);
+    NiceMock<MockUnvmeIOContext> mockIoContext;
+    EXPECT_CALL(mockIoContext, GetOpcode).WillOnce(Return(UbioDir::GetLogPage));
+    EXPECT_CALL(mockIoContext, GetBuffer).WillOnce(Return(&ctx));
+
+    NiceMock<MockSpdkNvmeCaller>* mockCaller = new NiceMock<MockSpdkNvmeCaller>();
+    EXPECT_CALL(*mockCaller, SpdkNvmeCtrlrCmdGetLogPage).WillOnce(Return(0));
+    EXPECT_CALL(*mockCaller, SpdkNvmeNsGetCtrlr).WillOnce(nullptr);
+
+    UnvmeCmd unvmeCmd(mockCaller);
+
+    // When
+    int ret = unvmeCmd.RequestIO(&mockDevContext, nullptr, &mockIoContext);
+
+    // Then
+    EXPECT_EQ(ret, 0);
+}
+
+TEST(UnvmeCmd, RequestIO_testIfUbioDirIsGetLogPageAndPageContextIsInvalid)
+{
+    // Given
+    NiceMock<MockUnvmeDeviceContext> mockDevContext;
+
+    GetLogPageContext ctx(nullptr, 0);
+    NiceMock<MockUnvmeIOContext> mockIoContext;
+    EXPECT_CALL(mockIoContext, GetOpcode).WillOnce(Return(UbioDir::GetLogPage));
+    EXPECT_CALL(mockIoContext, GetBuffer).WillOnce(Return(&ctx));
+
+    NiceMock<MockSpdkNvmeCaller>* mockCaller = new NiceMock<MockSpdkNvmeCaller>();
+
+    UnvmeCmd unvmeCmd(mockCaller);
+
+    // When
+    int ret = unvmeCmd.RequestIO(&mockDevContext, nullptr, &mockIoContext);
+
+    // Then
+    EXPECT_EQ(ret, -1);
+}
+
+TEST(UnvmeCmd, UnvmeCmdDestructor_testIfSpdkNvmeCallerIsNullptr)
+{
+    // Given
+    SpdkNvmeCaller* spdkCaller = nullptr;
+    UnvmeCmd* unvmeCmd = new UnvmeCmd(spdkCaller);
+
+    // When
+    delete unvmeCmd;
+
+    // Then
+    EXPECT_EQ(spdkCaller, nullptr);
+}
+
 
 } // namespace pos

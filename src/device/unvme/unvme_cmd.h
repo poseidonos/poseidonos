@@ -36,6 +36,7 @@
 #include <string>
 
 #include "spdk/nvme.h"
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 
 struct spdk_nvme_qpair;
 namespace pos
@@ -48,7 +49,7 @@ class SpdkNvmeCaller;
 class UnvmeCmd
 {
 public:
-    UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller = nullptr);
+    UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller());
     virtual ~UnvmeCmd(void);
     virtual int RequestIO(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,

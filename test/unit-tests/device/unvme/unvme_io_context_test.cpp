@@ -4,24 +4,18 @@
 
 namespace pos
 {
-TEST(UnvmeIOContext, UnvmeIOContext_)
-{
-}
 
-TEST(UnvmeIOContext, GetDeviceContext_)
+TEST(UnvmeIOContext, SetAdminCommand_testIfSetProperly)
 {
-}
+    // Given
+    UnvmeIOContext ioCtx(nullptr, nullptr, 0, false);
 
-TEST(UnvmeIOContext, IsFrontEnd_)
-{
-}
+    // When
+    ioCtx.SetAdminCommand();
 
-TEST(UnvmeIOContext, SetAdminCommand_)
-{
-}
+    // Then
+    EXPECT_TRUE(ioCtx.IsAdminCommand());
 
-TEST(UnvmeIOContext, IsAdminCommand_)
-{
 }
 
 } // namespace pos
