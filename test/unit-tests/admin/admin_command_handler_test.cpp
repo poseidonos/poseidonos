@@ -90,8 +90,8 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledFalse)
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
 
-    //NiceMock<MockSmartLogMgr> mockSmartLogMgr;
-    //ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(false));
+    // NiceMock<MockSmartLogMgr> mockSmartLogMgr;
+    // ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(false));
 
     AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr);
 

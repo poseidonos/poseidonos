@@ -21,13 +21,13 @@ TEST(ComponentManager, FindCpuTemperature_FileOpen)
     std::string filePath = "/sys/class/thermal/thermal_zone1/temp";
 
     ComponentManager componentManager;
-    //std::ifstream file(filePath);
+    // std::ifstream file(filePath);
     int foundTemperature = -1;
     bool expectedFileOpen = true;
-    //bool originalFileOpen = file.is_open();
+    // bool originalFileOpen = file.is_open();
     // as valid file name is passed file open should be true;
     bool originalFileOpen = componentManager.FindCpuTemperature();
-    //ASSERT_EQ(expectedFileOpen, originalFileOpen);
+    // ASSERT_EQ(expectedFileOpen, originalFileOpen);
 }
 
 TEST(ComponentManager, GetCpuTemperature_Initial_Zero)

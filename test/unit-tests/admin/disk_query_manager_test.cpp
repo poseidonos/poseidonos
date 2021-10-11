@@ -104,7 +104,6 @@ TEST(DiskQueryManager, Execute_otherOpc)
 
 TEST(DiskQueryManager, SendSmartCommandtoDisk_Return)
 {
-    //add test for getting disk list here
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
@@ -132,7 +131,6 @@ TEST(DiskQueryManager, SendSmartCommandtoDisk_Return)
 
 TEST(DiskQueryManager, SendSmartCommandtoDisk_DeviceSizeZero)
 {
-    //add test for getting disk list here
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
