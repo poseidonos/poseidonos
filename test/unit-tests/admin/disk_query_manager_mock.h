@@ -18,6 +18,7 @@ class MockDiskQueryManager : public DiskQueryManager
 {
 public:
     using DiskQueryManager::DiskQueryManager;
+    MOCK_METHOD(bool, Execute, (), (override));
 };
 
 } // namespace pos

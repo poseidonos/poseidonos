@@ -12,6 +12,7 @@ class MockSmartLogPageHandler : public SmartLogPageHandler
 {
 public:
     using SmartLogPageHandler::SmartLogPageHandler;
+    MOCK_METHOD(bool, Execute, (), (override));
 };
 
 } // namespace pos
