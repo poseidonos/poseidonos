@@ -104,10 +104,6 @@ TEST(DiskQueryManager, Execute_otherOpc)
 
 TEST(DiskQueryManager, SendSmartCommandtoDisk_Return)
 {
-<<<<<<< HEAD
-=======
-    //add test for getting disk list here
->>>>>>> [AWIBOF-4483] Adding UT framework for admin folder and CI script for smart log implementation
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
@@ -135,10 +131,6 @@ TEST(DiskQueryManager, SendSmartCommandtoDisk_Return)
 
 TEST(DiskQueryManager, SendSmartCommandtoDisk_DeviceSizeZero)
 {
-<<<<<<< HEAD
-=======
-    //add test for getting disk list here
->>>>>>> [AWIBOF-4483] Adding UT framework for admin folder and CI script for smart log implementation
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
