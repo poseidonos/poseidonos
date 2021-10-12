@@ -60,7 +60,7 @@ struct SmartLogEntry
 class SmartLogMgr
 {
 public:
-    SmartLogMgr(void);
+    SmartLogMgr(void) = default;
     ~SmartLogMgr(void);
 
 

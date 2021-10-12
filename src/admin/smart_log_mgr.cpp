@@ -37,10 +37,6 @@
 
 namespace pos
 {
-SmartLogMgr::SmartLogMgr(void)
-{
-}
-
 SmartLogMgr::~SmartLogMgr(void)
 {
 }

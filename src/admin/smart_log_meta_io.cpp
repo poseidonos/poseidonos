@@ -41,6 +41,7 @@ namespace pos
 {
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex)
 : loaded(false),
+  smartLogFile(nullptr),
   arrayId(arrayIndex)
 {
     fileName = "SmartLogPage.bin";

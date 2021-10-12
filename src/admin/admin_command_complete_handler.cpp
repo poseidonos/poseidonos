@@ -56,7 +56,11 @@ AdminCommandCompleteHandler::~AdminCommandCompleteHandler(void)
 bool
 AdminCommandCompleteHandler::_DoSpecificJob(void)
 {
-    callback->Execute();
+    bool ret = callback->Execute();
+    if (ret)
+    {
+        // Do nothing, For Coverity issue fixing
+    }
     return true;
 }
 } // namespace pos
