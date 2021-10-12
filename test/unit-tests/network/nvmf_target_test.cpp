@@ -3,11 +3,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "lib/spdk/include/spdk/uuid.h"
+#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "test/unit-tests/network/nvmf_target_mock.h"
 #include "test/unit-tests/network/nvmf_target_spy.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include "test/unit-tests/spdk_wrapper/spdk_caller_mock.h"
-#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 
 using namespace std;
 using ::testing::_;
@@ -54,14 +55,20 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevSuccess)
 {
     // Given
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_bdev* bdev;
+    struct spdk_bdev bdev;
+    memset(&bdev, 0, sizeof(bdev));
     bool actual, expected{true};
 
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
-    ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(bdev));
+    ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(&bdev));
+    EXPECT_CALL(*mockSpdkCaller, SpdkUuidParse).WillOnce([=](struct spdk_uuid* uuid, const char* uuid_str)
+    {
+        uuid = new struct spdk_uuid;
+        return 0;
+    });
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
+    actual = nvmfTarget.CreatePosBdev("bdev", "9aa0802f-761d-4330-930d-6c77a904f5e8", 0, 1024, 512, false, "array", 0);
 
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
@@ -71,10 +78,11 @@ TEST(NvmfTarget, CreatePosBdev_BdevAlreadyExist)
 {
     // Given
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_bdev* bdev;
+    struct spdk_bdev bdev;
+    memset(&bdev, 0, sizeof(bdev));
     bool actual, expected{false};
 
-    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(&bdev));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
     actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
@@ -99,12 +107,34 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevFail)
     delete mockSpdkCaller;
 }
 
+TEST(NvmfTarget, CreatePosBdev_ParseUuidFail)
+{
+    // Given
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    bool actual, expected{false};
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
+    ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(nullptr));
+    EXPECT_CALL(*mockSpdkCaller, SpdkUuidParse).WillOnce([=](struct spdk_uuid* uuid, const char* uuid_str)
+    {
+        uuid = new struct spdk_uuid;
+        return 1;
+    });
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    actual = nvmfTarget.CreatePosBdev("bdev", "9aa0802f-761d-4330-930d-6c77a904f5e8", 0, 1024, 512, false, "array", 0);
+
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
 TEST(NvmfTarget, DeletePosBdev_DeleteBdevSuccess)
 {
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_bdev* bdev;
+    struct spdk_bdev bdev;
+    memset(&bdev, 0, sizeof(bdev));
     bool actual, expected{true};
-    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(&bdev));
     ON_CALL(*mockSpdkCaller, SpdkBdevDeletePosDisk(_, _, _)).WillByDefault(Return());
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
@@ -117,7 +147,6 @@ TEST(NvmfTarget, DeletePosBdev_DeleteBdevSuccess)
 TEST(NvmfTarget, DeletePosBdev_DeleteBdevFail)
 {
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_bdev* bdev;
     bool actual, expected{false};
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
     ON_CALL(*mockSpdkCaller, SpdkBdevDeletePosDisk(_, _, _)).WillByDefault(Return());

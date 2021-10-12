@@ -33,13 +33,13 @@
 #include "src/network/nvmf_target.h"
 
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
 
 #include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/include/array_mgmt_policy.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 #include "src/network/nvmf_target_spdk.h"
@@ -77,14 +77,12 @@ NvmfTarget::~NvmfTarget(void)
 }
 
 bool
-NvmfTarget::CreatePosBdev(const string& bdevName, const string& uuid, uint32_t id,
+NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id,
     uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
     uint64_t numBlocks = volumeSizeInByte / blockSize;
     struct spdk_uuid* bdev_uuid = nullptr;
-
-    // spdkCaller->SpdkUuidParse(bdev_uuid, (char *)&uuid);
 
     struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
     if (nullptr != bdev)
@@ -94,9 +92,30 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string& uuid, uint32_t i
         POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         return false;
     }
+    if (false == uuid.empty())
+    {
+        bdev_uuid = new spdk_uuid;
+        int uuidParse = spdkCaller->SpdkUuidParse(bdev_uuid, uuid.c_str());
+        if (uuidParse != 0)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_PARSE_UUID;
+            POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), uuid);
+            if (nullptr != bdev_uuid)
+            {
+                delete bdev_uuid;
+            }
+            return false;
+        }
+    }
 
     bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
         numBlocks, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
+    if (nullptr != bdev_uuid)
+    {
+        delete bdev_uuid;
+    }
+
     if (bdev == nullptr)
     {
         POS_EVENT_ID eventId =
@@ -177,6 +196,9 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
         if (true == timeChecker.CheckTimeout())
         {
             attachedNsid = NvmfCallbackStatus::FAILED;
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_VOL_MOUNT_TIMEOUT;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
             break;
         }
         usleep(1);

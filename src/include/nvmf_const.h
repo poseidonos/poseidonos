@@ -36,6 +36,8 @@
 
 namespace pos
 {
+static const uint64_t NS_CREATE_TIMEOUT = 15000000000ULL;
+static const uint64_t NS_DELETE_TIMEOUT = 15000000000ULL;
 static const uint64_t NS_ATTACH_TIMEOUT = 15000000000ULL;
 static const uint64_t NS_DETACH_TIMEOUT = 15000000000ULL;
 } // namespace pos

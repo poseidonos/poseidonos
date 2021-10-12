@@ -58,14 +58,12 @@ public:
     NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* nvmfTarget);
     virtual ~NvmfVolumePos(void);
 
-    virtual void VolumeCreated(struct pos_volume_info* info);
-    virtual void VolumeDeleted(struct pos_volume_info* info);
+    virtual bool VolumeCreated(struct pos_volume_info* info, uint64_t time = NS_CREATE_TIMEOUT);
+    virtual bool VolumeDeleted(struct pos_volume_info* info, uint64_t time = NS_DELETE_TIMEOUT);
     virtual void VolumeMounted(struct pos_volume_info* info);
-    virtual void VolumeUnmounted(struct pos_volume_info* info);
+    virtual bool VolumeUnmounted(struct pos_volume_info* info, uint64_t time = NS_DETACH_TIMEOUT);
     virtual void VolumeUpdated(struct pos_volume_info* info);
-    virtual void VolumeDetached(vector<int>& volList, string arrayName);
-    static uint32_t VolumeDetachCompleted(void);
-    static bool WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time = NS_DETACH_TIMEOUT);
+    virtual bool VolumeDetached(vector<int>& volList, string arrayName, uint64_t time = NS_DETACH_TIMEOUT);
 
 protected:
     static atomic<uint32_t> volumeDetachedCnt;
@@ -73,6 +71,7 @@ protected:
     EventFrameworkApi* eventFrameworkApi;
     SpdkCaller* spdkCaller;
     static NvmfTarget* target;
+    uint32_t VOLUME_UNMOUNT_CNT = 1;
 
     static void _VolumeDetachHandler(void* arg1, void* arg2);
     static void _VolumeCreateHandler(void* arg1, void* arg2);
@@ -83,6 +82,9 @@ protected:
     static void _NamespaceDetachedHandler(void* cbArg, int status);
     static void _NamespaceDetachedAllHandler(void* cbArg, int status);
 
+    bool _WaitVolumeCreated(uint32_t volId, string arrayName, uint64_t time);
+    bool _WaitVolumeDeleted(uint32_t volId, string arrayName, uint64_t time);
+    bool _WaitVolumeDetached(uint32_t volCnt, uint64_t time);
 private:
     static atomic<bool> detachFailed;
 };

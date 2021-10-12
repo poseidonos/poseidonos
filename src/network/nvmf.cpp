@@ -144,8 +144,11 @@ Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeEventPerf(vInfo, volEventPerf);
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
-        volume->VolumeCreated(vInfo);
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        bool ret = volume->VolumeCreated(vInfo);
+        if (true == ret)
+        {
+            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        }
     }
     return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
@@ -154,13 +157,17 @@ int
 Nvmf::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
+    bool ret = false;
     if (vInfo)
     {
         _CopyVolumeEventBase(vInfo, volEventBase);
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
-        volume->VolumeDeleted(vInfo);
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        ret = volume->VolumeDeleted(vInfo);
+        if (true == ret)
+        {
+            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        }
     }
     return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
@@ -190,8 +197,11 @@ Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayIn
         _CopyVolumeEventBase(vInfo, volEventBase);
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
-        volume->VolumeUnmounted(vInfo);
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        bool ret = volume->VolumeUnmounted(vInfo);
+        if (true == ret)
+        {
+            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        }
     }
     return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
@@ -221,8 +231,12 @@ Nvmf::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
 int
 Nvmf::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
-    volume->VolumeDetached(volList, volArrayInfo->arrayName);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    bool ret = volume->VolumeDetached(volList, volArrayInfo->arrayName);
+    if (true == ret)
+    {
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    }
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
 } // namespace pos

@@ -100,7 +100,7 @@ TEST(VolumeUnmounter, Do_notifyFail)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_UNMOUNT_FAIL;
+    int expected = (int)POS_EVENT_ID::DONE_WITH_ERROR;
 
     NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
     NiceMock<MockNvmfTarget> mockNvmfTarget;

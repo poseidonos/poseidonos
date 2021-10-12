@@ -39,7 +39,6 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/network/nvmf_volume_pos.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
@@ -90,14 +89,6 @@ VolumeDetacher::DoAll(void)
     _SetVolumeArrayInfo();
 
     eventPublisher->NotifyVolumeDetached(mountedVols, &volumeArrayInfo);
-    bool res = NvmfVolumePos::WaitRequestedVolumesDetached(mountedVols.size());
-    if (res == false)
-    {
-        int ret = (int)POS_EVENT_ID::VOL_DETACH_FAIL;
-        POS_TRACE_ERROR(ret,
-            "Detach volume failed due to internal error or unmount timeout. Only some of them might be unmounted");
-        return;
-    }
 
     for (auto volId : mountedVols)
     {
