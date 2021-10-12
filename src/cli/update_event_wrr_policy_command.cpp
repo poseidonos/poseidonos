@@ -75,19 +75,22 @@ UpdateEventWrrPolicyCommand::Execute(json& doc, string rid)
         }
 
         QosManagerSingleton::Instance()->SetEventWeightWRR(event, weight);
+        
+        // if (ret == SUCCESS)
+        // {
+        //     return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "DONE", GetPosInfo());
+        // }
+        // else if (ret == QosReturnCode::VOLUME_POLICY_IN_EFFECT)
+        // {
+        //     return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "Volume Min Policy In Effect", GetPosInfo());
+        // }
+        // else
+        // {
+        //     return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "FAILED", GetPosInfo());
+        // }
 
-        if (ret == SUCCESS)
-        {
-            return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "DONE", GetPosInfo());
-        }
-        else if (ret == QosReturnCode::VOLUME_POLICY_IN_EFFECT)
-        {
-            return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "Volume Min Policy In Effect", GetPosInfo());
-        }
-        else
-        {
-            return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "FAILED", GetPosInfo());
-        }
+        // TODO(jun20.lee): check ret value and logic above
+        return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "DONE", GetPosInfo());
     }
     else
     {
