@@ -1076,6 +1076,16 @@ run_multi_array_test(){
         echo "    ${tc_array_one[fidx1]}"
     done
 }
+
+###################################################
+# MINIMUM POLICY TEST
+###################################################
+run_minimum_policy_test(){
+    echo "Starting CI Script for Minimum Policy QoS"
+    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh
+    echo "Completed Minimum Policy Tests"
+}
+
 ###################################################
 # SCRIPT USAGE GUIDE
 ###################################################
@@ -1198,5 +1208,7 @@ run_qos_test_cases;
 #run_test_on_multi_array and multi_volume_on_1 subsystem
 run_multi_array_test;
 
+# Minimum Volume Test
+run_minimum_policy_test;
 
 exit 0
