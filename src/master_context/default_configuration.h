@@ -83,12 +83,20 @@ private:
         {"debug_mode", "false"}
     };
     vector<ConfigKeyValue> flushData = {
-        {"enable", "false"}
+        {"enable", "false"},
+        {"internal_flush_enable", "true"},
+        {"internal_flush_threshold", "5"}
+    };
+    vector<ConfigKeyValue> adminData = {
+        {"smart_log_page", "false"}
     };
     vector<ConfigKeyValue> loggerData = {
         {"logfile_size_in_mb", "50"},
         {"logfile_rotation_count", "20"},
         {"min_allowable_log_level", "\"debug\""},
+    };
+    vector<ConfigKeyValue> eventSchedulerData = {
+        {"numa_dedicated", "false"}
     };
     vector<ConfigKeyValue> debugData = {
         {"memory_checker", "false"}
@@ -115,13 +123,13 @@ private:
         {"retry_count_frontend_io", "3"}
     };
     vector<ConfigKeyValue> perfImpactData = {
-        {"rebuild", "\"low\""}
+        {"rebuild", "\"highest\""}
     };
     vector<ConfigKeyValue> feQosData = {
         {"enable", "false"}
     };
     vector<ConfigKeyValue> flowControlData = {
-        {"enable", "false"},
+        {"enable", "true"},
         {"use_default", "true"},
         {"refill_timeout_in_msec", "1000"},
         {"total_token_in_stripe", "1024"},
@@ -131,20 +139,29 @@ private:
         {"flow_control_target_segment", "10"},
         {"flow_control_urgent_segment", "5"}
     };
+    vector<ConfigKeyValue> transportData = {
+        {"enable", "false"},
+        {"type", "\"tcp\""},
+        {"buf_cache_size", "64"},
+        {"num_shared_buffer", "4096"}
+    };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
     ConfigList defaultConfig = {
         {"journal", journalData},
         {"flush", flushData},
+        {"admin", adminData},
         {"logger", loggerData},
+        {"event_scheduler", eventSchedulerData},
         {"debug", debugData},
         {"ioat", ioatData},
         {"affinity_manager", affinityManagerData},
         {"user_nvme_driver", userNvmeDriverData},
         {"perf_impact", perfImpactData},
         {"fe_qos", feQosData},
-        {"flow_control", flowControlData}
+        {"flow_control", flowControlData},
+        {"transport", transportData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

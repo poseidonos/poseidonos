@@ -93,9 +93,7 @@ private:
     int _GetVersion(void* mem);
     int _GetLatestDataList(list<void*> mems, list<void*>* latestMems);
     string _GetSystemUuid(void);
-    bool _IsValidDevice(UblockSharedPtr ublockDev);
     bool _AllocMem(void);
-    int _RebuildMbr(void);
     int _LoadIndexMap(void);
 
     const int MBR_CHUNKS = 1;

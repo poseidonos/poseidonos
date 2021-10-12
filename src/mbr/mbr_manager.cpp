@@ -184,20 +184,6 @@ MbrManager::ResetMbr(void)
     return result;
 }
 
-int
-MbrManager::_RebuildMbr(void)
-{
-    pthread_rwlock_wrlock(&mbrLock);
-    char* buf = new char[BLOCK_SIZE];
-    _ReadFromDevices();
-    _WriteToDevices();
-
-    delete[] buf;
-    buf = nullptr;
-    pthread_rwlock_unlock(&mbrLock);
-    return (int)POS_EVENT_ID::SUCCESS;
-}
-
 bool
 MbrManager::_AllocMem(void)
 {
@@ -344,22 +330,6 @@ MbrManager::_DiskIo(UblockSharedPtr dev, void* ctx)
 
     IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
     ioDispatcher.Submit(bio, true);
-}
-
-bool
-MbrManager::_IsValidDevice(UblockSharedPtr ublockDev)
-{
-    bool ret = false;
-
-    if (ublockDev->GetType() == DeviceType::SSD)
-    {
-        ret = true;
-    }
-    else if (ublockDev->GetType() == DeviceType::NVRAM)
-    {
-        ret = true;
-    }
-    return ret;
 }
 
 void
