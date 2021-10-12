@@ -63,7 +63,6 @@ public:
 private:
     IArrayInfo* arrayInfo;
 
-    bool isJournalEnabled;
     IMapperVolumeEventHandler* mapper;
     Allocator* allocator;
     IJournalVolumeEventHandler* journal;

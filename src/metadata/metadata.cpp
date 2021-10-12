@@ -48,7 +48,8 @@ Metadata::Metadata(void)
   mapper(nullptr),
   allocator(nullptr),
   journal(nullptr),
-  metaUpdater(nullptr)
+  metaUpdater(nullptr),
+  volumeEventHandler(nullptr)
 {
 }
 
