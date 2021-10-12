@@ -94,7 +94,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     AllocatorCtx* allocatorCtx = new AllocatorCtx(nullptr, allocatorAddressInfo);
 
     // RebuildCtx (Real)
-    RebuildCtx* rebuildCtx = new RebuildCtx(allocatorCtx, segmentCtx, allocatorAddressInfo);
+    RebuildCtx* rebuildCtx = new RebuildCtx(allocatorCtx, allocatorAddressInfo);
 
     // ContextManager (Real)
     ContextManager contextManager(telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
@@ -238,7 +238,6 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     uint32_t numSegments = 10;
     ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
 
-    SegmentCtx* segmentCtx = new SegmentCtx(&addrInfo);
     NiceMock<MockTelemetryPublisher> telemetryPublisher;
     NiceMock<MockEventScheduler> eventScheduler;
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>;
@@ -249,6 +248,8 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockAllocatorFileIoManager>* allocatorFileIoManager = new NiceMock<MockAllocatorFileIoManager>;
     NiceMock<MockContextReplayer>* contextReplayer = new NiceMock<MockContextReplayer>;
+
+    SegmentCtx* segmentCtx = new SegmentCtx(rebuildCtx, &addrInfo);
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
 
     std::mutex allocatorLock, wbLsidBitmapLock;

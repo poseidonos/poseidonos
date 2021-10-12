@@ -36,9 +36,10 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
-#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/context_manager/segment_ctx/segment_lock.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
@@ -49,12 +50,14 @@ class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
     SegmentCtx(void) = default;
-    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_);
+    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
         BitMapMutex* segmentBitmap,
+        RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
-    explicit SegmentCtx(AllocatorAddressInfo* info);
+    explicit SegmentCtx(RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -82,7 +85,7 @@ public:
 
     virtual void AllocateSegment(SegmentId segId);
     virtual void ReleaseSegment(SegmentId segId);
-    virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
+    virtual SegmentId AllocateFreeSegment(void);
 
     virtual SegmentId GetUsedSegment(SegmentId startSegId);
     virtual uint64_t GetNumOfFreeSegment(void);
@@ -92,6 +95,9 @@ public:
     virtual int GetTotalSegmentsCount(void);
 
     virtual SegmentId FindMostInvalidSSDSegment(void);
+
+    virtual SegmentId GetRebuildTargetSegment(void);
+    virtual int MakeRebuildTarget(void);
 
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
@@ -118,6 +124,8 @@ private:
 
     std::mutex segCtxLock;
     SegmentLock* segStateLocks;
+
+    RebuildCtx* rebuildCtx;
 };
 
 } // namespace pos

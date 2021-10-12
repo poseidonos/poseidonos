@@ -97,8 +97,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 : ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(info);
-    segmentCtx = new SegmentCtx(info);
-    rebuildCtx = new RebuildCtx(allocatorCtx, segmentCtx, info);
+    rebuildCtx = new RebuildCtx(allocatorCtx, info);
+    segmentCtx = new SegmentCtx(rebuildCtx, info);
     wbStripeCtx = new WbStripeCtx(info);
     gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
@@ -224,20 +224,14 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {
-    SegmentId segId = segmentCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
-    while ((segId != UNMAP_SEGMENT) && (rebuildCtx->IsRebuildTargetSegment(segId) == true))
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "[AllocateSegment] segmentId:{} is already rebuild target!", segId);
-        segmentCtx->ReleaseSegment(segId);
-        ++segId;
-        segId = segmentCtx->AllocateFreeSegment(segId);
-    }
+    SegmentId segId = segmentCtx->AllocateFreeSegment();
 
     int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
     if (segId != UNMAP_SEGMENT)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] free segmentId:{}, free segment count:{}", segId, freeSegCount);
     }
+
     telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
 
     return segId;
@@ -315,7 +309,7 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
-    return rebuildCtx->GetRebuildTargetSegment();
+    return segmentCtx->GetRebuildTargetSegment();
 }
 
 bool
@@ -339,7 +333,7 @@ ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
 int
 ContextManager::MakeRebuildTarget(void)
 {
-    int ret = rebuildCtx->MakeRebuildTarget();
+    int ret = segmentCtx->MakeRebuildTarget();
     if (ret == 1) // need to flush
     {
         FlushRebuildContext(nullptr, false);

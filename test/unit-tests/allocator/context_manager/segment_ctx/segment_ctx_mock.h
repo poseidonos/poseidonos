@@ -31,7 +31,7 @@ public:
     MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));
     MOCK_METHOD(void, AllocateSegment, (SegmentId segId), (override));
     MOCK_METHOD(void, ReleaseSegment, (SegmentId segId), (override));
-    MOCK_METHOD(SegmentId, AllocateFreeSegment, (SegmentId startSegId), (override));
+    MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, GetUsedSegment, (SegmentId startSegId), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegment, (), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegmentWoLock, (), (override));
@@ -39,6 +39,8 @@ public:
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(int, GetTotalSegmentsCount, (), (override));
     MOCK_METHOD(SegmentId, FindMostInvalidSSDSegment, (), (override));
+    MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
 };

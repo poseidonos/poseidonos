@@ -30,8 +30,10 @@ public:
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(RTSegmentIter, GetRebuildTargetSegmentsBegin, (), (override));
     MOCK_METHOD(RTSegmentIter, GetRebuildTargetSegmentsEnd, (), (override));
-    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
+    MOCK_METHOD(void, ClearRebuildTargetList, (), (override));
+    MOCK_METHOD(void, AddRebuildTargetSegment, (SegmentId segmentId), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
+    MOCK_METHOD(void, EraseRebuildTargetSegment, (SegmentId segmentId), (override));
     MOCK_METHOD(std::mutex&, GetLock, (), (override));
 };
 

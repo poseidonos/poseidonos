@@ -44,14 +44,15 @@
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(header, segmentInfo_, nullptr, nullptr, nullptr, addrInfo_)
+SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
+: SegmentCtx(header, segmentInfo_, nullptr, nullptr, nullptr, rebuildCtx_, addrInfo_)
 {
 }
 
 SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
     BitMapMutex* segmentBitmap_,
+    RebuildCtx* rebuildCtx_,
     AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
@@ -60,7 +61,8 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
   numSegments(0),
   initialized(false),
   addrInfo(addrInfo_),
-  segStateLocks(segmentStateLocks_)
+  segStateLocks(segmentStateLocks_),
+  rebuildCtx(rebuildCtx_)
 {
     segmentInfos = segmentInfo_;
     if (header != nullptr)
@@ -78,8 +80,8 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     }
 }
 
-SegmentCtx::SegmentCtx(AllocatorAddressInfo* info)
-: SegmentCtx(nullptr, nullptr, info)
+SegmentCtx::SegmentCtx(RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info)
+: SegmentCtx(nullptr, nullptr, rebuildCtx_, info)
 {
 }
 
@@ -396,28 +398,43 @@ SegmentCtx::ReleaseSegment(SegmentId segId)
 }
 
 SegmentId
-SegmentCtx::AllocateFreeSegment(SegmentId startSegId)
+SegmentCtx::AllocateFreeSegment(void)
 {
-    SegmentId segId;
-    if (startSegId == UNMAP_SEGMENT)
-    {
-        segId = allocSegBitmap->SetNextZeroBit();
-    }
-    else
-    {
-        segId = allocSegBitmap->SetFirstZeroBit(startSegId);
-    }
+    SegmentId segId = UNMAP_SEGMENT;
 
-    if (allocSegBitmap->IsValidBit(segId) == false)
+    while (true)
     {
-        segId = UNMAP_SEGMENT;
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
-    }
-    else
-    {
-        segmentStates[segId].SetState(SegmentState::NVRAM);
-    }
+        if (segId == UNMAP_SEGMENT)
+        {
+            segId = allocSegBitmap->SetNextZeroBit();
+        }
+        else
+        {
+            segId = allocSegBitmap->SetFirstZeroBit(segId);
+        }
 
+        if (allocSegBitmap->IsValidBit(segId) == false)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT),
+                "[AllocateSegment] failed to allocate segment, free segment count:{}, rebuild target count: {}",
+                GetNumOfFreeSegmentWoLock(),
+                rebuildCtx->GetRebuildTargetSegmentCount());
+
+            segId = UNMAP_SEGMENT;
+            break;
+        }
+        else if (rebuildCtx->IsRebuildTargetSegment(segId) == true)
+        {
+            allocSegBitmap->ClearBit(segId);
+            segId++;
+            continue;
+        }
+        else
+        {
+            segmentStates[segId].SetState(SegmentState::NVRAM);
+            break;
+        }
+    }
     return segId;
 }
 
@@ -485,6 +502,59 @@ SegmentCtx::FindMostInvalidSSDSegment(void)
     }
 
     return victimSegment;
+}
+
+SegmentId
+SegmentCtx::GetRebuildTargetSegment(void)
+{
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
+
+    SegmentId segmentId = UNMAP_SEGMENT;
+
+    while (true)
+    {
+        segmentId = rebuildCtx->GetRebuildTargetSegment();
+        if (segmentId == UNMAP_SEGMENT)
+        {
+            segmentId = UINT32_MAX;
+            break;
+        }
+        else if (GetSegmentState(segmentId, true) == SegmentState::FREE)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "Skip Rebuilding segmentId:{}, Already Freed", segmentId);
+            rebuildCtx->EraseRebuildTargetSegment(segmentId);
+        }
+        else
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start to rebuild segmentId:{}", segmentId);
+            break;
+        }
+    }
+    return segmentId;
+}
+
+int
+SegmentCtx::MakeRebuildTarget(void)
+{
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
+    rebuildCtx->ClearRebuildTargetList();
+
+    SegmentId segmentId = 0;
+    while (true)
+    {
+        // Pick non-free segments and make rebuildTargetSegments
+        segmentId = GetUsedSegment(segmentId);
+        if (segmentId == UNMAP_SEGMENT)
+        {
+            break;
+        }
+        else
+        {
+            rebuildCtx->AddRebuildTargetSegment(segmentId);
+        }
+        ++segmentId;
+    }
+    return 1;
 }
 
 void

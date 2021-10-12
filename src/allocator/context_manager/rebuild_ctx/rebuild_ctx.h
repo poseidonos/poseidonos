@@ -38,7 +38,6 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
-#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/state/interface/i_state_control.h"
@@ -49,8 +48,8 @@ class RebuildCtx : public IAllocatorFileIoClient
 {
 public:
     RebuildCtx(void) = default;
-    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, SegmentCtx* segmentCtx, AllocatorAddressInfo* info); // for UT
-    RebuildCtx(AllocatorCtx* allocCtx, SegmentCtx* segmentCtx, AllocatorAddressInfo* info);
+    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info); // for UT
+    RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info);
     virtual ~RebuildCtx(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -72,8 +71,10 @@ public:
     virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual RTSegmentIter GetRebuildTargetSegmentsBegin(void);
     virtual RTSegmentIter GetRebuildTargetSegmentsEnd(void);
-    virtual int MakeRebuildTarget(void);
+    virtual void ClearRebuildTargetList(void);
+    virtual void AddRebuildTargetSegment(SegmentId segmentId);
     virtual int StopRebuilding(void);
+    virtual void EraseRebuildTargetSegment(SegmentId segmentId);
 
     // For Testing
     virtual std::mutex& GetLock(void) { return rebuildLock; }
@@ -83,8 +84,6 @@ public:
     static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
 private:
-    void _EraseRebuildTargetSegments(RTSegmentIter iter);
-
     AllocatorAddressInfo* addrInfo;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -96,7 +95,6 @@ private:
     std::mutex rebuildLock;
 
     AllocatorCtx* allocatorCtx;
-    SegmentCtx* segmentCtx;
     bool initialized;
 };
 

@@ -674,7 +674,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncSuccess)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 2;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
@@ -720,7 +720,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncSuccess2)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 2;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
@@ -768,7 +768,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase1)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 2;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
@@ -815,7 +815,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase2)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 2;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
@@ -863,7 +863,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase3)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 1;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
@@ -907,7 +907,7 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase4)
     RebuildCtxHeader header;
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 1;
-    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, nullptr, &addrInfo);
+    RebuildCtx* reCtx = new RebuildCtx(&header, nullptr, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();

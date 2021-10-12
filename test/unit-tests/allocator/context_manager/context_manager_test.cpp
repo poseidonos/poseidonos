@@ -542,13 +542,14 @@ TEST(ContextManager, AllocateFreeSegment_TestFreeSegmentAllocationByState)
     // given 1.
     EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     // when 1.
-    ctxManager.AllocateFreeSegment();
+    SegmentId ret = ctxManager.AllocateFreeSegment();
+    EXPECT_EQ(ret, UNMAP_SEGMENT);
 
     // given 2. first failed, second success
-    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(5)).WillOnce(Return(11));
-    EXPECT_CALL(*reCtx, IsRebuildTargetSegment).WillOnce(Return(true)).WillOnce(Return(false));
+    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(5));
     // when 2.
-    ctxManager.AllocateFreeSegment();
+    ret = ctxManager.AllocateFreeSegment();
+    EXPECT_EQ(ret, 5);
 }
 
 TEST(ContextManager, AllocateGCVictimSegment_TestIfVictimIsUpdated)
@@ -727,7 +728,7 @@ TEST(ContextManager, AllocateRebuildTargetSegment_TestSimpleByPassFunc)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
 
-    EXPECT_CALL(*reCtx, GetRebuildTargetSegment).WillOnce(Return(5));
+    EXPECT_CALL(*segCtx, GetRebuildTargetSegment).WillOnce(Return(5));
 
     // when
     int ret = ctxManager.AllocateRebuildTargetSegment();
@@ -1011,7 +1012,6 @@ TEST(ContextManager, SetNextSsdLsid_TestCheckReturnedSegmentId)
 
     // given 1.
     EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(5));
-    EXPECT_CALL(*reCtx, IsRebuildTargetSegment).WillOnce(Return(false));
     EXPECT_CALL(*allocCtx, SetNextSsdLsid(5));
 
     std::mutex allocCtxLock;
@@ -1130,14 +1130,14 @@ TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(-1));
+    EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(-1));
     // when 1.
     int ret = ctxManager.MakeRebuildTarget();
     // then 1.
     EXPECT_EQ(-1, ret);
 
     // given 2.
-    EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(1));
+    EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
     EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
     // when 1.

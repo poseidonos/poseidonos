@@ -290,8 +290,6 @@ StripeId
 BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
-
     StripeId ssdLsid = allocCtx->UpdatePrevLsid();
 
     if (_IsSegmentFull(ssdLsid))
@@ -308,20 +306,11 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
         SegmentId segmentId = contextManager->AllocateFreeSegment();
         if (segmentId == UNMAP_SEGMENT)
         {
-            // Under Rebuiling...
-            if (rbCtx->IsRebuidTargetSegmentsEmpty() == false)
+            while (addrInfo->IsUT() != true)
             {
-                POS_TRACE_INFO(EID(ALLOCATOR_REBUILDING_SEGMENT), "Couldn't Allocate a SegmentId, seems Under Rebuiling");
-                return UNMAP_STRIPE;
+                usleep(1); // assert(false);
             }
-            else
-            {
-                while (addrInfo->IsUT() != true)
-                {
-                    usleep(1); // assert(false);
-                }
-                return UNMAP_STRIPE;
-            }
+            return UNMAP_STRIPE;
         }
         ssdLsid = segmentId * addrInfo->GetstripesPerSegment();
     }
