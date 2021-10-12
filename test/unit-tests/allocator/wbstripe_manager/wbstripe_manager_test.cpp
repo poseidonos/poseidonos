@@ -198,6 +198,7 @@ TEST(WBStripeManager, ReferLsidCnt_TestwithAllConditions)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(5);
+    addrInfo.SetchunksPerStripe(1);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
