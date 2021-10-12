@@ -32,6 +32,7 @@ TEST(AccelEngineApi, Finalize_Fail)
     EXPECT_CALL(*mockEventFrameworkApi, GetFirstReactor()).WillOnce(Return(0));
     EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillOnce(Return(false));
     AccelEngineApi::Finalize(mockEventFrameworkApi);
+    delete mockEventFrameworkApi;
 }
 
 TEST(AccelEngineApi, IsIoatEnable_Success)
