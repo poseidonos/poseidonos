@@ -56,6 +56,10 @@ VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName, 
     {
         eventPublisher = volumeEventPublisher;
     }
+
+    volumeEventBase = {0, 0, "", "", ""};
+    volumeEventPerf = {0, 0};
+    volumeArrayInfo = {0, ""};
 }
 
 VolumeInterface::~VolumeInterface(void)
