@@ -50,9 +50,6 @@
 #include "src/allocator/i_block_allocator.h"
 #include "src/volume/volume_service.h"
 
-#include <memory>
-#include <vector>
-
 namespace pos
 {
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,

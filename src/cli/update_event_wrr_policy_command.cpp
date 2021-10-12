@@ -75,7 +75,7 @@ UpdateEventWrrPolicyCommand::Execute(json& doc, string rid)
         }
 
         QosManagerSingleton::Instance()->SetEventWeightWRR(event, weight);
-        
+
         // if (ret == SUCCESS)
         // {
         //     return jFormat.MakeResponse("UPDATEEVENTWRRPOLICY", rid, ret, "DONE", GetPosInfo());

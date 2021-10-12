@@ -34,7 +34,6 @@
 
 #include <memory>
 #include <vector>
-#include <memory>
 
 #include "src/gc/copier.h"
 #include "src/gc/gc_status.h"
