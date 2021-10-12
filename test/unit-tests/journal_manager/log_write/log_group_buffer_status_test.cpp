@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include "src/include/pos_event_id.h"
+
 namespace pos
 {
 static const uint64_t META_PAGE_SIZE = 4032;
@@ -44,7 +46,8 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocatedOffsetIsNotCrossingMetaP
     for (int testCount = 0; testCount < 10; testCount++)
     {
         uint64_t allocatedOffset = 0;
-        EXPECT_TRUE(status.TryToAllocate(logSize, allocatedOffset) == true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, allocatedOffset) == expectReturnCode);
 
         uint64_t startMpage = allocatedOffset / META_PAGE_SIZE;
         uint64_t endMpage = (allocatedOffset + logSize - 1) / META_PAGE_SIZE;
@@ -65,7 +68,9 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailWithSizeLargerThanMetaPa
 
     // Then: Allocation should be failed
     uint64_t allocatedOffset = 0;
-    EXPECT_TRUE(status.TryToAllocate(logSize, allocatedOffset) == false);
+
+    int expectReturnCode =  -1 * (int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED;
+    EXPECT_TRUE(status.TryToAllocate(logSize, allocatedOffset) == expectReturnCode);
 }
 
 TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailsWhenFull)
@@ -82,13 +87,15 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailsWhenFull)
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
         uint64_t offset = 0;
-        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
     }
 
     // When: Try to allocate one more log
     // Then: Allocation should be failed
     uint64_t offset = 0;
-    EXPECT_TRUE(status.TryToAllocate(logSize, offset) == false);
+    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 }
 
 TEST(LogGroupBufferStatus, LogFilled_testIfLogFilled)
@@ -104,7 +111,8 @@ TEST(LogGroupBufferStatus, LogFilled_testIfLogFilled)
     for (int testCount = 0; testCount < numLogsToTest; testCount++)
     {
         uint64_t offset = 0;
-        EXPECT_EQ(status.TryToAllocate(logSize, offset), true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
     }
     for (int testCount = 0; testCount < numLogsToTest; testCount++)
     {
@@ -131,7 +139,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullSuccess)
 
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
-        EXPECT_EQ(status.TryToAllocate(logSize, offset), true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
     }
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
@@ -139,7 +148,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullSuccess)
     }
 
     // When: One more log try to allocate buffer, but fails
-    EXPECT_EQ(status.TryToAllocate(logSize, offset), false);
+    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should be succeed
     EXPECT_EQ(status.TryToSetFull(), true);
@@ -160,7 +170,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotFullyFilled)
 
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
-        EXPECT_EQ(status.TryToAllocate(logSize, offset), true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
     }
     for (int testCount = 0; testCount < numTestsToMakeBufferFull - 1; testCount++)
     {
@@ -168,7 +179,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotFullyFilled)
     }
 
     // When: One more buffer allocation requested, and found there's no more space
-    EXPECT_EQ(status.TryToAllocate(logSize, offset), false);
+    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should not be succeed
     EXPECT_EQ(status.TryToSetFull(), false);
@@ -194,7 +206,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotWaitingToBeFille
     uint64_t offset = 0;
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
-        EXPECT_EQ(status.TryToAllocate(logSize, offset), true);
+        int expectReturnCode = 0;
+        EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
     }
     for (int testCount = 0; testCount < numTestsToMakeBufferFull; testCount++)
     {
@@ -205,7 +218,8 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotWaitingToBeFille
     EXPECT_EQ(status.TryToSetFull(), false);
 
     // When: One more buffer allocation requested, and found there's no more space
-    EXPECT_EQ(status.TryToAllocate(logSize, offset), false);
+    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should be succeed
     EXPECT_EQ(status.TryToSetFull(), true);

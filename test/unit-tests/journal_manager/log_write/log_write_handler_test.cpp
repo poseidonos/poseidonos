@@ -118,7 +118,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveRetur
 
     // When: Waiting list is empty and buffer allocation does not succeed
     EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
-    EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(1));
+    EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL));
 
     // When: Log is added
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
@@ -134,9 +134,9 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeRetur
 
     // When: Waiting list is empty, log is added and buffer allocation fails and
     EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
-    EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(-1));
+    EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(-1 * (int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED));
 
-    // Then: Add log should be failed
+    // Then: Add log should be failed with error code
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
     EXPECT_TRUE(logWriteHandler->AddLog(context) < 0);
 

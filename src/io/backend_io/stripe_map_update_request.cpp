@@ -131,7 +131,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
     }
 
     int result = iMetaUpdater->UpdateStripeMap(stripe, completionEvent);
-    if (unlikely(0 != result))
+    if (unlikely(result > 0))
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED;

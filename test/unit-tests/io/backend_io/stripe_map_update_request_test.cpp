@@ -153,7 +153,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
         &mockMetaUpdater, &mockEventScheduler, event, 0);
-    bool actual, expected{false};
+    bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
     StripeAddr stripeAddr;

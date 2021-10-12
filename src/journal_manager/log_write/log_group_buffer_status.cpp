@@ -66,16 +66,16 @@ LogGroupBufferStatus::SetActive(uint64_t inputSeqNum)
     _SetStatus(LogGroupStatus::ACTIVE);
 }
 
-bool
+int
 LogGroupBufferStatus::TryToAllocate(uint32_t logSize, uint64_t& offset)
 {
-    bool isAllocated = false;
+    int result = 0;
 
     if (logSize > metaPageSize)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED,
             "Requested log size is bigger than meta page");
-        return false;
+        return -1 * (int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED;
     }
 
     uint64_t currentMetaPage = _GetMetaPageNumber(nextOffset);
@@ -85,17 +85,16 @@ LogGroupBufferStatus::TryToAllocate(uint32_t logSize, uint64_t& offset)
     {
         nextOffset = endMetaPage * metaPageSize;
     }
-    isAllocated = _AllocateIfNotFull(logSize, offset);
-
-    if (isAllocated == false)
+    result = _AllocateIfNotFull(logSize, offset);
+    if (result != 0)
     {
         waitingToBeFilled = true;
     }
 
-    return isAllocated;
+    return result;
 }
 
-bool
+int
 LogGroupBufferStatus::_AllocateIfNotFull(uint32_t logSize, uint64_t& offset)
 {
     if (nextOffset + logSize <= maxOffset)
@@ -104,11 +103,11 @@ LogGroupBufferStatus::_AllocateIfNotFull(uint32_t logSize, uint64_t& offset)
         nextOffset += logSize;
         numLogsAdded++;
 
-        return true;
+        return 0;
     }
     else
     {
-        return false;
+        return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
     }
 }
 

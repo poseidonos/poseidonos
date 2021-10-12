@@ -58,7 +58,7 @@ public:
 
     void SetActive(uint64_t inputSeqNum);
 
-    bool TryToAllocate(uint32_t logSize, uint64_t& offset);
+    int TryToAllocate(uint32_t logSize, uint64_t& offset);
     virtual bool TryToSetFull(void);
 
     virtual void LogFilled(void);
@@ -105,7 +105,7 @@ private:
         return offset / metaPageSize;
     }
 
-    bool _AllocateIfNotFull(uint32_t logSize, uint64_t& offset);
+    int _AllocateIfNotFull(uint32_t logSize, uint64_t& offset);
 
     void _SetStatus(LogGroupStatus toStatus);
 

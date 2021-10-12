@@ -50,7 +50,7 @@ TEST(MssUtils, CheckFileExists_testIfFileExists)
 {
     std::string path = "./testfile";
 
-    int fd = open(path.c_str(), O_RDWR | O_CREAT);
+    int fd = open(path.c_str(), O_RDWR | O_CREAT, 0644);
 
     EXPECT_NE(fd, -1);
 
@@ -74,7 +74,7 @@ TEST(MssUtils, DeleteFile_testIfFileExists)
 {
     std::string path = "./testfile";
 
-    int fd = open(path.c_str(), O_RDWR | O_CREAT);
+    int fd = open(path.c_str(), O_RDWR | O_CREAT, 0644);
 
     EXPECT_NE(fd, -1);
 

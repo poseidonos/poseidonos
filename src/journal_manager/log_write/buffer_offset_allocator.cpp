@@ -130,24 +130,27 @@ BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffse
     }
 
     uint64_t offset = 0;
-    if (statusList[currentLogGroupId]->TryToAllocate(logSize, offset) == false)
+    int result = 0;
+    result = statusList[currentLogGroupId]->TryToAllocate(logSize, offset);
+    if (result > 0)
     {
         _TryToSetFull(currentLogGroupId);
-        int result = _GetNewActiveGroup();
+        result = _GetNewActiveGroup();
         if (result != 0)
         {
             return result;
         }
 
-        if (statusList[currentLogGroupId]->TryToAllocate(logSize, offset) == false)
+        result = statusList[currentLogGroupId]->TryToAllocate(logSize, offset);
+        if (result != 0)
         {
-            return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+            return result;
         }
     }
 
     allocatedOffset = offset;
 
-    return 0;
+    return result;
 }
 
 int
