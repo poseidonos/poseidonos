@@ -13,7 +13,7 @@ do
     nvme smart-log $1 -n 1 -o json > $outputFilePath
     res=$(python $scriptFilePath $fieldType $outputFilePath)
     if [ ${res} -eq 0 ]; then
-        failedSmartLogCount=$(failedSmartLogCount+1)
+        failedSmartLogCount=$((failedSmartLogCount+1))
     fi
 
 done

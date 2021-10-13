@@ -405,7 +405,7 @@ enable_smartlog()
 {
     texecc cp $CONFIG_FILE $ORIG_CONFIG_FILE
     echo " Enabling smart command handling in POS"
-    texecc -s eval "jq -r 'admin.smart_log_page |= true' $CONFIG_FILE > /tmp/temp.json && mv /tmp/temp.json $CONFIG_FILE"
+    texecc -s eval "jq -r '.admin.smart_log_page |= true' $CONFIG_FILE > /tmp/temp.json && mv /tmp/temp.json $CONFIG_FILE"
 }
 
 #****************************************************************************************
