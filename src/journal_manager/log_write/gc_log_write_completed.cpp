@@ -52,11 +52,7 @@ GcLogWriteCompleted::Execute(void)
     uint64_t result = numCompletedLogs.fetch_add(1) + 1;
     if (result == numLogs)
     {
-        int result = callbackFunc(context);
-        if (result != 0)
-        {
-            // TODO (huijeong.kim) to handle error case
-        }
+        callbackFunc(context);
     }
     return true;
 }

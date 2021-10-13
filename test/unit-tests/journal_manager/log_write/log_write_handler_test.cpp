@@ -95,7 +95,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogWritten)
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Waiting list is empty and buffer allocation succeeds
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
 
     // Then: Log should be successfully requested to be written to log buffer
@@ -117,7 +117,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveRetur
     EXPECT_CALL(*waitingList, AddToList);
 
     // When: Waiting list is empty and buffer allocation does not succeed
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(1));
 
     // When: Log is added
@@ -133,7 +133,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeRetur
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Waiting list is empty, log is added and buffer allocation fails and
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(-1));
 
     // Then: Add log should be failed
@@ -149,10 +149,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogPendedWhenWaitingListNotEmpty
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Waiting log list is not empty
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(false));
-
-    // Then: Log should be added to the waiting list
-    EXPECT_CALL(*waitingList, AddToList);
+    EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(true));
 
     // When: Log should be added
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
@@ -167,7 +164,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfContextCleanedUpWhenWriteLogFail
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Waiting list is empty, buffer allocation succeed, and write log fails
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, AddToListIfNotEmpty).WillOnce(Return(false));
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
     EXPECT_CALL(*logBuffer, WriteLog).WillOnce(Return(-1));
 

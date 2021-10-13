@@ -88,15 +88,17 @@ int
 LogWriteHandler::AddLog(LogWriteContext* context)
 {
     int ret = 0;
-    if (waitingList->IsEmpty() == false)
-    {
-        waitingList->AddToList(context);
-    }
-    else
+    if (waitingList->AddToListIfNotEmpty(context) == false)
     {
         ret = _AddLogInternal(context);
     }
     return ret;
+}
+
+void
+LogWriteHandler::AddLogToWaitingList(LogWriteContext* context)
+{
+    waitingList->AddToList(context);
 }
 
 int

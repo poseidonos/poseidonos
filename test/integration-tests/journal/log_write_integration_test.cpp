@@ -104,6 +104,32 @@ TEST_F(LogWriteIntegrationTest, WriteLog_GcStripe)
     writeTester->CompareLogs();
 }
 
+TEST_F(LogWriteIntegrationTest, DISABLED_WriteLog_GcStripes)
+{
+    POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::WriteLog_GcStripe");
+    JournalConfigurationBuilder builder(testInfo);
+    builder.SetJournalEnable(true)
+        ->SetLogBufferSize(4160 * 2);
+    testInfo->numBlksPerStripe *= 2;
+    InitializeJournal(builder.Build());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+        FlushContexts)
+        .Times(AtLeast(1));
+
+    int volumeId = testInfo->defaultTestVol;
+    StripeId vsid = 200;
+    StripeId wbLsid = 3;
+    StripeId userLsid = 200;
+
+    bool writeSuccessful = writeTester->WriteGcStripeLog(volumeId, vsid, wbLsid, userLsid);
+    EXPECT_TRUE(writeSuccessful == true);
+    writeTester->WaitForAllLogWriteDone();
+
+    EXPECT_EQ(journal->GetNumLogsAdded(), 3);
+    // TODO (cheolho.kang): Fix wait issue
+    WaitForAllCheckpointDone();
+}
+
 TEST_F(LogWriteIntegrationTest, WriteLogs)
 {
     POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::WriteLogs");

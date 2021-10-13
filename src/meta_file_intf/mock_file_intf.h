@@ -43,10 +43,7 @@ namespace pos
 class MockFileIntf : public MetaFileIntf
 {
 public:
-    explicit MockFileIntf(std::string fname, int arrayId, StorageOpt storageOpt = StorageOpt::DEFAULT)
-    : MetaFileIntf(fname, arrayId)
-    {
-    }
+    using MetaFileIntf::MetaFileIntf;
     virtual ~MockFileIntf(void) = default;
 
     virtual int Create(uint64_t fileSize) override;

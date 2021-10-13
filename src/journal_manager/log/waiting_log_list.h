@@ -48,7 +48,7 @@ public:
     virtual void AddToList(LogWriteContext* context);
     virtual LogWriteContext* GetWaitingIo(void);
 
-    virtual bool IsEmpty(void);
+    virtual bool AddToListIfNotEmpty(LogWriteContext* context);
 
 private:
     std::mutex waitingListLock;

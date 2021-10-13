@@ -43,10 +43,16 @@ WaitingLogList::~WaitingLogList(void)
 }
 
 bool
-WaitingLogList::IsEmpty(void)
+WaitingLogList::AddToListIfNotEmpty(LogWriteContext* context)
 {
     std::unique_lock<std::mutex> lock(waitingListLock);
-    return (waitingList.size() == 0);
+    if (waitingList.size() != 0)
+    {
+        waitingList.push_back(context);
+        return true;
+    }
+
+    return false;
 }
 
 void

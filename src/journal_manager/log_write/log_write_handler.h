@@ -58,6 +58,7 @@ public:
     virtual void Dispose(void);
 
     virtual int AddLog(LogWriteContext* context);
+    virtual void AddLogToWaitingList(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;

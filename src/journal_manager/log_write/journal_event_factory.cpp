@@ -42,7 +42,7 @@ namespace pos
 void
 JournalEventFactory::Init(LogWriteHandler* logWriteHandler)
 {
-    gcCallbackFunc = std::bind(&LogWriteHandler::AddLog, logWriteHandler, std::placeholders::_1);
+    gcCallbackFunc = std::bind(&LogWriteHandler::AddLogToWaitingList, logWriteHandler, std::placeholders::_1);
 }
 
 EventSmartPtr

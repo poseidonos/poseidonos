@@ -43,7 +43,7 @@ namespace pos
 {
 class LogWriteContext;
 
-using GcLogWriteCallback = std::function<int(LogWriteContext*)>;
+using GcLogWriteCallback = std::function<void(LogWriteContext*)>;
 
 class GcLogWriteCompleted : public Event
 {

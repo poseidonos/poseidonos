@@ -106,7 +106,11 @@ protected:
     _TriggerCheckpoint(void) override
     {
         EventSmartPtr event = _CreateCheckpointSubmissionEvent();
+
         event->Execute();
+        // TODO (cheolho.kang): need to change to execute from other thread
+        // std::thread eventExecution(&Event::Execute, event);
+        // eventExecution.detach();
     }
 };
 } // namespace pos

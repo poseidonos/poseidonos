@@ -14,7 +14,7 @@ public:
     using WaitingLogList::WaitingLogList;
     MOCK_METHOD(void, AddToList, (LogWriteContext * context), (override));
     MOCK_METHOD(LogWriteContext*, GetWaitingIo, (), (override));
-    MOCK_METHOD(bool, IsEmpty, (), (override));
+    MOCK_METHOD(bool, AddToListIfNotEmpty, (LogWriteContext * context), (override));
 };
 
 } // namespace pos

@@ -83,8 +83,15 @@ MockFileIntf::_MockAsyncIo(AsyncMetaFileIoCtx* ctx)
     }
     else if (ctx->opcode == MetaFsIoOpcode::Write)
     {
-        std::thread asyncIo(&MockFileIntf::_MockAsyncWrite, this, ctx);
-        asyncIo.detach();
+        if (storage == StorageOpt::NVRAM)
+        {
+            _MockAsyncWrite(ctx);
+        }
+        else
+        {
+            std::thread asyncIo(&MockFileIntf::_MockAsyncWrite, this, ctx);
+            asyncIo.detach();
+        }
     }
 }
 
