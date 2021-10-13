@@ -504,7 +504,6 @@ Mapper::_Dispose(void)
 bool
 Mapper::_LoadVolumeMeta(int volId, bool delVol)
 {
-    assert(volState[volId].GetSize() >= 0);
     VolState state = volState[volId].GetState();
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] volume:{} array:{}, state:{}", volId, addrInfo->GetArrayName(), state);
     if ((VolState::VOLUME_DELETING == state) || (VolState::NOT_EXIST == state))

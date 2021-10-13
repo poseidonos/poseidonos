@@ -380,7 +380,7 @@ ThrottlingPolicyDeficit::_CalculateDeficit(int64_t& bwCorrection, int64_t& iopsC
                 uint64_t avgBw = volParam.GetAvgBandwidth();
                 uint64_t minBandwidth = volumeUserPolicy->GetMinBandwidth();
 
-                if (minBandwidth - avgBw < 0)
+                if (avgBw > minBandwidth)   // Coverity Fix
                 {
                     continue;
                 }

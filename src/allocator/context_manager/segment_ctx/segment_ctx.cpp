@@ -74,6 +74,7 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     {
         ctxHeader.sig = SIG_SEGMENT_CTX;
         ctxHeader.ctxVersion = 0;
+        ctxHeader.numValidSegment = 0;
     }
 }
 
