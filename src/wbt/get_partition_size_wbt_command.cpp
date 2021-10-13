@@ -40,7 +40,7 @@
 namespace pos
 {
 GetPartitionSizeWbtCommand::GetPartitionSizeWbtCommand(void)
-: WbtCommand(GET_SEGMENT_INFO, "get_segment_info")
+: WbtCommand(GET_PARTITION_SIZE, "get_partition_size")
 {
 }
 
@@ -52,9 +52,9 @@ int
 GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
     string arrayName;
-    if (argv.contains("name"))
+    if (argv.contains("array"))
     {
-        arrayName = argv["name"].get<std::string>();
+        arrayName = argv["array"].get<std::string>();
     }
     else
     {

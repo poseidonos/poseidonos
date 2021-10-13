@@ -59,7 +59,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
 
-    if (!argv.contains("dev") || !argv.contains("lba") || !argv.contains("name"))
+    if (!argv.contains("dev") || !argv.contains("lba") || !argv.contains("array"))
     {
         out << "invalid parameter" << endl;
         out.close();
@@ -68,7 +68,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     string devName = argv["dev"].get<std::string>();
     uint64_t lba = atoi(argv["lba"].get<std::string>().c_str());
-    string arrayName = argv["name"].get<std::string>();
+    string arrayName = argv["array"].get<std::string>();
 
 
     ArrayComponents* compo = ArrayManagerSingleton::Instance()->_FindArray(arrayName);

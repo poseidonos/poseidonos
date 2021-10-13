@@ -469,6 +469,42 @@ echo --------------------------------------------------------------------
 echo ------- [WBT list] -------------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt list_wbt --json-res > ${cliOutput}
 check_result
+echo --------------------------------------------------------------------
+
+echo ------------[GC WBT CMDs]------------------------------------------
+echo -[gc : set_gc_threshold ]------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt set_gc_threshold --array $ARRAYNAME --normal 10 --urgent 3 --json-res > ${cliOutput}
+check_result
+
+echo -[gc : get_gc_threshold ]------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt get_gc_threshold --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+
+echo -[gc : get_gc_status ]---------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt get_gc_status --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+echo --------------------------------------------------------------------
+
+
+echo ------------[Array WBT CMDs]-------------------------------------------
+
+echo -[array : translate_device_lba ]-----------------------------------------
+${BIN_DIR}/poseidonos-cli wbt translate_device_lba --array $ARRAYNAME --lsid 0 --offset 10 --json-res > ${cliOutput}
+check_result
+
+echo -[array : dump_disk_layout ]-----------------------------------------
+${BIN_DIR}/poseidonos-cli wbt dump_disk_layout --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+
+echo -[array : parity_location ]-----------------------------------------
+${BIN_DIR}/poseidonos-cli wbt parity_location --array $ARRAYNAME --dev unvme-ns-1 --lba 1572864 --json-res > ${cliOutput}
+check_result
+
+echo -[array : get_partition_size ]-----------------------------------------
+${BIN_DIR}/poseidonos-cli wbt get_partition_size --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+
+echo --------------------------------------------------------------------
 
 ${BIN_DIR}/poseidonos-cli wbt flush_gcov
 

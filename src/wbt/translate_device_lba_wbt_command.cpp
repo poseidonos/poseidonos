@@ -63,16 +63,16 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     string arrayName;
     unsigned int arrayIndex;
 
-    if (!argv.contains("lsid") || !argv.contains("offset") || !argv.contains("name"))
+    if (!argv.contains("lsid") || !argv.contains("offset") || !argv.contains("array"))
     {
         out << "invalid parameter" << endl;
         out.close();
         return 0;
     }
 
-    if (argv.contains("name"))
+    if (argv.contains("array"))
     {
-        arrayName = argv["name"].get<std::string>();
+        arrayName = argv["array"].get<std::string>();
         arrayIndex = ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex();
     }
     else

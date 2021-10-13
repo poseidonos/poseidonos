@@ -60,13 +60,13 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
 
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    if (!argv.contains("name"))
+    if (!argv.contains("array"))
     {
         out << "invalid parameter" << endl;
         out.close();
         return -1;
     }
-    string arrayName = argv["name"].get<std::string>();
+    string arrayName = argv["array"].get<std::string>();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (nullptr == info)

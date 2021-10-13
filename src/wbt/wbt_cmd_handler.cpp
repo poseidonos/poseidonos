@@ -197,7 +197,7 @@ WbtCmdHandler::operator()(Args argv, JsonElement& elem)
         std::string coutfile = "output.txt";
         std::ofstream out(coutfile.c_str(), std::ofstream::app);
         out << std::endl
-            << "[Info] " << wbtCommand->GetCommandName() << std::endl;
+            << "[Info] " << wbtCommand->GetOpcode() << "_" << wbtCommand->GetCommandName() << std::endl;
         out.close();
 
         res = wbtCommand->Execute(argv, elem);
