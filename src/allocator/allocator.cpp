@@ -150,6 +150,9 @@ Allocator::Shutdown(void)
         _UnregisterFromAllocatorService();
         isInitialized = false;
     }
+    wbStripeManager->FlushAllActiveStripes();
+    wbStripeManager->Dispose();
+
     _UnregisterFromAllocatorService();
     isInitialized = false;
 }
