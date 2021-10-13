@@ -154,7 +154,7 @@ def wbt_request(event_name, argument):
 
 def stop_rebuilding(array):
     param_str = "--array-name " + array
-    return send_request("internal stop_rebuilding " + param_str)
+    return send_request("devel stop-rebuilding " + param_str)
 
 
 def create_uram(devname, block_size, num_blocks, numa=0):
