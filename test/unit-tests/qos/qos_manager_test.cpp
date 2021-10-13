@@ -4,8 +4,15 @@
 
 namespace pos
 {
-TEST(QosManager, QosManager_)
+TEST(QosManager, QosManager_Constructor_One_Stack)
 {
+    QosManager qosManager();
+}
+
+TEST(QosManager, QosManager_Constructor_One_Heap)
+{
+    QosManager* qosManager = new QosManager();
+    delete qosManager;
 }
 
 TEST(QosManager, Initialize_)
@@ -389,10 +396,6 @@ TEST(QosSpdkManager, GetReactorId_)
 }
 
 TEST(QosSpdkManager, SetReactorId_)
-{
-}
-
-TEST(QosSpdkManager, _SetupQosReactorPoller_)
 {
 }
 
