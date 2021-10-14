@@ -100,8 +100,12 @@ UNVMfSubmitHandler(struct pos_io* io)
                 break;
             }
             case IO_TYPE::FLUSH:
-                break;
-
+            {
+                AIO aio;
+                aio.SubmitAsyncIO(*io);
+                return POS_IO_STATUS_SUCCESS;
+            }
+            break;
             default:
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
