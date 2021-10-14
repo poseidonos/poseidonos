@@ -108,7 +108,7 @@ CreateArrayCmd = "create" , ( "--array-name" | "-a" ) ,
   RaidType ] ;
 
 AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
-  ArrayName , ( "--num-buffer" | "-b" ) , Number ,
+  ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
   [ "--raid" , RaidType ] ;
 
@@ -274,7 +274,7 @@ DevelCmd = "devel" ,
 
 ResetMbrCmd = "resetmbr" ;
 
-StopRebuildingCmd = "stop-rebuilding" ;
+StopRebuildingCmd = "stop-rebuilding" , ( "--array-name" | "-a" ) , ArrayName ;
 
 UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
   ( "flush"

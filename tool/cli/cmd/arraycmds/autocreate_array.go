@@ -22,11 +22,11 @@ which devices are included to the array. This command will automatically
 create an array with the devices in the same NUMA.
 
 Syntax: 
-	AutoCreateArrayCmd = "autocreate" ("--array-name" | "-a") ArrayName ("--num-buffer" | "-b") Number 
-	("--num-data-devs" | "-d") Number [("--num-spare" | "-s") Number] ["--raid" RaidType] .
+	poseidonos-cli array autocreate (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
+	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType] .
 
 Example: 
-	poseidonos-cli array autocreate --array-name Array0 --buffer device0 --num-data-devs 3 --num-spare 1
+	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {

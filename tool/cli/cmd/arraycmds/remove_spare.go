@@ -22,7 +22,7 @@ Syntax:
 	poseidonos-cli array rmspare (--spare | -s) DeviceName (--array-name | -a) ArrayName
 
 Example: 
-	poseidonos-cli array rmspare --spare SpareDeviceName --array-name Array0
+	poseidonos-cli array rmspare --spare DeviceName --array-name Array0
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

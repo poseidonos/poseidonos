@@ -20,7 +20,7 @@ var StopRebuildingCmd = &cobra.Command{
 Stop rebuilding.
 
 Syntax:
-	poseidonos-cli devel stop-rebuilding .
+	poseidonos-cli devel stop-rebuilding ( --array-name | -a ) ArrayName .
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -66,6 +66,6 @@ var stop_rebuilding_arrayName = ""
 
 func init() {
 	StopRebuildingCmd.Flags().StringVarP(&stop_rebuilding_arrayName,
-		"array-name", "", "", "Array name.")
+		"array-name", "a", "", "Array name.")
 	StopRebuildingCmd.MarkFlagRequired("array-name")
 }
