@@ -806,7 +806,7 @@ change_volume_name_and_check()
 
     print_info "change volume name [vol name: ${volName} to ${newVolName}]"
 
-    texecc ./bin/poseidonos-cli volume rename -v ${volName} --newname ${newVolName} -a POSArray --json-res > change_volume_name_and_check.txt
+    texecc ./bin/poseidonos-cli volume rename -v ${volName} -n ${newVolName} -a POSArray --json-res > change_volume_name_and_check.txt
     iexecc cat change_volume_name_and_check.txt | jq '.Response.result.status.code' > result.txt
     result=$(<result.txt)
 
