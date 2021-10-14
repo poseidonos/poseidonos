@@ -85,12 +85,13 @@ enum CallbackType
 class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>
 {
 public:
-    Callback(bool isFrontEnd, CallbackType type = CallbackType_Unknown, uint32_t weight = 1);
-    ~Callback(void) override;
+    Callback(bool isFrontEnd, CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
+        SystemTimeoutChecker* timeoutChecker = nullptr);
+    virtual ~Callback(void);
 
     bool Execute(void) final;
     void SetWaitingCount(uint32_t inputWaitingCount);
-    void SetCallee(CallbackSmartPtr callee);
+    virtual void SetCallee(CallbackSmartPtr callee);
     void InformError(IOErrorType inputIOErrorType);
 
 protected:
@@ -98,8 +99,6 @@ protected:
     IOErrorType _GetMostCriticalError(void);
 
 private:
-    bool _IsInvalidCallee(CallbackSmartPtr inputCallee);
-    bool _IsCalleeSet(void);
     virtual bool _DoSpecificJob(void) = 0;
     // If Every Callback of a callee is called
     // there can be some neccesity to prepare or finalization of current callback's context.

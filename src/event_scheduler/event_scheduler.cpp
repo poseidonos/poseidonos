@@ -33,6 +33,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 
 #include <assert.h>
+#include <stdexcept>
 #include <unistd.h>
 
 #include "src/cpu_affinity/affinity_manager.h"
@@ -49,17 +50,32 @@
 
 namespace pos
 {
-EventScheduler::EventScheduler(QosManager* qosManager_)
+EventScheduler::EventScheduler(QosManager* qosManagerArg,
+    ConfigManager* configManagerArg,
+    AffinityManager* affinityManagerArg)
 : policy(nullptr),
   exit(false),
   workerCount(UINT32_MAX),
   schedulerThread(nullptr),
   numaDedicatedSchedulingPolicy(false),
-  qosManager(qosManager_)
+  qosManager(qosManagerArg),
+  configManager(configManagerArg),
+  affinityManager(affinityManagerArg)
 {
     CPU_ZERO(&schedulerCPUSet);
     bool enable = false;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("event_scheduler",
+
+    if (nullptr == affinityManager)
+    {
+        affinityManager = AffinityManagerSingleton::Instance();
+    }
+
+    if (nullptr == configManager)
+    {
+        configManager = ConfigManagerSingleton::Instance();
+    }
+
+    int ret = configManager->GetValue("event_scheduler",
         "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
     if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
@@ -71,10 +87,9 @@ EventScheduler::EventScheduler(QosManager* qosManager_)
         qosManager = QosManagerSingleton::Instance();
     }
 
-    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-         event++)
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
-        eventQueue[event] = new SchedulerQueue{qosManager};
+        eventQueue[event] = new SchedulerQueue {qosManager};
         queueOccupied[event] = false;
     }
     for (uint32_t numa = 0; numa < MAX_NUMA; numa++)
@@ -83,6 +98,59 @@ EventScheduler::EventScheduler(QosManager* qosManager_)
     }
     totalWorkerIDVector.clear();
     cyclesElapsed = 0;
+}
+
+EventScheduler::~EventScheduler(void)
+{
+    exit = true;
+    if (nullptr != schedulerThread)
+    {
+        schedulerThread->join();
+    }
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
+    {
+        delete eventQueue[event];
+    }
+    if (nullptr != schedulerThread)
+    {
+        delete schedulerThread;
+    }
+    for (auto eventWorker : workerArray)
+    {
+        delete eventWorker;
+    }
+
+    if (nullptr != policy)
+    {
+        delete policy;
+    }
+}
+
+void
+EventScheduler::Initialize(uint32_t workerCountInput,
+    cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
+{
+    policy = new MinimumJobPolicy(workerCountInput);
+    workerCount = workerCountInput;
+    workerArray.resize(workerCountInput);
+    schedulerCPUSet = schedulerCPUInput;
+
+    try
+    {
+        _BuildCpuSet(eventCPUSetInput);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return;
+    }
+
+    for (unsigned int workerID = 0; workerID < workerCount; workerID++)
+    {
+        workerArray[workerID] =
+            new EventWorker(cpuSetVector.at(workerID), this, workerID);
+    }
+    schedulerThread = new std::thread(&EventScheduler::Run, this);
 }
 
 uint32_t
@@ -113,251 +181,6 @@ EventScheduler::GetWorkerIDMinimumJobs(uint32_t numa)
     return minimumWorkerID;
 }
 
-void
-EventScheduler::Initialize(uint32_t workerCountInput,
-    cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
-{
-    policy = new MinimumJobPolicy(workerCountInput);
-    workerCount = workerCountInput;
-    workerArray.resize(workerCountInput);
-    schedulerCPUSet = schedulerCPUInput;
-    _BuildCpuSet(eventCPUSetInput);
-
-    for (unsigned int workerID = 0; workerID < workerCount; workerID++)
-    {
-        workerArray[workerID] =
-            new EventWorker(cpuSetVector.at(workerID), this, workerID);
-    }
-    schedulerThread = new std::thread(&EventScheduler::Run, this);
-}
-
-EventScheduler::~EventScheduler(void)
-{
-    exit = true;
-    if (nullptr != schedulerThread)
-    {
-        schedulerThread->join();
-    }
-    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-         event++)
-    {
-        delete eventQueue[event];
-    }
-    if (nullptr != schedulerThread)
-    {
-        delete schedulerThread;
-    }
-    for (auto eventWorker : workerArray)
-    {
-        delete eventWorker;
-    }
-
-    if (nullptr != policy)
-    {
-        delete policy;
-    }
-}
-
-void
-EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
-{
-    uint32_t totalCore = AffinityManagerSingleton::Instance()->GetTotalCore();
-
-    uint32_t cpuIndex = 0;
-    for (unsigned int workerID = 0; workerID < workerCount; workerID++)
-    {
-        while (!CPU_ISSET(cpuIndex, &cpuSet))
-        {
-            cpuIndex++;
-            if (unlikely(cpuIndex >= totalCore))
-            {
-                POS_EVENT_ID eventId =
-                    POS_EVENT_ID::EVENTSCHEDULER_NOT_MATCH_WORKER_COUNT;
-                POS_TRACE_ERROR(static_cast<int>(eventId),
-                    PosEventId::GetString(eventId));
-                assert(0);
-            }
-        }
-
-        cpu_set_t tempCpuSet;
-        CPU_ZERO(&tempCpuSet);
-        CPU_SET(cpuIndex, &tempCpuSet);
-        cpuSetVector.push_back(tempCpuSet);
-
-        uint32_t numa = AffinityManagerSingleton::Instance()->GetNumaIdFromCoreId(cpuIndex);
-        workerIDPerNumaVector[numa].push_back(workerID);
-        totalWorkerIDVector.push_back(workerID);
-
-        cpuIndex = cpuIndex + 1;
-    }
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Check Contention between frontend IO and backend events
-
-    //  contention is between backend and frontend.
-    //  two backend events with no frontend are not contentions.
-    //  to be changed when weight application happens on all backend events.
-*/
-/* --------------------------------------------------------------------------*/
-bool
-EventScheduler::_CheckContention(void)
-{
-    bool frontendQueueOccupied = false;
-    bool backendQueueOccupied = false;
-    bool contention = false;
-
-    for (uint32_t eventType = BackendEvent_Start; (BackendEvent)eventType < BackendEvent_Count; eventType++)
-    {
-        if (eventType == BackendEvent_FrontendIO)
-        {
-            frontendQueueOccupied = _GetQueueOccupancy(BackendEvent_FrontendIO);
-        }
-        else
-        {
-            // if any of the backendQueus is occupied
-            backendQueueOccupied = backendQueueOccupied || _GetQueueOccupancy((BackendEvent)eventType);
-        }
-    }
-    contention = frontendQueueOccupied && backendQueueOccupied;
-    return contention;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Gets the queue status
- */
-/* --------------------------------------------------------------------------*/
-bool
-EventScheduler::_GetQueueOccupancy(BackendEvent eventId)
-{
-    return queueOccupied[eventId];
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Sets the queue status
- */
-/* --------------------------------------------------------------------------*/
-void
-EventScheduler::_CheckAndSetQueueOccupancy(BackendEvent eventId)
-{
-    if (eventQueue[eventId]->GetQueueSize() == 0)
-        queueOccupied[eventId] = false;
-    else
-        queueOccupied[eventId] = true;
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis checks for no contention Period
- */
-/* --------------------------------------------------------------------------*/
-bool
-EventScheduler::_NoContentionCycleDone(uint32_t cycles)
-{
-    bool cycleDone = false;
-
-    // Check how many cycles have passed with no contention;
-    if (cyclesElapsed / cycles >= 1)
-    {
-        cycleDone = true;
-    }
-
-    return cycleDone;
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis checks for no contention Period
-   if cycles have completed, keep it at that stage till contention happens.
-   then it will be refreshed and cycle count will restart
-*/
-/* --------------------------------------------------------------------------*/
-void
-EventScheduler::_IncrementCycles(void)
-{
-    cyclesElapsed++;
-    uint32_t cycles = qosManager->GetNoContentionCycles();
-    if (cyclesElapsed / cycles >= 1)
-    {
-        cyclesElapsed = cycles;
-    }
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Gets the event weight according to contention conditions
-   N consecutive cycles are checked for no contention
-   then only default weight is applied.
- */
-/* --------------------------------------------------------------------------*/
-int32_t
-EventScheduler::_GetEventWeight(BackendEvent eventId)
-{
-    int32_t eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
-
-    if (_CheckContention() == true)
-    {
-        eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
-        cyclesElapsed = 0;
-    }
-    else
-    {
-        uint32_t noContentionCycles = qosManager->GetNoContentionCycles();
-        if (_NoContentionCycleDone(noContentionCycles) == true)
-        {
-            eventWeight = qosManager->GetDefaultEventWeightWRR((BackendEvent)eventId);
-        }
-    }
-    return eventWeight;
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Big loop of EvntScheduler
- *           Get worker ID from policy and event form EventQueue
- *           Pass event pointer to event worker
- */
-/* --------------------------------------------------------------------------*/
-void
-EventScheduler::Run(void)
-{
-    pthread_setname_np(pthread_self(), "EventScheduler");
-    sched_setaffinity(0, sizeof(cpu_set_t), &schedulerCPUSet);
-
-    // Scheduler Big Loop
-    // Select thread according to SchedulerPolicy to execute event in Event Queue
-    while (false == exit)
-    {
-        std::queue<EventSmartPtr> eventList = DequeueEvents();
-        if (eventList.empty())
-        {
-            usleep(1);
-            continue;
-        }
-        uint32_t workerID = 0;
-        EventSmartPtr event = nullptr;
-        while (!eventList.empty())
-        {
-            event = eventList.front();
-            workerID = policy->GetProperWorkerID(event->GetNumaId());
-            if (unlikely(workerID >= workerCount))
-            {
-                PosEventId::Print(POS_EVENT_ID::EVTSCHDLR_INVALID_WORKER_ID,
-                    EventLevel::WARNING);
-                usleep(1); // Added sleep for event worker to be available
-                continue;
-            }
-            workerArray[workerID]->EnqueueEvent(event);
-            eventList.pop();
-        }
-    }
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Enqueue event for scheduling
- *           MPSC queue (Workers -> EventScheduler)
- *
- * @Param    input
- */
-/* --------------------------------------------------------------------------*/
 void
 EventScheduler::EnqueueEvent(EventSmartPtr input)
 {
@@ -392,9 +215,6 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
             case BackendEvent_FrontendIO:
                 eventQueue[BackendEvent_FrontendIO]->EnqueueEvent(input);
                 break;
-            case BackendEvent_Unknown:
-                eventQueue[BackendEvent_FrontendIO]->EnqueueEvent(input);
-                break;
             default:
                 assert(0);
                 break;
@@ -403,13 +223,6 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
     _CheckAndSetQueueOccupancy(input->GetEventType());
 }
 
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
 std::queue<EventSmartPtr>
 EventScheduler::DequeueEvents(void)
 {
@@ -474,5 +287,158 @@ EventScheduler::DequeueEvents(void)
     }
     _IncrementCycles();
     return eventList;
+}
+
+void
+EventScheduler::Run(void)
+{
+    pthread_setname_np(pthread_self(), "EventScheduler");
+    sched_setaffinity(0, sizeof(cpu_set_t), &schedulerCPUSet);
+
+    // Scheduler Big Loop
+    // Select thread according to SchedulerPolicy to execute event in Event Queue
+    while (false == exit)
+    {
+        std::queue<EventSmartPtr> eventList = DequeueEvents();
+        if (eventList.empty())
+        {
+            usleep(1);
+            continue;
+        }
+        uint32_t workerID = 0;
+        EventSmartPtr event = nullptr;
+        while (!eventList.empty())
+        {
+            event = eventList.front();
+            workerID = policy->GetProperWorkerID(event->GetNumaId());
+            if (unlikely(workerID >= workerCount))
+            {
+                PosEventId::Print(POS_EVENT_ID::EVTSCHDLR_INVALID_WORKER_ID,
+                    EventLevel::WARNING);
+                usleep(1); // Added sleep for event worker to be available
+                continue;
+            }
+            workerArray[workerID]->EnqueueEvent(event);
+            eventList.pop();
+        }
+    }
+}
+
+void
+EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
+{
+    uint32_t totalCore = affinityManager->GetTotalCore();
+
+    uint32_t cpuIndex = 0;
+    for (unsigned int workerID = 0; workerID < workerCount; workerID++)
+    {
+        while (!CPU_ISSET(cpuIndex, &cpuSet))
+        {
+            cpuIndex++;
+            if (unlikely(cpuIndex >= totalCore))
+            {
+                POS_EVENT_ID eventId =
+                    POS_EVENT_ID::EVENTSCHEDULER_NOT_MATCH_WORKER_COUNT;
+                POS_TRACE_ERROR(static_cast<int>(eventId),
+                    PosEventId::GetString(eventId));
+                throw std::runtime_error("cpuIndex is bigger than totalCore");
+            }
+        }
+
+        cpu_set_t tempCpuSet;
+        CPU_ZERO(&tempCpuSet);
+        CPU_SET(cpuIndex, &tempCpuSet);
+        cpuSetVector.push_back(tempCpuSet);
+
+        uint32_t numa = affinityManager->GetNumaIdFromCoreId(cpuIndex);
+        workerIDPerNumaVector[numa].push_back(workerID);
+        totalWorkerIDVector.push_back(workerID);
+
+        cpuIndex = cpuIndex + 1;
+    }
+}
+
+bool
+EventScheduler::_CheckContention(void)
+{
+    bool frontendQueueOccupied = false;
+    bool backendQueueOccupied = false;
+    bool contention = false;
+
+    for (uint32_t eventType = BackendEvent_Start; (BackendEvent)eventType < BackendEvent_Count; eventType++)
+    {
+        if (eventType == BackendEvent_FrontendIO)
+        {
+            frontendQueueOccupied = _GetQueueOccupancy(BackendEvent_FrontendIO);
+        }
+        else
+        {
+            // if any of the backendQueus is occupied
+            backendQueueOccupied = backendQueueOccupied || _GetQueueOccupancy((BackendEvent)eventType);
+        }
+    }
+    contention = frontendQueueOccupied && backendQueueOccupied;
+    return contention;
+}
+
+void
+EventScheduler::_CheckAndSetQueueOccupancy(BackendEvent eventId)
+{
+    if (eventQueue[eventId]->GetQueueSize() == 0)
+        queueOccupied[eventId] = false;
+    else
+        queueOccupied[eventId] = true;
+}
+
+bool
+EventScheduler::_GetQueueOccupancy(BackendEvent eventId)
+{
+    return queueOccupied[eventId];
+}
+
+bool
+EventScheduler::_NoContentionCycleDone(uint32_t cycles)
+{
+    bool cycleDone = false;
+
+    // Check how many cycles have passed with no contention;
+    if (cyclesElapsed / cycles >= 1)
+    {
+        cycleDone = true;
+    }
+
+    return cycleDone;
+}
+
+void
+EventScheduler::_IncrementCycles(void)
+{
+    cyclesElapsed++;
+    uint32_t cycles = qosManager->GetNoContentionCycles();
+    if (cyclesElapsed / cycles >= 1)
+    {
+        cyclesElapsed = cycles;
+    }
+}
+
+int32_t
+EventScheduler::_GetEventWeight(BackendEvent eventId)
+{
+    int32_t eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
+
+    if (_CheckContention() == true)
+    {
+        eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
+        cyclesElapsed = 0;
+    }
+    else
+    {
+        uint32_t noContentionCycles = qosManager->GetNoContentionCycles();
+        if (_NoContentionCycleDone(noContentionCycles) == true)
+        {
+            eventWeight = qosManager->GetDefaultEventWeightWRR((BackendEvent)eventId);
+        }
+    }
+    return eventWeight;
 }
 } // namespace pos

@@ -32,6 +32,8 @@
 
 #include "src/event_scheduler/io_completer.h"
 
+#include <stdexcept>
+
 #include "src/bio/ubio.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -45,9 +47,21 @@ namespace pos
 
 EventFactory* IoCompleter::recoveryEventFactory = nullptr;
 
-IoCompleter::IoCompleter(UbioSmartPtr ubio)
-: ubio(ubio)
+IoCompleter::IoCompleter(UbioSmartPtr ubio,
+    EventScheduler* eventSchedulerArg,
+    EventFrameworkApi* eventFrameworkApiArg)
+: ubio(ubio),
+  eventScheduler(eventSchedulerArg),
+  eventFrameworkApi(eventFrameworkApiArg)
 {
+    if (nullptr == eventScheduler)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
+    if (nullptr == eventFrameworkApi)
+    {
+        eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+    }
 }
 
 void
@@ -82,7 +96,6 @@ IoCompleter::CompleteUbio(IOErrorType errorType, bool executeCallback)
     CompleteUbioWithoutRecovery(errorType, executeCallback);
 }
 
-
 void
 IoCompleter::CompleteUbioWithoutRecovery(IOErrorType errorType, bool executeCallback)
 {
@@ -101,8 +114,7 @@ IoCompleter::CompleteUbioWithoutRecovery(IOErrorType errorType, bool executeCall
         bool done = false;
         if (originCore != INVALID_CORE)
         {
-            bool keepCurrentReactor =
-                EventFrameworkApiSingleton::Instance()->IsSameReactorNow(originCore);
+            bool keepCurrentReactor = eventFrameworkApi->IsSameReactorNow(originCore);
             if (keepCurrentReactor)
             {
                 done = callback->Execute();
@@ -115,7 +127,7 @@ IoCompleter::CompleteUbioWithoutRecovery(IOErrorType errorType, bool executeCall
 
         if (false == done)
         {
-            EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+            eventScheduler->EnqueueEvent(callback);
         }
     }
 }
@@ -126,11 +138,10 @@ IoCompleter::_SubmitRecovery(UbioSmartPtr ubio)
     ubio->SetError(IOErrorType::DEVICE_ERROR);
     if (recoveryEventFactory == nullptr)
     {
-        assert(0);
-        return;
+        throw std::runtime_error("recoveryEventFactory is nullptr");
     }
     EventSmartPtr failure = recoveryEventFactory->Create(ubio);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(failure);
+    eventScheduler->EnqueueEvent(failure);
 }
 
 void

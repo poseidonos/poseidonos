@@ -17,8 +17,14 @@ public:
     MOCK_METHOD(void, SetSyncMode, (), (override));
     MOCK_METHOD(bool, IsSyncMode, (), (override));
     MOCK_METHOD(IArrayDevice*, GetArrayDev, (), (override));
-    MOCK_METHOD(void, SetError, (IOErrorType), (override));
+    MOCK_METHOD(void, SetError, (IOErrorType inputErrorType), (override));
     MOCK_METHOD(bool, NeedRecovery, (), (override));
+    MOCK_METHOD(UbioSmartPtr, GetOriginUbio, (), (override));
+    MOCK_METHOD(CallbackSmartPtr, GetCallback, (), (override));
+    MOCK_METHOD(void, ClearCallback, (), (override));
+    MOCK_METHOD(void, ClearOrigin, (), (override));
+    MOCK_METHOD(void, Complete, (IOErrorType error), (override));
+    MOCK_METHOD(bool, CheckRecoveryAllowed, (), (override));
 };
 
 } // namespace pos

@@ -56,7 +56,7 @@ DumpModule<DumpBuffer> dumpCallbackError(DUMP_NAME,
     DumpModule<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
     DEFAULT_DUMP_ON);
 
-Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight)
+Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg)
 : Event(isFrontEnd),
   errorCount(0),
   errorBitMap((int)IOErrorType::CALLBACK_ERROR_MAX_COUNT),
@@ -64,7 +64,7 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight)
   waitingCount(1),
   weight(weight),
   callee(nullptr),
-  timeoutChecker(nullptr),
+  timeoutChecker(timeoutCheckerArg),
   returnAddress(nullptr),
   executed(false),
   type(type)
@@ -74,11 +74,15 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight)
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
         returnAddress = __builtin_return_address(Callback::CALLER_FRAME);
-        timeoutChecker = new SystemTimeoutChecker;
-        timeoutChecker->SetTimeout(DEFAULT_TIMEOUT_NS);
+        if (nullptr == timeoutChecker)
+        {
+            timeoutChecker = new SystemTimeoutChecker;
+            timeoutChecker->SetTimeout(DEFAULT_TIMEOUT_NS);
+        }
     }
 }
 
+// LCOV_EXCL_START
 Callback::~Callback(void)
 {
     airlog("LAT_Callback", "AIR_FREE", type, objectAddress);
@@ -108,26 +112,22 @@ Callback::~Callback(void)
     {
         if (timeoutChecker->CheckTimeout())
         {
-            try
-            {
-                POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
-                POS_TRACE_DEBUG_IN_MEMORY(
-                    ModuleInDebugLogDump::CALLBACK_TIMEOUT,
-                    eventId,
-                    PosEventId::GetString(eventId),
-                    returnAddress);
-                POS_TRACE_DEBUG(
-                    eventId,
-                    PosEventId::GetString(eventId),
-                    returnAddress);
-            }
-            catch (...)
-            {
-            }
+            POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
+            POS_TRACE_DEBUG_IN_MEMORY(
+                ModuleInDebugLogDump::CALLBACK_TIMEOUT,
+                eventId,
+                PosEventId::GetString(eventId),
+                returnAddress);
+            POS_TRACE_DEBUG(
+                eventId,
+                PosEventId::GetString(eventId),
+                returnAddress);
         }
         delete timeoutChecker;
+        timeoutChecker = nullptr;
     }
 }
+// LCOV_EXCL_STOP
 
 bool
 Callback::Execute(void)
@@ -206,7 +206,7 @@ Callback::SetWaitingCount(uint32_t inputWaitingCount)
 void
 Callback::SetCallee(CallbackSmartPtr inputCallee)
 {
-    if (unlikely(_IsInvalidCallee(inputCallee)))
+    if (unlikely(nullptr == inputCallee))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
@@ -214,7 +214,7 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
         return;
     }
 
-    if (unlikely(_IsCalleeSet()))
+    if (unlikely(nullptr != callee))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
@@ -223,20 +223,6 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
     }
 
     callee = inputCallee;
-}
-
-bool
-Callback::_IsInvalidCallee(CallbackSmartPtr inputCallee)
-{
-    bool isInvalidCallee = (inputCallee == nullptr);
-    return isInvalidCallee;
-}
-
-bool
-Callback::_IsCalleeSet(void)
-{
-    bool isCalleeSet = (_IsInvalidCallee(callee) == false);
-    return isCalleeSet;
 }
 
 bool

@@ -183,7 +183,7 @@ QosMonitoringManager::_UpdateContextResourceDetails(void)
 
     for (uint32_t event = 0; event < BackendEvent_Count; event++)
     {
-        uint32_t pendingEventCount = qosManager->GetPendingEvents(static_cast<BackendEvent>(event));
+        uint32_t pendingEventCount = qosManager->GetPendingBackendEvents(static_cast<BackendEvent>(event));
         resourceCpu.SetEventPendingCpuCount(static_cast<BackendEvent>(event), pendingEventCount);
         uint32_t generatedCpuEvents = qosManager->GetEventLog(static_cast<BackendEvent>(event));
         resourceCpu.SetTotalGeneratedEvents(static_cast<BackendEvent>(event), generatedCpuEvents);

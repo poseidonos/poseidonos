@@ -1,9 +1,39 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "src/event_scheduler/event_scheduler.h"
 
-#include <assert.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <unistd.h>
 
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/event_scheduler/event.h"
@@ -16,7 +46,10 @@
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_spdk_manager.h"
+
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
+#include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/qos/qos_manager_mock.h"
 
 using namespace pos;
@@ -28,279 +61,168 @@ using ::testing::Return;
 
 namespace pos
 {
+
+class StubEventES : public Event
+{
+public:
+    StubEventES(bool isFrontEndEvent = false, BackendEvent event = BackendEvent_Unknown,
+        AffinityManager* affinityManager = nullptr)
+    : Event(isFrontEndEvent, event, affinityManager)
+    {
+    }
+    virtual bool Execute(void) final
+    {
+        return true;
+    }
+};
+
 TEST(EventScheduler, EventScheduler_Stack)
 {
-    // Given: Set MockQosManager
+    // Given: MockQosManager, MockConfigManager, MockAffinityManager
     NiceMock<MockQosManager> mockQosManager;
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
+    NiceMock<MockConfigManager> mockConfigManager;
+    NiceMock<MockAffinityManager> mockAffinityManager;
 
-    // When: Create EventScheduler
-    EventScheduler eventSechduler{&mockQosManager};
+    // When 1: Create EventScheduler with numaDedicatedSchedulingPolicy
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(
+        Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    EventScheduler eventScheduler1 {&mockQosManager, &mockConfigManager, &mockAffinityManager};
+
+    // When 2: Create EventScheduler without numaDedicatedSchedulingPolicy
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(
+        Return(static_cast<int>(POS_EVENT_ID::EVENT_ID_MAPPING_WRONG)));
+    EventScheduler eventScheduler2 {&mockQosManager, &mockConfigManager, &mockAffinityManager};
 
     // Then: Do nothing
-
-    QosSpdkManager::unregistrationComplete = true; // Escape QosSpdkManager::Finalize infinite loop
 }
 
 TEST(EventScheduler, EventScheduler_Heap)
 {
-    // Given: Set MockQosManager
-    NiceMock<MockQosManager> mockQosManager;
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
+    // Given: Do nothing
 
     // When: Create EventScheduler
-    EventScheduler* eventSechduler = new EventScheduler{&mockQosManager};
-    delete eventSechduler;
+    EventScheduler* eventScheduler = new EventScheduler;
+    delete eventScheduler;
 
     // Then: Do nothing
 }
 
-TEST(EventScheduler, Initialize_InvalidArgs)
+TEST(EventScheduler, Initialize_EnoughCore)
 {
-    // Given: Set EventScheduler, cpu_set_t
+    // Given: MockQosManager, MockConfigManager, MockAffinityManager, EventScheduler
     NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    uint32_t workerCountInput = 3;
-    cpu_set_t schedulerCPUInput, eventCPUSetInput;
-    CPU_ZERO(&schedulerCPUInput);
-    CPU_SET(0, &schedulerCPUInput);
-    CPU_ZERO(&eventCPUSetInput);
-    CPU_SET(1, &eventCPUSetInput);
+    NiceMock<MockConfigManager> mockConfigManager;
+    NiceMock<MockAffinityManager> mockAffinityManager;
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(
+        Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(10));
+    ON_CALL(mockAffinityManager, GetNumaIdFromCoreId(_)).WillByDefault(Return(0));
+    EventScheduler eventSchechduler {&mockQosManager, &mockConfigManager, &mockAffinityManager};
+    cpu_set_t schedulerCPU, eventCPU;
+    CPU_ZERO(&schedulerCPU);
+    CPU_SET(1, &schedulerCPU);
+    CPU_ZERO(&eventCPU);
+    CPU_SET(2, &eventCPU);
 
     // When: Call Initialize
-    EXPECT_DEATH(eventScheduler.Initialize(workerCountInput, schedulerCPUInput, eventCPUSetInput), "");
+    eventSchechduler.Initialize(1, schedulerCPU, eventCPU);
 
     // Then: Do nothing
 }
 
-TEST(EventScheduler, Initialize_ValidArgs)
+TEST(EventScheduler, Initialize_NotEnoughCore)
 {
-    // Given: Set EventScheduler, cpu_set_t
+    // Given: MockQosManager, MockConfigManager, MockAffinityManager, EventScheduler
     NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    uint32_t workerCountInput = 1;
-    cpu_set_t schedulerCPUInput, eventCPUSetInput;
-    CPU_ZERO(&schedulerCPUInput);
-    CPU_SET(0, &schedulerCPUInput);
-    CPU_ZERO(&eventCPUSetInput);
-    CPU_SET(1, &eventCPUSetInput);
+    NiceMock<MockConfigManager> mockConfigManager;
+    NiceMock<MockAffinityManager> mockAffinityManager;
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(
+        Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(0));
+    ON_CALL(mockAffinityManager, GetNumaIdFromCoreId(_)).WillByDefault(Return(0));
+    EventScheduler eventSchechduler {&mockQosManager, &mockConfigManager, &mockAffinityManager};
+    cpu_set_t schedulerCPU, eventCPU;
+    CPU_ZERO(&schedulerCPU);
+    CPU_SET(1, &schedulerCPU);
+    CPU_ZERO(&eventCPU);
+    CPU_SET(2, &eventCPU);
 
     // When: Call Initialize
-    eventScheduler.Initialize(workerCountInput, schedulerCPUInput, eventCPUSetInput);
+    eventSchechduler.Initialize(1, schedulerCPU, eventCPU);
 
     // Then: Do nothing
 }
 
-TEST(EventScheduler, GetWorkerIDMinimumJobs_Simple)
+TEST(EventScheduler, GetWorkerIDMinimumJobs)
 {
-    // Given: Set EventScheduler, cpu_set_t, Initialize
+    // Given: MockQosManager, MockConfigManager, MockAffinityManager, EventScheduler
     NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    uint32_t workerCountInput = 1;
-    cpu_set_t schedulerCPUInput, eventCPUSetInput;
-    CPU_ZERO(&schedulerCPUInput);
-    CPU_SET(0, &schedulerCPUInput);
-    CPU_ZERO(&eventCPUSetInput);
-    CPU_SET(1, &eventCPUSetInput);
-    eventScheduler.Initialize(workerCountInput, schedulerCPUInput, eventCPUSetInput);
+    NiceMock<MockConfigManager> mockConfigManager;
+    NiceMock<MockAffinityManager> mockAffinityManager;
+    ON_CALL(mockConfigManager, GetValue).WillByDefault(
+        [this] (string module, string key, void* value, ConfigType type)
+        {
+            *(bool*)value = true;
+            return static_cast<int>(POS_EVENT_ID::SUCCESS);
+        });
+    ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(10));
+    ON_CALL(mockAffinityManager, GetNumaIdFromCoreId).WillByDefault(
+        [this] (uint32_t index)
+        {
+            return index % 2;
+        });
+    EventScheduler eventSchechduler {&mockQosManager, &mockConfigManager, &mockAffinityManager};
+    cpu_set_t schedulerCPU, eventCPU;
+    CPU_ZERO(&schedulerCPU);
+    CPU_SET(8, &schedulerCPU);
+    CPU_ZERO(&eventCPU);
+    CPU_SET(7, &eventCPU);
+    eventSchechduler.Initialize(1, schedulerCPU, eventCPU);
     uint32_t actual, expected = 0;
 
     // When: Call GetWorkerIDMinimumJobs
-    actual = eventScheduler.GetWorkerIDMinimumJobs(0);
+    actual = eventSchechduler.GetWorkerIDMinimumJobs(1);
 
-    // Then: Expect return value is zero
+    // Then: Expect to return 0
     EXPECT_EQ(actual, expected);
 }
 
-TEST(EventScheduler, EnqueueEvent_FrontendIO)
+TEST(EventScheduler, EnqueueEvent_VarietyInputs)
 {
-    // Given: Set EventScheduler, MockEvent
-    NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    auto mockEventSharedPtr = std::make_shared<MockEvent>(true);
-    ON_CALL(*mockEventSharedPtr.get(), IsFrontEnd()).WillByDefault(Return(true));
-    int eventTypeCount = 0;
-    ON_CALL(*mockEventSharedPtr.get(), GetEventType()).WillByDefault([&eventTypeCount]()
-    {
-        eventTypeCount++;
-        if (1 == eventTypeCount)
-        {
-            return BackendEvent_Unknown;
-        }
-        return BackendEvent_FrontendIO;
-    });
-    EXPECT_CALL(*mockEventSharedPtr.get(), GetEventType()).Times(4);
-    EXPECT_CALL(*mockEventSharedPtr.get(), SetEventType(_)).Times(1);
-    EXPECT_CALL(*mockEventSharedPtr.get(), IsFrontEnd()).Times(AtLeast(1));
+    // Given: EventScheduler, EventSmartPtr
+    EventScheduler eventSchechduler;
+    auto eventFront = std::make_shared<StubEventES>(true, BackendEvent_Unknown);
+    auto eventFlush = std::make_shared<StubEventES>(false, BackendEvent_Flush);
+    auto eventGC = std::make_shared<StubEventES>(false, BackendEvent_GC);
+    auto eventUserRebuild = std::make_shared<StubEventES>(false, BackendEvent_UserdataRebuild);
+    auto eventMetaRebuild = std::make_shared<StubEventES>(false, BackendEvent_MetadataRebuild);
+    auto eventMetaIO = std::make_shared<StubEventES>(false, BackendEvent_MetaIO);
+    auto eventFrontIO = std::make_shared<StubEventES>(false, BackendEvent_FrontendIO);
 
-    // When: Call EnqueueEvent
-    eventScheduler.EnqueueEvent(mockEventSharedPtr);
-
-    // Then: Check via DequeueEvents
-    auto eventQ = eventScheduler.DequeueEvents();
-    EXPECT_EQ(1, eventQ.size());
-    EXPECT_TRUE(BackendEvent_FrontendIO == eventQ.front().get()->GetEventType());
-}
-
-TEST(EventScheduler, EnqueueEvent_NotFrontendTypes)
-{
-    // Given: Set EventScheduler, MockEvents
-    NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetNoContentionCycles()).WillByDefault(Return(20));
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, IsFeQosEnabled()).WillByDefault(Return(false));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    auto mockEventSharedPtr1 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr1.get(), GetEventType()).WillByDefault(Return(BackendEvent_Flush));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr2 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr2.get(), GetEventType()).WillByDefault(Return(BackendEvent_GC));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr3 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr3.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr3.get(), GetEventType()).WillByDefault(Return(BackendEvent_UserdataRebuild));
-    EXPECT_CALL(*mockEventSharedPtr3.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr3.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr4 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr4.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr4.get(), GetEventType()).WillByDefault(Return(BackendEvent_MetadataRebuild));
-    EXPECT_CALL(*mockEventSharedPtr4.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr4.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr5 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr5.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr5.get(), GetEventType()).WillByDefault(Return(BackendEvent_MetaIO));
-    EXPECT_CALL(*mockEventSharedPtr5.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr5.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr6 = std::make_shared<MockEvent>();
-    int eventTypeCount = 0;
-    ON_CALL(*mockEventSharedPtr6.get(), GetEventType()).WillByDefault([&eventTypeCount]()
-    {
-        eventTypeCount++;
-        if (1 == eventTypeCount)
-        {
-            return BackendEvent_Unknown;
-        }
-        return BackendEvent_FrontendIO;
-    });
-    ON_CALL(*mockEventSharedPtr6.get(), IsFrontEnd()).WillByDefault(Return(false));
-    EXPECT_CALL(*mockEventSharedPtr6.get(), GetEventType()).Times(AtLeast(3));
-    EXPECT_CALL(*mockEventSharedPtr6.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtrErr = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtrErr.get(), GetEventType()).WillByDefault(Return(BackendEvent_End));
-    EXPECT_CALL(*mockEventSharedPtrErr.get(), GetEventType()).Times(0);
-    EXPECT_CALL(*mockEventSharedPtrErr.get(), IsFrontEnd()).Times(0);
-
-    // When: Call EnqueueEvent
-    eventScheduler.EnqueueEvent(mockEventSharedPtr1);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr2);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr3);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr4);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr5);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr6);
-    EXPECT_DEATH(eventScheduler.EnqueueEvent(mockEventSharedPtrErr), "");
-
-    // Then: Check via DequeueEvents
-    auto eventQ = eventScheduler.DequeueEvents();
-    EXPECT_EQ(6, eventQ.size());
-}
-
-TEST(EventScheduler, DequeueEvents_MultiEvents)
-{
-    // Given: Set EventScheduler, MockEvents, EnqueueEvent
-    NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    auto mockEventSharedPtr1 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr1.get(), GetEventType()).WillByDefault(Return(BackendEvent_Flush));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), GetEventType()).Times(AtLeast(1));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr2 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr2.get(), GetEventType()).WillByDefault(Return(BackendEvent_GC));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), GetEventType()).Times(AtLeast(1));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).Times(AtLeast(1));
-    auto mockEventSharedPtr3 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr3.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr3.get(), GetEventType()).WillByDefault(Return(BackendEvent_FrontendIO));
-    EXPECT_CALL(*mockEventSharedPtr3.get(), GetEventType()).Times(AtLeast(1));
-    EXPECT_CALL(*mockEventSharedPtr3.get(), IsFrontEnd()).Times(AtLeast(1));
-    eventScheduler.EnqueueEvent(mockEventSharedPtr1);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr2);
-    eventScheduler.EnqueueEvent(mockEventSharedPtr3);
-
-    // When: Call DequeueEvents
-    auto eventQ = eventScheduler.DequeueEvents();
-
-    // Then: Verify enqueued events
-    int qSize = eventQ.size();
-    EXPECT_EQ(3, qSize);
-    for (int i = 0; i < qSize; i++)
-    {
-        auto event = eventQ.front().get();
-        eventQ.pop();
-        if (0 == i)
-        {
-            EXPECT_TRUE(BackendEvent_Flush == event->GetEventType());
-        }
-        else if (1 == i)
-        {
-            EXPECT_TRUE(BackendEvent_GC == event->GetEventType());
-        }
-        else if (2 == i)
-        {
-            EXPECT_TRUE(BackendEvent_FrontendIO == event->GetEventType());
-        }
-    }
-    EXPECT_EQ(0, eventQ.size());
-}
-
-TEST(EventScheduler, Run_WithEvents)
-{
-    // Given: Set EventScheduler, Initialize, MockEvents, EnqueueEvent
-    NiceMock<MockQosManager> mockQosManager;
-    EventScheduler eventScheduler{&mockQosManager};
-    ON_CALL(mockQosManager, GetEventWeightWRR(_)).WillByDefault(Return(-1));
-    ON_CALL(mockQosManager, _Finalize()).WillByDefault(Return());
-    uint32_t workerCountInput = 1;
-    cpu_set_t schedulerCPUInput, eventCPUSetInput;
-    CPU_ZERO(&schedulerCPUInput);
-    CPU_SET(0, &schedulerCPUInput);
-    CPU_ZERO(&eventCPUSetInput);
-    CPU_SET(1, &eventCPUSetInput);
-    auto mockEventSharedPtr1 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr1.get(), GetEventType()).WillByDefault(Return(BackendEvent_Flush));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), GetEventType()).Times(AtLeast(1));
-    EXPECT_CALL(*mockEventSharedPtr1.get(), IsFrontEnd()).Times(AtLeast(1));
-    eventScheduler.EnqueueEvent(mockEventSharedPtr1);
-    auto mockEventSharedPtr2 = std::make_shared<MockEvent>();
-    ON_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).WillByDefault(Return(false));
-    ON_CALL(*mockEventSharedPtr2.get(), GetEventType()).WillByDefault(Return(BackendEvent_GC));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), GetEventType()).Times(AtLeast(1));
-    EXPECT_CALL(*mockEventSharedPtr2.get(), IsFrontEnd()).Times(AtLeast(1));
-    eventScheduler.EnqueueEvent(mockEventSharedPtr2);
-
-    // When: Call Initialize to create thread and call Run
-    eventScheduler.Initialize(workerCountInput, schedulerCPUInput, eventCPUSetInput);
+    // When: Call EnqueueEvent with variety inputs
+    eventSchechduler.EnqueueEvent(eventFront);
+    eventSchechduler.EnqueueEvent(eventFlush);
+    eventSchechduler.EnqueueEvent(eventGC);
+    eventSchechduler.EnqueueEvent(eventUserRebuild);
+    eventSchechduler.EnqueueEvent(eventMetaRebuild);
+    eventSchechduler.EnqueueEvent(eventMetaIO);
+    eventSchechduler.EnqueueEvent(eventFrontIO);
 
     // Then: Do nothing
+}
+
+TEST(EventScheduler, DequeueEvent_)
+{
+    // Given:
+    // When:
+    // Then:
+}
+
+TEST(EventScheduler, Run_)
+{
+    // Given:
+    // When:
+    // Then:
 }
 
 } // namespace pos

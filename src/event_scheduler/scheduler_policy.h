@@ -48,11 +48,11 @@ public:
     ISchedulerPolicy(void)
     {
     }
-
+    // LCOV_EXCL_START
     virtual ~ISchedulerPolicy(void)
     {
     }
-
+    // LCOV_EXCL_STOP
     virtual unsigned int GetProperWorkerID(uint32_t numa) = 0;
 };
 

@@ -16,6 +16,9 @@ public:
     MOCK_METHOD(int64_t, GetNoContentionCycles, (), ());
     MOCK_METHOD(bool, IsFeQosEnabled, (), (override));
     MOCK_METHOD(void, _Finalize, (), (override));
+    MOCK_METHOD(void, DecreasePendingBackendEvents, (BackendEvent event), (override));
+    MOCK_METHOD(void, IncreasePendingBackendEvents, (BackendEvent event), (override));
+    MOCK_METHOD(void, LogEvent, (BackendEvent event), (override));
 };
 
 } // namespace pos

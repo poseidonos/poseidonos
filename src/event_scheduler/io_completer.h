@@ -38,11 +38,15 @@
 namespace pos
 {
 class EventFactory;
+class EventFrameworkApi;
+class EventScheduler;
 
 class IoCompleter
 {
 public:
-    explicit IoCompleter(UbioSmartPtr ubio);
+    explicit IoCompleter(UbioSmartPtr ubio,
+        EventScheduler* eventScheduler = nullptr,
+        EventFrameworkApi* eventFrameworkApi = nullptr);
     virtual ~IoCompleter(void)
     {
     }
@@ -57,5 +61,7 @@ private:
     static EventFactory* recoveryEventFactory;
     void _SubmitRecovery(UbioSmartPtr ubio);
     UbioSmartPtr ubio;
+    EventScheduler* eventScheduler;
+    EventFrameworkApi* eventFrameworkApi;
 };
 } // namespace pos

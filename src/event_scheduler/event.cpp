@@ -35,15 +35,24 @@
 #include "src/include/core_const.h"
 namespace pos
 {
-Event::Event(bool isFrontEndEvent, BackendEvent eventType)
+Event::Event(bool isFrontEndEvent, BackendEvent eventType, AffinityManager* affinityManagerArg)
 : frontEndEvent(isFrontEndEvent),
   event(eventType),
-  numa(AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread())
+  numa(INVALID_NUMA),
+  affinityManager(affinityManagerArg)
 {
+    if (nullptr == affinityManager)
+    {
+        affinityManager = AffinityManagerSingleton::Instance();
+    }
+    numa = affinityManager->GetNumaIdFromCurrentThread();
 }
+
+// LCOV_EXCL_START
 Event::~Event(void)
 {
 }
+// LCOV_EXCL_STOP
 
 bool
 Event::IsFrontEnd(void)

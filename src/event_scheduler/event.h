@@ -45,10 +45,13 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 
+class AffinityManager;
+
 class Event
 {
 public:
-    Event(bool isFrontEndEvent = false, BackendEvent event = BackendEvent_Unknown);
+    Event(bool isFrontEndEvent = false, BackendEvent event = BackendEvent_Unknown,
+        AffinityManager* affinityManager = nullptr);
     virtual BackendEvent GetEventType(void);
     void SetFrontEnd(bool state);
     virtual void SetEventType(BackendEvent event);
@@ -61,6 +64,7 @@ private:
     bool frontEndEvent;
     BackendEvent event;
     uint32_t numa;
+    AffinityManager* affinityManager;
 };
 
 } // namespace pos

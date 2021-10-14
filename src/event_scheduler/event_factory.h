@@ -41,7 +41,9 @@ namespace pos
 class EventFactory
 {
 public:
+    // LCOV_EXCL_START
     virtual ~EventFactory() {}
+    // LCOV_EXCL_STOP
     virtual EventSmartPtr Create(UbioSmartPtr ubio) = 0;
 };
 

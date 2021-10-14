@@ -47,6 +47,9 @@ lib/spdlog-1.4.2/_builds
 lib/go
 test/regression/*.state
 test/regression/*.csv
+test/system/io_path/*.state
+test/system/io_path/*.txt
+test/system/io_path/*.csv
 PYTHON_COMMAND
 *.opendb
 *.ipch

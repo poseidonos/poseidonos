@@ -55,7 +55,7 @@ SpdkEventScheduler::SendSpdkEvent(uint32_t core, EventSmartPtr event)
 
     EventSmartPtr* argument = new EventSmartPtr(event);
 
-    return EventFrameworkApiSingleton::Instance()->SendSpdkEvent(core, _InvokeEvent, argument);
+    return EventFrameworkApiSingleton::Instance()->SendSpdkEvent(core, InvokeEvent, argument);
 }
 
 void
@@ -70,7 +70,7 @@ SpdkEventScheduler::ExecuteOrScheduleEvent(uint32_t core, EventSmartPtr event)
 }
 
 void
-SpdkEventScheduler::_InvokeEvent(void* voidTypeEvent)
+SpdkEventScheduler::InvokeEvent(void* voidTypeEvent)
 {
     EventSmartPtr event = *static_cast<EventSmartPtr*>(voidTypeEvent);
     uint32_t core = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();

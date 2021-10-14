@@ -76,7 +76,7 @@ EventSmartPtr
 SchedulerQueue::DequeueEvent(void)
 {
     EventSmartPtr event = nullptr;
-    if (queue.empty() == false)
+    if (false == queue.empty())
     {
         event = queue.front();
         queue.pop();
@@ -100,16 +100,13 @@ SchedulerQueue::EnqueueEvent(EventSmartPtr input)
         PosEventId::Print(POS_EVENT_ID::EVTQ_INVALID_EVENT, EventLevel::WARNING);
         return;
     }
+
+    queue.push(input);
+
+    if (false == input->IsFrontEnd())
     {
-        queue.push(input);
-    }
-    if (true == qosManager->IsFeQosEnabled())
-    {
-        if ((input->IsFrontEnd() == false))
-        {
-            qosManager->IncreasePendingEvents(input->GetEventType());
-            qosManager->LogEvent(input->GetEventType());
-        }
+        qosManager->IncreasePendingBackendEvents(input->GetEventType());
+        qosManager->LogEvent(input->GetEventType());
     }
 }
 /* --------------------------------------------------------------------------*/

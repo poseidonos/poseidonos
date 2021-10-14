@@ -94,11 +94,11 @@ public:
     void DecreaseUsedStripeCnt(std::string arrayName);
     void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId, std::string arrayName);
     void DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId, std::string arrayName);
-    void IncreasePendingEvents(BackendEvent event);
-    void DecreasePendingEvents(BackendEvent event);
-    void LogEvent(BackendEvent event);
+    virtual void IncreasePendingBackendEvents(BackendEvent event);
+    virtual void DecreasePendingBackendEvents(BackendEvent event);
+    virtual void LogEvent(BackendEvent event);
     uint32_t GetEventLog(BackendEvent event);
-    uint32_t GetPendingEvents(BackendEvent event);
+    uint32_t GetPendingBackendEvents(BackendEvent event);
     void CopyEventPolicy(void);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
@@ -133,7 +133,7 @@ private:
     bool feQosEnabled;
     bool initialized;
     uint32_t pollerTime;
-    std::atomic<uint32_t> pendingEvents[BackendEvent_Count];
+    std::atomic<uint32_t> pendingBackendEvents[BackendEvent_Count];
     std::atomic<uint32_t> eventLog[BackendEvent_Count];
     QosEventManager* qosEventManager;
     QosArrayManager* qosArrayManager[MAX_ARRAY_COUNT];

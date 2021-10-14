@@ -41,10 +41,15 @@ namespace pos
  * @Param    workerCountInput
  */
 /* --------------------------------------------------------------------------*/
-MinimumJobPolicy::MinimumJobPolicy(unsigned int workerCountInput)
+MinimumJobPolicy::MinimumJobPolicy(unsigned int workerCountInput, EventScheduler* eventSchedulerArg)
 : workerCount(workerCountInput),
-  currentWorkerID(workerCount - 1)
+  currentWorkerID(workerCount - 1),
+  eventScheduler(eventSchedulerArg)
 {
+    if (nullptr == eventScheduler)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -67,7 +72,7 @@ MinimumJobPolicy::~MinimumJobPolicy(void)
 unsigned int
 MinimumJobPolicy::GetProperWorkerID(uint32_t numa)
 {
-    uint32_t workerID = EventSchedulerSingleton::Instance()->GetWorkerIDMinimumJobs(numa);
+    uint32_t workerID = eventScheduler->GetWorkerIDMinimumJobs(numa);
     return workerID;
 }
 } // namespace pos

@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(bool, _DoSpecificJob, (), (override));
     MOCK_METHOD(bool, _RecordCallerCompletionAndCheckOkToCall,
         (uint32_t transferredErrorCount, BitMapMutex& inputErrorBitMap, uint32_t transferredWeight), (override));
+    MOCK_METHOD(void, SetCallee, (CallbackSmartPtr callee), (override));
 };
 
 } // namespace pos

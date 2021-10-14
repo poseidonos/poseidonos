@@ -74,7 +74,7 @@ QosManager::QosManager(void)
 
     for (uint32_t event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
-        pendingEvents[event] = M_RESET_TO_ZERO;
+        pendingBackendEvents[event] = M_RESET_TO_ZERO;
         eventLog[event] = M_RESET_TO_ZERO;
         oldLog[event] = M_RESET_TO_ZERO;
     }
@@ -554,9 +554,9 @@ QosManager::GetVolumePolicy(uint32_t volId, std::string arrayName)
  */
 /* --------------------------------------------------------------------------*/
 uint32_t
-QosManager::GetPendingEvents(BackendEvent event)
+QosManager::GetPendingBackendEvents(BackendEvent event)
 {
-    return pendingEvents[event];
+    return pendingBackendEvents[event];
 }
 
 /* --------------------------------------------------------------------------*/
@@ -567,9 +567,12 @@ QosManager::GetPendingEvents(BackendEvent event)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::DecreasePendingEvents(BackendEvent event)
+QosManager::DecreasePendingBackendEvents(BackendEvent event)
 {
-    pendingEvents[event]--;
+    if (feQosEnabled)
+    {
+        pendingBackendEvents[event]--;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -580,9 +583,12 @@ QosManager::DecreasePendingEvents(BackendEvent event)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::IncreasePendingEvents(BackendEvent event)
+QosManager::IncreasePendingBackendEvents(BackendEvent event)
 {
-    pendingEvents[event]++;
+    if (feQosEnabled)
+    {
+        pendingBackendEvents[event]++;
+    }
 }
 
 /* --------------------------------------------------------------------------*/

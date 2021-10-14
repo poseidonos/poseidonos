@@ -97,16 +97,16 @@ public:
     void* GetWholeBuffer(void) const;
     virtual void WaitDone(void);
 
-    void Complete(IOErrorType error);
-    void ClearOrigin(void);
+    virtual void Complete(IOErrorType error);
+    virtual void ClearOrigin(void);
 
     void SetPba(PhysicalBlkAddr& pbaInput);
     void FreeDataBuffer(void);
     virtual void SetSyncMode(void);
     void SetAsyncMode(void);
     void SetCallback(CallbackSmartPtr inputCallback);
-    CallbackSmartPtr GetCallback(void);
-    void ClearCallback(void);
+    virtual CallbackSmartPtr GetCallback(void);
+    virtual void ClearCallback(void);
 
     UBlockDevice* GetUBlock(void);
     virtual IArrayDevice* GetArrayDev(void);
@@ -117,7 +117,7 @@ public:
     uint32_t GetMemSize(void);
     virtual uint32_t GetOriginCore(void);
     void SetOriginUbio(UbioSmartPtr ubio);
-    UbioSmartPtr GetOriginUbio(void);
+    virtual UbioSmartPtr GetOriginUbio(void);
     virtual uint64_t GetSize(void);
 
     IOErrorType GetError(void);
@@ -125,7 +125,7 @@ public:
     void ResetError(void);
 
     bool CheckPbaSet(void);
-    bool CheckRecoveryAllowed(void);
+    virtual bool CheckRecoveryAllowed(void);
 
     virtual bool IsSyncMode(void);
 

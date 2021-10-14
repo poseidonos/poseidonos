@@ -44,8 +44,6 @@ class SpdkEventScheduler
 public:
     static bool SendSpdkEvent(uint32_t core, EventSmartPtr event);
     static void ExecuteOrScheduleEvent(uint32_t core, EventSmartPtr event);
-
-private:
-    static void _InvokeEvent(void* voidTypeEvent);
+    static void InvokeEvent(void* voidTypeEvent);
 };
 } // namespace pos

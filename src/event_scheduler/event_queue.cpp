@@ -46,8 +46,13 @@ namespace pos
  * @Synopsis Constructor 
  */
 /* --------------------------------------------------------------------------*/
-EventQueue::EventQueue(void)
+EventQueue::EventQueue(QosManager* qosManagerArg)
+: qosManager(qosManagerArg)
 {
+    if (nullptr == qosManager)
+    {
+        qosManager = QosManagerSingleton::Instance();
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -73,21 +78,20 @@ EventQueue::DequeueEvent(void)
 {
     std::unique_lock<std::mutex> uniqueLock(queueLock);
 
-    EventSmartPtr event = nullptr;
     uint32_t q_size = queue.size();
     airlog("Q_EventQueue", "AIR_BASE", 0, q_size);
 
-    if (queue.empty() == false)
+    if (queue.empty())
     {
-        event = queue.front();
-        queue.pop();
+        return nullptr;
     }
-    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+
+    EventSmartPtr event = queue.front();
+    queue.pop();
+
+    if (false == event->IsFrontEnd())
     {
-        if ((event != nullptr && event->IsFrontEnd() == false))
-        {
-            QosManagerSingleton::Instance()->DecreasePendingEvents(event->GetEventType());
-        }
+        qosManager->DecreasePendingBackendEvents(event->GetEventType());
     }
     return event;
 }

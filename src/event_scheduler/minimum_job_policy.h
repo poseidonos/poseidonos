@@ -36,6 +36,7 @@
 
 namespace pos
 {
+class EventScheduler;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Schedule event with Minimum Job Policy
@@ -45,7 +46,7 @@ namespace pos
 class MinimumJobPolicy : public ISchedulerPolicy
 {
 public:
-    explicit MinimumJobPolicy(unsigned int workerCountInput);
+    explicit MinimumJobPolicy(unsigned int workerCountInput, EventScheduler* eventScheduler = nullptr);
     virtual ~MinimumJobPolicy(void);
 
     virtual unsigned int GetProperWorkerID(uint32_t numa) final;
@@ -53,6 +54,7 @@ public:
 private:
     unsigned int workerCount;
     unsigned int currentWorkerID;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

@@ -48,6 +48,8 @@
 
 namespace pos
 {
+class AffinityManager;
+class ConfigManager;
 class ISchedulerPolicy;
 class EventQueue;
 class EventWorker;
@@ -62,17 +64,17 @@ class QosManager;
 class EventScheduler
 {
 public:
-    EventScheduler(QosManager* qosManager = nullptr);
+    EventScheduler(QosManager* qosManager = nullptr,
+        ConfigManager* configManager = nullptr,
+        AffinityManager* affinityManager = nullptr);
+    virtual ~EventScheduler(void);
     void Initialize(uint32_t workerCountInput, cpu_set_t schedulerCPUInput,
         cpu_set_t eventCPUSetInput);
-    virtual ~EventScheduler(void);
-
-    void Initialize(void);
-    uint32_t GetWorkerIDMinimumJobs(uint32_t numa);
+    virtual uint32_t GetWorkerIDMinimumJobs(uint32_t numa);
     virtual void EnqueueEvent(EventSmartPtr input);
-    std::mutex queueLock[BackendEvent_Count];
     std::queue<EventSmartPtr> DequeueEvents(void);
     void Run(void);
+    std::mutex queueLock[BackendEvent_Count];
 
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
@@ -100,6 +102,8 @@ private:
     bool numaDedicatedSchedulingPolicy;
     uint32_t cyclesElapsed = 0;
     QosManager* qosManager;
+    ConfigManager* configManager;
+    AffinityManager* affinityManager;
 };
 
 using EventSchedulerSingleton = Singleton<EventScheduler>;
