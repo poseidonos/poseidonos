@@ -2,45 +2,38 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
+#include "test/unit-tests/event_scheduler/event_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using ::testing::NiceMock;
 
 namespace pos
 {
-int
-TestCallback(LogWriteContext* context)
-{
-    context->IoDone();
-
-    delete context;
-    return 0;
-}
 
 TEST(GcLogWriteCompleted, Execute_testWhenNumLogsIsOne)
 {
-    GcLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
-    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
+    NiceMock<MockEventScheduler> eventScheduler;
+    EventSmartPtr event(new MockEvent());
 
-    GcLogWriteCompleted completed(callbackFunc, logWriteContext);
+    GcLogWriteCompleted completed(&eventScheduler, event);
     completed.SetNumLogs(1);
 
-    EXPECT_CALL(*logWriteContext, IoDone).Times(1);
+    EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
     completed.Execute();
 }
 
 TEST(GcLogWriteCompleted, Execute_testWhenNumLogsIsBiggerThanOne)
 {
-    GcLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
-    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
+    NiceMock<MockEventScheduler> eventScheduler;
+    EventSmartPtr event(new MockEvent());
 
-    GcLogWriteCompleted completed(callbackFunc, logWriteContext);
+    GcLogWriteCompleted completed(&eventScheduler, event);
 
     int numLogs = 10;
     completed.SetNumLogs(10);
 
-    EXPECT_CALL(*logWriteContext, IoDone).Times(1);
+    EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
     for (int count = 0; count < numLogs; count++)
     {

@@ -30,35 +30,56 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
 
-#include <atomic>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "src/event_scheduler/event.h"
-#include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
+
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class LogWriteContext;
-class EventScheduler;
-class GcLogWriteCompleted : public Event
+int
+TestCallback(LogWriteContext* context)
 {
-public:
-    GcLogWriteCompleted(void) = default;
-    GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback);
-    virtual ~GcLogWriteCompleted(void) = default;
+    int result = context->GetError();
 
-    virtual bool Execute(void) override;
+    delete context;
+    return result;
+}
 
-    virtual void SetNumLogs(uint64_t val);
+TEST(GcStripeLogWriteRequest, Execute_testIfExecutedSuccessfully)
+{
+    // Given
+    GcStripeLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
+    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
 
-private:
-    std::atomic<uint64_t> numLogs;
-    std::atomic<uint64_t> numCompletedLogs;
+    GcStripeLogWriteRequest gcStripeLogWriteRequest(callbackFunc, logWriteContext);
 
-    EventScheduler* eventScheduler;
-    EventSmartPtr callback;
-};
+    // When
+    EXPECT_CALL(*logWriteContext, GetError).WillOnce(Return(0));
+    bool actual = gcStripeLogWriteRequest.Execute();
 
+    // Then
+    EXPECT_EQ(actual, true);
+}
+
+TEST(GcStripeLogWriteRequest, Execute_testIfExecutedWithCallbackReturnErrorCode)
+{
+    // Given
+    GcStripeLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
+    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
+
+    GcStripeLogWriteRequest gcStripeLogWriteRequest(callbackFunc, logWriteContext);
+
+    // When
+    EXPECT_CALL(*logWriteContext, GetError).WillOnce(Return(-1));
+    bool actual = gcStripeLogWriteRequest.Execute();
+
+    // Then
+    EXPECT_EQ(actual, true);
+}
 } // namespace pos

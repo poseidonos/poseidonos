@@ -387,7 +387,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     bufferedSegCtxManager->Init(config);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
-    eventFactory->Init(logWriteHandler);
+    eventFactory->Init(eventScheduler, logWriteHandler);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
     // and logWriteHandler should be notified after bufferAllocator

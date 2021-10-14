@@ -10,9 +10,9 @@
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_statistics_mock.h"
 
+using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
-using testing::InSequence;
 
 namespace pos
 {
@@ -185,7 +185,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
     EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
 
-    // Then: The written context callback should be called    
+    // Then: The written context callback should be called
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
     EXPECT_CALL(*context, IoDone);
 
@@ -198,7 +198,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
 TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
 {
     // Given: Log write handler is initialized, waiting list is empty, and
-    // LogWriteContext is given 
+    // LogWriteContext is given
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
 

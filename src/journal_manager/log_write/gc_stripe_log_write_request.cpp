@@ -30,35 +30,27 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
 
-#include <atomic>
-
-#include "src/event_scheduler/event.h"
-#include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
+#include <assert.h>
 
 namespace pos
 {
-class LogWriteContext;
-class EventScheduler;
-class GcLogWriteCompleted : public Event
+GcStripeLogWriteRequest::GcStripeLogWriteRequest(GcStripeLogWriteCallback func, LogWriteContext* context)
+: callbackFunc(func),
+  context(context)
 {
-public:
-    GcLogWriteCompleted(void) = default;
-    GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback);
-    virtual ~GcLogWriteCompleted(void) = default;
+}
 
-    virtual bool Execute(void) override;
-
-    virtual void SetNumLogs(uint64_t val);
-
-private:
-    std::atomic<uint64_t> numLogs;
-    std::atomic<uint64_t> numCompletedLogs;
-
-    EventScheduler* eventScheduler;
-    EventSmartPtr callback;
-};
+bool
+GcStripeLogWriteRequest::Execute(void)
+{
+    int result = callbackFunc(context);
+    if (result < 0)
+    {
+        // TODO (cheolho.kang): Should handle the error case
+    }
+    return true;
+}
 
 } // namespace pos

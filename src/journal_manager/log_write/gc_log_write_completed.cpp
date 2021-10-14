@@ -34,13 +34,15 @@
 
 #include <assert.h>
 
+#include "src/event_scheduler/event_scheduler.h"
+
 namespace pos
 {
-GcLogWriteCompleted::GcLogWriteCompleted(GcLogWriteCallback callback, LogWriteContext* context)
+GcLogWriteCompleted::GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback)
 : numLogs(-1),
   numCompletedLogs(0),
-  callbackFunc(callback),
-  context(context)
+  eventScheduler(scheduler),
+  callback(callback)
 {
 }
 
@@ -52,7 +54,7 @@ GcLogWriteCompleted::Execute(void)
     uint64_t result = numCompletedLogs.fetch_add(1) + 1;
     if (result == numLogs)
     {
-        callbackFunc(context);
+        eventScheduler->EnqueueEvent(callback);
     }
     return true;
 }

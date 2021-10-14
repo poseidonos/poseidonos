@@ -148,8 +148,10 @@ JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, E
         logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
 
     // TODO (huijeong.kim) change GcLogWriteCompleted to inherit Callback instead of Event
-    EventSmartPtr callback = eventFactory->CreateGcLogWriteCompletedEvent(stripeFlushedLogWriteContext);
-    GcLogWriteCompleted* gcLogCallback = dynamic_cast<GcLogWriteCompleted*>(callback.get());
+    EventSmartPtr gcStripeLogWriteRequest = eventFactory->CreateGcStripeLogWriteRequestEvent(stripeFlushedLogWriteContext);
+    EventSmartPtr gcLogWriteCompleted = eventFactory->CreateGcLogWriteCompletedEvent(gcStripeLogWriteRequest);
+
+    GcLogWriteCompleted* gcLogCallback = dynamic_cast<GcLogWriteCompleted*>(gcLogWriteCompleted.get());
     assert(gcLogCallback != nullptr);
 
     if (mapUpdates.blockMapUpdateList.size() == 0)
@@ -161,7 +163,7 @@ JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, E
     else
     {
         MapPageList dummyList;
-        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, callback);
+        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, gcLogWriteCompleted);
         gcLogCallback->SetNumLogs(blockContexts.size());
 
         for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)

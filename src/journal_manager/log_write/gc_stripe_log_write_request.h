@@ -32,33 +32,29 @@
 
 #pragma once
 
-#include <atomic>
+#include <functional>
 
 #include "src/event_scheduler/event.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
 class LogWriteContext;
-class EventScheduler;
-class GcLogWriteCompleted : public Event
+
+using GcStripeLogWriteCallback = std::function<int(LogWriteContext*)>;
+
+class GcStripeLogWriteRequest : public Event
 {
 public:
-    GcLogWriteCompleted(void) = default;
-    GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback);
-    virtual ~GcLogWriteCompleted(void) = default;
+    GcStripeLogWriteRequest(void) = default;
+    GcStripeLogWriteRequest(GcStripeLogWriteCallback callback, LogWriteContext* context);
+    virtual ~GcStripeLogWriteRequest(void) = default;
 
     virtual bool Execute(void) override;
 
-    virtual void SetNumLogs(uint64_t val);
-
 private:
-    std::atomic<uint64_t> numLogs;
-    std::atomic<uint64_t> numCompletedLogs;
-
-    EventScheduler* eventScheduler;
-    EventSmartPtr callback;
+    GcStripeLogWriteCallback callbackFunc;
+    LogWriteContext* context;
 };
 
 } // namespace pos

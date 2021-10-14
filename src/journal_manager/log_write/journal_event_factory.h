@@ -32,12 +32,17 @@
 
 #pragma once
 
+#include <functional>
+
 #include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/log_write/gc_log_write_completed.h"
 
 namespace pos
 {
 class LogWriteHandler;
+class LogWriteContext;
+class EventScheduler;
+
+using GcStripeLogWriteCallback = std::function<int(LogWriteContext*)>;
 
 // TODO (huijeong.kim) : move to class to general folder to be used at everywhere in journal
 class JournalEventFactory
@@ -46,12 +51,14 @@ public:
     JournalEventFactory(void) = default;
     virtual ~JournalEventFactory(void) = default;
 
-    virtual void Init(LogWriteHandler* logWriteHandler);
+    virtual void Init(EventScheduler* scheduler, LogWriteHandler* logWriteHandler);
 
-    virtual EventSmartPtr CreateGcLogWriteCompletedEvent(LogWriteContext* callbackContext);
+    virtual EventSmartPtr CreateGcLogWriteCompletedEvent(EventSmartPtr callback);
+    virtual EventSmartPtr CreateGcStripeLogWriteRequestEvent(LogWriteContext* callbackContext);
 
 private:
-    GcLogWriteCallback gcCallbackFunc;
+    EventScheduler* eventScheduler;
+    GcStripeLogWriteCallback gcCallbackFunc;
 };
 
 } // namespace pos
