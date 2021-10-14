@@ -14,13 +14,14 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfOneOptionIsAvailable
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-3", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -33,12 +34,14 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfOneOptionIsAvailable
     EXPECT_CALL(*mockSpareDev1.get(), GetSize).WillRepeatedly(Return(homoSize));
 
     int homoNumaId = 1;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev1.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev2.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev3.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockSpareDev1.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
 
     DeviceClass system = DeviceClass::SYSTEM;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev1.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev2.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev3.get(), GetClass).WillRepeatedly(Return(system));
@@ -50,10 +53,11 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfOneOptionIsAvailable
     devs.push_back(mockDataDev3);
     devs.push_back(mockSpareDev1);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
@@ -66,8 +70,8 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInSam
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
@@ -79,6 +83,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInSam
     shared_ptr<MockUBlockDevice> mockSpareDev2 = make_shared<MockUBlockDevice>("unvme-ns-8", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-9", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -104,6 +109,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInSam
     EXPECT_CALL(*mockSpareDev2.get(), GetSize).WillRepeatedly(Return(anotherSize));
 
     int homoNumaId = 1;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev1.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev2.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev3.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
@@ -116,6 +122,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInSam
     EXPECT_CALL(*mockSpareDev2.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
 
     DeviceClass system = DeviceClass::SYSTEM;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev1.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev2.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev3.get(), GetClass).WillRepeatedly(Return(system));
@@ -139,10 +146,11 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInSam
     devs.push_back(mockSpareDev1);
     devs.push_back(mockSpareDev2);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
@@ -155,8 +163,8 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInter
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
@@ -168,6 +176,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInter
     shared_ptr<MockUBlockDevice> mockSpareDev2 = make_shared<MockUBlockDevice>("unvme-ns-8", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-9", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -193,6 +202,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInter
 
     int numaId = 1;
     int anotherNumaId = 0;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetNuma).WillRepeatedly(Return(numaId));
     EXPECT_CALL(*mockDataDev1.get(), GetNuma).WillRepeatedly(Return(numaId));
     EXPECT_CALL(*mockDataDev2.get(), GetNuma).WillRepeatedly(Return(numaId));
     EXPECT_CALL(*mockDataDev3.get(), GetNuma).WillRepeatedly(Return(numaId));
@@ -205,6 +215,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInter
     EXPECT_CALL(*mockSpareDev2.get(), GetNuma).WillRepeatedly(Return(anotherNumaId));
 
     DeviceClass system = DeviceClass::SYSTEM;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev1.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev2.get(), GetClass).WillRepeatedly(Return(system));
     EXPECT_CALL(*mockDataDev3.get(), GetClass).WillRepeatedly(Return(system));
@@ -228,29 +239,31 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfMultipleOptionsInter
     devs.push_back(mockSpareDev1);
     devs.push_back(mockSpareDev2);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
     // Then
     ASSERT_EQ(EID(SUCCESS), actual);
-    ASSERT_EQ(2, result.options.size());
+    ASSERT_EQ(1, result.options.size());
 }
 
 TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughNumaDevices)
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-3", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -281,10 +294,11 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughNumaDevices
     devs.push_back(mockDataDev3);
     devs.push_back(mockSpareDev1);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
@@ -296,13 +310,14 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughHomoSizeDev
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-3", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -333,10 +348,11 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughHomoSizeDev
     devs.push_back(mockDataDev3);
     devs.push_back(mockSpareDev1);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
@@ -348,13 +364,14 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughSystemDevic
 {
     // Given
     MockDeviceManager mockDevMgr(nullptr);
-    string writeBufferName = "uram0";
-    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>(writeBufferName, 0, nullptr);
+
+    shared_ptr<MockUBlockDevice> mockWriteBufferDev = make_shared<MockUBlockDevice>("uram0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev1 = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev2 = make_shared<MockUBlockDevice>("unvme-ns-1", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockDataDev3 = make_shared<MockUBlockDevice>("unvme-ns-2", 0, nullptr);
     shared_ptr<MockUBlockDevice> mockSpareDev1 = make_shared<MockUBlockDevice>("unvme-ns-3", 0, nullptr);
 
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetName).WillRepeatedly(Return("uram0"));
     EXPECT_CALL(*mockDataDev1.get(), GetName).WillRepeatedly(Return("unvme-ns-0"));
     EXPECT_CALL(*mockDataDev2.get(), GetName).WillRepeatedly(Return("unvme-ns-1"));
     EXPECT_CALL(*mockDataDev3.get(), GetName).WillRepeatedly(Return("unvme-ns-2"));
@@ -385,10 +402,11 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughSystemDevic
     devs.push_back(mockDataDev3);
     devs.push_back(mockSpareDev1);
 
+    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockWriteBufferDev));
     EXPECT_CALL(mockDevMgr, GetDevs).WillRepeatedly(Return(devs));
 
     // When
-    NumaAwaredArrayCreation naac({writeBufferName}, 3, 1, &mockDevMgr);
+    NumaAwaredArrayCreation naac({"uram0"}, 3, 1, &mockDevMgr);
     NumaAwaredArrayCreationResult result = naac.GetResult();
     int actual = result.code;
 
