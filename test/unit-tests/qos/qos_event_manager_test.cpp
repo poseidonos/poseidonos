@@ -5,7 +5,7 @@
 
 #include "src/bio/ubio.h"
 #include "src/include/backend_event.h"
-#include "src/qos/rate_limit.cpp"
+#include "src/qos/rate_limit.h"
 #include "test/unit-tests/qos/qos_context_mock.h"
 #include "test/unit-tests/qos/submission_adapter_mock.h"
 #include "test/unit-tests/qos/submission_notifier_mock.h"

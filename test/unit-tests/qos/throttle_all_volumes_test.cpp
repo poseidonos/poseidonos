@@ -29,7 +29,7 @@ TEST(AllVolumeThrottle, CheckVolumeThrottle_Getter_and_Setter)
     uint32_t arrayId = 0;
     allVolumeThrottle.InsertVolumeThrottle(arrayId, volId, volThrottle);
     std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& volumeThrottleMap = allVolumeThrottle.GetVolumeThrottleMap();
-    //ASSERT_NE(volumeThrottleMap, NULL);
+    // ASSERT_NE(volumeThrottleMap, NULL);
     uint32_t expectedCorrectionFlag = 0;
 
     uint32_t actualCorrectionFlag = volumeThrottleMap[make_pair(arrayId, volId)].CorrectionType();

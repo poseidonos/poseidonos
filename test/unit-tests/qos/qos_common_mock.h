@@ -8,31 +8,31 @@
 
 namespace pos
 {
-class Mockbw_iops_parameter : public bw_iops_parameter
+class MockbwIopsParameter : public bw_iops_parameter
 {
 public:
     using bw_iops_parameter::bw_iops_parameter;
 };
 
-class Mockpoller_structure : public poller_structure
+class MockpollerStructure : public poller_structure
 {
 public:
     using poller_structure::poller_structure;
 };
 
-class Mockqos_vol_policy : public qos_vol_policy
+class MockqosVolPolicy : public qos_vol_policy
 {
 public:
     using qos_vol_policy::qos_vol_policy;
 };
 
-class Mockqos_rebuild_policy : public qos_rebuild_policy
+class MockqosRebuildPolicy : public qos_rebuild_policy
 {
 public:
     using qos_rebuild_policy::qos_rebuild_policy;
 };
 
-class Mockqos_correction_type : public qos_correction_type
+class MockqosCorrectionType : public qos_correction_type
 {
 public:
     using qos_correction_type::qos_correction_type;

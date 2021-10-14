@@ -98,7 +98,7 @@ TEST(QosVolumeManager, VolumeMounted_Default_Parameters)
     volumeArrayInfo.arrayId = 0;
     volumeArrayInfo.arrayName = "POSArray1";
     bool expected = true, actual;
-    actual = qosVolumeManager.VolumeMounted(&volumeBase, &volumePerf, &volumeArrayInfo);qosVolumeManager.VolumeMounted
+    actual = qosVolumeManager.VolumeMounted(&volumeBase, &volumePerf, &volumeArrayInfo);
     ASSERT_EQ(expected, actual);
 #endif
 }
@@ -266,7 +266,7 @@ TEST(QosVolumeManager, ResetRateLimit_Test)
     uint32_t reactor = 1;
     int volId = 1;
     double offset = 100;
-    //EXPECT_CALL(mockBwIopsRateLimit, ResetRateLimit);
+    // EXPECT_CALL(mockBwIopsRateLimit, ResetRateLimit);
     qosVolumeManager.ResetRateLimit(reactor, volId, offset);
 }
 

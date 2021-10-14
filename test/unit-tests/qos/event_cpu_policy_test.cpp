@@ -28,7 +28,7 @@ TEST(EventCpuPolicy, HandlePolicy_TestRun)
     NiceMock<MockQosContext> qosContext;
     EventCpuPolicy eventCpuPolicy(&qosContext);
     eventCpuPolicy.HandlePolicy();
-    //do nothing
+    // do nothing
 }
 
 } // namespace pos

@@ -21,7 +21,7 @@ TEST(BwIopsRateLimit, IsLimitExceeded_Initial_Case)
     uint32_t id1 = 0;
     uint32_t id2 = 0;
     bool expectedRateExceeded = false;
-    //since intial case  iopsRateLimit[id1][id2] <= 0,condition wont satisy so expected value is false
+    // since intial case  iopsRateLimit[id1][id2] <= 0,condition wont satisy so expected value is false
     bool actualRateExceeded;
     actualRateExceeded = bwIopsRateLimit.IsLimitExceeded(id1, id2);
     ASSERT_EQ(expectedRateExceeded, actualRateExceeded);
@@ -38,7 +38,7 @@ TEST(BwIopsRateLimit, ResetRateLimit_Check_Setter_bwRateLimit)
     const int64_t iopsLimit = 0;
     bwIopsRateLimit.ResetRateLimit(id1, id2, offset, bwLimit, iopsLimit);
     bool expectedRateExceeded = true;
-    //since Reset Rate Limit will set bwRateLimit[id1][id2] <= 0,condition will satisy so expected value is true
+    // since Reset Rate Limit will set bwRateLimit[id1][id2] <= 0,condition will satisy so expected value is true
     bool actualRateExceeded;
     actualRateExceeded = bwIopsRateLimit.IsLimitExceeded(id1, id2);
     ASSERT_EQ(expectedRateExceeded, actualRateExceeded);

@@ -37,7 +37,7 @@ TEST(QosMonitoringManagerArray, UpdateVolumeParameter_TestRun)
 #if 0
     uint32_t arrayIndex = 0;
     NiceMock<MockQosContext> mockQoscontext;
-    QosMonitoringManagerArray qosMonitoringManagerArray(arrayIndex,&mockQoscontext);
+    QosMonitoringManagerArray qosMonitoringManagerArray(arrayIndex, &mockQoscontext);
     uint32_t volId = 0;
     qosMonitoringManagerArray.UpdateVolumeParameter(volId);
 #endif

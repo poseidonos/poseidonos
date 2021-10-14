@@ -39,7 +39,7 @@ TEST(QosProcessingManagerArray, Initilize_Test)
     int length = 100;
     NiceMock<MockMovingAvgCompute> mockMovingAvgCompute(length);
 
-    //EXPECT_CALL(mockMovingAvgCompute, Initilize);
+    // EXPECT_CALL(mockMovingAvgCompute, Initilize);
     qosProcessingManagerArray.Initilize();
 }
 

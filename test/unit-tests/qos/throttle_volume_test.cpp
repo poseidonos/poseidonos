@@ -29,7 +29,7 @@ TEST(VolumeThrottle, Reset_CorrectionFlag_Value_Test)
 
 TEST(VolumeThrottle, SetResetFlag_Check_Reset_Setter)
 {
-    //check for setter function to increase code coverage
+    // check for setter function to increase code coverage
     bool resetFlagVal = true;
 
     VolumeThrottle volumeThrottle;
@@ -38,7 +38,7 @@ TEST(VolumeThrottle, SetResetFlag_Check_Reset_Setter)
 
 TEST(VolumeThrottle, Setter_Getter_Check)
 {
-    //check the getter and setter for correctionFlag
+    // check the getter and setter for correctionFlag
     uint32_t correctionSet = 1;
     uint32_t correctionReturned;
     // set value

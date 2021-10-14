@@ -164,7 +164,7 @@ TEST(QosContext, Check_UpdateandGetReactorCoreListFunction)
     std::vector<uint32_t> reactorList;
     reactorList = qosContext.GetReactorCoreList();
     size_t noOfElements = reactorList.size();
-    //since the update function has been called only once, size of vector should be 1.
+    // since the update function has been called only once, size of vector should be 1.
     ASSERT_EQ(noOfElements, 1);
 
     ASSERT_EQ(reactorList[noOfElements - 1], reactorCore);

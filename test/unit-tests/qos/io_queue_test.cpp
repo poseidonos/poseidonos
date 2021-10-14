@@ -45,7 +45,7 @@ TEST(IoQueue, Check_EnqueueDequeue_Ubio)
 TEST(IoQueue, Check_EnqueueDequeue_pos_io)
 {
     IoQueue<pos_io*> ioQueue;
-    //struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
+    // struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
     struct pos_io io;
     io.ioType = 4;
     uint32_t id1 = 0;

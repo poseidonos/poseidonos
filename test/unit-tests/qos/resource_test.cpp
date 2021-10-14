@@ -23,8 +23,8 @@ TEST(QosResource, Check_Reset_and_Getter)
 {
     QosResource qosResource;
     qosResource.Reset();
-    //NiceMock<MockResourceArray> mockResourceArray ;//= new NiceMock<MockResourceArray>();
-    //EXPECT_CALL(mockResourceArray, Reset);
+    // NiceMock<MockResourceArray> mockResourceArray ;
+    // EXPECT_CALL(mockResourceArray, Reset);
     int arrayId = 0;
     ResourceNvramStripes resourceNvramStripes = qosResource.GetResourceNvramStripes(arrayId);
     ResourceArray resourceArray = qosResource.GetResourceArray(arrayId);
