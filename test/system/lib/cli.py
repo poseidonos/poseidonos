@@ -38,6 +38,15 @@ def create_array(buffer, data, spare, array, raid):
         param_str += " --raid " + raid
     return send_request("array create " + param_str)
 
+def auto_create_array(buffer, num_data, num_spare, array, raid):
+    param_str = "-b " + buffer
+    param_str += " -d " + str(num_data)
+    param_str += " -s " + str(num_spare)
+    param_str += " --array-name " + array
+    if raid != "":
+        param_str += " --raid " + raid
+    return send_request("array autocreate " + param_str)
+
 
 def delete_array(array):
     param_str = ""
