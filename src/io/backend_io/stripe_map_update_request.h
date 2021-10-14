@@ -47,9 +47,9 @@ class EventScheduler;
 class StripeMapUpdateRequest : public Callback
 {
 public:
-    explicit StripeMapUpdateRequest(Stripe* stripe, int arrayId);
+    explicit StripeMapUpdateRequest(Stripe* stripe, int arrayIdInput);
     StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-        IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event);
+        IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event, int arrayIdInput);
     ~StripeMapUpdateRequest(void) override;
 
 private:
@@ -59,6 +59,7 @@ private:
     IMetaUpdater* iMetaUpdater;
     EventScheduler* eventScheduler;
     CallbackSmartPtr completionEvent;
+    int arrayId;
 };
 
 } // namespace pos

@@ -37,6 +37,7 @@
 
 #include "flush_completion.h"
 #include "src/allocator/stripe/stripe.h"
+#include "src/allocator/event/stripe_put_event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
@@ -49,15 +50,15 @@
 
 namespace pos
 {
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, int arrayId)
-: StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
-      MetaServiceSingleton::Instance()->GetMetaUpdater(arrayId),
-      EventSchedulerSingleton::Instance(), make_shared<FlushCompletion>(stripe, arrayId))
+StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, int arrayIdInput)
+: StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayIdInput),
+      MetaServiceSingleton::Instance()->GetMetaUpdater(arrayIdInput),
+      EventSchedulerSingleton::Instance(), make_shared<FlushCompletion>(stripe, arrayIdInput), arrayIdInput)
 {
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-    IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event)
+    IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event, int arrayIdInput)
 : Callback(false, CallbackType_StripeMapUpdateRequest),
   stripe(stripe),
   iStripeMap(stripeMap),
@@ -65,6 +66,7 @@ StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* strip
   eventScheduler(eventScheduler),
   completionEvent(event)
 {
+    arrayId = arrayIdInput;
 }
 
 StripeMapUpdateRequest::~StripeMapUpdateRequest(void)
@@ -85,6 +87,16 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
 
     if (_GetErrorCount() > 0)
     {
+        StripeId nvmStripeId = stripe->GetWbLsid();
+        StripePutEvent event(*stripe, nvmStripeId, arrayId);
+
+        bool done = event.Execute();
+        FlushCountSingleton::Instance()->pendingFlush--;
+        if (false == done)
+        {
+            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));
+            eventScheduler->EnqueueEvent(eventForSchedule);
+        }
         POS_EVENT_ID eventId =
             POS_EVENT_ID::NFLSH_ERROR_DETECT;
         POS_TRACE_ERROR(static_cast<int>(eventId),

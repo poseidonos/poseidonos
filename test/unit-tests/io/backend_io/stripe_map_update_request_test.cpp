@@ -59,7 +59,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
 
     // When: Try to Create New StripeMapUpdateRequest object with 3 arguments
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockMetaUpdater, &mockEventScheduler, event);
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
 
     // Then: Do nothing
 }
@@ -73,9 +73,10 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCoun
     NiceMock<MockEventScheduler> mockEventScheduler;
     NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
     CallbackSmartPtr event(mockFlushCompletion);
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockMetaUpdater, &mockEventScheduler, event);
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
     stripeMapUpdateRequest.InformError(IOErrorType::GENERIC_ERROR);
     bool actual, expected{true};
 
@@ -97,7 +98,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
     CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockMetaUpdater, &mockEventScheduler, event);
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -124,7 +125,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_CompletionEven
     CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockMetaUpdater, &mockEventScheduler, event);
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -151,7 +152,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
     CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockMetaUpdater, &mockEventScheduler, event);
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
     bool actual, expected{false};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
