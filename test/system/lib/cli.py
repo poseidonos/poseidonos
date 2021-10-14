@@ -38,6 +38,7 @@ def create_array(buffer, data, spare, array, raid):
         param_str += " --raid " + raid
     return send_request("array create " + param_str)
 
+
 def auto_create_array(buffer, num_data, num_spare, array, raid):
     param_str = "-b " + buffer
     param_str += " -d " + str(num_data)
@@ -156,6 +157,7 @@ def list_device():
 
 def device_monitoring_state():
     return send_request("request monitoring_state")
+
 
 def wbt_request(event_name, argument):
     return send_request("wbt " + event_name + " " + argument)

@@ -14,11 +14,13 @@ import SCAN_DEV_BASIC
 
 ARRAYNAME = "POSArray"
 
+
 def execute():
     SCAN_DEV_BASIC.execute()
     cli.mbr_reset()
     out = cli.auto_create_array("uram0", 3, 1, ARRAYNAME, "RAID5")
     return out
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
