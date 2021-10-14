@@ -818,17 +818,21 @@ index 4fe815d06..cfcfc4a84 100644
  			nsid = req->cmd->nvme_cmd.nsid;
  
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
-index 05aaff048..ac750daa8 100644
+index 05aaff048..8c73cc7a9 100644
 --- lib/nvmf/nvmf.c
 +++ lib/nvmf/nvmf.c
-@@ -1055,7 +1055,10 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
+@@ -1055,7 +1055,14 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
  
  	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
  	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
 -
 +	if (qpair->qid != 0) {
-+		spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
-+							M_INVALID_SUBSYSTEM);
++		if (qpair->ctrlr != NULL && qpair->ctrlr->subsys != NULL) {
++			spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
++								M_INVALID_SUBSYSTEM);
++		} else {
++			SPDK_ERRLOG("Controller already destroyed for qid %d. Mapping not updated\n", qpair->qid);
++		}
 +	}
  	qpair_ctx = calloc(1, sizeof(struct nvmf_qpair_disconnect_ctx));
  	if (!qpair_ctx) {
@@ -858,10 +862,10 @@ index d76b742a3..7a9fb03a9 100644
  	const struct spdk_nvme_transport_id *trid);
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
-index 000000000..446c5450a
+index 000000000..713f410d6
 --- /dev/null
 +++ lib/nvmf/pos_nvmf.c
-@@ -0,0 +1,159 @@
+@@ -0,0 +1,161 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -985,24 +989,26 @@ index 000000000..446c5450a
 +_nvmf_update_reactor_subsystem_mapping(void *ctx)
 +{
 +	struct spdk_nvmf_qpair *qpair = ctx;
-+	if (qpair->ctrlr->subsys != NULL) {
-+		if (qpair->qid != 0) {
++	if (qpair->qid != 0) {
++		if (qpair->ctrlr != NULL && qpair->ctrlr->subsys != NULL) {
 +			spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
 +								M_VALID_SUBSYSTEM);
++		} else {
++			SPDK_ERRLOG("Controller already destroyed for qid %d. Mapping not updated\n", qpair->qid);
 +		}
 +	}
 +}
 +
 +void
-+spdk_nvmf_update_reactor_subsystem_mapping(struct spdk_nvmf_qpair* qpair)
++spdk_nvmf_update_reactor_subsystem_mapping(struct spdk_nvmf_qpair *qpair)
 +{
-+    if (spdk_likely(qpair->group->thread != spdk_get_thread())) {
-+        spdk_thread_send_msg(qpair->group->thread, _nvmf_update_reactor_subsystem_mapping, qpair);
-+        return;
-+    } else {
-+        _nvmf_update_reactor_subsystem_mapping(qpair);
-+        return;
-+    }
++	if (spdk_likely(qpair->group->thread != spdk_get_thread())) {
++		spdk_thread_send_msg(qpair->group->thread, _nvmf_update_reactor_subsystem_mapping, qpair);
++		return;
++	} else {
++		_nvmf_update_reactor_subsystem_mapping(qpair);
++		return;
++	}
 +}
 +
 +void
