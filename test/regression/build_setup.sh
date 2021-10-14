@@ -9,6 +9,8 @@ port=1158
 test_rev=0
 master_bin_path="/psdData/pos-bin"
 pos_bin_filename="poseidonos"
+build_optimization="OFF"
+job_number=12
 
 texecc()
 {
@@ -57,8 +59,68 @@ repositorySetup()
     echo "Setting git repository done"
 }
 
+setJobNumber()
+{
+    if [ $target_type == "PM" ] || [ $target_type == "PSD" ]
+    then
+        job_number=16
+    elif [ $target_type == "VM" ]
+    then
+        job_number=12
+    else
+        echo "## ERROR: incorrect target type(VM/PM/PSD)"
+        exit 1
+    fi
+}
+
+buildLib()
+{
+    echo "Build lib For $target_type"
+    texecc make CACHE=Y -j ${job_number} -C lib
+}
+
+buildPos()
+{
+    echo "Build For $target_type"
+    texecc make CACHE=Y -j ${job_number}
+}
+
+getPos()
+{
+    echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${target_ip}:${pos_working_dir}/bin ##"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -d ${pos_working_dir}/bin ]]
+    if [ ! $? -eq 0 ]
+    then
+        echo "## mkdir ${target_ip}:${pos_working_dir}/bin"
+        texecc mkdir ${pos_working_dir}/bin
+    else
+        echo "## rm old ${target_ip}:${pos_working_dir}/bin files"
+        texecc rm ${pos_working_dir}/bin/*
+    fi
+    sshpass -p bamboo sudo scp ${master_bin_path}/* root@${target_ip}:${pos_working_dir}/bin
+}
+
+backupPos()
+{
+    echo "## START TO COPY BIN FILES INTO MASTER : from ${target_ip}:${pos_working_dir}/bin to ${master_bin_path} ##"
+    sshpass -p bamboo sudo scp root@${target_ip}:${pos_working_dir}/bin/* ${master_bin_path}/
+
+    if [ -f ${master_bin_path}/${pos_bin_filename} ]
+    then
+        echo "#### COMPLETE TO COPY BINARY INTO MASTER ${master_bin_path}/${pos_bin_filename} "
+    else
+        echo "## ERROR: NO COPIED BINARY  ${master_bin_path}/${pos_bin_filename} "
+        exit 1
+    fi
+}
+
 buildTest()
 {
+    if [ $build_optimization == "ON" ]
+    then
+        texecc sed -i 's/O2/O0/g' $pos_working_dir/Makefile
+    fi
+
     texecc $pos_working_dir/script/pkgdep.sh
     texecc rm -rf /dev/shm/*
     texecc rm $pos_working_dir/bin/poseidonos
@@ -66,73 +128,49 @@ buildTest()
     texecc ./configure $config_option
     cwd=""
     sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
-    texecc make -j 4 clean
+    texecc make -j ${job_number} clean
 
-    if [ $target_type == "PM" ]
-    then
-        echo "Build lib For PM"
-        texecc make CACHE=Y -j 16 -C lib
-        echo "Build For PM"
-        texecc make CACHE=Y -j 16
-    elif [ $target_type == "PSD" ]
-    then
-        echo "Build lib For PSD"
-        texecc make CACHE=Y -j 16 -C lib
-        echo "Build For PSD"
-        texecc make CACHE=Y -j 16
-    elif [ $target_type == "VM" ]
+    if [ $target_type == "VM" ]
     then
         echo "copy air.cfg"
         texecc cp -f ${pos_working_dir}/config/air_ci.cfg ${pos_working_dir}/config/air.cfg
+    fi
 
-        echo "Build lib For VM"
-        texecc make CACHE=Y -j 4 -C lib
-        echo "Build For VM"
-        echo "#### CHECK BINARY IN MASTER : ${master_bin_path}/${pos_bin_filename} ####"
-        if [ ! -d ${master_bin_path} ]
+    if [ ! -d ${master_bin_path} ]
+    then
+        echo "## mkdir ${master_bin_path}"
+        sudo mkdir ${master_bin_path}
+    fi
+
+    buildLib
+    if [ $build_optimization == "OFF" ]
+    then
+        buildPos
+    else
+        if [ $target_type == "VM" ]
         then
-            echo "## mkdir ${master_bin_path}"
-            sudo mkdir ${master_bin_path}
-        fi
-        if [ -f ${master_bin_path}/${pos_bin_filename} ]
-        then
-            echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${target_ip}:${pos_working_dir}/bin ##"
-            sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -d ${pos_working_dir}/bin ]]
-            if [ ! $? -eq 0 ]
-            then
-                echo "## mkdir ${target_ip}:${pos_working_dir}/bin"
-                texecc mkdir ${pos_working_dir}/bin
-            else
-                echo "## rm old ${target_ip}:${pos_working_dir}/bin files"
-                texecc rm ${pos_working_dir}/bin/*
-            fi
-            sshpass -p bamboo sudo scp ${master_bin_path}/* root@${target_ip}:${pos_working_dir}/bin
-        else
-            echo "There is no binary with rev ${test_rev}"
-            echo "Build For VM"
-            texecc make CACHE=Y -j 4
-
-            sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f ${pos_working_dir}/bin/${pos_bin_filename} ]]
-            if [ ! $? -eq 0 ]
-            then
-                echo "## ERROR: NO BUILT BINARY  ${target_ip}:/${pos_working_dir}/bin/${pos_bin_filename} "
-                exit 1
-            fi
-
-            echo "## START TO COPY BIN FILES INTO MASTER : from ${target_ip}:${pos_working_dir}/bin to ${master_bin_path} ##"
-            sshpass -p bamboo sudo scp root@${target_ip}:${pos_working_dir}/bin/* ${master_bin_path}/
-
+            echo "#### CHECK BINARY IN MASTER : ${master_bin_path}/${pos_bin_filename} ####"
             if [ -f ${master_bin_path}/${pos_bin_filename} ]
             then
-                echo "#### COMPLETE TO COPY BINARY INTO MASTER ${master_bin_path}/${pos_bin_filename} "
+                getPos
             else
-                echo "## ERROR: NO COPIED BINARY  ${master_bin_path}/${pos_bin_filename} "
-                exit 1
+                buildPos
             fi
+        else
+            buildPos
         fi
-    else
-        echo "## ERROR: incorrect target type(VM/PM/PSD)"
+    fi
+
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f ${pos_working_dir}/bin/${pos_bin_filename} ]]
+    if [ ! $? -eq 0 ]
+    then
+        echo "## ERROR: NO BUILT BINARY  ${target_ip}:/${pos_working_dir}/bin/${pos_bin_filename} "
         exit 1
+    fi
+
+    if [ $target_type == "VM" ] && [ $build_optimization == "OFF" ]
+    then
+        backupPos
     fi
 
     texecc rm $pos_conf/pos.conf
@@ -189,6 +227,8 @@ do
         d) pos_root_dir="$OPTARG"
             pos_working_dir="${pos_root_dir}/ibofos"
             ;;
+        o) build_optimization="$OPTARG"
+            ;;
         ?) exit 2
             ;;
     esac
@@ -197,6 +237,7 @@ done
 printVariable
 processKill
 repositorySetup
+setJobNumber
 buildTest
 setupTest
 
