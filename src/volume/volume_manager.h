@@ -72,8 +72,6 @@ public:
     int Unmount(std::string name) override;
     int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw) override;
     int Rename(std::string oldname, std::string newname) override;
-    int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) override;
-    qos_vol_policy GetVolumePolicy(std::string volName) override;
 
     void DetachVolumes(void) override;
 

@@ -51,8 +51,6 @@ public:
     virtual int Unmount(std::string name) = 0;
     virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
-    virtual int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) = 0;
-    virtual qos_vol_policy GetVolumePolicy(std::string volName) = 0;
     virtual void DetachVolumes(void) = 0;
 
     virtual int VolumeName(int volId, std::string& volName) = 0;

@@ -349,34 +349,6 @@ VolumeManager::StateChanged(StateContext* prev, StateContext* next)
 }
 
 int
-VolumeManager::UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy)
-{
-    uint32_t volId = VolumeID(volName);
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    if (true == qosManager->IsFeQosEnabled())
-    {
-        return QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volPolicy, arrayInfo->GetIndex());
-    }
-    else
-    {
-        return (int)POS_EVENT_ID::QOS_NOT_SUPPORTED;
-    }
-}
-
-qos_vol_policy
-VolumeManager::GetVolumePolicy(std::string volName)
-{
-    uint32_t volId = VolumeID(volName);
-    qos_vol_policy volPolicy;
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    if (true == qosManager->IsFeQosEnabled())
-    {
-        volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId, arrayInfo->GetName());
-    }
-    return volPolicy;
-}
-
-int
 VolumeManager::_CheckPrerequisite(void)
 {
     if (stopped == true)
