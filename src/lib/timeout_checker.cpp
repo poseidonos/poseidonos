@@ -37,9 +37,9 @@ namespace pos
 TimeoutChecker::TimeoutChecker(void)
 {
 }
-
+// LCOV_EXCL_START
 TimeoutChecker::~TimeoutChecker(void)
 {
 }
-
+// LCOV_EXCL_STOP
 } // namespace pos
