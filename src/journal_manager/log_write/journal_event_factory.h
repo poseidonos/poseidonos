@@ -57,7 +57,7 @@ public:
     virtual EventSmartPtr CreateGcStripeLogWriteRequestEvent(LogWriteContext* callbackContext);
 
 private:
-    EventScheduler* eventScheduler;
+    EventScheduler* eventScheduler = nullptr;
     GcStripeLogWriteCallback gcCallbackFunc;
 };
 

@@ -60,7 +60,7 @@ public:
     string array;
     string part;
     RaidType raidType;
-    uint32_t arrayIndex;
+    uint32_t arrayIndex = 0;
     uint32_t faultIdx = 0;
     ArrayDevice* faultDev = nullptr;
     uint64_t stripeCnt = 0;
