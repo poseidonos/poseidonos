@@ -36,8 +36,9 @@ TEST(ArrayDeviceList, Exists_testWhenDevExists)
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
     UblockSharedPtr fakeUblockSharedPtr = make_shared<UnvmeSsd>(dataDevName, 1024, nullptr, fakeNs, "mock-addr");
     MockArrayDevice* mockDev = new MockArrayDevice(fakeUblockSharedPtr, ArrayDeviceState::NORMAL);
+    EXPECT_CALL(*mockDev, GetUblock).WillRepeatedly(Return(fakeUblockSharedPtr)); // Setting expectation should come before .AddData() below; otherwise, we'd see GMOCK warning uninteresting call.
     arrayDeviceList.AddData(mockDev);
-    EXPECT_CALL(*mockDev, GetUblock).WillRepeatedly(Return(fakeUblockSharedPtr));
+
     // When
     ArrayDeviceType actual = arrayDeviceList.Exists("mock-unvme");
     // Then

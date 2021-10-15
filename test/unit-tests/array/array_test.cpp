@@ -915,6 +915,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     EXPECT_CALL(*mockArrDev, SetUblock).Times(1);
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(true));
+    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false)); // the array is in mounted state as above, so cannot be in "broken" as a result
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL));
@@ -1031,7 +1032,7 @@ TEST(Array, Set_testIfSettersAreInvoked)
 {
     // Given: an array
     NiceMock<MockIStateControl> mockIStateControl;
-    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    NiceMock<MockArrayState>* mockState = new NiceMock<MockArrayState>(&mockIStateControl);
     Array array("mock", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     string expectedMRT = "mock-meta-raid-type";

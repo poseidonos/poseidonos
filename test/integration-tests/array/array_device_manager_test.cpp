@@ -41,6 +41,20 @@ MockUblockDevice(const char* devName)
     return shared_ptr<MockUBlockDevice>(rawPtr);
 }
 
+static void
+SuppressUninterestingCalls(const std::list<shared_ptr<MockUBlockDevice>>& uBlockDevices)
+{
+    for (auto& uBlockDev : uBlockDevices)
+    {
+        if (uBlockDev == nullptr)
+        {
+            continue;
+        }
+        EXPECT_CALL(*uBlockDev, SetClass).WillRepeatedly([](DeviceClass cls){});
+        EXPECT_CALL(*uBlockDev, GetSN).WillRepeatedly(Return("mock-SN"));
+    }
+}
+
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
 {
     // Given
@@ -71,6 +85,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
         .WillOnce(Return(data2UblockDevPtr))
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
@@ -169,6 +184,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
     EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
         .WillOnce(Return(nvm1UblockDevPtr))
         .WillOnce(Return(data1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr});
 
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
@@ -177,7 +193,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-    delete nvm1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
@@ -204,6 +219,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
     EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
         .WillOnce(Return(nvm1UblockDevPtr))
         .WillOnce(Return(data1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr});
 
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
@@ -212,7 +228,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-    delete nvm1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
@@ -245,6 +260,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
         .WillOnce(Return(data2UblockDevPtr))
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
@@ -253,10 +269,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-    delete nvm1UblockDevPtr.get();
-    delete data1UblockDevPtr.get();
-    delete data2UblockDevPtr.get();
-    delete data3UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
@@ -289,6 +301,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
         .WillOnce(Return(data2UblockDevPtr))
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
@@ -297,10 +310,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-    delete nvm1UblockDevPtr.get();
-    delete data1UblockDevPtr.get();
-    delete data2UblockDevPtr.get();
-    delete data3UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
@@ -334,6 +343,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
 
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
     // When
     int actual = arrDevMgr.ImportByName(nameSet);
 
@@ -341,11 +351,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
     int expected = (int)POS_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-    delete nvm1UblockDevPtr.get();
-    delete data1UblockDevPtr.get();
-    delete data2UblockDevPtr.get();
-    delete data3UblockDevPtr.get();
-    delete spare1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaSetInformation)
@@ -384,6 +389,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaS
         .WillOnce(Return(data2UblockDevPtr))
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
@@ -430,6 +436,7 @@ TEST(ArrayDeviceManager, Import_testIfNVMDeviceHasNoUblockWithMetaSetInformation
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr))
         .WillOnce(Return(nullptr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
@@ -483,6 +490,7 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceIsFaultState)
         .WillOnce(Return(data2UblockDevPtr))
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
@@ -537,6 +545,7 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
         .WillOnce(Return(nullptr))
         .WillOnce(Return(nullptr))
         .WillOnce(Return(nullptr));
+    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;

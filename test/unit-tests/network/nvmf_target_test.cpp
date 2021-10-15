@@ -7,6 +7,7 @@
 #include "test/unit-tests/network/nvmf_target_spy.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include "test/unit-tests/spdk_wrapper/spdk_caller_mock.h"
+#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 
 using namespace std;
 using ::testing::_;
@@ -295,21 +296,30 @@ TEST(NvmfTarget, DetachNamespace_FailedToGetNs2)
 
 TEST(NvmfTarget, DetachNamespace_GetNsSuccess)
 {
-    struct spdk_nvmf_tgt* target[1];
-    g_spdk_nvmf_tgt = target[0];
+    struct spdk_nvmf_tgt target;
+    memset(&target, 0, sizeof(target));
+    g_spdk_nvmf_tgt = &target;
+
     string nqn{"subnqn"};
     uint32_t nsid = 0;
     bool expected{true};
-    struct spdk_bdev* bdev;
-    struct spdk_nvmf_ns* ns[1];
-    struct spdk_nvmf_subsystem* subsystem[1];
+
+    struct spdk_bdev bdev;
+    memset(&bdev, 0, sizeof(bdev));
+
+    struct spdk_nvmf_ns ns;
+    memset(&ns, 0, sizeof(ns));
+
+    struct spdk_nvmf_subsystem subsystem;
+    memset(&subsystem, 0, sizeof(subsystem));
+
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
-    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(ns[0]));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(&subsystem));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(&bdev));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(&ns));
     ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_)).WillByDefault(Return(nullptr));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNextNs(_, _)).WillByDefault(Return(ns[0]));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_)).WillByDefault(Return(bdev));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNextNs(_, _)).WillByDefault(Return(&ns));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_)).WillByDefault(Return(&bdev));
     ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetId(_)).WillByDefault(Return(1));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillByDefault(Return(0));
 
