@@ -57,6 +57,9 @@ public:
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
 
     virtual int64_t GetNumUsedBlks(void);
+    virtual void SetCallback(EventSmartPtr cb);
+    virtual EventSmartPtr GetCallback(void);
+
     int InvalidateAllBlocks(void);
 
 private:
@@ -71,6 +74,7 @@ private:
     IBlockAllocator* iBlockAllocator;
 
     int arrayId;
+    EventSmartPtr callback;
 };
 
 } // namespace pos

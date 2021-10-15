@@ -104,7 +104,6 @@ private:
     std::atomic<bool> isVsaMapInternalAccessable[MAX_VOLUME_COUNT];
     std::atomic<int> numWriteIssuedCount;
     std::atomic<int> numLoadIssuedCount;
-    EventSmartPtr callback;
     EventScheduler* eventScheduler;
 };
 

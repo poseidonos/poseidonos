@@ -50,6 +50,7 @@ VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAlloc
     fileName = "VSAMap." + std::to_string(mapId) + ".bin";
     totalBlks = 0;
     this->arrayId = arrayId;
+    callback = nullptr;
 }
 
 VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo)
@@ -153,6 +154,18 @@ int64_t
 VSAMapContent::GetNumUsedBlks(void)
 {
     return mapHeader->GetNumUsedBlks();
+}
+
+void
+VSAMapContent::SetCallback(EventSmartPtr cb)
+{
+    callback = cb;
+}
+
+EventSmartPtr
+VSAMapContent::GetCallback(void)
+{
+    return callback;
 }
 
 int

@@ -7,8 +7,8 @@
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
 #include "test/unit-tests/mapper/stripemap/stripemap_manager_mock.h"
 #include "test/unit-tests/mapper/vsamap/vsamap_manager_mock.h"
-#include "test/unit-tests/state/interface/i_state_control_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
+#include "test/unit-tests/state/interface/i_state_control_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -34,8 +34,8 @@ TEST(Mapper, Init_InitAndDispose)
     mapper->Init();
     EXPECT_CALL(*strMan, FlushTouchedPages).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, FlushAllMaps).WillOnce(Return(0));
-    EXPECT_CALL(*strMan, WaitAllPendingIoDone).Times(2);
-    EXPECT_CALL(*vsaMan, WaitAllPendingIoDone).Times(2);
+    EXPECT_CALL(*strMan, WaitAllPendingIoDone).Times(3);
+    EXPECT_CALL(*vsaMan, WaitAllPendingIoDone).Times(3);
     EXPECT_CALL(*strMan, Dispose).Times(1);
     EXPECT_CALL(*vsaMan, Dispose).Times(1);
     EXPECT_CALL(*revMan, Dispose).Times(1);

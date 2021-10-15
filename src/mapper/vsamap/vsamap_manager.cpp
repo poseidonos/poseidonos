@@ -43,8 +43,7 @@ namespace pos
 VSAMapManager::VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, MapperAddressInfo* info)
 : addrInfo(info),
   numWriteIssuedCount(0),
-  numLoadIssuedCount(0),
-  callback(nullptr)
+  numLoadIssuedCount(0)
 {
     // only for UT
     vsaMaps[0] = vsaMap;
@@ -61,8 +60,7 @@ VSAMapManager::VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, 
 VSAMapManager::VSAMapManager(MapperAddressInfo* info)
 : addrInfo(info),
   numWriteIssuedCount(0),
-  numLoadIssuedCount(0),
-  callback(nullptr)
+  numLoadIssuedCount(0)
 {
     eventScheduler = EventSchedulerSingleton::Instance();
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
@@ -159,8 +157,8 @@ VSAMapManager::CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol)
 int
 VSAMapManager::LoadVSAMapFile(int volId)
 {
-    assert(vsaMaps[volId] != nullptr);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap] Issue Load VSAMap, volId:{}, array:{}", volId, addrInfo->GetArrayName());
+    assert(vsaMaps[volId] != nullptr);
     AsyncLoadCallBack cbLoadDone = std::bind(&VSAMapManager::_MapLoadDone, this, std::placeholders::_1);
     mapLoadState[volId] = MapLoadState::LOADING;
     numLoadIssuedCount++;
@@ -185,18 +183,20 @@ VSAMapManager::LoadVSAMapFile(int volId)
 int
 VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartPtr cb)
 {
-    if (numWriteIssuedCount != 0)
+    if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushDirtyPagesGiven] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushDirtyPagesGiven] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
-    assert(callback == nullptr);
-    callback = cb;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, array:{}", volId, addrInfo->GetArrayName());
+    assert(vsaMaps[volId] != nullptr);
+    assert(vsaMaps[volId]->GetCallback() == nullptr);
+    vsaMaps[volId]->SetCallback(cb);
 
     EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
     mapFlushState[volId] = MapFlushState::FLUSHING;
     numWriteIssuedCount++;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, array:{}", volId, addrInfo->GetArrayName());
+
     int ret = vsaMaps[volId]->FlushDirtyPagesGiven(dirtyPages, callBackVSAMap);
     if (ret < 0)
     {
@@ -214,18 +214,20 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
 int
 VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
 {
-    if (numWriteIssuedCount != 0)
+    if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
-    assert(callback == nullptr);
-    callback = cb;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, array:{}", volId, addrInfo->GetArrayName());
+    assert(vsaMaps[volId] != nullptr);
+    assert(vsaMaps[volId]->GetCallback() == nullptr);
+    vsaMaps[volId]->SetCallback(cb);
 
     EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
     mapFlushState[volId] = MapFlushState::FLUSHING;
     numWriteIssuedCount++;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, array:{}", volId, addrInfo->GetArrayName());
+
     int ret = vsaMaps[volId]->FlushTouchedPages(callBackVSAMap);
     if (ret < 0)
     {
@@ -243,12 +245,6 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
 int
 VSAMapManager::FlushAllMaps(void)
 {
-    if (numWriteIssuedCount != 0)
-    {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushAllMaps] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
-    }
-    assert(callback == nullptr);
     int ret = 0;
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushAllMaps] Issue Flush All VSAMaps, array:{}", addrInfo->GetArrayName());
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
@@ -341,10 +337,11 @@ void
 VSAMapManager::MapFlushDone(int mapId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] mapId:{} WritePendingCnt:{} Flushed Done", mapId, numWriteIssuedCount);
+    EventSmartPtr callback = vsaMaps[mapId]->GetCallback();
     if (callback != nullptr)
     {
         eventScheduler->EnqueueEvent(callback);
-        callback = nullptr;
+        vsaMaps[mapId]->SetCallback(nullptr);
     }
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;

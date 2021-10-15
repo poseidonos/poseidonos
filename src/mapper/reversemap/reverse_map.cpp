@@ -240,8 +240,6 @@ void
 ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
 {
     RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = static_cast<RevMapPageAsyncIoCtx*>(ctx);
-    POS_TRACE_INFO(EID(MFS_ASYNCIO_ERROR),
-            "[ReverseMap DoneHandler] numWriteIssued:{}, numReadIssued:{}, DoneIo", numWriteIssued, numLoadIssued);
     numWriteIssued = 0;
     numLoadIssued = 0;
     if (revMapPageAsyncIoReq->error != 0)

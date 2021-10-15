@@ -16,6 +16,8 @@ public:
     MOCK_METHOD(VirtualBlkAddr, GetEntry, (BlkAddr rba), (override));
     MOCK_METHOD(int, SetEntry, (BlkAddr rba, VirtualBlkAddr vsa), (override));
     MOCK_METHOD(int64_t, GetNumUsedBlks, (), (override));
+    MOCK_METHOD(void, SetCallback, (EventSmartPtr cb), (override));
+    MOCK_METHOD(EventSmartPtr, GetCallback, (), (override));
 };
 
 } // namespace pos

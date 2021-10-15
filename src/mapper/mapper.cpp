@@ -217,6 +217,9 @@ int
 Mapper::StoreAll(void)
 {
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StoreAll] Flush All Synchronously, array:{}", arrayName);
+    stripeMapManager->WaitAllPendingIoDone();
+    vsaMapManager->WaitAllPendingIoDone();
+
     int ret = stripeMapManager->FlushTouchedPages(nullptr);
     if (ret < 0)
     {
