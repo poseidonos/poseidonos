@@ -42,10 +42,12 @@
 
 namespace pos
 {
+
 class DeviceContext
 {
 public:
-    DeviceContext(void);
+    DeviceContext(SystemTimeoutChecker* timeoutChecker =
+                      new SystemTimeoutChecker());
     virtual ~DeviceContext(void);
 
     virtual void IncreasePendingIO(void);
@@ -60,7 +62,6 @@ public:
 private:
     bool _CheckErrorReady(IOContext& ioCtx);
     void _ReadyAllRemainingErrors(void);
-    void _ReadyCurrentRemainingError(void);
     void _ResetTargetExpiration(IOContext& firstErrorForNextTimeout);
     void _PrepareTimeoutChecker(void);
     std::list<IOContext*>::iterator _AddPendingIOContext(
@@ -76,7 +77,7 @@ private:
     uint32_t pendingIoCount;
     std::list<IOContext*> pendingErrorList;
     std::list<IOContext*>::iterator nextErrorCompletionStartIt;
-    SystemTimeoutChecker timeoutChecker;
+    SystemTimeoutChecker* timeoutChecker;
 };
 } // namespace pos
 

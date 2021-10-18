@@ -115,26 +115,6 @@ IOContext::GetDeviceName(void)
 }
 
 void
-IOContext::SetIOKey(std::list<IOContext*>::iterator it)
-{
-    keyForPendingIOList = it;
-    keyForPendingIOListSet = true;
-}
-
-std::pair<std::list<IOContext*>::iterator, bool>
-IOContext::GetIOKey(void)
-{
-    if (unlikely(false == keyForPendingIOListSet))
-    {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IOCTX_IO_KEY_NOT_SET;
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
-    }
-
-    return std::make_pair(keyForPendingIOList, keyForPendingIOListSet);
-}
-
-void
 IOContext::SetErrorKey(std::list<IOContext*>::iterator it)
 {
     keyForPendingErrorList = it;

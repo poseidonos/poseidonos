@@ -38,7 +38,12 @@ namespace pos
 IIODispatcher::IIODispatcher(void)
 {
 }
+
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 IIODispatcher::~IIODispatcher(void)
 {
 }
+// LCOV_EXCL_STOP
+
 } // namespace pos

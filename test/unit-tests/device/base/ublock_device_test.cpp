@@ -88,10 +88,6 @@ TEST(UBlockDevice, SubtractPendingErrorCount_)
 {
 }
 
-TEST(UBlockDevice, GetPendingErrorCount_)
-{
-}
-
 TEST(UBlockDevice, SetErrorDisregard_)
 {
 }
@@ -145,14 +141,6 @@ TEST(UBlockDevice, _RegisterThread_)
 }
 
 TEST(UBlockDevice, _UnRegisterContextToCurrentCore_)
-{
-}
-
-TEST(UBlockDevice, _IsCurrentCoreRegistered_)
-{
-}
-
-TEST(UBlockDevice, _IsCoreRegistered_)
 {
 }
 

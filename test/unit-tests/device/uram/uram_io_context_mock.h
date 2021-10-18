@@ -19,8 +19,6 @@ public:
     MOCK_METHOD(SpdkBdevCaller*, GetBdevCaller, ());
 
     // IoContext Functions
-    MOCK_METHOD(void, SetIOKey, (std::list<IOContext*>::iterator it), (override));
-    MOCK_METHOD((std::pair<std::list<IOContext*>::iterator, bool>), GetIOKey, (), (override));
     MOCK_METHOD(void, SetErrorKey, (std::list<IOContext*>::iterator it), (override));
     MOCK_METHOD((std::pair<std::list<IOContext*>::iterator, bool>), GetErrorKey, (), (override));
     MOCK_METHOD(std::string, GetDeviceName, (), (override));

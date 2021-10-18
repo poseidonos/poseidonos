@@ -34,19 +34,24 @@
 
 #include "src/include/branch_prediction.h"
 
-namespace pos
-{
+using namespace pos;
+
 const uint64_t
     DeviceContext::NANOS_TO_WAIT_UNTIL_ERROR_COMPLETION = 0ULL;
 
-DeviceContext::DeviceContext(void)
+DeviceContext::DeviceContext(SystemTimeoutChecker* timeoutChecker)
 : pendingIoCount(0),
-  nextErrorCompletionStartIt(pendingErrorList.end())
+  nextErrorCompletionStartIt(pendingErrorList.end()),
+  timeoutChecker(timeoutChecker)
 {
 }
 
 DeviceContext::~DeviceContext(void)
 {
+    if (timeoutChecker != nullptr)
+    {
+        delete timeoutChecker;
+    }
 }
 
 void
@@ -75,7 +80,7 @@ DeviceContext::AddPendingError(IOContext& errorToAdd)
     errorToAdd.SetErrorKey(it);
     errorToAdd.AddPendingErrorCount();
 
-    if (timeoutChecker.CheckTimeout())
+    if (timeoutChecker->CheckTimeout())
     {
         _ResetTargetExpiration(errorToAdd);
     }
@@ -91,7 +96,7 @@ DeviceContext::_ResetTargetExpiration(IOContext& firstErrorForNextTimeout)
     if (likely(errorAvailable))
     {
         nextErrorCompletionStartIt = currentIt;
-        timeoutChecker.SetTimeout(NANOS_TO_WAIT_UNTIL_ERROR_COMPLETION);
+        timeoutChecker->SetTimeout(NANOS_TO_WAIT_UNTIL_ERROR_COMPLETION);
     }
 }
 
@@ -121,15 +126,6 @@ DeviceContext::_ReadyAllRemainingErrors(void)
     nextErrorCompletionStartIt = pendingErrorList.end();
 }
 
-void
-DeviceContext::_ReadyCurrentRemainingError(void)
-{
-    if (pendingErrorList.end() != nextErrorCompletionStartIt)
-    {
-        nextErrorCompletionStartIt++;
-    }
-}
-
 IOContext*
 DeviceContext::GetPendingError(void)
 {
@@ -137,7 +133,7 @@ DeviceContext::GetPendingError(void)
 
     if (nullptr != ioCtx)
     {
-        if (timeoutChecker.CheckTimeout())
+        if (timeoutChecker->CheckTimeout())
         {
             _ReadyAllRemainingErrors();
         }
@@ -200,5 +196,3 @@ DeviceContext::_GetPendingIOContext(std::list<IOContext*>& ioCtxList)
 
     return pendingError;
 }
-
-} // namespace pos

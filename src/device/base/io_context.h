@@ -55,9 +55,6 @@ public:
     IOContext(UbioSmartPtr inputUbio, uint32_t inputRetry);
     virtual ~IOContext(void);
 
-    virtual void SetIOKey(std::list<IOContext*>::iterator it);
-    virtual std::pair<std::list<IOContext*>::iterator, bool> GetIOKey(void);
-
     virtual void SetErrorKey(std::list<IOContext*>::iterator it);
     virtual std::pair<std::list<IOContext*>::iterator, bool> GetErrorKey(void);
 

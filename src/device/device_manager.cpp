@@ -443,7 +443,7 @@ DeviceManager::GetNvmeCtrlr(std::string& deviceName)
     for (UblockSharedPtr dev : devices)
     {
         DeviceType deviceType = dev->GetType();
-        if (((DeviceType::SSD == deviceType) || (DeviceType::ZSSD == deviceType)) &&
+        if (DeviceType::SSD == deviceType &&
             (0 == static_cast<string>(dev->GetName()).compare(deviceName)))
         {
             UnvmeSsdSharedPtr unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);

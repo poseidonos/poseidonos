@@ -41,11 +41,14 @@ DeviceDriver::DeviceDriver(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 DeviceDriver::~DeviceDriver(void)
 {
     attach_event = nullptr;
     detach_event = nullptr;
 }
+// LCOV_EXCL_STOP
 
 int
 DeviceDriver::CompleteErrors(DeviceContext* deviceContext)

@@ -11,7 +11,7 @@ using testing::NiceMock;
 using testing::Return;
 using namespace pos;
 
-TEST(UnvmeSsd, testIfGetNsProperly)
+TEST(UnvmeSsd, GetNs_testIfGetNsProperly)
 {
     // Given
     NiceMock<MockSpdkNvmeCaller>* mockSpdkNvmeCaller =
@@ -32,4 +32,27 @@ TEST(UnvmeSsd, testIfGetNsProperly)
 
     // Then
     EXPECT_EQ(expected, ns);
-} // namespace pos
+}
+
+TEST(UnvmeSsd, GetByteAddress_testIfGetByteAddressInUnvmeSsd)
+{
+    // Given
+    NiceMock<MockSpdkNvmeCaller>* mockSpdkNvmeCaller =
+        new NiceMock<MockSpdkNvmeCaller>();
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
+    struct spdk_nvme_ns* ns = nullptr;
+    struct spdk_nvme_ctrlr_data data;
+    data.mn[0] = 0;
+    data.sn[0] = 0;
+    EXPECT_CALL(*mockSpdkNvmeCaller, SpdkNvmeCtrlrGetData)
+        .Times(2).WillRepeatedly(Return(&data));
+    UnvmeSsd unvmeSsd(
+        "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkEnvCaller);
+
+    // When : UnvmeSsd does not support this function. So it always returns nullptr
+    void* ret = unvmeSsd.GetByteAddress();
+
+    // Then
+    EXPECT_EQ(ret, nullptr);
+}

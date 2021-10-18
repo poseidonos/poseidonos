@@ -8,14 +8,6 @@ TEST(IOContext, IOContext_)
 {
 }
 
-TEST(IOContext, SetIOKey_)
-{
-}
-
-TEST(IOContext, GetIOKey_)
-{
-}
-
 TEST(IOContext, SetErrorKey_)
 {
 }

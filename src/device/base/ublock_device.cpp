@@ -45,41 +45,31 @@
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
-namespace pos
-{
+using namespace pos;
+
 thread_local uint32_t UBlockDevice::currentThreadVirtualId;
 std::atomic<uint32_t> UBlockDevice::lastVirtualId;
 
 UBlockDevice::UBlockDevice(std::string name, uint64_t size,
-    DeviceDriver* driverToUse)
-: driver(driverToUse),
+    DeviceDriver* driverToUse,
+    DeviceProperty* property)
+: property(property),
+  driver(driverToUse),
   pendingErrorCount(0),
   completeErrorAsSuccess(false),
   deviceContextCount(0),
   detachedFunctionProcessing(false),
   dedicatedIOWorker(nullptr)
 {
-    property.name = name;
-    property.size = size;
-    property.cls = DeviceClass::SYSTEM;
-    property.numa = UNKNOWN_NUMA_NODE;
+    property->name = name;
+    property->size = size;
+    property->cls = DeviceClass::SYSTEM;
+    property->numa = UNKNOWN_NUMA_NODE;
 
     for (auto& iter : contextArray)
     {
         iter = nullptr;
     }
-}
-
-bool
-UBlockDevice::_IsCurrentCoreRegistered(void)
-{
-    return (contextArray[currentThreadVirtualId] != nullptr);
-}
-
-bool
-UBlockDevice::_IsCoreRegistered(uint32_t coreId)
-{
-    return (contextArray[coreId] != nullptr);
 }
 
 bool
@@ -117,9 +107,17 @@ UBlockDevice::_UnRegisterContextToCurrentCore(void)
     }
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 UBlockDevice::~UBlockDevice(void)
 {
+    if (property != nullptr)
+    {
+        delete property;
+    }
 }
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 
 bool
 UBlockDevice::_RegisterThread(void)
@@ -331,12 +329,6 @@ UBlockDevice::SubtractPendingErrorCount(uint32_t errorsToSubtract)
     }
 }
 
-uint32_t
-UBlockDevice::GetPendingErrorCount(void)
-{
-    return pendingErrorCount;
-}
-
 void
 UBlockDevice::SetDedicatedIOWorker(IOWorker* ioWorker)
 {
@@ -365,4 +357,62 @@ UBlockDevice::GetDedicatedIOWorker(void)
     return dedicatedIOWorker;
 }
 
-} // namespace pos
+const char*
+UBlockDevice::GetName(void)
+{
+    return property->name.c_str();
+}
+
+string
+UBlockDevice::GetName(void) const
+{
+    return property->name;
+}
+
+uint64_t
+UBlockDevice::GetSize(void)
+{
+    return property->size;
+}
+
+DeviceType
+UBlockDevice::GetType(void)
+{
+    return property->type;
+}
+
+string
+UBlockDevice::GetSN(void) const
+{
+    return property->sn;
+}
+
+string
+UBlockDevice::GetMN(void)
+{
+    return property->mn;
+}
+
+DeviceClass
+UBlockDevice::GetClass(void)
+{
+    return property->cls;
+}
+
+int
+UBlockDevice::GetNuma(void)
+{
+    return property->numa;
+}
+
+DeviceProperty
+UBlockDevice::GetProperty(void)
+{
+    return *property;
+}
+
+void
+UBlockDevice::SetClass(DeviceClass cls)
+{
+    property->cls = cls;
+}

@@ -56,11 +56,11 @@ UnvmeSsd::UnvmeSsd(
   spdkNvmeCaller(spdkNvmeCaller),
   spdkEnvCaller(spdkEnvCaller)
 {
-    property.bdf = addr;
-    property.type = DeviceType::SSD;
-    property.mn = _GetMN();
-    property.sn = _GetSN();
-    property.numa = _GetNuma();
+    property->bdf = addr;
+    property->type = DeviceType::SSD;
+    property->mn = _GetMN();
+    property->sn = _GetSN();
+    property->numa = _GetNuma();
 }
 
 // Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov

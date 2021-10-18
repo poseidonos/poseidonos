@@ -74,10 +74,10 @@ Uram::Uram(std::string name,
 : UBlockDevice(name, size, driverToUse),
   baseByteAddress(nullptr)
 {
-    property.type = DeviceType::NVRAM;
-    property.mn = name;
-    property.sn = name;
-    property.numa = numa;
+    property->type = DeviceType::NVRAM;
+    property->mn = name;
+    property->sn = name;
+    property->numa = numa;
 
     // Uram dev only offload the ios to node 0
     reactorCount = AccelEngineApi::GetReactorCount();
@@ -97,7 +97,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
 {
     bool restoreSuccessful = true;
 
-    string backupFileName = "/tmp/" + property.name +".uram.data";
+    string backupFileName = "/tmp/" + property->name +".uram.data";
     const uint32_t bytesPerHugepage = 2 * SZ_1MB;
     int fd = -1;
 

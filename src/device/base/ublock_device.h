@@ -40,79 +40,12 @@
 #include <vector>
 
 #include "src/bio/ubio.h"
+#include "device_property.h"
 
 namespace pos
 {
-static const uint32_t SSD_MAX_QUEUE_DEPTH = 1024;
 
 class IOWorker;
-
-enum class DeviceClass
-{
-    SYSTEM,
-    ARRAY,
-};
-
-enum class DeviceType
-{
-    SSD,
-    NVRAM,
-    RAMDISK,
-    ZSSD,
-};
-
-const int UNKNOWN_NUMA_NODE = -1;
-class DeviceProperty
-{
-public:
-    DeviceType type;
-    DeviceClass cls;
-    std::string name;
-    uint64_t size;
-    std::string mn;
-    std::string sn;
-    std::string bdf;
-    int numa;
-
-    std::string
-    GetType(void)
-    {
-        switch (type)
-        {
-            case DeviceType::SSD:
-                return "SSD";
-
-            case DeviceType::NVRAM:
-                return "NVRAM";
-
-            case DeviceType::RAMDISK:
-                return "RAMDISK";
-
-            case DeviceType::ZSSD:
-                return "ZSSD";
-
-            default:
-                return "";
-        }
-    }
-
-    std::string
-    GetClass(void)
-    {
-        switch (cls)
-        {
-            case DeviceClass::SYSTEM:
-                return "SYSTEM";
-
-            case DeviceClass::ARRAY:
-                return "ARRAY";
-
-            default:
-                return "";
-        }
-    }
-};
-
 class DeviceContext;
 class DeviceDriver;
 class Ubio;
@@ -121,74 +54,32 @@ class UBlockDevice
 {
 public:
     explicit UBlockDevice(std::string name, uint64_t size,
-        DeviceDriver* driverToUse);
+        DeviceDriver* driverToUse,
+        DeviceProperty* property = new DeviceProperty());
     virtual ~UBlockDevice(void);
 
     virtual bool Open(void);
     virtual uint32_t Close(void);
-
     virtual int SubmitAsyncIO(UbioSmartPtr bio);
     virtual int CompleteIOs(void);
     virtual void* GetByteAddress(void);
     int Empty(void);
 
-    virtual const char*
-    GetName(void)
-    {
-        return property.name.c_str();
-    }
-    std::string
-    GetName(void) const
-    {
-        return property.name;
-    }
-    virtual uint64_t
-    GetSize(void)
-    {
-        return property.size;
-    }
-    virtual DeviceType
-    GetType(void)
-    {
-        return property.type;
-    }
-    virtual std::string
-    GetSN(void) const
-    {
-        return property.sn;
-    }
-    virtual std::string
-    GetMN(void)
-    {
-        return property.mn;
-    }
-    virtual DeviceClass
-    GetClass(void)
-    {
-        return property.cls;
-    }
-    virtual int
-    GetNuma(void)
-    {
-        return property.numa;
-    }
-    virtual DeviceProperty
-    GetProperty(void)
-    {
-        return property;
-    }
-
-    virtual void
-    SetClass(DeviceClass cls)
-    {
-        property.cls = cls;
-    }
+    virtual const char* GetName(void);
+    std::string GetName(void) const;
+    virtual uint64_t GetSize(void);
+    virtual DeviceType GetType(void);
+    virtual std::string GetSN(void) const;
+    virtual std::string GetMN(void);
+    virtual DeviceClass GetClass(void);
+    virtual int GetNuma(void);
+    virtual DeviceProperty GetProperty(void);
+    virtual void SetClass(DeviceClass cls);
     virtual bool IsAlive(void);
     virtual void ProfilePendingIoCount(uint32_t pendingIOCount);
 
     virtual void AddPendingErrorCount(uint32_t errorsToAdd = 1);
     virtual void SubtractPendingErrorCount(uint32_t errorsToSubtract = 1);
-    virtual uint32_t GetPendingErrorCount(void);
 
     virtual void SetDedicatedIOWorker(IOWorker* ioWorker);
     virtual IOWorker* GetDedicatedIOWorker(void);
@@ -201,7 +92,7 @@ protected:
     bool _CloseDeviceDriver(DeviceContext* deviceContextToClose);
     uint32_t _Empty(DeviceContext* deviceContext);
 
-    DeviceProperty property;
+    DeviceProperty* property;
 
 private:
     virtual bool _WrapupOpenDeviceSpecific(DeviceContext* devicecontext);
@@ -209,8 +100,6 @@ private:
     bool _RegisterContextToCurrentCore(DeviceContext* devCtx);
     bool _RegisterThread(void);
     void _UnRegisterContextToCurrentCore(void);
-    bool _IsCurrentCoreRegistered(void);
-    bool _IsCoreRegistered(uint32_t coreId);
 
     static thread_local uint32_t currentThreadVirtualId;
     static std::atomic<uint32_t> lastVirtualId;

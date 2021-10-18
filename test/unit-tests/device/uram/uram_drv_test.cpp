@@ -10,8 +10,8 @@
 using testing::_;
 using testing::NiceMock;
 using testing::Return;
-namespace pos
-{
+using namespace pos;
+
 TEST(UramDrv, UramDrvDestructor_testDestructUramDrvIfspdkCallerIsNullptr)
 {
     // Given
@@ -337,8 +337,86 @@ TEST(UramDrv, SubmitIO_testIfRetryCountIsExceeded)
     EXPECT_EQ(ret, 0);
 }
 
-TEST(UramDrv, _CloseBdev_)
+TEST(UramDrv, CompleteError_testIfCompleteErrorCalledProperly)
 {
+    // Given
+    UramDrv uramDrv;
+
+    // When
+    int ret = uramDrv.CompleteErrors(nullptr);
+
+    // Then
+    EXPECT_EQ(0, ret);
 }
 
-} // namespace pos
+TEST(UramDrv, SubmitIO_testIfRetryCallbackTriggerdProperly)
+{
+    // Given
+    struct spdk_io_channel channel;
+    UramDeviceContext devCtx("UtDevCtx");
+    devCtx.bdev_desc = nullptr;
+    devCtx.bdev_io_channel = &channel;
+    //NiceMock<MockUramIOContext>* mockIoCtx = new NiceMock<MockUramIOContext>();
+    NiceMock<MockUramIOContext> mockIoCtx;
+    EXPECT_CALL(mockIoCtx, GetDeviceContext).WillOnce(Return(&devCtx));
+    EXPECT_CALL(mockIoCtx, GetOpcode).WillOnce(Return(UbioDir::Read));
+    EXPECT_CALL(mockIoCtx, GetStartByteOffset).WillOnce(Return(0));
+    EXPECT_CALL(mockIoCtx, GetByteCount).WillOnce(Return(0));
+    EXPECT_CALL(mockIoCtx, GetBuffer).WillOnce(nullptr);
+    EXPECT_CALL(mockIoCtx, GetRetryCount).WillOnce(Return(0));
+    EXPECT_CALL(mockIoCtx, RequestRetry).WillOnce(
+        [](spdk_bdev_io_wait_cb callbackFunc)
+        {
+            callbackFunc(nullptr);
+            return true;
+        }
+    );
+    NiceMock<MockSpdkBdevCaller>* mockBdevCaller =
+        new NiceMock<MockSpdkBdevCaller>();
+    EXPECT_CALL(*mockBdevCaller, SpdkBdevRead)
+        .WillOnce(Return(-ENOMEM));
+
+    UramDrv uramDrv(mockBdevCaller);
+
+    // When
+    int ret = uramDrv.SubmitIO(&mockIoCtx);
+
+    // Then
+    EXPECT_EQ(ret, 0);
+}
+
+TEST(UramDrv, Open_testIfSpdkBdevOpenExtFailedAndCallbackTriggeredProperly)
+{
+    // Given
+    NiceMock<MockEventFrameworkApi> eventFrameworkApi;
+    EXPECT_CALL(eventFrameworkApi, IsReactorNow).WillOnce(Return(true));
+
+    struct spdk_bdev bdev;
+    NiceMock<MockSpdkBdevCaller>* mockSpdkBdevCaller =
+        new NiceMock<MockSpdkBdevCaller>();
+    EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevGetByName)
+        .WillOnce(Return(&bdev));
+    EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevOpenExt).WillOnce(
+        [](const char* bdev_name,
+            bool write,
+            spdk_bdev_event_cb_t event_cb,
+            void* event_ctx,
+            struct spdk_bdev_desc** desc) -> int
+        {
+            event_cb(spdk_bdev_event_type::SPDK_BDEV_EVENT_REMOVE,
+                nullptr, nullptr);
+            return -1;
+        }
+    );
+
+    UramDrv uramDrv(mockSpdkBdevCaller, nullptr, &eventFrameworkApi);
+    UramDeviceContext devCtx("UtDevCtx");
+    devCtx.opened = false;
+
+    // When
+    bool ret = uramDrv.Open(&devCtx);
+
+    // Then
+    EXPECT_FALSE(ret);
+
+}

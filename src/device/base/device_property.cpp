@@ -30,27 +30,38 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ublock_device_submission_adapter.h"
+#include "device_property.h"
 
-#include "ublock_device.h"
+using namespace pos;
+using namespace std;
 
-namespace pos
+string
+DeviceProperty::GetType(void)
 {
-UBlockDeviceSubmissionAdapter::UBlockDeviceSubmissionAdapter(void)
-{
+    string ret = "";
+    switch (type)
+    {
+        case DeviceType::SSD:
+            ret = "SSD";
+            break;
+        case DeviceType::NVRAM:
+            ret = "NVRAM";
+    }
+    return ret;
 }
 
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-UBlockDeviceSubmissionAdapter::~UBlockDeviceSubmissionAdapter(void)
+string
+DeviceProperty::GetClass(void)
 {
+    string ret = "";
+    switch (cls)
+    {
+        case DeviceClass::SYSTEM:
+            ret = "SYSTEM";
+            break;
+        case DeviceClass::ARRAY:
+            ret = "ARRAY";
+            break;
+    }
+    return ret;
 }
-// LCOV_EXCL_STOP
-
-int
-UBlockDeviceSubmissionAdapter::Do(UbioSmartPtr bio)
-{
-    UBlockDevice* device = bio->GetUBlock();
-    return device->SubmitAsyncIO(bio);
-}
-} // namespace pos

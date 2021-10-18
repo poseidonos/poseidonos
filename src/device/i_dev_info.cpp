@@ -32,12 +32,14 @@
 
 #include "i_dev_info.h"
 
-namespace pos
-{
+using namespace pos;
 IDevInfo::IDevInfo(void)
 {
 }
+
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 IDevInfo::~IDevInfo(void)
 {
 }
-} // namespace pos
+// LCOV_EXCL_STOP

@@ -148,7 +148,7 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     spdk_bdev_event_cb_t cb =
         [](enum spdk_bdev_event_type type,
             struct spdk_bdev* bdev,
-            void* event_ctx)
+            void* event_ctx) -> void
         {
             POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
                 "Unsupported bdev event: type {}", type);
@@ -257,13 +257,19 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
 {
     const int RETRYLIMIT = 1;
     int retValue = 0;
+    if (ioCtx == nullptr)
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_WARN_MSG;
+        POS_REPORT_WARN(eventId, "Failed to SumbitIO. IOContext is null");
+        return 0;
+    }
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     spdk_bdev_io_completion_cb callbackFunc;
 
     callbackFunc = &AsyncIOComplete;
 
     retValue = _RequestIO(devCtx, callbackFunc, ioCtx);
-    auto retryFunc = [](void* arg)
+    spdk_bdev_io_wait_cb retryFunc = [](void* arg) -> void
     {
         UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);
         UramDrvSingleton::Instance()->SubmitIO(ioCtx);
