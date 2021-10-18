@@ -125,7 +125,7 @@ MergedIO::Process(int arrayId)
         if (ioDispatcher->Submit(ubio) < 0)
         {
             IOSubmitHandlerStatus status =
-                _CheckAsyncReadError(POS_EVENT_ID::REF_COUNT_RAISE_FAIL, arrayId);
+                _CheckAsyncReadError(arrayId);
             return status;
         }
     }
@@ -134,7 +134,7 @@ MergedIO::Process(int arrayId)
 }
 
 IOSubmitHandlerStatus
-MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId)
+MergedIO::_CheckAsyncReadError(int arrayId)
 {
     if (StateEnum::TYPE_COUNT == stateType)
     {
@@ -147,7 +147,8 @@ MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId)
 
     if (StateEnum::STOP == stateType)
     {
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::REF_COUNT_RAISE_FAIL;
+        POS_TRACE_ERROR(eventId, "When Io Submit, refcount raise fail");
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }
     return IOSubmitHandlerStatus::SUCCESS;

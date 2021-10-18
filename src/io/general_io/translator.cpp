@@ -86,7 +86,7 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_VOLUME_ID;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Volume ID is not valid at Translator");
         throw eventId;
     }
 
@@ -147,7 +147,7 @@ Translator::GetVsa(uint32_t blockIndex)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Only valid for single block Translator");
         return UNMAP_VSA;
     }
 
@@ -167,7 +167,7 @@ Translator::GetLsidRefResult(uint32_t blockIndex)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Only valid for single block Translator");
         StripeAddr unmapLsid;
         unmapLsid.stripeId = UNMAP_STRIPE;
         unmapLsid.stripeLoc = IN_USER_AREA;
@@ -254,7 +254,7 @@ Translator::GetPba(uint32_t blockIndex)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Translate() or Convert() is failed");
         throw eventId;
     }
 
@@ -268,7 +268,7 @@ Translator::_GetLsa(uint32_t blockIndex)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_INVALID_BLOCK_INDEX;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Block index exceeds block count at Translator");
         throw eventId;
     }
 
@@ -303,7 +303,7 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Translate() or Convert() is failed");
         throw eventId;
     }
     return entries;
@@ -336,7 +336,7 @@ Translator::_CheckSingleBlock(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Only valid for single block Translator");
         throw eventId;
     }
 }

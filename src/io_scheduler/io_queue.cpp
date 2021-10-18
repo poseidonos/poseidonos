@@ -73,7 +73,7 @@ IOQueue::EnqueueUbio(UbioSmartPtr input)
     if (nullptr == input)
     {
         POS_TRACE_WARN((int)POS_EVENT_ID::IOQ_ENQUEUE_NULL_UBIO,
-            PosEventId::GetString(POS_EVENT_ID::IOQ_ENQUEUE_NULL_UBIO));
+            "Enqueue null ubio");
         return;
     }
 

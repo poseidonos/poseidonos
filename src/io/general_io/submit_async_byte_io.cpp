@@ -129,7 +129,7 @@ AsyncByteIO::Execute(
     {
         int event = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_BUFFER_NULLPTR);
         POS_TRACE_ERROR(event,
-            PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_BUFFER_NULLPTR));
+            "Buffer pointer of Byte IO is null");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
@@ -141,7 +141,7 @@ AsyncByteIO::Execute(
         int event
             = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE);
         POS_TRACE_ERROR(event,
-            PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE));
+            "Parition type is not allowed for memory access");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
@@ -165,7 +165,7 @@ AsyncByteIO::Execute(
         int event
             = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_DIR_NOT_SUPORTTED);
         POS_TRACE_ERROR(event,
-            PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_DIR_NOT_SUPORTTED),
+            "Given Direction {} is not supported",
             static_cast<int>(direction));
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
@@ -177,7 +177,7 @@ AsyncByteIO::Execute(
         int event
             = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR);
         POS_TRACE_ERROR(event,
-            PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR));
+            "Translate or Convert Error in ByteIO");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;

@@ -155,7 +155,7 @@ SubmitAsyncWrite::Execute(
             if (ioDispatcher->Submit(ubio) < 0)
             {
                 errorToReturn =
-                    _CheckAsyncWriteError(POS_EVENT_ID::REF_COUNT_RAISE_FAIL, arrayId);
+                    _CheckAsyncWriteError(arrayId);
                 continue;
             }
         }
@@ -169,7 +169,7 @@ SubmitAsyncWrite::Execute(
 }
 
 IOSubmitHandlerStatus
-SubmitAsyncWrite::_CheckAsyncWriteError(POS_EVENT_ID eventId, int arrayId)
+SubmitAsyncWrite::_CheckAsyncWriteError(int arrayId)
 {
     /*To do Remove after adding array Idx by Array*/
     IArrayInfo* info = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
@@ -177,7 +177,8 @@ SubmitAsyncWrite::_CheckAsyncWriteError(POS_EVENT_ID eventId, int arrayId)
     IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(info->GetName());
     if (stateControl->GetState()->ToStateType() == StateEnum::STOP)
     {
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::REF_COUNT_RAISE_FAIL;
+        POS_TRACE_ERROR(eventId, "When Io Submit, refcount raise fail");
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }
 

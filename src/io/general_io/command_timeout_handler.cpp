@@ -143,13 +143,13 @@ CommandTimeoutHandler::AbortCompletionHandler::_DoSpecificJob(void)
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_COMPLETION_FAILED;
         const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(abortContext->ctrlr);
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId), ctrlrData->sn);
+            "Failed to complete command abort: SN: {}", ctrlrData->sn);
         CommandTimeoutHandler::_TryResetHandler(abortContext->ctrlr, abortContext->qpair, abortContext->cid);
     }
     else
     {
         POS_TRACE_INFO(static_cast<int>(eventId),
-            PosEventId::GetString(eventId), ctrlrData->sn);
+            "successfully complete command abort: SN: {}", ctrlrData->sn);
     }
 
     CommandTimeoutHandler::_Delete(abortContext->ctrlr, abortContext->cid);
@@ -196,7 +196,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_TIMEOUT;
         const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(ctrlr);
         POS_TRACE_INFO(static_cast<int>(eventId),
-            PosEventId::GetString(eventId),
+            "Abort Also Timeout: SN: {}, QPair: {}, CID: {}",
             ctrlrData->sn, reinterpret_cast<uint64_t>(qpair), cid);
 
         _ResetHandler(ctrlr, qpair, cid);
@@ -209,7 +209,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
 
     POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SUBMITTING_CMD_ABORT;
     POS_TRACE_INFO(static_cast<int>(eventId),
-        PosEventId::GetString(eventId),
+        "Requesting command abort: SN: {}, QPair: {}, CID: {}",
         ctrlrData->sn, reinterpret_cast<uint64_t>(qpair), cid);
 
     AbortContext* abortContext = new AbortContext(ctrlr, qpair, cid);
@@ -228,7 +228,7 @@ CommandTimeoutHandler::_ResetHandler(
     spdk_nvme_ctrlr_fail_and_remove(ctrlr);
     POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_CONTROLLER_RESET;
     POS_TRACE_ERROR(static_cast<int>(eventId),
-        PosEventId::GetString(eventId), ctrlrData->sn);
+        "Controller Reset : SN : {}", ctrlrData->sn);
 }
 
 // In callback function is called, device can be already detached.

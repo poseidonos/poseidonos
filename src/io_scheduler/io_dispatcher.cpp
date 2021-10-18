@@ -212,7 +212,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IODISPATCHER_INVALID_PARM;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid Param in submit IO");
         IoCompleter ioCompleter(ubio);
         ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
         return PARAM_FAILED;
@@ -326,7 +326,8 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_COMPLETION_FAILED;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Error: occurred while getting IO completion events from device: {}",
+            dev->GetName());
     }
     else
     {
@@ -389,7 +390,8 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::DEVICE_COMPLETION_FAILED;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId), dev->GetName());
+                "Error: occurred while getting IO completion events from device: {}",
+                dev->GetName());
 
             frontendDone = true;
         }

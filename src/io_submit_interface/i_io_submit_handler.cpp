@@ -66,7 +66,7 @@ IIOSubmitHandler::GetInstance(void)
     if (unlikely(instance == nullptr))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::I_IOSMHDLR_NULLPTR;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "IIOSubmitHandler instance nullptr!");
     }
     return instance;
 }

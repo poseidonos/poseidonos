@@ -66,6 +66,6 @@ private:
     IODispatcher* ioDispatcher;
     StateType stateType;
 
-    IOSubmitHandlerStatus _CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId);
+    IOSubmitHandlerStatus _CheckAsyncReadError(int arrayId);
 };
 } // namespace pos

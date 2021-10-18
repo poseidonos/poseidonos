@@ -93,7 +93,8 @@ SubmitAsyncRead::Execute(
         if (blockCount < blockCountFromBufferList)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IOSMHDLR_COUNT_DIFFERENT;
-            POS_TRACE_WARN(eventId, PosEventId::GetString(eventId),
+            POS_TRACE_WARN(eventId,
+                "IOSubmitHandler Async BufferCounts are different :  total of each entries {}  blkcnt :{}",
                 blockCountFromBufferList, blockCount);
         }
         else

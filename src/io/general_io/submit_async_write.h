@@ -63,6 +63,6 @@ private:
     IIOTranslator* translator;
     IODispatcher* ioDispatcher;
 
-    IOSubmitHandlerStatus _CheckAsyncWriteError(POS_EVENT_ID eventId, int arrayId);
+    IOSubmitHandlerStatus _CheckAsyncWriteError(int arrayId);
 };
 } // namespace pos
