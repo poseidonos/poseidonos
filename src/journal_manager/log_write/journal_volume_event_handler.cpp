@@ -38,6 +38,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/checkpoint_manager.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/checkpoint/meta_flush_completed.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
@@ -55,6 +56,7 @@ JournalVolumeEventHandler::JournalVolumeEventHandler(void)
   config(nullptr),
   logFactory(nullptr),
   checkpointManager(nullptr),
+  dirtyMapManager(nullptr),
   logWriteHandler(nullptr),
   logWriteInProgress(false),
   flushInProgress(false)
@@ -67,13 +69,14 @@ JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
-    CheckpointManager* cpManager, LogWriteHandler* writter,
-    JournalConfiguration* journalConfiguration,
+    CheckpointManager* cpManager, DirtyMapManager* dirtyManager,
+    LogWriteHandler* writter, JournalConfiguration* journalConfiguration,
     IContextManager* contextManagerToUse, EventScheduler* scheduler)
 {
     config = journalConfiguration;
     logFactory = factory;
     checkpointManager = cpManager;
+    dirtyMapManager = dirtyManager;
     logWriteHandler = writter;
 
     contextManager = contextManagerToUse;
@@ -110,6 +113,8 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
     }
 
     _WaitForLogWriteDone(volumeId);
+
+    dirtyMapManager->DeleteDirtyList(volumeId);
 
     POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
         "Write volume deleted log done, volume id {} segInfo version is {}", volumeId, segCtxVersion);
