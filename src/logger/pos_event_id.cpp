@@ -215,6 +215,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::URAM_BACKUP_FILE_STAT_FAILED, "Cannot get URAM backup file stat"},
             {POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED, "Cannot open uram config file"},
             {POS_EVENT_ID::URAM_COMPLETION_TIMEOUT, "URAM completion checking timed out"},
+            {POS_EVENT_ID::URAM_COMPLETION_FAILED, "URAM completion failed"},
             {POS_EVENT_ID::URAM_FAIL_TO_CLOSE, "Fail to close URAM"},
             {POS_EVENT_ID::URAM_FAIL_TO_OPEN, "Fail to open URAM"},
             {POS_EVENT_ID::URAM_FAIL_TO_REQUEST_IO, "Fail to request nvram IO to reactor"},
