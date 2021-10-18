@@ -204,7 +204,7 @@ AccelEngineApi::_HandleInitialize(void* arg1)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IOATAPI_FAIL_TO_INITIALIZE;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Fail to initialize IOAT");
         }
     }
 }
@@ -307,7 +307,7 @@ AccelEngineApi::_HandleFinalize(void* arg1)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IOATAPI_FAIL_TO_FINALIZE;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Fail to finalize IOAT");
         }
     }
 }
@@ -328,7 +328,7 @@ AccelEngineApi::Finalize(EventFrameworkApi* eventFrameworkApi)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IOATAPI_FAIL_TO_FINALIZE;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Fail to finalize IOAT");
         return;
     }
 

@@ -108,8 +108,8 @@ NvmfVolumePos::_NamespaceDetachedAllHandler(void* cbArg, int status)
         {
             detachFailed = true;
             POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId),
-                "Requested volumes may have been detached since subsystem does not exist.");
+            POS_TRACE_WARN(static_cast<int>(eventId),
+            "Subsystem is not found Requested, volumes may have been detached since subsystem does not exist.");
         }
         else
         {
@@ -157,7 +157,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+            POS_TRACE_WARN(static_cast<int>(eventId), "Fail to create pos bdev({})", bdevName);
         }
         delete vInfo;
         vInfo = nullptr;
@@ -189,7 +189,7 @@ NvmfVolumePos::_VolumeDeleteHandler(void* arg1, void* arg2)
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            POS_TRACE_WARN(static_cast<int>(eventId), "Fail to delete pos bdev");
         }
 
         delete vInfo;
@@ -263,7 +263,7 @@ NvmfVolumePos::_VolumeUnmountHandler(void* arg1, void* arg2)
             {
                 POS_EVENT_ID eventId =
                     POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
-                POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+                POS_TRACE_WARN(static_cast<int>(eventId), "Fail to delete pos bdev");
             }
         }
     }
@@ -395,7 +395,8 @@ NvmfVolumePos::_WaitVolumeDetached(uint32_t volCnt, uint64_t time)
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Volume detached count is bigger than expected volume count");
         volumeDetachedCnt = 0;
         detachFailed = false;
         return false;

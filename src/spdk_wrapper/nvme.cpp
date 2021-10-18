@@ -521,14 +521,14 @@ Nvme::ControllerTimeoutCallback(void* cbArg, struct spdk_nvme_ctrlr* ctrlr,
 
     POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_COMPLETION_TIMEOUT;
     POS_TRACE_WARN(static_cast<int>(eventId),
-        PosEventId::GetString(eventId), ctrlData->sn);
+        "uNVMe completion checking timed out: SN: {}", ctrlData->sn);
 
     union spdk_nvme_csts_register csts = spdk_nvme_ctrlr_get_regs_csts(ctrlr);
     if (csts.bits.cfs)
     {
         eventId = POS_EVENT_ID::UNVME_CONTROLLER_FATAL_STATUS;
         POS_TRACE_WARN(static_cast<int>(eventId),
-            PosEventId::GetString(eventId), ctrlData->sn);
+            "Controller Fatal Status, reset required: SN: {}", ctrlData->sn);
 
         resetHandler(ctrlr, qpair, cid);
         return;

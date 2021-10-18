@@ -102,7 +102,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
     if (unlikely(core >= MAX_REACTOR_COUNT))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::EVENTFRAMEWORK_INVALID_REACTOR;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), core);
+        POS_TRACE_ERROR(eventId, "Reactor {} is not processable", core);
         return false;
     }
 
@@ -123,7 +123,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::EVENTFRAMEWORK_FAIL_TO_ALLOCATE_EVENT;
-        POS_TRACE_WARN(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_WARN(eventId, "Fail to allocate spdk event");
         _SendEventToSpareQueue(core, func, arg1);
     }
     return true;

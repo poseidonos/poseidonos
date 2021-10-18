@@ -98,7 +98,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST;
-        POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_TRACE_INFO(static_cast<int>(eventId), "Requested bdev{} already exist", bdevName);
         return false;
     }
     if (false == uuid.empty())
@@ -129,7 +129,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to create pos bdev({})", bdevName);
         return false;
     }
     struct EventContext* ctx = _CreateEventContext(nullptr, nullptr,
@@ -693,7 +693,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            POS_TRACE_WARN(static_cast<int>(eventId), "Fail to parse volume id from bdev name");
             ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
@@ -702,7 +702,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            POS_TRACE_WARN(static_cast<int>(eventId), "Fail to parse array name from bdev name");
             ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
@@ -728,7 +728,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_BDEV_DOES_NOT_EXIST;
-        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_TRACE_WARN(static_cast<int>(eventId), "Fail to find requested bdev : {}", bdevName);
         return "";
     }
     const struct spdk_uuid* uuid = spdkCaller->SpdkBdevGetUuid(bdev);
@@ -736,7 +736,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_BDEV_UUID_DOES_NOT_EXIST;
-        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_TRACE_WARN(static_cast<int>(eventId), "Fail to get requeted bdev uuid : {}", bdevName);
         return "";
     }
     int ret = spdkCaller->SpdkUuidFmtLower(uuidStr, sizeof(uuidStr), uuid);
@@ -744,7 +744,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING;
-        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_TRACE_WARN(static_cast<int>(eventId), "Fail to convert uuid into string : {}", bdevName);
         return "";
     }
     return uuidStr;
