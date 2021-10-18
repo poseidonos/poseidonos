@@ -63,7 +63,7 @@ UNVMfCompleteHandler(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_COMPLETION_POLLING_FAIL;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Fail to poll ibof completion");
     }
 }
 
@@ -76,7 +76,7 @@ UNVMfSubmitHandler(struct pos_io* io)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_NULL_COMMAND;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Command from bdev is empty");
             throw eventId;
         }
         if (io->ioType > IO_TYPE::ADMIN)
@@ -94,7 +94,7 @@ UNVMfSubmitHandler(struct pos_io* io)
                 {
                     POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_WRONG_BUFFER;
                     POS_TRACE_ERROR(static_cast<int>(eventId),
-                            PosEventId::GetString(eventId));
+                            "Single IO command should have a continuous buffer");
                     throw eventId;
                 }
                 break;
@@ -109,7 +109,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             default:
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
-                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+                POS_TRACE_ERROR(eventId, "Wrong IO direction (only read/write types are suppoered)");
                 throw eventId;
                 break;
             }
@@ -144,7 +144,7 @@ UNVMfSubmitHandler(struct pos_io* io)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_SUBMISSION_FAIL;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Fail to submit ibof IO");
 
         if (nullptr != io && nullptr != io->complete_cb)
         {

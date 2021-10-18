@@ -173,7 +173,7 @@ AioCompletion::_SendUserCompletion(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_END;
         POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-            eventId, PosEventId::GetString(eventId),
+            eventId, "Flush End in Aio, volume id : {}",
             posIo.volume_id);
     }
     else
@@ -217,7 +217,7 @@ AIO::CreateVolumeIo(pos_io& posIo)
         default:
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
-            POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+            POS_TRACE_ERROR(eventId, "Wrong IO direction (only read/write types are suppoered)");
             throw eventId;
             break;
         }
@@ -243,7 +243,7 @@ AIO::_CreateFlushIo(pos_io& posIo)
 
     POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_START;
     POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-        eventId, PosEventId::GetString(eventId),
+        eventId, "Flush Start in Aio, volume id : {}",
         posIo.volume_id);
 
     CallbackSmartPtr aioCompletion(new AioCompletion(flushIo, posIo,
@@ -295,7 +295,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         default:
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
-            POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+            POS_TRACE_ERROR(eventId, "Wrong IO direction (only read/write types are suppoered)");
             throw eventId;
             break;
         }

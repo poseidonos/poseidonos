@@ -370,7 +370,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
-            POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId));
+            POS_TRACE_DEBUG(eventId, "No free space in write buffer");
 
             /*To do Remove after adding array Idx by Array*/
             IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
@@ -381,7 +381,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             {
                 POS_EVENT_ID eventId =
                     POS_EVENT_ID::WRHDLR_FAIL_BY_SYSTEM_STOP;
-                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+                POS_TRACE_ERROR(eventId, "System Stop incurs write fail");
                 throw eventId;
             }
             break;

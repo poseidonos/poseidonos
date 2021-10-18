@@ -75,7 +75,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Block aligning Ubio is null");
             throw eventId;
         }
         CopyParameter* copyParam = static_cast<CopyParameter*>(argument);
@@ -165,7 +165,7 @@ ReadCompletionForPartialWrite::_DoSpecificJob(void)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Block aligning Ubio is null");
             throw eventId;
         }
         StripeAddr oldLsidEntry = volumeIo->GetOldLsidEntry();

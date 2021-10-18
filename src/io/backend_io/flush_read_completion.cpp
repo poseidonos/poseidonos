@@ -62,7 +62,7 @@ FlushReadCompletion::_DoSpecificJob(void)
         POS_EVENT_ID eventId =
             POS_EVENT_ID::FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Fail to allocate memory");
         return false;
     }
     EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);

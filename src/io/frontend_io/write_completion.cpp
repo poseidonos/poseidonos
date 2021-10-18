@@ -118,7 +118,7 @@ WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
         StripeId vsid = startVsa.stripeId;
         POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_STRIPE_NOT_FOUND;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId), vsid);
+            "Stripe #{} not found at WriteWrapup state", vsid);
 
         stripeUpdateSuccessful = false;
     }
@@ -136,7 +136,7 @@ WriteCompletion::_RequestFlush(Stripe* stripe)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Flush Event allocation failed at WriteWrapup state");
 
         requestFlushSuccessful = false;
     }

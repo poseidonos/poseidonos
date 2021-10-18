@@ -76,7 +76,7 @@ FlushCompletion::_DoSpecificJob(void)
     POS_EVENT_ID eventId =
         POS_EVENT_ID::FLUSH_DEBUG_COMPLETION;
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, static_cast<int>(eventId),
-        PosEventId::GetString(eventId), stripe->GetVsid(),
+        "Flush Completion vsid : {} userstripeid : {} userArea : {}", stripe->GetVsid(),
         userAreaStripeAddr.stripeId,
         static_cast<uint32_t>(userArea));
 
@@ -98,7 +98,7 @@ FlushCompletion::_DoSpecificJob(void)
         POS_EVENT_ID eventId =
             POS_EVENT_ID::FLUSH_WRAPUP_STRIPE_NOT_IN_USER_AREA;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId), stripe->GetVsid());
+            "Stripe #{} is not in UserArea.", stripe->GetVsid());
 
         wrapupSuccessful = false;
     }

@@ -80,7 +80,7 @@ BlockMapUpdateRequest::_DoSpecificJob(void)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_IO_ERROR;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Write is failed at WriteCompleting state");
             throw eventId;
         }
         result = _UpdateMeta();
@@ -117,14 +117,14 @@ BlockMapUpdateRequest::_UpdateMeta(void)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Write wraup failed at map update");
             return false;
         }
     }
     else
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(static_cast<int>(eventId), "Flush Event allocation failed at WriteWrapup state");
         eventScheduler->EnqueueEvent(blockMapUpdateCompletionEvent);
     }
     return true;

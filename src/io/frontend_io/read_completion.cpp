@@ -65,7 +65,7 @@ ReadCompletion::_DoSpecificJob(void)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_INVALID_UBIO;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Ubio is null at ReadCompleteHandler");
             throw eventId;
         }
 
@@ -78,7 +78,7 @@ ReadCompletion::_DoSpecificJob(void)
             // Check Partition type and ft method
             POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_READ_FAIL;
             POS_TRACE_ERROR(static_cast<int>(eventId),
-                PosEventId::GetString(eventId));
+                "Uncorrectable data error");
         }
 
         StripeAddr lsidEntry = volumeIo->GetLsidEntry();
