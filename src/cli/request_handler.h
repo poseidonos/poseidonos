@@ -51,9 +51,9 @@ public:
     RequestHandler(void);
     ~RequestHandler(void);
 
-    string ProcessCommand(char* msg);
-    string TimedOut(char* msg);
-    string PosBusy(char* msg);
+    string ProcessCommand(const char* msg);
+    string TimedOut(const char* msg);
+    string PosBusy(const char* msg);
     bool IsExit(void);
     void SetExit(bool inputExit);
 

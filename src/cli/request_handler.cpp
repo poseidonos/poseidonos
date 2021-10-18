@@ -57,7 +57,6 @@
 #include "src/cli/get_max_volume_count_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_array_command.h"
-#include "src/cli/list_array_device_command.h"
 #include "src/cli/list_device_command.h"
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
@@ -100,7 +99,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["DELETEARRAY"] = new DeleteArrayCommand();
     cmdDictionary["MOUNTARRAY"] = new MountArrayCommand();
     cmdDictionary["UNMOUNTARRAY"] = new UnmountArrayCommand();
-    cmdDictionary["LISTARRAYDEVICE"] = new ListArrayDeviceCommand();
     cmdDictionary["ARRAYINFO"] = new ArrayInfoCommand();
     cmdDictionary["RESETMBR"] = new ResetMbrCommand();
     cmdDictionary["CREATESUBSYSTEM"] = new CreateSubsystemCommand();
@@ -145,7 +143,7 @@ RequestHandler::~RequestHandler(void)
 }
 
 string
-RequestHandler::ProcessCommand(char* msg)
+RequestHandler::ProcessCommand(const char* msg)
 {
     try
     {
@@ -185,7 +183,7 @@ RequestHandler::ProcessCommand(char* msg)
 }
 
 string
-RequestHandler::TimedOut(char* msg)
+RequestHandler::TimedOut(const char* msg)
 {
     json jsonDoc = json::parse(msg);
     string command = jsonDoc["command"].get<std::string>();
@@ -198,7 +196,7 @@ RequestHandler::TimedOut(char* msg)
 }
 
 string
-RequestHandler::PosBusy(char* msg)
+RequestHandler::PosBusy(const char* msg)
 {
     json jsonDoc = json::parse(msg);
     string command = jsonDoc["command"].get<std::string>();

@@ -114,30 +114,6 @@ ListArrayCommand::Execute(json& doc, string rid)
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
             arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
             arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
-
-            JsonArray jsonDeviceList("devicelist");
-
-            for (unsigned int i = 0; i < abr.totalDevNum; i++)
-            {
-                JsonElement elem("");
-                switch (abr.devInfo[i].deviceType)
-                {
-                    case (int)ArrayDeviceType::NVM:
-                        elem.SetAttribute(JsonAttribute("type", "\"BUFFER\""));
-                        break;
-                    case (int)ArrayDeviceType::DATA:
-                        elem.SetAttribute(JsonAttribute("type", "\"DATA\""));
-                        break;
-                    case (int)ArrayDeviceType::SPARE:
-                        elem.SetAttribute(JsonAttribute("type", "\"SPARE\""));
-                        break;
-                }
-                string deviceSn(abr.devInfo[i].deviceUid);
-                elem.SetAttribute(JsonAttribute("sn", "\"" + deviceSn + "\""));
-                jsonDeviceList.AddElement(elem);
-            }
-
-            arrayElement.SetArray(jsonDeviceList);
             jsonArrayList.AddElement(arrayElement);
         }
         data.SetArray(jsonArrayList);

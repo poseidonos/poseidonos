@@ -33,5 +33,5 @@ POS_ADD_UNIT_TEST(get_log_level_command_ut get_log_level_command_test.cpp)
 POS_ADD_UNIT_TEST(handle_wbt_command_ut handle_wbt_command_test.cpp)
 POS_ADD_UNIT_TEST(rebuild_perf_impact_command_ut rebuild_perf_impact_command_test.cpp)
 POS_ADD_UNIT_TEST(smart_command_ut smart_command_test.cpp)
-POS_ADD_UNIT_TEST(list_array_device_command_ut list_array_device_command_test.cpp)
+
 

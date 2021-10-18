@@ -82,7 +82,6 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
         }
-
         else
         {
             return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "This level is unsupported", GetPosInfo());
