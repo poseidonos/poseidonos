@@ -53,7 +53,7 @@ public:
 
     virtual MapPageList GetDirtyList(int logGroupId);
     virtual MapPageList GetTotalDirtyList(void);
-    void DeleteDirtyList(int volumeId);
+    virtual void DeleteDirtyList(int volumeId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;

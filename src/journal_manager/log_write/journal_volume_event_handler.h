@@ -47,6 +47,7 @@ namespace pos
 class EventScheduler;
 class LogWriteContextFactory;
 class CheckpointManager;
+class DirtyMapManager;
 class LogWriteHandler;
 class JournalConfiguration;
 
@@ -57,7 +58,7 @@ public:
     virtual ~JournalVolumeEventHandler(void);
 
     virtual void Init(LogWriteContextFactory* logFactory,
-        CheckpointManager* cpManager,
+        CheckpointManager* cpManager, DirtyMapManager* dirtyManager,
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
         IContextManager* contextManager, EventScheduler* scheduler);
 
@@ -83,6 +84,7 @@ private:
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
     CheckpointManager* checkpointManager;
+    DirtyMapManager* dirtyMapManager;
     LogWriteHandler* logWriteHandler;
 
     std::mutex logWriteMutex;

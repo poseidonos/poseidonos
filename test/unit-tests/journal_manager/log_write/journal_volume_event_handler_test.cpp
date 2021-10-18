@@ -8,6 +8,7 @@
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
@@ -26,7 +27,7 @@ TEST(JournalVolumeEventHandler, Init_testIfExecutedSuccessfully)
     JournalVolumeEventHandler handler;
 
     // When
-    handler.Init(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    handler.Init(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // Then
 }
@@ -38,7 +39,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogNotWrittenWhenJou
     ON_CALL(config, IsEnabled).WillByDefault(Return(false));
 
     JournalVolumeEventHandler handler;
-    handler.Init(nullptr, nullptr, nullptr, &config, nullptr, nullptr);
+    handler.Init(nullptr, nullptr, nullptr, nullptr, &config, nullptr, nullptr);
 
     // When
     int volumeId = 0;
@@ -53,6 +54,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     // Given
     NiceMock<MockLogWriteContextFactory> factory;
     NiceMock<MockCheckpointManager> checkpointManager;
+    NiceMock<MockDirtyMapManager> dirtyMapManager;
     NiceMock<MockLogWriteHandler> logWriteHandler;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockEventScheduler> eventScheduler;
@@ -60,7 +62,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     ON_CALL(config, IsEnabled).WillByDefault(Return(true));
 
     JournalVolumeEventHandler handler;
-    handler.Init(&factory, &checkpointManager, &logWriteHandler, &config, &contextManager, &eventScheduler);
+    handler.Init(&factory, &checkpointManager, &dirtyMapManager, &logWriteHandler, &config, &contextManager, &eventScheduler);
 
     int volumeId = 4;
     uint64_t segVersion = 10;
@@ -68,6 +70,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     // Then
     EXPECT_CALL(contextManager, GetStoredContextVersion(SEGMENT_CTX)).WillOnce(Return(segVersion));
     EXPECT_CALL(factory, CreateVolumeDeletedLogWriteContext(volumeId, segVersion, _));
+    EXPECT_CALL(dirtyMapManager, DeleteDirtyList(volumeId));
 
     {
         InSequence s;
@@ -88,6 +91,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testLogWriteFail)
     // Given
     NiceMock<MockLogWriteContextFactory> factory;
     NiceMock<MockCheckpointManager> checkpointManager;
+    NiceMock<MockDirtyMapManager> dirtyMapManager;
     NiceMock<MockLogWriteHandler> logWriteHandler;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockEventScheduler> eventScheduler;
@@ -95,7 +99,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testLogWriteFail)
     ON_CALL(config, IsEnabled).WillByDefault(Return(true));
 
     JournalVolumeEventHandler handler;
-    handler.Init(&factory, &checkpointManager, &logWriteHandler, &config, &contextManager, &eventScheduler);
+    handler.Init(&factory, &checkpointManager, &dirtyMapManager, &logWriteHandler, &config, &contextManager, &eventScheduler);
 
     int volumeId = 4;
     uint64_t segVersion = 10;
@@ -125,7 +129,7 @@ TEST(JournalVolumeEventHandler, TriggerMetadataFlush_testIfNotFlushedWhenJournal
     ON_CALL(config, IsEnabled).WillByDefault(Return(false));
 
     JournalVolumeEventHandler handler;
-    handler.Init(nullptr, nullptr, nullptr, &config, nullptr, nullptr);
+    handler.Init(nullptr, nullptr, nullptr, nullptr, &config, nullptr, nullptr);
 
     // When
     int ret = handler.TriggerMetadataFlush();
@@ -142,7 +146,7 @@ TEST(JournalVolumeEventHandler, TriggerMetadataFlush_testIfMetaFlushed)
     ON_CALL(config, IsEnabled).WillByDefault(Return(true));
 
     JournalVolumeEventHandler handler;
-    handler.Init(nullptr, &checkpointManager, nullptr, &config, nullptr, nullptr);
+    handler.Init(nullptr, &checkpointManager, nullptr, nullptr, &config, nullptr, nullptr);
 
     // Then
     {
@@ -168,7 +172,7 @@ TEST(JournalVolumeEventHandler, TriggerMetadataFlush_testIfFailsWhenMetaFlushFai
     ON_CALL(config, IsEnabled).WillByDefault(Return(true));
 
     JournalVolumeEventHandler handler;
-    handler.Init(nullptr, &checkpointManager, nullptr, &config, nullptr, nullptr);
+    handler.Init(nullptr, &checkpointManager, nullptr, nullptr, &config, nullptr, nullptr);
 
     // Then
     EXPECT_CALL(checkpointManager, StartCheckpoint).Times(1).WillOnce(Return(-1));
