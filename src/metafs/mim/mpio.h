@@ -91,7 +91,6 @@ public:
     void SetCacheState(MpioCacheState state);
 #endif
 
-    const MetaIoOpcode GetOpcode(void);
     void BuildCompositeMDPage(void);
     bool IsValidPage(void);
     bool CheckDataIntegrity(void);

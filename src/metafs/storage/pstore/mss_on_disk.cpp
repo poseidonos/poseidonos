@@ -141,6 +141,8 @@ MssOnDisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capa
         // Format(mediaType, capacity);
     }
 
+    Open();
+
     retryIoCnt = 0;
 
     return POS_EVENT_ID::SUCCESS;

@@ -333,12 +333,6 @@ Mpio::DoIO(MpAioState expNextState)
     return continueToNextStateRun;
 }
 
-const MetaIoOpcode
-Mpio::GetOpcode(void)
-{
-    return this->io.opcode;
-}
-
 // a function is used to std::function<void(void*)> to std::function<void(Mpio*)>
 void
 Mpio::_HandlePartialDone(void* notused)
