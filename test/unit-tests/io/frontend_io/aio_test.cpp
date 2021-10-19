@@ -229,16 +229,21 @@ TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     NiceMock<MockIArrayInfo>* mockArrayInfo = new NiceMock<MockIArrayInfo>();
     MockComponentsInfo mockComponentsInfo{mockArrayInfo, nullptr};
 
+    char test[16] = {""};
+
     // When : Call SubmitAsyncAdmin
     posIo.ioType = IO_TYPE::GET_LOG_PAGE;
+    posIo.arrayName = test;
     nvmeCmd.cdw10 = SPDK_NVME_LOG_ERROR;
     nvmfMsg.nvme_cmd = nvmeCmd;
     nvmfRequest.cmd = &nvmfMsg;
     bio.internal.caller_ctx = &nvmfRequest;
     posIo.context = &bio;
+
     ON_CALL(*mockArrayManager, GetInfo(_)).WillByDefault(Return(&mockComponentsInfo));
     ON_CALL(*mockArrayInfo, GetArrayManager()).WillByDefault(Return(nullptr));
     EventSchedulerSingleton::Instance()->DequeueEvents();
+
     aio.SubmitAsyncAdmin(posIo, mockArrayManager);
 
     // Then : check eventscheduler queue
