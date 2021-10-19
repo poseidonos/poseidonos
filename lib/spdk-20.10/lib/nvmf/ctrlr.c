@@ -192,8 +192,8 @@ static void
 _nvmf_reactor_subsystem_connection_update(void *ctx)
 {
 	struct spdk_nvmf_request *req = ctx;
-	if (req->qpair->ctrlr->subsys != NULL) {
-		if (req->qpair->qid != 0) {
+	if (req->qpair->qid != 0) {
+		if (req->qpair->ctrlr != NULL && req->qpair->ctrlr->subsys != NULL) {
 			spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), req->qpair->ctrlr->subsys->id,
 								M_VALID_SUBSYSTEM);
 		}
