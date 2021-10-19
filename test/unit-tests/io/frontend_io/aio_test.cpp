@@ -229,11 +229,11 @@ TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     NiceMock<MockIArrayInfo>* mockArrayInfo = new NiceMock<MockIArrayInfo>();
     MockComponentsInfo mockComponentsInfo{mockArrayInfo, nullptr};
 
-    char test[16] = {""};
+    char testArrayName[16] = {""};
 
     // When : Call SubmitAsyncAdmin
     posIo.ioType = IO_TYPE::GET_LOG_PAGE;
-    posIo.arrayName = test;
+    posIo.arrayName = testArrayName;
     nvmeCmd.cdw10 = SPDK_NVME_LOG_ERROR;
     nvmfMsg.nvme_cmd = nvmeCmd;
     nvmfRequest.cmd = &nvmfMsg;
