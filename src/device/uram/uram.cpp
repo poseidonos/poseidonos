@@ -213,7 +213,7 @@ Uram::_InitByteAddress(void)
     else
     {
         POS_TRACE_ERROR(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED,
-            PosEventId::GetString(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED));
+            "Cannot open uram config file");
     }
     baseByteAddress = reinterpret_cast<void *>(byteAddressInt);
 }

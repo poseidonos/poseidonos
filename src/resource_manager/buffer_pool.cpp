@@ -106,7 +106,7 @@ BufferPool::_Alloc(void)
                 POS_EVENT_ID eventId =
                     POS_EVENT_ID::FREEBUFPOOL_FAIL_TO_ALLOCATE_MEMORY;
                 POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-                    PosEventId::GetString(eventId));
+                    "Fail to allocate memory");
                 return false;
             }
             remainBufferCount = allocSize * allocCount / BUFFER_INFO.size;

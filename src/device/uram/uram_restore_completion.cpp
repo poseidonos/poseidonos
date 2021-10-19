@@ -72,7 +72,7 @@ bool UramRestoreCompletion::_DoSpecificJob(void)
 
     pendingUbio--;
     POS_TRACE_INFO((int)eventId,
-        PosEventId::GetString(eventId),
+        "Restoring Hugepage #{} done.",
         (ubio->GetPba().lba / unitsPerHugepage));
 
     return true;

@@ -208,7 +208,8 @@ QosSpdkManager::Finalize(void)
     if (unlikely(false == succeeded))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_UNREGISTRATION_FAILED;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), reactorId);
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Failed to un-register Qos poller on reactor #: {}", reactorId);
     }
     while (QosSpdkManager::unregistrationComplete == false)
     {
@@ -238,7 +239,8 @@ QosSpdkManager::_SetupQosReactorPoller(void)
     if (unlikely(false == succeeded))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), reactorId);
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Failed to register Qos poller on reactor #: {}", reactorId);
     }
     else
     {
@@ -326,7 +328,8 @@ QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
     if (unlikely(NULL == poller))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), reactor);
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Failed to register Qos poller on reactor #: {}", reactor);
         registerQosPollerDone = true;
         return;
     }
@@ -347,7 +350,8 @@ QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
         if (unlikely(false == success))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;
-            POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), nextReactor);
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Failed to register Qos poller on reactor #: {}", nextReactor);
             registerQosPollerDone = true;
         }
     }

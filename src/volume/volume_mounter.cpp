@@ -266,7 +266,7 @@ VolumeMounter::_CheckAndSetSubsystemToArray(string subnqn, string volumeArrayNam
         else
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_SET_ARRAY_TO_SUBSYSTEM;
-            POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), volumeArrayName, subnqn);
+            POS_TRACE_INFO(static_cast<int>(eventId), "Successfully mapped array:{} to subsystem:{}", volumeArrayName, subnqn);
         }
     }
     else if (subnqnArrayName != volumeArrayName)

@@ -124,7 +124,7 @@ BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_INVALID_STRIPE;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Stripe is null at WriteCompleting state");
         throw eventId;
     }
 

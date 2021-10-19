@@ -85,7 +85,7 @@ DataBuffer::Free(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_FREE_UNALLOWED_BUFFER;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Cannot free unallowed data buffer");
         return;
     }
 
@@ -98,7 +98,7 @@ DataBuffer::GetAddress(uint64_t blockIndex, uint64_t sectorOffset) const
     if (unlikely(nullptr == baseAddress))
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UBIO_REQUEST_NULL_BUFFER,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_REQUEST_NULL_BUFFER));
+            "Requested buffer of Ubio is null");
 
         return baseAddress;
     }
@@ -109,7 +109,7 @@ DataBuffer::GetAddress(uint64_t blockIndex, uint64_t sectorOffset) const
     if (unlikely(size <= shiftSize))
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UBIO_REQUEST_OUT_RANGE,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_REQUEST_OUT_RANGE));
+            "Requested buffer of Ubio is out of range");
         return baseAddress;
     }
 
@@ -146,7 +146,7 @@ DataBuffer::Remove(uint64_t removalSize, bool removalFromTail)
     {
         assert(false);
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_WRONG_SPLIT_SIZE;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "Invalid size of Ubio split request");
 
         throw eventId;
     }

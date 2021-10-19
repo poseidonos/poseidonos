@@ -105,7 +105,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
                 name = name + std::to_string(nsIndex);
 
                 POS_TRACE_INFO((int)POS_EVENT_ID::UNVME_SSD_SCANNED,
-                    PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_SCANNED),
+                    "uNVMe Device has been scanned: {}, {}",
                     name, nsEntry->trAddr);
 
                 vector<UblockSharedPtr>::iterator it;
@@ -125,7 +125,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
                         nsEntry->u.nvme.ns, nsEntry->trAddr);
 
                     POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DEBUG_CREATED;
-                    POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId), name);
+                    POS_TRACE_DEBUG(eventId, "Create Ublock, Pointer : {}", name);
                     devs->push_back(dev);
                     addedDeviceCount++;
                 }
@@ -138,7 +138,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
         else
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_SCAN_FAILED,
-                PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_SCAN_FAILED));
+                "Failed to Scan uNVMe devices");
         }
     }
 
@@ -165,7 +165,7 @@ UnvmeMgmt::Open(DeviceContext* deviceContext)
                 if (nullptr == qpair)
                 {
                     POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_OPEN_FAILED,
-                        PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_OPEN_FAILED),
+                        "uNVMe Device open failed: namespace #{}",
                         spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
                 }
                 else
@@ -195,7 +195,7 @@ UnvmeMgmt::Close(DeviceContext* deviceContext)
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_CLOSE_FAILED;
                 POS_TRACE_ERROR(static_cast<int>(eventId),
-                    PosEventId::GetString(eventId),
+                    "uNVMe Device close failed: namespace #{}",
                     spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
                 closeSuccessful = false;
             }

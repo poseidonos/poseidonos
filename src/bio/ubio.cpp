@@ -195,7 +195,7 @@ Ubio::SetPba(PhysicalBlkAddr& pba)
     if (unlikely(pba.arrayDev == nullptr))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_PBA;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "Invalid PBA for Ubio");
         return;
     }
 
@@ -341,7 +341,7 @@ Ubio::GetOriginUbio(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_ORIGIN_UBIO;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid original Ubio");
         return nullptr;
     }
 
@@ -410,7 +410,7 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_DEVICE;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid UblockDevice for Ubio");
         assert(0);
     }
 

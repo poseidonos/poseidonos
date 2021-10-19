@@ -109,7 +109,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_PARSE_UUID;
-            POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), uuid);
+            POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to parse uuid string({}) to uuid", uuid);
             if (nullptr != bdev_uuid)
             {
                 delete bdev_uuid;
@@ -207,7 +207,9 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
             attachedNsid = NvmfCallbackStatus::FAILED;
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_VOL_MOUNT_TIMEOUT;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
+            POS_TRACE_WARN(static_cast<int>(eventId),
+                "Volume(id: {}, array: {}) mount timeout.",
+                volId, arrayName);
             break;
         }
         usleep(1);

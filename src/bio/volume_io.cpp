@@ -134,7 +134,7 @@ VolumeIo::GetVolumeId(void)
     if (unlikely(false == _CheckVolumeIdSet()))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_VOLUME_ID,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_VOLUME_ID));
+            "Invalid volume ID for Ubio");
         throw POS_EVENT_ID::UBIO_INVALID_VOLUME_ID;
     }
 
@@ -147,7 +147,7 @@ VolumeIo::SetVolumeId(uint32_t inputVolumeId)
     if (unlikely(_IsInvalidVolumeId(inputVolumeId)))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_VOLUME_ID,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_VOLUME_ID));
+            "Invalid volume ID for Ubio");
         return;
     }
 
@@ -192,7 +192,7 @@ VolumeIo::SetSectorRba(uint64_t inputSectorRba)
     if (unlikely(_IsInvalidSectorRba(inputSectorRba)))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_RBA,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_RBA));
+            "Invalid RBA for Ubio");
         return;
     }
 
@@ -205,7 +205,7 @@ VolumeIo::GetSectorRba(void)
     if (unlikely(false == _CheckSectorRbaSet()))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_RBA,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_RBA));
+            "Invalid RBA for Ubio");
         throw POS_EVENT_ID::UBIO_INVALID_RBA;
     }
 
@@ -232,7 +232,7 @@ VolumeIo::SetLsidEntry(StripeAddr& inputLsidEntry)
     if (unlikely(_IsInvalidLsidEntry(inputLsidEntry)))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_LSID,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_LSID));
+            "Invalid LSID for Ubio");
         return;
     }
 
@@ -246,7 +246,7 @@ VolumeIo::SetOldLsidEntry(StripeAddr& inputLsidEntry)
     {
         assert(false);
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_LSID,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_LSID));
+            "Invalid LSID for Ubio");
         return;
     }
     oldLsidEntry = inputLsidEntry;
@@ -259,7 +259,7 @@ VolumeIo::GetLsidEntry(void)
     {
         assert(false);
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_LSID,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_LSID));
+            "Invalid LSID for Ubio");
         throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
     return lsidEntry;
@@ -271,7 +271,7 @@ VolumeIo::GetOldLsidEntry(void)
     if (unlikely(_IsInvalidLsidEntry(oldLsidEntry)))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_PBA,
-            PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_LSID));
+            "Invalid PBA for Ubio");
         throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
     return oldLsidEntry;
@@ -291,7 +291,7 @@ VolumeIo::GetVsa(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_VSA;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid VSA for Ubio");
     }
 
     return vsa;
@@ -304,7 +304,7 @@ VolumeIo::SetVsa(VirtualBlkAddr& inputVsa)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_VSA;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid VSA for Ubio");
         return;
     }
     vsa = inputVsa;
@@ -347,7 +347,7 @@ VolumeIo::GetOldVsa(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_VSA;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid VSA for Ubio");
         return INVALID_VSA;
     }
 

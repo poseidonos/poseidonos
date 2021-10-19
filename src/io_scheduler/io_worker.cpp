@@ -275,7 +275,7 @@ IOWorker::_CompleteCommand(void)
             else
             {
                 POS_TRACE_ERROR((uint32_t)POS_EVENT_ID::IOWORKER_UNDERFLOW_HAPPENED,
-                    PosEventId::GetString(POS_EVENT_ID::IOWORKER_UNDERFLOW_HAPPENED),
+                    "Command completed more than submitted: current outstanding: {}, completion count: {}",
                     currentOutstandingIOCount, eventCount);
                 currentOutstandingIOCount = 0;
             }

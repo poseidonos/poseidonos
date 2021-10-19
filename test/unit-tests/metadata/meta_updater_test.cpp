@@ -272,17 +272,20 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalDisable)
     MetaUpdater metaUpdater(nullptr, nullptr, nullptr, nullptr, nullptr, &journal, nullptr, &eventScheduler, metaEventFactory, nullptr);
 
     // When
+    uint32_t stripeId = 100;
+    NiceMock<MockStripe> stripe;
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
     ON_CALL(*metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
+    ON_CALL(stripe, GetVsid).WillByDefault(Return(stripeId));
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
     // Then
     int expected = 0;
-    int actual = metaUpdater.UpdateGcMap(nullptr, mapUpdateInfoList, invalidSegCnt, nullptr);
+    int actual = metaUpdater.UpdateGcMap(&stripe, mapUpdateInfoList, invalidSegCnt, nullptr);
 
     EXPECT_EQ(actual, expected);
 }

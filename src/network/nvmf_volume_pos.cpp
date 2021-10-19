@@ -428,7 +428,8 @@ NvmfVolumePos::_WaitVolumeCreated(uint32_t volId, string arrayName, uint64_t tim
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_VOL_CREATE_TIMEOUT;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
+            POS_TRACE_WARN(static_cast<int>(eventId),
+                "Volume(id: {}, array: {}) create timeout.", volId, arrayName);
             return false;
         }
         usleep(1);
@@ -448,7 +449,8 @@ NvmfVolumePos::_WaitVolumeDeleted(uint32_t volId, string arrayName, uint64_t tim
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
+            POS_TRACE_WARN(static_cast<int>(eventId),
+                "Volume(id: {}, array: {}) delete timeout.", volId, arrayName);
             return false;
         }
         usleep(1);

@@ -154,7 +154,8 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
     if (!ioCtx->IsFrontEnd())
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_DEBUG_REQUEST_IO;
-        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_GENERAL, eventId, PosEventId::GetString(eventId),
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_GENERAL, eventId,
+            "Request IO in unvme_drv, startLBA: {}, sectorCount : {}, direction : {} deviceName : {} ret : {}",
             startLBA, sectorCount, static_cast<int>(dir),
             ioCtx->GetDeviceName(), ret);
     }

@@ -95,7 +95,7 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_DEBUG_COMPLETE_IO;
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_GENERAL,
-                eventId, PosEventId::GetString(eventId),
+                eventId, "Complete IO in unvme_drv, startLBA: {}, sectorCount : {}, direction : {}, sc : {}, sct : {} deviceName : {}",
                 ioCtx->GetStartSectorOffset(),
                 ioCtx->GetSectorCount(),
                 static_cast<int>(ioCtx->GetOpcode()),
@@ -200,7 +200,7 @@ UnvmeDrv::DeviceDetached(std::string sn)
     if (nullptr == detach_event)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DETACH_NOTIFICATION_FAILED;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), sn);
+        POS_TRACE_ERROR(eventId, "Failed to notify uNVMe device detachment: Device name: {}", sn);
         return (int)eventId;
     }
     detach_event(sn);
@@ -220,13 +220,13 @@ UnvmeDrv::DeviceAttached(struct spdk_nvme_ns* ns, int nsid,
         UblockSharedPtr dev = make_shared<UnvmeSsd>(deviceName, diskSize, this,
             ns, trid->traddr);
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DEBUG_CREATED;
-        POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId), deviceName);
+        POS_TRACE_DEBUG(eventId, "Create Ublock, Pointer : {}", deviceName);
         attach_event(dev);
     }
     else
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_ATTACH_NOTIFICATION_FAILED;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), deviceName);
+        POS_TRACE_ERROR(eventId, "Failed to notify uNVMe device attachment: Device name: {}", deviceName);
         ret = (int)eventId;
     }
 
@@ -276,7 +276,7 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
             sectorCount = ioCtx->GetSectorCount();
 
             POS_TRACE_WARN(static_cast<int>(eventId),
-                PosEventId::GetString(eventId),
+                "Could not submit the given IO request within limited count : lba : {} sectorCount : {} deviceName : {} namespace {}",
                 offset,
                 sectorCount,
                 ioCtx->GetDeviceName(),
@@ -408,7 +408,7 @@ UnvmeDrv::CompleteErrors(DeviceContext* deviceContext)
         else if (ioCtx->CheckAndDecreaseErrorRetryCount() == true)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_DEBUG_RETRY_IO;
-            POS_TRACE_INFO(eventId, PosEventId::GetString(eventId),
+            POS_TRACE_INFO(eventId, "Retry IO in unvme_drv, startLBA: {}, sectorCount : {}, direction : {}, deviceName : {}",
                 ioCtx->GetStartSectorOffset(),
                 ioCtx->GetSectorCount(),
                 static_cast<int>(ioCtx->GetOpcode()),

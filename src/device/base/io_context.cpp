@@ -128,7 +128,7 @@ IOContext::GetErrorKey(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IOCTX_ERROR_KEY_NOT_SET;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Key for pending ERROR was not set, before!");
     }
 
     return std::make_pair(keyForPendingErrorList, keyForPendingErrorListSet);
