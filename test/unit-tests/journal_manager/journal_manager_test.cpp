@@ -320,6 +320,12 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
 
     // Then: Log buffer should be disposed
     EXPECT_CALL(*logBuffer, Dispose);
+    EXPECT_CALL(*bufferAllocator, Dispose);
+    EXPECT_CALL(*dirtyMapManager, Dispose);
+    EXPECT_CALL(*logFilledNotifier, Dispose);
+    EXPECT_CALL(*logWriteHandler, Dispose);
+    EXPECT_CALL(*replayHandler, Dispose);
+    EXPECT_CALL(*bufferedSegmentContext, Dispose);
 
     // When: Journal is disposed
     journal->Dispose();

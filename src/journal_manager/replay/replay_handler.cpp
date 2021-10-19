@@ -91,15 +91,22 @@ ReplayHandler::_AddTask(ReplayTask* task)
     reporter->RegisterTask(task->GetId(), task->GetWeight());
 }
 
-ReplayHandler::~ReplayHandler(void)
+void
+ReplayHandler::Dispose(void)
 {
-    delete logDeleteChecker;
-    delete reporter;
     for (auto task : taskList)
     {
         delete task;
     }
     taskList.clear();
+}
+
+ReplayHandler::~ReplayHandler(void)
+{
+    Dispose();
+
+    delete logDeleteChecker;
+    delete reporter;
 }
 
 int

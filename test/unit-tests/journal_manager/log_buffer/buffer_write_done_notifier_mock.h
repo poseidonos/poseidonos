@@ -19,6 +19,7 @@ class MockLogBufferWriteDoneNotifier : public LogBufferWriteDoneNotifier
 public:
     using LogBufferWriteDoneNotifier::LogBufferWriteDoneNotifier;
     MOCK_METHOD(void, Register, (LogBufferWriteDoneEvent* notified), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, NotifyLogFilled, (int logGroupId, MapPageList& dirty), (override));
     MOCK_METHOD(void, NotifyLogBufferReseted, (int logGroupId), (override));
 };

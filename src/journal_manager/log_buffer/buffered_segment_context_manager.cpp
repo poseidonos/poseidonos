@@ -48,17 +48,7 @@ BufferedSegmentContextManager::BufferedSegmentContextManager(void)
 
 BufferedSegmentContextManager::~BufferedSegmentContextManager(void)
 {
-    if (bufferedSegCtx != nullptr)
-    {
-        for (uint32_t index = 0; index < numLogGroups; index++)
-        {
-            if (bufferedSegCtx[index] != nullptr)
-            {
-                delete bufferedSegCtx[index];
-            }
-        }
-        delete[] bufferedSegCtx;
-    }
+    Dispose();
 }
 
 void
@@ -79,6 +69,23 @@ BufferedSegmentContextManager::Init(JournalConfiguration* journalConfiguration, 
     config = journalConfiguration;
     numLogGroups = config->GetNumLogGroups();
     bufferedSegCtx = inputBufferedSegmentContext;
+}
+
+void
+BufferedSegmentContextManager::Dispose(void)
+{
+    if (bufferedSegCtx != nullptr)
+    {
+        for (uint32_t index = 0; index < numLogGroups; index++)
+        {
+            if (bufferedSegCtx[index] != nullptr)
+            {
+                delete bufferedSegCtx[index];
+            }
+        }
+        delete[] bufferedSegCtx;
+        bufferedSegCtx = nullptr;
+    }
 }
 
 void

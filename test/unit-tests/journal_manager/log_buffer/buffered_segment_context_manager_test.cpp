@@ -56,6 +56,24 @@ TEST(BufferedSegmentContextManager, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
     bufferedSegCtxManager.Init(&config);
 }
 
+TEST(BufferedSegmentContextManager, Dispose_testIfContextIsDeleted)
+{
+    // Given
+    BufferedSegmentContextManager bufferedSegCtxManager;
+
+    // When
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    // When : Dispose without Init
+    bufferedSegCtxManager.Dispose();
+
+    // When : Init and Dispose
+    bufferedSegCtxManager.Init(&config);
+    bufferedSegCtxManager.Dispose();
+}
+
 TEST(BufferedSegmentContextManager, GetSegmentContext_testIfExecutedWithCorrectLogGroupId)
 {
     // Given
