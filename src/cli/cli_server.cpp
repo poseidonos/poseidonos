@@ -275,41 +275,6 @@ ClientThread(void* arg)
 }
 
 int
-EnableKeepAlive(int sockfd)
-{
-    int optval = 1;
-    int rc = setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
-    if (rc != 0)
-    {
-        return rc;
-    }
-
-    int keepcnt = 3;
-    int keepidle = 60;
-    int keepintvl = 10;
-
-    rc = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof keepcnt);
-    if (rc != 0)
-    {
-        return rc;
-    }
-
-    rc = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof keepidle);
-    if (rc != 0)
-    {
-        return rc;
-    }
-
-    rc = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof keepintvl);
-    if (rc != 0)
-    {
-        return rc;
-    }
-
-    return 0;
-}
-
-int
 EnableReuseAddr(int sockfd)
 {
     int optval = 1;

@@ -13,6 +13,9 @@ import pos
 default_fabric_ip = "10.1.11.200"
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
+test_suites = ["array", "devel", "device_management", "fault_tolerance", "logger", "qos", "subsystem", "system_overall", "telemetry", "volume"]
+
+
 def run_tests(dirname):
     filenames = os.listdir(dirname)
     for filename in filenames:
@@ -21,6 +24,7 @@ def run_tests(dirname):
             print("********************** Testing " + filename + "*****************************")
             subprocess.call([working_dir+"/"+dirname+"/" +filename, args.fabric_ip], cwd=file_dir)
             time.sleep(30)
+
 
 def print_results(dirname):
     filenames = os.listdir(dirname)
@@ -31,19 +35,16 @@ def print_results(dirname):
             result = open(file_dir+"/"+filename)
             print(result.readline())
 
+
 def run_all_tests():
-    run_tests("array")
-    run_tests("device_management")
-    run_tests("fault_tolerance")
-    run_tests("system_overall")
-    run_tests("volume")
+    for test_suite in test_suites:
+        run_tests(test_suite)
+
 
 def print_all_results():
-    print_results("array")
-    print_results("device_management")
-    print_results("fault_tolerance")
-    print_results("system_overall")
-    print_results("volume")
+    for test_suite in test_suites:
+        print_results(test_suite)
+
 
 def parse_argument():
     parser = argparse.ArgumentParser(description='SRM Test')

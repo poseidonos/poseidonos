@@ -104,11 +104,17 @@ def delete_volume(vol_name, array):
     return send_request("volume delete " + param_str + " --force")
 
 
-def mount_volume(vol_name, array, subnqn):
+def mount_volume(vol_name, array, subnqn, transport_type="", target_addr="", transport_service_id=""):
     param_str = "--volume-name " + vol_name
     param_str += " --array-name " + array
     if subnqn != "":
         param_str += " --subnqn " + subnqn + " --force"
+    if transport_type != "":
+        param_str += " -t " + transport_type
+    if target_addr != "":
+        param_str += " -i " + target_addr
+    if transport_service_id != "":
+        param_str += " -p " + transport_service_id
     return send_request("volume mount " + param_str)
 
 
@@ -176,3 +182,79 @@ def create_uram(devname, block_size, num_blocks, numa=0):
     param_str += " --numa " + str(numa)
 
     return send_request("device create " + param_str)
+
+
+def add_listener(subnqn, transport_type, target_addr, transport_service_id):
+    param_str = "--subnqn" + subnqn
+    param_str += " --trtype " + transport_type
+    param_str += " --traddr " + target_addr
+    param_str += " --trsvcid " + transport_service_id
+    return send_request("subsystem add-listener " + param_str)
+
+
+def apply_log_filter():
+    return send_request("logger apply-filter")
+
+
+def get_log_level():
+    return send_request("logger get-level")
+
+
+def logger_info():
+    return send_request("logger info")
+
+
+def create_subsystem(subnqn, serial, model, max_namespace):
+    param_str = "--subnqn " + subnqn
+    param_str += " --serial-number " + serial
+    param_str += " --model-number " + model
+    param_str += " --max-namespaces " + str(max_namespace)
+    param_str += " -o"
+    return send_request("subsystem create " + param_str)
+
+
+def list_subsystem():
+    return send_request("subsystem list")
+
+
+def delete_subsystem(subnqn):
+    param_str = "--subnqn " + subnqn
+    return send_request("subsystem delete " + param_str + " --force")
+
+
+def list_qos_policies(array, volume):
+    param_str = ""
+    param_str += " --volume-name " + volume
+    param_str += " --array-name " + array
+    return send_request("qos list " + param_str)
+
+
+def reset_qos_policies(array, volume):
+    param_str = ""
+    param_str += " --volume-name " + volume
+    param_str += " --array-name " + array
+    return send_request("qos reset " + param_str)
+
+
+def reset_event_wrr_policy():
+    return send_request("devel reset-event-wrr")
+
+
+def update_event_wrr_policy(policy_name, weight):
+    param_str = ""
+    param_str += " --name " + policy_name
+    param_str += " --weight " + str(weight)
+    return send_request("devel update-event-wrr " + param_str)
+
+
+def smart(device):
+    param_str = "--device-name " + device
+    return send_request("device smart " + param_str)
+
+
+def start_telemetry():
+    return send_request("telemetry start ")
+
+
+def stop_telemetry():
+    return send_request("telemetry stop ")

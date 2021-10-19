@@ -39,7 +39,6 @@
 #include "src/cli/apply_log_filter_command.h"
 #include "src/cli/array_info_command.h"
 #include "src/cli/cli_event_code.h"
-#include "src/cli/cond_signal_command.h"
 #include "src/cli/create_array_command.h"
 #include "src/cli/autocreate_array_command.h"
 #include "src/cli/create_device_command.h"
@@ -51,10 +50,8 @@
 #include "src/cli/delete_subsystem_command.h"
 #include "src/cli/delete_volume_command.h"
 #include "src/cli/stop_pos_command.h"
-#include "src/cli/get_host_nqn_command.h"
 #include "src/cli/get_pos_info_command.h"
 #include "src/cli/get_log_level_command.h"
-#include "src/cli/get_max_volume_count_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_array_command.h"
 #include "src/cli/list_device_command.h"
@@ -114,9 +111,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["UNMOUNTVOLUME"] = new UnmountVolumeCommand();
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
-    cmdDictionary["GETMAXVOLUMECOUNT"] = new GetMaxVolumeCountCommand();
-    cmdDictionary["GETHOSTNQN"] = new GetHostNqnCommand();
-    cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();
     cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["STOPPOS"] = new StopPosCommand();
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();
@@ -129,6 +123,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CREATEQOSVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
     cmdDictionary["RESETQOSVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
     cmdDictionary["STARTTELEMETRY"] = new StartTelemetryCommand();
+    cmdDictionary["STOPTELEMETRY"] = new StopTelemetryCommand();
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
     cmdDictionary["RESETEVENTWRRPOLICY"] = new ResetEventWrrPolicyCommand();
