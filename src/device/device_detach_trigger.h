@@ -41,7 +41,8 @@ namespace pos
 class DeviceDetachTrigger
 {
 public:
-    void Run(UblockSharedPtr& dev);
+    virtual void Run(UblockSharedPtr& dev);
+    virtual ~DeviceDetachTrigger(void);
 };
 
 }  // namespace pos

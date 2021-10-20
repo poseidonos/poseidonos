@@ -55,3 +55,7 @@ DeviceDetachTrigger::Run(UblockSharedPtr& dev)
         "Device detach triggered manually");
     thread(DeviceDetachEventHandler, dev->GetSN()).detach();
 }
+
+DeviceDetachTrigger::~DeviceDetachTrigger(void)
+{
+}

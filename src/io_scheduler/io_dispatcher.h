@@ -51,7 +51,8 @@ class EventScheduler;
 class IODispatcher : public IIODispatcher
 {
 public:
-    explicit IODispatcher(EventFrameworkApi* eventFrameworkApi = nullptr);
+    explicit IODispatcher(EventFrameworkApi* eventFrameworkApi = nullptr,
+        EventScheduler* eventScheduler = nullptr);
     ~IODispatcher(void);
 
     void AddIOWorker(cpu_set_t cpuSet) override;
@@ -69,8 +70,16 @@ public:
     int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) override;
 
     static void RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory);
+    static void SetFrontendDone(bool value);
 
 private:
+    uint32_t _GetLogicalCore(cpu_set_t cpuSet, uint32_t index);
+    void _CallForFrontend(UblockSharedPtr device);
+    void _SubmitRecovery(UbioSmartPtr ubio);
+    static void _ProcessFrontend(void* ublockDevice);
+    static void _AddDeviceToThreadLocalList(UblockSharedPtr device);
+    static void _RemoveDeviceFromThreadLocalList(UblockSharedPtr device);
+
     using IOWorkerMap = std::unordered_map<uint32_t, IOWorker*>;
     using IOWorkerMapIter = IOWorkerMap::iterator;
     using IOWorkerPair = std::pair<uint32_t, IOWorker*>;
@@ -78,8 +87,9 @@ private:
     uint32_t ioWorkerCount;
     pthread_rwlock_t ioWorkerMapLock;
     IOWorkerMap ioWorkerMap;
-
+    uint32_t deviceAllocationTurn;
     std::mutex deviceLock;
+    EventScheduler* eventScheduler;
     enum class DispatcherAction
     {
         OPEN,
@@ -89,19 +99,11 @@ private:
     static EventFactory* recoveryEventFactory;
     static bool frontendDone;
 
-    uint32_t deviceAllocationTurn;
-    EventFrameworkApi* eventFrameworkApi{nullptr};
+    static EventFrameworkApi* eventFrameworkApi;
     static thread_local std::vector<UblockSharedPtr> threadLocalDeviceList;
 
     static const int DEVICE_FAILED = -1;
     static const int PARAM_FAILED = -2;
-
-    uint32_t _GetLogicalCore(cpu_set_t cpuSet, uint32_t index);
-    void _CallForFrontend(UblockSharedPtr device);
-    void _SubmitRecovery(UbioSmartPtr ubio);
-    static void _ProcessFrontend(void* ublockDevice);
-    static void _AddDeviceToThreadLocalList(UblockSharedPtr device);
-    static void _RemoveDeviceFromThreadLocalList(UblockSharedPtr device);
 };
 
 using IODispatcherSingleton = Singleton<IODispatcher>;

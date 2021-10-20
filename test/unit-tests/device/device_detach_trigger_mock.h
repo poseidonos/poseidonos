@@ -30,36 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
+#ifndef DEVICE_DETACH_TRIGGER_MOCK_H
+#define DEVICE_DETACH_TRIGGER_MOCK_H
 
-#include "src/io_scheduler/io_dispatcher.h"
-#include "src/io_scheduler/io_worker.h"
+#include <gmock/gmock.h>
+
+#include <list>
+#include <string>
+#include <vector>
+
+#include "src/device/device_detach_trigger.h"
 
 namespace pos
 {
-static uint32_t CORE_FOR_IO_WORKER = 3;
-
-IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
-    EventScheduler* eventSchedulerArg)
-: ioWorkerCount(0),
-  deviceAllocationTurn(0)
+class MockDeviceDetachTrigger : public DeviceDetachTrigger
 {
-    cpu_set_t cpuSet;
-
-    CPU_ZERO(&cpuSet);
-    CPU_SET(CORE_FOR_IO_WORKER, &cpuSet);
-
-    IOWorker* retIOWorker = new IOWorker(cpuSet, 0);
-    ioWorkerMap.insert(IOWorkerPair(CORE_FOR_IO_WORKER, retIOWorker));
-}
-
-IODispatcher::~IODispatcher(void)
-{
-    IOWorkerMapIter it;
-    for (it = ioWorkerMap.begin(); it != ioWorkerMap.end(); it++)
-    {
-        delete it->second;
-    }
-}
+public:
+    using DeviceDetachTrigger::DeviceDetachTrigger;
+    MOCK_METHOD(void, Run, (UblockSharedPtr& dev), (override));
+};
 
 } // namespace pos
+
+#endif // DEVICE_DETACH_TRIGGER_MOCK_H

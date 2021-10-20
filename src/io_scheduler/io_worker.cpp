@@ -65,18 +65,24 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
-    DeviceDetachTrigger* detachTrigger)
+    DeviceDetachTrigger* detachTriggerArg, QosManager* qosManagerArg)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
   exit(false),
   id(id),
-  detachTrigger(detachTrigger)
+  detachTrigger(detachTriggerArg),
+  qosManager(qosManagerArg)
 {
     thread = new std::thread(&IOWorker::Run, this);
-    if (detachTrigger == nullptr)
+    if (nullptr == detachTrigger)
     {
-        this->detachTrigger = new DeviceDetachTrigger();
+        detachTrigger = new DeviceDetachTrigger();
+        productDetachTrigger = true;
+    }
+    if (nullptr == qosManager)
+    {
+        qosManager = QosManagerSingleton::Instance();
     }
 }
 
@@ -91,10 +97,29 @@ IOWorker::~IOWorker(void)
     thread->join();
     delete ioQueue;
 
-    if (detachTrigger != nullptr)
+    if (true == productDetachTrigger)
     {
         delete detachTrigger;
     }
+}
+
+uint32_t
+IOWorker::GetWorkerId(void)
+{
+    return id;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis Decrement the current outstanding io count
+ *
+ * @Param    count
+ */
+/* --------------------------------------------------------------------------*/
+void
+IOWorker::DecreaseCurrentOutstandingIoCount(int count)
+{
+    currentOutstandingIOCount -= count;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -121,7 +146,7 @@ IOWorker::EnqueueUbio(UbioSmartPtr ubio)
 uint32_t
 IOWorker::AddDevice(UblockSharedPtr device)
 {
-    if (device != nullptr)
+    if (nullptr != device)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IOWORKER_DEVICE_ADDED;
         POS_TRACE_INFO(eventId, PosEventId::GetString(eventId),
@@ -203,89 +228,6 @@ IOWorker::Run(void)
     }
 }
 
-void
-IOWorker::_SubmitPendingIO(void)
-{
-    UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
-    currentOutstandingIOCount -=
-        QosManagerSingleton::Instance()->IOWorkerPoller(id, &ublockDeviceSubmission);
-}
-
-void
-IOWorker::_DoPeriodicJob(void)
-{
-    _CompleteCommand();
-    _HandleDeviceOperation();
-}
-
-void
-IOWorker::_HandleDeviceOperation(void)
-{
-    IoWorkerDeviceOperation* operation = operationQueue.Pop();
-    if (operation == nullptr)
-    {
-        return;
-    }
-
-    UblockSharedPtr device = operation->GetDevice();
-    switch (operation->GetCommand())
-    {
-        case INSERT:
-        {
-            /*
-                When opening the uram in IOWorker, Uram will issue recovery IO.
-                Completion check for this io,
-                device must be added to list before device open.
-            */
-            deviceList.insert(device);
-            bool isOpened = device->Open();
-            if (isOpened == false)
-            {
-                deviceList.erase(device);
-                if (device->GetType() == DeviceType::SSD)
-                {
-                    detachTrigger->Run(device);
-                }
-            }
-
-            break;
-        }
-        case REMOVE:
-        {
-            deviceList.erase(device);
-            currentOutstandingIOCount -= device->Close();
-            break;
-        }
-    }
-    operation->SetDone();
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Decrement the current outstanding io count
- *
- * @Param    count
- */
-/* --------------------------------------------------------------------------*/
-void
-IOWorker::DecreaseCurrentOutstandingIoCount(int count)
-{
-    currentOutstandingIOCount -= count;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Decrement the current outstanding io count
- *
- * @Param    count
- */
-/* --------------------------------------------------------------------------*/
-uint32_t
-IOWorker::GetWorkerId(void)
-{
-    return id;
-}
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Submit bio to device without waiting.
@@ -299,8 +241,16 @@ IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
     currentOutstandingIOCount++;
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
-    QosManagerSingleton::Instance()->HandleEventUbioSubmission(&ublockDeviceSubmission,
+    qosManager->HandleEventUbioSubmission(&ublockDeviceSubmission,
         &ioWorkerSubmissionNotifier, id, ubio);
+}
+
+void
+IOWorker::_SubmitPendingIO(void)
+{
+    UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
+    currentOutstandingIOCount -=
+        qosManager->IOWorkerPoller(id, &ublockDeviceSubmission);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -331,6 +281,56 @@ IOWorker::_CompleteCommand(void)
             }
         }
     }
+}
+
+void
+IOWorker::_DoPeriodicJob(void)
+{
+    _CompleteCommand();
+    _HandleDeviceOperation();
+}
+
+void
+IOWorker::_HandleDeviceOperation(void)
+{
+    IoWorkerDeviceOperation* operation = operationQueue.Pop();
+    if (nullptr == operation)
+    {
+        return;
+    }
+
+    UblockSharedPtr device = operation->GetDevice();
+    switch (operation->GetCommand())
+    {
+        case INSERT:
+        {
+            /*
+                When opening the uram in IOWorker, Uram will issue recovery IO.
+                Completion check for this io,
+                device must be added to list before device open.
+            */
+            deviceList.insert(device);
+            bool isOpened = device->Open();
+            if (false == isOpened)
+            {
+                deviceList.erase(device);
+                DeviceType type = device->GetType();
+                if (DeviceType::SSD == type)
+                {
+                    detachTrigger->Run(device);
+                }
+            }
+
+            break;
+        }
+        case REMOVE:
+        {
+            deviceList.erase(device);
+            currentOutstandingIOCount -= device->Close();
+            break;
+        }
+    }
+    operation->SetDone();
 }
 
 } // namespace pos

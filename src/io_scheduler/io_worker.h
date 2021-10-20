@@ -50,6 +50,7 @@ class IOQueue;
 class Ubio;
 class UBlockDevice;
 class DeviceDetachTrigger;
+class QosManager;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -61,26 +62,25 @@ class IOWorker
 {
 public:
     IOWorker(cpu_set_t cpuSetInput, uint32_t id,
-        DeviceDetachTrigger* detachTrigger = nullptr);
+        DeviceDetachTrigger* detachTrigger = nullptr,
+        QosManager* qosManager = nullptr);
     virtual ~IOWorker(void);
+    uint32_t GetWorkerId(void);
+    virtual void DecreaseCurrentOutstandingIoCount(int count);
 
     virtual void EnqueueUbio(UbioSmartPtr ubio);
     uint32_t AddDevice(UblockSharedPtr device);
     uint32_t AddDevices(std::vector<UblockSharedPtr>* inputList);
     virtual uint32_t RemoveDevice(UblockSharedPtr device);
-    bool HasDevice(UblockSharedPtr device);
 
     void Run(void);
 
-    void DecreaseCurrentOutstandingIoCount(int count);
-    uint32_t GetWorkerId(void);
-
 private:
     void _SubmitAsyncIO(UbioSmartPtr ubio);
+    void _SubmitPendingIO(void);
     void _CompleteCommand(void);
     void _DoPeriodicJob(void);
     void _HandleDeviceOperation(void);
-    void _SubmitPendingIO(void);
 
     using DeviceSet = std::unordered_set<UblockSharedPtr>;
     using DeviceSetIter = DeviceSet::iterator;
@@ -96,5 +96,7 @@ private:
     uint32_t id;
 
     DeviceDetachTrigger* detachTrigger;
+    bool productDetachTrigger {false};
+    QosManager* qosManager;
 };
 } // namespace pos

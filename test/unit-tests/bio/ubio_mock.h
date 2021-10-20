@@ -25,6 +25,7 @@ public:
     MOCK_METHOD(void, ClearOrigin, (), (override));
     MOCK_METHOD(void, Complete, (IOErrorType error), (override));
     MOCK_METHOD(bool, CheckRecoveryAllowed, (), (override));
+    MOCK_METHOD(UBlockDevice*, GetUBlock, (), (override));
 };
 
 } // namespace pos

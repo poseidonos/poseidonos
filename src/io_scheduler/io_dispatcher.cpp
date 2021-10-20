@@ -45,22 +45,31 @@
 #include "src/event_scheduler/event_factory.h"
 #include "src/device/device_detach_trigger.h"
 
+#include <unistd.h>
+
 namespace pos
 {
 IODispatcher::DispatcherAction IODispatcher::frontendOperation;
 bool IODispatcher::frontendDone;
 thread_local std::vector<UblockSharedPtr> IODispatcher::threadLocalDeviceList;
 EventFactory* IODispatcher::recoveryEventFactory = nullptr;
+EventFrameworkApi* IODispatcher::eventFrameworkApi = nullptr;
 
-IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApi_)
+IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
+    EventScheduler* eventSchedulerArg)
 : ioWorkerCount(0),
   deviceAllocationTurn(0),
-  eventFrameworkApi(eventFrameworkApi_)
+  eventScheduler(eventSchedulerArg)
 {
     pthread_rwlock_init(&ioWorkerMapLock, nullptr);
+    eventFrameworkApi = eventFrameworkApiArg;
     if (nullptr == eventFrameworkApi)
     {
         eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+    }
+    if (nullptr == eventScheduler)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
     }
 }
 
@@ -77,19 +86,15 @@ void
 IODispatcher::AddIOWorker(cpu_set_t cpuSet)
 {
     uint32_t cpuCount = CPU_COUNT(&cpuSet);
+    if (0 == cpuCount)
+    {
+        return;
+    }
 
     pthread_rwlock_wrlock(&ioWorkerMapLock);
     for (uint32_t index = 0; index < cpuCount; index++)
     {
         uint32_t logicalCore = _GetLogicalCore(cpuSet, index);
-        if (logicalCore == UINT32_MAX)
-        {
-            POS_EVENT_ID eventId =
-                POS_EVENT_ID::IODISPATCHER_INVALID_CPU_INDEX;
-            POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), index);
-            break;
-        }
-
         IOWorkerMapIter it = ioWorkerMap.find(logicalCore);
         if (it == ioWorkerMap.end())
         {
@@ -109,12 +114,15 @@ void
 IODispatcher::RemoveIOWorker(cpu_set_t cpuSet)
 {
     uint32_t cpuCount = CPU_COUNT(&cpuSet);
+    if (0 == cpuCount)
+    {
+        return;
+    }
 
     pthread_rwlock_wrlock(&ioWorkerMapLock);
     for (uint32_t index = 0; index < cpuCount; index++)
     {
         uint32_t logicalCore = _GetLogicalCore(cpuSet, index);
-
         IOWorkerMapIter it = ioWorkerMap.find(logicalCore);
         if (it != ioWorkerMap.end())
         {
@@ -154,9 +162,13 @@ IODispatcher::RemoveDeviceForReactor(UblockSharedPtr dev)
 void
 IODispatcher::AddDeviceForIOWorker(UblockSharedPtr dev, cpu_set_t cpuSet)
 {
-    std::lock_guard<std::mutex> lock(deviceLock);
     uint32_t cpuCount = CPU_COUNT(&cpuSet);
+    if (0 == cpuCount)
+    {
+        return;
+    }
 
+    std::lock_guard<std::mutex> lock(deviceLock);
     pthread_rwlock_rdlock(&ioWorkerMapLock);
     uint32_t index = deviceAllocationTurn % cpuCount;
     deviceAllocationTurn++;
@@ -180,7 +192,7 @@ IODispatcher::RemoveDeviceForIOWorker(UblockSharedPtr dev)
     std::lock_guard<std::mutex> lock(deviceLock);
     IOWorker* ioWorker = dev->GetDedicatedIOWorker();
 
-    if (ioWorker != nullptr)
+    if (nullptr != ioWorker)
     {
         ioWorker->RemoveDevice(dev);
     }
@@ -193,14 +205,6 @@ IODispatcher::CompleteForThreadLocalDeviceList(void)
     {
         iter->CompleteIOs();
     }
-}
-
-void
-IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
-{
-    ubio->SetError(IOErrorType::DEVICE_ERROR);
-    EventSmartPtr failure = recoveryEventFactory->Create(ubio);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(failure);
 }
 
 int
@@ -227,10 +231,14 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
     {
         ubio->SetSyncMode();
     }
-    else if (ioRecoveryNeeded && ubio->NeedRecovery())
+    else if (ioRecoveryNeeded)
     {
-        _SubmitRecovery(ubio);
-        return DEVICE_FAILED;
+        bool needRecovery = ubio->NeedRecovery();
+        if (needRecovery)
+        {
+            _SubmitRecovery(ubio);
+            return DEVICE_FAILED;
+        }
     }
 
     UBlockDevice* ublock = nullptr;
@@ -253,7 +261,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
     else
     {
         IOWorker* ioWorker = ublock->GetDedicatedIOWorker();
-        if (likely(ioWorker != nullptr))
+        if (likely(nullptr != ioWorker))
         {
             ioWorker->EnqueueUbio(ubio);
         }
@@ -267,29 +275,34 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
     return 0;
 }
 
+void
+IODispatcher::RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory)
+{
+    IODispatcher::recoveryEventFactory = recoveryEventFactory;
+}
+
+void
+IODispatcher::SetFrontendDone(bool value)
+{
+    IODispatcher::frontendDone = value;
+}
+
 uint32_t
 IODispatcher::_GetLogicalCore(cpu_set_t cpuSet, uint32_t index)
 {
-    uint32_t logicalCore = 0;
     uint32_t currentIndex = 0;
-    uint32_t cpuCount = CPU_COUNT(&cpuSet);
+    long nproc = sysconf(_SC_NPROCESSORS_ONLN);
+    long logicalCore;
 
-    if (cpuCount <= index)
+    for (logicalCore = 0; logicalCore < nproc; logicalCore++)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IODISPATCHER_INVALID_CPU_INDEX;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), index);
-        return UINT32_MAX;
-    }
-
-    for (;; logicalCore++)
-    {
-        if (CPU_ISSET(logicalCore, &cpuSet))
+        int cpu_set = CPU_ISSET(logicalCore, &cpuSet);
+        if (0 != cpu_set)
         {
             if (currentIndex == index)
             {
                 break;
             }
-
             currentIndex++;
         }
     }
@@ -330,20 +343,30 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
     }
 }
 
+void
+IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
+{
+    ubio->SetError(IOErrorType::DEVICE_ERROR);
+    EventSmartPtr failure = recoveryEventFactory->Create(ubio);
+    eventScheduler->EnqueueEvent(failure);
+}
+
 // This function will be executed in thread level.
 void
 IODispatcher::_ProcessFrontend(void* ublockDevice)
 {
     UblockSharedPtr dev = *static_cast<UblockSharedPtr*>(ublockDevice);
-    if (frontendOperation == DispatcherAction::OPEN)
+    if (DispatcherAction::OPEN == frontendOperation)
     {
-        if (dev->Open())
+        bool devOpen = dev->Open();
+        if (devOpen)
         {
             _AddDeviceToThreadLocalList(dev);
         }
         else
         {
-            if (dev->GetType() == DeviceType::SSD)
+            DeviceType deviceType = dev->GetType();
+            if (DeviceType::SSD == deviceType)
             {
                 DeviceDetachTrigger detachTrigger;
                 detachTrigger.Run(dev);
@@ -356,15 +379,16 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
         _RemoveDeviceFromThreadLocalList(dev);
     }
 
-    if (EventFrameworkApiSingleton::Instance()->IsLastReactorNow())
+    bool isLastReactorNow = eventFrameworkApi->IsLastReactorNow();
+    if (isLastReactorNow)
     {
         frontendDone = true;
     }
     else
     {
-        uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetNextReactor();
+        uint32_t nextCore = eventFrameworkApi->GetNextReactor();
         UblockSharedPtr* devArg = new UblockSharedPtr(dev);
-        bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextCore,
+        bool success = eventFrameworkApi->SendSpdkEvent(nextCore,
             _ProcessFrontend, devArg);
         if (unlikely(false == success))
         {
@@ -412,12 +436,6 @@ IODispatcher::_RemoveDeviceFromThreadLocalList(UblockSharedPtr device)
             break;
         }
     }
-}
-
-void
-IODispatcher::RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory)
-{
-    IODispatcher::recoveryEventFactory = recoveryEventFactory;
 }
 
 } // namespace pos

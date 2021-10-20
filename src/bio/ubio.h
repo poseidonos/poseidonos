@@ -108,7 +108,7 @@ public:
     virtual CallbackSmartPtr GetCallback(void);
     virtual void ClearCallback(void);
 
-    UBlockDevice* GetUBlock(void);
+    virtual UBlockDevice* GetUBlock(void);
     virtual IArrayDevice* GetArrayDev(void);
     uint64_t GetLba(void);
     const PhysicalBlkAddr GetPba(void);

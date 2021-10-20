@@ -79,8 +79,8 @@ public:
     QosManager(void);
     virtual ~QosManager(void);
     void Initialize(void);
-    int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
-    void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
+    virtual int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
+    virtual void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
     int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId);
     qos_vol_policy GetVolumePolicy(uint32_t volId, std::string arrayName);

@@ -1,4 +1,5 @@
-POS_ADD_UNIT_TEST(io_dispatcher_ut io_dispatcher_test.cpp)
+POS_ADD_UNIT_TEST(io_dispatcher_part1_ut io_dispatcher_part1_test.cpp)
+POS_ADD_UNIT_TEST(io_dispatcher_part2_ut io_dispatcher_part2_test.cpp)
 POS_ADD_UNIT_TEST(io_worker_ut io_worker_test.cpp)
 POS_ADD_UNIT_TEST(io_worker_device_operation_queue_ut io_worker_device_operation_queue_test.cpp)
 POS_ADD_UNIT_TEST(io_worker_device_operation_ut io_worker_device_operation_test.cpp)

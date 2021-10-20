@@ -19,6 +19,9 @@ public:
     MOCK_METHOD(void, DecreasePendingBackendEvents, (BackendEvent event), (override));
     MOCK_METHOD(void, IncreasePendingBackendEvents, (BackendEvent event), (override));
     MOCK_METHOD(void, LogEvent, (BackendEvent event), (override));
+    MOCK_METHOD(int, IOWorkerPoller, (uint32_t id, SubmissionAdapter* ioSubmission), (override));
+    MOCK_METHOD(void, HandleEventUbioSubmission, (SubmissionAdapter* ioSubmission,
+        SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio), (override));
 };
 
 } // namespace pos

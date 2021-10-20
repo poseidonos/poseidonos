@@ -44,12 +44,6 @@ namespace pos
 class Ubio;
 class UBlockDevice;
 
-struct UbioArray
-{
-    std::vector<Ubio*> array;
-    uint32_t validUbioCount;
-};
-
 class IOQueue
 {
 public:
