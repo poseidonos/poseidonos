@@ -47,6 +47,15 @@ JournalStatusProvider::JournalStatusProvider(void)
   checkpointStatus(nullptr),
   config(nullptr)
 {
+    logGroupStatusMap[LogGroupStatus::INIT] = "INIT";
+    logGroupStatusMap[LogGroupStatus::ACTIVE] = "ACTIVE";
+    logGroupStatusMap[LogGroupStatus::INVALID] = "INVALID";
+    logGroupStatusMap[LogGroupStatus::FULL] = "FULL";
+
+    checkpointStatusMap[CheckpointStatus::INIT] = "INIT";
+    checkpointStatusMap[CheckpointStatus::STARTED] = "STARTED";
+    checkpointStatusMap[CheckpointStatus::WAITING_FOR_FLUSH_DONE] = "WAITING_FOR_FLUSH_DONE";
+    checkpointStatusMap[CheckpointStatus::COMPLETED] = "COMPLETED";
 }
 
 JournalStatusProvider::~JournalStatusProvider(void)
@@ -59,16 +68,6 @@ JournalStatusProvider::Init(ILogBufferStatus* bufferStatusProvider, JournalConfi
     bufferStatus = bufferStatusProvider;
     checkpointStatus = checkpointStatusProvider;
     config = journalConfig;
-
-    logGroupStatusMap[LogGroupStatus::INIT] = "INIT";
-    logGroupStatusMap[LogGroupStatus::ACTIVE] = "ACTIVE";
-    logGroupStatusMap[LogGroupStatus::INVALID] = "INVALID";
-    logGroupStatusMap[LogGroupStatus::FULL] = "FULL";
-
-    checkpointStatusMap[CheckpointStatus::INIT] = "INIT";
-    checkpointStatusMap[CheckpointStatus::STARTED] = "STARTED";
-    checkpointStatusMap[CheckpointStatus::WAITING_FOR_FLUSH_DONE] = "WAITING_FOR_FLUSH_DONE";
-    checkpointStatusMap[CheckpointStatus::COMPLETED] = "COMPLETED";
 }
 
 bool

@@ -61,7 +61,7 @@ public:
     explicit NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi);
     virtual ~NvmfTarget(void);
 
-    virtual bool CreatePosBdev(const string& bdevName, const string& uuid, uint32_t id, uint64_t volumeSizeInMb,
+    virtual bool CreatePosBdev(const string& bdevName, const string uuid, uint32_t id, uint64_t volumeSizeInMb,
         uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId);
     virtual bool DeletePosBdev(const string& bdevName);
 

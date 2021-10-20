@@ -37,7 +37,6 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/network/nvmf_volume_pos.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
@@ -82,15 +81,6 @@ VolumeUnmounter::Do(string name)
         _SetVolumeEventPerf(vol);
         _SetVolumeArrayInfo();
         res = eventPublisher->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
-
-        bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);
-        if (volumeUnmounted == false)
-        {
-            ret = (int)POS_EVENT_ID::VOL_UNMOUNT_FAIL;
-            POS_TRACE_ERROR(ret, "Nvmf internal error occurred during volume unmount");
-            vol->UnlockStatus();
-            return ret;
-        }
         ret = vol->Unmount();
     }
     else

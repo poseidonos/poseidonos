@@ -54,6 +54,7 @@ VSAMapManager::VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, 
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         mapLoadState[volId] = MapLoadState::LOAD_DONE;
         isVsaMapInternalAccessable[volId] = false;
+        isVsaMapAccessable[volId] = false;
     }
 }
 
@@ -69,6 +70,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info)
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         mapLoadState[volId] = MapLoadState::LOAD_DONE;
         isVsaMapInternalAccessable[volId] = false;
+        isVsaMapAccessable[volId] = false;
     }
 }
 

@@ -50,6 +50,7 @@ public:
     virtual void Init(JournalConfiguration* journalConfiguration);
     // For UT
     void Init(JournalConfiguration* journalConfiguration, BufferedSegmentContext** inputBufferedSegmentContext);
+    virtual void Dispose(void);
 
     virtual void IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt);
     virtual void DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt);

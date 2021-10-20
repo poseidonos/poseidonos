@@ -83,11 +83,12 @@ NvmfVolumePos::_NamespaceDetachedHandler(void* cbArg, int status)
     else
     {
         SPDK_ERRLOG("Could not detach volume\n");
-        if (vInfo)
-        {
-            delete vInfo;
-        }
         detachFailed = true;
+    }
+    if (vInfo)
+    {
+        delete vInfo;
+        vInfo = nullptr;
     }
 }
 
@@ -159,14 +160,21 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         }
         delete vInfo;
+        vInfo = nullptr;
     }
 }
 
-void
-NvmfVolumePos::VolumeCreated(struct pos_volume_info* vInfo)
+bool
+NvmfVolumePos::VolumeCreated(struct pos_volume_info* vInfo, uint64_t time)
 {
+    uint32_t volId = vInfo->id;
+    string arrayName = vInfo->array_name;
+
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeCreateHandler, vInfo, nullptr);
+
+    bool ret = _WaitVolumeCreated(volId, arrayName, time);
+    return ret;
 }
 
 void
@@ -185,14 +193,21 @@ NvmfVolumePos::_VolumeDeleteHandler(void* arg1, void* arg2)
         }
 
         delete vInfo;
+        vInfo = nullptr;
     }
 }
 
-void
-NvmfVolumePos::VolumeDeleted(struct pos_volume_info* vInfo)
+bool
+NvmfVolumePos::VolumeDeleted(struct pos_volume_info* vInfo, uint64_t time)
 {
+    uint32_t volId = vInfo->id;
+    string arrayName = vInfo->array_name;
+
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeDeleteHandler, vInfo, nullptr);
+
+    bool res = _WaitVolumeDeleted(volId, arrayName, time);
+    return res;
 }
 
 void
@@ -210,11 +225,13 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
         {
             SPDK_ERRLOG("Failed to Get Subsystem Id. Unable to update subsystem to volume map and volume info.\n");
             delete vInfo;
+            vInfo = nullptr;
             return;
         }
         set_pos_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
         target->SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
+        vInfo = nullptr;
     }
 }
 
@@ -256,23 +273,36 @@ NvmfVolumePos::_VolumeUnmountHandler(void* arg1, void* arg2)
         if (vInfo)
         {
             delete vInfo;
+            vInfo = nullptr;
         }
     }
 }
 
-void
-NvmfVolumePos::VolumeUnmounted(struct pos_volume_info* vInfo)
+bool
+NvmfVolumePos::VolumeUnmounted(struct pos_volume_info* vInfo, uint64_t time)
 {
-    bool mounted = target->CheckVolumeAttached(vInfo->id, vInfo->array_name);
+    uint32_t volId = vInfo->id;
+    string arrayName = vInfo->array_name;
+    bool mounted = target->CheckVolumeAttached(volId, arrayName);
     if (mounted == false)
     {
         volumeDetachedCnt++;
+        return true;
     }
     else
     {
-        volumeDetachedCnt = 0;
         eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _VolumeUnmountHandler, vInfo, nullptr);
+
+        bool volumeUnmounted = _WaitVolumeDetached(VOLUME_UNMOUNT_CNT, time);
+        if (volumeUnmounted == false)
+        {
+            int ret = (int)POS_EVENT_ID::VOL_UNMOUNT_FAIL;
+            POS_TRACE_ERROR(ret, "Nvmf internal error/timeout occurred during volume(id: {}, array: {}) unmount",
+                volId, arrayName);
+            return false;
+        }
+        return true;
     }
 }
 
@@ -285,6 +315,7 @@ NvmfVolumePos::_VolumeUpdateHandler(void* arg1, void* arg2)
         string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
         target->SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
+        vInfo = nullptr;
     }
 }
 
@@ -309,8 +340,8 @@ NvmfVolumePos::_VolumeDetachHandler(void* volListInfo, void* arg)
     }
 }
 
-void
-NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
+bool
+NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName, uint64_t time)
 {
     uint32_t volsCountToDetach = 0;
     map<string, vector<int>> volsPerSubsystem;
@@ -330,7 +361,7 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
     }
     if (volsCountToDetach == 0)
     {
-        return;
+        return true;
     }
     uint32_t targetCore = eventFrameworkApi->GetFirstReactor();
     for (auto volumes : volsPerSubsystem)
@@ -342,10 +373,21 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
         eventFrameworkApi->SendSpdkEvent(targetCore, _VolumeDetachHandler,
             volsInfo, nullptr);
     }
+
+    bool res = _WaitVolumeDetached(volList.size(), time);
+    if (res == false)
+    {
+        int ret = (int)POS_EVENT_ID::VOL_DETACH_FAIL;
+        POS_TRACE_ERROR(ret,
+            "Detach volumes(array: {}) failed due to internal error or unmount timeout. Only some of them might be unmounted",
+            arrayName);
+        return false;
+    }
+    return true;
 }
 
 bool
-NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time)
+NvmfVolumePos::_WaitVolumeDetached(uint32_t volCnt, uint64_t time)
 {
     SystemTimeoutChecker timeChecker;
     timeChecker.SetTimeout(time);
@@ -354,6 +396,8 @@ NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time)
         POS_EVENT_ID eventId =
             POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW;
         POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        volumeDetachedCnt = 0;
+        detachFailed = false;
         return false;
     }
     while ((volumeDetachedCnt < volCnt))
@@ -368,6 +412,46 @@ NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time)
     }
     volumeDetachedCnt = 0;
     detachFailed = false;
+    return true;
+}
+
+bool
+NvmfVolumePos::_WaitVolumeCreated(uint32_t volId, string arrayName, uint64_t time)
+{
+    SystemTimeoutChecker timeChecker;
+    timeChecker.SetTimeout(time);
+    string bdevName = target->GetBdevName(volId, arrayName);
+    while (nullptr == spdkCaller->SpdkBdevGetByName(bdevName.c_str()))
+    {
+        if (true == timeChecker.CheckTimeout())
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_VOL_CREATE_TIMEOUT;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
+            return false;
+        }
+        usleep(1);
+    }
+    return true;
+}
+
+bool
+NvmfVolumePos::_WaitVolumeDeleted(uint32_t volId, string arrayName, uint64_t time)
+{
+    SystemTimeoutChecker timeChecker;
+    timeChecker.SetTimeout(time);
+    string bdevName = target->GetBdevName(volId, arrayName);
+    while (nullptr != spdkCaller->SpdkBdevGetByName(bdevName.c_str()))
+    {
+        if (true == timeChecker.CheckTimeout())
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), volId, arrayName);
+            return false;
+        }
+        usleep(1);
+    }
     return true;
 }
 

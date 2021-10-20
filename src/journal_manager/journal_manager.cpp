@@ -314,6 +314,8 @@ JournalManager::_DisposeModules(void)
     dirtyMapManager->Dispose();
     logFilledNotifier->Dispose();
     logWriteHandler->Dispose();
+    replayHandler->Dispose();
+    bufferedSegCtxManager->Dispose();
 }
 
 void

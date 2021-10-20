@@ -112,16 +112,22 @@ Callback::~Callback(void)
     {
         if (timeoutChecker->CheckTimeout())
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
-            POS_TRACE_DEBUG_IN_MEMORY(
-                ModuleInDebugLogDump::CALLBACK_TIMEOUT,
-                eventId,
-                PosEventId::GetString(eventId),
-                returnAddress);
-            POS_TRACE_DEBUG(
-                eventId,
-                PosEventId::GetString(eventId),
-                returnAddress);
+            try
+            {
+                POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
+                POS_TRACE_DEBUG_IN_MEMORY(
+                    ModuleInDebugLogDump::CALLBACK_TIMEOUT,
+                    eventId,
+                    PosEventId::GetString(eventId),
+                    returnAddress);
+                POS_TRACE_DEBUG(
+                    eventId,
+                    PosEventId::GetString(eventId),
+                    returnAddress);
+            }
+            catch(...)
+            {
+            }
         }
         delete timeoutChecker;
         timeoutChecker = nullptr;

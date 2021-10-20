@@ -31,11 +31,9 @@
  */
 
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/journal_manager/log_buffer/buffered_segment_context_manager.h"
 
 namespace pos
@@ -44,7 +42,8 @@ class MockBufferedSegmentContextManager : public BufferedSegmentContextManager
 {
 public:
     using BufferedSegmentContextManager::BufferedSegmentContextManager;
-    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration), (override));
+    MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (uint32_t logGroupId, SegmentId segId), (override));

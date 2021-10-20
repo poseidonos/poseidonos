@@ -3,6 +3,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "lib/spdk/include/spdk/pos_volume.h"
+#include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/sys_event/volume_event.h"
 #include "test/unit-tests/network/nvmf_volume_pos_mock.h"
@@ -157,7 +159,7 @@ TEST(Nvmf, VolumeCreated_Success)
     uint64_t maxBw = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    bool actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
@@ -167,10 +169,41 @@ TEST(Nvmf, VolumeCreated_Success)
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: Call VolumeCreated
-    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_)).WillByDefault(Return());
+    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_, _)).WillByDefault(Return(true));
     actual = nvmf.VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 
     // Then: Expect result as true
+    ASSERT_EQ(actual, expected);
+    delete mockNvmfVolumePos;
+}
+
+TEST(Nvmf, VolumeCreated_Fail)
+{
+    // Given
+    NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
+    unvmf_io_handler handler = {.submit = nullptr, .complete = nullptr};
+    NiceMock<MockNvmfVolumePos>* mockNvmfVolumePos = new NiceMock<MockNvmfVolumePos>(handler);
+    std::string volName("volume");
+    int volId = 0;
+    uint64_t volSizeByte = 1073741824;
+    uint64_t maxIops = 0;
+    uint64_t maxBw = 0;
+    std::string arrayName("array");
+    Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_FAIL};
+
+    VolumeEventBase volumeEventBase;
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    VolumeEventPerf volumeMountPerf;
+    nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
+    VolumeArrayInfo volumeArrayInfo;
+    nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
+
+    // When: Call VolumeCreated
+    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_, _)).WillByDefault(Return(false));
+    actual = nvmf.VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
+
+    // Then: Expect result as false
     ASSERT_EQ(actual, expected);
     delete mockNvmfVolumePos;
 }
@@ -186,17 +219,43 @@ TEST(Nvmf, VolumeDeleted_Success)
     uint64_t volSizeByte = 1073741824;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: Call VolumeDeleted
-    ON_CALL(*mockNvmfVolumePos, VolumeDeleted(_)).WillByDefault(Return());
+    ON_CALL(*mockNvmfVolumePos, VolumeDeleted(_, _)).WillByDefault(Return(true));
     actual = nvmf.VolumeDeleted(&volumeEventBase, &volumeArrayInfo);
 
     // Then: Expect result as true
+    ASSERT_EQ(actual, expected);
+    delete mockNvmfVolumePos;
+}
+
+TEST(Nvmf, VolumeDeleted_Fail)
+{
+    // Given
+    NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
+    unvmf_io_handler handler = {.submit = nullptr, .complete = nullptr};
+    NiceMock<MockNvmfVolumePos>* mockNvmfVolumePos = new NiceMock<MockNvmfVolumePos>(handler);
+    std::string volName("volume");
+    int volId = 0;
+    uint64_t volSizeByte = 1073741824;
+    std::string arrayName("array");
+    Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_FAIL};
+    VolumeEventBase volumeEventBase;
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    VolumeArrayInfo volumeArrayInfo;
+    nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
+
+    // When: Call VolumeDeleted
+    ON_CALL(*mockNvmfVolumePos, VolumeDeleted(_, _)).WillByDefault(Return(false));
+    actual = nvmf.VolumeDeleted(&volumeEventBase, &volumeArrayInfo);
+
+    // Then: Expect result as false
     ASSERT_EQ(actual, expected);
     delete mockNvmfVolumePos;
 }
@@ -215,7 +274,7 @@ TEST(Nvmf, VolumeMounted_Success)
     uint64_t maxBw = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
@@ -243,7 +302,7 @@ TEST(Nvmf, VolumeUnmounted_Success)
     int volId = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
@@ -251,10 +310,36 @@ TEST(Nvmf, VolumeUnmounted_Success)
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: CAll VolumeUnmounted
-    ON_CALL(*mockNvmfVolumePos, VolumeUnmounted(_)).WillByDefault(Return());
+    ON_CALL(*mockNvmfVolumePos, VolumeUnmounted(_, _)).WillByDefault(Return(true));
     actual = nvmf.VolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 
     // Then: Expect result as true
+    ASSERT_EQ(actual, expected);
+    delete mockNvmfVolumePos;
+}
+
+TEST(Nvmf, VolumeUnmounted_Fail)
+{
+    // Given
+    NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
+    unvmf_io_handler handler = {.submit = nullptr, .complete = nullptr};
+    NiceMock<MockNvmfVolumePos>* mockNvmfVolumePos = new NiceMock<MockNvmfVolumePos>(handler);
+    std::string volName("volume");
+    int volId = 0;
+    std::string arrayName("array");
+    Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_FAIL};
+
+    VolumeEventBase volumeEventBase;
+    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
+    VolumeArrayInfo volumeArrayInfo;
+    nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
+
+    // When: CAll VolumeUnmounted
+    ON_CALL(*mockNvmfVolumePos, VolumeUnmounted(_, _)).WillByDefault(Return(false));
+    actual = nvmf.VolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
+
+    // Then: Expect result as false
     ASSERT_EQ(actual, expected);
     delete mockNvmfVolumePos;
 }
@@ -272,7 +357,7 @@ TEST(Nvmf, VolumeLoaded_Success)
     uint64_t maxBw = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
@@ -282,7 +367,7 @@ TEST(Nvmf, VolumeLoaded_Success)
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: CAll VolumeLoaded
-    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_)).WillByDefault(Return());
+    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_, _)).WillByDefault(Return(true));
     actual = nvmf.VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 
     // Then: Expect result as true
@@ -302,7 +387,7 @@ TEST(Nvmf, VolumeUpdated_Success)
     uint64_t maxBw = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{true};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
@@ -329,15 +414,17 @@ TEST(Nvmf, VolumeDetached_Success)
     vector<int> volList{0, 1, 2};
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: Call VolumeDetached
-    ON_CALL(*mockNvmfVolumePos, VolumeDetached(volList, arrayName)).WillByDefault(Return());
-    nvmf.VolumeDetached(volList, &volumeArrayInfo);
+    ON_CALL(*mockNvmfVolumePos, VolumeDetached(volList, arrayName, _)).WillByDefault(Return(true));
+    actual = nvmf.VolumeDetached(volList, &volumeArrayInfo);
 
-    // Then: Do Nothing
+    // Then: Expect result as true
+    ASSERT_EQ(actual, expected);
     delete mockNvmfVolumePos;
 }
 } // namespace pos

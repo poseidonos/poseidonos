@@ -72,6 +72,7 @@ public:
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
+    virtual void Dispose(void);
 
     virtual int Start(void);
 

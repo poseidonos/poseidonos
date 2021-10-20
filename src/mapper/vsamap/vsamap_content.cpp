@@ -49,7 +49,7 @@ VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAlloc
 {
     fileName = "VSAMap." + std::to_string(mapId) + ".bin";
     totalBlks = 0;
-    this->arrayId = arrayId;
+    this->arrayId = addrInfo->GetArrayId();
     callback = nullptr;
 }
 

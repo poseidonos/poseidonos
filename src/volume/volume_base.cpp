@@ -53,12 +53,12 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} created", name, totalSize);
 }
 
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
+VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
 {
     array = arrayName;
     arrayId = arrayIdx;
     name = volName;
-    uuid = uuid;
+    uuid = inputUuid;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     maxiops = _maxiops;
