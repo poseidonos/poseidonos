@@ -59,7 +59,7 @@ ComponentManager::_CalculateAvgTemp(uint64_t temp)
     else
         cpuTemperature = 0;
 }
-bool
+int
 ComponentManager::FindCpuTemperature(void)
 {
     int i = 0;
@@ -84,18 +84,9 @@ ComponentManager::FindCpuTemperature(void)
             break;
         }
     }
-    if (fileOpened == false)
-    {
-        // CPU temperature could not be read
-        return false;
-    }
+
     _CalculateAvgTemp(sumCpuTemperature);
-    return true;
+    return cpuTemperature / MILLI;;
 }
 
-uint64_t
-ComponentManager::GetCpuTemperature(void)
-{
-    return cpuTemperature / MILLI;
-}
 } // namespace pos

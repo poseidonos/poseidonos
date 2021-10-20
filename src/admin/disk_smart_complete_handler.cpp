@@ -37,8 +37,9 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 namespace pos
 {
-DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback)
+DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback, SmartLogMgr* smartLogMgr)
 : Callback(false, CallbackType_DiskSmartCompleteHandler),
+  smartLogMgr(smartLogMgr),
   resultPage(resultPage),
   volId(volId),
   arrayId(arrayId),
@@ -46,7 +47,6 @@ DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_infor
   io(io),
   callback(callback)
 {
-    smartLogMgr = SmartLogMgrSingleton::Instance();
 }
 DiskSmartCompleteHandler::~DiskSmartCompleteHandler(void)
 {
@@ -57,9 +57,9 @@ DiskSmartCompleteHandler::_AddComponentTemperature(void)
     // test cpu temperature
     int index = 0;
     ComponentManager* componentMgr = new ComponentManager();
-    componentMgr->FindCpuTemperature();
+    uint64_t cpuTemperature = componentMgr->FindCpuTemperature();
     // since the spdk parser converts temperature from kelvin to celsius and cpu temperature is reported in celsius.
-    uint64_t cpuTemperature = componentMgr->GetCpuTemperature() + KELVIN_TO_CELSIUS;
+    cpuTemperature = cpuTemperature + KELVIN_TO_CELSIUS;
     delete componentMgr;
     resultPage->temperature = (resultPage->temperature + cpuTemperature) / NO_OF_COMPONENTS;
     // check for temperature sensor with no value(not filled) and fill cpu temperature in that

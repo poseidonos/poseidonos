@@ -26,17 +26,17 @@ TEST(ComponentManager, FindCpuTemperature_FileOpen)
     bool expectedFileOpen = true;
     // bool originalFileOpen = file.is_open();
     // as valid file name is passed file open should be true;
-    bool originalFileOpen = componentManager.FindCpuTemperature();
+    int temperature = componentManager.FindCpuTemperature();
     // ASSERT_EQ(expectedFileOpen, originalFileOpen);
 }
 
-TEST(ComponentManager, GetCpuTemperature_Initial_Zero)
+/*TEST(ComponentManager, GetCpuTemperature_Initial_Zero)
 {
     ComponentManager componentManager;
     uint64_t expected = 0;
     uint64_t actual = componentManager.GetCpuTemperature();
     ASSERT_EQ(expected, actual);
-}
+}*/
 
 TEST(ComponentManager, _CalculateAvgTemp_)
 {

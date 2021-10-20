@@ -39,33 +39,41 @@
 #endif
 namespace pos
 {
-SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex)
+SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
 : loaded(false),
   smartLogFile(nullptr),
-  arrayId(arrayIndex)
+  arrayId(arrayIndex),
+  smartLogMgr(smartLogMgr)
 {
     fileName = "SmartLogPage.bin";
+    smartLogFile = new FILESTORE(fileName, arrayId);
 }
-
+SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile)
+: loaded(false),
+  smartLogFile(metaFile),
+  arrayId(arrayIndex),
+  smartLogMgr(smartLogMgr)
+{
+}
 SmartLogMetaIo::~SmartLogMetaIo(void)
 {
 }
 int
 SmartLogMetaIo::Init(void)
 {
-    SmartLogMgrSingleton::Instance()->Init();
-    if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == false)
+    smartLogMgr->Init();
+
+    if (smartLogMgr->GetSmartLogEnabled() == false)
     {
         return 0;
     }
-    smartLogFile = new FILESTORE(fileName, arrayId);
     _CreateSmartLogFile();
     return 0;
 }
 void
 SmartLogMetaIo::Dispose(void)
 {
-    if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == false)
+    if (smartLogMgr->GetSmartLogEnabled() == false)
     {
         return;
     }
@@ -103,11 +111,6 @@ SmartLogMetaIo::_OpenFile(void)
     int ret = smartLogFile->Open();
     return ret;
 }
-bool
-SmartLogMetaIo::_IsFileOpened(void)
-{
-    return smartLogFile->IsOpened();
-}
 int
 SmartLogMetaIo::_CloseFile(void)
 {
@@ -116,21 +119,6 @@ SmartLogMetaIo::_CloseFile(void)
     {
         POS_TRACE_INFO(EID(MFS_INFO_MESSAGE), "{} file has been closed", fileName);
     }
-    return ret;
-}
-int
-SmartLogMetaIo::_DeleteSmartLogFile(void)
-{
-    int ret = 0;
-    ret = smartLogFile->Delete();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed",
-            fileName);
-        return ret;
-    }
-    delete smartLogFile;
-    smartLogFile = nullptr;
     return ret;
 }
 
@@ -151,7 +139,7 @@ SmartLogMetaIo::_DoMfsOperation(int direction)
     logpageFlushReq->fd = smartLogFile->GetFd();
     logpageFlushReq->fileOffset = 0;
     logpageFlushReq->length = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
-    logpageFlushReq->buffer = (char*)SmartLogMgrSingleton::Instance()->GetLogPages(arrayId);
+    logpageFlushReq->buffer = (char*)smartLogMgr->GetLogPages(arrayId);
     logpageFlushReq->callback = std::bind(&SmartLogMetaIo::_CompleteSmartLogIo, this, std::placeholders::_1);
     int ret = smartLogFile->AsyncIO(logpageFlushReq);
     if (ret < 0)
@@ -197,4 +185,3 @@ SmartLogMetaIo::Shutdown(void)
 }
 
 } // namespace pos
-

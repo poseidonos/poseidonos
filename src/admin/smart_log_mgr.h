@@ -35,11 +35,12 @@
 #include <mutex>
 #include <string>
 
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
 #include "src/logger/logger.h"
+#include "src/master_context/config_manager.h"
 #include "src/volume/volume_list.h"
-#include "src/include/array_mgmt_policy.h"
 
 using namespace std;
 
@@ -60,12 +61,12 @@ struct SmartLogEntry
 class SmartLogMgr
 {
 public:
-    SmartLogMgr(void) = default;
-    ~SmartLogMgr(void);
+    explicit SmartLogMgr(void);
+    explicit SmartLogMgr(ConfigManager* configManager);
+    virtual ~SmartLogMgr(void);
 
-
-    void Init(void);
-    bool GetSmartLogEnabled(void);
+    virtual void Init(void);
+    virtual bool GetSmartLogEnabled(void);
     void IncreaseReadCmds(uint32_t volId, uint32_t arrayId);
     void IncreaseWriteCmds(uint32_t volId, uint32_t arrayId);
     uint64_t GetWriteCmds(uint32_t volId, uint32_t arrayId);
@@ -73,13 +74,14 @@ public:
 
     void IncreaseReadBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId);
     void IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId);
-    uint64_t GetWriteBytes(uint32_t volId, uint32_t arrayId);
-    uint64_t GetReadBytes(uint32_t volId, uint32_t arrayId);
+    virtual uint64_t GetWriteBytes(uint32_t volId, uint32_t arrayId);
+    virtual uint64_t GetReadBytes(uint32_t volId, uint32_t arrayId);
     void* GetLogPages(uint32_t arrayId);
 
 private:
     struct SmartLogEntry logPage[MAX_ARRAYS][MAX_VOLUME_COUNT];
     bool smartLogEnable;
+    ConfigManager* configManager;
 };
 using SmartLogMgrSingleton = Singleton<SmartLogMgr>;
 } // namespace pos

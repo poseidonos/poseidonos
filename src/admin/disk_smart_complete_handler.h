@@ -32,23 +32,25 @@
 
 #pragma once
 
-#include "spdk/pos.h"
 #include "spdk/nvme_spec.h"
+#include "spdk/pos.h"
 #include "src/admin/component_manager.h"
 #include "src/admin/smart_log_mgr.h"
 #include "src/event_scheduler/callback.h"
 #include "src/io/general_io/io_submit_handler.h"
 namespace pos
 {
+class SmartLogMgr;
 // disk and cpu
 static const int NO_OF_COMPONENTS = 2;
 static const uint64_t NVME_SPEC_BYTE_UNIT = 512 * 1000;
 static const int NO_OF_TEMP_SENSORS = 8;
 static const int KELVIN_TO_CELSIUS = 273;
+
 class DiskSmartCompleteHandler : public Callback
 {
 public:
-    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback);
+    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback, SmartLogMgr* smartLogMgr);
     ~DiskSmartCompleteHandler(void) override;
 
 private:

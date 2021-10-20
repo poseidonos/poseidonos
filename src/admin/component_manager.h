@@ -46,8 +46,8 @@ class ComponentManager
 public:
     ComponentManager(void);
     ~ComponentManager(void);
-    bool FindCpuTemperature(void);
-    uint64_t GetCpuTemperature(void);
+    int FindCpuTemperature(void);
+    //uint64_t GetCpuTemperature(void);
 
 private:
     void _CalculateAvgTemp(uint64_t temp);

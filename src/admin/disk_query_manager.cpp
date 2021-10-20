@@ -36,10 +36,11 @@
 #include <tuple>
 #include <vector>
 
-#include "spdk/pos.h"
 #include "spdk/nvme.h"
 #include "spdk/nvme_spec.h"
+#include "spdk/pos.h"
 #include "src/admin/disk_smart_complete_handler.h"
+#include "src/admin/smart_log_mgr.h"
 #include "src/admin/smart_log_update_request.h"
 #include "src/array/device/i_array_device_manager.h"
 #include "src/array_mgmt/array_manager.h"
@@ -58,7 +59,7 @@ GetLogPageContext::GetLogPageContext(void* data, uint16_t lid)
 
 DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, pos_io* io,
     uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
+    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
 : cmd(cmd),
   resultPage(resultPage),
   io(io),
@@ -67,7 +68,8 @@ DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_h
   arrayInfo(info),
   devInfo(devInfo),
   dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr)
+  arrayDevMgr(arrayDevMgr),
+  smartLogMgr(smartLogMgr)
 {
 }
 
@@ -89,7 +91,7 @@ DiskQueryManager::SendSmartCommandtoDisk(void)
             "No Device in Array");
         return true;
     }
-    CallbackSmartPtr callback(new DiskSmartCompleteHandler(resultPage, io->volume_id, arrayInfo->GetIndex(), originCore, io, cb));
+    CallbackSmartPtr callback(new DiskSmartCompleteHandler(resultPage, io->volume_id, arrayInfo->GetIndex(), originCore, io, cb, smartLogMgr));
     callback->SetWaitingCount(devices.size());
     for (size_t i = 0; i < devices.size(); i++)
     {

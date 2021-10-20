@@ -21,7 +21,8 @@ TEST(DiskSmartCompleteHandler, DiskSmartCompleteHandler_Constructor_One)
     uint32_t arrayId = 0;
     ibofIo.ioType = IO_TYPE::GET_LOG_PAGE;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    DiskSmartCompleteHandler diskSmartCompleteHandler(buffer, volId, arrayId, originCore, &ibofIo, callback);
+    NiceMock<MockSmartLogMgr> smartLogMgr;
+    DiskSmartCompleteHandler diskSmartCompleteHandler(buffer, volId, arrayId, originCore, &ibofIo, callback, &smartLogMgr);
 }
 
 TEST(DiskSmartCompleteHandler, DiskSmartCompleteHandler_Constructor_One_heap)
@@ -33,7 +34,8 @@ TEST(DiskSmartCompleteHandler, DiskSmartCompleteHandler_Constructor_One_heap)
     uint32_t arrayId = 0;
     ibofIo.ioType = IO_TYPE::GET_LOG_PAGE;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    DiskSmartCompleteHandler* diskSmartCompleteHandler = new DiskSmartCompleteHandler(buffer, volId, arrayId, originCore, &ibofIo, callback);
+    NiceMock<MockSmartLogMgr> smartLogMgr;
+    DiskSmartCompleteHandler* diskSmartCompleteHandler = new DiskSmartCompleteHandler(buffer, volId, arrayId, originCore, &ibofIo, callback, &smartLogMgr);
     delete diskSmartCompleteHandler;
 }
 
@@ -46,7 +48,8 @@ TEST(DiskSmartCompleteHandler, _DoSpecificJob_Execute)
     uint32_t arrayId = 0;
     ibofIo.ioType = IO_TYPE::GET_LOG_PAGE;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback);
+    NiceMock<MockSmartLogMgr> smartLogMgr;
+    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback, &smartLogMgr);
     bool expected = true, actual;
     actual = diskSmartCompleteHandler.Execute();
 }
@@ -59,9 +62,9 @@ TEST(DiskSmartCompleteHandler, _DoSpecificJob_NonZeroReadWriteBytes)
     uint32_t arrayId = 0;
     ibofIo.ioType = IO_TYPE::GET_LOG_PAGE;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback);
+    NiceMock<MockSmartLogMgr> mockSmartLogMgr;
+    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback, &mockSmartLogMgr);
 
-    MockSmartLogMgr mockSmartLogMgr;
     ON_CALL(mockSmartLogMgr, GetReadBytes(_, _)).WillByDefault(Return(1));
     ON_CALL(mockSmartLogMgr, GetWriteBytes(_, _)).WillByDefault(Return(1));
     buffer.temp_sensor[0] = 0;
@@ -78,9 +81,9 @@ TEST(DiskSmartCompleteHandler, _DoSpecificJob_ZeroReadWriteBytes)
     uint32_t arrayId = 0;
     ibofIo.ioType = IO_TYPE::GET_LOG_PAGE;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback);
+    NiceMock<MockSmartLogMgr> mockSmartLogMgr;
+    DiskSmartCompleteHandler diskSmartCompleteHandler(&buffer, volId, arrayId, originCore, &ibofIo, callback, &mockSmartLogMgr);
 
-    MockSmartLogMgr mockSmartLogMgr;
     ON_CALL(mockSmartLogMgr, GetReadBytes(_, _)).WillByDefault(Return(0));
     ON_CALL(mockSmartLogMgr, GetWriteBytes(_, _)).WillByDefault(Return(0));
     buffer.temp_sensor[0] = 2;

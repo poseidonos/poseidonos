@@ -32,13 +32,14 @@
 
 #pragma once
 #include <string>
+
+#include "src/admin/smart_log_mgr.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/interface/i_mount_sequence.h"
 #include "src/meta_file_intf/async_context.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/meta_file_intf/meta_file_intf.h"
-#include "src/admin/smart_log_mgr.h"
-#include "src/array_models/interface/i_mount_sequence.h"
 #include "src/volume/volume_list.h"
-#include "src/array_models/interface/i_array_info.h"
 
 using namespace std;
 
@@ -52,7 +53,8 @@ public:
 class SmartLogMetaIo : public IMountSequence
 {
 public:
-    explicit SmartLogMetaIo(uint32_t arrayIndex);
+    SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr);
+    SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile);
     virtual ~SmartLogMetaIo(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
@@ -65,9 +67,7 @@ private:
     int _StoreLogData(void);
     int _LoadLogData(void);
     int _OpenFile(void);
-    bool _IsFileOpened(void);
     int _CloseFile(void);
-    int _DeleteSmartLogFile(void);
     void _CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx);
     int _DoMfsOperation(int Direction);
     bool loaded;
@@ -75,5 +75,6 @@ private:
     MetaFileIntf* smartLogFile;
     uint32_t arrayId;
     int ioError = 0;
+    SmartLogMgr* smartLogMgr;
 };
 } // namespace pos

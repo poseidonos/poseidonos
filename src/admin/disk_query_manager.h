@@ -46,6 +46,8 @@ class IArrayInfo;
 class IDevInfo;
 class IIODispatcher;
 class IArrayDevMgr;
+class SmartLogMgr;
+
 static const uint64_t INVALID_LBA = UINT64_MAX;
 class GetLogPageContext
 {
@@ -60,7 +62,7 @@ class DiskQueryManager : public Event
 public:
     DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, pos_io* io,
         uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
+        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr);
     bool Execute(void);
     bool SendSmartCommandtoDisk(void);
     bool SendLogPagetoDisk(struct spdk_nvme_cmd* cmd);
@@ -75,5 +77,6 @@ private:
     IDevInfo* devInfo;
     IIODispatcher* dispatcher;
     IArrayDevMgr* arrayDevMgr;
+    SmartLogMgr* smartLogMgr;
 };
 } // namespace pos

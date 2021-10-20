@@ -31,12 +31,21 @@
  */
 
 #include "src/admin/smart_log_mgr.h"
-#include "src/master_context/config_manager.h"
-#include "src/include/pos_event_id.hpp"
+
 #include <spdk/nvme_spec.h>
+
+#include "src/include/pos_event_id.hpp"
 
 namespace pos
 {
+SmartLogMgr::SmartLogMgr(void)
+{
+    configManager = ConfigManagerSingleton::Instance();
+}
+SmartLogMgr::SmartLogMgr(ConfigManager* configMgr)
+{
+    configManager = configMgr;
+}
 SmartLogMgr::~SmartLogMgr(void)
 {
 }
@@ -46,8 +55,7 @@ SmartLogMgr::Init(void)
 {
     bool enabled = false;
     smartLogEnable = false;
-    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
-    int ret = configManager.GetValue("admin", "smart_log_page", &enabled, CONFIG_TYPE_BOOL);
+    int ret = configManager->GetValue("admin", "smart_log_page", &enabled, CONFIG_TYPE_BOOL);
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         smartLogEnable = enabled;
@@ -64,13 +72,13 @@ SmartLogMgr::GetSmartLogEnabled(void)
 void*
 SmartLogMgr::GetLogPages(uint32_t arrayId)
 {
-    return (void *)logPage[arrayId];
+    return (void*)logPage[arrayId];
 }
 
 void
 SmartLogMgr::IncreaseReadCmds(uint32_t volId, uint32_t arrayId)
 {
-    if (smartLogEnable == false)
+    if (GetSmartLogEnabled() == false)
     {
         return;
     }
@@ -81,7 +89,7 @@ SmartLogMgr::IncreaseReadCmds(uint32_t volId, uint32_t arrayId)
 void
 SmartLogMgr::IncreaseWriteCmds(uint32_t volId, uint32_t arrayId)
 {
-    if (smartLogEnable == false)
+    if (GetSmartLogEnabled() == false)
     {
         return;
     }
@@ -104,7 +112,7 @@ SmartLogMgr::GetReadCmds(uint32_t volId, uint32_t arrayId)
 void
 SmartLogMgr::IncreaseReadBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId)
 {
-    if (smartLogEnable == false)
+    if (GetSmartLogEnabled() == false)
     {
         return;
     }
@@ -115,7 +123,7 @@ SmartLogMgr::IncreaseReadBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId
 void
 SmartLogMgr::IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId)
 {
-    if (smartLogEnable == false)
+    if (GetSmartLogEnabled() == false)
     {
         return;
     }

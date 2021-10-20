@@ -38,15 +38,17 @@
 #include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/admin/disk_query_manager.h"
+#include "src/admin/smart_log_mgr.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+
 namespace pos
 {
 SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
     CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
+    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
 : cmd(cmd),
   io(io),
   smartLogPageData(smartLogPageData),
@@ -56,7 +58,8 @@ SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, 
   arrayInfo(info),
   devInfo(devInfo),
   dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr)
+  arrayDevMgr(arrayDevMgr),
+  smartLogMgr(smartLogMgr)
 {
 }
 
@@ -70,7 +73,7 @@ SmartLogPageHandler::Execute(void)
         return true;
     }
     struct spdk_nvme_health_information_page* smartLogPage = (struct spdk_nvme_health_information_page*)smartLogPageData;
-    EventSmartPtr diskMgr(new DiskQueryManager(cmd, smartLogPage, io, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr));
+    EventSmartPtr diskMgr(new DiskQueryManager(cmd, smartLogPage, io, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr, smartLogMgr));
     bool result = diskMgr->Execute();
     if (result == false)
         EventSchedulerSingleton::Instance()->EnqueueEvent(diskMgr);

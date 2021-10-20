@@ -35,13 +35,13 @@
 #include "Air.h"
 #include "lib/spdk/include/spdk/bdev_module.h"
 #include "spdk/pos.h"
+#include "src/admin/smart_log_mgr.h"
 #include "src/admin/smart_log_page_handler.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/admin/smart_log_mgr.h"
 
 namespace pos
 {
@@ -54,6 +54,7 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
   dispatcher(dispatcher),
   arrayDevMgr(arrayDevMgr)
 {
+    smartLogMgr = SmartLogMgrSingleton::Instance();
     void* bio = io->context;
     struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
     void* callerContext = bioPos->internal.caller_ctx;
@@ -61,6 +62,24 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;
 }
+AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
+: io(posIo),
+  originCore(originCore),
+  callback(callback),
+  arrayInfo(info),
+  devInfo(devInfo),
+  dispatcher(dispatcher),
+  arrayDevMgr(arrayDevMgr),
+  smartLogMgr(smartLogMgr)
+{
+    void* bio = io->context;
+    struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
+    void* callerContext = bioPos->internal.caller_ctx;
+
+    req = (struct spdk_nvmf_request*)callerContext;
+    cmd = &req->cmd->nvme_cmd;
+}
+
 AdminCommandHandler::~AdminCommandHandler(void)
 {
 }
@@ -77,9 +96,9 @@ AdminCommandHandler::Execute(void)
             lid = cmd->cdw10 & 0xFF;
             if (lid == SPDK_NVME_LOG_HEALTH_INFORMATION)
             {
-                if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == true)
+                if (smartLogMgr->GetSmartLogEnabled() == true)
                 {
-                    EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr));
+                    EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr, smartLogMgr));
                     bool result = event->Execute();
                     if (result == false)
                         EventSchedulerSingleton::Instance()->EnqueueEvent(event);
