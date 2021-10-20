@@ -1217,8 +1217,7 @@ tc_min_bw_iops_simultaneous(){
     minVol1=$?
     getRandomVolId $volCnt
     monVol2=$?
-    if [ $minVol1 -eq $minVol2 ]
-    then
+    if [[ $minVol1 -eq $minVol2 ]]; then
         minVol2=`expr $minVol1 + 1`
     fi
 

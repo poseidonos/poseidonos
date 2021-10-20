@@ -16,18 +16,20 @@ def config_change(feEnable, impact):
     with open("default_ibofos.conf", "w") as jsonFile:
         json.dump(data, jsonFile, indent=4)
 
-    if ("qos" not in data):
-        data["qos"] = {}
+    if ("fe_qos" not in data):
+        data["fe_qos"] = {}
+    if ("perf_impact" not in data):
+        data["perf_impact"] = []
 
     if (feEnable == "true"):
-        data["qos"]["fe_enable"] = True
+        data["fe_qos"]["enable"] = True
     elif (feEnable == "false"):
-        data["qos"]["fe_enable"] = False
+        data["fe_qos"]["enable"] = False
 
     if (impact == "high"):
-        data["qos"]["rebuild_impact"] = "high"
+        data["perf_impact"]["rebuild"] = "high"
     elif (impact == "low"):
-        data["qos"]["rebuild_impact"] = "low"
+        data["perf_impact"]["rebuild"] = "low"
 
     with open("/etc/pos/pos.conf", "w") as jsonFile:
         json.dump(data, jsonFile, indent=4)

@@ -616,12 +616,12 @@ tc_8v_3job_randread()
 #**************************************************************************
 # Sequential Write
 #**************************************************************************
-tc_31v_1job_write()
+tc_15v_1job_write()
 {
-    fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 4 128k write 30 1 4 0 1 257 1
+    launch_fio 15 1 4 128k write 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -629,12 +629,12 @@ tc_31v_1job_write()
 #**************************************************************************
 # Sequential Read
 #**************************************************************************
-tc_31v_1job_read()
+tc_15v_1job_read()
 {
-    fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(4), BS(128k), Sequential Read"
+    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 4 128k read 30 1 4 0 1 257 1
+    launch_fio 15 1 4 128k read 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -642,12 +642,12 @@ tc_31v_1job_read()
 #**************************************************************************
 # Random Write
 #**************************************************************************
-tc_31v_1job_randwrite()
+tc_15v_1job_randwrite()
 {
-    fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(128), BS(4k), Random Write"
+    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 128 4k randwrite 30 1 4 0 1 257 1
+    launch_fio 15 1 128 4k randwrite 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -655,12 +655,12 @@ tc_31v_1job_randwrite()
 #**************************************************************************
 # Random Read
 #**************************************************************************
-tc_31v_1job_randread()
+tc_15v_1job_randread()
 {
-    fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(128), BS(4k), Random Read"
+    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 128 4k randread 30 1 4 0 1 257 1
+    launch_fio 15 1 128 4k randread 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -922,7 +922,7 @@ run_fio_tests(){
 
         tc_array=(tc_1v_31job_write tc_1v_31job_read tc_1v_31job_randwrite tc_1v_31job_randread
                    tc_8v_3job_write tc_8v_3job_read tc_8v_3job_randwrite tc_8v_3job_randread
-                    tc_31v_1job_write tc_31v_1job_read tc_31v_1job_randwrite tc_31v_1job_randread)
+                    tc_15v_1job_write tc_15v_1job_read tc_15v_1job_randwrite tc_15v_1job_randread)
     elif [ $mode == "fe_qos_multi_array" ]; then
         print_info "FE QOS TEST CASES MULTI ARRAY"
         echo ""
@@ -1082,7 +1082,8 @@ run_multi_array_test(){
 ###################################################
 run_minimum_policy_test(){
     echo "Starting CI Script for Minimum Policy QoS"
-    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh
+    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh -v $NR_VOLUME -t $TRANSPORT -a $TARGET_IP -p $PORT -l $LOC -m $EXEC_MODE
+    EXPECT_PASS "Minimum Volume Policy Test Cases" $?
     echo "Completed Minimum Policy Tests"
 }
 
