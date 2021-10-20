@@ -123,7 +123,7 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayId, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
-    
+
     // only for test
     if (nullptr != metaFs)
     {

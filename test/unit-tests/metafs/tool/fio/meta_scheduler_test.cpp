@@ -145,7 +145,7 @@ TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler3)
 TEST(MetaIoHandler, Complete_testJustCallCompleteHandler)
 {
     MetaIoHandler handler(1);
-    
+
     handler.MetaFsIOCompleteHandler();
 }
 
