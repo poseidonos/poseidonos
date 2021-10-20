@@ -9,7 +9,7 @@ port=1158
 test_rev=0
 master_bin_path="/psdData/pos-bin"
 pos_bin_filename="poseidonos"
-build_optimization="OFF"
+build_optimization="ON"
 job_number=12
 
 texecc()
@@ -116,7 +116,7 @@ backupPos()
 
 buildTest()
 {
-    if [ $build_optimization == "ON" ]
+    if [ $build_optimization == "OFF" ]
     then
         texecc sed -i 's/O2/O0/g' $pos_working_dir/Makefile
     fi
@@ -168,7 +168,7 @@ buildTest()
         exit 1
     fi
 
-    if [ $target_type == "VM" ] && [ $build_optimization == "OFF" ]
+    if [ $target_type == "VM" ] && [ $build_optimization == "ON" ]
     then
         backupPos
     fi
