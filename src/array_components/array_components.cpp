@@ -32,12 +32,10 @@
 
 #include "array_components.h"
 
-#include "src/admin/smart_log_mgr.h"
 #include "src/array_components/array_mount_sequence.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/logger/logger.h"
-#include "src/metadata/metadata.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs.h"
 #include "src/state/state_manager.h"
@@ -47,27 +45,28 @@ namespace pos
 {
 ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, IAbrControl* abr)
 : ArrayComponents(arrayName,
-      rebuilder,
-      abr,
-      nullptr /*stateMgr*/,
-      nullptr /*state*/,
-      nullptr /*array*/,
-      nullptr /*volMgr*/,
-      nullptr /*gc*/,
-      nullptr /*metadata*/,
-      nullptr /*rbaStateMgr*/,
-      nullptr /*metaFsFactory*/,
-      nullptr /*nvmf*/,
-      nullptr /*smartLogMetaIo*/,
-      nullptr /*arrayMountSequence*/
-  )
+    rebuilder,
+    abr,
+    nullptr /*stateMgr*/,
+    nullptr /*state*/,
+    nullptr /*array*/,
+    nullptr /*volMgr*/,
+    nullptr /*gc*/,
+    nullptr /*metadata*/,
+    nullptr /*rbaStateMgr*/,
+    nullptr /*metaFsFactory*/,
+    nullptr /*nvmf*/,
+    nullptr /*smartLogMetaIo*/,
+    nullptr /*arrayMountSequence*/
+    )
 {
     // object instantiations for prod
     POS_TRACE_DEBUG(SUCCESS, "Instantiating array components for {}", arrayName);
     this->stateMgr = StateManagerSingleton::Instance();
     this->state = stateMgr->CreateStateControl(arrayName);
     this->array = new Array(arrayName, rebuilder, abr, state);
-    this->metaFsFactory = [](Array* arrayPtr, bool isLoaded) {
+    this->metaFsFactory = [](Array* arrayPtr, bool isLoaded)
+    {
         return new MetaFs(arrayPtr, isLoaded);
     };
     POS_TRACE_DEBUG(SUCCESS, "Instantiated array components for {}", arrayName);
@@ -88,7 +87,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     GarbageCollector* gc,
     Metadata* meta,
     RBAStateManager* rbaStateMgr,
-    function<MetaFs*(Array*, bool)> metaFsFactory,
+    function<MetaFs* (Array*, bool)> metaFsFactory,
     Nvmf* nvmf,
     SmartLogMetaIo* smartLogMetaIo,
     ArrayMountSequence* arrayMountSequence)
@@ -176,7 +175,7 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
         return ret;
     }
 
-    _InstantiateMetaComponentsAndMountSequenceInOrder(false /* array has not been loaded yet*/);
+    _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
     _SetMountSequence(arrayIndex);
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been created.", arrayName);
@@ -194,7 +193,7 @@ ArrayComponents::Load(void)
         return ret;
     }
 
-    _InstantiateMetaComponentsAndMountSequenceInOrder(true /* array has been loaded already*/);
+    _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
     _SetMountSequence(arrayIndex);
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
@@ -282,7 +281,14 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
 void
 ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded)
 {
-    if (metafs != nullptr || volMgr != nullptr || nvmf != nullptr || meta != nullptr || flowControl != nullptr || gc != nullptr || info != nullptr || smartLogMetaIo != nullptr)
+    if (metafs != nullptr
+        || volMgr != nullptr
+        || nvmf != nullptr
+        || meta != nullptr
+        || flowControl != nullptr
+        || gc != nullptr
+        || info != nullptr
+        || smartLogMetaIo != nullptr)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
