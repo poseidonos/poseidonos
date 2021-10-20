@@ -50,7 +50,8 @@ class AdminCommandHandler : public Event
 {
 public:
     AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
-    AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr);
+    AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
+            IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr);
     ~AdminCommandHandler(void);
     bool Execute(void);
 

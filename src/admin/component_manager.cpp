@@ -86,7 +86,7 @@ ComponentManager::FindCpuTemperature(void)
     }
 
     _CalculateAvgTemp(sumCpuTemperature);
-    return cpuTemperature / MILLI;;
+    return cpuTemperature / MILLI;
 }
 
 } // namespace pos

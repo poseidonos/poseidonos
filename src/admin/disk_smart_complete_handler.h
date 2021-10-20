@@ -50,7 +50,8 @@ static const int KELVIN_TO_CELSIUS = 273;
 class DiskSmartCompleteHandler : public Callback
 {
 public:
-    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback, SmartLogMgr* smartLogMgr);
+    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t origincore,
+            pos_io* io, CallbackSmartPtr callback, SmartLogMgr* smartLogMgr);
     ~DiskSmartCompleteHandler(void) override;
 
 private:

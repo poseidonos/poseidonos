@@ -62,7 +62,9 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;
 }
-AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
+AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
+        CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
+        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
 : io(posIo),
   originCore(originCore),
   callback(callback),

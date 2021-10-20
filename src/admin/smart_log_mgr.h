@@ -61,7 +61,7 @@ struct SmartLogEntry
 class SmartLogMgr
 {
 public:
-    explicit SmartLogMgr(void);
+    SmartLogMgr(void);
     explicit SmartLogMgr(ConfigManager* configManager);
     virtual ~SmartLogMgr(void);
 
