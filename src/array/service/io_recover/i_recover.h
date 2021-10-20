@@ -42,9 +42,11 @@ namespace pos
 class IRecover
 {
 public:
+// LCOV_EXCL_START
     virtual ~IRecover(void)
     {
     }
+// LCOV_EXCL_END
     virtual int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) = 0;
 };
 } // namespace pos

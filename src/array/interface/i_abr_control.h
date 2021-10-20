@@ -41,9 +41,11 @@ namespace pos
 class IAbrControl
 {
 public:
+// LCOV_EXCL_START
     virtual ~IAbrControl(void)
     {
     }
+// LCOV_EXCL_STOP
     virtual int LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;
     virtual int SaveAbr(string arrayName, ArrayMeta& meta) = 0;
     virtual int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;

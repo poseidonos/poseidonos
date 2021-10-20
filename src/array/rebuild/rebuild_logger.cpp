@@ -46,6 +46,12 @@ RebuildLogger::RebuildLogger(string arrayName)
     array = arrayName;
 }
 
+// LCOV_EXCL_START
+RebuildLogger::~RebuildLogger(void)
+{
+}
+// LCOV_EXCL_STOP
+
 void RebuildLogger::SetArrayRebuildStart(void)
 {
     start = chrono::system_clock::now();

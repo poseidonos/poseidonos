@@ -61,9 +61,11 @@ public:
     Method()
     {
     }
+// LCOV_EXCL_START
     virtual ~Method()
     {
     }
+// LCOV_EXCL_STOP
 
     RecoverFunc& GetRecoverFunc(void);
     const FtSizeInfo* GetSizeInfo(void);

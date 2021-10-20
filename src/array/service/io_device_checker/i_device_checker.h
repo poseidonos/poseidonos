@@ -46,9 +46,11 @@ enum class ArrayDeviceState;
 class IDeviceChecker
 {
 public:
+// LCOV_EXCL_START
     virtual ~IDeviceChecker()
     {
     }
+// LCOV_EXCL_STOP
     virtual bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) = 0;
     virtual IArrayDevice* FindDevice(string devSn) = 0;
 };

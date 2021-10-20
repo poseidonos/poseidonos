@@ -19,6 +19,18 @@ TEST(BufferEntry, BufferEntry_testIfConstructorIsCalled)
     // Then
 }
 
+TEST(BufferEntry, BufferEntry_testOperator)
+{
+    // Given: a set of constructor params
+    char buffer[10];
+
+    // When
+    BufferEntry be(buffer, 10, false);
+    BufferEntry newBe(be);
+
+    // Then
+}
+
 TEST(BufferEntry, GetBufferPtr_testGetterSetter)
 {
     // Given

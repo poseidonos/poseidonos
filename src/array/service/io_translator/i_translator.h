@@ -42,9 +42,11 @@ namespace pos
 class ITranslator
 {
 public:
+// LCOV_EXCL_START
     virtual ~ITranslator(void)
     {
     }
+// LCOV_EXCL_END
     virtual int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
     virtual int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) = 0;
     virtual int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;

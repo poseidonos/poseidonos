@@ -44,6 +44,7 @@ class RebuildLogger
 {
 public:
     explicit RebuildLogger(string arrayName);
+    virtual ~RebuildLogger(void);
     void SetArrayRebuildStart(void);
     void SetPartitionRebuildStart(string partName);
     void SetResult(string result);

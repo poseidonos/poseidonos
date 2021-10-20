@@ -9,9 +9,10 @@ TEST(RebuildProgress, RebuildProgress_testConstructor)
     // Given: nothing
 
     // When
-    RebuildProgress rp("mock-array");
+    RebuildProgress *rp = new RebuildProgress("mock-array");
 
     // Then
+    delete rp;
 }
 
 TEST(RebuildProgress, Update_testIfFirstAndSecondProgressWorksAsExpected)
