@@ -47,7 +47,7 @@ PovertyCpuSetGenerator::PovertyCpuSetGenerator(
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_CPU_COUNT_NOT_ENOUGH;
         POS_TRACE_CRITICAL(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Unsatisfied CPU Count");
         exit(-1);
     }
 

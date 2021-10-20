@@ -48,7 +48,7 @@ SpdkEventScheduler::SendSpdkEvent(uint32_t core, EventSmartPtr event)
     if (unlikely(nullptr == event))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::EVENTFRAMEWORK_INVALID_EVENT;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "Invalid Event to send");
 
         return false;
     }

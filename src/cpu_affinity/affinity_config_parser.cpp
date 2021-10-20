@@ -88,13 +88,13 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_NO_USE_CONFIG;
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),
-            PosEventId::GetString(eventId));
+            "Use core description from default value");
         return;
     }
 
     POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
     POS_TRACE_INFO(static_cast<uint32_t>(eventId),
-        PosEventId::GetString(eventId));
+        "Use core description from config file");
 
     CoreDescriptionArray parsedDescs{};
 

@@ -153,7 +153,8 @@ GcMapUpdateRequest::_UpdateMeta(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::GC_MAP_UPDATE_FAILED;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "gc ma update failed, arrayName:{}, stripeUserLsid:{}",
+            iArrayInfo->GetName(), mapUpdates.userLsid);
         return false;
     }
 

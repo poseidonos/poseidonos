@@ -67,7 +67,7 @@ ListSubsystemCommand::Execute(json& doc, string rid)
         {
             POS_EVENT_ID result = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
             return jFormat.MakeResponse(command, rid, static_cast<int>(result),
-                PosEventId::GetString(result), data, GetPosInfo());
+                "Subsystem is not found", data, GetPosInfo());
         }
         getSubsystemInfo = true;
     }

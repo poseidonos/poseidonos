@@ -103,7 +103,7 @@ StringDescriptedCpuSetGenerator::_SetCpuMaskFromMask(
                     POS_EVENT_ID eventId =
                         POS_EVENT_ID::AFTMGR_FAIL_TO_OVERLAP_MASK;
                     POS_TRACE_CRITICAL(static_cast<int>(eventId),
-                        PosEventId::GetString(eventId));
+                        "Core mask is overlapped");
                     exit(-1);
                 }
                 else
@@ -182,7 +182,7 @@ StringDescriptedCpuSetGenerator::_SetCpuRange(
         POS_EVENT_ID eventId =
             POS_EVENT_ID::AFTMGR_FAIL_TO_PARSING_ERROR;
         POS_TRACE_CRITICAL(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+            "Cpu allowed list is wrongly set");
         exit(-1);
     }
 

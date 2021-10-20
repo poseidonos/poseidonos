@@ -91,7 +91,7 @@ Callback::~Callback(void)
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;
         POS_TRACE_WARN(
             eventId,
-            PosEventId::GetString(eventId),
+            "Callback destroy without executed : {}",
             static_cast<uint32_t>(GetEventType()));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
         dumpCallbackError.AddDump(buffer, 0);
@@ -102,7 +102,7 @@ Callback::~Callback(void)
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITH_ERROR;
         POS_TRACE_WARN(
             eventId,
-            PosEventId::GetString(eventId),
+            "Callback Error : Type : {}, Critical Error : {}",
             static_cast<uint32_t>(GetEventType()),
             static_cast<uint32_t>(_GetMostCriticalError()));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
@@ -118,11 +118,11 @@ Callback::~Callback(void)
                 POS_TRACE_DEBUG_IN_MEMORY(
                     ModuleInDebugLogDump::CALLBACK_TIMEOUT,
                     eventId,
-                    PosEventId::GetString(eventId),
+                    "Callback Timeout. Caller : {}",
                     returnAddress);
                 POS_TRACE_DEBUG(
                     eventId,
-                    PosEventId::GetString(eventId),
+                    "Callback Timeout. Caller : {}",
                     returnAddress);
             }
             catch(...)
@@ -216,7 +216,7 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid callee for callback");
         return;
     }
 
@@ -224,7 +224,7 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-            PosEventId::GetString(eventId));
+            "Invalid callee for callback");
         return;
     }
 
@@ -252,7 +252,7 @@ Callback::_RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_COUNT;
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-            PosEventId::GetString(eventId));
+            "CompletionCount exceeds WaitingCount");
     }
 
     return isOkToBeCalled;

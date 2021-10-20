@@ -108,7 +108,7 @@ BufferEntry::GetBlock(uint32_t blockIndex)
     if (unlikely(blockIndex >= blkCnt))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::BUFFER_ENTRY_OUT_OF_RANGE,
-            PosEventId::GetString(POS_EVENT_ID::BUFFER_ENTRY_OUT_OF_RANGE));
+            "Block / Chunk Index excceds block count of BufferEntry");
         return nullptr;
     }
 

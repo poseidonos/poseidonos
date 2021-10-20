@@ -164,7 +164,9 @@ GcFlushSubmission::Execute(void)
 
     POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
 
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId), stripe->GetVsid(), startLSA.stripeId, blocksInStripe);
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId,
+        "Flush Submission vsid  {}: StartLSA.stripeId : {} blocksInStripe : {}",
+        stripe->GetVsid(), startLSA.stripeId, blocksInStripe);
 
     IOSubmitHandlerStatus errorReturned = iIOSubmitHandler->SubmitAsyncIO(
         IODirection::WRITE,

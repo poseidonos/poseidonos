@@ -101,7 +101,7 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
             else
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_CORE_NOT_SUFFICIENT;
-                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+                POS_TRACE_ERROR(eventId, "Cpu is not sufficient");
                 PovertyCpuSetGenerator cpuSetGenerator(DESC_ARRAY);
                 cpuSetArray = cpuSetGenerator.GetCpuSetArray();
             }
@@ -110,7 +110,7 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
     catch (...)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_FAIL_TO_PARSING_ERROR;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "Cpu allowed list is wrongly set");
         PovertyCpuSetGenerator cpuSetGenerator(DESC_ARRAY);
         cpuSetArray = cpuSetGenerator.GetCpuSetArray();
     }
@@ -134,7 +134,7 @@ AffinityManager::_SetNumaInformation(const CoreDescriptionArray& descArray)
         if (static_cast<uint32_t>(numa) == INVALID_NUMA)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_DISABLED_CORE;
-            POS_TRACE_INFO(eventId, PosEventId::GetString(eventId), cpu);
+            POS_TRACE_INFO(eventId, "Core {} is disabled", cpu);
             continue;
         }
 
@@ -216,7 +216,7 @@ AffinityManager::GetEventWorkerSocket(void)
     if (unlikely(maxEventCoreNuma == UINT32_MAX))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_NO_EVENT_WORKER_ALLOCATED;
-        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+        POS_TRACE_ERROR(eventId, "Cannot find event worker at any NUMA");
     }
 
     return maxEventCoreNuma;
@@ -287,7 +287,7 @@ AffinityManager::GetMasterReactorCore(void)
     }
 
     POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_FAIL_TO_FIND_MASTER_REACTOR;
-    POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+    POS_TRACE_ERROR(eventId, "Fail to find master reactor");
 
     return INVALID_CORE;
 }
