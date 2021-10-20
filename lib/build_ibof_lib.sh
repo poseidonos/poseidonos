@@ -241,12 +241,9 @@ build_spdlog_ci(){
 }
 
 build_go() {
-	log_normal "[SETUP $GO_SOURCE ]"
-	if [ ! -d "go" ]; then
-		log_normal "extract GO"
-		tar -xvf $GO_SOURCE 1>/dev/null
-		log_normal "extract GO.. done"
-	fi
+    log_normal "[SETUP $GO_SOURCE ]"
+    
+        ${ROOT_DIR}/../script/install_go.sh -i
 }
 
 build_filebench() {
