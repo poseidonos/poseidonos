@@ -94,7 +94,7 @@ public:
     UbioSmartPtr Split(uint32_t sectors, bool removalFromTail);
     void MarkDone(void);
     void* GetBuffer(uint32_t blockIndex = 0, uint32_t sectorOffset = 0) const;
-    void* GetWholeBuffer(void) const;
+    virtual void* GetWholeBuffer(void) const;
     virtual void WaitDone(void);
 
     virtual void Complete(IOErrorType error);
@@ -112,7 +112,7 @@ public:
     virtual IArrayDevice* GetArrayDev(void);
     uint64_t GetLba(void);
     const PhysicalBlkAddr GetPba(void);
-    bool IsRetry(void);
+    virtual bool IsRetry(void);
     void SetRetry(bool retry);
     uint32_t GetMemSize(void);
     virtual uint32_t GetOriginCore(void);
