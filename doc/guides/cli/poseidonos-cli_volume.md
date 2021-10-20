@@ -9,7 +9,7 @@ Volume commands for PoseidonOS.
 	or display the information of the volumes. 
 
 Syntax: 
-  poseidonos-cli volume [create|delete|mount|unmount|list|rename] [flags]
+  poseidonos-cli volume [create|delete|mount|unmount|list|rename|mount-with-subsystem] [flags] .
 
 Example (to create a volume):
   poseidonos-cli volume create --volume-name Volume0 --array-name Array0 

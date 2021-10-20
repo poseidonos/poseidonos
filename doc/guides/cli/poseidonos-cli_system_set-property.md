@@ -8,7 +8,7 @@ Set the property of PoseidonOS.
 Set the property of PoseidonOS. 
 
 Syntax:
-	poseidonos-cli system set-property [--rebuild-impact "highest"|"higher"|"high"|"medium"|"low"|"lower"|"lowest"] .
+	poseidonos-cli system set-property [--rebuild-impact (highest | higher | high | medium | low | lower | lowest)] .
 
 Example (To set the impact of rebuilding process on the I/O performance to low):
 	poseidonos-cli system set-property --rebuild-impact low.

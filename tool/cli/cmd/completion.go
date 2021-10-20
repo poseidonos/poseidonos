@@ -32,7 +32,7 @@ Bash:
 Zsh:
 
   # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
+  # you will need to enable it. You can execute the following once:
 
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
@@ -43,9 +43,24 @@ Zsh:
   $ poseidonos-cli completion zsh > "/usr/local/share/zsh/site-functions/_poseidonos-cli"
 
   # You will need to start a new shell for this setup to take effect.
+
+fish:
+
+  $ poseidonos-cli completion fish | source
+
+  # To load completions for each session, execute once:
+  $ poseidonos-cli completion fish > ~/.config/fish/completions/poseidonos-cli.fish
+
+PowerShell:
+
+  PS> poseidonos-cli completion powershell | Out-String | Invoke-Expression
+
+  # To load completions for every new session, run:
+  PS> poseidonos-cli completion powershell > poseidonos-cli.ps1
+  # Add source /yourpath/poseidonos-cli.ps1 file from your PowerShell profile.
 `,
 	DisableFlagsInUseLine: true,
-	ValidArgs:             []string{"bash", "zsh"},
+	ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
 	Args:                  cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		switch args[0] {
@@ -53,6 +68,10 @@ Zsh:
 			cmd.Root().GenBashCompletion(os.Stdout)
 		case "zsh":
 			cmd.Root().GenZshCompletion(os.Stdout)
+		case "fish":
+			cmd.Root().GenFishCompletion(os.Stdout, true)
+		case "powershell":
+			cmd.Root().GenPowerShellCompletionWithDesc(os.Stdout)
 		}
 	},
 }

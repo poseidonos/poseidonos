@@ -9,7 +9,7 @@ Add a device as a spare to an array. Use this command when you want
 to add a spare device to an array that was created already. 
 
 Syntax:
-	poseidonos-cli array addspare (--spare | -s) SpareDeviceName (--array-name | -a) ArrayName .
+	poseidonos-cli array addspare (--spare | -s) DeviceName (--array-name | -a) ArrayName .
 
 Example: 
 	poseidonos-cli array addspare --spare nvme5 --array-name array0

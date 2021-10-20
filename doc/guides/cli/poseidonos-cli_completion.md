@@ -27,7 +27,7 @@ Bash:
 Zsh:
 
   # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
+  # you will need to enable it. You can execute the following once:
 
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
@@ -38,6 +38,21 @@ Zsh:
   $ poseidonos-cli completion zsh > "/usr/local/share/zsh/site-functions/_poseidonos-cli"
 
   # You will need to start a new shell for this setup to take effect.
+
+fish:
+
+  $ yourprogram completion fish | source
+
+  # To load completions for each session, execute once:
+  $ yourprogram completion fish > ~/.config/fish/completions/yourprogram.fish
+
+PowerShell:
+
+  PS> yourprogram completion powershell | Out-String | Invoke-Expression
+
+  # To load completions for every new session, run:
+  PS> yourprogram completion powershell > yourprogram.ps1
+  # and source this file from your PowerShell profile.
 
 
 ```

@@ -8,7 +8,7 @@ Create a buffer device.
 Create a buffer device.
 
 Syntax:
-	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks NumBlocks --block-size BlockSize --device-type ["uram"|"pram"] --numa NumaNode.
+	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks Number --block-size BlockSize --device-type uram --numa Number.
           
 
 ```
