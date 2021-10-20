@@ -30,6 +30,8 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <string>
+
 #include "src/metadata/metadata.h"
 
 #include "src/allocator/allocator.h"
@@ -43,16 +45,6 @@
 
 namespace pos
 {
-Metadata::Metadata(void)
-: arrayInfo(nullptr),
-  mapper(nullptr),
-  allocator(nullptr),
-  journal(nullptr),
-  metaUpdater(nullptr),
-  volumeEventHandler(nullptr)
-{
-}
-
 Metadata::Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state)
 : Metadata(info,
       new Mapper(info, nullptr),

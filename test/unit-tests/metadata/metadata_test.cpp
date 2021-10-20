@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/allocator/allocator_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/array_models/interface/i_mount_sequence_mock.h"
 #include "test/unit-tests/journal_manager/journal_manager_mock.h"
@@ -23,18 +25,29 @@ TEST(Metadata, Metadata_testContructor)
     // When 1
     Metadata metaForProductCode(nullptr, &arrayInfo, &stateControl);
 
-    // Given 2
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
-    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
-    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    {
+        // Given 2
+        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+        NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+        NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
 
-    // When 2
-    Metadata metaForUt(&arrayInfo, mapper, allocator, journal);
+        // When 2
+        Metadata metaForUt(&arrayInfo, mapper, allocator, journal);
+    }
+
+    {
+        // Given 3
+        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+        NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+        NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+
+        // When 3
+        Metadata* metataInHeap = new Metadata(&arrayInfo, mapper, allocator, journal);
+        delete metataInHeap;
+    }
 }
 
-// Disabled to avoid "segfault" at metafs_file_intf.cpp:161.
-// TODO(yyu): follow up with munseop.lim
-TEST(Metadata, DISABLED_Init_testIfEverySequenceIsInitialized)
+TEST(Metadata, Init_testIfEverySequenceIsInitialized)
 {
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -170,5 +183,77 @@ TEST(Metadata, Shutdown_testIfAllComponentsAreDisposed)
 
     // When
     meta.Shutdown();
+}
+
+TEST(Metadata, Flush_testFlush)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+
+    Metadata meta(&arrayInfo, mapper, allocator, journal);
+
+    meta.Flush();
+}
+
+TEST(Metadata, NeedRebuildAgain_testIfAllocatorIsCalled)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+
+    Metadata meta(&arrayInfo, mapper, allocator, journal);
+
+    NiceMock<MockIContextManager> contextManager;
+
+    EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
+    EXPECT_CALL(contextManager, NeedRebuildAgain);
+
+    meta.NeedRebuildAgain();
+}
+
+TEST(Metadata, PrepareRebuild_testIfAllocatorIsCalled)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+
+    Metadata meta(&arrayInfo, mapper, allocator, journal);
+
+    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
+
+    EXPECT_CALL(*allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeAllocator));
+    EXPECT_CALL(wbStripeAllocator, PrepareRebuild).WillOnce(Return(0));
+
+    int ret = meta.PrepareRebuild();
+    EXPECT_EQ(ret, 0);
+}
+
+TEST(Metadata, StopRebuilding_testIfAllocatorIsCalled)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+
+    Metadata meta(&arrayInfo, mapper, allocator, journal);
+
+    NiceMock<MockIContextManager> contextManager;
+
+    EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
+    EXPECT_CALL(contextManager, StopRebuilding);
+
+    meta.StopRebuilding();
 }
 } // namespace pos

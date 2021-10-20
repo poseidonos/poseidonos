@@ -49,7 +49,6 @@ class MetaVolumeEventHandler;
 class Metadata : public IMountSequence
 {
 public:
-    Metadata(void);
     Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
     Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
     virtual ~Metadata(void);

@@ -39,6 +39,7 @@
 #include "src/mapper/i_vsamap.h"
 #include "src/metadata/block_map_update.h"
 #include "src/metadata/gc_map_update.h"
+#include "src/metadata/stripe_map_update.h"
 
 namespace pos
 {
@@ -57,6 +58,13 @@ CallbackSmartPtr
 MetaEventFactory::CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo)
 {
     CallbackSmartPtr callback(new BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator));
+    return callback;
+}
+
+CallbackSmartPtr
+MetaEventFactory::CreateStripeMapUpdateEvent(Stripe* stripe)
+{
+    CallbackSmartPtr callback(new StripeMapUpdate(stripe, stripeMap, contextManager));
     return callback;
 }
 

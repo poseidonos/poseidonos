@@ -18,6 +18,9 @@ TEST(StripeMapUpdate, StripeMapUpdate_testIfConstructedSuccessfully)
     NiceMock<MockIContextManager> contextManager;
 
     StripeMapUpdate stripeMapUpdate(&stripe, &stripeMap, &contextManager);
+
+    StripeMapUpdate* stripeMapUpdateInHeap = new StripeMapUpdate(&stripe, &stripeMap, &contextManager);
+    delete stripeMapUpdateInHeap;
 }
 
 TEST(StripeMapUpdate, _DoSpecificJob_testIfMetadataUpdatedSuccessfully)

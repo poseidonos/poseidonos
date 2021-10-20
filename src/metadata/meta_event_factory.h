@@ -56,6 +56,7 @@ public:
     virtual ~MetaEventFactory(void) = default;
 
     virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);
+    virtual CallbackSmartPtr CreateStripeMapUpdateEvent(Stripe* stripe);
     virtual CallbackSmartPtr CreateGcMapUpdateEvent(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt);
 
 private:

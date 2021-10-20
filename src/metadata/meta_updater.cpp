@@ -136,7 +136,8 @@ MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
 {
     int result = 0;
 
-    CallbackSmartPtr stripeMapUpdate(new StripeMapUpdate(stripe, stripeMap, contextManager));
+    CallbackSmartPtr stripeMapUpdate =
+        metaEventFactory->CreateStripeMapUpdateEvent(stripe);
     stripeMapUpdate->SetCallee(callback);
 
     if (journal->IsEnabled() == true)
