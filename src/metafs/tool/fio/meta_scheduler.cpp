@@ -48,10 +48,8 @@ MetaIOScheduler metaioScheduler;
 const char* META_FIO_TARGET_FILE = "bdev";
 uint32_t g_meta_outstandingCmd = 0;
 
-void HandleMetaIoCompletion(void* arg1);
-
 void
-HandleMetaIoCompletion(void* arg1)
+MetaIOScheduler::HandleMetaIoCompletion(void* arg1)
 {
     pos_io* io = static_cast<pos_io*>(arg1);
     if (io->complete_cb)
@@ -82,6 +80,7 @@ int MetaIoHandler::fdList[4] = {
     0,
 };
 int MetaIoHandler::index = 0;
+MetaFs* MetaIoHandler::metaFs = nullptr;
 
 int
 MetaIoHandler::IoSubmitHandler0(struct pos_io* io)
@@ -124,7 +123,19 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayId, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
-    rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->io->SubmitIO(aiocb);
+    
+    // only for test
+    if (nullptr != metaFs)
+    {
+        rc_io = metaFs->io->SubmitIO(aiocb);
+
+        if (nullptr != aiocb)
+            delete aiocb;
+    }
+    else
+    {
+        rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->io->SubmitIO(aiocb);
+    }
     g_meta_outstandingCmd++;
 
 #else // testing for sync io

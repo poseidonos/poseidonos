@@ -306,34 +306,6 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
 }
 
 int
-WbtMetafsCmdHandler::ReadFileAsync(Args argv)
-{
-    /*int fd;
-    uint32_t byteOffset;
-    uint32_t byteSize;
-    void *buffer;
-    void *callback(int);
-    // metaFsMgr.io.ReadAsync(fd, byteOffset, byteSize, buffer, callback);
-    // As async functionality testing is not enabled yet.
-    */
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::WriteFileAsync(Args argv)
-{
-    /*int fd;
-    uint32_t byteOffset;
-    uint32_t byteSize;
-    void *buffer;
-    void *callback(int);
-    // metaFsMgr.io.WriteAsync(fd, byteOffset, byteSize, buffer, callback);
-    // As async functionality testing is not enabled yet.
-    */
-    return RESULT_FAILURE;
-}
-
-int
 WbtMetafsCmdHandler::GetFileSize(Args argv)
 {
     if (argv.size() < 3)
@@ -434,66 +406,6 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     }
 
     return res;
-}
-
-int
-WbtMetafsCmdHandler::GetFileChecksum(Args argv)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::GetCurrentSystemState(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::GetNextSystemState(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::CorruptFileSystemMBR(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::CorruptFileSystemSignature(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::SetAllBitsInFDInUse(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::GetAllBitsInFDInUse(Args argv)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::GetTotalFreeInodes(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::SetAllInodeEntryInUseBitmap(void)
-{
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::GetAllInodeEntryInUseBitmap(Args argv)
-{
-    return RESULT_FAILURE;
 }
 
 /**
@@ -605,39 +517,6 @@ WbtMetafsCmdHandler::_DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElemen
     metaInode.SetElement(fileProperty);
     metaInode.SetElement(fileExtentMap);
     element.SetElement(metaInode);
-}
-
-void
-WbtMetafsCmdHandler::_SetValuesInMetaFileInode(MetaFileInodeInfo& metaFileInode, rapidjson::Value& inodeData)
-{
-    rapidjson::Value& fileProperty = inodeData["fileProperty"];
-    rapidjson::Value& extentMap = inodeData["extentMap"];
-
-    std::cout << "======================================\n";
-    std::cout << "inUse : " << inodeData["inUse"].GetInt() << "\n";
-    std::cout << "fd " << inodeData["fd"].GetInt() << "\n";
-    std::cout << "fileName : " << inodeData["fileName"].GetString() << "\n";
-    std::cout << "fileByteSize : " << inodeData["fileByteSize"].GetUint() << "\n";
-    std::cout << "dataChunkSize : " << inodeData["dataChunkSize"].GetUint() << "\n";
-    std::cout << "baseMetaLpn : " << extentMap["baseMetaLpn"].GetUint64() << "\n";
-    std::cout << "pageCnt : " << extentMap["pageCnt"].GetUint64() << "\n";
-    std::cout << "integrity : " << fileProperty["integrity"].GetInt() << "\n";
-    std::cout << "ioAccPattern " << fileProperty["ioAccPattern"].GetInt() << "\n";
-    std::cout << "ioOpType : " << fileProperty["ioOpType"].GetInt() << "\n";
-    std::cout << "======================================\n";
-
-    metaFileInode.data.field.inUse = static_cast<bool>(inodeData["inUse"].GetInt());
-    metaFileInode.data.field.fd = static_cast<FileDescriptorType>(inodeData["fd"].GetInt());
-    metaFileInode.data.field.fileByteSize = static_cast<FileSizeType>(inodeData["fileByteSize"].GetUint());
-    metaFileInode.data.field.dataChunkSize = static_cast<FileSizeType>(inodeData["dataChunkSize"].GetUint());
-    metaFileInode.data.field.dataLocation = static_cast<MetaStorageType>(inodeData["dataLocation"].GetInt());
-
-    metaFileInode.data.field.extentMap[0].SetStartLpn(static_cast<MetaLpnType>(extentMap["baseMetaLpn"].GetUint64()));
-    metaFileInode.data.field.extentMap[0].SetCount(static_cast<MetaLpnType>(extentMap["pageCnt"].GetUint64()));
-
-    metaFileInode.data.field.fileProperty.integrity = static_cast<MetaFileIntegrityType>(fileProperty["integrity"].GetInt());
-    metaFileInode.data.field.fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(fileProperty["ioAccPattern"].GetInt());
-    metaFileInode.data.field.fileProperty.ioOpType = static_cast<MetaFileDominant>(fileProperty["ioOpType"].GetInt());
 }
 
 int

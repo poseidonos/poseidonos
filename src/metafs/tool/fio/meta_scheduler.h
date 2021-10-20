@@ -37,6 +37,7 @@
 #include <list>
 #include <mutex>
 #include "metafs_aiocb_cxt.h"
+#include "src/metafs/metafs.h"
 #include "spdk/pos_volume.h"
 
 namespace pos
@@ -73,6 +74,9 @@ public:
     static unvmf_submit_handler submitHandlerList[4];
     static int fdList[4];
     static int index;
+
+    // only for test
+    static MetaFs* metaFs;
 };
 
 class MetaIOScheduler
@@ -88,6 +92,7 @@ public:
     {
         return targetMetaFioFD;
     }
+    static void HandleMetaIoCompletion(void* arg1);
     void HandleIOCallback(void* data);
 
 private:

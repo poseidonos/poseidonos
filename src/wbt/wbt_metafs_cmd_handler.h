@@ -61,25 +61,13 @@ public:
 
     int ReadFile(Args argv);
     int WriteFile(Args argv);
-    int ReadFileAsync(Args argv);
-    int WriteFileAsync(Args argv);
 
     int GetFileSize(Args argv);
     int GetAlignedFileIOSize(Args argv);
 
     int DumpInodeInfo(Args argv);
     int64_t GetMaxFileSize(Args argv);
-    int GetFileChecksum(Args argv);
 
-    int GetCurrentSystemState(void);
-    int GetNextSystemState(void);
-    int CorruptFileSystemMBR(void);
-    int CorruptFileSystemSignature(void);
-    int SetAllBitsInFDInUse(void); // What happens if all fileDesc Are Used ?
-    int GetAllBitsInFDInUse(Args argv);
-    int GetTotalFreeInodes(void);
-    int SetAllInodeEntryInUseBitmap(void); // All Inodes are Used ?
-    int GetAllInodeEntryInUseBitmap(Args argv);
     int SetupMetaFioTest(Args argv);
 
 private:
@@ -87,6 +75,5 @@ private:
     int _ReadFileInBuffer(std::string fileName, char** buffer, uint32_t& fileSize);
     void _DumpFilesInfoToJsonElement(MetaFileInfoDumpCxt data, JsonArray& element);
     void _DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElement& element);
-    void _SetValuesInMetaFileInode(MetaFileInodeInfo& metaFileInode, rapidjson::Value& inodeData);
 };
 } // namespace pos

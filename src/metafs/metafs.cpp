@@ -91,10 +91,14 @@ MetaFs::~MetaFs(void)
 {
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
 
-    delete mgmt;
-    delete io;
-    delete ctrl;
-    delete wbt;
+    if (mgmt != nullptr)
+        delete mgmt;
+    if (io != nullptr)
+        delete io;
+    if (ctrl != nullptr)
+        delete ctrl;
+    if (wbt != nullptr)
+        delete wbt;
 }
 
 int
