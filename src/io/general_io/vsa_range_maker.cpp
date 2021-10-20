@@ -37,45 +37,23 @@
 namespace pos
 {
 VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
-    uint32_t blockCount, bool isGc, int arrayId)
-: VsaRangeMaker(volumeId, startRba, blockCount, isGc, MapperServiceSingleton::Instance()->GetIVSAMap(arrayId) )
+    uint32_t blockCount, int arrayId)
+: VsaRangeMaker(volumeId, startRba, blockCount, MapperServiceSingleton::Instance()->GetIVSAMap(arrayId) )
 {
 }
 
 VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
-    uint32_t blockCount, bool isGc, IVSAMap* iVSAMap)
+    uint32_t blockCount, IVSAMap* iVSAMap)
 : vsaRange({.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 0}),
   retry(false), iVSAMap(iVSAMap)
 {
     VsaArray vsaArray;
-    if (isGc)
-    {
-        uint32_t processedCount = 0;
-        for (auto& vsa : vsaArray)
-        {
-            BlkAddr rba = startRba + processedCount;
-            int caller = 0;
-            vsa = iVSAMap->GetVSAInternal(volumeId, rba, caller);
-            if (caller == NEED_RETRY)
-            {
-                retry = true;
-                return;
-            }
-            processedCount++;
-            if (processedCount == blockCount)
-            {
-                break;
-            }
-        }
-    }
-    else
-    {
-        int ret = iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
 
-        if (ret < 0)
-        {
-            throw ret;
-        }
+    int ret = iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
+
+    if (ret < 0)
+    {
+        throw ret;
     }
 
     for (uint32_t cnt = 0; cnt < blockCount; ++cnt)
@@ -149,12 +127,6 @@ VirtualBlks&
 VsaRangeMaker::GetVsaRange(uint32_t index)
 {
     return vsaRangeVector[index];
-}
-
-bool
-VsaRangeMaker::CheckRetry(void)
-{
-    return retry;
 }
 
 } // namespace pos

@@ -44,14 +44,11 @@ class IVSAMap;
 class VsaRangeMaker
 {
 public:
-    VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isGc, int arrayId);
-    VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isGc, IVSAMap* iVSAMap);
+    VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount, int arrayId);
+    VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount, IVSAMap* iVSAMap);
     virtual ~VsaRangeMaker(void);
     virtual uint32_t GetCount(void);
     virtual VirtualBlks& GetVsaRange(uint32_t index);
-    virtual bool CheckRetry(void);
 
 private:
     void _Add(void);

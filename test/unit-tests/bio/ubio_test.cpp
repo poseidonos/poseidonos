@@ -404,4 +404,11 @@ TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenReadingOnNormalDevice)
     delete dev;
 }
 
+TEST(Ubio, CheckPbaSet)
+{
+    // Given
+    Ubio ubio(nullptr, 0, 0);
+    EXPECT_EQ(ubio.CheckPbaSet(), false);
+}
+
 } // namespace pos

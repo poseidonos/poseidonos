@@ -14,7 +14,6 @@ public:
     using VsaRangeMaker::VsaRangeMaker;
     MOCK_METHOD(uint32_t, GetCount, (), (override));
     MOCK_METHOD(VirtualBlks&, GetVsaRange, (uint32_t index), (override));
-    MOCK_METHOD(bool, CheckRetry, (), (override));
 };
 
 } // namespace pos

@@ -45,8 +45,7 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
 : BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator,
       new VsaRangeMaker(volumeIo->GetVolumeId(),
           ChangeSectorToBlock(volumeIo->GetSectorRba()),
-          DivideUp(volumeIo->GetSize(), BLOCK_SIZE),
-          volumeIo->IsGc(), volumeIo->GetArrayId()))
+          DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
 {
 }
 

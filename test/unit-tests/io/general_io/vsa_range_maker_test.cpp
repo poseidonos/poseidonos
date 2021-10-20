@@ -117,50 +117,37 @@ protected:
 TEST_F(VsaRangeMakerTestFixture, VsaRangeMaker_Constructor_FiveArguments)
 {
     //When: Create VsaRangeMaker with mapped RBA (heap)
-    VsaRangeMaker* vrm = new VsaRangeMaker(VOLUME_ID, 0, 2, false, arrayId);
+    VsaRangeMaker* vrm = new VsaRangeMaker(VOLUME_ID, 0, 2, arrayId);
     delete vrm;
     //do nothing
 
     //When: Create VsaRangeMaker with mapped RBA(stack)
-    VsaRangeMaker vrm2(VOLUME_ID, 0, 1, false, arrayId);
+    VsaRangeMaker vrm2(VOLUME_ID, 0, 1, arrayId);
     //do nothing
 
     //When: Create VsaRangeMaker with unmapped RBA(stack)
-    VsaRangeMaker vrm3(VOLUME_ID, 3, 1, false, arrayId);
+    VsaRangeMaker vrm3(VOLUME_ID, 3, 1, arrayId);
     //do nothing
 
     //When: Create VsaRangeMaker with invalid Volume ID(stack)
     //Then: An exeption is thrown
-    EXPECT_THROW(VsaRangeMaker vrm4(MAX_VOLUME_COUNT, 2, 2, false, arrayId), int);
-}
-
-TEST_F(VsaRangeMakerTestFixture, VsaRangeMaker_CheckRetry)
-{
-    //When: Create VsaRangeMaker in GC context and VSAMap is not ready
-    VsaRangeMaker vrm(VOLUME_ID, 0, 1, true, arrayId);
-    //Then: retry is required
-    EXPECT_TRUE(vrm.CheckRetry());
-
-    //When: Create VsaRangeMaker in GC context and VSAMap is ready
-    VsaRangeMaker vrm2(VOLUME_ID, 0, 1, true, arrayId);
-    //Then: retry is not needed
-    EXPECT_FALSE(vrm2.CheckRetry());
+    EXPECT_THROW(VsaRangeMaker vrm4(MAX_VOLUME_COUNT, 2, 2, arrayId), int);
 }
 
 TEST_F(VsaRangeMakerTestFixture, VsaRangeMaker_GetCount)
 {
     //When: Create VsaRangeMaker with single RBA
-    VsaRangeMaker vrm(VOLUME_ID, 0, 1, false, arrayId);
+    VsaRangeMaker vrm(VOLUME_ID, 0, 1, arrayId);
     //Then: VSA range count should be one
     EXPECT_EQ(vrm.GetCount(), 1);
 
     //When: Create VsaRangeMaker with multiple RBAs mapped to contiguous VSAs
-    VsaRangeMaker vrm2(VOLUME_ID, 1, 2, false, arrayId);
+    VsaRangeMaker vrm2(VOLUME_ID, 1, 2, arrayId);
     //Then: VSA range count should be one
     EXPECT_EQ(vrm2.GetCount(), 1);
 
     //When: Create VsaRangeMaker with multiple RBAs mapped to non-contiguous VSAs
-    VsaRangeMaker vrm3(VOLUME_ID, 2, 2, false, arrayId);
+    VsaRangeMaker vrm3(VOLUME_ID, 2, 2, arrayId);
     //Then: VSA range count should be two
     EXPECT_EQ(vrm3.GetCount(), 2);
 }
@@ -168,21 +155,21 @@ TEST_F(VsaRangeMakerTestFixture, VsaRangeMaker_GetCount)
 TEST_F(VsaRangeMakerTestFixture, VsaRangeMaker_GetVsaRange)
 {
     //When: Create VsaRangeMaker with single RBA
-    VsaRangeMaker vrm(VOLUME_ID, 0, 1, false, arrayId);
+    VsaRangeMaker vrm(VOLUME_ID, 0, 1, arrayId);
     //Then: Single VSARange is returned
     VirtualBlks actual = vrm.GetVsaRange(0);
     VirtualBlks exp{{.stripeId = 0, .offset = 0}, .numBlks = 1};
     EXPECT_EQ(actual, exp);
 
     //When: Create VsaRangeMaker with multiple RBAs mapped to contiguous VSAs
-    VsaRangeMaker vrm2(VOLUME_ID, 1, 2, false, arrayId);
+    VsaRangeMaker vrm2(VOLUME_ID, 1, 2, arrayId);
     //Then: Single VSARange is returned
     actual = vrm2.GetVsaRange(0);
     exp = {{.stripeId = 0, .offset = 0}, .numBlks = 2};
     EXPECT_EQ(actual, exp);
 
     //When: Create VsaRangeMaker with multiple RBAs mapped to contiguous VSAs
-    VsaRangeMaker vrm3(VOLUME_ID, 2, 2, false, arrayId);
+    VsaRangeMaker vrm3(VOLUME_ID, 2, 2, arrayId);
     //Then: Two discrete VSARanges are returned
     actual = vrm3.GetVsaRange(0);
     exp = {{.stripeId = 0, .offset = 0}, .numBlks = 1};

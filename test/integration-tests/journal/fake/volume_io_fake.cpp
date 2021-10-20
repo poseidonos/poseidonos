@@ -6,17 +6,14 @@ namespace pos
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
 : Ubio(buffer, unitCount, arrayId),
   volumeId(UINT32_MAX),
-  originCore(INVALID_CORE),
-  isGc(false)
+  originCore(INVALID_CORE)
 {
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
 : Ubio(volumeIo),
   volumeId(volumeIo.volumeId),
-  originCore(volumeIo.originCore),
-  isGc(volumeIo.isGc),
-  oldVsaForGc(volumeIo.oldVsaForGc)
+  originCore(volumeIo.originCore)
 {
 }
 
@@ -108,24 +105,6 @@ void
 VolumeIo::SetVsa(VirtualBlkAddr& inputVsa)
 {
     vsa = inputVsa;
-}
-
-void
-VolumeIo::SetGc(VirtualBlkAddr& oldVsa)
-{
-    isGc = true;
-}
-
-bool
-VolumeIo::IsGc(void)
-{
-    return isGc;
-}
-
-const VirtualBlkAddr&
-VolumeIo::GetOldVsa(void)
-{
-    return oldVsaForGc;
 }
 
 bool

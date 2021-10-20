@@ -22,7 +22,7 @@ TEST(BlockMapUpdate, BlockMapUpdate_testIfUTConstructedSuccessfully)
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
+    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &blockAllocator,
         &wbStripeAllocator, vsaRangeMaker);
@@ -36,7 +36,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe> stripe;
-    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
+    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
     BlkAddr rba = 1203;
@@ -94,7 +94,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe> stripe;
-    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
+    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
     BlkAddr rba = 1203;
@@ -146,7 +146,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe> stripe;
-    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
+    NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
     BlkAddr rba = 1203;

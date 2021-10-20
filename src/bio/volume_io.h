@@ -86,9 +86,6 @@ public:
     virtual const StripeAddr& GetOldLsidEntry(void);
     virtual const VirtualBlkAddr& GetVsa(void);
     void SetVsa(VirtualBlkAddr&);
-    void SetGc(VirtualBlkAddr& oldVsa);
-    virtual bool IsGc(void);
-    virtual const VirtualBlkAddr& GetOldVsa(void);
     void SetSectorRba(uint64_t inputSectorRba);
     virtual uint64_t GetSectorRba(void);
 
@@ -102,8 +99,6 @@ private:
     StripeAddr lsidEntry;
     StripeAddr oldLsidEntry;
     VirtualBlkAddr vsa;
-    bool isGc;
-    VirtualBlkAddr oldVsaForGc;
     uint64_t sectorRba;
 
     bool _IsInvalidVolumeId(uint32_t inputVolumeId);

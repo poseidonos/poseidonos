@@ -54,8 +54,6 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  isGc(false),
-  oldVsaForGc(INVALID_VSA),
   sectorRba(INVALID_RBA)
 {
 }
@@ -67,8 +65,6 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo)
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  isGc(volumeIo.isGc),
-  oldVsaForGc(volumeIo.oldVsaForGc),
   sectorRba(volumeIo.sectorRba)
 {
 }
@@ -327,30 +323,4 @@ VolumeIo::_IsInvalidVsa(VirtualBlkAddr& inputVsa)
     return false;
 }
 
-void
-VolumeIo::SetGc(VirtualBlkAddr& oldVsa)
-{
-    isGc = true;
-    oldVsaForGc = oldVsa;
-}
-
-bool
-VolumeIo::IsGc(void)
-{
-    return isGc;
-}
-
-const VirtualBlkAddr&
-VolumeIo::GetOldVsa(void)
-{
-    if (unlikely(_IsInvalidVsa(oldVsaForGc)))
-    {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_VSA;
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "Invalid VSA for Ubio");
-        return INVALID_VSA;
-    }
-
-    return oldVsaForGc;
-}
 } // namespace pos

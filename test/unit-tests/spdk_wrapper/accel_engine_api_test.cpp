@@ -28,11 +28,10 @@ namespace pos
 {
 TEST(AccelEngineApi, Finalize_Fail)
 {
-    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
-    EXPECT_CALL(*mockEventFrameworkApi, GetFirstReactor()).WillOnce(Return(0));
-    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillOnce(Return(false));
-    AccelEngineApi::Finalize(mockEventFrameworkApi);
-    delete mockEventFrameworkApi;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    EXPECT_CALL(mockEventFrameworkApi, GetFirstReactor()).WillOnce(Return(0));
+    EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillOnce(Return(false));
+    AccelEngineApi::Finalize(&mockEventFrameworkApi);
 }
 
 TEST(AccelEngineApi, IsIoatEnable_Success)
