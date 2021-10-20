@@ -57,11 +57,13 @@ std::atomic<bool> QosSpdkManager::unregistrationComplete(false);
  */
 /* --------------------------------------------------------------------------*/
 QosSpdkManager::QosSpdkManager(QosContext* qosCtx, bool feQos,
+    EventFrameworkApi* eventFrameworkApiArg,
     SpdkPosNvmfCaller* spdkPosNvmfCaller)
-: qosContext(qosCtx),
-  reactorId(M_MAX_REACTORS + 1),
-  feQosEnabled(feQos),
-  spdkPosNvmfCaller(spdkPosNvmfCaller)
+    : qosContext(qosCtx),
+    reactorId(M_MAX_REACTORS + 1),
+    feQosEnabled(feQos),
+    eventFrameworkApi(eventFrameworkApiArg),
+    spdkPosNvmfCaller(spdkPosNvmfCaller)
 {
     for (int i = 0; i < M_MAX_REACTORS; i++)
     {
@@ -184,15 +186,15 @@ QosSpdkManager::PollerUnregister(void* arg1, void* arg2)
     spdk_poller* poller = spdkManager->GetSpdkPoller(reactor);
     SpdkThreadCaller spdkThreadCaller;
     spdkThreadCaller.SpdkPollerUnregister(&poller);
-    if ((EventFrameworkApiSingleton::Instance()->IsLastReactorNow()))
+    if (spdkManager->eventFrameworkApi->IsLastReactorNow())
     {
         unregistrationComplete = true;
     }
     else
     {
-        uint32_t nextReactor = EventFrameworkApiSingleton::Instance()->GetNextReactor();
+        uint32_t nextReactor = spdkManager->eventFrameworkApi->GetNextReactor();
         spdkManager->SetReactorId(nextReactor);
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextReactor, PollerUnregister, spdkManager, nullptr);
+        spdkManager->eventFrameworkApi->SendSpdkEvent(nextReactor, PollerUnregister, spdkManager, nullptr);
     }
 }
 
@@ -210,8 +212,8 @@ QosSpdkManager::Finalize(void)
     {
         return;
     }
-    reactorId = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
-    bool succeeded = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(reactorId, QosSpdkManager::PollerUnregister, this, nullptr);
+    reactorId = eventFrameworkApi->GetFirstReactor();
+    bool succeeded = eventFrameworkApi->SendSpdkEvent(reactorId, QosSpdkManager::PollerUnregister, this, nullptr);
     if (unlikely(false == succeeded))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_UNREGISTRATION_FAILED;
@@ -241,8 +243,8 @@ QosSpdkManager::_SetupQosReactorPoller(void)
         return;
     }
     registerQosPollerDone = false;
-    reactorId = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
-    bool succeeded = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(reactorId, RegisterQosPoller, this, nullptr);
+    reactorId = eventFrameworkApi->GetFirstReactor();
+    bool succeeded = eventFrameworkApi->SendSpdkEvent(reactorId, RegisterQosPoller, this, nullptr);
     if (unlikely(false == succeeded))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;
@@ -348,15 +350,15 @@ QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
         POS_TRACE_INFO(POS_EVENT_ID::QOS_POLLER_REGISTRATION, "Poller {} Registration Successful, ", pollerName);
     }
     spdkManager->UpdateSpdkPoller(reactor, poller);
-    if (EventFrameworkApiSingleton::Instance()->IsLastReactorNow())
+    if (spdkManager->eventFrameworkApi->IsLastReactorNow())
     {
         registerQosPollerDone = true;
     }
     else
     {
-        uint32_t nextReactor = EventFrameworkApiSingleton::Instance()->GetNextReactor();
+        uint32_t nextReactor = spdkManager->eventFrameworkApi->GetNextReactor();
         spdkManager->SetReactorId(nextReactor);
-        bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextReactor, RegisterQosPoller, spdkManager, nullptr);
+        bool success = spdkManager->eventFrameworkApi->SendSpdkEvent(nextReactor, RegisterQosPoller, spdkManager, nullptr);
         if (unlikely(false == success))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;

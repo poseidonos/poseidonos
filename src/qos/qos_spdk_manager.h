@@ -39,10 +39,12 @@
 namespace pos
 {
 class QosContext;
+class EventFrameworkApi;
 class QosSpdkManager
 {
 public:
     explicit QosSpdkManager(QosContext* qosCtx, bool feQos,
+        EventFrameworkApi* eventFrameworkApiArg,
         SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller());
     ~QosSpdkManager(void);
     void Initialize(void);
@@ -68,6 +70,7 @@ private:
     spdk_poller* spdkPollers[M_MAX_REACTORS];
     uint32_t reactorId;
     bool feQosEnabled;
+    EventFrameworkApi* eventFrameworkApi;
     SpdkPosNvmfCaller* spdkPosNvmfCaller;
 };
 } // namespace pos

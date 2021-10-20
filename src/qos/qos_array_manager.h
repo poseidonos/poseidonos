@@ -45,11 +45,16 @@ namespace pos
 {
 class QosVolumeManager;
 class QosContext;
+class EventFrameworkApi;
+class QosManager;
 class QosArrayManager : public ExitQosHandler
 {
 public:
-    QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx);
-    ~QosArrayManager(void);
+    QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx,
+        bool feQosEnabled,
+        EventFrameworkApi* eventFrameworkApiArg,
+        QosManager* qosManager);
+    virtual ~QosArrayManager(void);
     void Initalize(void);
     int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy);
     qos_vol_policy GetVolumePolicy(uint32_t volId);
@@ -76,12 +81,11 @@ public:
     void SetArrayName(std::string arrayName);
 
 private:
-    QosVolumeManager* qosVolumeManager;
+    void _Finalize(void);
+    uint32_t arrayId;
     bool feQosEnabled;
     bool initialized;
-    uint32_t arrayId;
     std::string arrayName;
-    void _Finalize(void);
     std::mutex policyUpdateLock;
     std::atomic<uint32_t> usedStripeCnt;
     std::vector<uint32_t> minGuaranteeVolume;
@@ -92,5 +96,7 @@ private:
     qos_vol_policy volPolicyCli[MAX_VOLUME_COUNT];
     qos_rebuild_policy rebuildPolicyCli;
     std::map<uint32_t, qos_vol_policy> volumePolicyMapCli;
+    QosManager* qosManager;
+    QosVolumeManager* qosVolumeManager;
 };
 } // namespace pos

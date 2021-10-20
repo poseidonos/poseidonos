@@ -57,11 +57,15 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 
-QosMonitoringManagerArray::QosMonitoringManagerArray(uint32_t arrayIndex, QosContext* qosCtx)
+QosMonitoringManagerArray::QosMonitoringManagerArray(uint32_t arrayIndex,
+        QosContext* qosCtx,
+        QosManager* qosManager)
+    : arrayId(arrayIndex),
+    qosContext(qosCtx),
+    qosManager(qosManager)
 {
-    arrayId = arrayIndex;
-    qosContext = qosCtx;
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -69,10 +73,10 @@ QosMonitoringManagerArray::QosMonitoringManagerArray(uint32_t arrayIndex, QosCon
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
 QosMonitoringManagerArray::~QosMonitoringManagerArray(void)
 {
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -113,7 +117,6 @@ QosMonitoringManagerArray::_UpdateContextActiveReactorVolumes(uint32_t reactor, 
 void
 QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     std::map<uint32_t, qos_vol_policy> volumePolicyMap;
     bool volumePolicyUpdated = qosManager->IsVolumePolicyUpdated(arrayId);
     QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
@@ -212,7 +215,6 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
 bool
 QosMonitoringManagerArray::VolParamActivities(uint32_t volId, uint32_t reactor)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     volParams[volId] = qosManager->DequeueVolumeParams(reactor, volId, arrayId);
     if (volParams[volId].valid == M_VALID_ENTRY)
     {
@@ -258,7 +260,6 @@ QosMonitoringManagerArray::UpdateVolumeParameter(uint32_t volId)
 void
 QosMonitoringManagerArray::UpdateContextResourceDetails(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     QosResource& resourceDetails = qosContext->GetQosResource();
     ResourceNvramStripes& resourceNvramStripes = resourceDetails.GetResourceNvramStripes(arrayId);
     ResourceArray& resourceArray = resourceDetails.GetResourceArray(arrayId);
@@ -363,7 +364,6 @@ QosMonitoringManagerArray::_UpdateVolumeReactorParameter(uint32_t volId, uint32_
 void
 QosMonitoringManagerArray::UpdateContextUserRebuildPolicy(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     string arrName = qosManager->GetArrayNameFromMap(arrayId);
     QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();

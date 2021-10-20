@@ -45,32 +45,20 @@ namespace pos
   * @Returns
   */
 /* --------------------------------------------------------------------------*/
-QosArrayManager::QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx)
+QosArrayManager::QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx,
+        bool feQosEnabled, EventFrameworkApi* eventFrameworkApiArg,
+        QosManager* qosManager)
+    : arrayId(arrayIndex),
+    feQosEnabled(feQosEnabled),
+    qosManager(qosManager)
 {
-    arrayId = arrayIndex;
-    feQosEnabled = false;
     initialized = false;
-    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
     volMinPolicyInEffect = false;
     gcFreeSegments = UPPER_GC_TH + 1;
     minBwGuarantee = false;
-    bool enabled = false;
-    int ret = configManager.GetValue("fe_qos", "enable", &enabled,
-        CONFIG_TYPE_BOOL);
-    if (ret == (int)POS_EVENT_ID::SUCCESS)
-    {
-        feQosEnabled = enabled;
-    }
-
     volumePolicyUpdated = false;
-    try
-    {
-        qosVolumeManager = new QosVolumeManager(qosCtx, feQosEnabled, arrayId, this);
-    }
-    catch (bad_alloc& ex)
-    {
-        assert(0);
-    }
+    qosVolumeManager = new QosVolumeManager(qosCtx, feQosEnabled,
+        arrayId, this, eventFrameworkApiArg, qosManager);
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -263,7 +251,7 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     }
     if (existingPolicyChange == true)
     {
-        QosManagerSingleton::Instance()->ResetCorrection();
+        qosManager->ResetCorrection();
     }
     return QosReturnCode::SUCCESS;
 }

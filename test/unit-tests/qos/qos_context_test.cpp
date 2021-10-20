@@ -96,7 +96,6 @@ TEST(QosContext, Check_InsertGet_activeVolReactorMap)
     reactorCount[reactor] = count;
     volReactorMap[volId] = reactorCount;
     qosContext.InsertActiveVolumeReactor(volReactorMap);
-
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMapReturned = qosContext.GetActiveVolumeReactors();
     map<uint32_t, uint32_t> reactorCountReturned;
     reactorCountReturned = volReactorMapReturned[volId];
@@ -106,8 +105,9 @@ TEST(QosContext, Check_InsertGet_activeVolReactorMap)
 TEST(QosContext, IsVolumeMinPolicyInEffect_volMinPolicyDisabled)
 {
     QosContext qosContext;
-    NiceMock<MockAllVolumeUserPolicy> mockAllVolumeUserPolicy;
-    ON_CALL(mockAllVolumeUserPolicy, IsMinPolicyInEffect()).WillByDefault(Return(false));
+    QosUserPolicy &mockQosUserPolicy = qosContext.GetQosUserPolicy();
+    AllVolumeUserPolicy &mockAllVolumeUserPolicy = mockQosUserPolicy.GetAllVolumeUserPolicy();
+    mockAllVolumeUserPolicy.SetMinimumPolicyInEffect(false);
     bool expected = false;
     bool actual;
     actual = qosContext.IsVolumeMinPolicyInEffect();
@@ -116,9 +116,10 @@ TEST(QosContext, IsVolumeMinPolicyInEffect_volMinPolicyDisabled)
 TEST(QosContext, IsVolumeMinPolicyInEffect_volMinPolicyEnabled)
 {
     QosContext qosContext;
-    NiceMock<MockAllVolumeUserPolicy> mockAllVolumeUserPolicy;
-    ON_CALL(mockAllVolumeUserPolicy, IsMinPolicyInEffect()).WillByDefault(Return(false));
-    bool expectedVal = false;
+    QosUserPolicy &mockQosUserPolicy = qosContext.GetQosUserPolicy();
+    AllVolumeUserPolicy &mockAllVolumeUserPolicy = mockQosUserPolicy.GetAllVolumeUserPolicy();
+    mockAllVolumeUserPolicy.SetMinimumPolicyInEffect(true);
+    bool expectedVal = true;
     bool actualVal;
     actualVal = qosContext.IsVolumeMinPolicyInEffect();
     ASSERT_EQ(expectedVal, actualVal);
@@ -145,6 +146,21 @@ TEST(QosContext, Check_IncrementAndIsCorrectionCyleFunctions)
     actual = qosContext.IsCorrectionCycleOver();
     ASSERT_EQ(expected, actual);
 }
+
+TEST(QosContext, Check_IncrementAndIsCorrectionCyleOverFalse)
+{
+    QosContext qosContext;
+    int i = 0;
+    for (i = 0; i < 10; i++)
+    {
+        qosContext.IncrementCorrectionCycle();
+    }
+    bool expected = false;
+    bool actual;
+    actual = qosContext.IsCorrectionCycleOver();
+    ASSERT_EQ(expected, actual);
+}
+
 TEST(QosContext, Check_GetterSetter_TotalConnection)
 {
     QosContext qosContext;
@@ -169,5 +185,28 @@ TEST(QosContext, Check_UpdateandGetReactorCoreListFunction)
 
     ASSERT_EQ(reactorList[noOfElements - 1], reactorCore);
 }
+TEST(QosContext, Test_SetResetReactorProcessed)
+{
+    QosContext qosContext;
+    uint32_t reactorId = 6;
+    bool value = true;
 
+    qosContext.UpdateReactorCoreList(reactorId);
+    qosContext.SetReactorProcessed(reactorId, true);
+    bool expected = true;
+    bool actual = qosContext.AllReactorsProcessed();
+    ASSERT_EQ(expected, actual);
+    qosContext.ResetAllReactorsProcessed();
+    actual =  qosContext.AllReactorsProcessed();
+    ASSERT_EQ(actual, false);
+}
+
+TEST(QosContext, Test_GetSetVolumeOperationDone)
+{
+    QosContext qosContext;
+    qosContext.SetVolumeOperationDone(false);
+    bool expected = false;
+    bool actual = qosContext.GetVolumeOperationDone();
+    ASSERT_EQ(actual, false);
+}
 } // namespace pos

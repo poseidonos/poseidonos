@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -32,23 +32,22 @@
 
 #pragma once
 
-#include "src/qos/qos_common.h"
+#include <gmock/gmock.h>
+
+#include <list>
+#include <string>
+#include <vector>
+
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 
 namespace pos
 {
-class QosInternalManager;
-class QosContext;
-class QosManager;
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- */
-/* --------------------------------------------------------------------------*/
-class InternalManagerFactory
+class MockSpdkPosNvmfCaller : public SpdkPosNvmfCaller
 {
 public:
-    static QosInternalManager* CreateInternalManager(QosInternalManagerType type,
-            QosContext *ctx, QosManager* qosManager);
+    using SpdkPosNvmfCaller::SpdkPosNvmfCaller;
+    MOCK_METHOD(uint32_t, SpdkNvmfGetReactorSubsystemMapping, (uint32_t reactorId, uint32_t nqnId), (override));
+    MOCK_METHOD(void, SetQosInSpdk, (bool value), ());
 };
+
 } // namespace pos

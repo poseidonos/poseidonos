@@ -59,6 +59,8 @@ TEST(AllVolumeUserPolicy, Test_Get_And_SetMinimumGuaranteeVolume)
     std::vector<std::pair<uint32_t, uint32_t>> setVol = allVolUserPolicy.GetMinimumGuaranteeVolume();
     ASSERT_EQ(vol, setVol[0].first);
     ASSERT_EQ(arrayId, setVol[0].second);
+    // call it again, it would return from first if
+    allVolUserPolicy.SetMinimumGuaranteeVolume(vol, arrayId);
 }
 
 TEST(AllVolumeUserPolicy, Test_Get_And_SetMinimumPolicyInEffect_True)
@@ -99,10 +101,16 @@ TEST(AllVolumeUserPolicy, EqualOperator_Test)
     allVolUserPolicy1.InsertVolumeUserPolicy(0, 1, userPolicy);
     equal = (allVolUserPolicy1 == allVolUserPolicy2);
     ASSERT_EQ(equal, false);
-    userPolicy.SetMinBandwidth(200);
     allVolUserPolicy2.InsertVolumeUserPolicy(0, 1, userPolicy);
     equal = (allVolUserPolicy1 == allVolUserPolicy2);
+    ASSERT_EQ(equal, true);
+    userPolicy.SetMinBandwidth(200);
+    allVolUserPolicy1.InsertVolumeUserPolicy(0, 1, userPolicy);
+    equal = (allVolUserPolicy1 == allVolUserPolicy2);
     ASSERT_EQ(equal, false);
+    allVolUserPolicy2.InsertVolumeUserPolicy(0, 1, userPolicy);
+    equal = (allVolUserPolicy1 == allVolUserPolicy2);
+    ASSERT_EQ(equal, true);
 }
 
 } // namespace pos

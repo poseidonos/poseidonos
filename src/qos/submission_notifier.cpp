@@ -37,9 +37,9 @@ namespace pos
 SubmissionNotifier::SubmissionNotifier(void)
 {
 }
-
+// LCOV_EXCL_START
 SubmissionNotifier::~SubmissionNotifier(void)
 {
 }
-
+// LCOV_EXCL_STOP
 } // namespace pos

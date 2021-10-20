@@ -42,6 +42,7 @@
 namespace pos
 {
 class QosContext;
+class QosManager;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -51,7 +52,7 @@ class QosContext;
 class QosMonitoringManagerArray
 {
 public:
-    QosMonitoringManagerArray(uint32_t arrayIndex, QosContext* qosCtx);
+    QosMonitoringManagerArray(uint32_t arrayIndex, QosContext* qosCtx, QosManager* qosManager);
     ~QosMonitoringManagerArray(void);
     void UpdateContextUserVolumePolicy(void);
     void UpdateVolumeParameter(uint32_t volId);
@@ -69,5 +70,6 @@ private:
     bw_iops_parameter volParams[MAX_VOLUME_COUNT];
     void _UpdateVolumeReactorParameter(uint32_t volId, uint32_t reactor);
     void _UpdateVolumeBlockSize(uint32_t volId, uint64_t blockSize);
+    QosManager* qosManager;
 };
 } // namespace pos

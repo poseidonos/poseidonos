@@ -435,5 +435,29 @@ QosContext::AllReactorsProcessed(void)
     }
     return allProcessed;
 }
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosContext::SetVolumeOperationDone(bool value)
+{
+    volumeOperationDone = value;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosContext::GetVolumeOperationDone(void)
+{
+    return volumeOperationDone;
+}
 
 } // namespace pos

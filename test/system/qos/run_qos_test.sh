@@ -29,6 +29,7 @@ ARRAYNAME1=POSArray1
 ARRAYNAME2=POSArray2
 MINVALUEBWIOPS=10
 NUM_DISKS=0
+PM_MACHINE=0
 
 #**************************************************************************
 # TEST SETUP INFORMATION
@@ -366,7 +367,6 @@ network_module_check(){
 # Setup test environment for QoS Test Scripts
 #**************************************************************************
 setup_test_environment(){
-
     print_info "Checking Environment"
     check_env
 
@@ -413,6 +413,10 @@ start_ibofos(){
 # Setup POS Single Array
 ###################################################
 setup_pos_single_array(){
+    if [ ${PM_MACHINE} -eq 0 ]; then
+        SUBSYSTEM=4
+        NR_VOLUME=4
+    fi
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
 }
@@ -421,8 +425,13 @@ setup_pos_single_array(){
 # START POS WITH MULTI ARRAY and multi volume in a subsystem
 ###################################################
 setup_pos_multi_array(){
-    SUBSYSTEM_COUNT=2
-    VOLUME_COUNT=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        SUBSYSTEM_COUNT=2
+        VOLUME_COUNT=8
+    else
+        SUBSYSTEM_COUNT=2
+        VOLUME_COUNT=2
+    fi
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_multi_array.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
     EXPECT_PASS "setup_multi_array.sh" $?
 
@@ -451,7 +460,7 @@ print_fio_result()
 launch_fio()
 {
     if [ $# -ne 12 ];then
-        echo "Insufficient  Parameters, ex. launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData"
+        echo "Insufficient  Parameters, ex. launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray"
         return 1
     fi
 
@@ -461,7 +470,6 @@ launch_fio()
     bs=$4
     readwrite=$5
     runtime=$6
-
     group=$7
     workload=$8
     run_background=$9
@@ -498,17 +506,25 @@ launch_fio()
 }
 
 ###################################################
-# FIO: 1 VOLUMES, 31 JOB
+# FIO: 1 VOLUMES, N JOB
 ###################################################
 #**************************************************************************
 # Sequential Write
 #**************************************************************************
-tc_1v_31job_write()
+tc_1v_njob_write()
 {
-    fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(4), BS(128k), Sequential Write"
+    num_vols=1
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_jobs=31
+    else
+        num_jobs=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 4 128k write 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k write 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -516,12 +532,20 @@ tc_1v_31job_write()
 #**************************************************************************
 # Sequential Read
 #**************************************************************************
-tc_1v_31job_read()
+tc_1v_njob_read()
 {
-    fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(4), BS(128k), Sequential Read"
+    num_vols=1
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_jobs=31
+    else
+        num_jobs=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 4 128k read 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k read 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -529,12 +553,20 @@ tc_1v_31job_read()
 #**************************************************************************
 # Random Write
 #**************************************************************************
-tc_1v_31job_randwrite()
+tc_1v_njob_randwrite()
 {
-    fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(128), BS(4k), Random Write"
+    num_vols=1
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_jobs=31
+    else
+        num_jobs=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 128 4k randwrite 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randwrite 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -542,28 +574,46 @@ tc_1v_31job_randwrite()
 #**************************************************************************
 # Random Read
 #**************************************************************************
-tc_1v_31job_randread()
+tc_1v_njob_randread()
 {
-    fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(128), BS(4k), Random Read"
+    num_vols=1
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_jobs=31
+    else
+        num_jobs=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 128 4k randread 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randread 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
 
 ###################################################
-# FIO: 8 VOLUMES, 3 JOB
+# FIO: N VOLUMES, N JOB
 ###################################################
 #**************************************************************************
 # Sequential Write
 #**************************************************************************
-tc_8v_3job_write()
+tc_nv_njob_write()
 {
-    fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(4), BS(128k), Sequential Write"
+    num_vols=0
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=8
+        num_jobs=3
+    else
+        num_vols=2
+        num_jobs=2
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 4 128k write 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k write 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -571,12 +621,22 @@ tc_8v_3job_write()
 #**************************************************************************
 # Sequential Read
 #**************************************************************************
-tc_8v_3job_read()
+tc_nv_njob_read()
 {
-    fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(4), BS(128k), Sequential Read"
+    num_vols=0
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=8
+        num_jobs=3
+    else
+        num_vols=2
+        num_jobs=2
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 4 128k read 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k read 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -584,12 +644,22 @@ tc_8v_3job_read()
 #**************************************************************************
 # Random Write
 #**************************************************************************
-tc_8v_3job_randwrite()
+tc_nv_njob_randwrite()
 {
-    fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(128), BS(4k), Random Write"
+    num_vols=0
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=8
+        num_jobs=3
+    else
+        num_vols=2
+        num_jobs=2
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 128 4k randwrite 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randwrite 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -597,28 +667,45 @@ tc_8v_3job_randwrite()
 #**************************************************************************
 # Random Read
 #**************************************************************************
-tc_8v_3job_randread()
+tc_nv_njob_randread()
 {
-    fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(128), BS(4k), Random Read"
+    num_vols=0
+    num_jobs=0
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=8
+        num_jobs=3
+    else
+        num_vols=2
+        num_jobs=2
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 128 4k randread 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randread 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
 
 ###################################################
-# FIO: 31 VOLUMES, 1 JOB
+# FIO: N VOLUMES, 1 JOB
 ###################################################
 #**************************************************************************
 # Sequential Write
 #**************************************************************************
-tc_15v_1job_write()
+tc_nv_1job_write()
 {
-    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    num_jobs=1
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=31
+    else
+        num_vols=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 15 1 4 128k write 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k write 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -626,12 +713,19 @@ tc_15v_1job_write()
 #**************************************************************************
 # Sequential Read
 #**************************************************************************
-tc_15v_1job_read()
+tc_nv_1job_read()
 {
-    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(4), BS(128k), Sequential Read"
+    num_jobs=1
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=31
+    else
+        num_vols=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 15 1 4 128k read 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 4 128k read 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -639,12 +733,19 @@ tc_15v_1job_read()
 #**************************************************************************
 # Random Write
 #**************************************************************************
-tc_15v_1job_randwrite()
+tc_nv_1job_randwrite()
 {
-    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(128), BS(4k), Random Write"
+    num_jobs=1
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=31
+    else
+        num_vols=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 15 1 128 4k randwrite 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randwrite 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -652,12 +753,19 @@ tc_15v_1job_randwrite()
 #**************************************************************************
 # Random Read
 #**************************************************************************
-tc_15v_1job_randread()
+tc_nv_1job_randread()
 {
-    fio_tc_name="Type: Performance, Volumes:15, Jobs:1, Details: QD(128), BS(4k), Random Read"
+    num_jobs=1
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        num_vols=31
+    else
+        num_vols=4
+    fi
+    fio_tc_name="Type: Performance, Volumes:${num_vols}, Jobs:${num_jobs}, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 15 1 128 4k randread 30 1 4 0 1 257 1
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
+    launch_fio ${num_vols} ${num_jobs} 128 4k randread 30 1 4 0 1 257 1
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -694,9 +802,14 @@ throttleBwMpbs()
 # QOS READ WRITE WITH FE ENABLED
 ###################################################
 tc_readwrite_fe()
-{
-    fio_tc_name="Type: Read Write FE, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
-    volCnt=8
+{ 
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+
+    fio_tc_name="Type: Read Write FE, Volumes:$volCnt, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without IOPS Throttling"
@@ -731,6 +844,7 @@ tc_readwrite_fe()
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxbw $throttleBw --maxiops $throttleIops --array-name ${ARRAYNAME2}
         volIdx=`expr $volIdx + 1`
     done
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257 2
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
@@ -741,11 +855,17 @@ tc_readwrite_fe()
 ###################################################
 tc_bw_throttle()
 {
-    fio_tc_name="Type: BW Throttle, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
-    volCnt=8
+ 
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Type: BW Throttle, Volumes:$volCnt, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without BW Throttling"
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 128 128k write 30 1 4 0 1 257 2
     array=()
     while read line ; do
@@ -771,6 +891,7 @@ tc_bw_throttle()
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxbw $throttleBw --array-name ${ARRAYNAME2}
         volIdx=`expr $volIdx + 1`
     done
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257 2
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
@@ -781,11 +902,17 @@ tc_bw_throttle()
 ###################################################
 tc_iops_throttle()
 {
-    fio_tc_name="Type: IOPS Throttle, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Type: IOPS Throttle, Volumes:$volCnt, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+   
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without IOPS Throttling"
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257 2
     array=()
     while read line ; do
@@ -808,7 +935,7 @@ tc_iops_throttle()
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxiops $throttleIops --array-name ${ARRAYNAME2}
         volIdx=`expr $volIdx + 1`
     done
-
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257 2
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
@@ -822,7 +949,11 @@ tc_throttle_value_check()
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     volIdx=1
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
     throttleIops=10
     while [ $volIdx -le $volCnt ]
     do
@@ -832,6 +963,7 @@ tc_throttle_value_check()
     done
     #as the unit is in KIOPS
     throttleIopsToCheck=10000
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 0 4 0 0 257 2
 
     volIdx=1
@@ -864,7 +996,11 @@ tc_list_qos_policies()
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     volIdx=1
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
     while [ $volIdx -le $volCnt ]
     do
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos list --volume-name vol$volIdx --array-name ${ARRAYNAME1}
@@ -882,13 +1018,11 @@ unmount_volume_test()
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     volIdx=1
-    volCnt=8
-    ##while [ $volIdx -le $volCnt ]
-    ##do
-        ##texecc $TARGET_ROOT_DIR/bin/poseidonos-cli volume unmount --volume-name vol$volIdx --array-name ${ARRAYNAME1}
-        ##volIdx=`expr $volIdx + 1`
-    ##done
-
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
     texecc $TARGET_ROOT_DIR/bin/poseidonos-cli array unmount  --array-name ${ARRAYNAME1} --json-res --force
     texecc sleep 10
     
@@ -903,7 +1037,7 @@ unmount_volume_test()
 
         volIndex=`expr $volIndex + 1`
     done
-
+    # launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData multiarray
     launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257 2
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
@@ -916,10 +1050,9 @@ run_fio_tests(){
     base_tc=$2
     if [ $mode == "be_qos" ]; then
         print_info "BE QOS TEST CASES"
-
-        tc_array=(tc_1v_31job_write tc_1v_31job_read tc_1v_31job_randwrite tc_1v_31job_randread
-                   tc_8v_3job_write tc_8v_3job_read tc_8v_3job_randwrite tc_8v_3job_randread
-                    tc_15v_1job_write tc_15v_1job_read tc_15v_1job_randwrite tc_15v_1job_randread)
+        tc_array=(tc_1v_njob_write tc_1v_njob_read tc_1v_njob_randwrite tc_1v_njob_randread
+                   tc_nv_njob_write tc_nv_njob_read tc_nv_njob_randwrite tc_nv_njob_randread
+                    tc_nv_1job_write tc_nv_1job_read tc_nv_1job_randwrite tc_nv_1job_randread)
     elif [ $mode == "fe_qos_multi_array" ]; then
         print_info "FE QOS TEST CASES MULTI ARRAY"
         echo ""
@@ -1054,6 +1187,13 @@ with_fe_qos_multi_array(){
 # SANITY TESTS
 ###################################################
 run_qos_test_cases(){
+    if [[ $TYPE == "PM" ]]; then
+        PM_MACHINE=1
+        echo -e "== **** PHYSICAL TARGET MACHINE ****"
+    else
+        PM_MACHINE=0
+        echo -e "== **** VIRTUAL TARGET MACHINE ****"
+    fi
     echo "----------------------------------------------------------------"
     echo "Test Cases To Run POS Code with BE/ FE QoS"
     echo "----------------------------------------------------------------"
@@ -1080,6 +1220,13 @@ run_multi_array_test(){
     echo "----------------------------------------------------------------"
     echo "Test Cases To Run POS Code with BE/ FE QoS"
     echo "----------------------------------------------------------------"
+    if [[ $TYPE == "PM" ]]; then
+        PM_MACHINE=1
+        echo -e "== **** PHYSICAL TARGET MACHINE ****"
+    else
+        PM_MACHINE=0
+        echo -e "== **** VIRTUAL TARGET MACHINE ****"
+    fi    
     tc_array_one=(with_fe_qos_multi_array)
     total_tc=${compile_tc_array[@]}
     local tc_list=""
@@ -1102,7 +1249,7 @@ run_multi_array_test(){
 ###################################################
 run_minimum_policy_test(){
     echo "Starting CI Script for Minimum Policy QoS"
-    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh -v $NR_VOLUME -t $TRANSPORT -a $TARGET_IP -p $PORT -l $LOC -m $EXEC_MODE -d $NUM_DISKS
+    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh -n $NR_VOLUME -t $TRANSPORT -a $TARGET_IP -p $PORT -l $LOC -m $EXEC_MODE -d $NUM_DISKS -v $PM_MACHINE
     EXPECT_PASS "Minimum Volume Policy Test Cases" $?
     echo "Completed Minimum Policy Tests"
 }
@@ -1124,7 +1271,7 @@ Prerequisite
     3. please configure your ip address, volume size, etc. propertly by editing nvme_fush_ci_test.sh
 
 Description
-    -v [target_volume to be created]
+    -n [target_volume to be created]
         default is 8
     -t [trtype]
         tcp:  IP configurations using tcp connection(default)
@@ -1133,11 +1280,12 @@ Description
         Default ip is 10.100.11.1
     -s [target_system_port]
         Default port is 1158
+    -v [VM/PM]
     -h
         Show script usage
 
 Default configuration (if specific option not given)
-    ./run_qos_test.sh -v 31 -t tcp -a 10.100.11.1 -s 1158
+    ./run_qos_test.sh -n 31 -t tcp -a 10.100.11.1 -s 1158 -v VM
 
 EOF
     exit 0
@@ -1147,10 +1295,10 @@ EOF
 # STARTS HERE
 ###################################################
 # QoS Code Compilation & Sanity Checks
-while getopts "v:t:a:s:p:m:l:h:" opt
+while getopts "n:t:a:s:p:m:l:h:v:" opt
 do
     case "$opt" in
-        v) NR_VOLUME="$OPTARG"
+        n) NR_VOLUME="$OPTARG"
             ;;
         t) TRANSPORT="$OPTARG"
             ;;
@@ -1164,6 +1312,8 @@ do
 	    ;;
         l) LOC="$OPTARG"
 	    ;;
+        v) TYPE="$OPTARG" 
+            ;;
         h) print_help
             ;;
         ?) exit 2
@@ -1216,6 +1366,9 @@ if [ -z $EXEC_MODE ]; then
 EXEC_MODE=1
 fi
 
+if [ -z $TYPE ]; then
+TYPE=VM
+fi
 
 # Show the Test Setup Information
 show_test_setup_info;

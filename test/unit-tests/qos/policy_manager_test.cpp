@@ -5,57 +5,61 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/qos/qos_context_mock.h"
+#include "test/unit-tests/qos/qos_manager_mock.h"
 
 using namespace std;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace pos
 {
 TEST(QosPolicyManager, QosPolicyManager_Construtor_One_Stack)
 {
     NiceMock<MockQosContext> mockQoscontext;
-    QosPolicyManager qosPolicyManager(&mockQoscontext);
+    NiceMock<MockQosManager> mockQosManager;
+    QosPolicyManager qosPolicyManager(&mockQoscontext, &mockQosManager);
 }
+
 TEST(QosPolicyManager, QosPolicyManager_Construtor_One_Heap)
 {
     NiceMock<MockQosContext> mockQoscontext;
-    QosPolicyManager* qosPolicyManager = new QosPolicyManager(&mockQoscontext);
+    NiceMock<MockQosManager> mockQosManager;
+    QosPolicyManager* qosPolicyManager = new QosPolicyManager(&mockQoscontext, &mockQosManager);
     delete qosPolicyManager;
 }
 
 TEST(QosPolicyManager, Execute_InternalManager_Correction_Disable)
 {
-#if 0
-    QosContext qosContext;
-    qosContext.SetApplyCorrection(false);
-    QosPolicyManager qosPolicyManager(&qosContext);
+    NiceMock<MockQosContext> qosContext;
+    NiceMock<MockQosManager> mockQosManager;
+    // qosContext.SetApplyCorrection(false);
+    QosUserPolicy userPolicy;
+    ON_CALL(qosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
+    ON_CALL(qosContext, GetApplyCorrection()).WillByDefault(Return(false));
+    QosParameters parameters;
+    ON_CALL(qosContext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
+    QosPolicyManager qosPolicyManager(&qosContext, &mockQosManager);
     qosPolicyManager.Execute();
     QosInternalManagerType expectedManager = QosInternalManager_Monitor;
     QosInternalManagerType actualManager = qosPolicyManager.GetNextManagerType();
     ASSERT_EQ(expectedManager, actualManager);
-#endif
 }
 
 TEST(QosPolicyManager, Execute_InternalManager_Correction_Enable)
 {
-    QosContext qosContext;
-    QosPolicyManager qosPolicyManager(&qosContext);
-    qosContext.SetApplyCorrection(true);
+    NiceMock<MockQosContext> qosContext;
+    NiceMock<MockQosManager> mockQosManager;
+    QosUserPolicy userPolicy;
+    ON_CALL(qosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
+    ON_CALL(qosContext, GetApplyCorrection()).WillByDefault(Return(true));
+    QosParameters parameters;
+    ON_CALL(qosContext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
+    QosPolicyManager qosPolicyManager(&qosContext, &mockQosManager);
     qosPolicyManager.Execute();
     QosInternalManagerType expectedManager = QosInternalManager_Correction;
     QosInternalManagerType actualManager = qosPolicyManager.GetNextManagerType();
     ASSERT_EQ(expectedManager, actualManager);
 }
-
-TEST(QosPolicyManager, Execute_PolicyManager_Array)
-{
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    qosManager->UpdateArrayMap("PosArray_1");
-    NiceMock<MockQosContext> qoscontext;
-    QosPolicyManager qosPolicyManager(&qoscontext);
-    qosPolicyManager.Execute();
-}
-
 } // namespace pos

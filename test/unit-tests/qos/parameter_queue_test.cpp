@@ -16,6 +16,7 @@ TEST(ParameterQueue, ParameterQueue_Constructor_One_Heap)
     ParameterQueue* parameterQueue = new ParameterQueue();
     delete parameterQueue;
 }
+
 TEST(ParameterQueue, Check_Enqueue_Dequeue_Params)
 {
     uint32_t id1 = 0;
@@ -33,6 +34,12 @@ TEST(ParameterQueue, Check_Enqueue_Dequeue_Params)
     ASSERT_EQ(param.valid, enqueued.valid);
     for (int i = 0; i < 11; i++)
         ASSERT_EQ(param.pad[i], enqueued.pad[i]);
+}
+
+TEST(ParameterQueue, ClearParameters_Test)
+{
+    ParameterQueue parameterQueue;
+    parameterQueue.ClearParameters(0);
 }
 
 } // namespace pos

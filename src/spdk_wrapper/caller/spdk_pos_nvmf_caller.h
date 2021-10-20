@@ -42,7 +42,7 @@ public:
     SpdkPosNvmfCaller(void);
     virtual ~SpdkPosNvmfCaller(void);
     void SpdkNvmfInitializeReactorSubsystemMapping(void);
-    uint32_t SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id);
+    virtual uint32_t SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id);
     void SetQosInSpdk(bool value);
 };
 

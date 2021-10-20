@@ -155,10 +155,20 @@ TEST(VolumeParameter, Test_InsertReactorParameter)
     ASSERT_EQ(bw, 0);
     ASSERT_EQ(iops, 0);
 }
+
 TEST(VolumeParameter, Test_GetReactorParameterMap)
 {
     VolumeParameter volParam;
     std::map<uint32_t, ReactorParameter> receivedMap = volParam.GetReactorParameterMap();
 }
+
+TEST(VolumeParameter, SetGetBlockSize_Test)
+{
+    VolumeParameter volParam;
+    volParam.SetBlockSize(200);
+    uint64_t blkSize = volParam.GetBlockSize();
+    ASSERT_EQ(blkSize, 200);
+}
+
 
 } // namespace pos

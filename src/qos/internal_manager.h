@@ -49,7 +49,9 @@ class QosInternalManager : public ExitQosHandler
 {
 public:
     QosInternalManager(void) {}
+// LCOV_EXCL_START
     virtual ~QosInternalManager(void) {}
+// LCOV_EXCL_STOP
     virtual void Execute(void) = 0;
     virtual QosInternalManagerType GetNextManagerType(void) = 0;
     virtual void Reset() {}

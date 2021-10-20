@@ -46,10 +46,12 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosProcessingManagerArray::QosProcessingManagerArray(uint32_t arrayIndex, QosContext* qosCtx)
+QosProcessingManagerArray::QosProcessingManagerArray(uint32_t arrayIndex,
+    QosContext* qosCtx,
+    QosManager* qosManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager)
 {
-    qosContext = qosCtx;
-
     arrayId = arrayIndex;
     try
     {

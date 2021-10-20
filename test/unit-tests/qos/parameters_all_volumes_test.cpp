@@ -95,4 +95,24 @@ TEST(AllVolumeParameter, Test_GetVolumeParameter_Invalid)
     }
 }
 
+TEST(AllVolumeParameter, SetGetMinVolumeBw_Test)
+{
+    AllVolumeParameter allVolParameter;
+    allVolParameter.IncrementMinVolumesBw(0, 100);
+    allVolParameter.IncrementMinVolumesBw(1, 200);
+    allVolParameter.IncrementMinVolumesBw(0, 300);
+    uint64_t arrayBw = allVolParameter.GetMinVolBw(0);
+    ASSERT_EQ(arrayBw, 400);
+}
+
+TEST(AllVolumeParameter, SetGetTotalBw_Test)
+{
+    AllVolumeParameter allVolParameter;
+    allVolParameter.IncrementTotalBw(0, 100);
+    allVolParameter.IncrementTotalBw(1, 200);
+    allVolParameter.IncrementTotalBw(0, 300);
+    uint64_t arrayBw = allVolParameter.GetTotalBw(0);
+    ASSERT_EQ(arrayBw, 400);
+}
+
 } // namespace pos

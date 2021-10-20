@@ -18,8 +18,8 @@ detach_dev="unvme-ns-0"
 spare_dev="unvme-ns-3"
 VOLUME_SIZE=2147483648
 DEFAULT_NUM_REACTORS=31
-DEFAULT_NR_VOLUME=31
-DEFAULT_SUBSYSTEM=31
+DEFAULT_NR_VOLUME=4
+DEFAULT_SUBSYSTEM=4
 DEFAULT_PORT=1158
 TARGET_ROOT_DIR=$(readlink -f $(dirname $0))/../../..
 TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk
@@ -367,6 +367,13 @@ start_pos(){
 # Setup pos single array
 ###################################################
 setup_pos_single_array(){
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        SUBSYSTEM=8
+        NR_VOLUME=8
+    else
+        SUBSYSTEM=4
+        NR_VOLUME=4
+    fi
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
 }
@@ -376,10 +383,13 @@ setup_pos_single_array(){
 ###################################################
 start_pos_with_multi_array(){
     SUBSYSTEM_COUNT=2
-    VOLUME_COUNT=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        VOLUME_COUNT=8
+    else
+        VOLUME_COUNT=2
+    fi
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_multi_array.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
     EXPECT_PASS "setup_multi_array.sh" $?
-
 }
 
 ###################################################
@@ -468,8 +478,12 @@ getRandomVolId()
 ###################################################
 tc_1v_min_bw_guarantee_write()
 {
-    fio_tc_name="Minimum BW Guarantee for Single Volume, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Minimum BW Guarantee for Single Volume, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     launch_fio $volCnt 1 128 128k write 30 1 4 0 1 257 1
@@ -505,8 +519,12 @@ tc_1v_min_bw_guarantee_write()
 ###################################################
 tc_1v_min_bw_guarantee_read()
 {
-    fio_tc_name="Minimum BW Guarantee for Single Volume, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Minimum BW Guarantee for Single Volume, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     launch_fio $volCnt 1 128 128k read 30 1 4 0 1 257 1
@@ -541,8 +559,12 @@ tc_1v_min_bw_guarantee_read()
 # QOS 1 VOLUME MINIMUM IOPS
 ###################################################
 tc_1v_min_iops_guarantee_write(){
-    fio_tc_name="Minimum IOPS Guarantee for Single Volume, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Minimum IOPS Guarantee for Single Volume, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without QoS"
@@ -575,8 +597,12 @@ tc_1v_min_iops_guarantee_write(){
 # QOS 1 VOLUME MINIMUM IOPS
 ###################################################
 tc_1v_min_iops_guarantee_read(){
-    fio_tc_name="Minimum IOPS Guarantee for Single Volume, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Minimum IOPS Guarantee for Single Volume, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without QoS"
@@ -609,8 +635,12 @@ tc_1v_min_iops_guarantee_read(){
 ###################################################
 tc_single_min_volume_reset()
 {
-    fio_tc_name="Single Minimum Volume Reset, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Single Minimum Volume Reset, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -658,8 +688,12 @@ tc_single_min_volume_reset()
 ###################################################
 tc_single_min_volume_reset_increase()
 {
-    fio_tc_name="Single Minimum Volume Policy Change Increase, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Single Minimum Volume Policy Change Increase, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -709,8 +743,12 @@ tc_single_min_volume_reset_increase()
 ###################################################
 tc_single_min_volume_reset_decrease()
 {
-    fio_tc_name="Single Minimum Volume Policy Change Decrease, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Single Minimum Volume Policy Change Decrease, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -761,8 +799,12 @@ tc_single_min_volume_reset_decrease()
 # CREATE NEW VOLUME WITH MIN POLICY FIO RUNNING
 ###################################################
 tc_create_new_volume(){
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
     fio_tc_name="Add new volume and mount during FIO run, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without QoS"
@@ -806,8 +848,12 @@ tc_create_new_volume(){
 ###################################################
 tc_no_correction_if_deficit_constant()
 {
-    fio_tc_name="No Correction if Deficit does not reduce, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="No Correction if Deficit does not reduce, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -865,8 +911,12 @@ tc_no_correction_if_deficit_constant()
 # QOSMULTI VOLUME MINIMUM BW
 ###################################################
 tc_multi_vol_min_bw_guarantee_write(){
-    fio_tc_name="Multi Volume Min BW Guarantee, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Multi Volume Min BW Guarantee, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     launch_fio $volCnt 1 128 128k write 30 1 4 0 1 257 1
@@ -886,7 +936,11 @@ tc_multi_vol_min_bw_guarantee_write(){
     fi
 
     volIdx=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIdx -le $minVols ]
     do
         getRandomVolId $volCnt
@@ -912,8 +966,12 @@ tc_multi_vol_min_bw_guarantee_write(){
 # QOSMULTI VOLUME MINIMUM BW
 ###################################################
 tc_multi_vol_min_bw_guarantee_read(){
-    fio_tc_name="Multi Volume Min BW Guarantee, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Multi Volume Min BW Guarantee, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     launch_fio $volCnt 1 128 128k read 30 1 4 0 1 257 1
@@ -933,7 +991,11 @@ tc_multi_vol_min_bw_guarantee_read(){
     fi
 
     volIdx=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIdx -le $minVols ]
     do
         getRandomVolId $volCnt
@@ -959,8 +1021,12 @@ tc_multi_vol_min_bw_guarantee_read(){
 # QOS MULTI VOLUME MINIMUM IOPS
 ###################################################
 tc_multi_vol_min_iops_guarantee_write(){
-    fio_tc_name="Multi Volume Min iops Guarantee, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Multi Volume Min iops Guarantee, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     volIdx=1
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
@@ -981,7 +1047,11 @@ tc_multi_vol_min_iops_guarantee_write(){
         minIops=10
     fi
     volIndex=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIndex -le $minVols ]
     do
         getRandomVolId $volCnt
@@ -1007,8 +1077,12 @@ tc_multi_vol_min_iops_guarantee_write(){
 # QOS MULTI VOLUME MINIMUM IOPS
 ###################################################
 tc_multi_vol_min_iops_guarantee_read(){
-    fio_tc_name="Multi Volume Min iops Guarantee, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Multi Volume Min iops Guarantee, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential read"
     volIdx=1
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
@@ -1029,7 +1103,11 @@ tc_multi_vol_min_iops_guarantee_read(){
         minIops=10
     fi
     volIndex=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIndex -le $minVols ]
     do
         getRandomVolId $volCnt
@@ -1053,8 +1131,12 @@ tc_multi_vol_min_iops_guarantee_read(){
 # QOS MULTI VOLUME MINIMUM POLICY RESET
 ###################################################
 tc_multi_vol_min_volume_reset(){
-    fio_tc_name="Type: Multi Volume Minimum Volume Reset, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Type: Multi Volume Minimum Volume Reset, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -1074,7 +1156,11 @@ tc_multi_vol_min_volume_reset(){
     fi
 
     volIdx=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIdx -le $minVols ]
     do
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx  --minbw $minBw --array-name ${ARRAYNAME}
@@ -1108,8 +1194,12 @@ tc_multi_vol_min_volume_reset(){
 # QOS MULTI VOLUME MINIMUM POLICY CHANGED
 ###################################################
 tc_multi_vol_min_volume_reset_increase(){
-    fio_tc_name="Type: Multi Volume Minimum Volume Policy change, Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Type: Multi Volume Minimum Volume Policy change, Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     volIdx=1
@@ -1132,7 +1222,11 @@ tc_multi_vol_min_volume_reset_increase(){
     fi
 
     volIdx=1
-    minVols=4
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=2
+    fi
     while [ $volIdx -le $minVols ]
     do
         texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx  --minbw $minBw --array-name ${ARRAYNAME}
@@ -1165,8 +1259,12 @@ tc_multi_vol_min_volume_reset_increase(){
 # MINIMUM POLICY - MIN BW AND IOPS SIMULTANEOUS
 ###################################################
 tc_min_bw_iops_simultaneous(){
-    fio_tc_name="Minimum Iops and Bandwidth Simultaneous , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
+    fio_tc_name="Minimum Iops and Bandwidth Simultaneous , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     volIdx=1
@@ -1229,8 +1327,11 @@ unmount_volume_test()
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     volIdx=1
-    volCnt=8
-
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
     print_info "FIO Results without Min Policy"
     launch_fio $volCnt 1 128 128k write 30 1 4 0 1 257 1
     array=()
@@ -1277,8 +1378,11 @@ unmount_array_test()
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     volIdx=1
-    volCnt=8
-
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=4
+    fi
     print_info "FIO Results without Min Policy"
     launch_fio $volCnt 1 128 128k write 30 1 4 0 1 257 1
     array=()
@@ -1322,8 +1426,13 @@ unmount_array_test()
 # MULTI ARRAY MINIMUM BW GUARANTEE
 ###################################################
 tc_multi_array_bandwidth_write(){
-    fio_tc_name="Multi Array Minimum Bandwidth , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multi Array Minimum Bandwidth , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
+    
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     volIdx=1
@@ -1351,7 +1460,11 @@ tc_multi_array_bandwidth_write(){
         minBw=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1379,8 +1492,12 @@ tc_multi_array_bandwidth_write(){
 # MULTI ARRAY MINIMUM BW GUARANTEE
 ###################################################
 tc_multi_array_bandwidth_read(){
-    fio_tc_name="Multi Array Minimum Bandwidth , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multi Array Minimum Bandwidth , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     volIdx=1
@@ -1408,7 +1525,11 @@ tc_multi_array_bandwidth_read(){
         minBw=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1436,8 +1557,12 @@ tc_multi_array_bandwidth_read(){
 # MULTI ARRAY MINIMUM IOPS GUARANTEE
 ###################################################
 tc_multi_array_iops_write(){
-    fio_tc_name="Multii Array Minimum Iops , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multii Array Minimum Iops , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -1456,7 +1581,11 @@ tc_multi_array_iops_write(){
         minIops=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1484,8 +1613,12 @@ tc_multi_array_iops_write(){
 # MULTI ARRAY MINIMUM IOPS GUARANTEE
 ###################################################
 tc_multi_array_iops_read(){
-    fio_tc_name="Multii Array Minimum Iops , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multii Array Minimum Iops , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -1504,7 +1637,11 @@ tc_multi_array_iops_read(){
         minIops=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1532,8 +1669,12 @@ tc_multi_array_iops_read(){
 # MULTI ARRAY MINIMUM POLICY RESET
 ###################################################
 tc_multi_array_reset(){
-    fio_tc_name="Multii Array Minimum Reset , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multii Array Minimum Reset , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -1551,7 +1692,11 @@ tc_multi_array_reset(){
         minBw=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1582,8 +1727,12 @@ tc_multi_array_reset(){
 # MULTI ARRAY MINIMUM POLICY CHANGE
 ###################################################
 tc_multi_array_reset_increase(){
-    fio_tc_name="Multii Array Minimum Change , Volumes:8, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
-    volCnt=8
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        volCnt=8
+    else
+        volCnt=2
+    fi
+    fio_tc_name="Multii Array Minimum Change , Volumes:$volCnt, Jobs:1, Details: QD(128), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
     print_info "FIO Results without Min Policy"
@@ -1601,7 +1750,11 @@ tc_multi_array_reset_increase(){
         minBw=10
     fi
 
-    minVols=2
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        minVols=4
+    else
+        minVols=1
+    fi
     volIdx=1
     while [ $volIdx -le $minVols ]
     do
@@ -1820,10 +1973,10 @@ EOF
 # STARTS HERE
 ###################################################
 # QoS Code Compilation & Sanity Checks
-while getopts "v:t:a:s:p:m:l:h:d:" opt
+while getopts "n:t:a:s:p:m:l:h:d:v:" opt
 do
     case "$opt" in
-        v) NR_VOLUME="$OPTARG"
+        n) NR_VOLUME="$OPTARG"
             ;;
         t) TRANSPORT="$OPTARG"
             ;;
@@ -1838,6 +1991,8 @@ do
         l) LOC="$OPTARG"
             ;;
         d) NUM_DISKS="$OPTARG"
+            ;;
+        v) PM_MACHINE="$OPTARG"
             ;;
         h) print_help
             ;;
@@ -1893,6 +2048,10 @@ fi
 
 if [ -z $NUM_DISKS ]; then
 NUM_DISKS=0
+fi
+
+if [ -z $PM_MACHINE ]; then
+PM_MACHINE=0
 fi
 
 # Show the Test Setup Information

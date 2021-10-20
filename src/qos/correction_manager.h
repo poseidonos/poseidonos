@@ -42,6 +42,7 @@
 namespace pos
 {
 class QosContext;
+class QosManager;
 class VolumeParameter;
 class VolumeUserPolicy;
 class IThrottlingLogic;
@@ -54,7 +55,7 @@ class IThrottlingLogic;
 class QosCorrectionManager : public QosInternalManager
 {
 public:
-    explicit QosCorrectionManager(QosContext* qosCtx);
+    explicit QosCorrectionManager(QosContext* qosCtx, QosManager* qosManager);
     ~QosCorrectionManager(void);
     void Execute(void) override;
     QosInternalManagerType GetNextManagerType(void) override;
@@ -69,6 +70,7 @@ private:
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
     void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
     QosContext* qosContext;
+    QosManager* qosManager;
     QosInternalManagerType nextManagerType;
     IThrottlingLogic *throttlingLogic;
 };

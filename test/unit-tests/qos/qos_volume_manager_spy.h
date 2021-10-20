@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -31,24 +31,36 @@
  */
 
 #pragma once
-
-#include "src/qos/qos_common.h"
+#include "src/qos/qos_volume_manager.h"
 
 namespace pos
 {
-class QosInternalManager;
-class QosContext;
-class QosManager;
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- */
-/* --------------------------------------------------------------------------*/
-class InternalManagerFactory
+class QosVolumeManagerSpy : public QosVolumeManager
 {
-public:
-    static QosInternalManager* CreateInternalManager(QosInternalManagerType type,
-            QosContext *ctx, QosManager* qosManager);
+    public:
+    using QosVolumeManager::QosVolumeManager;
+    QosVolumeManagerSpy(QosContext* qosCtx, bool feQos, uint32_t arrayIndex,
+        QosArrayManager* qosArrayManager,
+        EventFrameworkApi* eventFrameworkApiArg,
+        QosManager* qosManager)
+    : QosVolumeManager(qosCtx, feQos, arrayIndex, qosArrayManager, eventFrameworkApiArg, qosManager)
+    {
+    }
+    virtual ~QosVolumeManagerSpy(void) = default;
+    void
+    VolumeMountHandler(void* arg1, void* arg2)
+    {
+        QosVolumeManager::_VolumeMountHandler(arg1, arg2);
+    }
+    void
+    VolumeUnmountHandler(void* arg1, void* arg2)
+    {
+        QosVolumeManager::_VolumeUnmountHandler(arg1, arg2);
+    }
+    void
+    VolumeDetachHandler(void* arg1, void* arg2)
+    {
+        QosVolumeManager::_VolumeDetachHandler(arg1, arg2);
+    }
 };
 } // namespace pos

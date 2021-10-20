@@ -51,17 +51,7 @@ public:
     void HandlePolicy(void) override;
 
 private:
-    void _RebuildScenario(void);
-    void _NoRebuildScenario(void);
-    void _HighPriorityRebuildScenario(void);
-    void _LowPriorityRebuildScenario(void);
-    void _ManageEventCorrectionOnGcState(QosCorrectionDir priority);
-    void _CheckMinimum(QosCorrectionDir priority);
-    void _StoreContext(void);
     void _SetRebuildPolicyWeight(void);
-    ResourceArray lastArrayState;
-    bool lastMimimumPolicy;
     QosContext* qosContext;
-    bool changeCorrection;
 };
 } // namespace pos

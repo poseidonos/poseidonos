@@ -74,12 +74,17 @@ class QosEventManager;
 class QosSpdkManager;
 class QosContext;
 class QosInternalManager;
-
+class AffinityManager;
+class ConfigManager;
+class EventFrameworkApi;
 class QosManager : public ExitQosHandler
 {
 public:
-    QosManager(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller(),
-        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller());
+    explicit QosManager(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller(),
+        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller(),
+        ConfigManager* configManager = ConfigManagerSingleton::Instance(),
+        EventFrameworkApi* eventFrameworkApi = EventFrameworkApiSingleton::Instance(),
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
     virtual ~QosManager(void);
     void Initialize(void);
     virtual int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
@@ -87,8 +92,8 @@ public:
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
     int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId);
     qos_vol_policy GetVolumePolicy(uint32_t volId, std::string arrayName);
-    bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
-    bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
+    virtual bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
+    virtual bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
     virtual int64_t GetEventWeightWRR(BackendEvent event);
     virtual int64_t GetDefaultEventWeightWRR(BackendEvent event);
@@ -121,7 +126,7 @@ public:
     void UpdateArrayMap(string arrayName);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
     uint32_t GetNoContentionCycles(void);
-    bool IsMinimumPolicyInEffectInSystem(void);
+    virtual bool IsMinimumPolicyInEffectInSystem(void);
     void ResetCorrection(void);
 
 private:
@@ -153,6 +158,9 @@ private:
     bool systemMinPolicy;
     SpdkEnvCaller* spdkEnvCaller;
     SpdkPosNvmfCaller* spdkPosNvmfCaller;
+    ConfigManager* configManager;
+    EventFrameworkApi* eventFrameworkApi;
+    AffinityManager* affinityManager;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;

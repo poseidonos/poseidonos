@@ -54,7 +54,6 @@ TEST(SmartLogPageHandler, SmartLogPageHandler_Contructor_One_Heap)
     SmartLogPageHandler* smartLogPageHandler = new SmartLogPageHandler(&cmd, &ibofIo, &buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
     delete smartLogPageHandler;
 }
-
 TEST(SmartLogPageHandler, Execute_Return_true)
 {
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -75,7 +74,6 @@ TEST(SmartLogPageHandler, Execute_Return_true)
     actual = smartLogPageHandler.Execute();
     ASSERT_EQ(actual, expected);
 }
-
 TEST(SmartLogPageHandler, Execute_Return_true_null_buffer)
 {
     NiceMock<MockIArrayInfo> arrayInfo;

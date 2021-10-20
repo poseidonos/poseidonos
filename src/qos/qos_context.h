@@ -63,33 +63,35 @@ class QosContext
 {
 public:
     QosContext(void);
-    ~QosContext(void);
+    virtual ~QosContext(void);
     void Reset(void);
-    QosUserPolicy& GetQosUserPolicy(void);
-    QosParameters& GetQosParameters(void);
+    virtual QosUserPolicy& GetQosUserPolicy(void);
+    virtual QosParameters& GetQosParameters(void);
     QosCorrection& GetQosCorrection(void);
     QosResource& GetQosResource(void);
     void ResetActiveVolume(void);
-    void InsertActiveVolume(uint32_t volId);
-    std::map<uint32_t, uint32_t>& GetActiveVolumes(void);
+    virtual void InsertActiveVolume(uint32_t volId);
+    virtual std::map<uint32_t, uint32_t>& GetActiveVolumes(void);
     void ResetActiveReactorVolume(void);
     void InsertActiveReactorVolume(uint32_t reactor, uint32_t volId);
-    std::map<uint32_t, map<uint32_t, uint32_t>>& GetActiveVolumeReactors(void);
+    virtual std::map<uint32_t, map<uint32_t, uint32_t>>& GetActiveVolumeReactors(void);
     void InsertActiveVolumeReactor(std::map<uint32_t, map<uint32_t, uint32_t>> map);
     std::map<uint32_t, map<uint32_t, uint32_t>>& GetActiveVolReactorMap(void);
     uint32_t GetActiveReactorVolumeCount(void);
     bool IsVolumeMinPolicyInEffect(void);
     void SetApplyCorrection(bool apply);
-    bool GetApplyCorrection(void);
+    virtual bool GetApplyCorrection(void);
     void IncrementCorrectionCycle(void);
-    bool IsCorrectionCycleOver(void);
+    virtual bool IsCorrectionCycleOver(void);
     void SetTotalConnection(uint32_t volId, uint32_t value);
     uint32_t GetTotalConnection(uint32_t volId);
     void UpdateReactorCoreList(uint32_t reactorCore);
     std::vector<uint32_t>& GetReactorCoreList(void);
     void SetReactorProcessed(uint32_t reactorId, bool value);
-    bool AllReactorsProcessed(void);
+    virtual bool AllReactorsProcessed(void);
     void ResetAllReactorsProcessed(void);
+    void SetVolumeOperationDone(bool value);
+    virtual bool GetVolumeOperationDone(void);
 
 private:
     QosUserPolicy userPolicy;
@@ -110,5 +112,6 @@ private:
     uint32_t totalConnection[MAX_ARRAY_COUNT * MAX_VOLUME_COUNT];
     std::atomic<bool> reactorProcessed[M_MAX_REACTORS];
     std::vector<uint32_t> reactorCoreList;
+    std::atomic<bool> volumeOperationDone;
 };
 } // namespace pos

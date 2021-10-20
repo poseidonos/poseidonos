@@ -46,9 +46,11 @@
 #include "src/qos/qos_common.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event.h"
+#include "src/sys_event/volume_event_publisher.h"
 
 namespace pos
 {
+class QosManager;
 class IbofIoSubmissionAdapter;
 class BwIopsRateLimit;
 class ParameterQueue;
@@ -57,9 +59,13 @@ class IoQueue;
 class QosVolumeManager : public VolumeEvent, public ExitQosHandler
 {
 public:
-    QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayManager,
+    QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex,
+        QosArrayManager* qosArrayManager,
+        EventFrameworkApi* eventFrameworkApiArg,
+        QosManager* qosManager,
         SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller(),
-        SpdkPosVolumeCaller* spdkPosVolumeCaller = new SpdkPosVolumeCaller());
+        SpdkPosVolumeCaller* spdkPosVolumeCaller = new SpdkPosVolumeCaller(),
+        VolumeEventPublisher* volumeEventPublisher = VolumeEventPublisherSingleton::Instance());
     ~QosVolumeManager(void) override;
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
@@ -80,12 +86,13 @@ public:
     void ResetRateLimit(uint32_t reactor, int volId, double offset);
     std::string GetArrayName(void);
     void SetArrayName(std::string arrayName);
-
-protected:
-    EventFrameworkApi* eventFrameworkApi;
+    void EnqueueVolumeParamsUt(uint32_t reactor, uint32_t volId);
     static void _VolumeMountHandler(void* arg1, void* arg2);
     static void _VolumeUnmountHandler(void* arg1, void* arg2);
     static void _VolumeDetachHandler(void* arg1, void* arg2);
+
+protected:
+    EventFrameworkApi* eventFrameworkApi;
 
 private:
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
@@ -101,8 +108,6 @@ private:
     void _InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmountInfo);
     void _InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo);
     void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
-    void _SetVolumeOperationDone(bool value);
-    bool _GetVolumeOperationDone(void);
 
     std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
@@ -117,10 +122,11 @@ private:
     IoQueue<pos_io*>* ioQueue;
     QosContext* qosContext;
     QosArrayManager* qosArrayManager;
+    QosManager* qosManager;
     std::mutex subsysVolMapLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
-    std::atomic<bool> volumeOperationDone;
     SpdkPosNvmfCaller* spdkPosNvmfCaller;
     SpdkPosVolumeCaller* spdkPosVolumeCaller;
+    VolumeEventPublisher* volumeEventPublisher;
 };
 } // namespace pos

@@ -63,9 +63,16 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller, SpdkPosNvmfCaller* spdkPosNvmfCaller)
-: spdkEnvCaller(spdkEnvCaller),
-  spdkPosNvmfCaller(spdkPosNvmfCaller)
+QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
+        SpdkPosNvmfCaller* spdkPosNvmfCaller,
+        ConfigManager* configManager,
+        EventFrameworkApi* eventFrameworkApi,
+        AffinityManager* affinityManager)
+    : spdkEnvCaller(spdkEnvCaller),
+      spdkPosNvmfCaller(spdkPosNvmfCaller),
+      configManager(configManager),
+      eventFrameworkApi(eventFrameworkApi),
+      affinityManager(affinityManager)
 {
     qosThread = nullptr;
     feQosEnabled = false;
@@ -79,38 +86,28 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller, SpdkPosNvmfCaller* spdkPosN
         eventLog[event] = M_RESET_TO_ZERO;
         oldLog[event] = M_RESET_TO_ZERO;
     }
-
-    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
     bool enabled = false;
-    int ret = configManager.GetValue("fe_qos", "enable", &enabled,
-        CONFIG_TYPE_BOOL);
+    int ret = configManager->GetValue("fe_qos", "enable", &enabled, CONFIG_TYPE_BOOL);
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         feQosEnabled = enabled;
     }
-
     spdkPosNvmfCaller->SetQosInSpdk(feQosEnabled);
     initialized = false;
-    try
+    qosEventManager = new QosEventManager;
+    qosContext = ContextFactory::CreateQosContext();
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
-        qosEventManager = new QosEventManager;
-        qosContext = ContextFactory::CreateQosContext();
-        for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
-        {
-            qosArrayManager[i] = new QosArrayManager(i, qosContext);
-        }
-        spdkManager = new QosSpdkManager(qosContext, feQosEnabled);
-        monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext);
-        policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext);
-        processingManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Processing, qosContext);
-        correctionManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Correction, qosContext);
+        qosArrayManager[i] = new QosArrayManager(i, qosContext, feQosEnabled, eventFrameworkApi, this);
     }
-    catch (bad_alloc& ex)
-    {
-        assert(0);
-    }
+    spdkManager = new QosSpdkManager(qosContext, feQosEnabled, eventFrameworkApi);
+    monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext, this);
+    policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext, this);
+    processingManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Processing, qosContext, this);
+    correctionManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Correction, qosContext, this);
     currentNumberOfArrays = 0;
     systemMinPolicy = false;
+    affinityManager = AffinityManagerSingleton::Instance();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -160,8 +157,6 @@ QosManager::Initialize(void)
     {
         spdkManager->Initialize();
     }
-
-    AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
     initialized = true;

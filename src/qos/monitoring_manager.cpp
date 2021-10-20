@@ -31,8 +31,6 @@
  */
 
 #include "src/qos/monitoring_manager.h"
-
-#include "src/cpu_affinity/affinity_manager.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
@@ -52,14 +50,19 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosMonitoringManager::QosMonitoringManager(QosContext* qosCtx, SpdkPosNvmfCaller* spdkPosNvmfCaller)
-: spdkPosNvmfCaller(spdkPosNvmfCaller)
+QosMonitoringManager::QosMonitoringManager(QosContext* qosCtx,
+        QosManager* qosManager,
+        SpdkPosNvmfCaller* spdkPosNvmfCaller,
+        AffinityManager* affinityManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager),
+    spdkPosNvmfCaller(spdkPosNvmfCaller),
+    affinityManager(affinityManager)
 {
-    qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
     for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
-        qosMonitoringManagerArray[i] = new QosMonitoringManagerArray(i, qosCtx);
+        qosMonitoringManagerArray[i] = new QosMonitoringManagerArray(i, qosCtx, qosManager);
     }
 }
 
@@ -92,7 +95,7 @@ QosMonitoringManager::~QosMonitoringManager(void)
 void
 QosMonitoringManager::Execute(void)
 {
-    if (QosManagerSingleton::Instance()->IsFeQosEnabled() == true)
+    if (qosManager->IsFeQosEnabled() == true)
     {
         _UpdateContextUserVolumePolicy();
         if (true == _GatherActiveVolumeParameters())
@@ -143,7 +146,7 @@ QosMonitoringManager::_ComputeTotalActiveConnection(void)
 void
 QosMonitoringManager::_UpdateContextUserVolumePolicy(void)
 {
-    uint32_t maxArrays = QosManagerSingleton::Instance()->GetNumberOfArrays();
+    uint32_t maxArrays = qosManager->GetNumberOfArrays();
     for (uint32_t i = 0; i < maxArrays; i++)
     {
         qosMonitoringManagerArray[i]->UpdateContextUserVolumePolicy();
@@ -176,7 +179,6 @@ QosMonitoringManager::_UpdateContextUserRebuildPolicy(void)
 void
 QosMonitoringManager::_UpdateContextResourceDetails(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     uint32_t maxArrays = qosManager->GetNumberOfArrays();
     for (uint32_t i = 0; i < maxArrays; i++)
     {
@@ -237,7 +239,6 @@ QosMonitoringManager::_UpdateAllVolumeParameter(void)
 bool
 QosMonitoringManager::_GatherActiveVolumeParameters(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     qosContext->ResetActiveVolume();
     qosContext->ResetActiveReactorVolume();
     qosContext->ResetAllReactorsProcessed();
@@ -321,7 +322,7 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
 
     if (_CheckChangeInActiveVolumes() == true)
     {
-        QosManagerSingleton::Instance()->ResetCorrection();
+        qosManager->ResetCorrection();
     }
     return changeDetected;
 }
@@ -413,8 +414,7 @@ QosMonitoringManager::_UpdateEventParameter(BackendEvent event)
 void
 QosMonitoringManager::_GatherActiveEventParameters(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    cpu_set_t cpuSet = AffinityManagerSingleton::Instance()->GetCpuSet(CoreType::UDD_IO_WORKER);
+    cpu_set_t cpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     uint32_t cpuCount = CPU_COUNT(&cpuSet);
 
     for (uint32_t workerId = 0; workerId < cpuCount; workerId++)

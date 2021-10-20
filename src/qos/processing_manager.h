@@ -42,6 +42,7 @@ namespace pos
 {
 class QosContext;
 class MovingAvgCompute;
+class QosManager;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -51,7 +52,7 @@ class MovingAvgCompute;
 class QosProcessingManager : public QosInternalManager
 {
 public:
-    explicit QosProcessingManager(QosContext* qosCtx);
+    explicit QosProcessingManager(QosContext* qosCtx, QosManager* qosManager);
     ~QosProcessingManager(void);
     void Execute(void) override;
     QosInternalManagerType GetNextManagerType(void) override;
@@ -59,6 +60,7 @@ public:
 private:
     void _SetNextManagerType(void);
     QosContext* qosContext;
+    QosManager* qosManager;
     QosInternalManagerType nextManagerType;
     QosProcessingManagerArray* qosProcessingManagerArray[MAX_ARRAY_COUNT];
 };

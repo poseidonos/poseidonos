@@ -37,17 +37,17 @@ namespace pos
 SubmissionAdapter::SubmissionAdapter(void)
 {
 }
-
+// LCOV_EXCL_START
 SubmissionAdapter::~SubmissionAdapter(void)
 {
 }
-
+// LCOV_EXCL_STOP
 IbofIoSubmissionAdapter::IbofIoSubmissionAdapter(void)
 {
 }
-
+// LCOV_EXCL_START
 IbofIoSubmissionAdapter::~IbofIoSubmissionAdapter(void)
 {
 }
-
+// LCOV_EXCL_STOP
 } // namespace pos

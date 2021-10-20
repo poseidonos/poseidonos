@@ -9,7 +9,7 @@
 #include "test/unit-tests/qos/qos_context_mock.h"
 #include "test/unit-tests/qos/submission_adapter_mock.h"
 #include "test/unit-tests/qos/submission_notifier_mock.h"
-
+#include "src/include/memory.h"
 using namespace std;
 using ::testing::_;
 using ::testing::NiceMock;
@@ -31,6 +31,35 @@ TEST(QosEventManager, HandleEventUbioSubmission_Test)
     NiceMock<MockSubmissionNotifier> mockSubmissionNotifier;
     int buf[10];
     UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
+    uint32_t id = 1;
+    NiceMock<MockSubmissionAdapter> mockSubmissionAdapter;
+    qosEventManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio);
+}
+
+TEST(QosEventManager, HandleEventUbioSubmission_Test_RateLimitTrue)
+{
+    QosEventManager qosEventManager;
+    NiceMock<MockSubmissionNotifier> mockSubmissionNotifier;
+    int buf[10];
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, DEFAULT_MAX_BW_IOPS+1, 0);
+    uint32_t id = 1;
+    ubio->SetEventType(BackendEvent_Flush);
+    NiceMock<MockSubmissionAdapter> mockSubmissionAdapter;
+    qosEventManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio);
+    int buf2[10];
+    UbioSmartPtr ubio2 = std::make_shared<Ubio>((void*)buf2, DEFAULT_MAX_BW_IOPS, 0);
+    ubio2->SetEventType(BackendEvent_Flush);
+    qosEventManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio2);
+}
+
+TEST(QosEventManager, HandleEventUbioSubmission_BackendVenetFlush_Test)
+{
+    QosEventManager qosEventManager;
+    NiceMock<MockSubmissionNotifier> mockSubmissionNotifier;
+    int buf[10];
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
+    ubio->SetEventType(BackendEvent_Flush);
+
     uint32_t id = 1;
     NiceMock<MockSubmissionAdapter> mockSubmissionAdapter;
     qosEventManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio);

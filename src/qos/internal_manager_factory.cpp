@@ -48,36 +48,29 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 QosInternalManager*
-InternalManagerFactory::CreateInternalManager(QosInternalManagerType type, QosContext *ctx)
+InternalManagerFactory::CreateInternalManager(QosInternalManagerType type, QosContext *ctx, QosManager* qosManager)
 {
     QosInternalManager* internalManager = nullptr;
-    try
+    switch (type)
     {
-        switch (type)
-        {
-            case QosInternalManager_Monitor:
-                internalManager = new QosMonitoringManager(ctx);
-                break;
+        case QosInternalManager_Monitor:
+            internalManager = new QosMonitoringManager(ctx, qosManager);
+            break;
 
-            case QosInternalManager_Policy:
-                internalManager = new QosPolicyManager(ctx);
-                break;
+        case QosInternalManager_Policy:
+            internalManager = new QosPolicyManager(ctx, qosManager);
+            break;
 
-            case QosInternalManager_Processing:
-                internalManager = new QosProcessingManager(ctx);
-                break;
+        case QosInternalManager_Processing:
+            internalManager = new QosProcessingManager(ctx, qosManager);
+            break;
 
-            case QosInternalManager_Correction:
-                internalManager = new QosCorrectionManager(ctx);
-                break;
+        case QosInternalManager_Correction:
+            internalManager = new QosCorrectionManager(ctx, qosManager);
+            break;
 
-            default:
-                break;
-        }
-    }
-    catch (bad_alloc& ex)
-    {
-        assert(0);
+        default:
+            break;
     }
     return internalManager;
 }

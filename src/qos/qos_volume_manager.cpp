@@ -42,8 +42,8 @@
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
-#include "src/sys_event/volume_event_publisher.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/qos/qos_context.h"
 
 namespace pos
 {
@@ -55,18 +55,20 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex,
-    QosArrayManager* qosArrayMgr, SpdkPosNvmfCaller* spdkPosNvmfCaller,
-    SpdkPosVolumeCaller* spdkPosVolumeCaller)
+    QosArrayManager* qosArrayMgr, EventFrameworkApi* eventFrameworkApiArg,
+    QosManager* qosManager, SpdkPosNvmfCaller* spdkPosNvmfCaller,
+    SpdkPosVolumeCaller* spdkPosVolumeCaller, VolumeEventPublisher* volumeEventPublisher)
 : VolumeEvent("QosManager", "", arrayIndex),
+  eventFrameworkApi(eventFrameworkApiArg),
   feQosEnabled(feQos),
   qosContext(qosCtx),
+  qosArrayManager(qosArrayMgr),
+  qosManager(qosManager),
   spdkPosNvmfCaller(spdkPosNvmfCaller),
-  spdkPosVolumeCaller(spdkPosVolumeCaller)
+  spdkPosVolumeCaller(spdkPosVolumeCaller),
+  volumeEventPublisher(volumeEventPublisher)
 {
-    arrayId = arrayIndex;
-    qosArrayManager = qosArrayMgr;
-    volumeOperationDone = false;
-    eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+    uint32_t arrayId = arrayIndex;
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
         for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
@@ -76,17 +78,10 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
             pendingIO[reactor][volId] = 0;
         }
     }
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "", arrayId);
-    try
-    {
-        bwIopsRateLimit = new BwIopsRateLimit;
-        parameterQueue = new ParameterQueue;
-        ioQueue = new IoQueue<pos_io*>;
-    }
-    catch (std::bad_alloc& ex)
-    {
-        assert(0);
-    }
+    volumeEventPublisher->RegisterSubscriber(this, "", arrayId);
+    bwIopsRateLimit = new BwIopsRateLimit;
+    parameterQueue = new ParameterQueue;
+    ioQueue = new IoQueue<pos_io*>;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -98,7 +93,7 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::~QosVolumeManager(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "", arrayId);
+    volumeEventPublisher->RemoveSubscriber(this, "", arrayId);
     delete bwIopsRateLimit;
     delete parameterQueue;
     delete ioQueue;
@@ -199,7 +194,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     {
         return;
     }
-    uint32_t reactorId = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+    uint32_t reactorId = eventFrameworkApi->GetCurrentReactor();
     uint32_t volId = volIo->volume_id;
     uint64_t currentBw = 0;
     uint64_t currentIO = 0;
@@ -373,15 +368,15 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
     vInfo->id = volEventBase->volId;
     vInfo->iops_limit = volEventPerf->maxiops;
     vInfo->bw_limit = volEventPerf->maxbw;
-    _SetVolumeOperationDone(false);
+    qosContext->SetVolumeOperationDone(false);
 
     // enqueue in same reactor as NvmfVolumePos::VolumeMounted so that pos_disk structure is populated with correct values before qos tries to access it.
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _VolumeMountHandler, vInfo, this);
 
-    while (_GetVolumeOperationDone() == false)
+    while (qosContext->GetVolumeOperationDone() == false)
     {
-        if (_GetVolumeOperationDone() == true)
+        if (qosContext->GetVolumeOperationDone() == true)
         {
             break;
         }
@@ -419,7 +414,7 @@ QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info *volMountIn
         nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
         UpdateSubsystemToVolumeMap(nqnId, volMountInfo->id);
         _UpdateVolumeMaxQos(volMountInfo->id, volMountInfo->iops_limit, volMountInfo->bw_limit, volMountInfo->array_name);
-        _SetVolumeOperationDone(true);
+        qosContext->SetVolumeOperationDone(true);
         delete (volMountInfo);
     }
 }
@@ -443,14 +438,14 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
     vInfo->id = volEventBase->volId;
     vInfo->iops_limit = 0;
     vInfo->bw_limit = 0;
-    _SetVolumeOperationDone(false);
+    qosContext->SetVolumeOperationDone(false);
 
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _VolumeUnmountHandler, vInfo, this);
 
-    while (_GetVolumeOperationDone() == false)
+    while (qosContext->GetVolumeOperationDone() == false)
     {
-        if (_GetVolumeOperationDone() == true)
+        if (qosContext->GetVolumeOperationDone() == true)
         {
             break;
         }
@@ -492,7 +487,7 @@ QosVolumeManager::_InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmou
             nqnVolumeMap[nqnId].erase(position);
         }
         _ClearVolumeParameters(volUnmountInfo->id);
-        _SetVolumeOperationDone(true);
+        qosContext->SetVolumeOperationDone(true);
         delete(volUnmountInfo);
     }
 }
@@ -550,14 +545,14 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
         vInfo->id = volId;
         vInfo->iops_limit = 0;
         vInfo->bw_limit = 0;
-        _SetVolumeOperationDone(false);
+        qosContext->SetVolumeOperationDone(false);
 
         eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _VolumeDetachHandler, vInfo, this);
 
-        while (_GetVolumeOperationDone() == false)
+        while (qosContext->GetVolumeOperationDone() == false)
         {
-            if (_GetVolumeOperationDone() == true)
+            if (qosContext->GetVolumeOperationDone() == true)
             {
                 break;
             }
@@ -600,7 +595,7 @@ QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetach
             nqnVolumeMap[nqnId].erase(position);
         }
         _ClearVolumeParameters(volDetachInfo->id);
-        _SetVolumeOperationDone(true);
+        qosContext->SetVolumeOperationDone(true);
         delete(volDetachInfo);
     }
 }
@@ -688,7 +683,7 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
 {
     uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
     uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
-    bool minimumPolicyInEffect = QosManagerSingleton::Instance()->IsMinimumPolicyInEffectInSystem();
+    bool minimumPolicyInEffect = qosManager->IsMinimumPolicyInEffectInSystem();
     qos_vol_policy volPolicy = qosArrayManager->GetVolumePolicy(volId);
     bool enqueueParameters = false;
 
@@ -807,20 +802,10 @@ QosVolumeManager::_CopyVolumeInfo(char* destInfo, const char* srcInfo, int len)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_SetVolumeOperationDone(bool value)
+QosVolumeManager::EnqueueVolumeParamsUt(uint32_t reactor, uint32_t volId)
 {
-    volumeOperationDone = value;
+    uint32_t offset = 1;
+    _EnqueueVolumeParameter(reactor, volId, offset);
 }
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-bool
-QosVolumeManager::_GetVolumeOperationDone(void)
-{
-    return volumeOperationDone;
-}
+
 } // namespace pos

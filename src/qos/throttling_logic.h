@@ -50,11 +50,11 @@ public:
     IThrottlingLogic(void)
     {
     }
-
+// LCOV_EXCL_START
     virtual ~IThrottlingLogic(void)
     {
     }
-
+// LCOV_EXCL_STOP
     virtual unsigned int GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeThrottle* volumeThrottle) = 0;
     virtual bool GetCorrectionType(uint32_t volId, uint32_t arrayId) = 0;
     virtual void Reset(void) = 0;

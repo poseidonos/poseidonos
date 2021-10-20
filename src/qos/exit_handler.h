@@ -47,7 +47,7 @@ class ExitQosHandler
 {
 public:
     ExitQosHandler(void);
-    ~ExitQosHandler(void);
+    virtual ~ExitQosHandler(void);
     bool IsExitQosSet(void);
     void SetExitQos(void);
 

@@ -41,6 +41,7 @@ namespace pos
 {
 class QosContext;
 class PolicyHandler;
+class QosManager;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -50,7 +51,7 @@ class PolicyHandler;
 class QosPolicyManager : public QosInternalManager
 {
 public:
-    explicit QosPolicyManager(QosContext* qosCtx);
+    explicit QosPolicyManager(QosContext* qosCtx, QosManager* qosManager);
     ~QosPolicyManager(void);
     void Execute(void) override;
     QosInternalManagerType GetNextManagerType(void) override;
@@ -58,6 +59,7 @@ public:
 private:
     void _SetNextManagerType(void);
     QosContext* qosContext;
+    QosManager* qosManager;
     QosInternalManagerType nextManagerType;
     PolicyHandler* eventCpuPolicy;
     PolicyHandler* volumePolicy;

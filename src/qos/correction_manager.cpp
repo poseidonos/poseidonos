@@ -46,11 +46,12 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx)
+QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx, QosManager* qosManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager)
 {
-    qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
-    throttlingLogic = new ThrottlingPolicyDeficit(qosCtx);
+    throttlingLogic = new ThrottlingPolicyDeficit(qosCtx, qosManager);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -75,7 +76,6 @@ QosCorrectionManager::~QosCorrectionManager(void)
 void
 QosCorrectionManager::_HandleWrrCorrection(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     QosCorrection qosCorrection = qosContext->GetQosCorrection();
     QosEventWrrWeight eventWrrPolicy = qosCorrection.GetEventWrrWeightPolicy();
     for (uint32_t event = BackendEvent_Start; event < BackendEvent_Count; event++)
@@ -227,7 +227,6 @@ QosCorrectionManager::_HandleMinThrottling(std::vector<std::pair<uint32_t, uint3
 void
 QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t globalVolId, uint64_t reactor, uint64_t count, uint64_t totalConnection)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     uint32_t volId = globalVolId % MAX_VOLUME_COUNT;
     uint32_t arrayId = globalVolId / MAX_VOLUME_COUNT;
     if (true == iops)
@@ -256,7 +255,6 @@ QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t globa
 void
 QosCorrectionManager::_HandleMaxThrottling(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
     std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();

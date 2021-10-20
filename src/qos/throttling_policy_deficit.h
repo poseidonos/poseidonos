@@ -44,21 +44,23 @@
 namespace pos
 {
 class VolumeThrottle;
+class QosManager;
+
 class ThrottlingPolicyDeficit : public IThrottlingLogic
 {
 public:
-    explicit ThrottlingPolicyDeficit(QosContext* qosCtx);
+    explicit ThrottlingPolicyDeficit(QosContext* qosCtx, QosManager* qosManager);
+// LCOV_EXCL_START
     virtual ~ThrottlingPolicyDeficit(void)
     {
     }
+// LCOV_EXCL_STOP
     virtual unsigned int GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeThrottle* volumeThrottle) override;
     virtual bool GetCorrectionType(uint32_t volId, uint32_t arrayId) override;
     virtual void Reset(void) override;
     virtual void IncrementCycleCount(void) override;
 
 private:
-    QosContext* qosContext;
-    std::map<std::pair<uint32_t, uint32_t>, bool> correctionType;
     void _GetBwIopsCorrection(int64_t& bwCorrection, int64_t& iopsCorrection, uint32_t volId, uint32_t arrayId, VolumeThrottle* volthrottle);
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
     uint64_t _MinimumVolumeCorrection(VolumeThrottle* volumeThrottle, VolumeUserPolicy* volumeUserPolicy);
@@ -66,6 +68,9 @@ private:
     void _CalculateDeficit(int64_t& bwCorrection, int64_t& iopsCorrection);
     AllVolumeParameter& _GetAllVolumeParameters(void);
     AllVolumeUserPolicy& _GetUserPolicy(void);
+    QosContext* qosContext;
+    QosManager* qosManager;
+    std::map<std::pair<uint32_t, uint32_t>, bool> correctionType;
     uint64_t storeCorrection;
     bool resetFlag;
     bool beginAgain;

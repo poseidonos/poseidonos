@@ -49,6 +49,14 @@ TEST(RebuildUserPolicy, SetRebuildImpact_Invalid)
     ASSERT_EQ(setRebuildImpact, PRIORITY_DEFAULT);
 }
 
+TEST(RebuildUserPolicy, SetRebuildImpact_Invalid_Less)
+{
+    RebuildUserPolicy rebuildUserPolicy;
+    rebuildUserPolicy.SetRebuildImpact(0);
+    uint8_t setRebuildImpact = rebuildUserPolicy.GetRebuildImpact();
+    ASSERT_EQ(setRebuildImpact, PRIORITY_DEFAULT);
+}
+
 TEST(RebuildUserPolicy, SetPolicyChange)
 {
     RebuildUserPolicy rebuildUserPolicy;

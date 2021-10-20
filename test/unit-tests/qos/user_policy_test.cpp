@@ -43,4 +43,19 @@ TEST(QosUserPolicy, EqualOperator_Test)
     ASSERT_EQ(equal, true);
 }
 
+TEST(QosUserPolicy, EqualOperator_Test_all_volume_user_policy_unequal)
+{
+}
+
+TEST(QosUserPolicy, EqualOperator_Test_rebuild_user_policy_unequal)
+{
+    QosUserPolicy qosUserPolicy1;
+    RebuildUserPolicy& rebuildUserPolicy1 = qosUserPolicy1.GetRebuildUserPolicy();
+    rebuildUserPolicy1.SetRebuildImpact(PRIORITY_HIGHEST);
+    QosUserPolicy qosUserPolicy2;
+    RebuildUserPolicy& rebuildUserPolicy2 = qosUserPolicy2.GetRebuildUserPolicy();
+    rebuildUserPolicy2.SetRebuildImpact(PRIORITY_HIGH);
+    bool equal = (qosUserPolicy1 == qosUserPolicy2);
+    ASSERT_EQ(equal, false);
+}
 } // namespace pos

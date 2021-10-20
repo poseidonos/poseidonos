@@ -46,8 +46,9 @@ const int MIN_CORRECTION = (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL
 
 namespace pos
 {
-ThrottlingPolicyDeficit::ThrottlingPolicyDeficit(QosContext* qosCtx)
-: qosContext(qosCtx)
+ThrottlingPolicyDeficit::ThrottlingPolicyDeficit(QosContext* qosCtx, QosManager* qosManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager)
 {
     resetFlag = true;
     totalDeficit = 0;
@@ -171,8 +172,6 @@ ThrottlingPolicyDeficit::_GetBwIopsCorrection(int64_t& bwCorrection, int64_t& io
 unsigned int
 ThrottlingPolicyDeficit::GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeThrottle* volumeThrottle)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
-
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
     std::pair<uint32_t, uint32_t> volArray = std::make_pair(volId, arrayId);
     correctionType[volArray] = true;
@@ -180,7 +179,6 @@ ThrottlingPolicyDeficit::GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeTh
     AllVolumeParameter& allVolumeParameters = _GetAllVolumeParameters();
     VolumeParameter& volumeParam = allVolumeParameters.GetVolumeParameter(arrayId, volId);
     VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, volId);
-
     if (volumeUserPolicy == nullptr)
     {
         return -1;

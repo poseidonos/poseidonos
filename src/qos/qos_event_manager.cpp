@@ -218,14 +218,16 @@ QosEventManager::DequeueParams(uint32_t workerId, BackendEvent event)
  * @Synopsis
  *
  * @Returns
+ * Throttling of event is not supported and excluding in coverage
  */
 /* --------------------------------------------------------------------------*/
+// LCOV_EXCL_START
 void
 QosEventManager::_EnqueueEventUbio(uint32_t id, BackendEvent event, UbioSmartPtr ubio)
 {
     ioQueue->EnqueueIo(id, event, ubio);
 }
-
+// LCOV_EXCL_STOP
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

@@ -41,11 +41,11 @@ namespace pos
 {
 class QosContext;
 class MovingAvgCompute;
-
+class QosManager;
 class QosProcessingManagerArray
 {
 public:
-    QosProcessingManagerArray(uint32_t arrayIndex, QosContext* qosCtx);
+    QosProcessingManagerArray(uint32_t arrayIndex, QosContext* qosCtx, QosManager* qosManager);
     ~QosProcessingManagerArray(void);
     void Execute(uint32_t volId);
     void Initilize(void);
@@ -53,6 +53,7 @@ public:
 private:
     uint32_t arrayId;
     QosContext* qosContext;
+    QosManager* qosManager;
     MovingAvgCompute* movingAvgCompute;
 };
 } // namespace pos

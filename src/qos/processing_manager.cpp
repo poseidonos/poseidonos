@@ -46,12 +46,13 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosProcessingManager::QosProcessingManager(QosContext* qosCtx)
+QosProcessingManager::QosProcessingManager(QosContext* qosCtx, QosManager* qosManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager)
 {
-    qosContext = qosCtx;
     for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
-        qosProcessingManagerArray[i] = new QosProcessingManagerArray(i, qosCtx);
+        qosProcessingManagerArray[i] = new QosProcessingManagerArray(i, qosCtx, qosManager);
     }
     nextManagerType = QosInternalManager_Unknown;
 }
@@ -85,12 +86,12 @@ QosProcessingManager::Execute(void)
 
     if (0 == activeVolMap.size())
     {
-        uint32_t numberArrays = QosManagerSingleton::Instance()->GetNumberOfArrays();
+        uint32_t numberArrays = qosManager->GetNumberOfArrays();
         for (uint32_t i = 0; i < numberArrays; i++)
         {
             qosProcessingManagerArray[i]->Initilize();
         }
-        nextManagerType = QosInternalManager_Policy;
+        _SetNextManagerType();
         return;
     }
 

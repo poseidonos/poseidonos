@@ -2,10 +2,13 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
+#include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/include/backend_event.h"
 #include "src/qos/qos_common.h"
 #include "test/unit-tests/qos/qos_context_mock.h"
+#include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
+#include "test/unit-tests/qos/qos_manager_mock.h"
+
 using namespace std;
 using ::testing::_;
 using ::testing::NiceMock;
@@ -14,23 +17,32 @@ namespace pos
 TEST(QosArrayManager, QosArrayManager_Constructor_One_Stack)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
 }
 
 TEST(QosArrayManager, QosArrayManager_Constructor_One_Heap)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager* qosArrayManager = new QosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager* qosArrayManager = new QosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     delete qosArrayManager;
 }
 
 TEST(QosArrayManager, Check_Update_And_Get_VolumePolicy)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     uint32_t volId = 0;
     qos_vol_policy setPolicy;
     setPolicy.maxIops = 1000;
@@ -54,8 +66,11 @@ TEST(QosArrayManager, Check_Update_And_Get_VolumePolicy)
 TEST(QosArrayManager, Check_Update_And_GetUsedStripeCnt)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     uint32_t oldUsedStripeCnt = qosArrayManager.GetUsedStripeCnt();
     qosArrayManager.IncreaseUsedStripeCnt();
     uint32_t newUsedStripeCnt = qosArrayManager.GetUsedStripeCnt();
@@ -68,8 +83,11 @@ TEST(QosArrayManager, Check_Update_And_GetUsedStripeCnt)
 TEST(QosArrayManager, Check_Get_And_Update_RebuildPolicy)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     qos_rebuild_policy setPolicy;
     setPolicy.rebuildImpact = PRIORITY_HIGH;
     setPolicy.policyChange = true;
@@ -83,8 +101,11 @@ TEST(QosArrayManager, Check_Get_And_Update_RebuildPolicy)
 TEST(QosArrayManager, Check_Set_And_Get_VolumeLimit)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     uint32_t reactor = 1;
     uint32_t volId = 1;
     int64_t weight = 100;
@@ -97,8 +118,11 @@ TEST(QosArrayManager, Check_Set_And_Get_VolumeLimit)
 TEST(QosArrayManager, Check_Get_And_Set_GC_Free_Segments)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     uint32_t freeSegments = 100;
     qosArrayManager.SetGcFreeSegment(freeSegments);
     uint32_t retFreeSegments = qosArrayManager.GetGcFreeSegment();
@@ -108,8 +132,11 @@ TEST(QosArrayManager, Check_Get_And_Set_GC_Free_Segments)
 TEST(QosArrayManager, Check_Set_And_Get_UpdateSubsystemToVolumeMap)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     uint32_t nqnId = 1;
     uint32_t volId = 1;
 
@@ -130,8 +157,11 @@ TEST(QosArrayManager, Check_Set_And_Get_UpdateSubsystemToVolumeMap)
 TEST(QosArrayManager, SetArrayName_TestRun)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     std::string name = "POSArray2";
     qosArrayManager.SetArrayName(name);
 }
@@ -139,10 +169,26 @@ TEST(QosArrayManager, SetArrayName_TestRun)
 TEST(QosArrayManager, IsMinimumPolicyInEffect)
 {
     NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     uint32_t arrayIndex = 1;
-    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext);
+    bool feQosEnabled = true;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     bool minPolicy = qosArrayManager.IsMinimumPolicyInEffect();
     ASSERT_EQ(minPolicy, false);
+}
+
+TEST(QosArrayManager, HandlePosIoSubmissionTest)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 1;
+    bool feQosEnabled = false;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    AioSubmissionAdapter aioSubmission;
+    pos_io io;
+    qosArrayManager.HandlePosIoSubmission(&aioSubmission, &io);
 }
 
 

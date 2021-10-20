@@ -49,9 +49,10 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosPolicyManager::QosPolicyManager(QosContext* qosCtx)
+QosPolicyManager::QosPolicyManager(QosContext* qosCtx, QosManager* qosManager)
+    : qosContext(qosCtx),
+    qosManager(qosManager)
 {
-    qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
     eventCpuPolicy = new EventCpuPolicy(qosCtx);
     volumePolicy = new VolumePolicy(qosCtx);
@@ -85,7 +86,7 @@ QosPolicyManager::Execute(void)
     qosCorrection.SetCorrectionType(QosCorrection_EventThrottle, false);
     qosCorrection.SetCorrectionType(QosCorrection_EventWrr, false);
     qosCorrection.SetCorrectionType(QosCorrection_VolumeThrottle, false);
-    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    if (true == qosManager->IsFeQosEnabled())
     {
         volumePolicy->HandlePolicy();
     }

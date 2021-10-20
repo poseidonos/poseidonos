@@ -22,10 +22,18 @@ TEST(IoQueue, IoQueue_Constructor_One_Stack_pos_io)
 {
     IoQueue<pos_io*> ioQueue();
 }
+
 TEST(IoQueue, IoQueue_Constructor_One_Heap_pos_io)
 {
     IoQueue<pos_io*>* ioQueue = new IoQueue<pos_io*>;
     delete ioQueue;
+}
+
+TEST(IoQueue, Check_Dequeue_Empty)
+{
+    IoQueue<pos_io*> ioQueue;
+    pos_io* io = ioQueue.DequeueIo(0, 0);
+    ASSERT_EQ(io, nullptr);
 }
 
 TEST(IoQueue, Check_EnqueueDequeue_Ubio)

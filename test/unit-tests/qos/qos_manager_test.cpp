@@ -1,9 +1,23 @@
 #include "src/qos/qos_manager.h"
 
 #include <gtest/gtest.h>
-
+#include "test/unit-tests/master_context/config_manager_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_pos_nvmf_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_env_caller_mock.h"
+#include "test/unit-tests/qos/submission_adapter_mock.h"
+#include "test/unit-tests/qos/submission_notifier_mock.h"
+#include "src/io/frontend_io/aio_submission_adapter.h"
+#include <unistd.h>
+using ::testing::_;
+using ::testing::NiceMock;
 namespace pos
 {
+ACTION_P(SetArg2ToBoolAndReturn0, boolValue)
+{
+    *static_cast<bool*>(arg2) = boolValue;
+    return 0;
+}
+
 TEST(QosManager, QosManager_Constructor_One_Stack)
 {
     QosManager qosManager();
@@ -15,388 +29,268 @@ TEST(QosManager, QosManager_Constructor_One_Heap)
     delete qosManager;
 }
 
-TEST(QosManager, Initialize_)
+TEST(QosManager, Initialize_Test)
 {
+    QosManager qosManager;
+    qosManager.Initialize();
+    // try to initialize again, it will return from the first if.
+    qosManager.Initialize();
 }
-
-TEST(QosManager, EventQosPoller_)
-{
-}
-
-TEST(QosManager, SubmitAsyncIO_)
-{
-}
-
-TEST(QosManager, UpdateVolumePolicy_)
-{
-}
-
-TEST(QosManager, GetVolumePolicy_)
-{
-}
-
-TEST(QosManager, DequeueVolumeParams_)
-{
-}
-
-TEST(QosManager, DequeueEventParams_)
-{
-}
-
-TEST(QosManager, SetVolumeWeight_)
-{
-}
-
-TEST(QosManager, SetEventWeight_)
-{
-}
-
-TEST(QosManager, SetEventWeightWRR_)
-{
-}
-
-TEST(QosManager, GetEventWeightWRR_)
-{
-}
-
-TEST(QosManager, GetVolumeWeight_)
-{
-}
-
-TEST(QosManager, GetEventWeight_)
-{
-}
-
-TEST(QosManager, GetUsedStripeCnt_)
-{
-}
-
-TEST(QosManager, IncreaseUsedStripeCnt_)
-{
-}
-
-TEST(QosManager, DecreaseUsedStripeCnt_)
-{
-}
-
-TEST(QosManager, UpdateSubsystemToVolumeMap_)
-{
-}
-
-TEST(QosManager, GetRemainingUserRebuildSegmentCnt_)
-{
-}
-
-TEST(QosManager, GetRemainingMetaRebuildStripeCnt_)
-{
-}
-
-TEST(QosManager, GetFreeSegmentCnt_)
-{
-}
-
-TEST(QosManager, IncreasePendingEvents_)
-{
-}
-
-TEST(QosManager, DecreasePendingEvents_)
-{
-}
-
-TEST(QosManager, LogEvent_)
-{
-}
-
-TEST(QosManager, GetEventLog_)
-{
-}
-
-TEST(QosManager, GetPendingEvents_)
-{
-}
-
-TEST(QosManager, GetVolBWLog_)
-{
-}
-
-TEST(QosManager, LogVolBw_)
-{
-}
-
-TEST(QosManager, SetEventPolicy_)
-{
-}
-
-TEST(QosManager, ResetEventPolicy_)
-{
-}
-
-TEST(QosManager, CopyEventPolicy_)
-{
-}
-
-TEST(QosManager, AioSubmitAsyncIO_)
-{
-}
-
-TEST(QosManager, GetEventId_)
-{
-}
-
-TEST(QosManager, SetMaxVolWeightCli_)
-{
-}
-
-TEST(QosManager, GetMaxVolumeWeight_)
-{
-}
-
-TEST(QosManager, GetVolumeReactorMap_)
-{
-}
-
-TEST(QosManager, GetVolumeTotalConnection_)
-{
-}
-
-TEST(QosManager, VolumeQosPoller_)
+TEST(QosManager, Initialize_Test2)
 {
+    QosManager* qosManager = new QosManager();
+    qosManager->Initialize();
+    usleep(100);
+    delete qosManager;
 }
 
-TEST(QosManager, _Finalize_)
+TEST(QosManager, IsFeQosEnabled_heap)
 {
+    QosManager* qosManager = new QosManager();
+    qosManager->IsFeQosEnabled();
+    delete qosManager;
 }
 
-TEST(QosManager, _QosWorkerPoller_)
+TEST(QosManager, IsFeQosEnabled_stack)
 {
+    QosManager qosManager;
+    qosManager.IsFeQosEnabled();
 }
 
-TEST(QosManager, _UpdatePolicyManagerActiveVolumeData_)
+TEST(QosManager, DequeueVolumeParams_Run)
 {
+    QosManager qosManager;
+    uint32_t reactor = 1;
+    uint32_t volId = 0;
+    uint32_t arrayId = 0;
+    qosManager.DequeueVolumeParams(reactor, volId, arrayId);
 }
 
-TEST(QosManager, _UpdateMaxVolumeWeightReactorVolume_)
+TEST(QosManager, DequeueEventParams_Run)
 {
+    QosManager qosManager;
+    uint32_t workerId = 1;
+    BackendEvent eventId = BackendEvent_GC;
+    qosManager.DequeueEventParams(workerId, eventId);
 }
 
-TEST(QosManager, _HandleVolumeMinimumPolicy_)
+TEST(QosManager, Test_Getter_Setter_EventWeightWRR)
 {
+    QosManager* qosManager = new QosManager();
+    BackendEvent eventId = BackendEvent_GC;
+    int64_t weight = 100;
+    qosManager->SetEventWeightWRR(eventId, weight);
+    int64_t retWeight = qosManager->GetEventWeightWRR(eventId);
+    ASSERT_EQ(weight, retWeight);
+    delete qosManager;
 }
 
-TEST(QosManager, _GetVolumeFromActiveSubsystem_)
+TEST(QosManager, Test_Getter_Default_EventWeightWRR)
 {
+    BackendEvent eventId = BackendEvent_GC;
+    QosManager qosManager;
+    int64_t retWeight = qosManager.GetDefaultEventWeightWRR(eventId);
+    ASSERT_EQ(retWeight, M_DEFAULT_WEIGHT);
 }
 
-} // namespace pos
-
-namespace pos
-{
-TEST(QosVolumeManager, QosVolumeManager_)
-{
-}
-
-TEST(QosVolumeManager, VolumeCreated_)
-{
-}
-
-TEST(QosVolumeManager, VolumeDeleted_)
-{
-}
-
-TEST(QosVolumeManager, VolumeMounted_)
-{
-}
-
-TEST(QosVolumeManager, VolumeUnmounted_)
-{
-}
-
-TEST(QosVolumeManager, VolumeLoaded_)
-{
-}
-
-TEST(QosVolumeManager, VolumeUpdated_)
-{
-}
-
-TEST(QosVolumeManager, VolumeDetached_)
-{
-}
-
-TEST(QosVolumeManager, UpdateSubsystemToVolumeMap_)
-{
-}
-
-TEST(QosVolumeManager, GetVolumeFromActiveSubsystem_)
-{
-}
-
-TEST(QosVolumeManager, AioSubmitAsyncIO_)
-{
-}
-
-TEST(QosVolumeManager, SetVolumeWeight_)
-{
-}
-
-TEST(QosVolumeManager, GetVolumeWeight_)
-{
-}
-
-TEST(QosVolumeManager, DequeueVolumeParams_)
-{
-}
-
-TEST(QosVolumeManager, VolumeQosPoller_)
-{
-}
-
-TEST(QosVolumeManager, _EnqueueVolumeParams_)
-{
-}
-
-TEST(QosVolumeManager, _ResetRateLimit_)
-{
-}
-
-TEST(QosVolumeManager, _RateLimit_)
+TEST(QosManager, Test_Getter_Setter_StripeCnt)
 {
+    QosManager qosManager;
+    uint32_t arrayId = 0;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t InitStripeCount = qosManager.GetUsedStripeCnt(arrayId);
+    qosManager.IncreaseUsedStripeCnt(arrayId);
+    qosManager.IncreaseUsedStripeCnt(arrayId);
+    uint32_t stripeCount = qosManager.GetUsedStripeCnt(arrayId);
+    ASSERT_EQ(stripeCount, 2 + InitStripeCount);
+    qosManager.DecreaseUsedStripeCnt(arrayName);
+    stripeCount = qosManager.GetUsedStripeCnt(arrayId);
+    ASSERT_EQ(stripeCount, 1 + InitStripeCount);
 }
 
-TEST(QosVolumeManager, _UpdateRateLimit_)
+TEST(QosManager, Test_Getter_Setter_SubsystemToVolumeMap)
 {
+    QosManager qosManager;
+    std::string arrayName = "POSArray";
+    uint32_t nqnId = 1;
+    uint32_t volId = 1;
+    qosManager.UpdateArrayMap(arrayName);
+    qosManager.UpdateSubsystemToVolumeMap(nqnId, volId, arrayName);
+    uint32_t arrayId = 0;
+    std::vector<int> volVector = qosManager.GetVolumeFromActiveSubsystem(nqnId, arrayId);
+    std::vector<int>::iterator it;
+    it = std::find(volVector.begin(), volVector.end(), volId);
+    ASSERT_NE(it, volVector.end());
+    qosManager.DeleteVolumeFromSubsystemMap(nqnId, volId, arrayName);
+    std::vector<int> volVector2 = qosManager.GetVolumeFromActiveSubsystem(nqnId, arrayId);
+    std::vector<int>::iterator it2;
+    it2 = std::find(volVector2.begin(), volVector2.end(), volId);
+    ASSERT_EQ(it2, volVector2.end());
 }
 
-TEST(QosVolumeManager, _EnqueueVolumeUbio_)
+TEST(QosManager, Test_Getter_Setter_LogEvent)
 {
+     QosManager qosManager;
+     BackendEvent eventId = BackendEvent_Flush;
+     uint32_t InitCount = qosManager.GetEventLog(eventId);
+     qosManager.LogEvent(eventId);
+     uint32_t count = qosManager.GetEventLog(eventId);
+     ASSERT_EQ(count, InitCount+1);
 }
 
-TEST(QosVolumeManager, _UpdateVolumeMaxQos_)
+TEST(QosManager, Test_IsMinimumPolicyInEffectInSystem)
 {
+    QosManager qosManager;
+    bool actual = qosManager.IsMinimumPolicyInEffectInSystem();
+    ASSERT_EQ(actual, false);
 }
 
-TEST(QosVolumeManager, _DequeueVolumeUbio_)
+TEST(QosManager, Test_ResetCorrection)
 {
+    QosManager qosManager;
+    qosManager.ResetCorrection();
 }
-
-} // namespace pos
-
-namespace pos
-{
-TEST(QosEventManager, QosEventManager_)
-{
-}
-
-TEST(QosEventManager, EventQosPoller_)
-{
-}
-
-TEST(QosEventManager, SubmitAsyncIO_)
-{
-}
-
-TEST(QosEventManager, DequeueEventParams_)
-{
-}
-
-TEST(QosEventManager, GetEventWeight_)
-{
-}
-
-TEST(QosEventManager, SetEventWeight_)
-{
-}
-
-TEST(QosEventManager, GetEventWeightWRR_)
-{
-}
-
-TEST(QosEventManager, SetEventWeightWRR_)
-{
-}
-
-TEST(QosEventManager, _EventParamterInit_)
+TEST(QosManager, Test_Setter_Getter_volume_Policy)
 {
+    QosManager qosManager;
+    std::string arrayName = "Posarray";
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t arrayId = 0;
+    uint32_t volId = 0;
+    qos_vol_policy volPolicy;
+    volPolicy.minBwGuarantee = true;
+    int actual = qosManager.UpdateVolumePolicy(volId, volPolicy, arrayId);
+    ASSERT_EQ(actual, 0);
+    qos_vol_policy retPolicy = qosManager.GetVolumePolicy(volId, arrayName);
+    ASSERT_EQ(volPolicy.minBwGuarantee, true);
 }
 
-TEST(QosEventManager, _EnqueueEventParams_)
+TEST(QosManager, Test_Getter_Setter_Pending_BackendEvent_fe_qos_false)
 {
+    QosManager qosManager;
+    BackendEvent event = BackendEvent_Flush;
+    qosManager.IncreasePendingBackendEvents(event);
+    int actual = qosManager.GetPendingBackendEvents(event);
+    qosManager.DecreasePendingBackendEvents(event);
+    actual = qosManager.GetPendingBackendEvents(event);
 }
 
-TEST(QosEventManager, _EnqueueEventUbio_)
+TEST(QosManager, Test_Getter_Setter_VolumeLimit)
 {
+    QosManager qosManager;
+    uint32_t reactorId = 0;
+    uint32_t volId = 0;
+    int64_t weight = 10;
+    bool iops = true;
+    uint32_t arrayId = 1;
+    qosManager.SetVolumeLimit(reactorId, volId, weight, iops, arrayId);
+    int64_t retWeight = qosManager.GetVolumeLimit(reactorId, volId, iops, arrayId);
+    ASSERT_EQ(retWeight, weight);
 }
-
-TEST(QosEventManager, _DequeueEventUbio_)
-{
-}
-
-TEST(QosEventManager, _ResetEventRateLimit_)
-{
-}
-
-TEST(QosEventManager, _EventRateLimit_)
-{
-}
-
-TEST(QosEventManager, _UpdateEventRateLimit_)
-{
-}
-
-TEST(QosEventManager, _IdentifyEventType_)
+TEST(QosManager, Test_Getter_Setter_GcFreeSegment)
 {
+    QosManager qosManager;
+    uint32_t freeSegments = 10;
+    uint32_t arrayId = 1;
+    qosManager.SetGcFreeSegment(freeSegments, arrayId);
+    int64_t retFreeSegments = qosManager.GetGcFreeSegment(arrayId);
+    ASSERT_EQ(retFreeSegments, freeSegments);
 }
 
-} // namespace pos
-
-namespace pos
-{
-TEST(QosSpdkManager, QosSpdkManager_)
-{
-}
-
-TEST(QosSpdkManager, Initialize_)
-{
-}
-
-TEST(QosSpdkManager, Finalize_)
-{
-}
-
-TEST(QosSpdkManager, GetReactorData_)
+TEST(QosManager, Test_Getter_Setter_ArrayId_ArrayName_Map)
 {
+    QosManager qosManager;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t arrayId = 0;
+    uint32_t retArrayId = qosManager.GetArrayIdFromMap(arrayName);
+    ASSERT_EQ(retArrayId, arrayId);
+    std::string retArrayName = qosManager.GetArrayNameFromMap(arrayId);
+    ASSERT_EQ(retArrayName, arrayName);
+    uint32_t noOfArrays = qosManager.GetNumberOfArrays();
+    ASSERT_EQ(noOfArrays, 1);
 }
 
-TEST(QosSpdkManager, GetSpdkPoller_)
+TEST(QosManager, Test_Getter_ContentionCycles)
 {
+    QosManager qosManager;
+    uint32_t contentionCycles = qosManager.GetNoContentionCycles();
+    ASSERT_EQ(contentionCycles, NO_CONTENTION_CYCLES);
 }
 
-TEST(QosSpdkManager, UpdateReactorData_)
+TEST(QosManager, Test_Getter_SubsystemVolumeMap)
 {
+    QosManager qosManager;
+    std::unordered_map<int32_t, std::vector<int>> subsysVolMap;
+    uint32_t arrayId = 0;
+    qosManager.GetSubsystemVolumeMap(subsysVolMap, arrayId);
 }
 
-TEST(QosSpdkManager, UpdateSpdkPoller_)
+TEST(QosManager, Test_Getter_GetVolumePolicyMap)
 {
+    QosManager qosManager;
+    std::map<uint32_t, qos_vol_policy> volumePolicyMapCopy;
+    uint32_t arrayId = 0;
+    qosManager.GetVolumePolicyMap(arrayId, volumePolicyMapCopy);
 }
 
-TEST(QosSpdkManager, RegisterQosPoller_)
+TEST(QosManager, Test_Getter_UpdateRebuildPolicy)
 {
+    QosManager qosManager;
+    qos_rebuild_policy rebuildPolicy;
+    rebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t arrayId = 0;
+    qosManager.UpdateRebuildPolicy(rebuildPolicy);
+    qos_rebuild_policy retRebuildPolicy = qosManager.GetRebuildPolicy(arrayName);
+    ASSERT_EQ(retRebuildPolicy.rebuildImpact, rebuildPolicy.rebuildImpact);
 }
-
-TEST(QosSpdkManager, PollerUnregister_)
+NiceMock<MockConfigManager>*
+CreateQosMockConfigManager(bool isQosEnabled)
 {
-}
+    NiceMock<MockConfigManager>* configManager = new NiceMock<MockConfigManager>;
 
-TEST(QosSpdkManager, SpdkVolumeQosPoller_)
-{
+    ON_CALL(*configManager, GetValue("fe_qos", "enable", _, _)).WillByDefault(SetArg2ToBoolAndReturn0(isQosEnabled));
+    return configManager;
 }
 
-TEST(QosSpdkManager, GetReactorId_)
+TEST(QosManager, Test_HandlePosIoSubmission)
 {
+    NiceMock<MockConfigManager>* mockConfigManager = CreateQosMockConfigManager(false);
+    NiceMock<MockSpdkPosNvmfCaller>* mockSpdkPosNvmfCaller =
+        new NiceMock<MockSpdkPosNvmfCaller>;
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
+    QosManager qosManager(mockSpdkEnvCaller, mockSpdkPosNvmfCaller, mockConfigManager);
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t arrayId = 0;
+    pos_io io;
+    io.volume_id = 1;
+    io.length = 10;
+    io.ioType = IO_TYPE::READ;
+    io.array_id = 0;
+    io.arrayName = new char[9] {"POSArray"};
+    AioSubmissionAdapter aioSubmission;
+    qosManager.HandlePosIoSubmission(&aioSubmission, &io);
+    delete mockConfigManager;
 }
 
-TEST(QosSpdkManager, SetReactorId_)
+TEST(QosManager, Test_HandleEventUbioSubmission)
 {
+    QosManager qosManager;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    uint32_t arrayId = 0;
+    NiceMock<MockSubmissionNotifier> mockSubmissionNotifier;
+    int buf[10];
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
+    uint32_t id = 1;
+    NiceMock<MockSubmissionAdapter> mockSubmissionAdapter;
+    qosManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio);
 }
 
 } // namespace pos

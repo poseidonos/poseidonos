@@ -43,9 +43,11 @@ namespace pos
 class PolicyHandler
 {
 public:
+// LCOV_EXCL_START
     virtual ~PolicyHandler(void)
     {
     }
+// LCOV_EXCL_STOP
     virtual void HandlePolicy(void) = 0;
 };
 } // namespace pos
