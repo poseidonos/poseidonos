@@ -1,5 +1,6 @@
 #!/bin/bash
-ibof_root="/home/ibof/ibofos"
+account_root_dir="home/ibof/"
+ibof_root="${account_root_dir}ibofos"
 ibof_conf="/etc/pos"
 target_ip=127.0.0.1
 target_type="VM"
@@ -118,7 +119,7 @@ print_help()
     echo "./build_setup.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option]"
 }
 
-while getopts "i:h:t:c:r:" opt
+while getopts "i:h:t:c:r:d:" opt
 do
     case "$opt" in
         h) print_help
@@ -130,6 +131,9 @@ do
         c) config_option="$OPTARG"
             ;;
         r) test_rev="$OPTARG"
+            ;;
+        d) account_root_dir="$OPTARG"
+            ibof_root="${account_root_dir}ibofos"
             ;;
         ?) exit 2
             ;;
