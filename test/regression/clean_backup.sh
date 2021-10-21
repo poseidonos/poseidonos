@@ -1,8 +1,8 @@
 #!/bin/bash
 pos_root_dir="/home/ibof/"
 pos_working_dir="${pos_root_dir}/ibofos"
-pos_core="/etc/pos/core"
-pos_log="/etc/pos/log"
+pos_core="/psdData/core"
+pos_log="/psdData/log"
 target_ip=0
 trtype="tcp"
 port=1158
@@ -37,38 +37,44 @@ printVariable()
     echo "Transport Type : $trtype"
     echo "Port Number : $port"
     echo "PoseidonOS Root : $pos_working_dir"
+    echo "Plan Name : $plan_name"
     echo "Test Name : $test_name"
     echo "Test Revision : $test_rev"
 }
 
 coreDump()
 {
-    echo "Deleting previously-generated core dump files.."
+    echo "Kill poseidonos to generate core dump files.."
     texecc pkill -11 poseidonos
     sshpass -p bamboo ssh -q -tt root@${target_ip} "cd $pos_working_dir/tool/dump/; sudo ./trigger_core_dump.sh crashed"
 
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $pos_core/$test_name/$test_rev ]]
-    if [ $? -eq 0 ]
+    if [ -d $pos_core/$plan_name/$test_name/$test_rev ]
     then
-        texecc mkdir -p $pos_core/$test_name/$test_rev
+        echo "Core File Directory: $pos_core/$plan_name/$test_name/$test_rev"
+    else
+        mkdir -p $pos_core/$plan_name/$test_name/$test_rev
     fi
 
-    echo "Copying core dump files to $pos_core/$test_name/$test_rev"
-    texecc cp $pos_working_dir/tool/dump/*.tar.gz* $pos_core/$test_name/$test_rev
-    texecc rm $pos_core/*
+    echo "Copying core dump files to service server $pos_core/$plan_name/$test_name/$test_rev"
+    sshpass -p bamboo scp -r root@${target_ip}:/$pos_working_dir/tool/dump/*.tar.gz* $pos_core/$plan_name/$test_name/$test_rev
+
+    echo "Deleting core dump files in ${target_ip} since files are copied to service server"
+    texecc rm /etc/pos/core/*
     texecc rm $pos_working_dir/tool/dump/*.tar.gz*
 }
 
 backupLog()
 {
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $pos_log/$test_name/$test_rev ]]
-    if [ $? -eq 0 ]
+    if  [ -d $pos_log/$plan_name/$test_name/$test_rev ]
     then
-        texecc mkdir -p $pos_log/$test_name/$test_rev
+        echo "Log Files Directory: $pos_log/$plan_name/$test_name/$test_rev"
+    else
+        mkdir -p $pos_log/$plan_name/$test_name/$test_rev
     fi
 
-    echo "Copying log files to $pos_log/$test_name/$test_rev"
-    texecc cp /var/log/pos/* $pos_log/$test_name/$test_rev/
+    echo "Copying log files to service server $pos_log/$plan_name/$test_name/$test_rev"
+    sshpass -p bamboo scp -r root@${target_ip}:/var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "rm -rf /var/log/pos/*"
 }
 
 resetConfig()
@@ -81,15 +87,17 @@ resetConfig()
 print_help()
 {
     echo "Script Must Be Called with Variables"
-    echo "./clean_backup.sh -i [target_ip] -n [test_name] -r [revision] -d [working directory]"
+    echo "./clean_backup.sh -i [target_ip] -p [plan_name] -n [test_name] -r [revision] -d [working directory]"
 }
 
-while getopts "i:h:n:r:d:" opt
+while getopts "i:h:p:n:r:d:" opt
 do
     case "$opt" in
         h) print_help
             ;;
         i) target_ip="$OPTARG"
+            ;;
+        p) plan_name="$OPTARG"
             ;;
         n) test_name="$OPTARG"
             ;;
