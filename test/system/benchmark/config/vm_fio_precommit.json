@@ -108,7 +108,7 @@
     "Scenarios":
     [
         {
-            "NAME": "precommit",
+            "NAME": "fio_precommit",
             "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"
         }
     ]

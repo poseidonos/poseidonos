@@ -37,6 +37,17 @@ def FormatBW(y, idx=0):
         return f"{round(y)}B/s"
 
 
+def FormatKBW(y, idx=0):
+    if y >= 1e9:
+        return f"{round(y/1e9)}TiB/s"
+    elif y >= 1e6:
+        return f"{round(y/1e6)}GiB/s"
+    elif y >= 1e3:
+        return f"{round(y/1e3)}MiB/s"
+    else:
+        return f"{round(y)}KiB/s"
+
+
 def FormatSimpleFloat(y, pos=1):
     if y >= 1e9:
         return f"{round(y/1e9, pos)}"
@@ -107,7 +118,7 @@ def DrawResult(data, pic_name):
             elif "iops" in data[i]["title"]:
                 ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatIOPS))
             elif "bw" in data[i]["title"]:
-                ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatBW))
+                ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatKBW))
             else:
                 ax.xaxis.set_major_formatter(ticker.EngFormatter())
             ax.tick_params(axis="x", labelrotation=30, labelsize=8)

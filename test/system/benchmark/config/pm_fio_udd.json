@@ -5,7 +5,7 @@
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/home/psd/ibofos/",
+            "DIR": "/home/psd/ibofos",
             "NIC":
             {
                 "SSH": "10.1.2.14",

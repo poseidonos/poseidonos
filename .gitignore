@@ -55,7 +55,7 @@ PYTHON_COMMAND
 *.ipch
 *.suo
 *.json
-!test/system/benchmark/*.json
+!test/system/benchmark/config/*.json
 *.sqlite
 *.pb.go
 ubio_error_test

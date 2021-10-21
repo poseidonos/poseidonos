@@ -146,9 +146,9 @@ def play(json_targets, json_inits, json_scenario):
                 try:
                     for key in initiators:
                         init = initiators[key]
-                        graph_fio.AddEtaData(f"{output_name}_{init.name}.eta", f"{bs}_{rw}")
+                        graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}.eta", f"{bs}_{rw}")
                         graph_fio.DrawEta(["bw_read", "bw_write", "iops_read", "iops_write"])
-                        graph_fio.AddResultData(f"{output_name}_{init.name}", f"{bs}_{rw}")
+                        graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}", f"{bs}_{rw}")
                         graph_fio.DrawResult()
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")
