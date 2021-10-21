@@ -46,8 +46,9 @@ public:
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
         EXPECT_CALL(*array, GetName).WillRepeatedly(Return("POSArray"));
 
-        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
+        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
+        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
         inUseBitmap = new NiceMock<MockBitMapMutex>(2);
@@ -64,9 +65,10 @@ public:
         }
 
         gcBufferPool = new std::vector<FreeBufferPool*>;
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(GC_BUFFER_COUNT);
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, affinityManager));
+            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
         }
 
         copierMeta = new CopierMeta(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
@@ -77,7 +79,6 @@ public:
     {
         delete copierMeta;
         delete array;
-        delete affinityManager;
     }
 
 protected:
@@ -85,7 +86,6 @@ protected:
 
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockBitMapMutex>* inUseBitmap;
-    NiceMock<MockAffinityManager>* affinityManager;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockReverseMapPack>* reverseMapPack;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
@@ -98,13 +98,13 @@ protected:
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
     PartitionLogicalSize partitionLogicalSize = {
-    .minWriteBlkCnt = 0,/* no interesting */
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768
+    .minWriteBlkCnt = 0/* not interesting */,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 32,
+    .totalStripes = 3200,
+    .totalSegments = 100,
     };
     uint32_t GC_BUFFER_COUNT = 512;
     uint32_t GC_CONCURRENT_COUNT = 16;

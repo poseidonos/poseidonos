@@ -27,6 +27,7 @@ using ::testing::AnyNumber;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::Test;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -70,8 +71,9 @@ public:
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         gcStatus = new NiceMock<MockGcStatus>;
-        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
+        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(AtLeast(1));
+        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
 
@@ -89,7 +91,7 @@ public:
         gcBufferPool = new std::vector<FreeBufferPool*>;
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, affinityManager));
+            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
         }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
@@ -105,7 +107,6 @@ public:
     {
         delete copier;
         delete array;
-        delete affinityManager;
         delete iBlockAllocator;
         delete iContextManager;
     }
@@ -127,7 +128,6 @@ protected:
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockReverseMapPack>* reverseMapPack;
-    NiceMock<MockAffinityManager>* affinityManager;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;    
@@ -140,12 +140,12 @@ protected:
     CallbackSmartPtr reverseMapLoadCompletionPtr;
     PartitionLogicalSize partitionLogicalSize = {
     .minWriteBlkCnt = 0/* not interesting */,
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 2,
+    .totalStripes = 300,
+    .totalSegments = 300,
     };
 
     uint32_t TEST_SEGMENT_1 = 100;

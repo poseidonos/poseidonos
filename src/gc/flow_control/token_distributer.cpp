@@ -39,12 +39,6 @@
 
 namespace pos
 {
-TokenDistributer::TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration)
-: TokenDistributer(iArrayInfo, flowControlConfiguration,
-                AllocatorServiceSingleton::Instance()->GetIContextManager(iArrayInfo->GetName()))
-{
-}
-
 TokenDistributer::TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration,
                                 IContextManager* inputIContextManager)
 : iArrayInfo(iArrayInfo),

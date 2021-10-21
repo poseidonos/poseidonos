@@ -46,6 +46,7 @@ public:
     MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
     MOCK_METHOD(uint32_t, GetTotalCore, (), (override));
     MOCK_METHOD(uint32_t, GetNumaIdFromCoreId, (uint32_t coreId), (override));
+    MOCK_METHOD(uint32_t, GetEventWorkerSocket, (), (override));
 };
 
 } // namespace pos

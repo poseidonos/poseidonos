@@ -22,6 +22,7 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Test;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -64,10 +65,11 @@ public:
             }
         }
         gcBufferPool = new std::vector<FreeBufferPool*>;
-        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
+        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(AtLeast(1));
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, affinityManager));
+            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
         }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, nullptr, victimStripes, gcBufferPool);
@@ -79,7 +81,6 @@ public:
         delete stripeCopier;
         delete array;
         delete meta;
-        delete affinityManager;
     }
 
 protected:
@@ -95,7 +96,6 @@ protected:
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
     std::vector<FreeBufferPool*>* gcBufferPool;
-    NiceMock<MockAffinityManager>* affinityManager;
 
     EventSmartPtr mockCopyEvent;
     EventSmartPtr mockStripeCopier;
@@ -105,12 +105,12 @@ protected:
 
     PartitionLogicalSize partitionLogicalSize = {
     .minWriteBlkCnt = 0/* not interesting */,
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 32,
+    .totalStripes = 3200,
+    .totalSegments = 100,
     };
 };
 

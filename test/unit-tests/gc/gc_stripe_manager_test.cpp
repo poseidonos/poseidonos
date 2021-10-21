@@ -23,8 +23,7 @@ public:
     : gcStripeManager(nullptr),
       array(nullptr),
       gcWriteBufferPool(nullptr),
-      volumeEventPublisher(nullptr),
-      affinityManager(nullptr)
+      volumeEventPublisher(nullptr)
     {
     }
 
@@ -40,9 +39,10 @@ public:
         EXPECT_CALL(*array, GetName()).WillRepeatedly(Return("POSArray"));
         EXPECT_CALL(*array, GetIndex()).WillRepeatedly(Return(0));
 
-        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
+        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
 
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
+        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
 
         gcStripeManager = new GcStripeManager(array, gcWriteBufferPool, volumeEventPublisher);
@@ -61,18 +61,17 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
-    NiceMock<MockAffinityManager>* affinityManager;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
     PartitionLogicalSize partitionLogicalSize = {
-    .minWriteBlkCnt = 0/*not interesting*/,
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768,
+    .minWriteBlkCnt = 0/* not interesting */,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 32,
+    .totalStripes = 3200,
+    .totalSegments = 100,
     };
 };
 

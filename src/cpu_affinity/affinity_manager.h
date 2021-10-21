@@ -53,7 +53,7 @@ public:
     cpu_set_t GetCpuSet(CoreType type);
     std::string GetReactorCPUSetString(void);
     uint32_t GetMasterReactorCore(void);
-    uint32_t GetEventWorkerSocket(void);
+    virtual uint32_t GetEventWorkerSocket(void);
     virtual uint32_t GetTotalCore(void);
     virtual uint32_t GetNumaIdFromCurrentThread(void);
     virtual uint32_t GetNumaIdFromCoreId(uint32_t coreId);

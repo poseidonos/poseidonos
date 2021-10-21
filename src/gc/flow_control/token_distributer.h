@@ -43,7 +43,6 @@ class IArrayInfo;
 class TokenDistributer
 {
 public:
-    TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration);
     TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration, IContextManager* iContextManager);
     virtual ~TokenDistributer(void);
     virtual void Init(void);

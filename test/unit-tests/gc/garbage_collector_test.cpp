@@ -72,13 +72,13 @@ protected:
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
     PartitionLogicalSize partitionLogicalSize = {
-    .minWriteBlkCnt = 0, /*no interesting*/
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768
+    .minWriteBlkCnt = 0/* not interesting */,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 32,
+    .totalStripes = 3200,
+    .totalSegments = 100,
     };
 };
 

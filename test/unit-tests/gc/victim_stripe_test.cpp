@@ -46,14 +46,7 @@ public:
         volumeManager = new NiceMock<MockIVolumeManager>;
         reverseMapLoadCompletionPtr = std::make_shared<NiceMock<MockReverseMapLoadCompletion>>();
 
-        PartitionLogicalSize ubSize = {.minWriteBlkCnt = 0, /* not interesting */
-                                .blksPerChunk = 0, /* not interesting */
-                                .blksPerStripe = partitionLogicalSize.blksPerStripe,
-                                .chunksPerStripe = 0, /* not interesting */
-                                .stripesPerSegment = 0, /* not interesting */
-                                .totalStripes = 0, /* not interesting */
-                                .totalSegments = 0 /* not interesting */};
-        EXPECT_CALL(*array, GetSizeInfo(PartitionType::USER_DATA)).WillOnce(Return((const PartitionLogicalSize*)&ubSize));
+        EXPECT_CALL(*array, GetSizeInfo(PartitionType::USER_DATA)).WillOnce(Return((const PartitionLogicalSize*)&partitionLogicalSize));
 
         ON_CALL(*vsaMap, GetVSAInternal(_, _, _)).WillByDefault([this](int volumeId, BlkAddr startRba, int& caller)
         {
@@ -93,10 +86,10 @@ protected:
 
     PartitionLogicalSize partitionLogicalSize = {
     .minWriteBlkCnt = 0, /* no interesting */
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
+    .blksPerChunk = BLOCKS_IN_CHUNK,
+    .blksPerStripe = BLOCKS_IN_CHUNK * 4, // blksPerChunk * chunksPerStripe
+    .chunksPerStripe = 4,
+    .stripesPerSegment = STRIPES_PER_SEGMENT,
     .totalStripes = 32,
     .totalSegments = 32768
     };
@@ -332,10 +325,14 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = UNMAP_STRIPE};
-    EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
+
+    StripeAddr unMapLsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = UNMAP_STRIPE};
+    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
+
+    EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillOnce(Return(unMapLsa)).WillRepeatedly(Return(lsa));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 
+    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
     EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
     EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
@@ -343,7 +340,15 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
 
     // then
-    EXPECT_TRUE(victimStripe->GetBlkInfoListSize() == 0);
+    uint32_t blkInfoListCnt = victimStripe->GetBlkInfoListSize();
+    uint32_t totalValidBlkCnt = 0;
+    EXPECT_TRUE(blkInfoListCnt == partitionLogicalSize.chunksPerStripe);
+    for (uint32_t index = 0; index < blkInfoListCnt; index++)
+    {
+        list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(index);
+        totalValidBlkCnt += blkInfoList.size();
+    }
+    EXPECT_TRUE(totalValidBlkCnt == ((partitionLogicalSize.blksPerChunk * blkInfoListCnt) - 1));
 }
 
 TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentLsa)

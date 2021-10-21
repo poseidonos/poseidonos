@@ -33,7 +33,6 @@ public:
     : gcMapUpdateCompletion(nullptr),
       array(nullptr),
       gcStripeManager(nullptr),
-      affinityManager(nullptr),
       gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr)
     {
@@ -52,8 +51,9 @@ public:
         array = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
-        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
+        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
+        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
+        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
 
@@ -74,7 +74,6 @@ public:
     {
         delete gcMapUpdateCompletion;
         delete array;
-        delete affinityManager;
         delete gcStripeManager;
         delete volumeEventPublisher;
         delete rbaStateManager;
@@ -95,7 +94,6 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
-    NiceMock<MockAffinityManager>* affinityManager;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockStripe>* stripe;
     NiceMock<MockRBAStateManager>* rbaStateManager;
@@ -114,13 +112,13 @@ protected:
     std::map<SegmentId, uint32_t> invalidSegCnt;
 
     PartitionLogicalSize partitionLogicalSize = {
-        .minWriteBlkCnt = 0 /*not interesting*/,
-        .blksPerChunk = 64,
-        .blksPerStripe = 2048,
-        .chunksPerStripe = 32,
-        .stripesPerSegment = 1024,
-        .totalStripes = 32,
-        .totalSegments = 32768,
+    .minWriteBlkCnt = 0/* not interesting */,
+    .blksPerChunk = 4,
+    .blksPerStripe = 16,
+    .chunksPerStripe = 4,
+    .stripesPerSegment = 32,
+    .totalStripes = 3200,
+    .totalSegments = 100,
     };
 };
 
