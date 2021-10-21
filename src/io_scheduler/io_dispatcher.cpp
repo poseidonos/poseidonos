@@ -55,21 +55,15 @@ thread_local std::vector<UblockSharedPtr> IODispatcher::threadLocalDeviceList;
 EventFactory* IODispatcher::recoveryEventFactory = nullptr;
 EventFrameworkApi* IODispatcher::eventFrameworkApi = nullptr;
 
-IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
-    EventScheduler* eventSchedulerArg)
+IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg)
 : ioWorkerCount(0),
-  deviceAllocationTurn(0),
-  eventScheduler(eventSchedulerArg)
+  deviceAllocationTurn(0)
 {
     pthread_rwlock_init(&ioWorkerMapLock, nullptr);
     eventFrameworkApi = eventFrameworkApiArg;
     if (nullptr == eventFrameworkApi)
     {
         eventFrameworkApi = EventFrameworkApiSingleton::Instance();
-    }
-    if (nullptr == eventScheduler)
-    {
-        eventScheduler = EventSchedulerSingleton::Instance();
     }
 }
 
@@ -348,7 +342,7 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
 {
     ubio->SetError(IOErrorType::DEVICE_ERROR);
     EventSmartPtr failure = recoveryEventFactory->Create(ubio);
-    eventScheduler->EnqueueEvent(failure);
+    EventSchedulerSingleton::Instance()->EnqueueEvent(failure);
 }
 
 // This function will be executed in thread level.

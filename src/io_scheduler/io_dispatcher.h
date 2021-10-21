@@ -51,8 +51,7 @@ class EventScheduler;
 class IODispatcher : public IIODispatcher
 {
 public:
-    explicit IODispatcher(EventFrameworkApi* eventFrameworkApi = nullptr,
-        EventScheduler* eventScheduler = nullptr);
+    explicit IODispatcher(EventFrameworkApi* eventFrameworkApi = nullptr);
     ~IODispatcher(void);
 
     void AddIOWorker(cpu_set_t cpuSet) override;
@@ -89,7 +88,6 @@ private:
     IOWorkerMap ioWorkerMap;
     uint32_t deviceAllocationTurn;
     std::mutex deviceLock;
-    EventScheduler* eventScheduler;
     enum class DispatcherAction
     {
         OPEN,
