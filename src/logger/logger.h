@@ -71,7 +71,7 @@ public:
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        if (_ShouldLog(lvl, id, fmt))
+        if (ShouldLog(lvl, id))
         {
             uint32_t moduleId = static_cast<uint32_t>(module);
             fmt::memory_buffer buf;
@@ -89,7 +89,7 @@ public:
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        if (_ShouldLog(lvl, id, fmt))
+        if (ShouldLog(lvl, id))
         {
             logger->iboflog_sink(loc, lvl, id, fmt, args...);
         }
@@ -116,8 +116,12 @@ public:
         return preferences.LogDir();
     }
 
+    bool ShouldLog(spdlog::level::level_enum lvl, int id)
+    {
+        return preferences.ShouldLog(lvl, id);
+    }
+
 private:
-    bool _ShouldLog(spdlog::level::level_enum lvl, int id, spdlog::string_view_t fmt);
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];

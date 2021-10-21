@@ -84,7 +84,7 @@ public:
     JsonElement ToJson();
     int ApplyFilter();
     int ApplyFilter(string filePath);
-    bool ShouldLog(spdlog::level::level_enum lvl, int id, string msg);
+    bool ShouldLog(spdlog::level::level_enum lvl, int id);
     string LogLevelToString(spdlog::level::level_enum lvl);
     spdlog::level::level_enum StringToLogLevel(string lvl);
 

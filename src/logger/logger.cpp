@@ -101,12 +101,6 @@ Logger::GetLevel()
     return preferences.LogLevel();
 }
 
-bool
-Logger::_ShouldLog(spdlog::level::level_enum lvl, int id, spdlog::string_view_t fmt)
-{
-    return preferences.ShouldLog(lvl, id, fmt.begin());
-}
-
 Reporter::Reporter(void)
 {
     if (DirExists(REPORT_PATH) == false)

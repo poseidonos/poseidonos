@@ -49,10 +49,6 @@ enum JsonFormatType
 
 class JsonAttribute // name-value pair
 {
-private:
-    string name;
-    string value; // quotes should be included in value if value type is string
-
 public:
     JsonAttribute(string _name, string _value)
     : name(_name),
@@ -65,20 +61,18 @@ public:
     {
     }
     string ToJson();
+
+private:
+    string name;
+    string value; // quotes should be included in value if value type is string
 };
 
 class JsonArray;
 class JsonElement // attribute collection
 {
-private:
-    string name;
-    vector<JsonAttribute> attributes;
-    vector<JsonElement> elements;
-    vector<JsonArray> array;
-
 public:
-    JsonElement(string name)
-    : name(name)
+    explicit JsonElement(string _name)
+    : name(_name)
     {
     }
     void
@@ -97,16 +91,18 @@ public:
         elements.push_back(elem);
     }
     string ToJson(JsonFormatType type = JSON_FORMAT_TYPE_DEFAULT);
+
+private:
+    string name;
+    vector<JsonAttribute> attributes;
+    vector<JsonElement> elements;
+    vector<JsonArray> array;
 };
 
 class JsonArray // group of elements
 {
-private:
-    string name;
-    vector<JsonElement> item;
-
 public:
-    JsonArray(string _name)
+    explicit JsonArray(string _name)
     : name(_name)
     {
     }
@@ -116,6 +112,10 @@ public:
         item.push_back(element);
     }
     string ToJson(JsonFormatType type = JSON_FORMAT_TYPE_DEFAULT);
+
+private:
+    string name;
+    vector<JsonElement> item;
 };
 
 class JsonFormat

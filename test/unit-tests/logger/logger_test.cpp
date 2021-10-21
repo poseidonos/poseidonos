@@ -138,4 +138,41 @@ TEST(Logger, ApplyFilter_testIfFilterIsAppliedWellByGetPreferencesAfterApplyingT
     ASSERT_EQ(filterExcluded, "1005,1006");
 }
 
+
+
+TEST(Logger, ShouldLog_testIfFilterIsApplied)
+{
+    // Backup existing filter
+    string filterPath = "/var/log/pos/filter";
+    string filterBackup = "/var/log/pos/filter.bak.test";
+    rename(filterPath.c_str(), filterBackup.c_str());
+
+    // Given
+    ofstream f;
+    f.open(filterPath, ios::out);
+    if (f.is_open())
+    {
+        string filterInclude = "include:1000-1010";
+        string filterExclude = "exclude:3000,3001";
+        f << filterInclude << endl << filterExclude;
+    }
+    f.close();
+
+    Logger* logger = new Logger();
+
+    // When
+    logger->ApplyFilter();
+
+    // Rollback previous filter
+    remove(filterPath.c_str());
+    rename(filterBackup.c_str(), filterPath.c_str());
+
+    // Then
+    bool include = logger->ShouldLog(spdlog::level::info, 1005);
+    bool exclude = logger->ShouldLog(spdlog::level::info, 3000);
+    
+    ASSERT_EQ(include, true);
+    ASSERT_EQ(exclude, false);
+}
+
 } // namespace pos

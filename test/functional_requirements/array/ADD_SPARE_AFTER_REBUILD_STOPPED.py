@@ -24,7 +24,8 @@ def execute():
     print("rescan done")
     out = cli.add_device(REBUILD_STOP_BASIC.REMAINING_DEV, ARRAYNAME)
     print("device added")
-    api.wait_situation(ARRAYNAME, "REBUILDING")
+    timeout = 10000
+    api.wait_situation(ARRAYNAME, "REBUILDING", timeout)
     return out
 
 if __name__ == "__main__":

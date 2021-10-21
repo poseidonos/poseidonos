@@ -49,7 +49,7 @@ Preferences::Preferences()
 }
 
 bool
-Preferences::ShouldLog(spdlog::level::level_enum lvl, int id, string msg)
+Preferences::ShouldLog(spdlog::level::level_enum lvl, int id)
 {
     if (lvl < logLevel)
     {
