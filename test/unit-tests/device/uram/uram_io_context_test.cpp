@@ -37,7 +37,6 @@ TEST(UramIOContext, RequestRetry_testRequestRetryProperly)
 
     // Then
     EXPECT_EQ(ret, true);
-
 }
 
 } // namespace pos

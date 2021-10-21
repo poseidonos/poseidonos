@@ -77,8 +77,10 @@ MonitorStart(DeviceMonitor* monitor)
     monitor->Start();
 }
 
-DeviceManager::DeviceManager(AffinityManager* affinityManager)
-: affinityManager(affinityManager)
+DeviceManager::DeviceManager(AffinityManager* affinityManager,
+    SpdkNvmeCaller* spdkNvmeCaller)
+: affinityManager(affinityManager),
+  spdkNvmeCaller(spdkNvmeCaller)
 {
     _InitDriver();
     _InitMonitor();
@@ -88,6 +90,10 @@ DeviceManager::~DeviceManager()
 {
     _ClearDevices();
     _ClearMonitors();
+    if (spdkNvmeCaller != nullptr)
+    {
+        delete spdkNvmeCaller;
+    }
 }
 
 void
@@ -176,7 +182,7 @@ DeviceManager::_ClearMonitors()
 }
 
 void
-DeviceManager::StartMonitoring()
+DeviceManager::_StartMonitoring()
 {
     POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_START_MONITOR,
         "Start Monitoring");
@@ -197,45 +203,6 @@ DeviceManager::StartMonitoring()
         POS_TRACE_ERROR(POS_EVENT_ID::DEVICEMGR_START_MONITOR,
             "unable to start monitoring");
     }
-}
-
-void
-DeviceManager::StopMonitoring()
-{
-    POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_STOP_MONITOR, "StopMonitoring");
-
-    bool tryStop = false;
-    for (auto it = monitors.begin(); it != monitors.end(); ++it)
-    {
-        if ((*it)->IsRunning() == true)
-        {
-            (*it)->Stop();
-            tryStop = true;
-        }
-    }
-    if (tryStop == false)
-    {
-        POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_STOP_MONITOR,
-            "unable to stop monitoring");
-    }
-}
-
-vector<pair<string, string>>
-DeviceManager::MonitoringState()
-{
-    vector<pair<string, string>> result;
-    for (auto it = monitors.begin(); it != monitors.end(); ++it)
-    {
-        string state = "stopped";
-        if ((*it)->IsRunning())
-        {
-            state = "running";
-        }
-
-        result.push_back(make_pair((*it)->GetName(), state));
-    }
-
-    return result;
 }
 
 bool
@@ -265,7 +232,7 @@ DeviceManager::ScanDevs(void)
         _PrepareIOWorker();
         _InitScan();
         _PrepareDevices();
-        StartMonitoring();
+        _StartMonitoring();
     }
     else
     {
@@ -447,7 +414,7 @@ DeviceManager::GetNvmeCtrlr(std::string& deviceName)
             (0 == static_cast<string>(dev->GetName()).compare(deviceName)))
         {
             UnvmeSsdSharedPtr unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);
-            return spdk_nvme_ns_get_ctrlr(unvmeSsd->GetNs());
+            return spdkNvmeCaller->SpdkNvmeNsGetCtrlr(unvmeSsd->GetNs());
         }
     }
 

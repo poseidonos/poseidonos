@@ -48,6 +48,7 @@
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
 #include "src/device/i_dev_info.h"
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 
 using namespace std;
 
@@ -65,7 +66,10 @@ class DeviceManager
 : public IDevInfo
 {
 public:
-    DeviceManager(AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
+    DeviceManager(
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
+        SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller());
+
     virtual ~DeviceManager(void);
 
     virtual void Initialize(IIODispatcher* ioDispatcherInterface);
@@ -79,9 +83,6 @@ public:
     virtual int RemoveDevice(UblockSharedPtr dev);
     virtual struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
 
-    virtual void StartMonitoring(void);
-    virtual void StopMonitoring(void);
-    virtual vector<pair<string, string>> MonitoringState(void);
 
     virtual void HandleCompletedCommand(void);
 
@@ -101,6 +102,7 @@ private:
     void _PrepareDevices(void);
     void _PrepareDevice(UblockSharedPtr dev);
     bool _CheckDuplication(UblockSharedPtr dev);
+    void _StartMonitoring(void);
 
     static const int LOCK_ACQUIRE_FAILED = -1;
 
@@ -111,6 +113,7 @@ private:
     vector<future<void>> monitorFutures;
 
     AffinityManager* affinityManager;
+    SpdkNvmeCaller* spdkNvmeCaller;
     IDeviceEvent* deviceEvent = nullptr;
     IIODispatcher* ioDispatcher = nullptr;
 };
