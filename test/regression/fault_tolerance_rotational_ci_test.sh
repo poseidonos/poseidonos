@@ -412,7 +412,25 @@ add_spare()
 {
 	local spare_dev_name="unvme-ns-"${attach_index}
     notice "add spare device ${spare_dev_name}"
-	${ibof_cli} array addspare --spare ${spare_dev_name} --array-name $array_name
+    local retry=10
+    while :
+	do
+		ret=$(${ibof_cli} array addspare --spare ${spare_dev_name} --array-name $array_name --json-res | jq '.Response.result.status.code')
+		if [ $ret = "0" ]; then
+			notice "spare added"
+			break;
+        elif [$retry = 0]; then
+			notice "failed to add spare"
+            kill_ibofos
+            exit 2
+			break;
+		else
+			notice "add_spare retry"
+			sleep 1
+			retry=$((retry-1))
+		fi
+	done
+
 	attach_index=$((attach_index+1))
 }
 
