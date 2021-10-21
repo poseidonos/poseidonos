@@ -14,12 +14,6 @@ public:
     using SmartLogEntry::SmartLogEntry;
 };
 
-/*class MockLogPageFlushIoCtx : public LogPageFlushIoCtx
-{
-public:
-    using LogPageFlushIoCtx::LogPageFlushIoCtx;
-};*/
-
 class MockSmartLogMgr : public SmartLogMgr
 {
 public:
