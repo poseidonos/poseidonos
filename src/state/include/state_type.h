@@ -60,7 +60,6 @@ static const string STATE_STR[(int)StateEnum::TYPE_COUNT]
 class StateType
 {
 public:
-    StateType(void) { val = StateEnum::OFFLINE; }
     StateType(StateEnum t) : val(t) { }
     operator StateEnum(void) const { return val; }
     bool operator == (const StateType t) const { return val == t.val; }
