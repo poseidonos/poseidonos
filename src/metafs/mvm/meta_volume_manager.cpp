@@ -247,7 +247,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
             if (rc.second != POS_EVENT_ID::SUCCESS)
             {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
+                MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
                     "There is no NVRAM and SSD free space");
             }
             break;
