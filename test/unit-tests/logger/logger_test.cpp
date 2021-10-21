@@ -139,7 +139,6 @@ TEST(Logger, ApplyFilter_testIfFilterIsAppliedWellByGetPreferencesAfterApplyingT
 }
 
 
-
 TEST(Logger, ShouldLog_testIfFilterIsApplied)
 {
     // Backup existing filter
@@ -170,7 +169,7 @@ TEST(Logger, ShouldLog_testIfFilterIsApplied)
     // Then
     bool include = logger->ShouldLog(spdlog::level::info, 1005);
     bool exclude = logger->ShouldLog(spdlog::level::info, 3000);
-    
+
     ASSERT_EQ(include, true);
     ASSERT_EQ(exclude, false);
 }
