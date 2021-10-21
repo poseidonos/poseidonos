@@ -211,7 +211,7 @@ print_help()
     echo "./build_setup.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option] -d [working directory]"
 }
 
-while getopts "i:h:t:c:r:d:" opt
+while getopts "i:h:t:c:r:d:o:" opt
 do
     case "$opt" in
         h) print_help
