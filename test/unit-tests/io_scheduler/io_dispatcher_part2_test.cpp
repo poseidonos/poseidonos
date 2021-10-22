@@ -101,7 +101,7 @@ TEST(IODispatcher, Submit_Reactor_Sync)
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(true));
     IODispatcher ioDispatcher{&mockEventFrameworkApi};
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, "");
+    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), IsSyncMode()).WillByDefault(Return(true));
     EXPECT_CALL(*ubio.get(), IsSyncMode()).Times(AtLeast(1));
     EXPECT_CALL(*ubio.get(), Complete(_)).Times(AtLeast(1));
@@ -116,7 +116,6 @@ TEST(IODispatcher, Submit_Reactor_Sync)
 
 TEST(IODispatcher, Submit_Reactor_Async_Recovery)
 {
-    /*
     // Given: IODispatcher, MockEventFrameworkApi, MockEventScheduler, MockEventFactory, MockUbio
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(true));
@@ -126,7 +125,7 @@ TEST(IODispatcher, Submit_Reactor_Async_Recovery)
     NiceMock<MockEventFactory> mockEventFactory;
     ON_CALL(mockEventFactory, Create(_)).WillByDefault(Return(nullptr));
     ioDispatcher.RegisterRecoveryEventFactory(&mockEventFactory);
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, "");
+    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     int actual, expected = -1;
 
     // When 1: Call Submit with MockUbio, false(async) and true(isRecoveryNeeded)
@@ -152,7 +151,6 @@ TEST(IODispatcher, Submit_Reactor_Async_Recovery)
 
     // Then 2: Expect actual value and expected value should be same
     EXPECT_EQ(actual, expected);
-    */
 }
 
 TEST(IODispatcher, Submit_Reactor_Async_NotRecovery)
@@ -165,7 +163,7 @@ TEST(IODispatcher, Submit_Reactor_Async_NotRecovery)
     ON_CALL(mockUBlockDevice, SubmitAsyncIO(_)).WillByDefault(Return(4));
     NiceMock<MockArrayDevice> mockArrayDevice {nullptr};
     ON_CALL(mockArrayDevice, GetUblockPtr()).WillByDefault(Return(&mockUBlockDevice));
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, "");
+    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), GetArrayDev()).WillByDefault(Return(&mockArrayDevice));
     EXPECT_CALL(*ubio.get(), GetArrayDev()).Times(AtLeast(1));
     int actual, expected = 4;
@@ -184,7 +182,7 @@ TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(false));
     IODispatcher ioDispatcher{&mockEventFrameworkApi};
     NiceMock<MockUBlockDevice> mockUBlockDevice {"", 0, nullptr};
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, "");
+    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), SetSyncMode()).WillByDefault(Return());
     ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
     ON_CALL(*ubio.get(), WaitDone()).WillByDefault(Return());

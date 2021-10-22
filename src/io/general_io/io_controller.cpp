@@ -34,17 +34,14 @@
 
 namespace pos
 {
-IODispatcher* IOController::ioDispatcher = IODispatcherSingleton::Instance();
+IODispatcher* IOController::ioDispatcher = nullptr;
 
-IOController::IOController(void)
+IOController::IOController(IODispatcher* ioDispatcherArg)
 {
-}
-
-IOController::IOController(IODispatcher* _ioDispatcher)
-{
-    if (nullptr != _ioDispatcher)
+    ioDispatcher = ioDispatcherArg;
+    if (nullptr == ioDispatcher)
     {
-        ioDispatcher = _ioDispatcher;
+        ioDispatcher = IODispatcherSingleton::Instance();
     }
 }
 
