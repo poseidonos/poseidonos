@@ -68,7 +68,7 @@ TEST(WbStripeCtx, GetSectionAddr_TestSimpleGetter)
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
 
-    EXPECT_CALL(*allocBitmap, GetMapAddr).WillOnce(Return(100));
+    EXPECT_CALL(*allocBitmap, GetMapAddr).WillOnce(Return((uint64_t*)100));
     // when 1.
     char* ret = wbstripeCtx.GetSectionAddr(AC_ALLOCATE_WBLSID_BITMAP);
     // then

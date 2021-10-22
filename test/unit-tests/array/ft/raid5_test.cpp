@@ -54,8 +54,11 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 1234,
-        .chunksPerStripe = 4567};
+        .chunksPerStripe = 4567,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
 
     // When
     Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */);
@@ -65,8 +68,11 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 10};
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     uint32_t STRIPE_ID = 13;
     uint32_t OFFSET = 400;
 
@@ -92,8 +98,11 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 4,
-        .chunksPerStripe = 4};
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */);
 
     std::list<BufferEntry> buffers;
@@ -130,8 +139,11 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 100};
+        .chunksPerStripe = 100,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     Raid5 raid5(&physicalSize, 10);
     StripeId STRIPE_ID = 1234;
     BlkOffset BLK_OFFSET = 400;
@@ -153,8 +165,11 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 100};
+        .chunksPerStripe = 100,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     Raid5 raid5(&physicalSize, 10);
 
     // When & Then

@@ -103,7 +103,7 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfSuccessWhenStatusIsJournaling)
     // When: Journal is requested to write block write done log
     // Then: Log write should be successfully requested
     MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
+    StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
     EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) == 0);
 }
 
@@ -123,7 +123,7 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsInvalid)
     // When: Requested to write block write done log
     // Then: Log write should be failed
     MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
+    StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
     EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) < 0);
 }
 
@@ -143,7 +143,7 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsNotJournalingO
     // When: Requested to write block write done log
     // Then: Should return value above zero to let caller retry it
     MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
+    StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
     EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) > 0);
 }
 

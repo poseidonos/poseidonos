@@ -456,7 +456,7 @@ TEST(AllocatorCtx, GetSectionAddr_TestGetEachSectionAddr)
     // when 1.
     char* ret = allocCtx.GetSectionAddr(AC_HEADER);
     // given 2.
-    EXPECT_CALL(*allocBitmap, GetMapAddr).WillOnce(Return(100));
+    EXPECT_CALL(*allocBitmap, GetMapAddr).WillOnce(Return((uint64_t*)100));
     // when 2.
     ret = allocCtx.GetSectionAddr(AC_ALLOCATE_SEGMENT_BITMAP);
     // then 2.
