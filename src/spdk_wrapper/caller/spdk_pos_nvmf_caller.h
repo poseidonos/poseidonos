@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -29,23 +29,21 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#pragma once
 
-#include "src/spdk_wrapper/spdk_thread_caller.h"
+#include "spdk/pos_nvmf.h"
 
 namespace pos
 {
-SpdkThreadCaller::SpdkThreadCaller(void)
-{
-}
 
-SpdkThreadCaller::~SpdkThreadCaller(void)
+class SpdkPosNvmfCaller
 {
-}
+public:
+    SpdkPosNvmfCaller(void);
+    virtual ~SpdkPosNvmfCaller(void);
+    void SpdkNvmfInitializeReactorSubsystemMapping(void);
+    uint32_t SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id);
+    void SetQosInSpdk(bool value);
+};
 
-uint32_t
-SpdkThreadCaller::SpdkEnvGetCoreCount(void)
-{
-    return spdk_env_get_core_count();
-}
 } // namespace pos
-

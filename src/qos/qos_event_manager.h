@@ -35,6 +35,7 @@
 #include <atomic>
 #include <queue>
 
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
 
@@ -49,7 +50,7 @@ class IoQueue;
 class QosEventManager : public ExitQosHandler
 {
 public:
-    QosEventManager(void);
+    explicit QosEventManager(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
     ~QosEventManager(void);
     int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
     void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
@@ -76,5 +77,6 @@ private:
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
     IoQueue<UbioSmartPtr>* ioQueue;
+    SpdkEnvCaller* spdkEnvCaller;
 };
 } // namespace pos

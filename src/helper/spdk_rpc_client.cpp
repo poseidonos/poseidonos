@@ -40,14 +40,14 @@
 
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/spdk_wrapper/spdk_thread_caller.h"
 
 using namespace pos;
 using namespace std;
 
-SpdkRpcClient::SpdkRpcClient(void)
+SpdkRpcClient::SpdkRpcClient(SpdkEnvCaller* spdkEnvCaller)
 : client(nullptr),
-  connector(nullptr)
+  connector(nullptr),
+  spdkEnvCaller(spdkEnvCaller)
 {
     _SetClient();
 }
@@ -61,6 +61,10 @@ SpdkRpcClient::~SpdkRpcClient(void)
     if (client != nullptr)
     {
         delete client;
+    }
+    if (spdkEnvCaller != nullptr)
+    {
+        delete spdkEnvCaller;
     }
 }
 
@@ -202,7 +206,7 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
 
     if ("tcp" == trtype)
     {
-        uint32_t coreCount = SpdkThreadCallerSingleton::Instance()->SpdkEnvGetCoreCount();
+        uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
         uint32_t minSharedBuffers = coreCount * bufCacheSize;
         if (minSharedBuffers > numSharedBuf)
         {

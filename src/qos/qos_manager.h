@@ -49,6 +49,8 @@
 #include "src/include/event_priority.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/lib/singleton.h"
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
@@ -76,7 +78,8 @@ class QosInternalManager;
 class QosManager : public ExitQosHandler
 {
 public:
-    QosManager(void);
+    QosManager(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller(),
+        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller());
     virtual ~QosManager(void);
     void Initialize(void);
     virtual int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
@@ -148,6 +151,8 @@ private:
     uint32_t currentNumberOfArrays;
     std::mutex mapUpdateLock;
     bool systemMinPolicy;
+    SpdkEnvCaller* spdkEnvCaller;
+    SpdkPosNvmfCaller* spdkPosNvmfCaller;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;

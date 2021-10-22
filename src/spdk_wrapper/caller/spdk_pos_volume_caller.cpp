@@ -30,20 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "spdk/env.h"
-#include "src/lib/singleton.h"
+#include "src/spdk_wrapper/caller/spdk_pos_volume_caller.h"
 
 namespace pos
 {
-class SpdkThreadCaller
+SpdkPosVolumeCaller::SpdkPosVolumeCaller(void)
 {
-public:
-    SpdkThreadCaller(void);
-    virtual ~SpdkThreadCaller(void);
-    virtual uint32_t SpdkEnvGetCoreCount(void);
-};
+}
 
-using SpdkThreadCallerSingleton = Singleton<SpdkThreadCaller>;
+SpdkPosVolumeCaller::~SpdkPosVolumeCaller(void)
+{
+}
+
+uint32_t
+SpdkPosVolumeCaller::GetAttachedSubsystemId(const char* bdev_name)
+{
+    return get_attached_subsystem_id(bdev_name);
+}
+
 } // namespace pos

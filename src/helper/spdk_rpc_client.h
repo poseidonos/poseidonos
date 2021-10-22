@@ -38,12 +38,14 @@
 #include <string>
 #include <utility>
 
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+
 namespace pos
 {
 class SpdkRpcClient
 {
 public:
-    SpdkRpcClient(void);
+    SpdkRpcClient(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
     virtual ~SpdkRpcClient(void);
     std::pair<int, std::string> BdevMallocCreate(
         std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
@@ -59,6 +61,8 @@ private:
     jsonrpc::Client* client;
     jsonrpc::IClientConnector* connector;
     static const int SUCCESS = 0;
+
+    SpdkEnvCaller* spdkEnvCaller;
 };
 
 } // namespace pos

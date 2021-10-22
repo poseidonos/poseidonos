@@ -52,7 +52,6 @@
 #include "src/qos/qos_event_manager.h"
 #include "src/qos/qos_spdk_manager.h"
 #include "src/qos/qos_volume_manager.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
@@ -64,7 +63,9 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosManager::QosManager(void)
+QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller, SpdkPosNvmfCaller* spdkPosNvmfCaller)
+: spdkEnvCaller(spdkEnvCaller),
+  spdkPosNvmfCaller(spdkPosNvmfCaller)
 {
     qosThread = nullptr;
     feQosEnabled = false;
@@ -88,7 +89,7 @@ QosManager::QosManager(void)
         feQosEnabled = enabled;
     }
 
-    SpdkConnection::SetQosInSpdk(feQosEnabled);
+    spdkPosNvmfCaller->SetQosInSpdk(feQosEnabled);
     initialized = false;
     try
     {
@@ -131,6 +132,14 @@ QosManager::~QosManager(void)
     delete processingManager;
     delete correctionManager;
     delete qosContext;
+    if (spdkEnvCaller != nullptr)
+    {
+        delete spdkEnvCaller;
+    }
+    if (spdkPosNvmfCaller != nullptr)
+    {
+        delete spdkPosNvmfCaller;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -453,7 +462,7 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
 {
     if (true == feQosEnabled)
     {
-        uint64_t now = SpdkConnection::SpdkGetTicks();
+        uint64_t now = spdkEnvCaller->SpdkGetTicks();
         uint32_t reactor = param->id;
         uint64_t next_tick = param->nextTimeStamp;
         if (now < next_tick)
@@ -467,7 +476,7 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
             qosArrayManager[i]->VolumeQosPoller(reactor, aioSubmission, offset);
         }
         qosContext->SetReactorProcessed(reactor, true);
-        now = SpdkConnection::SpdkGetTicks();
+        now = spdkEnvCaller->SpdkGetTicks();
         param->nextTimeStamp = now + param->qosTimeSlice;
     }
     return 0;

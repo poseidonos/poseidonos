@@ -59,7 +59,6 @@
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/network/transport_configuration.h"
-#include "src/spdk_wrapper/spdk_thread_caller.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -118,7 +117,6 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
-    SpdkThreadCallerSingleton::ResetInstance();
 
     air_deactivate();
     air_finalize();

@@ -39,9 +39,9 @@
 #include "src/logger/logger.h"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/poller_management.h"
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+#include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 
 namespace pos
 {
@@ -56,16 +56,18 @@ std::atomic<bool> QosSpdkManager::unregistrationComplete(false);
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosSpdkManager::QosSpdkManager(QosContext* qosCtx, bool feQos)
+QosSpdkManager::QosSpdkManager(QosContext* qosCtx, bool feQos,
+    SpdkPosNvmfCaller* spdkPosNvmfCaller)
 : qosContext(qosCtx),
   reactorId(M_MAX_REACTORS + 1),
-  feQosEnabled(feQos)
+  feQosEnabled(feQos),
+  spdkPosNvmfCaller(spdkPosNvmfCaller)
 {
     for (int i = 0; i < M_MAX_REACTORS; i++)
     {
         spdkPollers[i] = nullptr;
     }
-    SpdkConnection::SpdkNvmfInitializeReactorSubsystemMapping();
+    spdkPosNvmfCaller->SpdkNvmfInitializeReactorSubsystemMapping();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -77,6 +79,10 @@ QosSpdkManager::QosSpdkManager(QosContext* qosCtx, bool feQos)
 /* --------------------------------------------------------------------------*/
 QosSpdkManager::~QosSpdkManager(void)
 {
+    if (spdkPosNvmfCaller != nullptr)
+    {
+        delete spdkPosNvmfCaller;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -176,7 +182,8 @@ QosSpdkManager::PollerUnregister(void* arg1, void* arg2)
     }
     uint32_t reactor = spdkManager->GetReactorId();
     spdk_poller* poller = spdkManager->GetSpdkPoller(reactor);
-    PollerManager::SpdkPollerUnregister(&poller);
+    SpdkThreadCaller spdkThreadCaller;
+    spdkThreadCaller.SpdkPollerUnregister(&poller);
     if ((EventFrameworkApiSingleton::Instance()->IsLastReactorNow()))
     {
         unregistrationComplete = true;
@@ -320,11 +327,14 @@ QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
     }
     uint32_t reactor = spdkManager->GetReactorId();
     poller_structure& pollerData = spdkManager->GetReactorData(reactor);
-    pollerData.qosTimeSlice = IBOF_QOS_TIMESLICE_IN_USEC * SpdkConnection::SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
-    pollerData.nextTimeStamp = SpdkConnection::SpdkGetTicks() + pollerData.qosTimeSlice;
+    SpdkEnvCaller spdkEnvCaller;
+    pollerData.qosTimeSlice = IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller.SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+    pollerData.nextTimeStamp = spdkEnvCaller.SpdkGetTicks() + pollerData.qosTimeSlice;
     pollerData.id = reactor;
     std::string pollerName = "volume_qos_poller_" + std::to_string(reactor);
-    spdk_poller* poller = static_cast<spdk_poller*>(PollerManager::SpdkPollerRegister(spdkManager->SpdkVolumeQosPoller, &pollerData, 0, pollerName));
+    char* name = const_cast<char*>(pollerName.c_str());
+    SpdkThreadCaller spdkThreadCaller;
+    spdk_poller* poller = static_cast<spdk_poller*>(spdkThreadCaller.SpdkPollerRegister(spdkManager->SpdkVolumeQosPoller, &pollerData, 0, name));
     if (unlikely(NULL == poller))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED;

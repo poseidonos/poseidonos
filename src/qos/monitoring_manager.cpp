@@ -36,7 +36,6 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 #define VALID_ENTRY (1)
@@ -53,7 +52,8 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosMonitoringManager::QosMonitoringManager(QosContext* qosCtx)
+QosMonitoringManager::QosMonitoringManager(QosContext* qosCtx, SpdkPosNvmfCaller* spdkPosNvmfCaller)
+: spdkPosNvmfCaller(spdkPosNvmfCaller)
 {
     qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
@@ -75,6 +75,10 @@ QosMonitoringManager::~QosMonitoringManager(void)
     for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
         delete qosMonitoringManagerArray[i];
+    }
+    if (spdkPosNvmfCaller != nullptr)
+    {
+        delete spdkPosNvmfCaller;
     }
 }
 
@@ -274,7 +278,7 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
             for (auto& subsystemVolume : subsystemVolumeMap)
             {
                 uint32_t subsystemId = subsystemVolume.first;
-                if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsystemId) != INVALID_SUBSYSTEM)
+                if (spdkPosNvmfCaller->SpdkNvmfGetReactorSubsystemMapping(reactor, subsystemId) != INVALID_SUBSYSTEM)
                 {
                     volList[reactor][subsystemId] = qosManager->GetVolumeFromActiveSubsystem(subsystemId, arrayId);
                 }

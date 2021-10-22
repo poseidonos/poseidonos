@@ -39,3 +39,18 @@ SpdkThreadCaller::SpdkPutIoChannel(struct spdk_io_channel* ch)
 {
     spdk_put_io_channel(ch);
 }
+
+void*
+SpdkThreadCaller::SpdkPollerRegister(SpdkPollerFunction func,
+    void* arg,
+    uint64_t period_microseconds,
+    char* pollerName)
+{
+    return spdk_poller_register_named(func, arg, period_microseconds, pollerName);
+}
+
+void
+SpdkThreadCaller::SpdkPollerUnregister(spdk_poller** spdkPoller)
+{
+    spdk_poller_unregister(spdkPoller);
+}

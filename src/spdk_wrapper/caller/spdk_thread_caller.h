@@ -34,11 +34,14 @@
 
 namespace pos
 {
+using SpdkPollerFunction = int (*)(void*);
 
 class SpdkThreadCaller
 {
 public:
     void SpdkPutIoChannel(struct spdk_io_channel* ch);
+    void* SpdkPollerRegister(SpdkPollerFunction func, void* arg, uint64_t period_microseconds, char* pollerName);
+    void SpdkPollerUnregister(spdk_poller** spdkPoller);
 };
 
 } // namespace pos

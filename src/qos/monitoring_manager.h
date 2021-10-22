@@ -34,6 +34,7 @@
 
 #include <map>
 
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 #include "src/qos/internal_manager.h"
 #include "src/qos/monitoring_manager_array.h"
 #include "src/qos/qos_common.h"
@@ -51,7 +52,8 @@ class QosMonitoringManagerArray;
 class QosMonitoringManager : public QosInternalManager
 {
 public:
-    explicit QosMonitoringManager(QosContext* qosCtx);
+    explicit QosMonitoringManager(QosContext* qosCtx,
+        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller());
     ~QosMonitoringManager(void);
     void Execute(void) override;
     QosInternalManagerType GetNextManagerType(void) override;
@@ -75,5 +77,6 @@ private:
     bw_iops_parameter eventParams[BackendEvent_Count];
     QosMonitoringManagerArray* qosMonitoringManagerArray[MAX_ARRAY_COUNT];
     std::map<uint32_t, uint32_t> prevActiveVolumeMap;
+    SpdkPosNvmfCaller* spdkPosNvmfCaller;
 };
 } // namespace pos

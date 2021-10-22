@@ -42,7 +42,6 @@
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/event_scheduler/event_scheduler.h"
 
@@ -55,10 +54,14 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayMgr)
+QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex,
+    QosArrayManager* qosArrayMgr, SpdkPosNvmfCaller* spdkPosNvmfCaller,
+    SpdkPosVolumeCaller* spdkPosVolumeCaller)
 : VolumeEvent("QosManager", "", arrayIndex),
   feQosEnabled(feQos),
-  qosContext(qosCtx)
+  qosContext(qosCtx),
+  spdkPosNvmfCaller(spdkPosNvmfCaller),
+  spdkPosVolumeCaller(spdkPosVolumeCaller)
 {
     arrayId = arrayIndex;
     qosArrayManager = qosArrayMgr;
@@ -99,6 +102,14 @@ QosVolumeManager::~QosVolumeManager(void)
     delete bwIopsRateLimit;
     delete parameterQueue;
     delete ioQueue;
+    if (spdkPosNvmfCaller != nullptr)
+    {
+        delete spdkPosNvmfCaller;
+    }
+    if (spdkPosVolumeCaller != nullptr)
+    {
+        delete spdkPosVolumeCaller;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -405,7 +416,7 @@ QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info *volMountIn
     {
         string bdevName = _GetBdevName(volMountInfo->id, volMountInfo->array_name);
         uint32_t nqnId = 0;
-        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
         UpdateSubsystemToVolumeMap(nqnId, volMountInfo->id);
         _UpdateVolumeMaxQos(volMountInfo->id, volMountInfo->iops_limit, volMountInfo->bw_limit, volMountInfo->array_name);
         _SetVolumeOperationDone(true);
@@ -474,7 +485,7 @@ QosVolumeManager::_InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmou
     {
         string bdevName = _GetBdevName(volUnmountInfo->id, volUnmountInfo->array_name);
         uint32_t nqnId = 0;
-        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
         std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volUnmountInfo->id);
         if (position != nqnVolumeMap[nqnId].end())
         {
@@ -582,7 +593,7 @@ QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetach
     {
         string bdevName = _GetBdevName(volDetachInfo->id, volDetachInfo->array_name);
         uint32_t nqnId = 0;
-        nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
         std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volDetachInfo->id);
         if (position != nqnVolumeMap[nqnId].end())
         {
@@ -625,7 +636,7 @@ QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aio
     for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
     {
         uint32_t subsys = it->first;
-        if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != INVALID_SUBSYSTEM)
+        if (spdkPosNvmfCaller->SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != INVALID_SUBSYSTEM)
         {
             volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
         }

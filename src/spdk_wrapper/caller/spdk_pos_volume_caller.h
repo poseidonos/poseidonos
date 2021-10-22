@@ -30,27 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/spdk_wrapper/poller_management.h"
+#pragma once
 
-#include "spdk/thread.h"
+#include "spdk/pos_volume.h"
 
 namespace pos
 {
-void*
-PollerManager::SpdkPollerRegister(SpdkPollerFunction func,
-    void* arg,
-    uint64_t period_microseconds,
-    std::string pollerName)
-{
-    char* name = const_cast<char*>(pollerName.c_str());
-    return spdk_poller_register_named(func, arg, period_microseconds, name);
-}
 
-void
-PollerManager::SpdkPollerUnregister(void* poller)
+class SpdkPosVolumeCaller
 {
-    struct spdk_poller** spdkPoller = static_cast<struct spdk_poller**> (poller);
-    spdk_poller_unregister(spdkPoller);
-}
+public:
+    SpdkPosVolumeCaller(void);
+    virtual ~SpdkPosVolumeCaller(void);
+    virtual uint32_t GetAttachedSubsystemId(const char* bdev_name);
+};
 } // namespace pos
-

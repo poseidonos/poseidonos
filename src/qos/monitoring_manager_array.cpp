@@ -40,7 +40,6 @@
 #include "src/qos/resource.h"
 #include "src/qos/resource_cpu.h"
 #include "src/qos/user_policy_all_volumes.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 #define VALID_ENTRY (1)

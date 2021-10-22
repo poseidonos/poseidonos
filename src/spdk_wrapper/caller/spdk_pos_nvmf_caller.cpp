@@ -30,51 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/spdk_wrapper/connection_management.h"
-
-#include "spdk/env.h"
-#include "spdk/thread.h"
-#include "spdk/nvmf.h"
-#include "spdk/pos.h"
-#include "spdk/pos_nvmf.h"
-#include "spdk/pos_volume.h"
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 
 namespace pos
 {
+
+SpdkPosNvmfCaller::SpdkPosNvmfCaller(void)
+{
+}
+
+SpdkPosNvmfCaller::~SpdkPosNvmfCaller(void)
+{
+}
+
 void
-SpdkConnection::SpdkNvmfInitializeReactorSubsystemMapping(void)
+SpdkPosNvmfCaller::SpdkNvmfInitializeReactorSubsystemMapping(void)
 {
     spdk_nvmf_initialize_reactor_subsystem_mapping();
 }
 
 uint32_t
-SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id)
+SpdkPosNvmfCaller::SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id)
 {
     return spdk_nvmf_get_reactor_subsystem_mapping(reactor, id);
 }
 
-uint64_t
-SpdkConnection::SpdkGetTicksHz(void)
-{
-    return spdk_get_ticks_hz();
-}
-
-uint64_t
-SpdkConnection::SpdkGetTicks(void)
-{
-    return spdk_get_ticks();
-}
-
-uint32_t
-SpdkConnection::GetAttachedSubsystemId(const char* bdev_name)
-{
-    return get_attached_subsystem_id(bdev_name);
-}
-
 void
-SpdkConnection::SetQosInSpdk(bool value)
+SpdkPosNvmfCaller::SetQosInSpdk(bool value)
 {
     spdk_nvmf_configure_pos_qos(value);
 }
 } // namespace pos
-

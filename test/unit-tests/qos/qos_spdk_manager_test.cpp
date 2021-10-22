@@ -5,7 +5,6 @@
 
 #include "lib/spdk/include/spdk_internal/thread.h"
 #include "src/qos/qos_common.h"
-#include "src/spdk_wrapper/poller_management.h"
 #include "test/unit-tests/qos/qos_context_mock.h"
 using namespace std;
 using ::testing::_;

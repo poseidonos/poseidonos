@@ -42,6 +42,9 @@ class SpdkEnvCaller
 public:
     virtual ~SpdkEnvCaller() {}
     virtual int SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev);
+    virtual uint32_t SpdkEnvGetCoreCount(void);
+    uint64_t SpdkGetTicksHz(void);
+    uint64_t SpdkGetTicks(void);
 };
 
 } // namespace pos

@@ -39,7 +39,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "spdk/pos.h"
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
+#include "src/spdk_wrapper/caller/spdk_pos_volume_caller.h"
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
@@ -56,8 +57,10 @@ class IoQueue;
 class QosVolumeManager : public VolumeEvent, public ExitQosHandler
 {
 public:
-    QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayManager);
-    ~QosVolumeManager(void);
+    QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayManager,
+        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller(),
+        SpdkPosVolumeCaller* spdkPosVolumeCaller = new SpdkPosVolumeCaller());
+    ~QosVolumeManager(void) override;
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
     int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
@@ -117,5 +120,7 @@ private:
     std::mutex subsysVolMapLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
     std::atomic<bool> volumeOperationDone;
+    SpdkPosNvmfCaller* spdkPosNvmfCaller;
+    SpdkPosVolumeCaller* spdkPosVolumeCaller;
 };
 } // namespace pos

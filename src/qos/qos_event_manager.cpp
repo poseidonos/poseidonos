@@ -36,7 +36,6 @@
 #include "src/qos/parameter_queue.h"
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
-#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
@@ -49,7 +48,8 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosEventManager::QosEventManager(void)
+QosEventManager::QosEventManager(SpdkEnvCaller* spdkEnvCaller)
+: spdkEnvCaller(spdkEnvCaller)
 {
     for (uint32_t eventId = BackendEvent_Start; eventId < BackendEvent_Count; eventId++)
     {
@@ -88,6 +88,10 @@ QosEventManager::~QosEventManager(void)
     delete bwIopsRateLimit;
     delete parameterQueue;
     delete ioQueue;
+    if (spdkEnvCaller != nullptr)
+    {
+        delete spdkEnvCaller;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -283,7 +287,7 @@ int
 QosEventManager::IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission)
 {
     int32_t retVal = 0;
-    uint64_t now = SpdkConnection::SpdkGetTicks();
+    uint64_t now = spdkEnvCaller->SpdkGetTicks();
     int completions = 0;
     uint64_t currentBW = 0;
     struct poller_structure* param = &eventPollStructure[id];
@@ -350,8 +354,8 @@ QosEventManager::_IdentifyEventType(UbioSmartPtr ubio)
 void
 QosEventManager::_EventParamterInit(uint32_t id)
 {
-    eventPollStructure[id].qosTimeSlice = IBOF_QOS_TIMESLICE_IN_USEC * SpdkConnection::SpdkGetTicksHz() / SEC_TO_USEC;
-    eventPollStructure[id].nextTimeStamp = SpdkConnection::SpdkGetTicks() + eventPollStructure[id].qosTimeSlice;
+    eventPollStructure[id].qosTimeSlice = IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SEC_TO_USEC;
+    eventPollStructure[id].nextTimeStamp = spdkEnvCaller->SpdkGetTicks() + eventPollStructure[id].qosTimeSlice;
     eventPollStructure[id].id = id;
 }
 } // namespace pos

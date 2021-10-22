@@ -30,12 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "spdk_env_caller.h"
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
 
-using namespace pos;
+namespace pos
+{
 
 int
 SpdkEnvCaller::SpdkPciDeviceGetSocketId(struct spdk_pci_device* dev)
 {
     return spdk_pci_device_get_socket_id(dev);
 }
+
+uint32_t
+SpdkEnvCaller::SpdkEnvGetCoreCount(void)
+{
+    return spdk_env_get_core_count();
+}
+
+uint64_t
+SpdkEnvCaller::SpdkGetTicksHz(void)
+{
+    return spdk_get_ticks_hz();
+}
+
+uint64_t
+SpdkEnvCaller::SpdkGetTicks(void)
+{
+    return spdk_get_ticks();
+}
+} // namespace pos

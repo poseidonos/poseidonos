@@ -34,6 +34,7 @@
 
 #include "spdk/thread.h"
 #include "src/qos/qos_common.h"
+#include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 
 namespace pos
 {
@@ -41,7 +42,8 @@ class QosContext;
 class QosSpdkManager
 {
 public:
-    explicit QosSpdkManager(QosContext* qosCtx, bool feQos);
+    explicit QosSpdkManager(QosContext* qosCtx, bool feQos,
+        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller());
     ~QosSpdkManager(void);
     void Initialize(void);
     void Finalize(void);
@@ -66,5 +68,6 @@ private:
     spdk_poller* spdkPollers[M_MAX_REACTORS];
     uint32_t reactorId;
     bool feQosEnabled;
+    SpdkPosNvmfCaller* spdkPosNvmfCaller;
 };
 } // namespace pos
