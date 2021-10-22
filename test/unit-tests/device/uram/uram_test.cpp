@@ -51,7 +51,7 @@ TEST(Uram, Close_testIfDeviceContextIsNull)
     EXPECT_EQ(ret, 0);
 }
 
-TEST(Uram, GetMN_testIfGetModelNamePropery)
+TEST(Uram, GetMN_testIfGetModelNameProperly)
 {
     // Given
     string name = "uram";
@@ -63,7 +63,7 @@ TEST(Uram, GetMN_testIfGetModelNamePropery)
     EXPECT_EQ(mn, name);
 }
 
-TEST(Uram, GetClass_testIfGetClassPropery)
+TEST(Uram, GetClass_testIfGetClassProperly)
 {
     // Given
     string name = "uram";
@@ -74,4 +74,17 @@ TEST(Uram, GetClass_testIfGetClassPropery)
 
     // Then
     EXPECT_EQ(DeviceClass::SYSTEM, cl);
+}
+
+TEST(Uram, GetName_testIfGetNameProperly)
+{
+    // Given
+    string name = "uram_get_name_test";
+    Uram uram(name, 0, nullptr, 0);
+
+    // When
+    string ret = uram.GetName();
+
+    // Then
+    EXPECT_EQ(name, ret);
 }
