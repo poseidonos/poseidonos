@@ -286,7 +286,7 @@ add_custom_target(nlohmann_json ALL
 #execute_process(COMMAND ./generate_mocks.sh) # commented out until we figure out how to integrate git-clang-format with UT build
 
 # Build gtest conditionally
-SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/googletest-release-1.10.x)
+SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/googletest-release-1.10.0)
 if(EXISTS "${POS_DEP_GTEST}")
     message("GTEST build exists: ${POS_DEP_GTEST}. Build skipped.")
 else()

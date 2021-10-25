@@ -1,1 +1,0 @@
-../../../lib/librte_eal/include/generic/rte_pause.h

@@ -1,1 +1,0 @@
-../../lib/librte_ethdev/rte_dev_info.h
