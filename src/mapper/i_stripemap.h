@@ -48,10 +48,8 @@ public:
     virtual LsidRefResult GetLSAandReferLsid(StripeId vsid) = 0;
     virtual StripeId GetRandomLsid(StripeId vsid) = 0;  // will be deprecated
     virtual int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc) = 0;
-
     virtual bool IsInUserDataArea(StripeAddr entry) = 0;
     virtual bool IsInWriteBufferArea(StripeAddr entry) = 0;
-
     virtual MpageList GetDirtyStripeMapPages(int vsid) = 0;
 };
 

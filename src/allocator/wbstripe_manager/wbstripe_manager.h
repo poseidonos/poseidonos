@@ -59,7 +59,6 @@ public:
     virtual void Dispose(void);
 
     virtual Stripe* GetStripe(StripeAddr& lsidEntry) override;
-    virtual StripeId AllocateUserDataStripeId(StripeId vsid) override;
     virtual void FreeWBStripeId(StripeId lsid) override;
 
     virtual void FlushActiveStripes(uint32_t volumeId) override;

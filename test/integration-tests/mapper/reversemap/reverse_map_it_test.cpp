@@ -8,15 +8,15 @@ namespace pos
 void
 ReverseMapTest::SetUp(void)
 {
-    ReverseMapPack::SetPageSize();
-    ReverseMapPack::SetNumPagesUT(UT_REVMAP_PAGES_PER_STRIPE);
+    _PrepareFile();
     reverseMapPack = new ReverseMapPack();
-    reverseMapPack->Init(UT_WBLSID);
+    reverseMapPack->Init(revMapWholefile, UT_WBLSID, 0, 4032, 1);
 }
 
 void
 ReverseMapTest::TearDown(void)
 {
+    revMapWholefile->Close();
     delete reverseMapPack;
     reverseMapPack = nullptr;
 }
@@ -24,7 +24,7 @@ ReverseMapTest::TearDown(void)
 MetaFileIntf*
 ReverseMapTest::_PrepareFile(void)
 {
-    MetaFileIntf* revMapWholefile = new MockFileIntf("RevMapWhole.bin");
+    revMapWholefile = new MockFileIntf("RevMapWhole.bin");
     if (revMapWholefile->DoesFileExist() == false)
     {
         uint64_t fileSize = ReverseMapPack::GetfileSizePerStripe() * MAX_UT_VSID;
@@ -53,54 +53,19 @@ TEST_F(ReverseMapTest, GetFileSizePerStripe)
     EXPECT_EQ(fileSizePerStripe, DEFAULT_REVMAP_PAGE_SIZE * UT_REVMAP_PAGES_PER_STRIPE);
 }
 
-TEST_F(ReverseMapTest, LinkVSID)
-{
-    int ret = 0;
-
-    ret = reverseMapPack->LinkVsid(UT_VSID);
-    EXPECT_EQ(ret, RET_INT_SUCCESS);
-
-    ret = reverseMapPack->LinkVsid(UT_VSID);
-    EXPECT_LT(ret, RET_INT_SUCCESS);
-}
-
-TEST_F(ReverseMapTest, UnLinkVSID)
-{
-    int ret = 0;
-
-    ret = reverseMapPack->LinkVsid(UT_VSID);
-    EXPECT_EQ(ret, RET_INT_SUCCESS);
-
-    ret = reverseMapPack->UnLinkVsid();
-    EXPECT_EQ(ret, RET_INT_SUCCESS);
-
-    ret = reverseMapPack->UnLinkVsid();
-    EXPECT_LT(ret, RET_INT_SUCCESS);
-}
-
 TEST_F(ReverseMapTest, SetAndFlush)
 {
     int ret = 0;
-
-    // Prepare Mock file
-    MetaFileIntf* revMapFile = _PrepareFile();
-    reverseMapPack->SetRevMapFileUT(revMapFile);
-
     // Set some revesemap data
     ret = reverseMapPack->SetReverseMapEntry(UT_OFFSET, UT_RBA, UT_VOLUMEID);
     EXPECT_EQ(ret, RET_INT_SUCCESS);
 
-    // Link VSID
-    ret = reverseMapPack->LinkVsid(UT_VSID);
-    EXPECT_EQ(ret, RET_INT_SUCCESS);
-
     // Flush
     Stripe stripeDummy;
-    ret = reverseMapPack->Flush(&stripeDummy, nullptr);
+    uint32_t offset = stripeDummy.GetVsid() * reverseMapPack->GetfileSizePerStripe();
+    ret = reverseMapPack->Flush(&stripeDummy, offset, nullptr);
     EXPECT_EQ(ret, RET_INT_SUCCESS);
     usleep(1000);
-
-    ret = revMapFile->Close();
     EXPECT_EQ(ret, RET_INT_SUCCESS);
 }
 
@@ -108,16 +73,8 @@ TEST_F(ReverseMapTest, LoadAndGet)
 {
     int ret = 0;
 
-    // Prepare Mock file
-    MetaFileIntf* revMapFile = _PrepareFile();
-    reverseMapPack->SetRevMapFileUT(revMapFile);
-
-    // Link VSID
-    ret = reverseMapPack->LinkVsid(UT_VSID);
-    EXPECT_EQ(ret, RET_INT_SUCCESS);
-
     // Load
-    ret = reverseMapPack->Load();
+    ret = reverseMapPack->Load(0, nullptr);
     EXPECT_EQ(ret, RET_INT_SUCCESS);
     usleep(1000);
 
@@ -127,8 +84,6 @@ TEST_F(ReverseMapTest, LoadAndGet)
     std::tie(rba, volumeId) = reverseMapPack->GetReverseMapEntry(UT_OFFSET);
     EXPECT_EQ(rba, UT_RBA);
     EXPECT_EQ(volumeId, UT_VOLUMEID);
-
-    ret = revMapFile->Close();
     EXPECT_EQ(ret, RET_INT_SUCCESS);
 }
 

@@ -61,7 +61,6 @@ StripePutEvent::Execute(void)
     if (stripe.IsOkToFree())
     {
         stripe.SetFinished(true);
-        stripe.UnLinkReverseMap();
         if (iWBStripeAllocator != nullptr)
         {
             iWBStripeAllocator->FreeWBStripeId(prevLsid);

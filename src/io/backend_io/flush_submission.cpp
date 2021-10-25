@@ -35,8 +35,6 @@
 #include <list>
 #include <string>
 
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator_service/allocator_service.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
@@ -53,16 +51,14 @@ namespace pos
 {
 FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId)
 : FlushSubmission(inputStripe,
-    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId),
     IIOSubmitHandler::GetInstance(), arrayId, ArrayService::Instance()->Getter()->GetTranslator())
 {
 }
 
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, int arrayId,
+FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
     IIOTranslator* translator)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
-  iWBStripeAllocator(wbStripeAllocator),
   iIOSubmitHandler(ioSubmitHandler),
   arrayId(arrayId),
   translator(translator)
@@ -77,8 +73,7 @@ FlushSubmission::~FlushSubmission(void)
 bool
 FlushSubmission::Execute(void)
 {
-    StripeId logicalStripeId = iWBStripeAllocator->AllocateUserDataStripeId(stripe->GetVsid());
-
+    StripeId logicalStripeId = stripe->GetUserLsid();
     uint64_t blocksInStripe = 0;
     bufferList.clear();
 

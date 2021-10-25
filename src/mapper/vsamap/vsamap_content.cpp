@@ -40,21 +40,32 @@
 
 namespace pos
 {
-VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_)
+VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_, FlushCmdManager* flm_)
 : MapContent(mapId, addrInfo),
-  flushCmdManager(FlushCmdManagerSingleton::Instance()),
-  flushThreshold(FlushCmdManagerSingleton::Instance()->GetInternalFlushThreshold()),
-  internalFlushEnabled(FlushCmdManagerSingleton::Instance()->IsInternalFlushEnabled()),
-  iBlockAllocator(iBlockAllocator_)
+  flushThreshold(0),
+  internalFlushEnabled(false)
 {
     fileName = "VSAMap." + std::to_string(mapId) + ".bin";
     totalBlks = 0;
     this->arrayId = addrInfo->GetArrayId();
     callback = nullptr;
+
+    iBlockAllocator = iBlockAllocator_;
+    if (iBlockAllocator == nullptr)
+    {
+        iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(addrInfo->GetArrayId());
+    }
+    flushCmdManager = flm_;
+    if (flushCmdManager == nullptr)
+    {
+        flushCmdManager = FlushCmdManagerSingleton::Instance();
+    }
+    flushThreshold = flushCmdManager->GetInternalFlushThreshold();
+    internalFlushEnabled = flushCmdManager->IsInternalFlushEnabled();
 }
 
 VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo)
-: VSAMapContent(mapId, addrInfo, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(addrInfo->GetArrayId()))
+: VSAMapContent(mapId, addrInfo, nullptr, nullptr)
 {
 }
 

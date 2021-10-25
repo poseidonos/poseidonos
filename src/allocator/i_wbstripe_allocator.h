@@ -42,7 +42,6 @@ class IWBStripeAllocator
 {
 public:
     virtual Stripe* GetStripe(StripeAddr& lsa) = 0;
-    virtual StripeId AllocateUserDataStripeId(StripeId vsid) = 0;
     virtual void FreeWBStripeId(StripeId lsid) = 0;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) = 0;

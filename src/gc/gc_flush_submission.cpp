@@ -64,7 +64,6 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
                                     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
 : GcFlushSubmission(arrayName, blkInfoList, volumeId, dataBuffer, gcStripeManager, nullptr,
                     AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
-                    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
                     IIOSubmitHandler::GetInstance(),
                     FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
                     ArrayMgr()->GetInfo(arrayName)->arrayInfo)
@@ -74,7 +73,7 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
 GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
                                     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
                                     CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                                    IWBStripeAllocator* inputIWBStripeAllocator, IIOSubmitHandler* inputIIOSubmitHandler,
+                                    IIOSubmitHandler* inputIIOSubmitHandler,
                                     FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
 : Event(false, BackendEvent_Flush),
   arrayName(arrayName),
@@ -84,7 +83,6 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
   gcStripeManager(gcStripeManager),
   inputCallback(inputCallback),
   iBlockAllocator(inputIBlockAllocator),
-  iWBStripeAllocator(inputIWBStripeAllocator),
   iIOSubmitHandler(inputIIOSubmitHandler),
   flowControl(inputFlowControl),
   iArrayInfo(inputIArrayInfo)
@@ -109,10 +107,7 @@ GcFlushSubmission::Execute(void)
         return false;
     }
 
-    Stripe* stripe;
-
-    stripe = AllocateStripe(volumeId);
-
+    Stripe* stripe = AllocateStripe(volumeId);
     if (stripe == nullptr)
     {
         if (0 < token)
@@ -122,21 +117,20 @@ GcFlushSubmission::Execute(void)
         return false;
     }
 
-    StripeId logicalStripeId = iWBStripeAllocator->AllocateUserDataStripeId(stripe->GetVsid());
-
     for (uint32_t offset = 0; offset < blkInfoList->size(); offset++)
     {
         std::vector<BlkInfo>::iterator it = blkInfoList->begin();
         std::advance(it, offset);
         BlkInfo blkInfo = *it;
-        stripe->UpdateReverseMap(offset, blkInfo.rba, volumeId);
-        stripe->UpdateVictimVsa(offset, blkInfo.vsa);
+        stripe->UpdateReverseMapEntry(offset, blkInfo.rba, volumeId);
+        stripe->UpdateVictimVsa(offset, blkInfo.vsa, blkInfo.rba, volumeId);
     }
 
     blkInfoList->clear();
     delete blkInfoList;
 
     std::list<BufferEntry> bufferList;
+
     uint64_t blocksInStripe = 0;
 
     for (auto it = dataBuffer->begin(); it != dataBuffer->end(); ++it)
@@ -145,8 +139,6 @@ GcFlushSubmission::Execute(void)
         bufferList.push_back(bufferEntry);
         blocksInStripe += BLOCKS_IN_CHUNK;
     }
-
-    stripe->SetUserLsid(logicalStripeId);
 
     CallbackSmartPtr callback;
     if (nullptr == inputCallback)
@@ -158,6 +150,7 @@ GcFlushSubmission::Execute(void)
         callback = inputCallback;
     }
 
+    StripeId logicalStripeId = stripe->GetUserLsid();
     LogicalBlkAddr startLSA = {
         .stripeId = logicalStripeId,
         .offset = 0};
@@ -179,7 +172,7 @@ GcFlushSubmission::Execute(void)
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
             "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",
             arrayName,
-            stripe->GetUserLsid(),
+            logicalStripeId,
             (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);

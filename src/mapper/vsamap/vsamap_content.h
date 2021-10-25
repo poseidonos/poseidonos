@@ -47,12 +47,12 @@ class VSAMapContent : public MapContent
 {
 public:
     VSAMapContent(void) = default;
-    VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_);
+    VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_, FlushCmdManager* flm_);
     VSAMapContent(int mapId, MapperAddressInfo* addrInfo);
 
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
-    int InMemoryInit(uint64_t volId, uint64_t numEntries, uint64_t mpageSize);
+    virtual int InMemoryInit(uint64_t volId, uint64_t numEntries, uint64_t mpageSize);
     virtual VirtualBlkAddr GetEntry(BlkAddr rba);
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
 

@@ -14,7 +14,6 @@ class MockIWBStripeAllocator : public IWBStripeAllocator
 public:
     using IWBStripeAllocator::IWBStripeAllocator;
     MOCK_METHOD(Stripe*, GetStripe, (StripeAddr & lsa), (override));
-    MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
     MOCK_METHOD(void, FreeWBStripeId, (StripeId lsid), (override));
     MOCK_METHOD(bool, ReferLsidCnt, (StripeAddr & lsa), (override));
     MOCK_METHOD(void, DereferLsidCnt, (StripeAddr & lsa, uint32_t blockCount), (override));

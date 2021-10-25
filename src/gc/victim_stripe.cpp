@@ -46,7 +46,7 @@ namespace pos
 {
 VictimStripe::VictimStripe(IArrayInfo* array)
 : VictimStripe(array,
-            MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName())->AllocReverseMapPack(false),
+            MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName()),
             MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName()),
             MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName()),
             VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetIndex()))
@@ -54,7 +54,7 @@ VictimStripe::VictimStripe(IArrayInfo* array)
 }
 
 VictimStripe::VictimStripe(IArrayInfo* array,
-                        ReverseMapPack* inputRevMapPack,
+                        IReverseMap* inputRevMap,
                         IVSAMap* inputIVSAMap,
                         IStripeMap* inputIStripeMap,
                         IVolumeManager* inputVolumeManager)
@@ -65,12 +65,13 @@ VictimStripe::VictimStripe(IArrayInfo* array,
   validBlockCnt(0),
   isLoaded(false),
   array(array),
-  revMapPack(inputRevMapPack),
+  iReverseMap(inputRevMap),
   iVSAMap(inputIVSAMap),
   iStripeMap(inputIStripeMap),
   volumeManager(inputVolumeManager)
 {
     dataBlks = array->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
+    revMapPack = iReverseMap->AllocReverseMapPack(myLsid);
 }
 
 VictimStripe::~VictimStripe(void)
@@ -107,8 +108,7 @@ VictimStripe::_InitValue(StripeId _lsid)
 void
 VictimStripe::_LoadReverseMap(CallbackSmartPtr callback)
 {
-    revMapPack->LinkVsid(myLsid);
-    revMapPack->Load(callback);
+    iReverseMap->Load(revMapPack, UNMAP_STRIPE, myLsid, callback);
 }
 
 bool
@@ -132,7 +132,7 @@ VictimStripe::LoadValidBlock(void)
         }
 
         BlkInfo blkInfo;
-        std::tie(blkInfo.rba, blkInfo.volID) = revMapPack->GetReverseMapEntry(blockOffset);
+        std::tie(blkInfo.rba, blkInfo.volID) = iReverseMap->GetReverseMapEntry(revMapPack, UNMAP_STRIPE, blockOffset);
 
         if ((MAX_VOLUME_COUNT <= blkInfo.volID) || (INVALID_RBA <= blkInfo.rba))
         {
@@ -187,10 +187,7 @@ VictimStripe::LoadValidBlock(void)
         validBlkInfos.push_back(blkInfoList);
         blkInfoList.clear();
     }
-
     isLoaded = true;
-    revMapPack->UnLinkVsid();
-
     return true;
 }
 

@@ -115,13 +115,8 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     }
 
     StripeId newVsid = arrayLsid;
-    Stripe* stripe = new Stripe(false, addrInfo);
-    stripe->Assign(newVsid, UNMAP_STRIPE, 0);
-    if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP), "failed to link ReverseMap to allocate gc stripe!");
-        return nullptr;
-    }
+    Stripe* stripe = new Stripe(iReverseMap, false, addrInfo->GetblksPerStripe());
+    stripe->Assign(newVsid, UINT32_MAX, 0);
     return stripe;
 }
 
@@ -270,14 +265,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     // 3. Get Stripe object for wbLsid and link it with reverse map for vsid
     Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
     stripe->Assign(newVsid, wbLsid, asTailArrayIdx);
-
-    if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid)) < 0))
-    {
-        // LinkReverseMap fails when the wbLsid is allocated before it's released (NOT POSSIBLE)
-        std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-        _RollBackStripeIdAllocation(wbLsid);
-        return -EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP);
-    }
+    iReverseMap->Assign(wbLsid, newVsid);
 
     // 4. Update the stripe map
     iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);

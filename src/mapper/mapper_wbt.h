@@ -68,8 +68,8 @@ public:
 
 private:
     VSAMapContent* _GetFirstValidVolume(void);
-    int _LoadReverseMapVsidFromMFS(ReverseMapPack* reverseMapPack, StripeId vsid);
-    int _StoreReverseMapToMFS(ReverseMapPack* reverseMapPack);
+    int _LoadReverseMapVsidFromMFS(StripeId vsid);
+    int _StoreReverseMapToMFS(StripeId vsid);
 
     MapperAddressInfo* addrInfo;
     VSAMapManager* vsaMapManager;

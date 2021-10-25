@@ -1,7 +1,13 @@
 #include "src/mapper/stripemap/stripemap_manager.h"
-
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/mapper/address/mapper_address_info_mock.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
+using ::testing::AtLeast;
+using testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 namespace pos
 {
 TEST(StripeMapManager, StripeMapManager_)
@@ -62,6 +68,19 @@ TEST(StripeMapManager, IsInWriteBufferArea_)
 
 TEST(StripeMapManager, GetDirtyStripeMapPages_)
 {
+}
+
+TEST(StripeMapManager, AllocateUserDataStripeId_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockEventScheduler>* e = new NiceMock<MockEventScheduler>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    StripeMapManager stripeManager(e, addrInfo);
+    // when
+    stripeManager.AllocateUserDataStripeId(0);
+
+    delete e;
+    delete addrInfo;
 }
 
 } // namespace pos

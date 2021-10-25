@@ -36,6 +36,7 @@
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/logger/logger.h"
+#include "src/mapper/i_stripemap.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos

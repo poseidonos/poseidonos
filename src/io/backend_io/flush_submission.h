@@ -50,7 +50,7 @@ class FlushSubmission : public Event
 {
 public:
     FlushSubmission(Stripe* inputStripe, int arrayId);
-    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, int arrayId,
+    FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
         IIOTranslator* translator);
     ~FlushSubmission(void) override;
     bool Execute(void) override;
@@ -58,7 +58,6 @@ public:
 
 private:
     Stripe* stripe;
-    IWBStripeAllocator* iWBStripeAllocator;
     IIOSubmitHandler* iIOSubmitHandler;
     std::list<BufferEntry> bufferList;
     int arrayId;

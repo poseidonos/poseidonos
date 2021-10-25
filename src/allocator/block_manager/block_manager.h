@@ -42,6 +42,7 @@
 namespace pos
 {
 class IReverseMap;
+class IStripeMap;
 class BlockAllocationStatus;
 
 class BlockManager : public IBlockAllocator

@@ -40,20 +40,23 @@
 #include "src/include/pos_event_id.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/volume/volume_list.h"
+#include "src/mapper/i_reversemap.h"
+#include "src/mapper/reversemap/reverse_map.h"
 
 namespace pos
 {
-Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
+Stripe::Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe)
 : asTailArrayIdx(UINT32_MAX),
   vsid(UINT32_MAX),
   wbLsid(UINT32_MAX),
   userLsid(UINT32_MAX),
-  revMapPack(revMap),
+  revMapPack(rev),
   finished(true),
   remaining(0),
   referenceCount(0),
-  totalBlksPerUserStripe(1), // for UT
-  withDataBuffer(withDataBuffer_)
+  totalBlksPerUserStripe(numBlksPerStripe), // for UT
+  withDataBuffer(withDataBuffer_),
+  iReverseMap(revMapMan)
 {
     if (withDataBuffer == false)
     {
@@ -62,10 +65,9 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
     flushIo = nullptr;
 }
 
-Stripe::Stripe(bool withDataBuffer_, AllocatorAddressInfo* allocatorAddressInfo)
-: Stripe(nullptr, withDataBuffer_)
+Stripe::Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe)
+: Stripe(nullptr, revMapMan, withDataBuffer_, numBlksPerStripe)
 {
-    totalBlksPerUserStripe = allocatorAddressInfo->GetblksPerStripe();
 }
 
 Stripe::~Stripe(void)
@@ -81,23 +83,7 @@ Stripe::~Stripe(void)
 }
 
 void
-Stripe::UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId)
-{
-    if (rba != INVALID_RBA && volumeId >= MAX_VOLUME_COUNT)
-    {
-        throw POS_EVENT_ID::STRIPE_INVALID_VOLUME_ID;
-    }
-    revMapPack->SetReverseMapEntry(offset, rba, volumeId);
-}
-
-std::tuple<BlkAddr, uint32_t>
-Stripe::GetReverseMapEntry(uint32_t offset)
-{
-    return revMapPack->GetReverseMapEntry(offset);
-}
-
-void
-Stripe::UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa)
+Stripe::UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa, BlkAddr rba, uint32_t volumeId)
 {
     oldVsaList[offset] = vsa;
 }
@@ -108,56 +94,20 @@ Stripe::GetVictimVsa(uint32_t offset)
     return oldVsaList[offset];
 }
 
-int
-Stripe::LinkReverseMap(ReverseMapPack* revMapPackToLink)
-{
-    if (unlikely(revMapPack != nullptr))
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::REVMAP_PACK_ALREADY_LINKED,
-            "Stripe object for wbLsid:{} is already linked to ReverseMapPack, GcStripe:{}",
-            wbLsid, (!withDataBuffer));
-        return -(int)POS_EVENT_ID::REVMAP_PACK_ALREADY_LINKED;
-    }
-
-    revMapPack = revMapPackToLink;
-    int ret = revMapPack->LinkVsid(vsid);
-    return ret;
-}
-
-int
-Stripe::UnLinkReverseMap(void)
-{
-    if (likely(revMapPack != nullptr))
-    {
-        if (withDataBuffer == false)
-        {
-            delete revMapPack;
-        }
-        else
-        {
-            revMapPack->UnLinkVsid();
-        }
-        revMapPack = nullptr;
-        return 0;
-    }
-    else
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP,
-            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Unlink, GcStripe:{}",
-            wbLsid, (!withDataBuffer));
-        return -(int)POS_EVENT_ID::ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP;
-    }
-}
-
 void
-Stripe::Assign(StripeId inputVsid, StripeId inputLsid, ASTailArrayIdx inputTailArrayIdx)
+Stripe::Assign(StripeId vsid_, StripeId lsid_, ASTailArrayIdx tailArrayIdx_)
 {
-    vsid = inputVsid;
-    wbLsid = inputLsid;
-    asTailArrayIdx = inputTailArrayIdx;
+    vsid = vsid_;
+    wbLsid = lsid_;
+    asTailArrayIdx = tailArrayIdx_;
     oldVsaList.assign(totalBlksPerUserStripe, UNMAP_VSA);
     remaining.store(totalBlksPerUserStripe, memory_order_release);
     finished = false;
+    if (withDataBuffer == false)
+    {
+        revMapPack = iReverseMap->AllocReverseMapPack(vsid);
+    }
+    userLsid = vsid; // Future work: Allocate userLsid in Flush submission
 }
 
 bool
@@ -229,12 +179,28 @@ Stripe::GetAsTailArrayIdx(void)
     return asTailArrayIdx;
 }
 
+void
+Stripe::UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
+{
+    if (rba != INVALID_RBA && volumeId >= MAX_VOLUME_COUNT)
+    {
+        throw POS_EVENT_ID::STRIPE_INVALID_VOLUME_ID;
+    }
+    iReverseMap->UpdateReverseMapEntry(revMapPack, wbLsid, offset, rba, volumeId);
+}
+
+std::tuple<BlkAddr, uint32_t>
+Stripe::GetReverseMapEntry(uint32_t offset)
+{
+    return iReverseMap->GetReverseMapEntry(revMapPack, wbLsid, offset);
+}
+
 int
 Stripe::Flush(EventSmartPtr callback)
 {
     if (likely(revMapPack != nullptr))
     {
-        return revMapPack->Flush(this, callback);
+        return iReverseMap->Flush(revMapPack, UNMAP_STRIPE, this, vsid, callback);
     }
     else
     {
@@ -297,18 +263,6 @@ Stripe::SetFinished(bool state)
         flushIo->DecreaseStripeCnt();
         flushIo = nullptr;
     }
-}
-
-int
-Stripe::ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
-{
-    return revMapPack->ReconstructMap(volumeId, vsid, wbLsid, blockCount, revMapInfos);
-}
-
-bool
-Stripe::IsGcDestStripe(void)
-{
-    return (!withDataBuffer);
 }
 
 void

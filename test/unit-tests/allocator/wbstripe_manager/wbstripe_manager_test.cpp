@@ -66,25 +66,6 @@ TEST(WBStripeManager, Init_TestInitialization)
     delete wbCtx;
 }
 
-TEST(WBStripeManager, AllocateUserDataStripeId_TestSimpleGetter)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(5);
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    WBStripeManager wbStripeManager(nullptr, 1, nullptr, nullptr, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    // when
-    wbStripeManager.AllocateUserDataStripeId(0);
-
-    delete blkManager;
-    delete ctxManager;
-    delete wbCtx;
-    delete iStripeMap;
-}
-
 TEST(WBStripeManager, FreeWBStripeId_TestSimpleCaller)
 {
     // given

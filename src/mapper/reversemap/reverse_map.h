@@ -144,52 +144,35 @@ public:
     ReverseMapPack(void);
     virtual ~ReverseMapPack(void);
 
-    virtual void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
-    virtual void Init(IVolumeManager* volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap);
-    virtual int LinkVsid(StripeId vsid); // vsid == SSD LSID
-    virtual int UnLinkVsid(void);
+    virtual void Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_);
+    virtual void Assign(StripeId vsid);
 
-    virtual int Load(EventSmartPtr callback);
-    virtual int Flush(Stripe* stripe, EventSmartPtr callback);
+    virtual int Load(uint32_t fileOffset, EventSmartPtr cb);
+    virtual int Flush(Stripe* stripe, uint32_t fileOffset, EventSmartPtr cb);
 
     virtual int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual int ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
+    virtual void WaitForPendingIO(void);
     virtual int IsAsyncIoDone(void);
-    virtual int GetIoError(void);
-    virtual int WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirection);
+
+    virtual char* GetRevMapPtrForWBT(void) { return reinterpret_cast<char*>(&revMaps[0]->sector[0]); }
 
 private:
-    void _HeaderInit(StripeId wblsid);
-    int _SetTimeToHeader(ACTION act);
+    void _SetHeader(StripeId wblsid, StripeId vsid);
     std::tuple<uint32_t, uint32_t, uint32_t> _ReverseMapGeometry(uint64_t offset);
-    std::tuple<uint32_t, uint32_t> _GetCurrentTime(void);
     void _RevMapPageIoDone(AsyncMetaFileIoCtx* ctx);
-    bool _FindRba(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockOffset, BlkAddr rbaStart, BlkAddr& foundRba);
 
-    bool linkedToVsid;
+    StripeId wbLsid;
     StripeId vsid;   // SSD LSID
-    StripeId wbLsid; // WriteBuffer LSID
-
-    uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
-    uint64_t numMpagesPerStripe; // It depends on block count per a stripe
-    uint64_t fileSizePerStripe;
+    std::vector<RevMap*> revMaps;    
 
     MetaFileIntf* revMapfile; // MFS file
+    uint32_t mpageSize;
     std::atomic<uint32_t> mfsAsyncIoDonePages;
+    uint64_t numMpagesPerStripe; // It depends on block count per a stripe
     int ioError; // indicates if there is an Async-IO error among mpages
     int ioDirection;
-    std::vector<RevMap*> revMaps;
     EventSmartPtr callback;
-
-    VSAMapManager* iVSAMap;
-    IStripeMap* iStripeMap;
-    std::string arrayName;
-
-    BlkAddr totalRbaNum;
-    IVolumeManager* volumeManager;
-    std::atomic<uint32_t> numWriteIssued;
-    std::atomic<uint32_t> numLoadIssued;
 };
 
 } // namespace pos

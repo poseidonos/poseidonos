@@ -35,6 +35,7 @@
 #include <vector>
 #include <list>
 
+#include "src/mapper/i_reversemap.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/array_models/interface/i_array_info.h"
 
@@ -59,7 +60,7 @@ class VictimStripe
 public:
     explicit VictimStripe(IArrayInfo* array);
     VictimStripe(IArrayInfo* array,
-                ReverseMapPack* inputRevMapPack,
+                IReverseMap* inputRevMap,
                 IVSAMap* inputIVSAMap,
                 IStripeMap* inputIStripeMap,
                 IVolumeManager* inputVolumeManager);
@@ -101,10 +102,11 @@ private:
     bool isLoaded;
 
     IArrayInfo* array;
-    ReverseMapPack* revMapPack;
+    IReverseMap* iReverseMap;
     IVSAMap* iVSAMap;
     IStripeMap* iStripeMap;
     IVolumeManager* volumeManager;
+    ReverseMapPack* revMapPack;
 };
 
 } // namespace pos

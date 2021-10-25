@@ -31,17 +31,23 @@
  */
 
 #pragma once
-
-#include "src/allocator/stripe/stripe.h"
-
+#include "src/include/address_type.h"
+#include <map>
 namespace pos
 {
+class ReverseMapPack;
+class Stripe;
 
 class IReverseMap
 {
 public:
-    virtual ReverseMapPack* GetReverseMapPack(StripeId wbLsid) = 0;
-    virtual ReverseMapPack* AllocReverseMapPack(bool gcDest) = 0;
+    virtual int Load(ReverseMapPack* rev, StripeId wblsid, StripeId vsid, EventSmartPtr cb) = 0;
+    virtual int UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId) = 0;
+    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset) = 0;
+    virtual void Assign(StripeId wblsid, StripeId vsid) = 0;
+    virtual ReverseMapPack* AllocReverseMapPack(uint32_t vsid) = 0;
+    virtual int ReconstructReverseMap(uint32_t volumeId, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
+    virtual int Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, StripeId vsid, EventSmartPtr cb) = 0;
 };
 
 } // namespace pos

@@ -163,7 +163,6 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
                         .vsa = {.stripeId = vsid, .offset = index}};
         blkInfoList->push_back(blkInfo);
 
-        EXPECT_CALL(*stripe, UpdateReverseMap(index, index, testVolumeId)).Times(1);
         EXPECT_CALL(*stripe, UpdateVictimVsa(index, blkInfo.vsa)).Times(1);
     }
 

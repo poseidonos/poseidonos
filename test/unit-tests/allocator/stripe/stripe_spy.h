@@ -57,7 +57,7 @@ public:
         return 0;
     }
     void
-    UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId)
+    UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
     {
     }
     uint32_t

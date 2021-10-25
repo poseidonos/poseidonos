@@ -108,7 +108,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(true, addrInfo);
+        Stripe* stripe = new Stripe(iReverseMap, true, addrInfo->GetblksPerStripe());
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {
@@ -147,12 +147,6 @@ WBStripeManager::GetStripe(StripeAddr& lsa)
         return nullptr;
     }
     return wbStripeArray[lsa.stripeId];
-}
-
-StripeId
-WBStripeManager::AllocateUserDataStripeId(StripeId vsid)
-{
-    return vsid;
 }
 
 void
@@ -241,12 +235,6 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 {
     Stripe* stripe;
     int ret = _ReconstructAS(tailVsa.stripeId, wbLsid, tailVsa.offset, volumeId, stripe);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    ret = _ReconstructReverseMap(volumeId, stripe, tailVsa.offset, revMapInfos);
     return ret;
 }
 
@@ -435,27 +423,6 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     return 0;
 }
 
-int
-WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
-{
-    int ret = 0;
-    // TODO (jk.man.kim): Don't forget to insert array name in the future.
-    StripeId wbLsid = stripe->GetWbLsid();
-    ret = stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid));
-    if (unlikely(ret < 0))
-    {
-        return ret;
-    }
-
-    ret = stripe->ReconstructReverseMap(volumeId, blockCount, revMapInfos);
-    if (ret < 0)
-    {
-        POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_NOT_FOUND_RBA), "There was no vsa map entry for some blocks");
-    }
-
-    return ret;
-}
-
 Stripe*
 WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 {
@@ -524,7 +491,7 @@ WBStripeManager::_FinishRemainingBlocks(VirtualBlks remainingVsaRange)
         uint32_t lastBlock = startBlock + remainingVsaRange.numBlks - 1;
         for (uint32_t block = startBlock; block <= lastBlock; ++block)
         {
-            activeStripe->UpdateReverseMap(block, INVALID_RBA, UINT32_MAX);
+            activeStripe->UpdateReverseMapEntry(block, INVALID_RBA, UINT32_MAX);
         }
         uint32_t remain = activeStripe->DecreseBlksRemaining(remainingVsaRange.numBlks);
         if (remain == 0)

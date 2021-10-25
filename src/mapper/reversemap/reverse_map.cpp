@@ -47,135 +47,84 @@
 namespace pos
 {
 ReverseMapPack::ReverseMapPack(void)
-: linkedToVsid(false),
+: wbLsid(UNMAP_STRIPE),
   vsid(UINT32_MAX),
+  revMapfile(nullptr),
+  mpageSize(0),
+  mfsAsyncIoDonePages(0),
+  numMpagesPerStripe(0),
   ioError(0),
   ioDirection(0),
-  callback(nullptr),
-  totalRbaNum(UINT64_MAX),
-  volumeManager(nullptr)
+  callback(nullptr)
 {
-    wbLsid = UNMAP_STRIPE;
-    mpageSize = 0;
-    numMpagesPerStripe = 0;
-    fileSizePerStripe = 0;
-    revMapfile = nullptr;
-    iVSAMap = nullptr;
-    iStripeMap = nullptr;
-    numWriteIssued = 0;
-    numLoadIssued = 0;
 }
 
 ReverseMapPack::~ReverseMapPack(void)
 {
     for (auto& revMap : revMaps)
     {
-        delete revMap;
-        revMap = nullptr;
+        if (revMap != nullptr)
+        {
+            delete revMap;
+            revMap = nullptr;
+        }
     }
     revMaps.clear();
 
-    revMapfile = nullptr;
+    if (revMapfile != nullptr)
+    {
+        if (revMapfile->IsOpened() == true)
+        {
+            revMapfile->Close();
+        }
+        delete revMapfile;
+        revMapfile = nullptr;
+    }
 }
 
 void
-ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName)
+ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
 {
-    mpageSize = mpsize;
-    numMpagesPerStripe = nmpPerStripe;
-    fileSizePerStripe = mpageSize * numMpagesPerStripe;
-    revMapfile = file;
-    arrayName = arrName;
-
+    wbLsid = wbLsid_;
+    vsid = vsid_;
+    mpageSize_ = mpageSize_;
+    numMpagesPerStripe = numMpagesPerStripe_;
     for (uint64_t mpage = 0; mpage < numMpagesPerStripe; ++mpage)
     {
         RevMap* revMap = new RevMap();
         memset(revMap, 0xFF, mpageSize);
         revMaps.push_back(revMap);
     }
+    _SetHeader(wbLsid, vsid);
 }
 
 void
-ReverseMapPack::Init(IVolumeManager* volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap)
+ReverseMapPack::Assign(StripeId vsid_)
 {
-    wbLsid = wblsid;
-    iVSAMap = ivsaMap;
-    iStripeMap = istripeMap;
-    this->volumeManager = volumeManager;
-    _HeaderInit(wbLsid);
+    vsid = vsid_;
+    _SetHeader(wbLsid, vsid);
 }
 
 int
-ReverseMapPack::LinkVsid(StripeId vsid)
-{
-    if (unlikely(linkedToVsid))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_PACK_ALREADY_LINKED),
-            "ReverseMapPack for wbLsid:{} is already linked to vsid:{} but tried to link vsid:{} again",
-            this->wbLsid, this->vsid, vsid);
-        return -EID(REVMAP_PACK_ALREADY_LINKED);
-    }
-
-    // Set vsid to object and header
-    this->vsid = vsid;
-    RevMapSector& hdr = revMaps[0]->sector[0];
-    hdr.u.header.vsid = vsid;
-
-    linkedToVsid = true;
-    return 0;
-}
-
-int
-ReverseMapPack::UnLinkVsid(void)
-{
-    if (unlikely(linkedToVsid == false))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_NOT_LINKED_PACK),
-            "ReverseMapPack for wbLsid:{} is not linked but tried to unlink", this->wbLsid);
-        return -EID(REVMAP_NOT_LINKED_PACK);
-    }
-
-    vsid = UINT32_MAX;
-
-    _HeaderInit(wbLsid);
-
-    linkedToVsid = false;
-
-    return 0;
-}
-
-int
-ReverseMapPack::Load(EventSmartPtr inputCallback)
+ReverseMapPack::Load(uint32_t fileOffset, EventSmartPtr cb)
 {
     ioDirection = IO_LOAD;
     ioError = 0;
-    if (unlikely(linkedToVsid == false))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_NOT_LINKED_PACK),
-            "This Pack wblsid:{} is not linked but tried to Load()", this->wbLsid);
-        ioError = -EID(REVMAP_NOT_LINKED_PACK);
-        return ioError;
-    }
-
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
     assert(callback == nullptr);
-    assert(numWriteIssued == 0);
-    callback = inputCallback;
+    callback = cb;
 
     for (auto& revMap : revMaps)
     {
         RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx();
         revMapPageAsyncIoReq->opcode = MetaFsIoOpcode::Read;
         revMapPageAsyncIoReq->fd = revMapfile->GetFd();
-        revMapPageAsyncIoReq->fileOffset = (fileSizePerStripe * vsid) + mpageSize * pageNum;
+        revMapPageAsyncIoReq->fileOffset = fileOffset + mpageSize * pageNum;
         revMapPageAsyncIoReq->length = mpageSize;
         revMapPageAsyncIoReq->buffer = (char*)revMap;
-        revMapPageAsyncIoReq->callback = std::bind(&ReverseMapPack::_RevMapPageIoDone,
-            this, std::placeholders::_1);
-
+        revMapPageAsyncIoReq->callback = std::bind(&ReverseMapPack::_RevMapPageIoDone, this, std::placeholders::_1);
         revMapPageAsyncIoReq->mpageNum = pageNum++;
-        numLoadIssued++;
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
@@ -185,35 +134,25 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
             ioError = ret;
         }
     }
-
     return ioError;
 }
 
 int
-ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
+ReverseMapPack::Flush(Stripe* stripe, uint32_t fileOffset, EventSmartPtr cb)
 {
     ioDirection = IO_FLUSH;
     ioError = 0;
-    if (unlikely(linkedToVsid == false))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_NOT_LINKED_PACK),
-            "This Pack wblsid:{} is not linked but tried to Flush()", this->wbLsid);
-        ioError = -EID(REVMAP_NOT_LINKED_PACK);
-        return ioError;
-    }
-
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
     assert(callback == nullptr);
-    assert(numLoadIssued == 0);
-    callback = inputCallback;
+    callback = cb;
 
     for (auto& revMap : revMaps)
     {
         RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx();
         revMapPageAsyncIoReq->opcode = MetaFsIoOpcode::Write;
         revMapPageAsyncIoReq->fd = revMapfile->GetFd();
-        revMapPageAsyncIoReq->fileOffset = (fileSizePerStripe * vsid) + mpageSize * pageNum;
+        revMapPageAsyncIoReq->fileOffset = fileOffset + mpageSize * pageNum;
         revMapPageAsyncIoReq->length = mpageSize;
         revMapPageAsyncIoReq->buffer = (char*)revMap;
         revMapPageAsyncIoReq->callback = std::bind(&ReverseMapPack::_RevMapPageIoDone,
@@ -221,7 +160,6 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
 
         revMapPageAsyncIoReq->mpageNum = pageNum++;
         revMapPageAsyncIoReq->stripeToFlush = stripe;
-        numWriteIssued++;
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
@@ -236,12 +174,68 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
     return ioError;
 }
 
+int
+ReverseMapPack::SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
+{
+    uint32_t pageIndex;
+    uint32_t sectorIndex;
+    uint32_t entryIndex;
+    std::tie(pageIndex, sectorIndex, entryIndex) = _ReverseMapGeometry(offset);
+
+    RevMapEntry& entry = revMaps[pageIndex]->sector[sectorIndex].u.body.entry[entryIndex];
+    entry.u.entry.rba = rba;
+    entry.u.entry.volumeId = volumeId;
+
+    return 0;
+}
+
+std::tuple<BlkAddr, uint32_t>
+ReverseMapPack::GetReverseMapEntry(uint32_t offset)
+{
+    uint32_t pageIndex;
+    uint32_t sectorIndex;
+    uint32_t entryIndex;
+    std::tie(pageIndex, sectorIndex, entryIndex) = _ReverseMapGeometry(offset);
+
+    RevMapEntry& entry = revMaps[pageIndex]->sector[sectorIndex].u.body.entry[entryIndex];
+    BlkAddr rba = entry.u.entry.rba;
+    uint32_t volumeId = entry.u.entry.volumeId;
+
+    return std::make_tuple(rba, volumeId);
+}
+
+void
+ReverseMapPack::WaitForPendingIO(void)
+{
+    while(numMpagesPerStripe == mfsAsyncIoDonePages);
+}
+
+int
+ReverseMapPack::IsAsyncIoDone(void)
+{
+    if (unlikely(ioError != 0))
+    {
+        POS_TRACE_ERROR(EID(REVMAP_MFS_IO_ERROR), "RevMap MFS IO Error:{}  IoDirection:{}", ioError, ioDirection);
+        return ioError; // < 0
+    }
+
+    return numMpagesPerStripe - mfsAsyncIoDonePages; // 0: Done, > 0: Remaining pages
+}
+
+void
+ReverseMapPack::_SetHeader(StripeId wblsid_, StripeId vsid_)
+{
+    RevMapSector& hdr = revMaps[0]->sector[0];
+    hdr.u.header.magic = REVMAP_MAGIC;
+    hdr.u.header.wbLsid = wblsid_;
+    hdr.u.header.vsid = vsid_;
+}
+
+
 void
 ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
 {
     RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = static_cast<RevMapPageAsyncIoCtx*>(ctx);
-    numWriteIssued = 0;
-    numLoadIssued = 0;
     if (revMapPageAsyncIoReq->error != 0)
     {
         ioError = revMapPageAsyncIoReq->error;
@@ -275,192 +269,4 @@ ReverseMapPack::_ReverseMapGeometry(uint64_t offset) //   Ex) offset = 300 | 500
     return std::make_tuple(pageNr, sectorNr, entNr);
 }
 
-int
-ReverseMapPack::SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
-{
-    uint32_t pageIndex;
-    uint32_t sectorIndex;
-    uint32_t entryIndex;
-    std::tie(pageIndex, sectorIndex, entryIndex) = _ReverseMapGeometry(offset);
-
-    RevMapEntry& entry =
-        revMaps[pageIndex]->sector[sectorIndex].u.body.entry[entryIndex];
-    entry.u.entry.rba = rba;
-    entry.u.entry.volumeId = volumeId;
-
-    return 0;
-}
-
-std::tuple<BlkAddr, uint32_t>
-ReverseMapPack::GetReverseMapEntry(uint32_t offset)
-{
-    uint32_t pageIndex;
-    uint32_t sectorIndex;
-    uint32_t entryIndex;
-    std::tie(pageIndex, sectorIndex, entryIndex) = _ReverseMapGeometry(offset);
-
-    RevMapEntry& entry =
-        revMaps[pageIndex]->sector[sectorIndex].u.body.entry[entryIndex];
-    BlkAddr rba = entry.u.entry.rba;
-    uint32_t volumeId = entry.u.entry.volumeId;
-
-    return std::make_tuple(rba, volumeId);
-}
-
-int
-ReverseMapPack::IsAsyncIoDone(void)
-{
-    if (unlikely(ioError != 0))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_MFS_IO_ERROR),
-            "RevMap MFS IO Error:{}  IoDirection:{}", ioError, ioDirection);
-        return ioError; // < 0
-    }
-
-    return numMpagesPerStripe - mfsAsyncIoDonePages; // 0: Done, > 0: Remaining pages
-}
-
-int
-ReverseMapPack::GetIoError(void)
-{
-    return ioError;
-}
-
-void
-ReverseMapPack::_HeaderInit(StripeId wblsid)
-{
-    // Set Header as default
-    RevMapSector& hdr = revMaps[0]->sector[0];
-    hdr.u.header.magic = REVMAP_MAGIC;
-    hdr.u.header.wbLsid = wblsid;
-}
-
-std::tuple<uint32_t, uint32_t>
-ReverseMapPack::_GetCurrentTime(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    uint32_t sec = ts.tv_sec;
-    uint32_t nsec = ts.tv_nsec;
-
-    return std::make_tuple(sec, nsec);
-}
-
-int
-ReverseMapPack::_SetTimeToHeader(ACTION act)
-{
-    uint32_t sec, nsec;
-    std::tie(sec, nsec) = _GetCurrentTime();
-
-    RevMapSector& hdr = revMaps[0]->sector[0];
-    hdr.u.header.closeSec = sec;
-    hdr.u.header.closeNsec = nsec;
-
-    return 0;
-}
-
-int
-ReverseMapPack::WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirection)
-{
-    int ret = 0;
-    uint64_t curOffset = 0;
-
-    for (auto& revMap : revMaps)
-    {
-        ret = fileLinux->AppendIO(IoDirection, curOffset, mpageSize, (char*)revMap);
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "AppendIO Error, ret:{}  fd:{}", ret,
-                fileLinux->GetFd());
-            return ret;
-        }
-    }
-
-    return ret;
-}
-
-int
-ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
-{
-    int ret = 0;
-    BlkAddr lastFoundRba = UINT64_MAX;
-    POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
-        "[ReconstructMap]START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}",
-        volumeId, lsid, vsid, blockCount);
-
-    uint64_t volSize = 0;
-    assert(volumeManager != nullptr);
-    ret = volumeManager->GetVolumeSize(volumeId, volSize);
-    if (ret != 0)
-    {
-        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[ReconstructMap]GetVolumeSize failure, volumeId:{}", volumeId);
-        return -(int)EID(GET_VOLUMESIZE_FAILURE);
-    }
-    totalRbaNum = DivideUp(volSize, BLOCK_SIZE);
-
-    for (uint64_t offset = 0; offset < blockCount; offset++)
-    {
-        if (revMapInfos.find(offset) == revMapInfos.end())
-        {
-            // Set the RBA to start finding
-            BlkAddr rbaStart = 0;
-            if (lastFoundRba != UINT64_MAX)
-            {
-                rbaStart = lastFoundRba + 1;
-            }
-
-            BlkAddr foundRba = INVALID_RBA;
-            bool found = _FindRba(volumeId, vsid, lsid, offset, rbaStart, foundRba);
-            if (found == false)
-            {
-                continue;
-            }
-            revMapInfos.insert(make_pair(offset, foundRba));
-            lastFoundRba = foundRba;
-        }
-        SetReverseMapEntry(offset, revMapInfos[offset], volumeId);
-    }
-
-    POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
-        "[ReconstructMap] {}/{} blocks are reconstructed for Stripe(wbLsid:{})",
-        revMapInfos.size(), blockCount, lsid);
-    return ret;
-}
-
-bool
-ReverseMapPack::_FindRba(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
-{
-    bool looped = false;
-    for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= totalRbaNum; ++rbaToCheck)
-    {
-        // If rbaToCheck exceeds more than totalRbaNum, looped would be set as TRUE
-        if (rbaToCheck == totalRbaNum)
-        {
-            rbaToCheck = 0;
-            looped = true;
-        }
-
-        if ((rbaToCheck == rbaStart) && looped)
-        {
-            return false;
-        }
-
-        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWoCond(volumeId, rbaToCheck);
-        if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
-        {
-            continue;
-        }
-
-        StripeAddr lsaToCheck = iStripeMap->GetLSA(vsaToCheck.stripeId);
-        if (iStripeMap->IsInUserDataArea(lsaToCheck) || lsaToCheck.stripeId != lsid)
-        {
-            continue;
-        }
-
-        foundRba = rbaToCheck;
-        return true;
-    }
-
-    return false;
-}
 } // namespace pos

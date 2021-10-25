@@ -71,7 +71,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMap).Times(newVsas.numBlks);
+    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).WillOnce(ReturnRef(oldVsas));
@@ -122,7 +122,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMap).Times(newVsas.numBlks);
+    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
 
@@ -187,7 +187,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMap).Times(newVsas.numBlks);
+    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(numOldVsaRange).WillOnce(ReturnRef(oldVsas[0])).WillOnce(ReturnRef(oldVsas[1]));

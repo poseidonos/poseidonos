@@ -8,10 +8,6 @@ TEST(IWBStripeAllocator, GetStripe_)
 {
 }
 
-TEST(IWBStripeAllocator, AllocateUserDataStripeId_)
-{
-}
-
 TEST(IWBStripeAllocator, FreeWBStripeId_)
 {
 }

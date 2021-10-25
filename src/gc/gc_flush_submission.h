@@ -55,7 +55,7 @@ public:
     GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
                     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
                     CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                    IWBStripeAllocator* inputIWBStripeAllocator, IIOSubmitHandler* inputIIOSubmitHandler,
+                    IIOSubmitHandler* inputIIOSubmitHandler,
                     FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo);
     ~GcFlushSubmission(void) override;
     bool Execute(void) override;
@@ -71,7 +71,6 @@ private:
 
     CallbackSmartPtr inputCallback;
     IBlockAllocator* iBlockAllocator;
-    IWBStripeAllocator* iWBStripeAllocator;
     IIOSubmitHandler* iIOSubmitHandler;
     FlowControl* flowControl;
     IArrayInfo* iArrayInfo;

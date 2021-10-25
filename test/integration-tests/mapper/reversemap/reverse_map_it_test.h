@@ -57,6 +57,7 @@ protected:
     MetaFileIntf* _PrepareFile(void);
 
     ReverseMapPack* reverseMapPack = nullptr;   // SUT object
+    MetaFileIntf* revMapWholefile = nullptr;
 };
 
 }   // namespace pos

@@ -110,7 +110,7 @@ BlockMapUpdate::_UpdateReverseMap(Stripe& stripe)
     {
         uint64_t vsOffset = startVsOffset + blockIndex;
         BlkAddr targetRba = startRba + blockIndex;
-        stripe.UpdateReverseMap(vsOffset, targetRba, volumeId);
+        stripe.UpdateReverseMapEntry(vsOffset, targetRba, volumeId);
     }
 }
 

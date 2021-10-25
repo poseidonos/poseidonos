@@ -41,18 +41,19 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/bio/flush_io.h"
-#include "src/mapper/reversemap/reverse_map.h"
 
 namespace pos
 {
+class IReverseMap;
+class ReverseMapPack;
 using DataBufferIter = std::vector<void*>::iterator;
 
 class Stripe
 {
 public:
     Stripe(void) = default;
-    Stripe(ReverseMapPack* revMap, bool withDataBuffer);                                            // Ctor for UT & IT
-    Stripe(bool withDataBuffer, AllocatorAddressInfo* allocatorAddressInfo);                        // Ctor for Production
+    Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer, uint32_t numBlksPerStripe);
+    Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe);
     virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 
@@ -66,13 +67,11 @@ public:
     virtual StripeId GetUserLsid(void);
     virtual void SetUserLsid(StripeId userAreaLsid);
 
-    virtual int Flush(EventSmartPtr callback);
-    virtual void UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
-    virtual int LinkReverseMap(ReverseMapPack* revMapPackToLink);
-    virtual int UnLinkReverseMap(void);
+    virtual void UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
-    virtual void UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa);
+    virtual int Flush(EventSmartPtr callback);
+
+    virtual void UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa, BlkAddr rba, uint32_t volumeId);
     virtual VirtualBlkAddr GetVictimVsa(uint32_t offset);
 
     virtual bool IsFinished(void);
@@ -88,7 +87,6 @@ public:
     virtual void AddDataBuffer(void* buf);
     virtual DataBufferIter DataBufferBegin(void);
     virtual DataBufferIter DataBufferEnd(void);
-    virtual bool IsGcDestStripe(void);
 
     virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
 
@@ -109,6 +107,7 @@ protected: // for UT
 
     FlushIoSmartPtr flushIo;
     std::mutex flushIoUpdate;
+    IReverseMap* iReverseMap;
 };
 
 } // namespace pos

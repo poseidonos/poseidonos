@@ -16,7 +16,6 @@ public:
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(Stripe*, GetStripe, (StripeAddr & lsidEntry), (override));
-    MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
     MOCK_METHOD(void, FreeWBStripeId, (StripeId lsid), (override));
     MOCK_METHOD(void, FlushActiveStripes, (uint32_t volumeId), (override));
     MOCK_METHOD(void, GetWbStripes, (FlushIoSmartPtr flushIo), (override));

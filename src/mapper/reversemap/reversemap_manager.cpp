@@ -42,7 +42,6 @@
 
 namespace pos
 {
-
 ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_)
 : mpageSize(0),
   numMpagesPerStripe(0),
@@ -61,11 +60,13 @@ ReverseMapManager::~ReverseMapManager(void)
 {
     if (revMapWholefile != nullptr)
     {
-        revMapWholefile->Close();
+        if (revMapWholefile->IsOpened() == true)
+        {
+            revMapWholefile->Close();
+        }
         delete revMapWholefile;
         revMapWholefile = nullptr;
     }
-
     if (revMapPacks != nullptr)
     {
         delete [] revMapPacks;
@@ -81,11 +82,7 @@ ReverseMapManager::Init(void)
         volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(addrInfo->GetArrayName());
     }
 
-    mpageSize = addrInfo->GetMpageSize();
     _SetNumMpages();
-
-    int maxVsid = addrInfo->GetMaxVSID();
-    fileSizeWholeRevermap = fileSizePerStripe * maxVsid;
 
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
@@ -99,7 +96,7 @@ ReverseMapManager::Init(void)
     if (revMapWholefile->DoesFileExist() == false)
     {
         POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-                        fileSizePerStripe, maxVsid, fileSizeWholeRevermap);
+                        fileSizePerStripe, addrInfo->GetMaxVSID(), fileSizeWholeRevermap);
 
         int ret = revMapWholefile->Create(fileSizeWholeRevermap);
         if (ret != 0)
@@ -115,9 +112,7 @@ ReverseMapManager::Init(void)
     revMapPacks = new ReverseMapPack[numWbStripes]();
     for (StripeId wbLsid = 0; wbLsid < numWbStripes; ++wbLsid)
     {
-        std::string arrName = addrInfo->GetArrayName();
-        revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
-        revMapPacks[wbLsid].Init(volumeManager, wbLsid, iVSAMap, iStripeMap);
+        revMapPacks[wbLsid].Init(revMapWholefile, wbLsid, UINT32_MAX, addrInfo->GetMpageSize(), numMpagesPerStripe);
     }
 }
 
@@ -139,24 +134,80 @@ ReverseMapManager::Dispose(void)
         revMapPacks = nullptr;
     }
 }
-//----------------------------------------------------------------------------//
-ReverseMapPack*
-ReverseMapManager::GetReverseMapPack(StripeId wbLsid)
+
+int
+ReverseMapManager::Load(ReverseMapPack* rev, StripeId wblsid, StripeId vsid, EventSmartPtr cb)
 {
-    return &revMapPacks[wbLsid];
+    uint32_t fileOffset = fileSizePerStripe * vsid;
+    if (rev != nullptr)
+    {
+        return rev->Load(fileOffset, cb);
+    }
+    else
+    {
+        return revMapPacks[wblsid].Load(fileOffset, cb);
+    }
+}
+
+int
+ReverseMapManager::Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, StripeId vsid, EventSmartPtr cb)
+{
+    uint32_t fileOffset = fileSizePerStripe * stripe->GetVsid();
+    if (rev != nullptr)
+    {
+        return rev->Flush(stripe, fileOffset, cb);
+    }
+    else
+    {
+        return revMapPacks[wblsid].Flush(stripe, fileOffset, cb);
+    }
+}
+
+void
+ReverseMapManager::WaitForPendingIO(StripeId wblsid)
+{
+    revMapPacks[wblsid].WaitForPendingIO();
+}
+
+int
+ReverseMapManager::UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId)
+{
+    if (rev != nullptr)
+    {
+        return rev->SetReverseMapEntry(offset, rba, volumeId);
+    }
+    else
+    {
+        return revMapPacks[wblsid].SetReverseMapEntry(offset, rba, volumeId);
+    }
+}
+
+std::tuple<BlkAddr, uint32_t>
+ReverseMapManager::GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset)
+{
+    if (rev != nullptr)
+    {
+        return rev->GetReverseMapEntry(offset);
+    }
+    else
+    {
+        return revMapPacks[wblsid].GetReverseMapEntry(offset);
+    }
+}
+
+void
+ReverseMapManager::Assign(StripeId wblsid, StripeId vsid)
+{
+    revMapPacks[wblsid].Assign(vsid);
 }
 
 ReverseMapPack*
-ReverseMapManager::AllocReverseMapPack(bool gcDest)
+ReverseMapManager::AllocReverseMapPack(uint32_t vsid)
 {
-    ReverseMapPack* obj = new ReverseMapPack;
-    std::string arrName = addrInfo->GetArrayName();
-    obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
-    if (gcDest == true)
-    {
-        obj->Init(volumeManager, UNMAP_STRIPE, iVSAMap, iStripeMap);
-    }
-    return obj;
+    ReverseMapPack* revPack = new ReverseMapPack();
+    revPack->Init(revMapWholefile, UNMAP_STRIPE, vsid, addrInfo->GetMpageSize(), numMpagesPerStripe);
+    revPack->Assign(vsid);
+    return revPack;
 }
 
 uint64_t
@@ -172,17 +223,106 @@ ReverseMapManager::GetWholeReverseMapFileSize(void)
 }
 
 int
-ReverseMapManager::LoadWholeReverseMap(char* pBuffer)
+ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
-    int ret = revMapWholefile->IssueIO(MetaFsIoOpcode::Read, 0, fileSizeWholeRevermap, pBuffer);
+    int ret = 0;
+    BlkAddr lastFoundRba = UINT64_MAX;
+    POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA), "[ReconstructMap] START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}", volumeId, wblsid, vsid, blockCount);
+
+    for (uint64_t offset = 0; offset < blockCount; offset++)
+    {
+        if (revMapInfos.find(offset) == revMapInfos.end())
+        {
+            // Set the RBA to start finding
+            BlkAddr rbaStart = 0;
+            if (lastFoundRba != UINT64_MAX)
+            {
+                rbaStart = lastFoundRba + 1;
+            }
+
+            BlkAddr foundRba = INVALID_RBA;
+            bool found = _FindRba(volumeId, vsid, wblsid, offset, rbaStart, foundRba);
+            if (found == false)
+            {
+                continue;
+            }
+            revMapInfos.insert(make_pair(offset, foundRba));
+            lastFoundRba = foundRba;
+        }
+        revMapPacks[wblsid].SetReverseMapEntry(offset, revMapInfos[offset], volumeId);
+    }
+
+    POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA), "[ReconstructMap] {}/{} blocks are reconstructed for Stripe(wbLsid:{})", revMapInfos.size(), blockCount, wblsid);
     return ret;
 }
 
 int
-ReverseMapManager::StoreWholeReverseMap(char* pBuffer)
+ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset,  uint32_t fileSize, char* buf)
 {
-    int ret = revMapWholefile->IssueIO(MetaFsIoOpcode::Write, 0, fileSizeWholeRevermap, pBuffer);
-    return ret;
+    if (fileLinux == nullptr)
+    {
+        fileLinux = revMapWholefile;
+    }
+    return fileLinux->IssueIO(MetaFsIoOpcode::Read, offset, fileSize, buf);
+}
+
+int
+ReverseMapManager::StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset, uint32_t fileSize, char* buf)
+{
+    if (fileLinux == nullptr)
+    {
+        fileLinux = revMapWholefile;
+    }
+    return fileLinux->IssueIO(MetaFsIoOpcode::Write, offset, fileSize, buf);
+}
+
+char*
+ReverseMapManager::GetReverseMapPtrForWBT(void)
+{
+    return revMapPacks[0].GetRevMapPtrForWBT();
+}
+
+bool
+ReverseMapManager::_FindRba(uint32_t volumeId, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
+{
+    uint64_t totalRbaNum = 0;
+    assert(volumeManager != nullptr);
+    volumeManager->GetVolumeSize(volumeId, totalRbaNum);
+    assert(totalRbaNum > 0);
+    totalRbaNum = DivideUp(totalRbaNum, BLOCK_SIZE);
+
+    bool looped = false;
+    for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= totalRbaNum; ++rbaToCheck)
+    {
+        // If rbaToCheck exceeds more than totalRbaNum, looped would be set as TRUE
+        if (rbaToCheck == totalRbaNum)
+        {
+            rbaToCheck = 0;
+            looped = true;
+        }
+
+        if ((rbaToCheck == rbaStart) && looped)
+        {
+            return false;
+        }
+
+        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWoCond(volumeId, rbaToCheck);
+        if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
+        {
+            continue;
+        }
+
+        StripeAddr lsaToCheck = iStripeMap->GetLSA(vsaToCheck.stripeId);
+        if (iStripeMap->IsInUserDataArea(lsaToCheck) || lsaToCheck.stripeId != wblsid)
+        {
+            continue;
+        }
+
+        foundRba = rbaToCheck;
+        return true;
+    }
+
+    return false;
 }
 
 int
@@ -201,13 +341,13 @@ ReverseMapManager::_SetNumMpages(void)
         numMpagesPerStripe = 1 + DivideUp(blksPerStripe - entriesPerFirstPage, entriesPerNormalPage);
     }
 
-    // Set fileSize
+    mpageSize = addrInfo->GetMpageSize();
+    int maxVsid = addrInfo->GetMaxVSID();
     fileSizePerStripe = mpageSize * numMpagesPerStripe;
+    fileSizeWholeRevermap = fileSizePerStripe * maxVsid;
 
-    POS_TRACE_INFO(EID(REVMAP_FILE_SIZE),
-        "[ReverseMap Info] entriesPerNormalPage:{}  entriesPerFirstPage:{}  numMpagesPerStripe:{}  fileSizePerStripe:{}",
-        entriesPerNormalPage, entriesPerFirstPage, numMpagesPerStripe,
-        fileSizePerStripe);
+    POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "[ReverseMap Info] entriesPerNormalPage:{}  entriesPerFirstPage:{}  numMpagesPerStripe:{}  fileSizePerStripe:{}",
+        entriesPerNormalPage, entriesPerFirstPage, numMpagesPerStripe, fileSizePerStripe);
 
     return 0;
 }

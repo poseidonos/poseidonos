@@ -142,21 +142,20 @@ MapperWbt::WriteStripeMapEntry(StripeId vsid, StripeLoc loc, StripeId lsid)
 int
 MapperWbt::ReadReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
-
-    int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
+    uint32_t fileSize = reverseMapManager->GetReverseMapPerStripeFileSize();
+    uint32_t offset = fileSize * vsid;
+    char* buf = new char[fileSize];
+    int ret = reverseMapManager->LoadReverseMapForWBT(nullptr, offset, fileSize, buf);
     if (ret < 0)
     {
-        delete reverseMapPack;
         return ret;
     }
 
     // Store ReverseMap of vsid to Linux file(fname)
     MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
-    fileToStore->Create(reverseMapManager->GetReverseMapPerStripeFileSize());
+    fileToStore->Create(fileSize);
     fileToStore->Open();
-
-    ret = reverseMapPack->WbtFileSyncIo(fileToStore, MetaFsIoOpcode::Write);
+    ret = fileToStore->IssueIO(MetaFsIoOpcode::Write, 0, fileSize, buf);
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
@@ -164,52 +163,44 @@ MapperWbt::ReadReverseMap(StripeId vsid, std::string fname)
 
     fileToStore->Close();
     delete fileToStore;
-    delete reverseMapPack;
     return ret;
 }
 
 int
 MapperWbt::WriteReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
-    int ret = reverseMapPack->LinkVsid(vsid);
-    if (ret < 0)
-    {
-        delete reverseMapPack;
-        return ret;
-    }
-
-    // Load ReverseMap from Linux file(fname)
+    uint32_t fileSize = reverseMapManager->GetReverseMapPerStripeFileSize();
+    uint32_t offset = fileSize * vsid;
+    char* buf = new char[fileSize];
     MetaFileIntf* fileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
     fileFromLoad->Open();
-
-    ret = reverseMapPack->WbtFileSyncIo(fileFromLoad, MetaFsIoOpcode::Read);
+    int ret = fileFromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buf);
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
     }
-
     fileFromLoad->Close();
     delete fileFromLoad;
 
-    ret = _StoreReverseMapToMFS(reverseMapPack);
-
-    delete reverseMapPack;
+    ret = reverseMapManager->StoreReverseMapForWBT(nullptr, offset, fileSize, buf);
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
+    }
+    delete[] buf;
     return ret;
 }
 
 int
 MapperWbt::ReadWholeReverseMap(std::string fname)
 {
-    int ret = 0;
     uint64_t fileSize = reverseMapManager->GetWholeReverseMapFileSize();
-    char* buffer = new char[fileSize]();
-
-    // Load Whole ReverseMap from MFS
-    ret = reverseMapManager->LoadWholeReverseMap(buffer);
+    char* buf = new char[fileSize]();
+    int ret = reverseMapManager->LoadReverseMapForWBT(nullptr, 0, fileSize, buf);
     if (ret < 0)
     {
-        delete[] buffer;
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
+        delete[] buf;
         return ret;
     }
 
@@ -220,46 +211,63 @@ MapperWbt::ReadWholeReverseMap(std::string fname)
     fileToStore->Create(fileSize);
     fileToStore->Open();
 
-    fileToStore->IssueIO(MetaFsIoOpcode::Write, 0, fileSize, buffer);
+    ret = fileToStore->IssueIO(MetaFsIoOpcode::Write, 0, fileSize, buf);
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
+    }
     fileToStore->Close();
 
     delete fileToStore;
-    delete[] buffer;
+    delete[] buf;
     return ret;
 }
 
 int
 MapperWbt::WriteWholeReverseMap(std::string fname)
 {
-    int ret = 0;
     uint64_t fileSize = reverseMapManager->GetWholeReverseMapFileSize();
-    char* buffer = new char[fileSize]();
+    char* buf = new char[fileSize]();
 
     // Load Whole ReverseMap from Linux file(fname)
     MetaFileIntf* filefromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
     filefromLoad->Open();
-    filefromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buffer);
+    int ret = filefromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buf);
     filefromLoad->Close();
     delete filefromLoad;
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
+        delete[] buf;
+        return ret;
+    }
 
     // Store Whole ReverseMap to MFS
-    ret = reverseMapManager->StoreWholeReverseMap(buffer);
-
-    delete[] buffer;
+    ret = reverseMapManager->StoreReverseMapForWBT(nullptr, 0, fileSize, buf);
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
+    }
+    delete[] buf;
     return ret;
 }
 
 int
 MapperWbt::ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
-
-    int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
+    uint32_t fileSize = reverseMapManager->GetReverseMapPerStripeFileSize();
+    uint32_t fileOffset = fileSize * vsid;
+    int ret = reverseMapManager->LoadReverseMapForWBT(nullptr, fileOffset, fileSize, reverseMapManager->GetReverseMapPtrForWBT());
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
+        return ret;
+    }
 
     // Print out to fname
     BlkAddr rba;
     uint32_t volId;
-    std::tie(rba, volId) = reverseMapPack->GetReverseMapEntry(offset);
+    std::tie(rba, volId) = reverseMapManager->GetReverseMapEntry(nullptr, 0, offset);
 
     std::ofstream outFile(fname, std::ofstream::app);
 
@@ -268,32 +276,30 @@ MapperWbt::ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fnam
     outFile << "rba: 0x" << std::hex << rba << std::endl;
     outFile << "volumeId: 0x" << std::hex << volId << std::endl;
     outFile << std::endl;
-
-    delete reverseMapPack;
     return ret;
 }
 
 int
 MapperWbt::WriteReverseMapEntry(StripeId vsid, BlkOffset offset, BlkAddr rba, uint32_t volumeId)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
-
-    int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
+    uint32_t fileSize = reverseMapManager->GetReverseMapPerStripeFileSize();
+    uint32_t fileOffset = fileSize * vsid;
+    int ret = reverseMapManager->LoadReverseMapForWBT(nullptr, fileOffset, fileSize, reverseMapManager->GetReverseMapPtrForWBT());
     if (ret < 0)
     {
-        delete reverseMapPack;
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
         return ret;
     }
 
     // Update entry
-    reverseMapPack->SetReverseMapEntry(offset, rba, volumeId);
-
-    ret = _StoreReverseMapToMFS(reverseMapPack);
-
-    delete reverseMapPack;
+    reverseMapManager->UpdateReverseMapEntry(nullptr, 0, offset, rba, volumeId);
+    ret = reverseMapManager->LoadReverseMapForWBT(nullptr, fileOffset, fileSize, reverseMapManager->GetReverseMapPtrForWBT());
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
+    }
     return ret;
 }
-
 
 int
 MapperWbt::GetMapLayout(std::string fname)
@@ -314,48 +320,6 @@ MapperWbt::GetMapLayout(std::string fname)
     out << std::endl;
     out.close();
     return 0;
-}
-
-int
-MapperWbt::_LoadReverseMapVsidFromMFS(ReverseMapPack* reverseMapPack, StripeId vsid)
-{
-    int ret = reverseMapPack->LinkVsid(vsid);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    ret = reverseMapPack->Load(nullptr);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    int pagesToWait = 0;
-    while (0 != (pagesToWait = reverseMapPack->IsAsyncIoDone()))
-    {
-        usleep(1);
-    }
-
-    return ret;
-}
-
-int
-MapperWbt::_StoreReverseMapToMFS(ReverseMapPack* reverseMapPack)
-{
-    int ret = reverseMapPack->Flush(nullptr, nullptr);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    int pagesToWait = 0;
-    while (0 != (pagesToWait = reverseMapPack->IsAsyncIoDone()))
-    {
-        usleep(1);
-    }
-
-    return ret;
 }
 
 } // namespace pos

@@ -19,6 +19,7 @@ public:
     MOCK_METHOD(bool, IsInUserDataArea, (StripeAddr entry), (override));
     MOCK_METHOD(bool, IsInWriteBufferArea, (StripeAddr entry), (override));
     MOCK_METHOD(MpageList, GetDirtyStripeMapPages, (int vsid), (override));
+    MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
 };
 
 } // namespace pos
