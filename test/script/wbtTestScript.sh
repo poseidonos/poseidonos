@@ -55,24 +55,8 @@ touch $cliOutput
 
 nss="nqn.2019-04.pos:subsystem1"
 
-transport=tcp
-target_ip=10.1.11.254
-target_fabric_ip=10.100.11.254
-target_port=1158
-
 ip=`hostname -I | awk '{print $NF}'`
-test_iteration=2000
-totalsize=100 #pm : 12500
-volcnt=4
-test_time=3600
-cpusallowed="10-11"
-
-# array mode [normal, degraded]
-arraymode="normal"
-# shutdown type [none, spor, npor]
-shutdowntype="none"
-# rebuild mode [none, rebuild_before_gc, rebuild_after_gc]
-rebuild="none"
+volcnt=1
 
 exit_result=0
 
@@ -129,24 +113,10 @@ pause()
 }
 
 
-while getopts "f:t:i:s:c:p:a:r:" opt
+while getopts "f:" opt
 do
     case "$opt" in
         f) ip="$OPTARG"
-            ;;
-        t) test_time="$OPTARG"
-            ;;
-        i) test_iteration="$OPTARG"
-            ;;
-        s) totalsize="$OPTARG"
-            ;;
-        c) cpusallowed="$OPTARG"
-            ;;
-        p) shutdowntype="$OPTARG"
-            ;;
-        a) arraymode="$OPTARG"
-            ;;
-        r) rebuild="$OPTARG"
     esac
 done
 
@@ -159,12 +129,45 @@ sleep 10
 
 echo ------------[setup poseidonos]-------------------------------------------
 
-#sudo ${ROOT_DIR}/test/system/longterm/setup_ibofos.sh create ${arraymode} ${totalsize} ${volcnt} ${ip}
-
 ${ROOT_DIR}/test/system/io_path/setup_ibofos_nvmf_volume.sh -a ${ip}
 
 echo ------------[setup Done]-------------------------------------------
 echo -------------------------------------------------------------------
+
+echo --------------------------------------------------------------------
+echo ------------[GC WBT CMDs]-------------------------------------------
+echo --------------------------------------------------------------------
+
+
+IO_PATH_DIR=${ROOT_DIR}/test/system/io_path
+
+sudo ${IO_PATH_DIR}/fio_bench.py --traddr=${ip} --trtype=tcp --readwrite=write \
+--io_size=512M --verify=false --bs=128K --time_based=0 \
+--run_time=0 --iodepth=4 --file_num=${volcnt} > /dev/null
+
+sudo ${IO_PATH_DIR}/fio_bench.py --traddr=${ip} --trtype=tcp --readwrite=randwrite \
+--io_size=256M --verify=false --bs=4K --time_based=0 \
+--run_time=0 --iodepth=4 --file_num=${volcnt} > /dev/null
+
+sleep 5
+
+echo -[gc : do_gc ]---------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt do_gc --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+echo --------------------------------------------------------------------
+
+echo -[gc : set_gc_threshold ]-------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt set_gc_threshold --array $ARRAYNAME --normal 10 --urgent 3 --json-res > ${cliOutput}
+check_result
+
+echo -[gc : get_gc_threshold ]------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt get_gc_threshold --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+
+echo -[gc : get_gc_status ]---------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt get_gc_status --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+echo --------------------------------------------------------------------
 
 echo ---------------------------------------------------------------------
 echo ------------[Map WBT CMDs]-------------------------------------------
@@ -332,10 +335,9 @@ do
     fi
   
     let "count += 1"  # 카운터 증가.
-done  
+done
 
 echo --------------------------------------------------------------------
-
 echo ------------[MetaFs WBT CMDs]------------------------------------------
 echo --------------------------------------------------------------------
 
@@ -468,23 +470,6 @@ echo --------------------------------------------------------------------
 echo ------- [WBT list] -------------------------------------------------
 echo --------------------------------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt list_wbt --json-res > ${cliOutput}
-check_result
-echo --------------------------------------------------------------------
-
-echo --------------------------------------------------------------------
-echo ------------[GC WBT CMDs]-------------------------------------------
-echo --------------------------------------------------------------------
-
-echo -[gc : set_gc_threshold ]-------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt set_gc_threshold --array $ARRAYNAME --normal 10 --urgent 3 --json-res > ${cliOutput}
-check_result
-
-echo -[gc : get_gc_threshold ]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt get_gc_threshold --array $ARRAYNAME --json-res > ${cliOutput}
-check_result
-
-echo -[gc : get_gc_status ]---------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt get_gc_status --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 echo --------------------------------------------------------------------
 
