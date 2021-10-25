@@ -44,11 +44,11 @@ GetGcThresholdWbtCommand::GetGcThresholdWbtCommand(void)
 :   GcWbtCommand(GET_GC_THRESHOLD, "get_gc_threshold")
 {
 }
-
+// LCOV_EXCL_START
 GetGcThresholdWbtCommand::~GetGcThresholdWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

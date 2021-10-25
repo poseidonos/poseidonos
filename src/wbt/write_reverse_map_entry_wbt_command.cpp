@@ -44,11 +44,11 @@ WriteReverseMapEntryWbtCommand::WriteReverseMapEntryWbtCommand(void)
 :   WbtCommand(WRITE_REVERSE_MAP_ENTRY, "write_reverse_map_entry")
 {
 }
-
+// LCOV_EXCL_START
 WriteReverseMapEntryWbtCommand::~WriteReverseMapEntryWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

@@ -40,11 +40,11 @@ SetupMetaFioTestWbtCommand::SetupMetaFioTestWbtCommand(void)
 :   WbtCommand(MFS_SETUP_META_FIO_TEST, "mfs_setup_meta_fio_test")
 {
 }
-
+// LCOV_EXCL_START
 SetupMetaFioTestWbtCommand::~SetupMetaFioTestWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 SetupMetaFioTestWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

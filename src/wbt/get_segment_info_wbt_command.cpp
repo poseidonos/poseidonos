@@ -43,11 +43,11 @@ GetSegmentInfoWbtCommand::GetSegmentInfoWbtCommand(void)
 :   WbtCommand(GET_SEGMENT_INFO, "get_segment_info")
 {
 }
-
+// LCOV_EXCL_START
 GetSegmentInfoWbtCommand::~GetSegmentInfoWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetSegmentInfoWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

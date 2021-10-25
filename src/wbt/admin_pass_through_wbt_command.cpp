@@ -48,11 +48,11 @@ AdminPassThrough::AdminPassThrough(void)
 : WbtCommand(ADMIN_PASS_THROUGH, "admin-passthru")
 {
 }
-
+// LCOV_EXCL_START
 AdminPassThrough::~AdminPassThrough(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 AdminPassThrough::Execute(Args& argv, JsonElement& elem)
 {

@@ -40,11 +40,11 @@ CloseFileWbtCommand::CloseFileWbtCommand(void)
 :   WbtCommand(MFS_CLOSE_FILE, "mfs_close_file")
 {
 }
-
+// LCOV_EXCL_START
 CloseFileWbtCommand::~CloseFileWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 CloseFileWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

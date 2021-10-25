@@ -42,11 +42,11 @@ ReadStripeMapWbtCommand::ReadStripeMapWbtCommand(void)
 :   WbtCommand(READ_STRIPEMAP, "read_stripemap")
 {
 }
-
+// LCOV_EXCL_START
 ReadStripeMapWbtCommand::~ReadStripeMapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadStripeMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

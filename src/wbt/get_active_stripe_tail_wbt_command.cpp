@@ -44,11 +44,11 @@ GetActiveStripeTailWbtCommand::GetActiveStripeTailWbtCommand(void)
 :   WbtCommand(GET_ACTIVE_STRIPE_TAIL, "get_active_stripe_tail")
 {
 }
-
+// LCOV_EXCL_START
 GetActiveStripeTailWbtCommand::~GetActiveStripeTailWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetActiveStripeTailWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

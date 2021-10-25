@@ -43,11 +43,11 @@ SetUserSegmentBitmapWbtCommand::SetUserSegmentBitmapWbtCommand(void)
 :   WbtCommand(SET_USER_SEGMENT_BITMAP, "set_user_segment_bitmap")
 {
 }
-
+// LCOV_EXCL_START
 SetUserSegmentBitmapWbtCommand::~SetUserSegmentBitmapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 SetUserSegmentBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

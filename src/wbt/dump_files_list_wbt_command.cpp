@@ -41,11 +41,11 @@ DumpFilesListWbtCommand::DumpFilesListWbtCommand(void)
 :   WbtCommand(MFS_DUMP_FILES_LIST, "mfs_dump_files_list")
 {
 }
-
+// LCOV_EXCL_START
 DumpFilesListWbtCommand::~DumpFilesListWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 DumpFilesListWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

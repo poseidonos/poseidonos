@@ -43,11 +43,11 @@ ReadVsaMapWbtCommand::ReadVsaMapWbtCommand(void)
 :   WbtCommand(READ_VSAMAP, "read_vsamap")
 {
 }
-
+// LCOV_EXCL_START
 ReadVsaMapWbtCommand::~ReadVsaMapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadVsaMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

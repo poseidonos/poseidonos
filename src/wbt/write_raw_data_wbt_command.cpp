@@ -45,11 +45,11 @@ WriteRawDataCommand::WriteRawDataCommand(void)
 :   RawDataWbtCommand(WRITE_RAW_DATA, "write_raw")
 {
 }
-
+// LCOV_EXCL_START
 WriteRawDataCommand::~WriteRawDataCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteRawDataCommand::Execute(Args &argv, JsonElement &elem)
 {
@@ -129,13 +129,16 @@ WriteRawDataCommand::_FilloutPayloadToWrite(Args& argv,
     void* buffer, uint32_t bytesToWrite)
 {
     int returnValue = -1;
-
+    int written=0;
     std::string pattern = _GetParameter(argv, "pattern");
     if (0 < pattern.length())
     {
         uint32_t patternToInput = _ConvertHexStringToUINT32(pattern);
-        _WritePattern(buffer, patternToInput, bytesToWrite);
-        returnValue = 0;
+        written = _WritePattern(buffer, patternToInput, bytesToWrite);
+        if(0 < written)
+        {
+            returnValue = 0;
+        }
     }
     else
     {

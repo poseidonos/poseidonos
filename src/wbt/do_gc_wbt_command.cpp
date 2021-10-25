@@ -42,11 +42,11 @@ DoGcWbtCommand::DoGcWbtCommand(void)
 :   GcWbtCommand(DO_GC, "do_gc")
 {
 }
-
+// LCOV_EXCL_START
 DoGcWbtCommand::~DoGcWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

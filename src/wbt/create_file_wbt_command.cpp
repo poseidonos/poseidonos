@@ -40,11 +40,11 @@ CreateFileWbtCommand::CreateFileWbtCommand(void)
 :   WbtCommand(MFS_CREATE_FILE, "mfs_create_file")
 {
 }
-
+// LCOV_EXCL_START
 CreateFileWbtCommand::~CreateFileWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 CreateFileWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

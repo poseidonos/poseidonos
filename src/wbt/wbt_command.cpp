@@ -40,11 +40,11 @@ WbtCommand::WbtCommand(WbtCommandOpcode opcodeToUse, const std::string &commandN
     name(commandName)
 {
 }
-
+// LCOV_EXCL_START
 WbtCommand::~WbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 const std::string &
 WbtCommand::GetCommandName(void)
 {

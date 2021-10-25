@@ -166,8 +166,9 @@ ${ROOT_DIR}/test/system/io_path/setup_ibofos_nvmf_volume.sh -a ${ip}
 echo ------------[setup Done]-------------------------------------------
 echo -------------------------------------------------------------------
 
-
+echo ---------------------------------------------------------------------
 echo ------------[Map WBT CMDs]-------------------------------------------
+echo ---------------------------------------------------------------------
 volname="vol1"
 volsize=21474836480
 
@@ -176,11 +177,11 @@ ${BIN_DIR}/poseidonos-cli wbt get_map_layout --array $ARRAYNAME --json-res > ${c
 check_result
 
 echo -[Map : read_vsamap]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt read_vsamap --name vol1 --output VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_vsamap --name $volname --output VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_vsamap]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt write_vsamap --name vol1 --input VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_vsamap --name $volname --input VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_vsamap_entry]------------------------------------------
@@ -283,9 +284,9 @@ echo -[Map : get_segment_valid_count]------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt get_segment_valid_count --output segValidCount.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
-
-echo -------------[User Data IO WBT CMDs]------------------------------------
-
+echo --------------------------------------------------------------------
+echo -------------[User Data IO WBT CMDs]--------------------------------
+echo --------------------------------------------------------------------
 MAXCOUNT=3
 count=0
 lbaIdx=0
@@ -301,7 +302,7 @@ do
 
     echo -[IO Path : unvme-ns-${count} : wbt write_raw]------------------------------------------
 
-    ${BIN_DIR}/poseidonos-cli wbt write_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --pattern 0xdeadbeef --output segValidCount.bin --json-res > ${cliOutput}
+    ${BIN_DIR}/poseidonos-cli wbt write_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --pattern 0xdeadbeef --json-res > ${cliOutput}
     check_result 
 
     if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
@@ -312,21 +313,18 @@ do
     else 
 
         echo -[IO Path : unvme-ns-${count} : wbt write_uncorrectable_lba]------------------------------------------
-        ${BIN_DIR}/poseidonos-cli wbt write_uncorrectable_lba --dev unvme-ns-${count} --lba ${lbaIdx} --output segValidCount.bin --json-res > ${cliOutput}
+        ${BIN_DIR}/poseidonos-cli wbt write_uncorrectable_lba --dev unvme-ns-${count} --lba ${lbaIdx} --json-res > ${cliOutput}
         check_result
     fi
 
     echo -[IO Path : unvme-ns-${count} : wbt flush]------------------------------------------
-    ${BIN_DIR}/poseidonos-cli wbt flush --output segValidCount.bin --json-res > ${cliOutput} --array $ARRAYNAME
- 
+    ${BIN_DIR}/poseidonos-cli wbt flush --array $ARRAYNAME --json-res > ${cliOutput} 
     check_result
 
-    
-
     echo -[IO Path : unvme-ns-${count} : wbt read_raw]------------------------------------------
-    ${BIN_DIR}/poseidonos-cli wbt read_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --output dump.bin --output segValidCount.bin --json-res > ${cliOutput}
- 
-    
+    ${BIN_DIR}/poseidonos-cli wbt read_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --output dump.bin --json-res > ${cliOutput}
+
+
     if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
         check_result
     else 
@@ -466,13 +464,18 @@ ${BIN_DIR}/poseidonos-cli wbt get_journal_status --array $ARRAYNAME --json-res >
 check_result
 
 echo --------------------------------------------------------------------
+
 echo ------- [WBT list] -------------------------------------------------
+echo --------------------------------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt list_wbt --json-res > ${cliOutput}
 check_result
 echo --------------------------------------------------------------------
 
-echo ------------[GC WBT CMDs]------------------------------------------
-echo -[gc : set_gc_threshold ]------------------------------------------
+echo --------------------------------------------------------------------
+echo ------------[GC WBT CMDs]-------------------------------------------
+echo --------------------------------------------------------------------
+
+echo -[gc : set_gc_threshold ]-------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt set_gc_threshold --array $ARRAYNAME --normal 10 --urgent 3 --json-res > ${cliOutput}
 check_result
 
@@ -485,9 +488,9 @@ ${BIN_DIR}/poseidonos-cli wbt get_gc_status --array $ARRAYNAME --json-res > ${cl
 check_result
 echo --------------------------------------------------------------------
 
-
+echo -----------------------------------------------------------------------
 echo ------------[Array WBT CMDs]-------------------------------------------
-
+echo -----------------------------------------------------------------------
 echo -[array : translate_device_lba ]-----------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt translate_device_lba --array $ARRAYNAME --lsid 0 --offset 10 --json-res > ${cliOutput}
 check_result
@@ -508,10 +511,6 @@ echo --------------------------------------------------------------------
 
 ${BIN_DIR}/poseidonos-cli wbt flush_gcov
 
-rm -rf result.txt
-rm -rf ${inputFile}
-rm -rf ${cliOutput}
-
 echo "------------[WBT Test End, Close poseidonos]----------------------------------"
 ${BIN_DIR}/poseidonos-cli array unmount --array-name $ARRAYNAME --force
 ${BIN_DIR}/poseidonos-cli system stop --force
@@ -520,6 +519,17 @@ echo "------------[MetaFs Performance Test Starts]------------------------------
 sleep 5
 ${ROOT_DIR}/test/script/run_metafs_fio_test.sh -f ${ip} -w 1
 echo "------------[MetaFs Performance Test Done]----------------------------------"
+
+echo -----------------------------------------------------------------------
+echo ------------[ WBT negative Test Starts]--------------------------------
+echo -----------------------------------------------------------------------
+${ROOT_DIR}/test/script/wbtNegativeTest.sh
+echo ------------[ WBT negative Test End]----------------------------------
+
+rm -rf result.txt
+rm -rf ${inputFile}
+rm -rf ${cliOutput}
+
 
 if [ $exit_result -eq 0 ]; then
     echo -[ Test Success ] -

@@ -43,11 +43,11 @@ GetCurrentSsdLsidWbtCommand::GetCurrentSsdLsidWbtCommand(void)
 :   WbtCommand(GET_ACTIVE_STRIPE_TAIL, "get_active_stripe_tail")
 {
 }
-
+// LCOV_EXCL_START
 GetCurrentSsdLsidWbtCommand::~GetCurrentSsdLsidWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetCurrentSsdLsidWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

@@ -49,11 +49,11 @@ GetGcStatusWbtCommand::GetGcStatusWbtCommand(void)
 :   GcWbtCommand(GET_GC_STATUS, "get_gc_status")
 {
 }
-
+// LCOV_EXCL_START
 GetGcStatusWbtCommand::~GetGcStatusWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

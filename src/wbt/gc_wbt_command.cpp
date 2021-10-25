@@ -42,11 +42,11 @@ GcWbtCommand::GcWbtCommand(WbtCommandOpcode opcodeToUse, const std::string &comm
 :   WbtCommand(opcodeToUse, commandName)
 {
 }
-
+// LCOV_EXCL_START
 GcWbtCommand::~GcWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 GarbageCollector*
 GcWbtCommand::_GetGC(std::string arrayName)
 {

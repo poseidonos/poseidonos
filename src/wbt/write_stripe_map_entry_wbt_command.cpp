@@ -43,11 +43,11 @@ WriteStripeMapEntryWbtCommand::WriteStripeMapEntryWbtCommand(void)
 :   WbtCommand(WRITE_STRIPEMAP_ENTRY, "write_stripemap_entry")
 {
 }
-
+// LCOV_EXCL_START
 WriteStripeMapEntryWbtCommand::~WriteStripeMapEntryWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteStripeMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

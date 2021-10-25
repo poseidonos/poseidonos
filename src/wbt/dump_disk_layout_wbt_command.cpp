@@ -48,11 +48,11 @@ DumpDiskLayoutWbtCommand::DumpDiskLayoutWbtCommand(void)
 : WbtCommand(DUMP_DISK_LAYOUT, "dump_disk_layout")
 {
 }
-
+// LCOV_EXCL_START
 DumpDiskLayoutWbtCommand::~DumpDiskLayoutWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
 {

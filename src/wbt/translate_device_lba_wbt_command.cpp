@@ -50,14 +50,15 @@ TranslateDeviceLbaWbtCommand::TranslateDeviceLbaWbtCommand(void)
 : WbtCommand(TRANSLATE_DEVICE_LBA, "translate_device_lba")
 {
 }
-
+// LCOV_EXCL_START
 TranslateDeviceLbaWbtCommand::~TranslateDeviceLbaWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
+    int ret = -1;
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
     string arrayName;
@@ -67,21 +68,22 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     {
         out << "invalid parameter" << endl;
         out.close();
-        return 0;
+        return ret;
     }
 
     if (argv.contains("array"))
     {
         arrayName = argv["array"].get<std::string>();
-        arrayIndex = ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex();
-    }
-    else
-    {
-        out << "wrong array name";
-        out.close();
-        return 0;
+        ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        if (info == nullptr)
+        {
+            out << "wrong array name";
+            out.close();
+            return ret;
+        }
     }
 
+    arrayIndex = ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex();
     LogicalBlkAddr lsa =
         {
             .stripeId = static_cast<uint32_t>(strtoul(argv["lsid"].get<std::string>().c_str(), nullptr, 0)),
@@ -93,7 +95,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
 
     PhysicalBlkAddr pba;
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    int ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
+    ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
     if (ret != 0 || pba.arrayDev == nullptr)
     {
         out << "translation failed" << std::endl;
@@ -110,7 +112,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     }
     out.close();
 
-    return 0;
+    return ret;
 }
 
 } // namespace pos

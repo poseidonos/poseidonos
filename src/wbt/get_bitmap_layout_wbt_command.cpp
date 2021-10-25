@@ -43,11 +43,11 @@ GetBitmapLayoutWbtCommand::GetBitmapLayoutWbtCommand(void)
 :   WbtCommand(GET_BITMAP_LAYOUT, "get_bitmap_layout")
 {
 }
-
+// LCOV_EXCL_START
 GetBitmapLayoutWbtCommand::~GetBitmapLayoutWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetBitmapLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

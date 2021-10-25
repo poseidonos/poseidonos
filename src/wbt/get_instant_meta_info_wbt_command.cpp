@@ -43,11 +43,11 @@ GetInstantMetaInfoWbtCommand::GetInstantMetaInfoWbtCommand(void)
 :   WbtCommand(GET_INSTANT_META_INFO, "get_instant_meta_info")
 {
 }
-
+// LCOV_EXCL_START
 GetInstantMetaInfoWbtCommand::~GetInstantMetaInfoWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetInstantMetaInfoWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

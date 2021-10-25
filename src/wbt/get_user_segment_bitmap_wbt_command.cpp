@@ -44,11 +44,11 @@ GetUserSegmentBitmapWbtCommand::GetUserSegmentBitmapWbtCommand(void)
 :   WbtCommand(GET_USER_SEGMENT_BITMAP, "get_user_segment_bitmap")
 {
 }
-
+// LCOV_EXCL_START
 GetUserSegmentBitmapWbtCommand::~GetUserSegmentBitmapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetUserSegmentBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

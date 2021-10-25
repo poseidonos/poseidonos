@@ -42,11 +42,11 @@ ReadWholeReverseMapWbtCommand::ReadWholeReverseMapWbtCommand(void)
 :   WbtCommand(READ_WHOLE_REVERSE_MAP, "read_whole_reverse_map")
 {
 }
-
+// LCOV_EXCL_START
 ReadWholeReverseMapWbtCommand::~ReadWholeReverseMapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadWholeReverseMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

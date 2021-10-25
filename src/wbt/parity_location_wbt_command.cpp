@@ -48,14 +48,15 @@ ParityLocationWbtCommand::ParityLocationWbtCommand(void)
 :   WbtCommand(PARITY_LOCATION, "parity_location")
 {
 }
-
+// LCOV_EXCL_START
 ParityLocationWbtCommand::~ParityLocationWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
+    int ret = -1;
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
 
@@ -63,7 +64,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     {
         out << "invalid parameter" << endl;
         out.close();
-        return 0;
+        return ret;
     }
 
     string devName = argv["dev"].get<std::string>();
@@ -76,20 +77,20 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     {
         out << "array does not exist" << endl;
         out.close();
-        return 0;
+        return ret;
     }
     Array* sysArray = compo->GetArray();
     if (sysArray == nullptr)
     {
         out << "array does not exist" << endl;
         out.close();
-        return 0;
+        return ret;
     }
     if (sysArray->state->IsMounted() == false)
     {
         out << "array is not mounted" << endl;
         out.close();
-        return 0;
+        return ret;
     }
 
     ArrayDeviceType devType;
@@ -100,7 +101,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     if (arrayDev == nullptr || devType != ArrayDeviceType::DATA)
     {
         out << "device not found" << endl;
-        return 0;
+        return ret;
     }
     PhysicalBlkAddr pba = {
         .lba = lba,
@@ -115,10 +116,10 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     out << "device name : " << parityDev->GetUblock()->GetName() << endl;
     out << "lba : " << lba << endl;
-
     out << std::endl;
     out.close();
-    return 0;
+    ret = 0;
+    return ret;
 }
 
 } // namespace pos

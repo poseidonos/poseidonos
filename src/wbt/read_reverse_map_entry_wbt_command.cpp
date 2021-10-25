@@ -43,11 +43,11 @@ ReadReverseMapEntryWbtCommand::ReadReverseMapEntryWbtCommand(void)
 :   WbtCommand(READ_REVERSE_MAP_ENTRY, "read_reverse_map_entry")
 {
 }
-
+// LCOV_EXCL_START
 ReadReverseMapEntryWbtCommand::~ReadReverseMapEntryWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

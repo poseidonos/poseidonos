@@ -43,11 +43,11 @@ ReadStripeMapEntryWbtCommand::ReadStripeMapEntryWbtCommand(void)
 :   WbtCommand(READ_STRIPEMAP_ENTRY, "read_stripemap_entry")
 {
 }
-
+// LCOV_EXCL_START
 ReadStripeMapEntryWbtCommand::~ReadStripeMapEntryWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadStripeMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

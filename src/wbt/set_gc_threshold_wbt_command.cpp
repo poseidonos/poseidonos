@@ -46,11 +46,11 @@ SetGcThresholdWbtCommand::SetGcThresholdWbtCommand(void)
 :   GcWbtCommand(SET_GC_THRESHOLD, "set_gc_threshold")
 {
 }
-
+// LCOV_EXCL_START
 SetGcThresholdWbtCommand::~SetGcThresholdWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

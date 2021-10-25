@@ -40,11 +40,11 @@ GetAlignedFileIoSizeWbtCommand::GetAlignedFileIoSizeWbtCommand(void)
 :   WbtCommand(MFS_GET_ALIGNED_FILE_IO_SIZE, "mfs_get_aligned_file_io_size")
 {
 }
-
+// LCOV_EXCL_START
 GetAlignedFileIoSizeWbtCommand::~GetAlignedFileIoSizeWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetAlignedFileIoSizeWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

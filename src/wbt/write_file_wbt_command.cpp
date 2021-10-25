@@ -40,11 +40,11 @@ WriteFileWbtCommand::WriteFileWbtCommand(void)
 :   WbtCommand(MFS_WRITE_FILE, "mfs_write_file")
 {
 }
-
+// LCOV_EXCL_START
 WriteFileWbtCommand::~WriteFileWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteFileWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

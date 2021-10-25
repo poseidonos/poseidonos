@@ -43,11 +43,11 @@ GetSegmentValidBlockCountWbtCommand::GetSegmentValidBlockCountWbtCommand(void)
 :   WbtCommand(GET_SEGMENT_VALID_COUNT, "get_segment_valid_count")
 {
 }
-
+// LCOV_EXCL_START
 GetSegmentValidBlockCountWbtCommand::~GetSegmentValidBlockCountWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetSegmentValidBlockCountWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

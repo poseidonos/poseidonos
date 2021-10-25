@@ -43,11 +43,11 @@ GetWbLsidBitmapWbtCommand::GetWbLsidBitmapWbtCommand(void)
 :   WbtCommand(GET_WB_LSID_BITMAP, "get_wb_lsid_bitmap")
 {
 }
-
+// LCOV_EXCL_START
 GetWbLsidBitmapWbtCommand::~GetWbLsidBitmapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetWbLsidBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

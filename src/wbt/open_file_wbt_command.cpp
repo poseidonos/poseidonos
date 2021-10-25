@@ -40,11 +40,11 @@ OpenFileWbtCommand::OpenFileWbtCommand(void)
 :   WbtCommand(MFS_OPEN_FILE, "mfs_open_file")
 {
 }
-
+// LCOV_EXCL_START
 OpenFileWbtCommand::~OpenFileWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 OpenFileWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

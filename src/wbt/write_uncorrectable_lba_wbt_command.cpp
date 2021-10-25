@@ -47,11 +47,11 @@ WriteUncorrectableLbaWbtCommand::WriteUncorrectableLbaWbtCommand(void)
 :   WbtCommand(WRITE_UNCORRECTABLE_LBA, "write_uncorrectable_lba")
 {
 }
-
+// LCOV_EXCL_START
 WriteUncorrectableLbaWbtCommand::~WriteUncorrectableLbaWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteUncorrectableLbaWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

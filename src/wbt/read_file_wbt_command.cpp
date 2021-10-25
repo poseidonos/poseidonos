@@ -40,11 +40,11 @@ ReadFileWbtCommand::ReadFileWbtCommand(void)
 :   WbtCommand(MFS_READ_FILE, "mfs_read_file")
 {
 }
-
+// LCOV_EXCL_START
 ReadFileWbtCommand::~ReadFileWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadFileWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

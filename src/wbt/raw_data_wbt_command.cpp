@@ -38,11 +38,11 @@ RawDataWbtCommand::RawDataWbtCommand(WbtCommandOpcode opcodeToUse, const std::st
 :   WbtCommand(opcodeToUse, commandName)
 {
 }
-
+// LCOV_EXCL_START
 RawDataWbtCommand::~RawDataWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 bool
 RawDataWbtCommand::_VerifyCommonParameters(Args& argv)
 {

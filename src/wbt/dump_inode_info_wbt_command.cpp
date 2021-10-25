@@ -40,11 +40,11 @@ DumpInodeInfoWbtCommand::DumpInodeInfoWbtCommand(void)
 :   WbtCommand(MFS_DUMP_INODE_INFO, "mfs_dump_inode_info")
 {
 }
-
+// LCOV_EXCL_START
 DumpInodeInfoWbtCommand::~DumpInodeInfoWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 DumpInodeInfoWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

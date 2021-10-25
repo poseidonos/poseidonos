@@ -47,11 +47,11 @@ ReadRawDataCommand::ReadRawDataCommand(void)
 :   RawDataWbtCommand(READ_RAW_DATA, "read_raw")
 {
 }
-
+// LCOV_EXCL_START
 ReadRawDataCommand::~ReadRawDataCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 ReadRawDataCommand::Execute(Args &argv, JsonElement &elem)
 {

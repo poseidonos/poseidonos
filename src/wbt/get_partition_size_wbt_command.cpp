@@ -43,14 +43,15 @@ GetPartitionSizeWbtCommand::GetPartitionSizeWbtCommand(void)
 : WbtCommand(GET_PARTITION_SIZE, "get_partition_size")
 {
 }
-
+// LCOV_EXCL_START
 GetPartitionSizeWbtCommand::~GetPartitionSizeWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
+    int ret = -1;
     string arrayName;
     if (argv.contains("array"))
     {
@@ -58,13 +59,13 @@ GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
     }
     else
     {
-        return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+        return ret;
     }
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
-        return (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
+        return ret;
     }
 
     IArrayInfo* array = info->arrayInfo;
@@ -88,9 +89,9 @@ GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
         partitionElement.SetAttribute(JsonAttribute("user partition chunksPerStripe", "\"" + to_string(userPartitionSize->chunksPerStripe) + "\""));
         partitionElement.SetAttribute(JsonAttribute("user partition blksPerStripe", "\"" + to_string(userPartitionSize->blksPerStripe) + "\""));
         partitionElement.SetAttribute(JsonAttribute("user partition blksPerChunk", "\"" + to_string(userPartitionSize->blksPerChunk) + "\""));
-
+        ret = 0;
         elem.SetElement(partitionElement);
-        return 0;
+        return ret;
     }
 
     return (int)POS_EVENT_ID::ARRAY_STATE_OFFLINE;

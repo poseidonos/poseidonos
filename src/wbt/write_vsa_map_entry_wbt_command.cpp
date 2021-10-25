@@ -45,11 +45,11 @@ WriteVsaMapEntryWbtCommand::WriteVsaMapEntryWbtCommand(void)
 :   WbtCommand(WRITE_VSAMAP_ENTRY, "write_vsamap_entry")
 {
 }
-
+// LCOV_EXCL_START
 WriteVsaMapEntryWbtCommand::~WriteVsaMapEntryWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteVsaMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

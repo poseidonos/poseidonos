@@ -42,11 +42,11 @@ WriteWholeReverseMapWbtCommand::WriteWholeReverseMapWbtCommand(void)
 :   WbtCommand(WRITE_WHOLE_REVERSE_MAP, "write_whole_reverse_map")
 {
 }
-
+// LCOV_EXCL_START
 WriteWholeReverseMapWbtCommand::~WriteWholeReverseMapWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 WriteWholeReverseMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

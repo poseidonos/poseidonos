@@ -42,10 +42,11 @@ FlushGcovDataWbtCommand::FlushGcovDataWbtCommand(void)
 :   WbtCommand(FLUSH_GCOV_DATA, "flush_gcov")
 {
 }
-
+// LCOV_EXCL_START
 FlushGcovDataWbtCommand::~FlushGcovDataWbtCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 int
 FlushGcovDataWbtCommand::Execute(Args &argv, JsonElement &elem)

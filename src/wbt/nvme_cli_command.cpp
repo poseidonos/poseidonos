@@ -50,11 +50,11 @@ NvmeCliCommand::NvmeCliCommand(void)
 : WbtCommand(NVME_CLI, "nvme_cli")
 {
 }
-
+// LCOV_EXCL_START
 NvmeCliCommand::~NvmeCliCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 NvmeCliCommand::Execute(Args& argv, JsonElement& elem)
 {

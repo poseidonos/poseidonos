@@ -40,11 +40,11 @@ GetFileSizeWbtCommand::GetFileSizeWbtCommand(void)
 :   WbtCommand(MFS_GET_FILE_SIZE, "mfs_get_file_size")
 {
 }
-
+// LCOV_EXCL_START
 GetFileSizeWbtCommand::~GetFileSizeWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetFileSizeWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

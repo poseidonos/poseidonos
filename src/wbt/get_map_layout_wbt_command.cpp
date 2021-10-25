@@ -43,10 +43,11 @@ GetMapLayoutWbtCommand::GetMapLayoutWbtCommand(void)
 :   WbtCommand(GET_MAP_LAYOUT, "get_map_layout")
 {
 }
+// LCOV_EXCL_START
 GetMapLayoutWbtCommand::~GetMapLayoutWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetMapLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
 {

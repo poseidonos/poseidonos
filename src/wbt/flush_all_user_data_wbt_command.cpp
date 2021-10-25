@@ -47,11 +47,11 @@ FlushAllUserDataWbtCommand::FlushAllUserDataWbtCommand(void)
 : WbtCommand(FLUSH_USER_DATA, "flush")
 {
 }
-
+// LCOV_EXCL_START
 FlushAllUserDataWbtCommand::~FlushAllUserDataWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
 {

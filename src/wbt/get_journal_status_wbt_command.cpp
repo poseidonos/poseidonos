@@ -42,11 +42,11 @@ GetJournalStatusWbtCommand::GetJournalStatusWbtCommand(void)
 : WbtCommand(GET_JOURNAL_STATUS, "get_journal_status")
 {
 }
-
+// LCOV_EXCL_START
 GetJournalStatusWbtCommand::~GetJournalStatusWbtCommand(void)
 {
 }
-
+// LCOV_EXCL_STOP
 int
 GetJournalStatusWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
