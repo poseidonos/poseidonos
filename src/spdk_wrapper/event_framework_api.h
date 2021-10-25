@@ -42,7 +42,9 @@
 
 #include "src/lib/singleton.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/caller/spdk_env_caller.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
+#include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 namespace pos
 {
 class EventFrameworkApi;
@@ -61,7 +63,8 @@ struct EventWrapper
 class EventFrameworkApi
 {
 public:
-    EventFrameworkApi(void);
+    EventFrameworkApi(SpdkThreadCaller* spdkThreadCaller = new SpdkThreadCaller(),
+        SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
     virtual ~EventFrameworkApi(void);
     virtual bool SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
             void* arg2);
@@ -70,8 +73,6 @@ public:
     virtual bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
     void CompleteEvents(void);
 
-    virtual uint32_t GetTargetReactor(void);
-    virtual uint32_t GetNextTargetReactor(uint32_t prevReactor);
     virtual uint32_t GetFirstReactor(void);
     virtual uint32_t GetCurrentReactor(void);
     virtual uint32_t GetNextReactor(void);
@@ -92,6 +93,8 @@ private:
     static std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
     static std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
 
+    SpdkThreadCaller* spdkThreadCaller;
+    SpdkEnvCaller* spdkEnvCaller;
     void _SendEventToSpareQueue(uint32_t core, EventFuncOneParam func, void* arg1);
 };
 

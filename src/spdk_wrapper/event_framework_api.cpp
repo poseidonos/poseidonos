@@ -64,12 +64,23 @@ EventFuncWrapper(void* ctx)
     delete eventWrapper;
 }
 
-EventFrameworkApi::EventFrameworkApi(void)
+EventFrameworkApi::EventFrameworkApi(SpdkThreadCaller* spdkThreadCaller,
+    SpdkEnvCaller* spdkEnvCaller)
+: spdkThreadCaller(spdkThreadCaller),
+  spdkEnvCaller(spdkEnvCaller)
 {
 }
 
 EventFrameworkApi::~EventFrameworkApi(void)
 {
+    if (spdkThreadCaller != nullptr)
+    {
+        delete spdkThreadCaller;
+    }
+    if (spdkEnvCaller != nullptr)
+    {
+        delete spdkEnvCaller;
+    }
 }
 
 bool
@@ -105,8 +116,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
         POS_TRACE_ERROR(eventId, "Reactor {} is not processable", core);
         return false;
     }
-
-    struct spdk_thread* thread = get_nvmf_thread_from_reactor(core);
+    struct spdk_thread* thread = spdkThreadCaller->GetNvmfThreadFromReactor(core);
 
     // If nvmf target module is initialized, we can utilize.
     if (unlikely(thread == nullptr))
@@ -117,7 +127,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
         return false;
     }
 
-    int eventCallSuccess = spdk_thread_send_msg(thread, func, arg1);
+    int eventCallSuccess = spdkThreadCaller->SpdkThreadSendMsg(thread, func, arg1);
 
     if (0 != eventCallSuccess)
     {
@@ -157,50 +167,28 @@ EventFrameworkApi::CompleteEvents(void)
 }
 
 uint32_t
-EventFrameworkApi::GetTargetReactor(void)
-{
-    targetReactor = spdk_env_get_next_core(targetReactor);
-    if (targetReactor == INVALID_CORE)
-    {
-        targetReactor = spdk_env_get_first_core();
-    }
-    return targetReactor;
-}
-
-uint32_t
-EventFrameworkApi::GetNextTargetReactor(uint32_t prevReactor)
-{
-    uint32_t nextReactor = spdk_env_get_next_core(prevReactor);
-    if (nextReactor == INVALID_CORE)
-    {
-        nextReactor = spdk_env_get_first_core();
-    }
-    return nextReactor;
-}
-
-uint32_t
 EventFrameworkApi::GetFirstReactor(void)
 {
-    return spdk_env_get_first_core();
+    return spdkEnvCaller->SpdkEnvGetFirstCore();
 }
 
 bool
 EventFrameworkApi::IsLastReactorNow(void)
 {
-    return GetCurrentReactor() == spdk_env_get_last_core();
+    return GetCurrentReactor() == spdkEnvCaller->SpdkEnvGetLastCore();
 }
 
 uint32_t
 EventFrameworkApi::GetCurrentReactor(void)
 {
-    return spdk_env_get_current_core();
+    return spdkEnvCaller->SpdkEnvGetCurrentCore();
 }
 
 uint32_t
 EventFrameworkApi::GetNextReactor(void)
 {
     uint32_t currentCore = GetCurrentReactor();
-    return spdk_env_get_next_core(currentCore);
+    return spdkEnvCaller->SpdkEnvGetNextCore(currentCore);
 }
 
 bool

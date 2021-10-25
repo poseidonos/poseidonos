@@ -1,4 +1,3 @@
-
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -30,7 +29,6 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <gmock/gmock.h>
 
 #include "src/spdk_wrapper/caller/spdk_env_caller.h"
@@ -40,7 +38,13 @@ namespace pos
 class MockSpdkEnvCaller : public SpdkEnvCaller
 {
 public:
-    MOCK_METHOD(int, SpdkPciDeviceGetSocketId, (struct spdk_pci_device* dev), (override));
+    using SpdkEnvCaller::SpdkEnvCaller;
+    MOCK_METHOD(int, SpdkPciDeviceGetSocketId, (struct spdk_pci_device * dev), (override));
+    MOCK_METHOD(uint32_t, SpdkEnvGetCoreCount, (), (override));
+    MOCK_METHOD(uint32_t, SpdkEnvGetFirstCore, (), (override));
+    MOCK_METHOD(uint32_t, SpdkEnvGetLastCore, (), (override));
+    MOCK_METHOD(uint32_t, SpdkEnvGetCurrentCore, (), (override));
+    MOCK_METHOD(uint32_t, SpdkEnvGetNextCore, (uint32_t core), (override));
 };
 
 } // namespace pos

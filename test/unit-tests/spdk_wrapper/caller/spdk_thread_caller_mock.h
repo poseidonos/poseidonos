@@ -29,26 +29,19 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#pragma once
+#include <gmock/gmock.h>
 
-#include "spdk/thread.h"
-#include "spdk/pos_thread.h"
+#include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 
 namespace pos
 {
-using SpdkPollerFunction = int (*)(void*);
-
-class SpdkThreadCaller
+class MockSpdkThreadCaller : public SpdkThreadCaller
 {
 public:
-    SpdkThreadCaller(void);
-    virtual ~SpdkThreadCaller(void);
-    void SpdkPutIoChannel(struct spdk_io_channel* ch);
-    void* SpdkPollerRegister(SpdkPollerFunction func, void* arg, uint64_t period_microseconds, char* pollerName);
-    void SpdkPollerUnregister(spdk_poller** spdkPoller);
-    virtual int SpdkThreadSendMsg(const struct spdk_thread* thread, spdk_msg_fn fn, void* ctx);
-    virtual struct spdk_thread* GetNvmfThreadFromReactor(uint32_t core);
-    virtual void SetTlsThreadToReactor(int reactor, struct spdk_thread *thread);
+    using SpdkThreadCaller::SpdkThreadCaller;
+    MOCK_METHOD(int, SpdkThreadSendMsg, (const struct spdk_thread* thread, spdk_msg_fn fn, void* ctx), (override));
+    MOCK_METHOD(struct spdk_thread*, GetNvmfThreadFromReactor, (uint32_t core), (override));
+    MOCK_METHOD(void, SetTlsThreadToReactor, (int reactor, struct spdk_thread* thread), (override));
 };
 
 } // namespace pos

@@ -45,6 +45,10 @@ public:
     virtual uint32_t SpdkEnvGetCoreCount(void);
     uint64_t SpdkGetTicksHz(void);
     uint64_t SpdkGetTicks(void);
+    virtual uint32_t SpdkEnvGetFirstCore(void);
+    virtual uint32_t SpdkEnvGetLastCore(void);
+    virtual uint32_t SpdkEnvGetCurrentCore(void);
+    virtual uint32_t SpdkEnvGetNextCore(uint32_t core);
 };
 
 } // namespace pos

@@ -58,4 +58,29 @@ SpdkEnvCaller::SpdkGetTicks(void)
 {
     return spdk_get_ticks();
 }
+
+uint32_t
+SpdkEnvCaller::SpdkEnvGetFirstCore(void)
+{
+    return spdk_env_get_first_core();
+}
+
+uint32_t
+SpdkEnvCaller::SpdkEnvGetLastCore(void)
+{
+    return spdk_env_get_last_core();
+}
+
+uint32_t
+SpdkEnvCaller::SpdkEnvGetCurrentCore(void)
+{
+    return spdk_env_get_current_core();
+}
+
+uint32_t
+SpdkEnvCaller::SpdkEnvGetNextCore(uint32_t core)
+{
+    return spdk_env_get_next_core(core);
+}
+
 } // namespace pos

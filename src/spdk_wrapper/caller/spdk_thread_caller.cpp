@@ -32,7 +32,16 @@
 
 #include "src/spdk_wrapper/caller/spdk_thread_caller.h"
 
-using namespace pos;
+namespace pos
+{
+
+SpdkThreadCaller::SpdkThreadCaller(void)
+{
+}
+
+SpdkThreadCaller::~SpdkThreadCaller(void)
+{
+}
 
 void
 SpdkThreadCaller::SpdkPutIoChannel(struct spdk_io_channel* ch)
@@ -54,3 +63,21 @@ SpdkThreadCaller::SpdkPollerUnregister(spdk_poller** spdkPoller)
 {
     spdk_poller_unregister(spdkPoller);
 }
+int
+SpdkThreadCaller::SpdkThreadSendMsg(const struct spdk_thread* thread, spdk_msg_fn fn, void* ctx)
+{
+    return spdk_thread_send_msg(thread, fn, ctx);
+}
+
+struct spdk_thread*
+SpdkThreadCaller::GetNvmfThreadFromReactor(uint32_t core)
+{
+    return get_nvmf_thread_from_reactor(core);
+}
+
+void
+SpdkThreadCaller::SetTlsThreadToReactor(int reactor, struct spdk_thread *thread)
+{
+    set_tls_thread_to_reactor(reactor, thread);
+}
+} // namespace pos
