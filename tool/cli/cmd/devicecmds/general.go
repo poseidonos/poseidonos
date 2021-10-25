@@ -26,5 +26,5 @@ func init() {
 	DeviceCmd.AddCommand(CreateDeviceCmd)
 	DeviceCmd.AddCommand(ScanDeviceCmd)
 	DeviceCmd.AddCommand(ListDeviceCmd)
-	DeviceCmd.AddCommand(SMARTCmd)
+	DeviceCmd.AddCommand(SMARTLOGCmd)
 }

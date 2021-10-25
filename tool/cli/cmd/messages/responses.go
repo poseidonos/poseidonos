@@ -139,21 +139,48 @@ type GetLogLevelResData struct {
 }
 
 // Response for SMART command
-type SMARTResponse struct {
-	RID     string      `json:"rid"`
-	COMMAND string      `json:"command"`
-	RESULT  SMARTResult `json:"result,omitempty"`
-	INFO    Info        `json:"info"`
+type SMARTLOGResponse struct {
+	RID     string      	`json:"rid"`
+	COMMAND string      	`json:"command"`
+	RESULT  SMARTLOGResult 	`json:"result,omitempty"`
+	INFO    Info      		`json:"info"`
 }
 
-type SMARTResult struct {
+type SMARTLOGResult struct {
 	STATUS Status       `json:"status,omitempty"`
-	DATA   SMARTResData `json:"data,omitempty"`
+	DATA   SMARTLog 	`json:"data,omitempty"`
 }
 
-type SMARTResData struct {
-	PERCENTAGEUSED string `json:"percentage_used"`
-	TEMPERATURE    string `json:"temperature"`
+type SMARTLog struct {
+	AVAILABLESPARESPACE 	string `json:"available_spare_space"`
+	TEMPERATURE    			string `json:"temperature"`
+	DEVICERELIABILITY   	string `json:"device_reliability"`
+	READONLY   				string `json:"read_only"`
+	VOLATILEMEMORYBACKUP   	string `json:"volatile_memory_backup"`
+	CURRENTTEMPERATURE   	string `json:"current_temperature"`
+	AVAILABLESPARE   		string `json:"available_spare"`
+	AVAILABLESPARETHRESHOLD	string `json:"available_spare_threshold"`
+	LIFEPERCENTAGEUSED   	string `json:"life_percentage_used"`
+	DATAUNITSREAD   		string `json:"data_units_read"`
+	DATAUNITSWRITTEN   		string `json:"data_units_written"`
+	HOSTREADCOMMANDS   		string `json:"host_read_commands"`
+	HOSTWRITECOMMANDS   	string `json:"host_write_commands"`
+	CONTROLLERBUSYTIME   	string `json:"controller_busy_time"`
+	POWERCYCLES   			string `json:"power_cycles"`
+	POWERONHOURS   			string `json:"power_on_hours"`
+	UNSAFESHUTDOWNS   		string `json:"unsafe_shutdowns"`
+	UNRECOVERABLEMEDIAERROS string `json:"unrecoverable_media_errors"`
+	LIFETIMEERRORLOGENTRIES string `json:"lifetime_error_log_entries"`
+	WARNINGTEMPERATURETIME  string `json:"warning_temperature_time"`
+	CRITICALTEMPERATURETIME string `json:"critical_temperature_time"`		
+	TEMPERATURESENSOR1		string `json:"temperature_sensor1,omitempty"`
+	TEMPERATURESENSOR2		string `json:"temperature_sensor2,omitempty"`
+	TEMPERATURESENSOR3		string `json:"temperature_sensor3,omitempty"`
+	TEMPERATURESENSOR4		string `json:"temperature_sensor4,omitempty"`
+	TEMPERATURESENSOR5		string `json:"temperature_sensor5,omitempty"`
+	TEMPERATURESENSOR6		string `json:"temperature_sensor6,omitempty"`
+	TEMPERATURESENSOR7		string `json:"temperature_sensor7,omitempty"`
+	TEMPERATURESENSOR8		string `json:"temperature_sensor8,omitempty"`
 }
 
 // Response for LISTVOLUME command

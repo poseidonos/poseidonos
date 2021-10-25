@@ -207,14 +207,41 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		}
 		w.Flush()
 
-	case "SMART":
-		res := messages.SMARTResponse{}
+	case "SMARTLOG":
+		res := messages.SMARTLOGResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		fmt.Fprintln(w, "Percentage used\t:", res.RESULT.DATA.PERCENTAGEUSED)
-		fmt.Fprintln(w, "Tempurature\t:", res.RESULT.DATA.TEMPERATURE)
+		fmt.Fprintln(w, "AvailableSpareSpace\t:", res.RESULT.DATA.AVAILABLESPARESPACE)
+		fmt.Fprintln(w, "Temperature\t:", res.RESULT.DATA.TEMPERATURE)
+		fmt.Fprintln(w, "DeviceReliability\t:", res.RESULT.DATA.DEVICERELIABILITY)
+		fmt.Fprintln(w, "ReadOnly\t:", res.RESULT.DATA.READONLY)
+		fmt.Fprintln(w, "VolatileMemoryBackup\t:", res.RESULT.DATA.VOLATILEMEMORYBACKUP)
+		fmt.Fprintln(w, "CurrentTemperature\t:", res.RESULT.DATA.CURRENTTEMPERATURE)
+		fmt.Fprintln(w, "AvailableSpare\t:", res.RESULT.DATA.AVAILABLESPARE)
+		fmt.Fprintln(w, "AvailableSpareThreshold\t:", res.RESULT.DATA.AVAILABLESPARETHRESHOLD)
+		fmt.Fprintln(w, "LifePercentageUsed\t:", res.RESULT.DATA.LIFEPERCENTAGEUSED)
+		fmt.Fprintln(w, "DataUnitsRead\t:", res.RESULT.DATA.DATAUNITSREAD)
+		fmt.Fprintln(w, "DataUnitsWritten\t:", res.RESULT.DATA.DATAUNITSWRITTEN)
+		fmt.Fprintln(w, "HostReadCommands\t:", res.RESULT.DATA.HOSTREADCOMMANDS)
+		fmt.Fprintln(w, "HostWriteCommands\t:", res.RESULT.DATA.HOSTWRITECOMMANDS)
+		fmt.Fprintln(w, "ControllerBusyTime\t:", res.RESULT.DATA.CONTROLLERBUSYTIME)
+		fmt.Fprintln(w, "PowerCycles\t:", res.RESULT.DATA.POWERCYCLES)
+		fmt.Fprintln(w, "PowerOnHours\t:", res.RESULT.DATA.POWERONHOURS)
+		fmt.Fprintln(w, "UnsafeShutdowns\t:", res.RESULT.DATA.UNSAFESHUTDOWNS)
+		fmt.Fprintln(w, "unrecoverableMediaErrors\t:", res.RESULT.DATA.UNRECOVERABLEMEDIAERROS)
+		fmt.Fprintln(w, "LifetimeErrorLogEntries\t:", res.RESULT.DATA.LIFETIMEERRORLOGENTRIES)
+		fmt.Fprintln(w, "WarningTemperatureTime\t:", res.RESULT.DATA.WARNINGTEMPERATURETIME)
+		fmt.Fprintln(w, "CriticalTemperatureTime\t:", res.RESULT.DATA.CRITICALTEMPERATURETIME)
+		fmt.Fprintln(w, "TemperatureSensor1\t:", res.RESULT.DATA.TEMPERATURESENSOR1)
+		fmt.Fprintln(w, "TemperatureSensor2\t:", res.RESULT.DATA.TEMPERATURESENSOR2)
+		fmt.Fprintln(w, "TemperatureSensor3\t:", res.RESULT.DATA.TEMPERATURESENSOR3)
+		fmt.Fprintln(w, "TemperatureSensor4\t:", res.RESULT.DATA.TEMPERATURESENSOR4)
+		fmt.Fprintln(w, "TemperatureSensor5\t:", res.RESULT.DATA.TEMPERATURESENSOR5)
+		fmt.Fprintln(w, "TemperatureSensor6\t:", res.RESULT.DATA.TEMPERATURESENSOR6)
+		fmt.Fprintln(w, "TemperatureSensor7\t:", res.RESULT.DATA.TEMPERATURESENSOR7)
+		fmt.Fprintln(w, "TemperatureSensor8\t:", res.RESULT.DATA.TEMPERATURESENSOR8)
 
 		w.Flush()
 

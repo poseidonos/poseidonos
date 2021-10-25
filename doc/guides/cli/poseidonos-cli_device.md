@@ -43,5 +43,5 @@ poseidonos-cli device [flags]
 * [poseidonos-cli device create](poseidonos-cli_device_create.md)	 - Create a buffer device.
 * [poseidonos-cli device list](poseidonos-cli_device_list.md)	 - List all devices in the system.
 * [poseidonos-cli device scan](poseidonos-cli_device_scan.md)	 - Scan devices in the system.
-* [poseidonos-cli device smart](poseidonos-cli_device_smart.md)	 - Display SMART information.
+* [poseidonos-cli device smart-log](poseidonos-cli_device_smart-log.md)	 - Display SMART log information of a device.
 
