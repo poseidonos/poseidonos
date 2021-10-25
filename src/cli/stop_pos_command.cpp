@@ -46,9 +46,12 @@ StopPosCommand::StopPosCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 StopPosCommand::~StopPosCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 StopPosCommand::Execute(json& doc, string rid)

@@ -41,9 +41,12 @@ MountVolumeCommand::MountVolumeCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 MountVolumeCommand::~MountVolumeCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 MountVolumeCommand::Execute(json& doc, string rid)

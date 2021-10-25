@@ -41,9 +41,12 @@ AddDeviceCommand::AddDeviceCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 AddDeviceCommand::~AddDeviceCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 AddDeviceCommand::Execute(json& doc, string rid)

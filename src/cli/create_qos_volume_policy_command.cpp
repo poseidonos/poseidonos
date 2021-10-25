@@ -47,9 +47,12 @@ QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
     arrayName = "";
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 QosCreateVolumePolicyCommand::~QosCreateVolumePolicyCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 QosCreateVolumePolicyCommand::Execute(json& doc, string rid)

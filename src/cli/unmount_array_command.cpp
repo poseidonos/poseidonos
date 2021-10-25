@@ -41,9 +41,12 @@ UnmountArrayCommand::UnmountArrayCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 UnmountArrayCommand::~UnmountArrayCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 UnmountArrayCommand::Execute(json& doc, string rid)

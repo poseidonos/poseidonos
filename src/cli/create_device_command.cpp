@@ -43,6 +43,8 @@ CreateDeviceCommand::CreateDeviceCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 CreateDeviceCommand::~CreateDeviceCommand(void)
 {
     if (spdkRpcClient != nullptr)
@@ -50,6 +52,7 @@ CreateDeviceCommand::~CreateDeviceCommand(void)
         delete spdkRpcClient;
     }
 }
+// LCOV_EXCL_STOP
 
 void
 CreateDeviceCommand::Init(

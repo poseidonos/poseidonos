@@ -42,9 +42,12 @@ ArrayInfoCommand::ArrayInfoCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 ArrayInfoCommand::~ArrayInfoCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 ArrayInfoCommand::Execute(json& doc, string rid)

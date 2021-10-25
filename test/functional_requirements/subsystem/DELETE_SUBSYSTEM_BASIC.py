@@ -2,6 +2,11 @@
 import subprocess
 import os
 import sys
+
+sys.path.append("../")
+sys.path.append("../../system/lib/")
+sys.path.append("../volume/")
+
 import json
 import json_parser
 import pos
@@ -9,9 +14,6 @@ import cli
 import api
 import test_result
 import CREATE_VOL_BASIC_1
-sys.path.append("../")
-sys.path.append("../../system/lib/")
-sys.path.append("../volume/")
 
 
 def clear_result():

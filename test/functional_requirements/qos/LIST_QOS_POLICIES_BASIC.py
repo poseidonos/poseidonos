@@ -2,14 +2,16 @@
 import subprocess
 import os
 import sys
+
+sys.path.append("../")
+sys.path.append("../../system/lib/")
+sys.path.append("../volume/")
+
 import json_parser
 import pos
 import cli
 import api
 import CREATE_VOL_BASIC_1
-sys.path.append("../")
-sys.path.append("../../system/lib/")
-sys.path.append("../volume/")
 
 
 def execute():

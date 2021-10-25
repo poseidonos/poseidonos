@@ -41,9 +41,12 @@ RenameVolumeCommand::RenameVolumeCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 RenameVolumeCommand::~RenameVolumeCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 RenameVolumeCommand::Execute(json& doc, string rid)

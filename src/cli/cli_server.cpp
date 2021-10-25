@@ -326,6 +326,9 @@ CreateSocket(int& sock)
     return SUCCESS;
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// mj: it is suspected that gcc copies the codes in the function to the caller.
+// LCOV_EXCL_START
 void
 InitClientPool()
 {
@@ -335,6 +338,7 @@ InitClientPool()
         sock_pool[i].state = UNUSED;
     }
 }
+// LCOV_EXCL_STOP
 
 #ifdef SSL_ON
 SSL_CTX*

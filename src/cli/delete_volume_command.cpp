@@ -41,9 +41,12 @@ DeleteVolumeCommand::DeleteVolumeCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 DeleteVolumeCommand::~DeleteVolumeCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 DeleteVolumeCommand::Execute(json& doc, string rid)

@@ -45,9 +45,12 @@ ListArrayCommand::ListArrayCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 ListArrayCommand::~ListArrayCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 bool
 abrCmp(ArrayBootRecord& a, ArrayBootRecord& b)

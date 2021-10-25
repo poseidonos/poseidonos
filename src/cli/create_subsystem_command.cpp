@@ -44,9 +44,12 @@ CreateSubsystemCommand::CreateSubsystemCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 CreateSubsystemCommand::~CreateSubsystemCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 CreateSubsystemCommand::Execute(json& doc, string rid)

@@ -46,9 +46,12 @@ QosResetVolumePolicyCommand::QosResetVolumePolicyCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 QosResetVolumePolicyCommand::~QosResetVolumePolicyCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 QosResetVolumePolicyCommand::Execute(json& doc, string rid)

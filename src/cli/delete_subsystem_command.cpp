@@ -48,9 +48,12 @@ DeleteSubsystemCommand::DeleteSubsystemCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 DeleteSubsystemCommand::~DeleteSubsystemCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 DeleteSubsystemCommand::Execute(json& doc, string rid)

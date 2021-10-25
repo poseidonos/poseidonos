@@ -44,9 +44,12 @@ Command::Command(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 Command::~Command(void)
 {
 }
+// LCOV_EXCL_STOP
 
 JsonElement
 GetPosInfo(string name)

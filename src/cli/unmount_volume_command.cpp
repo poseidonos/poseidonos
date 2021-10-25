@@ -41,9 +41,12 @@ UnmountVolumeCommand::UnmountVolumeCommand(void)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 UnmountVolumeCommand::~UnmountVolumeCommand(void)
 {
 }
+// LCOV_EXCL_STOP
 
 string
 UnmountVolumeCommand::Execute(json& doc, string rid)

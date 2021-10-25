@@ -2,6 +2,12 @@
 import subprocess
 import os
 import sys
+
+sys.path.append("../")
+sys.path.append("../../system/lib/")
+sys.path.append("../volume/")
+sys.path.append("../array/")
+
 import json_parser
 import pos
 import pos_util
@@ -10,10 +16,6 @@ import api
 import json
 import time
 import LIST_DEV_BASIC
-sys.path.append("../")
-sys.path.append("../../system/lib/")
-sys.path.append("../volume/")
-sys.path.append("../array/")
 
 SMART_TARGET_DEV = "unvme-ns-0"
 

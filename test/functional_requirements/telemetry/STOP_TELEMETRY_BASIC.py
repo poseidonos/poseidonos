@@ -2,15 +2,17 @@
 import subprocess
 import os
 import sys
+
+sys.path.append("../")
+sys.path.append("../../system/lib/")
+sys.path.append("../system_overall/")
+
 import json_parser
 import pos
 import cli
 import api
 import json
 import START_TELEMETRY_BASIC
-sys.path.append("../")
-sys.path.append("../../system/lib/")
-sys.path.append("../system_overall/")
 
 
 def execute():
