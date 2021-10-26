@@ -53,7 +53,6 @@ public:
     int GetID(std::string volName);
     VolumeBase* GetVolume(int volId);
     VolumeBase* GetVolume(std::string volName);
-    VolumeBase* Prev(int& index);
     VolumeBase* Next(int& index);
     int
     Count()

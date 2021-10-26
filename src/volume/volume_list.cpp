@@ -189,21 +189,6 @@ VolumeList::GetVolume(int volId)
 }
 
 VolumeBase*
-VolumeList::Prev(int& index)
-{
-    for (int i = index - 1; i >= 0; i--)
-    {
-        if (items[i] != nullptr)
-        {
-            index = i;
-            return items[i];
-        }
-    }
-
-    return nullptr;
-}
-
-VolumeBase*
 VolumeList::Next(int& index)
 {
     for (int i = index + 1; i < MAX_VOLUME_COUNT; i++)

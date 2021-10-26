@@ -41,9 +41,12 @@ VolumeEvent::VolumeEvent(std::string _tag, std::string _arrayName, int _arrayId)
 {
 }
 
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 VolumeEvent::~VolumeEvent(void)
 {
 }
+// LCOV_EXCL_STOP
 
 std::string
 VolumeEvent::Tag(void)
