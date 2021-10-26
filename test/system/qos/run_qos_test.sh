@@ -28,7 +28,7 @@ ARRAYNAME=POSArray
 ARRAYNAME1=POSArray1
 ARRAYNAME2=POSArray2
 MINVALUEBWIOPS=10
-
+NUM_DISKS=0
 
 #**************************************************************************
 # TEST SETUP INFORMATION
@@ -223,18 +223,20 @@ reset_spdk(){
 }
 
 #**************************************************************************
-# EXIT POS
+# UNMOUNT SINGLE ARRAY
 #**************************************************************************
-stop_pos(){
-    #texecc $TARGET_ROOT_DIR/bin/cli request unmount_ibofos
-    
+unmount_single_array(){
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME} --force
     texecc sleep 10
     echo "Array successfully unmounted"
-    #texecc ${ibof_cli} system stop --force
+}
+#**************************************************************************
+# EXIT POS
+#**************************************************************************
+stop_pos(){
     texecc ${ibof_cli} system stop --force
     texecc sleep 10
-    
+
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     n=1
     while [[ ${?} == 0 ]]
@@ -253,29 +255,12 @@ stop_pos(){
 #**************************************************************************
 # EXIT POS
 #**************************************************************************
-stop_pos_multi_array(){
-
+unmount_multi_array(){
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME1} --force
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME2} --force
     texecc sleep 10
     echo "Array successfully unmounted"
     echo ""
-    texecc ${ibof_cli} system stop --force
-    texecc sleep 10
-
-    texecc ps -C poseidonos > /dev/null >> ${logfile}
-    n=1
-    while [[ ${?} == 0 ]]
-    do
-        if [ $n -eq 30 ]; then
-            kill_pos
-            return
-        fi
-        texecc sleep 10
-        n=$(( n+1 ))
-        print_info "Waiting for POS to exit ($n of 30)"
-        texecc ps -C poseidonos > /dev/null >> ${logfile}
-    done
     print_info "POS Instance Exited"
 }
 
@@ -401,6 +386,20 @@ setup_test_environment(){
     texecc sleep 10
 }
 
+#**************************************************************************
+# Check for number of disks
+#**************************************************************************
+check_number_disks(){
+    print_info "Check for number of disks"
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli device scan
+    texecc sleep 15
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli device list --json-res > $TARGET_ROOT_DIR/test/system/qos/dev_list.log
+    texecc sleep 10
+    texecc $TARGET_ROOT_DIR/test/system/qos/check_number_disk.py
+    diskCount=$?
+    NUM_DISKS=$diskCount
+}
+
 ###################################################
 # START POS
 ###################################################
@@ -408,22 +407,20 @@ start_ibofos(){
     texecc $TARGET_ROOT_DIR/test/regression/start_poseidonos.sh
     ibof_launch_wait
     EXPECT_PASS "POS OS Launch"  $?
+}
 
-    texecc sleep 10
+###################################################
+# Setup POS Single Array
+###################################################
+setup_pos_single_array(){
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
-
 }
 
 ###################################################
 # START POS WITH MULTI ARRAY and multi volume in a subsystem
 ###################################################
 start_ibofos_with_multi_array(){
-    texecc $TARGET_ROOT_DIR/test/regression/start_poseidonos.sh
-    ibof_launch_wait
-    EXPECT_PASS "POS OS Launch"  $?
-
-    texecc sleep 10
     SUBSYSTEM_COUNT=2
     VOLUME_COUNT=8
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_multi_array.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
@@ -982,12 +979,21 @@ with_be_qos(){
     start_tc "${tc_name}"
     disable_fe_qos
     start_ibofos
-    EXPECT_PASS "Successful POS Launch & Configuration" $?
-    run_fio_tests be_qos with_be_qos
-    EXPECT_PASS "Successful Completion of FIO test cases" $?
-    texecc sleep 10
-    EXPECT_PASS "${tc_name}" $?
-    end_tc "${tc_name}"
+    check_number_disks
+    if [ $NUM_DISKS -ge 3 ]; then 
+        setup_pos_single_array
+        EXPECT_PASS "Successful POS Launch & Configuration" $?
+        run_fio_tests be_qos with_be_qos
+        EXPECT_PASS "Successful Completion of FIO test cases" $?
+        texecc sleep 10
+        EXPECT_PASS "${tc_name}" $?
+        end_tc "${tc_name}"
+        unmount_single_array
+    else
+        echo "Insufficient disks for POS, failed"
+        abrupt_shutdown
+        exit 1
+    fi
     stop_pos
 }
 
@@ -1000,17 +1006,24 @@ with_fe_qos(){
     start_tc "${tc_name}"
     enable_fe_qos
     start_ibofos
-    EXPECT_PASS "Successful POS Launch & Configuration" $?
-    run_fio_tests fe_qos with_fe_qos
-    EXPECT_PASS "Successful Completion of FIO test cases" $?
-    texecc sleep 10
-    EXPECT_PASS "${tc_name}" $?
-    disable_fe_qos
-    end_tc "${tc_name}"
+    check_number_disks
+    if [ $NUM_DISKS -ge 3 ]; then
+        setup_pos_single_array
+        EXPECT_PASS "Successful POS Launch & Configuration" $?
+        run_fio_tests fe_qos with_fe_qos
+        EXPECT_PASS "Successful Completion of FIO test cases" $?
+        texecc sleep 10
+        EXPECT_PASS "${tc_name}" $?
+        disable_fe_qos
+        end_tc "${tc_name}"
+        unmount_single_array
+    else
+        echo "Insufficient disks for POS, failed"
+        abrupt_shutdown
+        exit 1 
+    fi
     stop_pos
 }
-
-
 
 with_fe_qos_multi_array(){
     tc_name="POS Code, BE Enabled, FE Enabled. MULTI ARRAY"
@@ -1020,15 +1033,22 @@ with_fe_qos_multi_array(){
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
     enable_fe_qos
-    start_ibofos_with_multi_array
-    EXPECT_PASS "Successful POS Launch & Configuration" $?
-    run_fio_tests fe_qos_multi_array with_fe_qos
-    EXPECT_PASS "Successful Completion of FIO test cases" $?
-    texecc sleep 10
-    EXPECT_PASS "${tc_name}" $?
-    disable_fe_qos
-    end_tc "${tc_name}"
-    stop_pos_multi_array
+    start_ibofos
+    check_number_disks
+    if [ $NUM_DISKS -ge 6 ]; then
+        setup_ibofos_with_multi_array
+        EXPECT_PASS "Successful POS Launch & Configuration" $?
+        run_fio_tests fe_qos_multi_array with_fe_qos
+        EXPECT_PASS "Successful Completion of FIO test cases" $?
+        texecc sleep 10
+        EXPECT_PASS "${tc_name}" $?
+        disable_fe_qos
+        end_tc "${tc_name}"
+        unmount_multi_array
+    else
+        echo "Insufficient disks, skipping tests"
+    fi
+    stop_pos
 }
 ###################################################
 # SANITY TESTS
@@ -1082,7 +1102,7 @@ run_multi_array_test(){
 ###################################################
 run_minimum_policy_test(){
     echo "Starting CI Script for Minimum Policy QoS"
-    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh -v $NR_VOLUME -t $TRANSPORT -a $TARGET_IP -p $PORT -l $LOC -m $EXEC_MODE
+    texecc $TARGET_ROOT_DIR/test/system/qos/minimum_volume_test.sh -v $NR_VOLUME -t $TRANSPORT -a $TARGET_IP -p $PORT -l $LOC -m $EXEC_MODE -d $NUM_DISKS
     EXPECT_PASS "Minimum Volume Policy Test Cases" $?
     echo "Completed Minimum Policy Tests"
 }
