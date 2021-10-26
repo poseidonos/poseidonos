@@ -39,9 +39,11 @@ MetaStorageSubsystem::MetaStorageSubsystem(int arrayId)
 {
 }
 
+// LCOV_EXCL_START
 MetaStorageSubsystem::~MetaStorageSubsystem(void)
 {
 }
+// LCOV_EXCL_STOP
 
 POS_EVENT_ID
 MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,

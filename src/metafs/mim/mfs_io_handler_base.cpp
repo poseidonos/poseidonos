@@ -44,6 +44,7 @@ MetaFsIoHandlerBase::MetaFsIoHandlerBase(int threadId, int coreId)
 {
 }
 
+// LCOV_EXCL_START
 MetaFsIoHandlerBase::~MetaFsIoHandlerBase(void)
 {
     if (threadName)
@@ -55,6 +56,7 @@ MetaFsIoHandlerBase::~MetaFsIoHandlerBase(void)
         delete th;
     }
 }
+// LCOV_EXCL_STOP
 
 void
 MetaFsIoHandlerBase::ExitThread(void)

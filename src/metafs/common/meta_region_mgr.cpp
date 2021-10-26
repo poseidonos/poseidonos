@@ -44,9 +44,11 @@ MetaRegionManager::MetaRegionManager(int arrayId)
 {
 }
 
+// LCOV_EXCL_START
 MetaRegionManager::~MetaRegionManager(void)
 {
 }
+// LCOV_EXCL_STOP
 
 void
 MetaRegionManager::SetRegionInfo(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)

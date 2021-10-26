@@ -55,7 +55,7 @@ public:
     MetaFileIntf(void);
     explicit MetaFileIntf(std::string fname, int arrayId,
                         StorageOpt storageOpt = StorageOpt::DEFAULT);
-    virtual ~MetaFileIntf(void) = default;
+    virtual ~MetaFileIntf(void);
 
     virtual int Create(uint64_t size) = 0;
     virtual bool DoesFileExist(void) = 0;

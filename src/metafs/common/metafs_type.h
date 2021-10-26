@@ -72,8 +72,10 @@ public:
     {
     }
 
+// LCOV_EXCL_START
     virtual ~MetaFsRequestBase(void)
     {
     }
+// LCOV_EXCL_STOP
 };
 } // namespace pos

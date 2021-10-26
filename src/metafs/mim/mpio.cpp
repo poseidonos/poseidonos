@@ -82,9 +82,11 @@ Mpio::Reset(void)
     errorStopState = false;
 }
 
+// LCOV_EXCL_START
 Mpio::~Mpio(void)
 {
 }
+// LCOV_EXCL_STOP
 
 void
 Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)

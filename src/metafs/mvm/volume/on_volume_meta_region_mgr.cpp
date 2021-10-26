@@ -42,9 +42,11 @@ OnVolumeMetaRegionManager::OnVolumeMetaRegionManager(int arrayId)
 {
 }
 
+// LCOV_EXCL_START
 OnVolumeMetaRegionManager::~OnVolumeMetaRegionManager(void)
 {
 }
+// LCOV_EXCL_STOP
 
 void
 OnVolumeMetaRegionManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)

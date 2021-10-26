@@ -48,9 +48,11 @@ MssAioCbCxt::Init(MssAioData* cxt, MssCallbackPointer& callback)
     MetaAsyncCbCxt::Init(cxt, callback);
 }
 
+// LCOV_EXCL_START
 MssAioCbCxt::~MssAioCbCxt(void)
 {
 }
+// LCOV_EXCL_STOP
 
 void
 MssAioCbCxt::SaveIOStatus(int error)

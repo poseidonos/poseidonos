@@ -39,9 +39,11 @@ MetaIntegrityManager::MetaIntegrityManager(void)
 {
 }
 
+// LCOV_EXCL_START
 MetaIntegrityManager::~MetaIntegrityManager(void)
 {
 }
+// LCOV_EXCL_STOP
 
 POS_EVENT_ID
 MetaIntegrityManager::CheckReqSanity(MetaFsRequestBase& reqMsg)

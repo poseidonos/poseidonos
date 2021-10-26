@@ -70,6 +70,7 @@ MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType,
     this->arrayId = arrayId;
 }
 
+// LCOV_EXCL_START
 MetaVolume::~MetaVolume(void)
 {
     regionMgrMap.clear();
@@ -83,6 +84,7 @@ MetaVolume::~MetaVolume(void)
         "MetaVolume: {}: destructed",
         (uint32_t)volumeType);
 }
+// LCOV_EXCL_STOP
 
 void
 MetaVolume::Init(MetaStorageSubsystem* metaStorage)

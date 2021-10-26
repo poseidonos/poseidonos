@@ -60,6 +60,12 @@ MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, StorageOpt storageOpt
     storage = storageOpt;
 }
 
+// LCOV_EXCL_START
+MetaFileIntf::~MetaFileIntf(void)
+{
+}
+// LCOV_EXCL_STOP
+
 int
 MetaFileIntf::IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset,
     uint64_t length, char* buffer)

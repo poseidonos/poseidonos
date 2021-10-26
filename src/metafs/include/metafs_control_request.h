@@ -130,6 +130,12 @@ public:
     {
     }
 
+// LCOV_EXCL_START
+    virtual ~MetaFsFileControlRequest(void)
+    {
+    }
+// LCOV_EXCL_STOP
+
     virtual bool
     IsValid(void)
     {

@@ -35,10 +35,11 @@
 
 namespace pos
 {
-
+// LCOV_EXCL_START
 MssDiskPlace::~MssDiskPlace(void)
 {
 }
+// LCOV_EXCL_STOP
 
 /**
  * Returns block size of underlying array devices

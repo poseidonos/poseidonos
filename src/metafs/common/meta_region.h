@@ -99,6 +99,7 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
         baseLpn, GetLpnCntOfContent());
 }
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
 {
@@ -106,20 +107,25 @@ MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
         "MetaRegion(destructed): media={}, region={}",
         (int)mediaType, (int)regionType);
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 MetaContentT*
 MetaRegion<MetaRegionT, MetaContentT>::GetContent(void)
 {
     return content;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void
 MetaRegion<MetaRegionT, MetaContentT>::SetContent(MetaContentT* content_)
 {
     content = content_;
 }
+// LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
 const size_t
@@ -128,20 +134,25 @@ MetaRegion<MetaRegionT, MetaContentT>::GetSizeOfContent(void)
     return sizeof(MetaContentT);
 }
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType
 MetaRegion<MetaRegionT, MetaContentT>::GetBaseLpn(void)
 {
     return startLpn;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void*
 MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(void)
 {
     return content;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void*
 MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(MetaLpnType pageOffset)
@@ -149,6 +160,7 @@ MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(MetaLpnType pageOffset)
     uint8_t* buf = (uint8_t*)GetDataBuf() + (MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * pageOffset);
     return buf;
 }
+// LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType
@@ -157,6 +169,7 @@ MetaRegion<MetaRegionT, MetaContentT>::GetLpnCntOfRegion(void)
     return totalLpnCnt;
 }
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void
 MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
@@ -165,6 +178,7 @@ MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Reset all content...");
 }
+// LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
 void
@@ -173,6 +187,7 @@ MetaRegion<MetaRegionT, MetaContentT>::SetMss(MetaStorageSubsystem* mss)
     mssIntf = mss;
 }
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Load(void)
@@ -185,7 +200,9 @@ MetaRegion<MetaRegionT, MetaContentT>::Load(void)
     POS_EVENT_ID rc = mssIntf->ReadPage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
@@ -197,7 +214,9 @@ MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType b
     POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Store(void)
@@ -208,7 +227,9 @@ MetaRegion<MetaRegionT, MetaContentT>::Store(void)
     POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
@@ -220,6 +241,7 @@ MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType 
     POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
+// LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType

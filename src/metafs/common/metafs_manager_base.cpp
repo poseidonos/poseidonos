@@ -38,9 +38,11 @@ MetaFsManagerBase::MetaFsManagerBase(void)
 {
 }
 
+// LCOV_EXCL_START
 MetaFsManagerBase::~MetaFsManagerBase(void)
 {
 }
+// LCOV_EXCL_STOP
 
 POS_EVENT_ID
 MetaFsManagerBase::HandleNewRequest(MetaFsRequestBase& reqMsg)

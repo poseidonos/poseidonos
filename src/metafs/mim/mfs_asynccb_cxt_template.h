@@ -49,6 +49,7 @@ public:
       callback(nullptr)
     {
     }
+
     MetaAsyncCbCxt(void* data, AsyncCallback callback)
     : data(data),
       callback(callback)
@@ -62,9 +63,11 @@ public:
         this->callback = callback;
     }
 
+// LCOV_EXCL_START
     virtual ~MetaAsyncCbCxt(void)
     {
     }
+// LCOV_EXCL_STOP
 
     void*
     GetAsycCbCxt(void)

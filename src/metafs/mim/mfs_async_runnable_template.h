@@ -78,6 +78,7 @@ MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::MetaAsyn
     memset(stateHandler, 0, sizeof(AsyncStateExecutionEntry*) * ((int)AsyncStateT::Max));
 }
 
+// LCOV_EXCL_START
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::~MetaAsyncRunnable(void)
 {
@@ -93,6 +94,8 @@ MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::~MetaAsy
         delete cxt;
     }
 }
+// LCOV_EXCL_STOP
+
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
 MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Init(void)
