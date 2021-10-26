@@ -185,12 +185,17 @@ def create_uram(devname, block_size, num_blocks, numa=0):
 
 
 def add_listener(subnqn, transport_type, target_addr, transport_service_id):
-    param_str = "--subnqn" + subnqn
+    param_str = "--subnqn " + subnqn
     param_str += " --trtype " + transport_type
     param_str += " --traddr " + target_addr
     param_str += " --trsvcid " + transport_service_id
     return send_request("subsystem add-listener " + param_str)
 
+def create_transport(transport_type, buf_cache_size, num_shared_buf):
+    param_str = " --trtype " + transport_type
+    param_str += " --buf-cache-size " + buf_cache_size
+    param_str += " --num-shared-buf " + num_shared_buf
+    return send_request("subsystem create-transport " + param_str)
 
 def apply_log_filter():
     return send_request("logger apply-filter")

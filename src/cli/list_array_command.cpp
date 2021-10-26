@@ -52,14 +52,6 @@ ListArrayCommand::~ListArrayCommand(void)
 }
 // LCOV_EXCL_STOP
 
-bool
-abrCmp(ArrayBootRecord& a, ArrayBootRecord& b)
-{
-    time_t aTime = GetTimeT(a.createDatetime, "%Y-%m-%d %X %z");
-    time_t bTime = GetTimeT(b.createDatetime, "%Y-%m-%d %X %z");
-    return aTime < bTime;
-}
-
 string
 ListArrayCommand::Execute(json& doc, string rid)
 {
@@ -90,7 +82,6 @@ ListArrayCommand::Execute(json& doc, string rid)
     else
     {
         JsonArray jsonArrayList("arrayList");
-        sort(abrList.begin(), abrList.end(), abrCmp);
         for (const auto& abr : abrList)
         {
             JsonElement arrayElement("");

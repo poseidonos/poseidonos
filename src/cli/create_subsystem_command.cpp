@@ -63,7 +63,7 @@ CreateSubsystemCommand::Execute(json& doc, string rid)
         POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_SUBSYSTEM;
         return jFormat.MakeResponse(
             "CREATESUBSYSTEM", rid, static_cast<int>(eventId),
-            "Fail to create subsystem {}", GetPosInfo());
+            errorMessage, GetPosInfo());
     }
 
     return jFormat.MakeResponse(

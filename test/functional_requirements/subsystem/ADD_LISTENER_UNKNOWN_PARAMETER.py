@@ -5,7 +5,7 @@ import sys
 
 sys.path.append("../")
 sys.path.append("../../system/lib/")
-sys.path.append("../array/")
+sys.path.append("../volume/")
 
 import json
 import json_parser
@@ -14,16 +14,6 @@ import cli
 import api
 import test_result
 import CREATE_VOL_BASIC_1
-
-VOL_NAME = CREATE_VOL_BASIC_1.VOL_NAME
-VOL_SIZE = CREATE_VOL_BASIC_1.VOL_SIZE
-VOL_IOPS = CREATE_VOL_BASIC_1.VOL_IOPS
-VOL_BW = CREATE_VOL_BASIC_1.VOL_BW
-
-SPARE = CREATE_VOL_BASIC_1.SPARE
-ANY_DATA = CREATE_VOL_BASIC_1.ANY_DATA
-
-ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 
 
 def clear_result():
@@ -41,7 +31,7 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    out = cli.mount_volume(CREATE_VOL_BASIC_1.VOL_NAME, ARRAYNAME, "wrongsubnqn@#", "uknowntrtype", "unknokwntraddr", "unknowntrsvcid")
+    out = cli.add_listener("unknownsubnqn", "unknowntrtype", "unknowntraddr", "unknowntrsvcid")
     return out
 
 
