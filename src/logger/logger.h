@@ -61,6 +61,7 @@ enum class ModuleInDebugLogDump
 class Logger
 {
 public:
+// LCOV_EXCL_START
     Logger();
     ~Logger();
 
@@ -127,6 +128,7 @@ private:
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
     pos_logger::Preferences preferences;
+// LCOV_EXCL_STOP
 };
 
 using LoggerSingleton = pos::Singleton<Logger>;

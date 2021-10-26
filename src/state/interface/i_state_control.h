@@ -42,7 +42,9 @@ class IStateObserver;
 class IStateControl
 {
 public:
+// LCOV_EXCL_START
     virtual ~IStateControl(void) = default; // needed since ArrayComponents takes this to free the resource within ~ArrayComponents()
+// LCOV_EXCL_STOP
     virtual void Subscribe(IStateObserver* sub, string name) = 0;
     virtual void Unsubscribe(IStateObserver* sub) = 0;
     virtual StateContext* GetState(void) = 0;

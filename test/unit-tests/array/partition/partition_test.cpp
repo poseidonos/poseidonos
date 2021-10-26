@@ -1,5 +1,6 @@
 #include "src/array/partition/partition.h"
 #include "src/array/partition/stripe_partition.h"
+#include "src/array/partition/nvm_partition.h"
 #include "src/array/ft/raid5.h"
 #include "test/unit-tests/array/ft/raid5_mock.h"
 #include "src/cpu_affinity/cpu_set_generator.h"
@@ -36,18 +37,16 @@ TEST(Partition, GetRaidState_testConstructorAndDestructor)
     // Given
     string mockArrayName = "mockArray";
     uint32_t mockArrayIndex = 0;
-    PartitionType mockPartitionType = PartitionType::USER_DATA;
+    PartitionType mockPartitionType = PartitionType::META_NVM;
     const PartitionPhysicalSize mockPhysicalSize{
         .startLba = 0,
-        .blksPerChunk = 10,
-        .chunksPerStripe = 5,
-        .stripesPerSegment = 20,
-        .totalSegments = 100};
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
     vector<ArrayDevice*> devs;
     CpuSetArray cpuSetArray;
-    MockAffinityManager mockAffMgr(8, cpuSetArray);
-    Method* mockMethod = new Raid5(&mockPhysicalSize, 10, &mockAffMgr, nullptr);
-    Partition* partition = new StripePartition(mockArrayName, mockArrayIndex, mockPartitionType, mockPhysicalSize, devs, mockMethod);
+    Partition* partition = new NvmPartition(mockArrayName, mockArrayIndex, mockPartitionType, mockPhysicalSize, devs);
     // When
     RaidState ret = partition->GetRaidState();
 

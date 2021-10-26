@@ -14,7 +14,7 @@ TEST(BufferEntry, BufferEntry_testIfConstructorIsCalled)
     char buffer[10];
 
     // When
-    BufferEntry be(buffer, 10, false);
+    BufferEntry* be = new BufferEntry(buffer, 10, false);
 
     // Then
 }
@@ -27,6 +27,8 @@ TEST(BufferEntry, BufferEntry_testOperator)
     // When
     BufferEntry be(buffer, 10, false);
     BufferEntry newBe(be);
+    BufferEntry anotherBe(buffer, 20, false);
+    anotherBe = newBe;
 
     // Then
 }

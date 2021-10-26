@@ -41,9 +41,11 @@ namespace pos
 class IArrayDevice
 {
 public:
+// LCOV_EXCL_START
     virtual ~IArrayDevice(void)
     {
     }
+// LCOV_EXCL_STOP
 
     virtual ArrayDeviceState GetState(void) = 0;
     virtual void SetState(ArrayDeviceState state) = 0;

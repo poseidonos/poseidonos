@@ -341,9 +341,11 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::STRIPEPUTEVT_STRIPE_NOT_IN_NORMAL_POOL, "Stripe #{} is not in NormalStripePool."},
 };
 
+// LCOV_EXCL_START
 PosEventId::~PosEventId(void)
 {
 }
+// LCOV_EXCL_STOP
 
 const char*&
 PosEventId::GetString(POS_EVENT_ID eventId)

@@ -82,20 +82,6 @@ protected:
         return nameSet;
     }
 
-    BufferEntry
-    AllocBuffer(uint32_t blkCnt)
-    {
-        using Block = char[4096];
-
-        BufferEntry buffer;
-        uint32_t size = sizeof(Block) * blkCnt;
-        buffer.GetBufferPtr() = malloc(size);
-        memset(buffer.mem, 1, size);
-        buffer.blkCnt = blkCnt;
-
-        return buffer;
-    }
-
     const uint32_t DATA_DEVICE_COUNT = 3;
     const uint32_t SPARE_DEVICE_COUNT = 1;
     const uint64_t NVM_SIZE = 2 * 1024 * 256;  // 2GB(4K BlockCount)

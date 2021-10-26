@@ -69,11 +69,13 @@ Partition::Partition(
         physicalSize_.totalSegments;
 }
 
+// LCOV_EXCL_START
 Partition::~Partition(void)
 {
     delete method_;
     method_ = nullptr;
 }
+// LCOV_EXCL_STOP
 
 int
 Partition::FindDevice(ArrayDevice* target)

@@ -47,7 +47,6 @@ public:
     RebuildBehavior(unique_ptr<RebuildContext> ctx,
         MemoryManager* mm = MemoryManagerSingleton::Instance());
     virtual ~RebuildBehavior(void);
-
     virtual void StopRebuilding(void);
     virtual RebuildContext* GetContext(void);
     virtual bool Read(void) = 0;

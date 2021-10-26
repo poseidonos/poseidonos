@@ -45,13 +45,13 @@ RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> ctx,
   mm(mm)
 {
 }
-
+// LCOV_EXCL_START
 RebuildBehavior::~RebuildBehavior(void)
 {
     delete recoverBuffers;
     delete rebuildReadBuffers;
 }
-
+// LCOV_EXCL_STOP
 void
 RebuildBehavior::StopRebuilding(void)
 {
