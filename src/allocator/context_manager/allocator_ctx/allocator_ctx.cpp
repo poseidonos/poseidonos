@@ -152,6 +152,7 @@ void
 AllocatorCtx::AfterLoad(char* buf)
 {
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}", ctxHeader.ctxVersion);
+    ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 

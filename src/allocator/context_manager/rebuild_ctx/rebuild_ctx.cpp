@@ -102,6 +102,7 @@ void
 RebuildCtx::AfterLoad(char* buf)
 {
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file loaded:{}", ctxHeader.ctxVersion);
+    ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
     targetSegmentCount = ctxHeader.numTargetSegments;
 

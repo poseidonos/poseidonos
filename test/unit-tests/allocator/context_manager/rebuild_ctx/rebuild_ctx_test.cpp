@@ -413,6 +413,31 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccessAndSetBuf)
     delete segmentCtx;
 }
 
+TEST(RebuildCtx, AfterLoad_testIfStoredVersionIsUpdated)
+{
+    // given
+    RebuildCtxHeader header;
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 3;
+    header.ctxVersion = 2;
+
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 3; i++)
+    {
+        buf2[i] = i;
+    }
+    RebuildCtx rebuildCtx(&header, allocCtx, nullptr, nullptr);
+    // when 1.
+    rebuildCtx.AfterLoad(buf);
+
+    EXPECT_EQ(rebuildCtx.GetStoredVersion(), header.ctxVersion);
+
+    delete allocCtx;
+}
+
 TEST(RebuildCtx, GetLock_TestSimpleGetter)
 {
     // given

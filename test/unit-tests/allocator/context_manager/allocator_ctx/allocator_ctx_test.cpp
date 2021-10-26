@@ -18,10 +18,13 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
     // given
     AllocatorCtxHeader header;
     header.sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    header.ctxVersion = 12;
     AllocatorCtx allocCtx(&header, nullptr);
 
     // when
     allocCtx.AfterLoad(nullptr);
+
+    EXPECT_EQ(allocCtx.GetStoredVersion(), header.ctxVersion);
 }
 
 TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
