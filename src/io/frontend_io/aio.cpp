@@ -59,7 +59,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_service.h"
 

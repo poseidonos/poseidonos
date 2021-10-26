@@ -46,7 +46,7 @@
 #include "src/main/poseidonos.h"
 
 #if defined UNVME_BUILD
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #endif
 
 #include "Air.h"

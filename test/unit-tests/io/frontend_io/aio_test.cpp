@@ -9,7 +9,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/io/frontend_io/flush_command_handler.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "test/unit-tests/array_components/components_info_mock.h"
 #include "test/unit-tests/array_mgmt/array_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"

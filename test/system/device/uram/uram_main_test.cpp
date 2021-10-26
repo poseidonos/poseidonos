@@ -40,7 +40,7 @@
 #include "lib/spdk/include/spdk/thread.h"
 #include "src/device/base/device_driver.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/include/memory.h"
 #include "uram_drv.h"
 #include "uram_test.h"

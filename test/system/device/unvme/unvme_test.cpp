@@ -41,7 +41,7 @@
 
 #include "src/device/base/device_driver.h"
 #include "src/spdk_wrapper/nvme.hpp"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/include/memory.h"
 #include "unvme_device_context.h"
 #include "unvme_drv.h"

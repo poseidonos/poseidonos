@@ -34,7 +34,7 @@
 #include <vector>
 #include "src/metafs/include/metafs_service.h"
 #include "wbt_metafs_cmd_handler.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/metafs/tool/fio/meta_scheduler.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/metafs/common/meta_file_util.h"

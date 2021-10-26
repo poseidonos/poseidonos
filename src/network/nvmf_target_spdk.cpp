@@ -46,7 +46,7 @@
 #include "src/network/nvmf_volume_pos.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 

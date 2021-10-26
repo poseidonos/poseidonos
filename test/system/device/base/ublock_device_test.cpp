@@ -35,7 +35,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 
 using namespace pos;
 

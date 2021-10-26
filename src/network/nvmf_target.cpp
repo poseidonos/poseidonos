@@ -45,7 +45,7 @@
 #include "src/network/nvmf_target_spdk.h"
 #include "src/network/nvmf_volume_pos.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/sys_event/volume_event_publisher.h"
 
 using namespace std;

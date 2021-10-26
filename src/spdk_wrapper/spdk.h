@@ -49,8 +49,6 @@
 #include "spdk/stdinc.h"
 #include "src/lib/singleton.h"
 
-using SpdkNvmfStartCompletedCallback_t = std::function<int(void)>;
-
 using namespace std;
 
 namespace pos
@@ -64,16 +62,13 @@ public:
     bool Init(int argc, char** argv);
     void Finalize();
 
-    static void SetStartCompletedHandler(SpdkNvmfStartCompletedCallback_t handler);
-    static SpdkNvmfStartCompletedCallback_t GetStartCompletedHandler();
-
 private:
     std::thread* spdkThread;
-    static SpdkNvmfStartCompletedCallback_t startCompletedHandler;
     static std::atomic<bool> spdkInitialized;
 
     static void _InitWorker(int argc, char** argv);
     static void _AppStartedCallback(void* arg1);
+    // LCOV_EXCL_START
     static int
     _AppParseCallback(int ch, char* arg)
     {
@@ -83,6 +78,7 @@ private:
     _AppUsageCallback(void)
     {
     }
+    // LCOV_EXCL_STOP
 };
 
 using SpdkSingleton = Singleton<Spdk>;

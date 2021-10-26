@@ -57,7 +57,7 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/network/transport_configuration.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"

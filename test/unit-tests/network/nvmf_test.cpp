@@ -159,7 +159,7 @@ TEST(Nvmf, VolumeCreated_Success)
     uint64_t maxBw = 0;
     std::string arrayName("array");
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
-    bool actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
+    int actual, expected{(int)POS_EVENT_ID::VOL_EVENT_OK};
 
     VolumeEventBase volumeEventBase;
     nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");

@@ -39,7 +39,7 @@
 #include <list>
 #include <memory>
 
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/spdk_wrapper/spdk.h"
 #include "src/include/memory.h"
 #include "unvme_drv.h"
 

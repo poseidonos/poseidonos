@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "spdk.hpp"
+#include "spdk.h"
 
 #include <string>
 
@@ -43,7 +43,6 @@ namespace pos
 {
 std::atomic<bool> Spdk::spdkInitialized;
 
-SpdkNvmfStartCompletedCallback_t Spdk::startCompletedHandler = nullptr;
 
 void
 Spdk::_AppStartedCallback(void* arg1)
@@ -66,30 +65,9 @@ Spdk::_AppStartedCallback(void* arg1)
 
     AccelEngineApi::Initialize();
 
-    if (startCompletedHandler)
-    {
-        startCompletedHandler();
-    }
-
     spdkInitialized = true;
 
     cout << "poseidonos started" << endl;
-}
-
-void
-Spdk::SetStartCompletedHandler(SpdkNvmfStartCompletedCallback_t handler)
-{
-    if (startCompletedHandler)
-    {
-        cout << "startCompletedHandler is overrided" << endl;
-    }
-    startCompletedHandler = handler;
-}
-
-SpdkNvmfStartCompletedCallback_t
-Spdk::GetStartCompletedHandler()
-{
-    return startCompletedHandler;
 }
 
 bool
@@ -98,10 +76,6 @@ Spdk::Init(int argc, char** argv)
     if (spdkInitialized == true)
     {
         cout << "SPDK is already initialized" << endl;
-        if (startCompletedHandler)
-        {
-            startCompletedHandler();
-        }
         return true;
     }
 
