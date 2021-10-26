@@ -38,17 +38,15 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-ContextReplayer::ContextReplayer(AllocatorCtx* allocatorCtx_, SegmentCtx* segmentCtx_, WbStripeCtx* wbStripeCtx_, AllocatorAddressInfo* info_)
+ContextReplayer::ContextReplayer(AllocatorCtx* allocatorCtx_, SegmentCtx* segmentCtx_, AllocatorAddressInfo* info_)
 : allocatorCtx(allocatorCtx_),
   segmentCtx(segmentCtx_),
-  wbStripeCtx(wbStripeCtx_),
   addrInfo(info_)
 {
 }
@@ -91,7 +89,7 @@ void
 ContextReplayer::ReplayStripeAllocation(StripeId wbLsid, StripeId userLsid)
 {
     assert(wbLsid != UNMAP_STRIPE);
-    wbStripeCtx->AllocWbStripe(wbLsid);
+    allocatorCtx->AllocWbStripe(wbLsid);
 
     SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
     segmentCtx->AllocateSegment(segId);
@@ -101,7 +99,7 @@ void
 ContextReplayer::ReplayStripeRelease(StripeId wbLsid)
 {
     assert(wbLsid != UNMAP_STRIPE);
-    wbStripeCtx->ReleaseWbStripe(wbLsid);
+    allocatorCtx->ReleaseWbStripe(wbLsid);
 }
 
 void
@@ -120,13 +118,13 @@ ContextReplayer::ReplayStripeFlushed(StripeId userLsid)
 void
 ContextReplayer::ResetActiveStripeTail(int index)
 {
-    wbStripeCtx->SetActiveStripeTail(index, UNMAP_VSA);
+    allocatorCtx->SetActiveStripeTail(index, UNMAP_VSA);
 }
 
 std::vector<VirtualBlkAddr>
 ContextReplayer::GetAllActiveStripeTail(void)
 {
-    return wbStripeCtx->GetAllActiveStripeTail();
+    return allocatorCtx->GetAllActiveStripeTail();
 }
 
 void

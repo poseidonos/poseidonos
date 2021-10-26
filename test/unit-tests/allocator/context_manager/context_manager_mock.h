@@ -37,7 +37,6 @@ public:
     MOCK_METHOD(RebuildCtx*, GetRebuildCtx, (), (override));
     MOCK_METHOD(SegmentCtx*, GetSegmentCtx, (), (override));
     MOCK_METHOD(AllocatorCtx*, GetAllocatorCtx, (), (override));
-    MOCK_METHOD(WbStripeCtx*, GetWbStripeCtx, (), (override));
     MOCK_METHOD(ContextReplayer*, GetContextReplayer, (), (override));
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
     MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));

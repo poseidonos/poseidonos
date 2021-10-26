@@ -47,7 +47,7 @@ class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
     AllocatorCtx(void) = default;
-    AllocatorCtx(AllocatorCtxHeader* header, AllocatorAddressInfo* info);
+    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info);
     explicit AllocatorCtx(AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
@@ -69,7 +69,20 @@ public:
     virtual void SetPrevSsdLsid(StripeId stripeId);
     virtual void SetNextSsdLsid(SegmentId segId);
 
+    virtual void AllocWbStripe(StripeId stripeId);
+    virtual StripeId AllocFreeWbStripe(void);
+    virtual void ReleaseWbStripe(StripeId stripeId);
+    virtual void SetAllocatedWbStripeCount(int count);
+    virtual uint64_t GetAllocatedWbStripeCount(void);
+    virtual uint64_t GetNumTotalWbStripe(void);
+
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+    virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
+    virtual void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
+
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
+    virtual std::mutex& GetAllocWbLsidBitmapLock(void);
+    virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
 
     static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
 
@@ -78,6 +91,10 @@ private:
     AllocatorCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
+
+    VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
+    std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
+    BitMapMutex* allocWbLsidBitmap;
 
     StripeId prevSsdLsid;
     StripeId currentSsdLsid;

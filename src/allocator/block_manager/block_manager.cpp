@@ -36,7 +36,6 @@
 
 #include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
-#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/logger/logger.h"
@@ -45,7 +44,7 @@
 
 namespace pos
 {
-BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
 : addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
@@ -53,16 +52,14 @@ BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, Al
   arrayId(arrayId)
 {
     allocCtx = allocCtx_;
-    wbStripeCtx = wbCtx_;
     iReverseMap = iReverseMap_;
     iStripeMap = stripeMap_;
 }
 
 BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
-: BlockManager(nullptr, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
+: BlockManager(nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
 {
     allocCtx = contextManager->GetAllocatorCtx();
-    wbStripeCtx = contextManager->GetWbStripeCtx();
     allocStatus = contextManager->GetAllocationStatus();
 }
 
@@ -174,9 +171,9 @@ VirtualBlks
 BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
 {
     assert(numBlks != 0);
-    std::unique_lock<std::mutex> volLock(wbStripeCtx->GetActiveStripeTailLock(asTailArrayIdx));
+    std::unique_lock<std::mutex> volLock(allocCtx->GetActiveStripeTailLock(asTailArrayIdx));
     VirtualBlks allocatedBlks;
-    VirtualBlkAddr curVsa = wbStripeCtx->GetActiveStripeTail(asTailArrayIdx);
+    VirtualBlkAddr curVsa = allocCtx->GetActiveStripeTail(asTailArrayIdx);
 
     if (_IsStripeFull(curVsa) || IsUnMapStripe(curVsa.stripeId))
     {
@@ -199,7 +196,7 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
         allocatedBlks.numBlks = addrInfo->GetblksPerStripe() - curVsa.offset;
 
         VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = addrInfo->GetblksPerStripe()};
-        wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
+        allocCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
     }
     else
     {
@@ -207,7 +204,7 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
         allocatedBlks.numBlks = numBlks;
 
         VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = curVsa.offset + numBlks};
-        wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
+        allocCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
     }
 
     return allocatedBlks;
@@ -233,7 +230,7 @@ BlockManager::_AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayId
 
     // Temporally no lock required, as AllocateBlks and this function cannot be executed in parallel
     // TODO(jk.man.kim): add or move lock to wbuf tail manager
-    wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
+    allocCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
 
     return allocatedBlks;
 }
@@ -242,7 +239,7 @@ int
 BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 {
     // 1. WriteBuffer Logical StripeId Allocation
-    StripeId wbLsid = wbStripeCtx->AllocFreeWbStripe();
+    StripeId wbLsid = allocCtx->AllocFreeWbStripe();
     if (wbLsid == UNMAP_STRIPE)
     {
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
@@ -312,7 +309,7 @@ BlockManager::_RollBackStripeIdAllocation(StripeId wbLsid)
 {
     if (wbLsid != UINT32_MAX)
     {
-        wbStripeCtx->ReleaseWbStripe(wbLsid);
+        allocCtx->ReleaseWbStripe(wbLsid);
     }
 }
 

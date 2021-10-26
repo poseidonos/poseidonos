@@ -39,7 +39,6 @@
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
@@ -328,8 +327,8 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
             }
             else
             {
-                WbStripeCtx* wbCtx = contextManager->GetWbStripeCtx();
-                wbCtx->SetAllocatedWbStripeCount(numBitsSet);
+                AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
+                allocCtx->SetAllocatedWbStripeCount(numBitsSet);
             }
         }
         else if (WBT_SEGMENT_BITMAP == type)
@@ -369,18 +368,17 @@ Allocator::GetInstantMetaInfo(std::string fname)
 {
     std::ostringstream oss;
     std::ofstream ofs(fname, std::ofstream::app);
-    WbStripeCtx* wbCtx = contextManager->GetWbStripeCtx();
     AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
     RebuildCtx* rebuildCtx = contextManager->GetRebuildCtx();
     SegmentCtx* segCtx = contextManager->GetSegmentCtx();
     oss << "<< WriteBuffers >>" << std::endl;
-    oss << "Set:" << std::dec << wbCtx->GetAllocatedWbStripeCount() << " / ToTal:" << wbCtx->GetNumTotalWbStripe() << std::endl;
+    oss << "Set:" << std::dec << allocCtx->GetAllocatedWbStripeCount() << " / ToTal:" << allocCtx->GetNumTotalWbStripe() << std::endl;
     oss << "activeStripeTail[] Info" << std::endl;
     for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
     {
         for (int idx = volumeId; idx < ACTIVE_STRIPE_TAIL_ARRAYLEN; idx += MAX_VOLUME_COUNT)
         {
-            VirtualBlkAddr asTail = wbCtx->GetActiveStripeTail(idx);
+            VirtualBlkAddr asTail = allocCtx->GetActiveStripeTail(idx);
             oss << "Idx:" << std::dec << idx << " stripeId:0x" << std::hex << asTail.stripeId << " offset:0x" << asTail.offset << "  ";
         }
         oss << std::endl;

@@ -42,13 +42,12 @@ namespace pos
 class AllocatorAddressInfo;
 class AllocatorCtx;
 class SegmentCtx;
-class WbStripeCtx;
 
 class ContextReplayer : public IContextReplayer
 {
 public:
     ContextReplayer(void) = default;
-    ContextReplayer(AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, WbStripeCtx* wbStripeCtx, AllocatorAddressInfo* info);
+    ContextReplayer(AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, AllocatorAddressInfo* info);
     virtual ~ContextReplayer(void);
 
     virtual void ResetDirtyContextVersion(int owner);
@@ -64,7 +63,6 @@ public:
 private:
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
-    WbStripeCtx* wbStripeCtx;
 
     AllocatorAddressInfo* addrInfo;
 };

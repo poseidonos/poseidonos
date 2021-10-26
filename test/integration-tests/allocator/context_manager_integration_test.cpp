@@ -21,7 +21,6 @@
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_lock_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_states_mock.h"
-#include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"
@@ -58,9 +57,9 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     EXPECT_CALL(*segmentCtx, GetSegmentCtxLock).WillRepeatedly(ReturnRef(segStateLock));
 
     // WbStripeCtx (Mock)
-    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>();
     std::mutex allocWbLsidbitMapLock;
-    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillRepeatedly(ReturnRef(allocWbLsidbitMapLock));
+    EXPECT_CALL(*allocatorCtx, GetAllocWbLsidBitmapLock).WillRepeatedly(ReturnRef(allocWbLsidbitMapLock));
 
     // GcCtx (Mock)
     NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
@@ -90,15 +89,12 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     }
     AllocatorFileIoManager* allocatorFileIoManager = new AllocatorFileIoManager(fileArr, allocatorAddressInfo);
 
-    // AllocatorCtx (Real)
-    AllocatorCtx* allocatorCtx = new AllocatorCtx(nullptr, allocatorAddressInfo);
-
     // RebuildCtx (Real)
     RebuildCtx* rebuildCtx = new RebuildCtx(allocatorCtx, allocatorAddressInfo);
 
     // ContextManager (Real)
     ContextManager contextManager(telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
-        wbStripeCtx, gcCtx, blockAllocStatus, allocatorFileIoManager,
+        gcCtx, blockAllocStatus, allocatorFileIoManager,
         contextReplayer, false, allocatorAddressInfo, ARRAY_ID);
 
     // Prepare Test
@@ -134,7 +130,6 @@ TEST(ContextManagerIntegrationTest, FlushContexts_FlushRebuildContext)
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>;
     NiceMock<MockSegmentCtx>* segmentCtx = new NiceMock<MockSegmentCtx>;
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>;
-    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>;
     NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>;
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockAllocatorFileIoManager>* allocatorFileIoManager = new NiceMock<MockAllocatorFileIoManager>;
@@ -142,13 +137,13 @@ TEST(ContextManagerIntegrationTest, FlushContexts_FlushRebuildContext)
     NiceMock<MockAllocatorAddressInfo> allocatorAddressInfo;
 
     ContextManager contextManager(&telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
-        wbStripeCtx, gcCtx, blockAllocStatus, allocatorFileIoManager,
+        gcCtx, blockAllocStatus, allocatorFileIoManager,
         contextReplayer, false, &allocatorAddressInfo, ARRAY_ID);
 
     std::mutex allocatorLock, segmentLock, wbLsidBitmapLock;
     EXPECT_CALL(*allocatorCtx, GetAllocatorCtxLock).WillRepeatedly(ReturnRef(allocatorLock));
     EXPECT_CALL(*segmentCtx, GetSegmentCtxLock).WillRepeatedly(ReturnRef(segmentLock));
-    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillRepeatedly(ReturnRef(wbLsidBitmapLock));
+    EXPECT_CALL(*allocatorCtx, GetAllocWbLsidBitmapLock).WillRepeatedly(ReturnRef(wbLsidBitmapLock));
 
     ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
         event->Execute();
@@ -243,7 +238,6 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>;
 
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>;
-    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>;
     NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>;
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockAllocatorFileIoManager>* allocatorFileIoManager = new NiceMock<MockAllocatorFileIoManager>;
@@ -254,10 +248,10 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
 
     std::mutex allocatorLock, wbLsidBitmapLock;
     ON_CALL(*allocatorCtx, GetAllocatorCtxLock).WillByDefault(ReturnRef(allocatorLock));
-    ON_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillByDefault(ReturnRef(wbLsidBitmapLock));
+    ON_CALL(*allocatorCtx, GetAllocWbLsidBitmapLock).WillByDefault(ReturnRef(wbLsidBitmapLock));
 
     ContextManager contextManager(&telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
-        wbStripeCtx, gcCtx, blockAllocStatus, allocatorFileIoManager,
+        gcCtx, blockAllocStatus, allocatorFileIoManager,
         contextReplayer, false, &addrInfo, ARRAY_ID);
     contextManager.Init();
 

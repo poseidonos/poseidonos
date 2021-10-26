@@ -49,7 +49,7 @@ class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
@@ -101,7 +101,6 @@ protected: // for UT
     int arrayId;
 
     AllocatorCtx* allocCtx;
-    WbStripeCtx* wbStripeCtx;
     IReverseMap* iReverseMap;
     IStripeMap* iStripeMap;
 };

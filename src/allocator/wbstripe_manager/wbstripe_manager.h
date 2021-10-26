@@ -48,11 +48,13 @@ using StripeVec = std::vector<Stripe*>;
 class IVolumeManager;
 class IReverseMap;
 class FreeBufferPool;
+class AllocatorCtx;
+
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
@@ -103,7 +105,7 @@ protected: // for UT
     IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
-    WbStripeCtx* wbStripeCtx;
+    AllocatorCtx* allocCtx;
     BlockManager* blockManager;
     std::string arrayName;
     int arrayId;

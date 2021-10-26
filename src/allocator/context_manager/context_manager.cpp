@@ -43,7 +43,6 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_states.h"
-#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
@@ -54,17 +53,17 @@ namespace pos
 {
 ContextManager::ContextManager(TelemetryPublisher* tp,
     AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-    WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
     AllocatorFileIoManager* fileManager_,
     ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : ContextManager(tp, EventSchedulerSingleton::Instance(), allocCtx_, segCtx_,
-    rebuildCtx_, wbstripeCtx_, gcCtx_, blockAllocStatus_, fileManager_, ctxReplayer_, flushProgress, info_, arrayId_)
+    rebuildCtx_, gcCtx_, blockAllocStatus_, fileManager_, ctxReplayer_, flushProgress, info_, arrayId_)
 {
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, EventScheduler* eventScheduler_,
     AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-    WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
     AllocatorFileIoManager* fileManager_,
     ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : numReadIoIssued(0),
@@ -80,7 +79,6 @@ ContextManager::ContextManager(TelemetryPublisher* tp, EventScheduler* eventSche
     allocatorCtx = allocCtx_;
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
-    wbStripeCtx = wbstripeCtx_;
     gcCtx = gcCtx_;
     blockAllocStatus = blockAllocStatus_;
     fileIoManager = fileManager_;
@@ -99,11 +97,10 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     allocatorCtx = new AllocatorCtx(info);
     rebuildCtx = new RebuildCtx(allocatorCtx, info);
     segmentCtx = new SegmentCtx(rebuildCtx, info);
-    wbStripeCtx = new WbStripeCtx(info);
     gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
     fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayId);
-    contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
+    contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
     fileOwner[SEGMENT_CTX] = segmentCtx;
     fileOwner[ALLOCATOR_CTX] = allocatorCtx;
     fileOwner[REBUILD_CTX] = rebuildCtx;
@@ -115,7 +112,6 @@ ContextManager::~ContextManager(void)
 {
     delete segmentCtx;
     delete rebuildCtx;
-    delete wbStripeCtx;
     delete allocatorCtx;
     delete gcCtx;
     delete blockAllocStatus;
@@ -126,7 +122,6 @@ ContextManager::~ContextManager(void)
 void
 ContextManager::Init(void)
 {
-    wbStripeCtx->Init();
     allocatorCtx->Init();
     segmentCtx->Init();
     rebuildCtx->Init();
@@ -174,7 +169,6 @@ void
 ContextManager::Dispose(void)
 {
     segmentCtx->Dispose();
-    wbStripeCtx->Dispose();
     rebuildCtx->Dispose();
     allocatorCtx->Dispose();
     fileIoManager->Dispose();
@@ -492,7 +486,6 @@ ContextManager::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         owner = ALLOCATOR_CTX;
         fileIoManager->LoadSectionData(owner, ctx->buffer);
         fileOwner[owner]->AfterLoad(ctx->buffer);
-        wbStripeCtx->AfterLoad(ctx->buffer);
     }
     else
     {
@@ -559,17 +552,10 @@ ContextManager::_UpdateSectionInfo()
         currentOffset += size;
     }
     currentOffset = 0;
-    for (section = 0; section < NUM_ALLOCATION_INFO; section++) // allocatorCtx file
+    for (section = 0; section < NUM_ALLOCATOR_CTX_SECTION; section++) // allocatorCtx file
     {
         int size = allocatorCtx->GetSectionSize(section);
         fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, allocatorCtx->GetSectionAddr(section), size, currentOffset);
-        currentOffset += size;
-    }
-    assert(section == AC_ALLOCATE_WBLSID_BITMAP);
-    for (; section < NUM_ALLOCATOR_CTX_SECTION; section++) // wbstripeCtx in allocatorCtx file
-    {
-        int size = wbStripeCtx->GetSectionSize(section);
-        fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, wbStripeCtx->GetSectionAddr(section), size, currentOffset);
         currentOffset += size;
     }
     currentOffset = 0;
@@ -654,11 +640,10 @@ ContextManager::_PrepareBuffer(int owner, char* buf)
             fileIoManager->CopySectionData(owner, buf, 0, NUM_ALLOCATION_INFO);
         }
         { // lock boundary
-            std::lock_guard<std::mutex> lock(wbStripeCtx->GetAllocWbLsidBitmapLock());
-            wbStripeCtx->BeforeFlush(AC_HEADER, buf);
-            wbStripeCtx->BeforeFlush(AC_ALLOCATE_WBLSID_BITMAP, buf + fileIoManager->GetSectionOffset(owner, AC_ALLOCATE_WBLSID_BITMAP));
+            std::lock_guard<std::mutex> lock(allocatorCtx->GetAllocWbLsidBitmapLock());
+            allocatorCtx->BeforeFlush(AC_ALLOCATE_WBLSID_BITMAP, buf + fileIoManager->GetSectionOffset(owner, AC_ALLOCATE_WBLSID_BITMAP));
         }
-        wbStripeCtx->BeforeFlush(AC_ACTIVE_STRIPE_TAIL, buf + fileIoManager->GetSectionOffset(owner, AC_ACTIVE_STRIPE_TAIL));
+        allocatorCtx->BeforeFlush(AC_ACTIVE_STRIPE_TAIL, buf + fileIoManager->GetSectionOffset(owner, AC_ACTIVE_STRIPE_TAIL));
     }
 }
 

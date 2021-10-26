@@ -50,7 +50,6 @@ class IAllocatorFileIoClient;
 class AllocatorFileIoManager;
 class AllocatorCtx;
 class SegmentCtx;
-class WbStripeCtx;
 class ContextReplayer;
 class TelemetryPublisher;
 class EventScheduler;
@@ -71,12 +70,12 @@ public:
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, EventScheduler* eventScheduler_,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
@@ -110,7 +109,6 @@ public:
     virtual RebuildCtx* GetRebuildCtx(void) { return rebuildCtx; }
     virtual SegmentCtx* GetSegmentCtx(void) { return segmentCtx; }
     virtual AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
-    virtual WbStripeCtx* GetWbStripeCtx(void) { return wbStripeCtx; }
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
@@ -146,7 +144,6 @@ private:
     AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
-    WbStripeCtx* wbStripeCtx;
     RebuildCtx* rebuildCtx;
     ContextReplayer* contextReplayer;
     GcCtx* gcCtx;

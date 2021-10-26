@@ -26,7 +26,18 @@ public:
     MOCK_METHOD(StripeId, GetPrevSsdLsid, (), (override));
     MOCK_METHOD(void, SetPrevSsdLsid, (StripeId stripeId), (override));
     MOCK_METHOD(void, SetNextSsdLsid, (SegmentId segId), (override));
+    MOCK_METHOD(void, AllocWbStripe, (StripeId stripeId), (override));
+    MOCK_METHOD(StripeId, AllocFreeWbStripe, (), (override));
+    MOCK_METHOD(void, ReleaseWbStripe, (StripeId stripeId), (override));
+    MOCK_METHOD(void, SetAllocatedWbStripeCount, (int count), (override));
+    MOCK_METHOD(uint64_t, GetAllocatedWbStripeCount, (), (override));
+    MOCK_METHOD(uint64_t, GetNumTotalWbStripe, (), (override));
+    MOCK_METHOD(std::vector<VirtualBlkAddr>, GetAllActiveStripeTail, (), (override));
+    MOCK_METHOD(VirtualBlkAddr, GetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx), (override));
+    MOCK_METHOD(void, SetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa), (override));
     MOCK_METHOD(std::mutex&, GetAllocatorCtxLock, (), (override));
+    MOCK_METHOD(std::mutex&, GetAllocWbLsidBitmapLock, (), (override));
+    MOCK_METHOD(std::mutex&, GetActiveStripeTailLock, (ASTailArrayIdx asTailArrayIdx), (override));
 };
 
 } // namespace pos

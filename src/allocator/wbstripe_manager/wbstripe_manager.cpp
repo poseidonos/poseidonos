@@ -36,7 +36,6 @@
 
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
-#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/flush_submission.h"
@@ -47,7 +46,7 @@
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
+WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
   iStripeMap(istripeMap_),
@@ -57,7 +56,7 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
   arrayName(arrayName),
   arrayId(arrayId)
 {
-    wbStripeCtx = wbCtx;
+    allocCtx = allocCtx_;
     volumeManager = volManager;
     numVolumes = numVolumes_;
     iReverseMap = iReverseMap_;
@@ -75,7 +74,7 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
 WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
 : WBStripeManager(nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
 {
-    wbStripeCtx = ctxMgr->GetWbStripeCtx();
+    allocCtx = ctxMgr->GetAllocatorCtx();
 }
 // LCOV_EXCL_START
 WBStripeManager::~WBStripeManager(void)
@@ -154,7 +153,7 @@ WBStripeManager::FreeWBStripeId(StripeId lsid)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
-    wbStripeCtx->ReleaseWbStripe(lsid);
+    allocCtx->ReleaseWbStripe(lsid);
     QosManagerSingleton::Instance()->DecreaseUsedStripeCnt(arrayName);
 }
 
@@ -249,7 +248,7 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 void
 WBStripeManager::SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid)
 {
-    wbStripeCtx->SetActiveStripeTail(volumeId, tail);
+    allocCtx->SetActiveStripeTail(volumeId, tail);
 }
 
 int
@@ -441,10 +440,10 @@ WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 VirtualBlks
 WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
 {
-    std::unique_lock<std::mutex> lock(wbStripeCtx->GetActiveStripeTailLock(index));
-    VirtualBlkAddr tail = wbStripeCtx->GetActiveStripeTail(index);
+    std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
+    VirtualBlkAddr tail = allocCtx->GetActiveStripeTail(index);
     VirtualBlks remainingBlocks = _AllocateRemainingBlocks(tail);
-    wbStripeCtx->SetActiveStripeTail(index, UNMAP_VSA);
+    allocCtx->SetActiveStripeTail(index, UNMAP_VSA);
 
     return remainingBlocks;
 }

@@ -44,7 +44,7 @@
 
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, AllocatorAddressInfo* info_)
+AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
@@ -62,10 +62,12 @@ AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, AllocatorAddressInfo* inf
         ctxHeader.numValidWbLsid = header->numValidWbLsid;
         ctxHeader.ctxVersion = header->ctxVersion;
     }
+
+    allocWbLsidBitmap = allocWbLsidBitmap_;
 }
 
 AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
-: AllocatorCtx(nullptr, info)
+: AllocatorCtx(nullptr, nullptr, info)
 {
 }
 
@@ -82,6 +84,11 @@ AllocatorCtx::Init(void)
         return;
     }
 
+    allocWbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
+    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+    {
+        activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
+    }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
     prevSsdLsid = STRIPES_PER_SEGMENT - 1;
 
@@ -98,11 +105,15 @@ AllocatorCtx::Dispose(void)
     {
         return;
     }
-
+    
+    if (allocWbLsidBitmap != nullptr)
+    {
+        delete allocWbLsidBitmap;
+        allocWbLsidBitmap = nullptr;
+    }
+    
     initialized = false;
 }
-
-
 
 void
 AllocatorCtx::SetNextSsdLsid(SegmentId segId)
@@ -154,12 +165,41 @@ AllocatorCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+
+    AllocatorCtxHeader* header = (AllocatorCtxHeader*)buf;
+    allocWbLsidBitmap->SetNumBitsSet(header->numValidWbLsid);
 }
 
 void
 AllocatorCtx::BeforeFlush(int section, char* buf)
 {
-    ctxHeader.ctxVersion = ctxDirtyVersion++;
+    switch (section)
+    {
+        case AC_HEADER:
+        {
+            ctxHeader.ctxVersion = ctxDirtyVersion++;
+
+            AllocatorCtxHeader* header = (AllocatorCtxHeader*)buf;
+            header->numValidWbLsid = allocWbLsidBitmap->GetNumBitsSetWoLock();
+
+            break;
+        }
+        case AC_ALLOCATE_WBLSID_BITMAP:
+        {
+            memcpy(buf, GetSectionAddr(section), GetSectionSize(section));
+            break;
+        }
+        case AC_ACTIVE_STRIPE_TAIL:
+        {
+            for (int index = 0; index < ACTIVE_STRIPE_TAIL_ARRAYLEN; index++)
+            {
+                std::unique_lock<std::mutex> volLock(activeStripeTailLock[index]);
+                int offset = sizeof(VirtualBlkAddr) * index;
+                memcpy(buf + offset, &activeStripeTail[index], sizeof(VirtualBlkAddr));
+            }
+            break;
+        }
+    }
 }
 
 void
@@ -184,6 +224,16 @@ AllocatorCtx::GetSectionAddr(int section)
             ret = (char*)&currentSsdLsid;
             break;
         }
+        case AC_ALLOCATE_WBLSID_BITMAP:
+        {
+            ret = (char*)allocWbLsidBitmap->GetMapAddr();
+            break;
+        }
+        case AC_ACTIVE_STRIPE_TAIL:
+        {
+            ret = (char*)activeStripeTail;
+            break;
+        }
     }
     return ret;
 }
@@ -204,8 +254,95 @@ AllocatorCtx::GetSectionSize(int section)
             ret = sizeof(currentSsdLsid);
             break;
         }
+        case AC_ALLOCATE_WBLSID_BITMAP:
+        {
+            ret = allocWbLsidBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
+            break;
+        }
+        case AC_ACTIVE_STRIPE_TAIL:
+        {
+            ret = sizeof(activeStripeTail);
+            break;
+        }
     }
     return ret;
+}
+
+void
+AllocatorCtx::AllocWbStripe(StripeId stripeId)
+{
+    allocWbLsidBitmap->SetBit(stripeId);
+}
+
+StripeId
+AllocatorCtx::AllocFreeWbStripe(void)
+{
+    StripeId stripe = allocWbLsidBitmap->SetNextZeroBit();
+    if (allocWbLsidBitmap->IsValidBit(stripe) == false)
+    {
+        stripe = UNMAP_STRIPE;
+    }
+    return stripe;
+}
+
+void
+AllocatorCtx::ReleaseWbStripe(StripeId stripeId)
+{
+    allocWbLsidBitmap->ClearBit(stripeId);
+}
+
+void
+AllocatorCtx::SetAllocatedWbStripeCount(int count)
+{
+    allocWbLsidBitmap->SetNumBitsSet(count);
+}
+
+uint64_t
+AllocatorCtx::GetAllocatedWbStripeCount(void)
+{
+    return allocWbLsidBitmap->GetNumBitsSet();
+}
+
+uint64_t
+AllocatorCtx::GetNumTotalWbStripe(void)
+{
+    return allocWbLsidBitmap->GetNumBits();
+}
+
+std::vector<VirtualBlkAddr>
+AllocatorCtx::GetAllActiveStripeTail(void)
+{
+    std::vector<VirtualBlkAddr> asTails;
+    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+    {
+        asTails.push_back(activeStripeTail[asTailArrayIdx]);
+    }
+    return asTails;
+}
+
+VirtualBlkAddr
+AllocatorCtx::GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx)
+{
+    return activeStripeTail[asTailArrayIdx];
+}
+
+void
+AllocatorCtx::SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa)
+{
+    activeStripeTail[asTailArrayIdx] = vsa;
+}
+
+
+std::mutex&
+AllocatorCtx::GetAllocWbLsidBitmapLock(void)
+{
+    return allocWbLsidBitmap->GetLock();
+}
+
+std::mutex&
+AllocatorCtx::GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx)
+{
+    return activeStripeTailLock[asTailArrayIdx];
 }
 
 uint64_t

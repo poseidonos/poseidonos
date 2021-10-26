@@ -9,7 +9,6 @@ context_manager/io_ctx \
 context_manager/allocator_ctx \
 context_manager/rebuild_ctx \
 context_manager/segment_ctx \
-context_manager/wbstripe_ctx \
 event \
 stripe \
 wbstripe_manager

@@ -10,7 +10,6 @@
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
 #include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
@@ -181,7 +180,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, nullptr, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, nullptr, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
@@ -261,9 +260,8 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>(nullptr, nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr, wbCtx, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
@@ -294,8 +292,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetWbStripeCtx).Times(0);
-    EXPECT_CALL(*wbCtx, SetAllocatedWbStripeCount).Times(0);
+    EXPECT_CALL(*allocCtx, SetAllocatedWbStripeCount).Times(0);
     // when 3.
     ret = alloc.SetMeta(WBT_WBLSID_BITMAP, "", file);
     // then 3.
@@ -306,8 +303,8 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetWbStripeCtx).WillOnce(Return(wbCtx));
-    EXPECT_CALL(*wbCtx, SetAllocatedWbStripeCount);
+    EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
+    EXPECT_CALL(*allocCtx, SetAllocatedWbStripeCount);
     // when 4.
     ret = alloc.SetMeta(WBT_WBLSID_BITMAP, "", file);
     // then 4.
@@ -380,9 +377,8 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr, wbCtx, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, false, nullptr, "");
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
@@ -390,7 +386,6 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
     EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(rebuildCtx));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetWbStripeCtx).WillOnce(Return(wbCtx));
     addrInfo->SetnumUserAreaSegments(6);
     EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
