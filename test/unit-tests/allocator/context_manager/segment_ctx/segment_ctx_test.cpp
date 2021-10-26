@@ -24,6 +24,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     // given
     SegmentCtxHeader header;
     header.sig = SegmentCtx::SIG_SEGMENT_CTX;
+    header.ctxVersion = 5;
     header.numValidSegment = 100;
 
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -34,6 +35,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     // when
     segCtx.AfterLoad(nullptr);
 
+    EXPECT_EQ(segCtx.GetStoredVersion(), header.ctxVersion);
     delete segmentBitmap;
 }
 

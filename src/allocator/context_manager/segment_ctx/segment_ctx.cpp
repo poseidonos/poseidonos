@@ -258,6 +258,7 @@ SegmentCtx::AfterLoad(char* buf)
 {
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
+    ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
