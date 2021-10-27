@@ -231,6 +231,12 @@ AIO::CreateVolumeIo(pos_io& posIo)
 
     volumeIo->SetCallback(aioCompletion);
 
+    ioContext.cnt++;
+    if (volumeIo->IsPollingNecessary())
+    {
+        ioContext.needPollingCount++;
+    }
+
     return volumeIo;
 }
 
@@ -250,6 +256,8 @@ AIO::_CreateFlushIo(pos_io& posIo)
         ioContext));
     flushIo->SetCallback(aioCompletion);
 
+    ioContext.cnt++;
+
     return flushIo;
 }
 
@@ -259,7 +267,6 @@ AIO::SubmitAsyncIO(pos_io& posIo)
     if (posIo.ioType == IO_TYPE::FLUSH)
     {
         FlushIoSmartPtr flushIo = _CreateFlushIo(posIo);
-        ioContext.cnt++;
 
         SpdkEventScheduler::ExecuteOrScheduleEvent(flushIo->GetOriginCore(), std::make_shared<FlushCmdHandler>(flushIo));
         return;
@@ -267,11 +274,6 @@ AIO::SubmitAsyncIO(pos_io& posIo)
 
     VolumeIoSmartPtr volumeIo = CreateVolumeIo(posIo);
 
-    ioContext.cnt++;
-    if (volumeIo->IsPollingNecessary())
-    {
-        ioContext.needPollingCount++;
-    }
     uint32_t core = volumeIo->GetOriginCore();
     uint32_t arr_vol_id = posIo.volume_id + (posIo.array_id << 8);
     switch (volumeIo->dir)

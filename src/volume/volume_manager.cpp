@@ -276,7 +276,7 @@ VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeSta
         return static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
     POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
-        "The requested volume is already deleted");
+        "The requested volume {} is already deleted", volId);
     return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
 }
 
