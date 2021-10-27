@@ -136,7 +136,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful_Close_Unsuccessf
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
-    //EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
     AsyncMetaFileIoCtx *ctx = new AsyncMetaFileIoCtx();
     ctx->error = 0;
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce([&](AsyncMetaFileIoCtx* ctx)
