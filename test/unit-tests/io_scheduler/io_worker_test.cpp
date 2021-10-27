@@ -267,9 +267,12 @@ TEST(IOWorker, Run_NormalCase)
     ioWorker.AddDevice(device);
     auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
 
-    // When: Call EnqueueUbio with MockUbio & sleep for 10ms to handle this queue
+    // When: Call EnqueueUbio with MockUbio & sleep repeatedly for 10us until ioQueue empty
     ioWorker.EnqueueUbio(ubio);
-    usleep(10000); // 10ms
+    while (0 != ioWorker.GetQueueSize())
+    {
+        usleep(10);
+    }
 
     // Then: Do nothing
 }
@@ -293,9 +296,12 @@ TEST(IOWorker, Run_IOCountUnderflowCase)
     ioWorker.AddDevice(device);
     auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
 
-    // When: Call EnqueueUbio with MockUbio & sleep for 10ms to handle this queue
+    // When: Call EnqueueUbio with MockUbio & sleep repeatedly for 10us until ioQueue empty
     ioWorker.EnqueueUbio(ubio);
-    usleep(10000); // 10ms
+    while (0 != ioWorker.GetQueueSize())
+    {
+        usleep(10);
+    }
 
     // Then: Do nothing
 }

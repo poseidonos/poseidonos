@@ -136,6 +136,12 @@ IOWorker::EnqueueUbio(UbioSmartPtr ubio)
     ioQueue->EnqueueUbio(ubio);
 }
 
+int
+IOWorker::GetQueueSize(void)
+{
+    return ioQueue->GetQueueSize();
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis    Adds a UBlockDevice to be controlled by this IOWorker

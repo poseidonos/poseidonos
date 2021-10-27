@@ -69,6 +69,7 @@ public:
     virtual void DecreaseCurrentOutstandingIoCount(int count);
 
     virtual void EnqueueUbio(UbioSmartPtr ubio);
+    int GetQueueSize(void);
     uint32_t AddDevice(UblockSharedPtr device);
     uint32_t AddDevices(std::vector<UblockSharedPtr>* inputList);
     virtual uint32_t RemoveDevice(UblockSharedPtr device);
