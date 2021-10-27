@@ -47,7 +47,7 @@ public:
     explicit FlushIo(int arrayId);
     ~FlushIo(void) override;
 
-    uint32_t GetVolumeId(void);
+    virtual uint32_t GetVolumeId(void);
     void SetVolumeId(uint32_t volumeId);
 
     uint32_t GetOriginCore(void) override;

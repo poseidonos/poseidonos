@@ -857,6 +857,24 @@ TEST(ContextManager, GetRebuildCtx_TestSimpleGetter)
     EXPECT_EQ(reCtx, ret);
 }
 
+TEST(ContextManager, GetGcCtx_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
+    NiceMock<MockTelemetryPublisher> tc;
+    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
+    // when
+    MockGcCtx* ret = reinterpret_cast<MockGcCtx*>(ctxManager.GetGcCtx());
+    // then
+    EXPECT_EQ(gcCtx, ret);
+}
+
 TEST(ContextManager, GetContextReplayer_TestSimpleGetter)
 {
     // given
@@ -1114,6 +1132,23 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleGetter)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
     // when
     ctxManager.NeedRebuildAgain();
+}
+
+TEST(ContextManager, IncreaseValidBlockCount_TestSimple)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
+    NiceMock<MockTelemetryPublisher> tc;
+    ContextManager sut(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
+
+    // when
+    sut.IncreaseValidBlockCount(0, 1);
 }
 
 TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)

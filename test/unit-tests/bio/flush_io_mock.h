@@ -12,6 +12,7 @@ class MockFlushIo : public FlushIo
 {
 public:
     using FlushIo::FlushIo;
+    MOCK_METHOD(uint32_t, GetVolumeId, (), (override));
     MOCK_METHOD(uint32_t, GetOriginCore, (), (override));
 };
 

@@ -12,6 +12,7 @@
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_spy.h"
 #include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_spy.h"
+#include "test/unit-tests/bio/flush_io_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
@@ -54,6 +55,11 @@ TEST(WBStripeManager, Init_TestInitialization)
     WBStripeManager wbStripeManager(&addrInfo, ctxManager, blkManager, "", 0);
     // when
     wbStripeManager.Init();
+
+    // When 2
+    std::shared_ptr<MockFlushIo> flushIo = std::make_shared<MockFlushIo>(0);
+    EXPECT_CALL(*flushIo, GetVolumeId).WillOnce(Return(0));
+    wbStripeManager.GetWbStripes(flushIo);
 
     delete blkManager;
     delete ctxManager;

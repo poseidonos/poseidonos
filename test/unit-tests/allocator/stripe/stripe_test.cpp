@@ -362,4 +362,15 @@ TEST(Stripe, GetVictimVsa_TestSimpleGetter)
     EXPECT_EQ(5, ret.offset);
 }
 
+TEST(Stripe, UpdateFlushIo_TestSimple)
+{
+    NiceMock<MockReverseMapPack>* revMap = new NiceMock<MockReverseMapPack>();
+    Stripe stripe(revMap, true);
+
+    // When
+    stripe.SetFinished(true);
+    stripe.UpdateFlushIo(nullptr);
+}
+
+
 } // namespace pos

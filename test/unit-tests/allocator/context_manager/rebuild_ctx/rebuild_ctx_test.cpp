@@ -61,8 +61,10 @@ TEST(RebuildCtx, ReleaseRebuildSegment_TestIfSuccessOrNot)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     RebuildCtx rebuildCtx(allocCtx, nullptr);
     rebuildCtx.AddRebuildTargetSegment(0);
-    rebuildCtx.AddRebuildTargetSegment(1);
-    rebuildCtx.AddRebuildTargetSegment(2);
+    rebuildCtx.AddRebuildTargetSegment(1);        
+    // Use another methods for UT function coverage
+    rebuildCtx.EmplaceRebuildTargetSegment(2);
+    rebuildCtx.SetTargetSegmentCnt(3);
 
     // when 1.
     int ret = rebuildCtx.ReleaseRebuildSegment(10);

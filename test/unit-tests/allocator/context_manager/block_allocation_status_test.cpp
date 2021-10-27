@@ -6,6 +6,7 @@ namespace pos
 TEST(BlockAllocationStatus, BlockAllocationStatus_testIfConstructedSuccessfully)
 {
     BlockAllocationStatus status;
+    status.PermitBlockAllocation();
 
     for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; volumeId++)
     {

@@ -111,6 +111,9 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     EXPECT_CALL(*wbManager, Dispose);
     // when 2.
     alloc.Shutdown();
+
+    // When 3: Call No-Op methods
+    alloc.Flush();
 }
 
 TEST(Allocator, FinalizeActiveStripes_TestSimpleCall)
@@ -496,5 +499,6 @@ TEST(Allocator, GetIAllocatorWbt_TestSimpleGetter)
     // when
     IAllocatorWbt* ret = alloc.GetIAllocatorWbt();
 }
+
 
 } // namespace pos
