@@ -107,7 +107,8 @@ DebugInfo::DebugInfo(void)
 DebugInfo::~DebugInfo(void)
 {
 }
-
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
 void
 DebugInfo::Update(void)
 {
@@ -141,4 +142,5 @@ DebugInfo::Update(void)
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
 }
+// LCOV_EXCL_STOP
 } // namespace pos
