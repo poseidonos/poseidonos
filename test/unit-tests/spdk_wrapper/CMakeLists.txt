@@ -1,4 +1,4 @@
-POS_ADD_UNIT_TEST(spdk_caller_ut spdk_caller_test.cpp)
 POS_ADD_UNIT_TEST(event_framework_api_ut event_framework_api_test.cpp)
 POS_ADD_UNIT_TEST(free_buffer_pool_ut free_buffer_pool_test.cpp)
 POS_ADD_UNIT_TEST(accel_engine_api_ut accel_engine_api_test.cpp)
+POS_ADD_UNIT_TEST(nvme_ut nvme_test.cpp)

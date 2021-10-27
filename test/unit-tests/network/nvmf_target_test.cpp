@@ -8,7 +8,7 @@
 #include "test/unit-tests/network/nvmf_target_mock.h"
 #include "test/unit-tests/network/nvmf_target_spy.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
-#include "test/unit-tests/spdk_wrapper/spdk_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_caller_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_nvmf_caller_mock.h"
 
 using namespace std;
@@ -16,6 +16,7 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Matcher;
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 namespace pos
@@ -167,7 +168,7 @@ TEST(NvmfTarget, TryToAttachNamespace_Fail)
     string arrayName{"array"};
     bool actual, expected{false};
 
-    ON_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).WillByDefault(Return(true));
+    ON_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncTwoParams>(_), _, _)).WillByDefault(Return(true));
     NvmfTarget nvmfTarget(mockSpdkCaller, false, mockEventFrameworkApi);
     actual = nvmfTarget.TryToAttachNamespace(nqn, 0, arrayName, 500000000ULL);
     ASSERT_EQ(actual, expected);
@@ -1054,5 +1055,48 @@ TEST(NvmfTargetSpdk, NvmfTargetSpdk_DetachNamespaceAllPauseDone)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     NvmfTargetSpy nvmfTarget(mockSpdkCaller, false, nullptr);
     nvmfTarget.DetachNamespaceAllPauseDone(nullptr, nullptr, NvmfCallbackStatus::FAILED);
+}
+
+TEST(NvmfTarget, AttachNamespaceWithPause_Success)
+{
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
+    void* arg1 = nullptr;
+    void* arg2 = nullptr;
+    NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncFourParams>(_), _, _)).Times(1);
+
+    nvmfTarget.AttachNamespaceWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
+    delete mockEventFrameworkApi;
+}
+
+TEST(NvmfTarget, DetachNamespaceWithPause_Success)
+{
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
+    void* arg1 = nullptr;
+    void* arg2 = nullptr;
+    NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncFourParams>(_), _, _)).Times(1);
+
+    nvmfTarget.DetachNamespaceWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
+    delete mockEventFrameworkApi;
+}
+
+TEST(NvmfTarget, DetachNamespaceAllWithPause_Success)
+{
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
+    void* arg1 = nullptr;
+    void* arg2 = nullptr;
+    NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetNqn(_)).Times(1);
+    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncFourParams>(_), _, _)).Times(1);
+
+    nvmfTarget.DetachNamespaceAllWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
+    delete mockEventFrameworkApi;
 }
 } // namespace pos

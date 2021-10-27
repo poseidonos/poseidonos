@@ -59,5 +59,23 @@ public:
     {
         nvmfCallbacks.detachNamespaceAllPauseDone(subsystem, arg, status);
     }
+
+    void AttachNamespaceWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
+    {
+        _AttachNamespaceWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
+    }
+
+    void DetachNamespaceWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
+    {
+        _DetachNamespaceWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
+    }
+
+    void DetachNamespaceAllWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
+    {
+        _DetachNamespaceAllWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
+    }
 };
 } // namespace pos

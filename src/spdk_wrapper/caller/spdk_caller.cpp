@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/spdk_wrapper/spdk_caller.h"
+#include "src/spdk_wrapper/caller/spdk_caller.h"
 
 #include "spdk/bdev.h"
 #include "spdk/bdev_module.h"

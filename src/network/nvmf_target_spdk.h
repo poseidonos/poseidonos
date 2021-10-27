@@ -41,7 +41,7 @@
 #include "spdk/nvmf.h"
 #include "spdk/stdinc.h"
 #include "spdk/string.h"
-#include "src/spdk_wrapper/spdk_caller.h"
+#include "src/spdk_wrapper/caller/spdk_caller.h"
 
 typedef void (*PosNvmfEventDoneCallback_t)(void* cb_arg, int status);
 

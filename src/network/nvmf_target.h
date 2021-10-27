@@ -42,7 +42,7 @@
 #include "src/lib/singleton.h"
 #include "src/network/nvmf_target_spdk.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/spdk_caller.h"
+#include "src/spdk_wrapper/caller/spdk_caller.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 using namespace std;
 class EventFrameworkApi;
@@ -99,6 +99,14 @@ public:
 protected:
     static struct NvmfTargetCallbacks nvmfCallbacks;
 
+    static bool _AttachNamespaceWithNsid(const string& nqn, const string& bdevName, uint32_t nsid,
+        PosNvmfEventDoneCallback_t cb, void* cbArg, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
+    static void _AttachNamespaceWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
+    static void _DetachNamespaceWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
+    static void _DetachNamespaceAllWithPause(void* arg1, void* arg2,
+        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
 private:
     uint32_t nrVolumePerSubsystem = 1;
     static const char* BDEV_NAME_PREFIX;
@@ -113,14 +121,6 @@ private:
     static bool _IsTargetExist(void);
     static void _AttachDone(void* cbArg, int status);
     static void _TryAttachHandler(void* arg1, void* arg2);
-    static void _DetachNamespaceWithPause(void* arg1, void* arg2,
-        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
-    static void _AttachNamespaceWithPause(void* arg1, void* arg2,
-        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
-    static void _DetachNamespaceAllWithPause(void* arg1, void* arg2,
-        EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
-    static bool _AttachNamespaceWithNsid(const string& nqn, const string& bdevName, uint32_t nsid,
-        PosNvmfEventDoneCallback_t cb, void* cbArg, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
 };
 
 using NvmfTargetSingleton = Singleton<NvmfTarget>;

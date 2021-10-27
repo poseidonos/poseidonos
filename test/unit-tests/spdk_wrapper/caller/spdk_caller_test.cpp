@@ -29,65 +29,98 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "src/spdk_wrapper/caller/spdk_caller.h"
 
-#pragma once
-
-#include <string>
-#include <unordered_map>
-
-#define DEFAULT_YAML_VALUE ""
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class ConfigGrain
+TEST(SpdkCaller, SpdkCaller_)
 {
-public:
-    ConfigGrain(void)
-    {
-        values.clear();
-    }
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-    virtual ~ConfigGrain(void)
-    {
-    }
-// LCOV_EXCL_STOP
+}
 
-    virtual bool UpdateConfig(std::string key, std::string value)
-    {
-        auto result = values.insert({ key, value });
-        return result.second;
-    }
+TEST(SpdkCaller, SpdkNvmfGetTgt_)
+{
+}
 
-    virtual bool UpdateConfig(std::string key, uint64_t value)
-    {
-        auto result = values.insert({ key, std::to_string(value) });
-        return result.second;
-    }
+TEST(SpdkCaller, SpdkNvmfTgtFindSubsystem_)
+{
+}
 
-    virtual bool UpdateConfig(std::string key, bool value)
-    {
-        std::string str = value ? "true" : "false";
-        auto result = values.insert({ key, str });
-        return result.second;
-    }
+TEST(SpdkCaller, SpdkNvmfSubsystemGetType_)
+{
+}
 
-    // only for test
-    std::unordered_map<std::string, std::string>& GetValues(void)
-    {
-        return values;
-    }
+TEST(SpdkCaller, SpdkNvmfSubsystemGetNqn_)
+{
+}
 
-    static const std::string DEFAULT_VALUE;
+TEST(SpdkCaller, SpdkNvmfSubsystemGetFirst_)
+{
+}
 
-protected:
-    std::string _GetValue(std::string key)
-    {
-        if (values.count(key))
-            return values[key];
-        return "";
-    }
+TEST(SpdkCaller, SpdkNvmfSubsystemGetNext_)
+{
+}
 
-    std::unordered_map<std::string, std::string> values;
-};
+TEST(SpdkCaller, SpdkNvmfSubsystemGetCtrlrHostnqn_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemGetFirstCtrlr_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemGetNextCtrlr_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemGetFirstNs_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemGetNextNs_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemPause_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemResume_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfNsGetBdev_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfNsGetId_)
+{
+}
+
+TEST(SpdkCaller, SpdkNvmfSubsystemGetId_)
+{
+}
+
+TEST(SpdkCaller, SpdkBdevCreatePosDisk_)
+{
+}
+
+TEST(SpdkCaller, SpdkBdevDeletePosDisk_)
+{
+}
+
+TEST(SpdkCaller, SpdkBdevGetByName_)
+{
+}
+
+TEST(SpdkCaller, SpdkBdevGetName_)
+{
+}
+
+TEST(SpdkCaller, SpdkBdevSetQosRateLimits_)
+{
+}
+
 } // namespace pos

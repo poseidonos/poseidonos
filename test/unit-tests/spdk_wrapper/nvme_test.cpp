@@ -29,65 +29,25 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "src/spdk_wrapper/nvme.hpp"
 
-#pragma once
-
-#include <string>
-#include <unordered_map>
-
-#define DEFAULT_YAML_VALUE ""
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class ConfigGrain
+TEST(Nvme, PauseAndCheck_Sucess)
 {
-public:
-    ConfigGrain(void)
-    {
-        values.clear();
-    }
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-    virtual ~ConfigGrain(void)
-    {
-    }
-// LCOV_EXCL_STOP
+    // Given
+    bool expected = true;
 
-    virtual bool UpdateConfig(std::string key, std::string value)
-    {
-        auto result = values.insert({ key, value });
-        return result.second;
-    }
+    // When: Try to pause nvme monitoring
+    Nvme* nvme = new Nvme("dummy");
+    nvme->Pause();
+    bool actual = nvme->IsPaused();
 
-    virtual bool UpdateConfig(std::string key, uint64_t value)
-    {
-        auto result = values.insert({ key, std::to_string(value) });
-        return result.second;
-    }
-
-    virtual bool UpdateConfig(std::string key, bool value)
-    {
-        std::string str = value ? "true" : "false";
-        auto result = values.insert({ key, str });
-        return result.second;
-    }
-
-    // only for test
-    std::unordered_map<std::string, std::string>& GetValues(void)
-    {
-        return values;
-    }
-
-    static const std::string DEFAULT_VALUE;
-
-protected:
-    std::string _GetValue(std::string key)
-    {
-        if (values.count(key))
-            return values[key];
-        return "";
-    }
-
-    std::unordered_map<std::string, std::string> values;
-};
+    // Then: check if paused
+    EXPECT_EQ(actual, expected);
+    delete nvme;
+}
 } // namespace pos
+

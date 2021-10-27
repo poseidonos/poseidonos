@@ -20,6 +20,7 @@ class MockEventFrameworkApi : public EventFrameworkApi
 public:
     using EventFrameworkApi::EventFrameworkApi;
     MOCK_METHOD(bool, SendSpdkEvent, (uint32_t core, EventFuncTwoParams func, void* arg1, void* arg2), (override));
+    MOCK_METHOD(bool, SendSpdkEvent, (uint32_t core, EventFuncFourParams func, void* arg1, void* arg2), (override));
     MOCK_METHOD(bool, SendSpdkEvent, (uint32_t core, EventFuncOneParam func, void* arg1), (override));
     MOCK_METHOD(uint32_t, GetFirstReactor, (), (override));
     MOCK_METHOD(uint32_t, GetCurrentReactor, (), (override));
