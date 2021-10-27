@@ -115,7 +115,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         newVolPolicy.maxIops = 0;
         newVolPolicy.policyChange = true;
         newVolPolicy.maxValueChanged = true;
-        retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
+        retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
         if (retVal != SUCCESS)
         {
             return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());

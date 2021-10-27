@@ -140,7 +140,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"Remaining%\t"+
 				globals.FieldSeparator+"Status\t"+
 				globals.FieldSeparator+"MaximumIOPS\t"+
-				globals.FieldSeparator+"MaximumBandwith")
+				globals.FieldSeparator+"MaximumBandwith\t"+
+				globals.FieldSeparator+"MinimumIOPS\t"+
+				globals.FieldSeparator+"MinimumBandwith")
 
 		// Horizontal line
 		fmt.Fprintln(w,
@@ -150,6 +152,8 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"----------------------------\t"+
 				globals.FieldSeparator+"---------\t"+
 				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"----------------\t"+
+				globals.FieldSeparator+"----------------\t"+
 				globals.FieldSeparator+"----------------\t"+
 				globals.FieldSeparator+"----------------")
 
@@ -163,7 +167,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MAXBW))
+					globals.FieldSeparator+strconv.Itoa(volume.MAXBW)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.MINIOPS)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.MINBW))
 		}
 		w.Flush()
 

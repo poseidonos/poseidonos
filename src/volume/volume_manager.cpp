@@ -170,7 +170,10 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     }
 
     VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeCreator.Do(name, size, maxIops, maxBw);
+    // setting default values for miniops and minbw
+    uint64_t defaultMinIops = 0;
+    uint64_t defaultMinBw = 0;
+    return volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw);
 }
 
 int
@@ -213,7 +216,7 @@ VolumeManager::Unmount(std::string name)
 }
 
 int
-VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw)
+VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     int ret = _CheckPrerequisite();
     if (ret != (int)POS_EVENT_ID::SUCCESS)
@@ -222,7 +225,7 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw)
     }
 
     VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeQosUpdater.Do(name, maxIops, maxBw);
+    return volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
 }
 
 int

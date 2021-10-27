@@ -33,6 +33,8 @@ TEST(VolumeCreator, Do_wrongName)
     uint64_t size = 1024;
     uint64_t maxIops = 100;
     uint64_t maxBw = 100;
+    uint64_t minIops = 0;
+    uint64_t minBw = 0;
 
     int actual;
     int expected = (int)POS_EVENT_ID::SUCCESS;
@@ -42,7 +44,7 @@ TEST(VolumeCreator, Do_wrongName)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(newName, size, maxIops, maxBw);
+    actual = volumeCreator.Do(newName, size, maxIops, maxBw, minIops, minBw);
 
     // Then
     ASSERT_NE(actual, expected);
@@ -58,6 +60,8 @@ TEST(VolumeCreator, Do_SameName)
     uint64_t size = 1024;
     uint64_t maxIops = 100;
     uint64_t maxBw = 100;
+    uint64_t minIops = 0;
+    uint64_t minBw = 0;
 
     int actual;
     int expected = (int)POS_EVENT_ID::VOL_NAME_DUPLICATED;
@@ -71,7 +75,7 @@ TEST(VolumeCreator, Do_SameName)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -87,6 +91,8 @@ TEST(VolumeCreator, Do_SetSizeFail)
     uint64_t size = 1024;
     uint64_t maxIops = 1;
     uint64_t maxBw = 1;
+    uint64_t minIops = 0;
+    uint64_t minBw = 0;
 
     int actual;
     int expected = (int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED;
@@ -96,7 +102,7 @@ TEST(VolumeCreator, Do_SetSizeFail)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -112,6 +118,8 @@ TEST(VolumeCreator, Do_NotEnoughArraySize)
     uint64_t size = 1024*1024;
     uint64_t maxIops = 1;
     uint64_t maxBw = 1;
+    uint64_t minIops = 0;
+    uint64_t minBw = 0;
 
     int actual;
     int expected = (int)POS_EVENT_ID::VOL_SIZE_EXCEEDED;
@@ -121,7 +129,7 @@ TEST(VolumeCreator, Do_NotEnoughArraySize)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw);
 
     // Then
     ASSERT_EQ(actual, expected);

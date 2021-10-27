@@ -89,7 +89,7 @@ VolumeInterface::_CheckVolumeSize(uint64_t volumeSize)
 
 int
 VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
-        uint64_t maxBw)
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     if (volume == nullptr)
     {
@@ -110,14 +110,29 @@ VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
         return ret;
     }
 
+    ret = volume->SetMinIOPS(minIops);
+    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    {
+        return ret;
+    }
+
+    ret = volume->SetMinBW(minBw);
+    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    {
+        return ret;
+    }
+
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
 void
-VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw)
+VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw,
+        uint64_t originalMinIops, uint64_t originalMinBw)
 {
     uint64_t maxIops = volume->MaxIOPS();
     uint64_t maxBw = volume->MaxBW();
+    uint64_t minIops = volume->MinIOPS();
+    uint64_t minBw = volume->MinBW();
 
     if (maxIops != originalMaxIops)
     {
@@ -131,6 +146,19 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
         POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
             "Max bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMaxBw, maxBw);
+    }
+    if (minIops != originalMinIops)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+            "Min iops is set on volume {} ({}->{})", volume->GetName(),
+            originalMinIops, minIops);
+    }
+
+    if (minBw != originalMinBw)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+            "Min bandwidth is set on volume {} ({}->{})",
+            volume->GetName(), originalMinBw, minBw);
     }
 }
 

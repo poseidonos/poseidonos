@@ -182,6 +182,8 @@ type Volume struct {
 	STATUS     string `json:"status"`
 	MAXIOPS    int    `json:"maxiops"`
 	MAXBW      int    `json:"maxbw"`
+	MINIOPS    int    `json:"miniops"`
+	MINBW      int    `json:"minbw"`
 }
 
 // Response for LISTDEVICE Command

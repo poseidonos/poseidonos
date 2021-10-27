@@ -40,9 +40,7 @@ namespace pos_cli
 {
 QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
 {
-    minBw = 0;
     maxBw = 0;
-    minIops = 0;
     maxIops = 0;
     arrayName = "";
 }
@@ -60,7 +58,7 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     string ioType;
     if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
     {
-        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, QosReturnCode::FAILURE, "QOS Settings Skipped", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -143,14 +141,13 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
             int64_t minBwFromCli = doc["param"]["minbw"].get<int64_t>();
             if (-1 != minBwFromCli)
             {
-                if (minBwFromCli < 0)
+                if (minBwFromCli < 0 || ((0 != minBwFromCli) && ((uint64_t)minBwFromCli > MAX_BW_LIMIT)))
                 {
                     errorMsg = "Min Bandwidth value outside allowed range";
                     return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                 }
-                minBw = minBwFromCli;
                 newVolPolicy.minBwGuarantee = true;
-                newVolPolicy.minBw = minBw;
+                newVolPolicy.minBw = minBwFromCli;
                 if (newVolPolicy.minBw != prevVolPolicy.minBw)
                 {
                     newVolPolicy.policyChange = true;
@@ -184,14 +181,13 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
             int64_t minIopsFromCli = doc["param"]["miniops"].get<int64_t>();
             if (-1 != minIopsFromCli)
             {
-                if (minIopsFromCli < 0)
+                if (minIopsFromCli < 0 || ((0 != minIopsFromCli) && ((uint64_t)minIopsFromCli > MAX_IOPS_LIMIT)))
                 {
                     errorMsg = "Min Iops value outside allowed range";
                     return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                 }
-                minIops = minIopsFromCli;
                 newVolPolicy.minIopsGuarantee = true;
-                newVolPolicy.minIops = minIops;
+                newVolPolicy.minIops = minIopsFromCli;
                 if (newVolPolicy.minIops != prevVolPolicy.minIops)
                 {
                     newVolPolicy.policyChange = true;
@@ -227,14 +223,11 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 errorMsg = "Either Min IOPS or Min BW Allowed";
                 return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
             }
-            if (true == newVolPolicy.maxValueChanged)
+            retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
+            if (retVal != SUCCESS)
             {
-                retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
-                if (retVal != SUCCESS)
-                {
-                    errorMsg = "QoS update in Volume Manager failed";
-                    return retVal;
-                }
+                errorMsg = "QoS update in Volume Manager failed";
+                return retVal;
             }
             uint32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
             retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);

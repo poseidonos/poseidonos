@@ -44,7 +44,7 @@ public:
     explicit VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeCreator(void) override;
 
-    int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw);
+    int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw);
 };
 
 }  // namespace pos

@@ -54,7 +54,7 @@ TEST(VolumeQosUpdater, Do_)
     VolumeQosUpdater VolumeQosUpdater(volumes, arrayName, arrayID, &mockVolumeEventPublisher);
 
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeUpdated(_, _, _)).WillByDefault(Return(false));
-    actual = VolumeQosUpdater.Do(name, 1024*1024, 1024*1024);
+    actual = VolumeQosUpdater.Do(name, 1024*1024, 1024*1024, 0, 0);
 
     // Then
     ASSERT_EQ(actual, expected);
