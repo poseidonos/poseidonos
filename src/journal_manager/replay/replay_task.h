@@ -43,7 +43,9 @@ public:
     : reporter(reporter)
     {
     }
+// LCOV_EXCL_START
     virtual ~ReplayTask(void) = default;
+// LCOV_EXCL_STOP
 
     virtual int Start(void) = 0;
     virtual ReplayTaskId GetId(void) = 0;

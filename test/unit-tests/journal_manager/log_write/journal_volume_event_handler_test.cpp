@@ -81,7 +81,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     // When
     std::thread writeLogSync(&JournalVolumeEventHandler::WriteVolumeDeletedLog, &handler, volumeId);
 
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(1s);
     handler.VolumeDeletedLogWriteDone(volumeId);
     writeLogSync.join();
 }
@@ -158,7 +158,7 @@ TEST(JournalVolumeEventHandler, TriggerMetadataFlush_testIfMetaFlushed)
     // When
     std::future<int> metaFlushSync = std::async(&JournalVolumeEventHandler::TriggerMetadataFlush, &handler);
 
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(1s);
     handler.MetaFlushed();
 
     EXPECT_TRUE(metaFlushSync.get() == 0);

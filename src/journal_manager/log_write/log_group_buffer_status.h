@@ -53,14 +53,15 @@ class LogGroupBufferStatus
 {
 public:
     LogGroupBufferStatus(uint64_t startOffset, uint64_t maxOffset, uint64_t metaPageSize);
+    virtual ~LogGroupBufferStatus(void) = default;
     void Reset(void);
 
     void SetActive(uint64_t inputSeqNum);
 
     bool TryToAllocate(uint32_t logSize, uint64_t& offset);
-    bool TryToSetFull(void);
+    virtual bool TryToSetFull(void);
 
-    void LogFilled(void);
+    virtual void LogFilled(void);
 
     inline LogGroupStatus
     GetStatus(void)

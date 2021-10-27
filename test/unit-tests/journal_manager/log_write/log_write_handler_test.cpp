@@ -177,6 +177,14 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfContextCleanedUpWhenWriteLogFail
     // Then: The context should be deleted by LogWriteHandler
 }
 
+TEST_F(LogWriteHandlerTestFixture, AddLogToWaitingList_testIfExecutedSuccessfully)
+{
+    // Given
+    NiceMock<MockLogWriteContext> context;
+    EXPECT_CALL(*waitingList, AddToList(&context));
+    logWriteHandler->AddLogToWaitingList(&context);
+}
+
 TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
 {
     // Given: Log write handler is initialized, waiting list is empty,
@@ -297,5 +305,4 @@ TEST_F(LogWriteHandlerTestFixture, LogBufferReseted_testIfWaitingListIsRestarted
 
     delete waitingContext;
 }
-
 } // namespace pos

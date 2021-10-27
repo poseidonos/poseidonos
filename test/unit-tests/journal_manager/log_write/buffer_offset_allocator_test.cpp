@@ -6,6 +6,7 @@
 
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
+#include "test/unit-tests/journal_manager/log_write/log_group_buffer_status_mock.h"
 
 using testing::NiceMock;
 using ::testing::Return;
@@ -59,6 +60,30 @@ AllocateBuffer(BufferOffsetAllocator* allocator, uint64_t totalSizeToAllocate)
             break;
         }
     }
+}
+
+std::vector<LogGroupBufferStatus*>
+CreateMockLogGroupBufferStatusList(int numLogGroups)
+{
+    std::vector<LogGroupBufferStatus*> statusList;
+    for (int groupId = 0; groupId < numLogGroups; groupId++)
+    {
+        NiceMock<MockLogGroupBufferStatus>* status = new NiceMock<MockLogGroupBufferStatus>(0, 0, 0);
+        statusList.push_back(status);
+    }
+    return statusList;
+}
+
+void
+DeleteMockLogGroupBufferStatus(BufferOffsetAllocator& allocator, std::vector<LogGroupBufferStatus*>& statusList)
+{
+    for (int groupId = 0; groupId < numLogGroups; groupId++)
+    {
+        MockLogGroupBufferStatus* targetToDelete = (MockLogGroupBufferStatus*)statusList[groupId];
+        delete targetToDelete;
+    }
+    statusList.clear();
+    allocator.Init(nullptr, nullptr, statusList);
 }
 
 TEST(BufferOffsetAllocator, Allocate_AllocateBuffer)
@@ -129,5 +154,27 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBufferWithCheckpoint)
     delete releaser;
     delete config;
     delete allocator;
+}
+
+TEST(BufferOffsetAllocator, LogWriteCanceled_testWithAllocatedBuffer)
+{
+    // Given
+    NiceMock<MockLogGroupReleaser> releaser;
+    BufferOffsetAllocator allocator;
+    int numLogGroups = 2;
+    std::vector<LogGroupBufferStatus*> statusList;
+
+    statusList = CreateMockLogGroupBufferStatusList(numLogGroups);
+    allocator.Init(&releaser, nullptr, statusList);
+
+    // When, Then
+    int targetLogGroup = 1;
+
+    EXPECT_CALL((*(MockLogGroupBufferStatus*)statusList[targetLogGroup]), LogFilled);
+    EXPECT_CALL((*(MockLogGroupBufferStatus*)statusList[targetLogGroup]), TryToSetFull).WillOnce(Return(true));
+    EXPECT_CALL(releaser, AddToFullLogGroup(targetLogGroup));
+    allocator.LogWriteCanceled(targetLogGroup);
+
+    DeleteMockLogGroupBufferStatus(allocator, statusList);
 }
 } // namespace pos

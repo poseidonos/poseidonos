@@ -12,6 +12,8 @@ class MockLogGroupBufferStatus : public LogGroupBufferStatus
 {
 public:
     using LogGroupBufferStatus::LogGroupBufferStatus;
+    MOCK_METHOD(bool, TryToSetFull, (), (override));
+    MOCK_METHOD(void, LogFilled, (), (override));
 };
 
 } // namespace pos

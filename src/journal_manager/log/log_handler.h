@@ -42,8 +42,9 @@ class LogHandlerInterface
 {
 public:
     LogHandlerInterface(void) = default;
+// LCOV_EXCL_START
     virtual ~LogHandlerInterface(void) = default;
-
+// LCOV_EXCL_STOP
     virtual LogType GetType(void) = 0;
     virtual uint32_t GetSize(void) = 0;
     virtual char* GetData(void) = 0;

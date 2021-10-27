@@ -47,7 +47,9 @@ class AsyncMetaFileIoCtx
 {
 public:
     AsyncMetaFileIoCtx(void);
+// LCOV_EXCL_START
     virtual ~AsyncMetaFileIoCtx(void) = default;
+// LCOV_EXCL_STOP
 
     virtual void HandleIoComplete(void* data);
     virtual int GetError(void);

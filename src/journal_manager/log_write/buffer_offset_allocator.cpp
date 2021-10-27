@@ -81,6 +81,15 @@ BufferOffsetAllocator::Init(LogGroupReleaser* logGroupReleaser,
 }
 
 void
+BufferOffsetAllocator::Init(LogGroupReleaser* logGroupReleaser,
+    JournalConfiguration* journalConfiguration, std::vector<LogGroupBufferStatus*> LogBufferstatusList)
+{
+    releaser = logGroupReleaser;
+    config = journalConfiguration;
+    statusList = LogBufferstatusList;
+}
+
+void
 BufferOffsetAllocator::Dispose(void)
 {
     for (auto it : statusList)

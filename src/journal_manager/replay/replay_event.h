@@ -55,7 +55,9 @@ public:
     : status(status)
     {
     }
+// LCOV_EXCL_START
     virtual ~ReplayEvent(void) = default;
+// LCOV_EXCL_STOP
 
     virtual int Replay(void) = 0;
     virtual ReplayEventType GetType(void) = 0;

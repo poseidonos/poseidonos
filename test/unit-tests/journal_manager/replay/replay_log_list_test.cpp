@@ -30,7 +30,7 @@ TEST(ReplayLogList, AddLog_testIfMapUpdatedLogIsAdded)
     ReplayLogList logList;
     logList.AddLog(&log);
 
-    ReplayLogGroup logGroup = logList.PopReplayLogGroup();
+    ReplayLogGroup logGroup = std::move(logList.PopReplayLogGroup());
     EXPECT_EQ(logGroup.seqNum, seqNum);
     EXPECT_EQ(logGroup.logs.size(), 1);
     EXPECT_EQ(logGroup.logs.front().time, 0);

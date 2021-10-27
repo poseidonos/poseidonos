@@ -51,6 +51,10 @@ public:
     virtual ~BufferOffsetAllocator(void);
 
     virtual void Init(LogGroupReleaser* releaser, JournalConfiguration* journalConfiguration);
+    // For UT
+    void Init(LogGroupReleaser* logGroupReleaser,
+        JournalConfiguration* journalConfiguration, std::vector<LogGroupBufferStatus*> LogBufferstatusList);
+
     virtual void Dispose(void);
 
     void Reset(void);
