@@ -52,7 +52,8 @@ class StripeMapManager : public IMapManagerInternal, public IStripeMap
 {
 public:
     StripeMapManager(void) = default;
-    explicit StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info);
+    StripeMapManager(StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info);
+    StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info);
     virtual ~StripeMapManager(void);
 
     virtual int Init(void);

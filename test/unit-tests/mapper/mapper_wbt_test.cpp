@@ -205,28 +205,168 @@ TEST(MapperWbt, WriteStripeMapEntry_)
     delete wbt;
 }
 
-TEST(MapperWbt, ReadReverseMap_)
+TEST(MapperWbt, ReadReverseMap_TestFail)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, LoadReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    std::string fname = "newfile";
+    int ret = wbt->ReadReverseMap(0, fname);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
-TEST(MapperWbt, ReadWholeReverseMap_)
+TEST(MapperWbt, WriteReverseMap_TestFail)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, StoreReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    std::string fname = "newfile";
+    int ret = wbt->WriteReverseMap(0, fname);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
-TEST(MapperWbt, ReadReverseMapEntry_)
+TEST(MapperWbt, ReadWholeReverseMap_TestFail)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, GetWholeReverseMapFileSize).WillOnce(Return(10));
+    EXPECT_CALL(*revMan, LoadReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    std::string fname = "newfile";
+    int ret = wbt->ReadWholeReverseMap(fname);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
-TEST(MapperWbt, WriteReverseMap_)
+TEST(MapperWbt, WriteWholeReverseMap_TestFail)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, GetWholeReverseMapFileSize).WillOnce(Return(10));
+    EXPECT_CALL(*revMan, StoreReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    std::string fname = "newfile";
+    int ret = wbt->WriteWholeReverseMap(fname);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
-TEST(MapperWbt, WriteWholeReverseMap_)
+TEST(MapperWbt, ReadReverseMapEntry_TestFail)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, GetReverseMapPerStripeFileSize).WillOnce(Return(10));
+    EXPECT_CALL(*revMan, LoadReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    std::string fname = "newfile";
+    int ret = wbt->ReadReverseMapEntry(0, 0, fname);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
-TEST(MapperWbt, WriteReverseMapEntry_)
+TEST(MapperWbt, WriteReverseMapEntry_TestFail0)
 {
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, GetReverseMapPerStripeFileSize).WillOnce(Return(10));
+    EXPECT_CALL(*revMan, LoadReverseMapForWBT).WillOnce(Return(-1));
+    // when
+    int ret = wbt->WriteReverseMapEntry(0, 0, 0, 0);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
+}
+
+TEST(MapperWbt, WriteReverseMapEntry_TestFail1)
+{
+    // given
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    MapperWbt* wbt = new MapperWbt(addrInfo, vsaMan, strMan, revMan);
+    StripeLoc loc = IN_USER_AREA;
+
+    EXPECT_CALL(*revMan, GetReverseMapPerStripeFileSize).WillOnce(Return(10));
+    EXPECT_CALL(*revMan, LoadReverseMapForWBT).WillOnce(Return(0)).WillOnce(Return(-1));
+    // when
+    int ret = wbt->WriteReverseMapEntry(0, 0, 0, 0);
+    // then
+    EXPECT_EQ(-1, ret);
+    delete vsaMan;
+    delete strMan;
+    delete revMan;
+    delete addrInfo;
+    delete wbt;
 }
 
 } // namespace pos

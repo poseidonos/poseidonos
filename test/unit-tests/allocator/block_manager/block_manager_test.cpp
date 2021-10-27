@@ -98,7 +98,6 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     std::mutex Lock;
     EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(Lock));
     EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
-    EXPECT_CALL(*revMapPack, LinkVsid).WillOnce(Return(0));
     EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false)).WillOnce(Return(true));
 
     // when
@@ -172,11 +171,8 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
     EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false));
     EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(Lock));
     EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
-    EXPECT_CALL(*revMapPack, LinkVsid).WillOnce(Return(-1));
     // when
     Stripe* ret = blkManager.AllocateGcDestStripe(0);
-    // then
-    EXPECT_EQ(nullptr, ret);
 
     delete iWbstripe;
     delete allocCtx;
@@ -495,19 +491,15 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     EXPECT_CALL(*wbCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
     EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
 
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
-    EXPECT_CALL(*stripe, LinkReverseMap).WillOnce(Return(-1));
     // when
     VirtualBlks ret = blkManager._AllocateBlks(0, 1);
-    // then
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
 
     delete iWbstripe;
     delete allocCtx;
@@ -549,8 +541,6 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
 
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
-    EXPECT_CALL(*stripe, LinkReverseMap).WillOnce(Return(0));
     EXPECT_CALL(*iStripeMap, SetLSA).Times(1);
 
     EXPECT_CALL(*wbCtx, SetActiveStripeTail).Times(1);

@@ -6,30 +6,18 @@ namespace pos
 {
 TEST(MpageSet, CanBeCoalesced_)
 {
+    MpageSet ms;
+    ms.numMpages = 1;
+    ms.startMpage = 5;
+    ms.CanBeCoalesced(5);
 }
 
 TEST(MpageSet, Coalesce_)
 {
-}
-
-} // namespace pos
-
-namespace pos
-{
-TEST(SequentialPageFinder, SequentialPageFinder_)
-{
-}
-
-TEST(SequentialPageFinder, PopNextMpageSet_)
-{
-}
-
-TEST(SequentialPageFinder, IsRemaining_)
-{
-}
-
-TEST(SequentialPageFinder, _UpdateSequentialPageList_)
-{
+    MpageSet ms;
+    ms.numMpages = 1;
+    ms.startMpage = 5;
+    ms.Coalesce(4);
 }
 
 } // namespace pos

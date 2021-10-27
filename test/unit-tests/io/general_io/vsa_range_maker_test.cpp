@@ -37,6 +37,7 @@
 
 #include "src/mapper/include/mapper_const.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/volume/volume_base.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
 using namespace pos;
 using namespace std;

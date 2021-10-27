@@ -43,7 +43,7 @@ public:
     virtual int VolumeMounted(int volId, uint64_t volSizeByte) = 0;
     virtual int VolumeLoaded(int volId, uint64_t volSizeByte) = 0;
     virtual int VolumeUnmounted(int volId, bool flushMapRequired) = 0;
-    virtual int VolumeDetached(vector<int> volList) = 0;
+    virtual int VolumeDetached(std::vector<int> volList) = 0;
 
     virtual int PrepareVolumeDelete(int volId) = 0;
 

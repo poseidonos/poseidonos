@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 
 #include <list>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -21,12 +20,9 @@ public:
     MOCK_METHOD(void, SetWbLsid, (StripeId wbAreaLsid), (override));
     MOCK_METHOD(StripeId, GetUserLsid, (), (override));
     MOCK_METHOD(void, SetUserLsid, (StripeId userAreaLsid), (override));
-    MOCK_METHOD(int, Flush, (EventSmartPtr callback), (override));
     MOCK_METHOD(void, UpdateReverseMapEntry, (uint32_t offset, BlkAddr rba, uint32_t volumeId), (override));
-    MOCK_METHOD(int, ReconstructReverseMap, (uint32_t volumeId, uint64_t blockCount, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
-    MOCK_METHOD(int, LinkReverseMap, (ReverseMapPack * revMapPackToLink), (override));
-    MOCK_METHOD(int, UnLinkReverseMap, (), (override));
     MOCK_METHOD((std::tuple<BlkAddr, uint32_t>), GetReverseMapEntry, (uint32_t offset), (override));
+    MOCK_METHOD(int, Flush, (EventSmartPtr callback), (override));
     MOCK_METHOD(void, UpdateVictimVsa, (uint32_t offset, VirtualBlkAddr vsa), (override));
     MOCK_METHOD(VirtualBlkAddr, GetVictimVsa, (uint32_t offset), (override));
     MOCK_METHOD(bool, IsFinished, (), (override));
@@ -39,7 +35,7 @@ public:
     MOCK_METHOD(void, AddDataBuffer, (void* buf), (override));
     MOCK_METHOD(DataBufferIter, DataBufferBegin, (), (override));
     MOCK_METHOD(DataBufferIter, DataBufferEnd, (), (override));
-    MOCK_METHOD(bool, IsGcDestStripe, (), (override));
+    MOCK_METHOD(void, UpdateFlushIo, (FlushIoSmartPtr flushIo), (override));
 };
 
 } // namespace pos

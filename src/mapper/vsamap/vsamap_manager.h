@@ -56,7 +56,7 @@ public:
     virtual int Init(void);
     virtual void Dispose(void);
 
-    virtual int CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol);
+    virtual int CreateVsaMapContent(VSAMapContent* vsaMap, int volId, uint64_t volSizeByte, bool delVol);
     virtual int LoadVSAMapFile(int volId);
     virtual int FlushDirtyPagesGiven(int volId, MpageList list, EventSmartPtr cb);
     virtual int FlushTouchedPages(int volId, EventSmartPtr cb);

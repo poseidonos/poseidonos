@@ -71,7 +71,7 @@ public:
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
     virtual int Flush(EventSmartPtr callback);
 
-    virtual void UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa, BlkAddr rba, uint32_t volumeId);
+    virtual void UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa);
     virtual VirtualBlkAddr GetVictimVsa(uint32_t offset);
 
     virtual bool IsFinished(void);

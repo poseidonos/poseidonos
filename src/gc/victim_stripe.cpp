@@ -68,10 +68,14 @@ VictimStripe::VictimStripe(IArrayInfo* array,
   iReverseMap(inputRevMap),
   iVSAMap(inputIVSAMap),
   iStripeMap(inputIStripeMap),
-  volumeManager(inputVolumeManager)
+  volumeManager(inputVolumeManager),
+  revMapPack(nullptr)
 {
     dataBlks = array->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
-    revMapPack = iReverseMap->AllocReverseMapPack(myLsid);
+    if (iReverseMap != nullptr)
+    {
+        revMapPack = iReverseMap->AllocReverseMapPack(myLsid);
+    }
 }
 
 VictimStripe::~VictimStripe(void)

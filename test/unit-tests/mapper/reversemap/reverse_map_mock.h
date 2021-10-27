@@ -36,15 +36,15 @@ class MockReverseMapPack : public ReverseMapPack
 {
 public:
     using ReverseMapPack::ReverseMapPack;
-    MOCK_METHOD(void, Init, (uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName), (override));
-    MOCK_METHOD(void, Init, (IVolumeManager * volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap), (override));
-    MOCK_METHOD(int, Load, (EventSmartPtr callback), (override));
-    MOCK_METHOD(int, Flush, (Stripe * stripe, EventSmartPtr callback), (override));
+    MOCK_METHOD(void, Init, (MetaFileIntf * file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_), (override));
+    MOCK_METHOD(void, Assign, (StripeId vsid), (override));
+    MOCK_METHOD(int, Load, (uint32_t fileOffset, EventSmartPtr cb), (override));
+    MOCK_METHOD(int, Flush, (Stripe * stripe, uint32_t fileOffset, EventSmartPtr cb), (override));
     MOCK_METHOD(int, SetReverseMapEntry, (uint32_t offset, BlkAddr rba, uint32_t volumeId), (override));
-    MOCK_METHOD(int, ReconstructMap, (uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD((std::tuple<BlkAddr, uint32_t>), GetReverseMapEntry, (uint32_t offset), (override));
+    MOCK_METHOD(void, WaitForPendingIO, (), (override));
     MOCK_METHOD(int, IsAsyncIoDone, (), (override));
-    MOCK_METHOD(int, WbtFileSyncIo, (MetaFileIntf * fileLinux, MetaFsIoOpcode IoDirection), (override));
+    MOCK_METHOD(char*, GetRevMapPtrForWBT, (), (override));
 };
 
 } // namespace pos

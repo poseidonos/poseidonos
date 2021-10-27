@@ -265,7 +265,6 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     // 3. Get Stripe object for wbLsid and link it with reverse map for vsid
     Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
     stripe->Assign(newVsid, wbLsid, asTailArrayIdx);
-    iReverseMap->Assign(wbLsid, newVsid);
 
     // 4. Update the stripe map
     iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);

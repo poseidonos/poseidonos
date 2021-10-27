@@ -520,65 +520,6 @@ TEST(WBStripeManager, PrepareRebuild_TestwithAllConditions)
     delete stripe2;
 }
 
-TEST(WBStripeManager, _ReconstructReverseMap_TestwithAllConditions)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(1);
-    addrInfo.SetblksPerStripe(1);
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    WBStripeManagerSpy wbStripeManager(nullptr, 1, reverseMap, nullptr, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
-
-    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-    wbStripeManager.PushStripeToStripeArray(stripe);
-
-    std::map<uint64_t, BlkAddr> revMapInfos;
-
-    // given 1.
-    EXPECT_CALL(*stripe, GetWbLsid).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, LinkReverseMap).WillOnce(Return(-1));
-    EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
-    // when 1.
-    int ret = wbStripeManager._ReconstructReverseMap(0, stripe, 0, revMapInfos);
-    // then 1.
-    EXPECT_EQ(-1, ret);
-
-    // given 2.
-    EXPECT_CALL(*stripe, GetWbLsid).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, LinkReverseMap).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, ReconstructReverseMap).WillOnce(Return(-1));
-    EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
-    // when 2.
-    ret = wbStripeManager._ReconstructReverseMap(0, stripe, 0, revMapInfos);
-    // then 2.
-    EXPECT_EQ(-1, ret);
-
-    // given 3.
-    EXPECT_CALL(*stripe, GetWbLsid).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, LinkReverseMap).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, ReconstructReverseMap).WillOnce(Return(0));
-    EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
-    // when 2.
-    ret = wbStripeManager._ReconstructReverseMap(0, stripe, 0, revMapInfos);
-    // then 2.
-    EXPECT_EQ(0, ret);
-
-    delete blkManager;
-    delete ctxManager;
-    delete wbCtx;
-    delete iStripeMap;
-    delete reCtx;
-    delete stripe;
-    delete reverseMap;
-    delete revMapPack;
-}
-
 TEST(WBStripeManager, _ReconstructAS_TestwithAllConditions)
 {
     // given
@@ -624,8 +565,9 @@ TEST(WBStripeManager, ReconstructActiveStripe_TestFunc)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(1);
     addrInfo.SetblksPerStripe(1);
+    NiceMock<MockIVolumeManager>* vol = new NiceMock<MockIVolumeManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    WBStripeManagerSpy wbStripeManager(nullptr, 1, reverseMap, nullptr, nullptr, nullptr, &addrInfo, nullptr, nullptr, "", 0);
+    WBStripeManagerSpy wbStripeManager(nullptr, 1, reverseMap, vol, nullptr, nullptr, &addrInfo, nullptr, nullptr, "", 0);
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = UNMAP_OFFSET};
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     wbStripeManager.PushStripeToStripeArray(stripe);
@@ -634,6 +576,7 @@ TEST(WBStripeManager, ReconstructActiveStripe_TestFunc)
     wbStripeManager.ReconstructActiveStripe(0, 0, vsa, revMapInfos);
     delete stripe;
     delete reverseMap;
+    delete vol;
 }
 
 TEST(WBStripeManager, _AllocateRemainingBlocks_TestFunc)

@@ -38,6 +38,14 @@
 
 namespace pos
 {
+StripeMapContent::StripeMapContent(Map* m, int mapId, MapperAddressInfo* addrInfo)
+: MapContent(mapId, addrInfo)
+{
+    // only for UT
+    fileName = "StripeMap.bin";
+    map = m;
+}
+
 StripeMapContent::StripeMapContent(int mapId, MapperAddressInfo* addrInfo)
 : MapContent(mapId, addrInfo)
 {

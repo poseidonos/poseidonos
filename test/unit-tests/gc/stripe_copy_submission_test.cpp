@@ -15,6 +15,7 @@
 #include <test/unit-tests/utils/mock_builder.h>
 #include <test/unit-tests/event_scheduler/event_scheduler_mock.h>
 #include <test/unit-tests/gc/stripe_copier_mock.h>
+#include <test/unit-tests/mapper/i_reversemap_mock.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -53,6 +54,7 @@ public:
         baseStripeId = 0;
         copyIndex = 0;
         array = new NiceMock<MockIArrayInfo>;
+        revMap = new NiceMock<MockIReverseMap>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
@@ -83,6 +85,7 @@ public:
         delete stripeCopySubmission;
         delete array;
         delete meta;
+        delete revMap;
     }
 
 protected:
@@ -95,6 +98,7 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockCopierMeta>* meta;
     NiceMock<MockBitMapMutex>* inUseBitmap;
+    NiceMock<MockIReverseMap>* revMap;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
     std::vector<FreeBufferPool*>* gcBufferPool;
@@ -123,7 +127,7 @@ TEST_F(StripeCopySubmissionTestFixture, Execute_testIfExecuteFailsWhenMetaModule
                         nullptr, nullptr, eventScheduler);
     stripeCopySubmission = new StripeCopySubmission(0, meta, 0, mockStripeCopier, eventScheduler);
 
-    NiceMock<MockVictimStripe> victimStripe(array, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockVictimStripe> victimStripe(array, revMap, nullptr, nullptr, nullptr);
     EXPECT_CALL(*meta, GetStripePerSegment).WillOnce(Return(0));
     EXPECT_CALL(*meta, IsReadytoCopy(copyIndex)).WillOnce(Return(false));
 
@@ -140,7 +144,7 @@ TEST_F(StripeCopySubmissionTestFixture, Execute_testStripeCopySubmissionFaliWhen
                         nullptr, nullptr, eventScheduler);
     stripeCopySubmission = new StripeCopySubmission(0, meta, 0, mockStripeCopier, eventScheduler);
 
-    NiceMock<MockVictimStripe> victimStripe(array, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockVictimStripe> victimStripe(array, revMap, nullptr, nullptr, nullptr);
     EXPECT_CALL(*meta, GetStripePerSegment).WillRepeatedly(Return(10));
     for (uint32_t index = 0; index < 10; index++)
     {
@@ -162,7 +166,7 @@ TEST_F(StripeCopySubmissionTestFixture, Execute_teststripeCopySubmissionExecuteW
                         nullptr, nullptr, eventScheduler);
     stripeCopySubmission = new StripeCopySubmission(0, meta, 0, mockStripeCopier, eventScheduler);
 
-    NiceMock<MockVictimStripe> victimStripe(array, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockVictimStripe> victimStripe(array, revMap, nullptr, nullptr, nullptr);
     EXPECT_CALL(*meta, GetStripePerSegment).WillRepeatedly(Return(10));
     for (uint32_t index = 0; index < 10; index++)
     {

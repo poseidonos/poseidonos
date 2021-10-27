@@ -41,18 +41,18 @@ Zsh:
 
 fish:
 
-  $ yourprogram completion fish | source
+  $ poseidonos-cli completion fish | source
 
   # To load completions for each session, execute once:
-  $ yourprogram completion fish > ~/.config/fish/completions/yourprogram.fish
+  $ poseidonos-cli completion fish > ~/.config/fish/completions/poseidonos-cli.fish
 
 PowerShell:
 
-  PS> yourprogram completion powershell | Out-String | Invoke-Expression
+  PS> poseidonos-cli completion powershell | Out-String | Invoke-Expression
 
   # To load completions for every new session, run:
-  PS> yourprogram completion powershell > yourprogram.ps1
-  # and source this file from your PowerShell profile.
+  PS> poseidonos-cli completion powershell > poseidonos-cli.ps1
+  # Add source /yourpath/poseidonos-cli.ps1 file from your PowerShell profile.
 
 
 ```

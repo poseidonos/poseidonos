@@ -228,6 +228,15 @@ TEST(Mapper, TestEnableInternalAccess)
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->EnableInternalAccess(3);
     EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+
+    mapper->SetVolumeState(5, VolState::VOLUME_LOADING, 10);
+    EXPECT_CALL(*vsaMan, IsVolumeLoaded).WillOnce(Return(false));
+    ret = mapper->EnableInternalAccess(5);
+    EXPECT_EQ(NEED_RETRY, ret);
+
+    VirtualBlkAddr bret = mapper->GetVSAInternal(5, 0, ret);
+    EXPECT_EQ(UNMAP_VSA, bret);
+
     delete mapper;
     delete arr;
 }
@@ -420,6 +429,107 @@ TEST(Mapper, TestGetNumUsedBlks)
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->GetNumUsedBlks(2);
     EXPECT_EQ(-1, ret);
+
+    delete mapper;
+    delete arr;
+}
+
+TEST(Mapper, TestVolumeCreated_Failed)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    mapper->SetVolumeState(0, VolState::BACKGROUND_MOUNTED, 10);
+    int ret = mapper->VolumeCreated(0, 100);
+    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+
+    mapper->SetVolumeState(0, VolState::NOT_EXIST, 10);
+    EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
+    ret = mapper->VolumeCreated(0, 100);
+    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+
+    mapper->SetVolumeState(1, VolState::VOLUME_DELETING, 10);
+    ret = mapper->VolumeLoaded(1, 100);
+    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    ret = mapper->PrepareVolumeDelete(1);
+    EXPECT_EQ(-EID(MAPPER_FAILED), ret);
+
+    delete mapper;
+    delete arr;
+}
+
+TEST(Mapper, TestPrepareVolumeDelete_Failed)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    mapper->SetVolumeState(1, VolState::VOLUME_DELETING, 10);
+    int ret = mapper->PrepareVolumeDelete(1);
+    EXPECT_EQ(-EID(MAPPER_FAILED), ret);
+
+    mapper->SetVolumeState(1, VolState::EXIST_UNLOADED, 10);
+    EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
+    ret = mapper->PrepareVolumeDelete(1);
+    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+
+
+    EXPECT_CALL(*vsaMan, NeedToDeleteFile).WillOnce(Return(false));
+    EXPECT_CALL(*vsaMan, InvalidateAllBlocks).WillOnce(Return(-1));
+    ret = mapper->PrepareVolumeDelete(1);
+    EXPECT_EQ(-EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), ret);
+
+    delete mapper;
+    delete arr;
+}
+
+TEST(Mapper, TestDeleteVolMap_Failed)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    EXPECT_CALL(*vsaMan, DeleteVSAMap).WillOnce(Return(-1));
+    int ret = mapper->DeleteVolumeMap(1);
+    EXPECT_EQ(-EID(MFS_FILE_DELETE_FAILED), ret);
+
+    delete mapper;
+    delete arr;
+}
+
+TEST(Mapper, TestVolumeDetacheds_Failed)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    vector<int> list;
+    int volId = 0;
+    list.push_back(volId);
+    mapper->SetVolumeState(0, VolState::VOLUME_DELETING, 10);
+    int ret = mapper->VolumeDetached(list);
+    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
 
     delete mapper;
     delete arr;

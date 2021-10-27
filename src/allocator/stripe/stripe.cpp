@@ -69,7 +69,7 @@ Stripe::Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPer
 : Stripe(nullptr, revMapMan, withDataBuffer_, numBlksPerStripe)
 {
 }
-
+// LCOV_EXCL_START
 Stripe::~Stripe(void)
 {
     if (withDataBuffer == false)
@@ -81,9 +81,9 @@ Stripe::~Stripe(void)
         }
     }
 }
-
+// LCOV_EXCL_STOP
 void
-Stripe::UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa, BlkAddr rba, uint32_t volumeId)
+Stripe::UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa)
 {
     oldVsaList[offset] = vsa;
 }
@@ -106,6 +106,10 @@ Stripe::Assign(StripeId vsid_, StripeId lsid_, ASTailArrayIdx tailArrayIdx_)
     if (withDataBuffer == false)
     {
         revMapPack = iReverseMap->AllocReverseMapPack(vsid);
+    }
+    else
+    {
+        revMapPack = iReverseMap->Assign(wbLsid, vsid);
     }
     userLsid = vsid; // Future work: Allocate userLsid in Flush submission
 }
@@ -198,17 +202,7 @@ Stripe::GetReverseMapEntry(uint32_t offset)
 int
 Stripe::Flush(EventSmartPtr callback)
 {
-    if (likely(revMapPack != nullptr))
-    {
-        return iReverseMap->Flush(revMapPack, UNMAP_STRIPE, this, vsid, callback);
-    }
-    else
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP),
-            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Flush, GcStripe:{}",
-            wbLsid, (!withDataBuffer));
-        return -EID(ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP);
-    }
+    return iReverseMap->Flush(revMapPack, wbLsid, this, vsid, callback);
 }
 
 DataBufferIter
@@ -257,7 +251,7 @@ Stripe::SetFinished(bool state)
 {
     std::unique_lock<std::mutex> lock(flushIoUpdate);
     finished = state;
-
+    revMapPack = nullptr;
     if (flushIo != nullptr)
     {
         flushIo->DecreaseStripeCnt();

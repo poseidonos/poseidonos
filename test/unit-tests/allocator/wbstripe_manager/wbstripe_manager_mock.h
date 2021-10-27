@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 
 #include <list>
-#include <map>
 #include <string>
 #include <vector>
 

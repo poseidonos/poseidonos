@@ -13,7 +13,6 @@
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
 #include <test/unit-tests/gc/gc_map_update_request_mock.h>
 #include <test/unit-tests/allocator/i_block_allocator_mock.h>
-#include <test/unit-tests/allocator/i_wbstripe_allocator_mock.h>
 #include <test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h>
 #include <test/unit-tests/gc/flow_control/flow_control_mock.h>
 #include <test/unit-tests/gc/gc_flush_completion_mock.h>
@@ -66,7 +65,6 @@ public:
         inputEvent = std::make_shared<MockGcMapUpdateRequest>(stripe, nullptr, nullptr, array, nullptr);
 
         blockAllocator = new NiceMock<MockIBlockAllocator>();
-        wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>();
         ioSubmitHandler = new NiceMock<MockIIOSubmitHandler>();
         flowControl = new NiceMock<MockFlowControl>(array, nullptr,
                         nullptr, nullptr, nullptr, nullptr);
@@ -82,7 +80,6 @@ public:
         delete stripe;
         delete rbaStateManager;
         delete blockAllocator;
-        delete wbStripeAllocator;
         delete ioSubmitHandler;
         delete flowControl;
 
@@ -109,7 +106,6 @@ protected:
 
     CallbackSmartPtr callback;
     NiceMock<MockIBlockAllocator>* blockAllocator;
-    NiceMock<MockIWBStripeAllocator>* wbStripeAllocator;
     NiceMock<MockIIOSubmitHandler>* ioSubmitHandler;
     NiceMock<MockFlowControl>* flowControl;
 
@@ -129,7 +125,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenG
     // given gc flush submission and get token fail
     gcFlushSubmission = new GcFlushSubmission(arrayName, blkInfoList, testVolumeId,
                         dataBuffer, gcStripeManager, callback, blockAllocator,
-                        wbStripeAllocator, ioSubmitHandler, flowControl, array);
+                        ioSubmitHandler, flowControl, array);
     EXPECT_CALL(*flowControl, GetToken(_, _)).WillOnce(Return(-1));
 
     // when Execute
@@ -142,7 +138,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenA
     // given gc flush submission and allocate gc stripe fail
     gcFlushSubmission = new GcFlushSubmission(arrayName, blkInfoList, testVolumeId,
                         dataBuffer, gcStripeManager, callback, blockAllocator,
-                        wbStripeAllocator, ioSubmitHandler, flowControl, array);
+                        ioSubmitHandler, flowControl, array);
     EXPECT_CALL(*flowControl, GetToken(_, _)).WillOnce(Return(partitionLogicalSize.blksPerStripe));
     EXPECT_CALL(*blockAllocator, AllocateGcDestStripe(testVolumeId)).WillOnce(nullptr);
     EXPECT_CALL(*flowControl, ReturnToken(_, partitionLogicalSize.blksPerStripe)).Times(1);
@@ -173,12 +169,10 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
 
     gcFlushSubmission = new GcFlushSubmission(arrayName, blkInfoList, testVolumeId,
                         dataBuffer, gcStripeManager, callback, blockAllocator,
-                        wbStripeAllocator, ioSubmitHandler, flowControl, array);
+                        ioSubmitHandler, flowControl, array);
     EXPECT_CALL(*flowControl, GetToken(_, _)).WillOnce(Return(partitionLogicalSize.blksPerStripe));
     EXPECT_CALL(*blockAllocator, AllocateGcDestStripe(testVolumeId)).WillOnce(Return(stripe));
 
-    EXPECT_CALL(*wbStripeAllocator, AllocateUserDataStripeId(_)).WillOnce(Return(vsid));
-    EXPECT_CALL(*stripe, SetUserLsid(vsid)).Times(1);
     EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayIndex)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
     // when execute

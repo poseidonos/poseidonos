@@ -13,13 +13,13 @@ class MockVSAMapContent : public VSAMapContent
 public:
     using VSAMapContent::VSAMapContent;
     MOCK_METHOD(MpageList, GetDirtyPages, (uint64_t start, uint64_t numEntries), (override));
+    MOCK_METHOD(int, InMemoryInit, (uint64_t volId, uint64_t numEntries, uint64_t mpageSize), (override));
     MOCK_METHOD(VirtualBlkAddr, GetEntry, (BlkAddr rba), (override));
     MOCK_METHOD(int, SetEntry, (BlkAddr rba, VirtualBlkAddr vsa), (override));
     MOCK_METHOD(int64_t, GetNumUsedBlks, (), (override));
     MOCK_METHOD(void, SetCallback, (EventSmartPtr cb), (override));
     MOCK_METHOD(EventSmartPtr, GetCallback, (), (override));
 
-    MOCK_METHOD(MpageList, GetDirtyPages, (BlkAddr start, uint64_t numEntries), (override));
     MOCK_METHOD(int, Init, (uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, Load, (AsyncLoadCallBack & cb), (override));
@@ -32,8 +32,6 @@ public:
     MOCK_METHOD(int, Dump, (std::string fileName), (override));
     MOCK_METHOD(int, DumpLoad, (std::string fileName), (override));
     MOCK_METHOD(uint64_t, GetEntriesPerPage, (), (override));
-    MOCK_METHOD(void, SetMapHeader, (MapHeader * mapHeader_), (override));
-    MOCK_METHOD(void, SetMap, (Map * map_), (override));
 };
 
 } // namespace pos

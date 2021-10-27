@@ -4,7 +4,7 @@
 
 namespace pos
 {
-TEST(MapContent, MapContent_)
+TEST(MapContent, SetMapHeaderAndMap)
 {
 }
 

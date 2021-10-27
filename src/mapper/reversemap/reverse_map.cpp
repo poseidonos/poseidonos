@@ -58,7 +58,7 @@ ReverseMapPack::ReverseMapPack(void)
   callback(nullptr)
 {
 }
-
+// LCOV_EXCL_START
 ReverseMapPack::~ReverseMapPack(void)
 {
     for (auto& revMap : revMaps)
@@ -70,24 +70,15 @@ ReverseMapPack::~ReverseMapPack(void)
         }
     }
     revMaps.clear();
-
-    if (revMapfile != nullptr)
-    {
-        if (revMapfile->IsOpened() == true)
-        {
-            revMapfile->Close();
-        }
-        delete revMapfile;
-        revMapfile = nullptr;
-    }
 }
-
+// LCOV_EXCL_STOP
 void
 ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
 {
+    revMapfile = file;
     wbLsid = wbLsid_;
     vsid = vsid_;
-    mpageSize_ = mpageSize_;
+    mpageSize = mpageSize_;
     numMpagesPerStripe = numMpagesPerStripe_;
     for (uint64_t mpage = 0; mpage < numMpagesPerStripe; ++mpage)
     {
@@ -236,6 +227,9 @@ void
 ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
 {
     RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = static_cast<RevMapPageAsyncIoCtx*>(ctx);
+                POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
+                "!!!!!!!!!!!!!!!! RevIO Done!!!:{}", revMapPageAsyncIoReq->error);
+
     if (revMapPageAsyncIoReq->error != 0)
     {
         ioError = revMapPageAsyncIoReq->error;

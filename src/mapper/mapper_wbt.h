@@ -48,7 +48,7 @@ class MapperWbt : public IMapperWbt
 public:
     MapperWbt(void) = default;
     MapperWbt(MapperAddressInfo* addrInfo_, VSAMapManager* vsaMapMgr, StripeMapManager* stripeMapMgr, ReverseMapManager* revMapMgr);
-    virtual ~MapperWbt(void) = default;
+    virtual ~MapperWbt(void);
 
     int GetMapLayout(std::string fname) override;
     int ReadVsaMap(int volId, std::string fname) override;

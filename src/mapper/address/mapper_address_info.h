@@ -44,7 +44,7 @@ class MapperAddressInfo
 public:
     MapperAddressInfo(void) = default;
     explicit MapperAddressInfo(IArrayInfo* iArrayInfo_);
-    virtual ~MapperAddressInfo(void) {}
+    virtual ~MapperAddressInfo(void);
     virtual void SetupAddressInfo(int mpageSize_);
     virtual std::string GetArrayName(void);
     virtual int GetArrayId(void);

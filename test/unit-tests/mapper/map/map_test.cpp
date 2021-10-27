@@ -4,40 +4,27 @@
 
 namespace pos
 {
-} // namespace pos
-
-namespace pos
-{
-TEST(Mpage, Mpage_)
-{
-}
-
-} // namespace pos
-
-namespace pos
-{
 TEST(Map, Map_)
 {
-}
-
-TEST(Map, GetMpage_)
-{
+    Map map(0, 0);
+    Map map2();
 }
 
 TEST(Map, GetMpageWithLock_)
 {
+    Map map(5, 4032);
+    char* ret = map.GetMpageWithLock(100);
+    EXPECT_EQ(nullptr, ret);
+
+    map.GetMpageWithLock(1);
 }
 
 TEST(Map, AllocateMpage_)
 {
-}
-
-TEST(Map, GetMpageLock_)
-{
-}
-
-TEST(Map, ReleaseMpageLock_)
-{
+    Map map(5, 4032);
+    map.AllocateMpage(1);
+    char* ret = map.AllocateMpage(1);
+    EXPECT_EQ(nullptr, ret);
 }
 
 } // namespace pos

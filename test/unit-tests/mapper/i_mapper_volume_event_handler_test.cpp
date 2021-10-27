@@ -1,4 +1,4 @@
-#include "src/mapper/mapper.h"
+#include "src/volume/volume_base.h"
 #include "src/mapper/i_mapper_volume_event_handler.h"
 
 #include <gtest/gtest.h>

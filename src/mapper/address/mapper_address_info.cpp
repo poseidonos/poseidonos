@@ -48,6 +48,11 @@ MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
     mpageSize = 0;
     isUT = false;
 }
+// LCOV_EXCL_START
+MapperAddressInfo::~MapperAddressInfo(void)
+{
+}
+// LCOV_EXCL_STOP
 
 void
 MapperAddressInfo::SetupAddressInfo(int mpageSize_)

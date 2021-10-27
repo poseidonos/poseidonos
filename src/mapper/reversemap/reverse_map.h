@@ -164,7 +164,7 @@ private:
 
     StripeId wbLsid;
     StripeId vsid;   // SSD LSID
-    std::vector<RevMap*> revMaps;    
+    std::vector<RevMap*> revMaps;
 
     MetaFileIntf* revMapfile; // MFS file
     uint32_t mpageSize;

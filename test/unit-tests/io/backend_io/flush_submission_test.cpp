@@ -5,7 +5,6 @@
 
 #include <list>
 
-#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/include/backend_event.h"
 #include "src/include/meta_const.h"
@@ -57,11 +56,10 @@ TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
 
     // When : constructor is called
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
 
     // Then : Do nothing
 }
@@ -70,9 +68,8 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
     const uint32_t BUFFER_SIZE = 4;
     uint32_t testBuffer[BUFFER_SIZE];
     uint32_t actualBufferSize;
@@ -85,7 +82,6 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
     {
         dataBuffer.push_back(static_cast<void*>(&testBuffer[i]));
     }
-    ON_CALL(mockIWBStripeAllocator, AllocateUserDataStripeId(_)).WillByDefault(Return(0));
     ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::SUCCESS));
     ON_CALL(mockStripe, DataBufferBegin()).WillByDefault(Return(static_cast<std::vector<void*>::iterator>(dataBuffer.begin())));
     ON_CALL(mockStripe, DataBufferEnd()).WillByDefault(Return(static_cast<std::vector<void*>::iterator>(dataBuffer.end())));
@@ -100,9 +96,8 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
     bool actualReturn;
     int arrayId = 0;
 
@@ -139,10 +134,9 @@ TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     NiceMock<MockIIOTranslator> mockIIOTranslator;
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, 0, &mockIIOTranslator);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, &mockIIOTranslator);
     bool actualReturn;
 
     // When : Translate returns value except SUCCESS(0)

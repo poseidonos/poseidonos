@@ -48,7 +48,11 @@ MapperWbt::MapperWbt(MapperAddressInfo* addrInfo_, VSAMapManager* vsaMapMgr, Str
   reverseMapManager(revMapMgr)
 {
 }
-
+// LCOV_EXCL_START
+MapperWbt::~MapperWbt(void)
+{
+}
+// LCOV_EXCL_STOP
 /*
  * File("fname") Format
  *

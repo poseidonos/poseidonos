@@ -58,23 +58,26 @@ MapIoHandler::MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId_, M
 : MapIoHandler(nullptr,  mapData, mapHeaderData, mapId_, addrInfo_)
 {
 }
-
+// LCOV_EXCL_START
 MapIoHandler::~MapIoHandler(void)
 {
     Dispose();
 }
-
+// LCOV_EXCL_STOP
 int
 MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize)
 {
-    assert(file == nullptr);
     if (addrInfo->IsUT() == false)
     {
+        assert(file == nullptr);
         file = new FILESTORE(fileName, addrInfo->GetArrayId());
     }
     else
     {
-        file = new MockFileIntf(fileName, addrInfo->GetArrayId());
+        if (file == nullptr)
+        {
+            file = new MockFileIntf(fileName, addrInfo->GetArrayId());
+        }
     }
 
     if (file->DoesFileExist() == false)

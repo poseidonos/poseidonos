@@ -9,7 +9,7 @@
 #include <src/volume/volume_base.h>
 #include <src/mapper/include/mapper_const.h>
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
-#include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
+#include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
 #include <test/unit-tests/mapper/i_stripemap_mock.h>
 #include <test/unit-tests/volume/i_volume_manager_mock.h>
@@ -40,7 +40,7 @@ public:
     SetUp(void)
     {
         array = new NiceMock<MockIArrayInfo>;
-        reverseMapPack = new NiceMock<MockReverseMapPack>;
+        reverseMap = new NiceMock<MockIReverseMap>;
         vsaMap = new NiceMock<MockIVSAMap>;
         stripeMap = new NiceMock<MockIStripeMap>;
         volumeManager = new NiceMock<MockIVolumeManager>;
@@ -62,7 +62,7 @@ public:
             return tmpVsa;
         });
 
-        victimStripe = new VictimStripe(array, reverseMapPack, vsaMap, stripeMap, volumeManager);
+        victimStripe = new VictimStripe(array, reverseMap, vsaMap, stripeMap, volumeManager);
     }
 
     virtual void
@@ -73,12 +73,13 @@ public:
         delete vsaMap;
         delete stripeMap;
         delete volumeManager;
+        delete reverseMap;
     }
 
 protected:
     VictimStripe* victimStripe;
     NiceMock<MockIArrayInfo>* array;
-    NiceMock<MockReverseMapPack>* reverseMapPack;
+    NiceMock<MockIReverseMap>* reverseMap;
     NiceMock<MockIVSAMap>* vsaMap;
     NiceMock<MockIStripeMap>* stripeMap;
     NiceMock<MockIVolumeManager>* volumeManager;
@@ -100,7 +101,6 @@ protected:
 
 TEST_F(VictimStripeTestFixture, Load_)
 {
-    EXPECT_CALL(*reverseMapPack, LinkVsid(TEST_SEGMENT_1_BASE_STRIPE_ID)).Times(1);
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 }
 
@@ -112,10 +112,6 @@ TEST_F(VictimStripeTestFixture, GetBlkInfoListSize_)
 {
 }
 
-TEST_F(VictimStripeTestFixture, IsAsyncIoDone_)
-{
-}
-
 TEST_F(VictimStripeTestFixture, LoadValidBlock_GetVsaRetry)
 {
     uint32_t chunksPerStripe = partitionLogicalSize.chunksPerStripe;
@@ -124,7 +120,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlock_GetVsaRetry)
 
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillRepeatedly(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillRepeatedly(Return(std::tie(blockOffset, volId)));
     }
     // set victim stripe id
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
@@ -133,8 +129,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlock_GetVsaRetry)
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
     EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when loadValidBlock mapper return need retry then return false
     EXPECT_TRUE(victimStripe->LoadValidBlock() == false);
@@ -149,7 +143,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithValidAllBlocks)
 
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillRepeatedly(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillRepeatedly(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
@@ -160,8 +154,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithValidAllBlocks)
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
     EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -203,12 +195,9 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidReverseMap1)
     uint32_t maxVolCnt = MAX_VOLUME_COUNT;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(INVALID_RBA, maxVolCnt)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(INVALID_RBA, maxVolCnt)));
     }
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -225,12 +214,10 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidReverseMap2)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(INVALID_RBA, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(INVALID_RBA, volId)));
     }
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
     // then
@@ -245,15 +232,12 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapVsa)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = UNMAP_STRIPE, .offset = UNMAP_OFFSET};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -270,15 +254,12 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidVsa1)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = UNMAP_STRIPE, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -295,15 +276,12 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidVsa2)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = UNMAP_OFFSET};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -320,7 +298,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
@@ -333,8 +311,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 
     EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -359,7 +335,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentLsa)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
@@ -367,9 +343,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentLsa)
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID + 1};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -386,7 +359,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentBlkOffset)
     uint32_t volId = 1;
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
-        EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+        EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
         int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset + 1};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
@@ -394,9 +367,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentBlkOffset)
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -412,7 +382,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDeletedVolume)
     uint32_t blocksPerStripe = partitionLogicalSize.blksPerStripe;
     uint32_t volId = 1;
     uint32_t blockOffset = 0;
-    EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
+    EXPECT_CALL(*reverseMap, GetReverseMapEntry(nullptr, UNMAP_STRIPE, blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
     int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
     VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
     EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
@@ -421,9 +391,6 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDeletedVolume)
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
     EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(2010));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
-
-    EXPECT_CALL(*reverseMapPack, IsAsyncIoDone()).WillRepeatedly(Return(0));
-    EXPECT_TRUE(victimStripe->IsAsyncIoDone() == 0);
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);

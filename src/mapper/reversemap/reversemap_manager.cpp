@@ -55,7 +55,7 @@ ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripe
   addrInfo(addrInfo_)
 {
 }
-
+// LCOV_EXCL_START
 ReverseMapManager::~ReverseMapManager(void)
 {
     if (revMapWholefile != nullptr)
@@ -73,7 +73,7 @@ ReverseMapManager::~ReverseMapManager(void)
         revMapPacks = nullptr;
     }
 }
-
+// LCOV_EXCL_STOP
 void
 ReverseMapManager::Init(void)
 {
@@ -112,7 +112,7 @@ ReverseMapManager::Init(void)
     revMapPacks = new ReverseMapPack[numWbStripes]();
     for (StripeId wbLsid = 0; wbLsid < numWbStripes; ++wbLsid)
     {
-        revMapPacks[wbLsid].Init(revMapWholefile, wbLsid, UINT32_MAX, addrInfo->GetMpageSize(), numMpagesPerStripe);
+        revMapPacks[wbLsid].Init(revMapWholefile, wbLsid, UINT32_MAX, mpageSize, numMpagesPerStripe);
     }
 }
 
@@ -195,17 +195,18 @@ ReverseMapManager::GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint
     }
 }
 
-void
+ReverseMapPack*
 ReverseMapManager::Assign(StripeId wblsid, StripeId vsid)
 {
     revMapPacks[wblsid].Assign(vsid);
+    return &revMapPacks[wblsid];
 }
 
 ReverseMapPack*
 ReverseMapManager::AllocReverseMapPack(uint32_t vsid)
 {
     ReverseMapPack* revPack = new ReverseMapPack();
-    revPack->Init(revMapWholefile, UNMAP_STRIPE, vsid, addrInfo->GetMpageSize(), numMpagesPerStripe);
+    revPack->Init(revMapWholefile, UNMAP_STRIPE, vsid, mpageSize, numMpagesPerStripe);
     revPack->Assign(vsid);
     return revPack;
 }
@@ -223,7 +224,7 @@ ReverseMapManager::GetWholeReverseMapFileSize(void)
 }
 
 int
-ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
+ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     int ret = 0;
     BlkAddr lastFoundRba = UINT64_MAX;
@@ -241,7 +242,7 @@ ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint32_t wblsid, uin
             }
 
             BlkAddr foundRba = INVALID_RBA;
-            bool found = _FindRba(volumeId, vsid, wblsid, offset, rbaStart, foundRba);
+            bool found = _FindRba(volumeId, totalRbaNum, vsid, wblsid, offset, rbaStart, foundRba);
             if (found == false)
             {
                 continue;
@@ -283,13 +284,9 @@ ReverseMapManager::GetReverseMapPtrForWBT(void)
 }
 
 bool
-ReverseMapManager::_FindRba(uint32_t volumeId, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
+ReverseMapManager::_FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
 {
-    uint64_t totalRbaNum = 0;
-    assert(volumeManager != nullptr);
-    volumeManager->GetVolumeSize(volumeId, totalRbaNum);
     assert(totalRbaNum > 0);
-    totalRbaNum = DivideUp(totalRbaNum, BLOCK_SIZE);
 
     bool looped = false;
     for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= totalRbaNum; ++rbaToCheck)
@@ -328,6 +325,8 @@ ReverseMapManager::_FindRba(uint32_t volumeId, StripeId vsid, StripeId wblsid, u
 int
 ReverseMapManager::_SetNumMpages(void)
 {
+    int maxVsid = addrInfo->GetMaxVSID();
+    mpageSize = addrInfo->GetMpageSize();
     uint32_t blksPerStripe = addrInfo->GetBlksPerStripe();
     uint32_t entriesPerNormalPage = (mpageSize / REVMAP_SECTOR_SIZE) * (REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE);
     uint32_t entriesPerFirstPage = entriesPerNormalPage - (REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE);
@@ -341,8 +340,6 @@ ReverseMapManager::_SetNumMpages(void)
         numMpagesPerStripe = 1 + DivideUp(blksPerStripe - entriesPerFirstPage, entriesPerNormalPage);
     }
 
-    mpageSize = addrInfo->GetMpageSize();
-    int maxVsid = addrInfo->GetMaxVSID();
     fileSizePerStripe = mpageSize * numMpagesPerStripe;
     fileSizeWholeRevermap = fileSizePerStripe * maxVsid;
 

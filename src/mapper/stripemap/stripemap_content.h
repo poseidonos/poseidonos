@@ -41,6 +41,8 @@ namespace pos
 class StripeMapContent : public MapContent
 {
 public:
+    StripeMapContent(void) = default;
+    StripeMapContent(Map* m, int mapId, MapperAddressInfo* addrInfo);
     StripeMapContent(int mapId, MapperAddressInfo* addrInfo);
     virtual ~StripeMapContent(void) = default;
 

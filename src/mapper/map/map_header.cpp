@@ -52,7 +52,7 @@ MapHeader::MapHeader(int mapId_)
 : MapHeader(nullptr, nullptr, mapId_)
 {
 }
-
+// LCOV_EXCL_START
 MapHeader::~MapHeader(void)
 {
     if (mPageMap != nullptr)
@@ -66,7 +66,7 @@ MapHeader::~MapHeader(void)
         touchedMpages = nullptr;
     }
 }
-
+// LCOV_EXCL_STOP
 void
 MapHeader::Init(uint64_t numMpages, uint64_t mpageSize)
 {
@@ -131,6 +131,24 @@ MapHeader::UpdateNumUsedBlks(VirtualBlkAddr oldVsa)
     {
         numUsedBlks++;
     }
+}
+
+uint32_t
+MapHeader::GetNumTouchedMpagesSet(void)
+{
+    return touchedMpages->GetNumBitsSet();
+}
+
+uint32_t
+MapHeader::GetNumTotalTouchedMpages(void)
+{
+    return touchedMpages->GetNumBits();
+}
+
+void
+MapHeader::SetTouchedMpageBit(uint64_t pageNr)
+{
+    touchedMpages->SetBit(pageNr);
 }
 
 }   // namespace pos

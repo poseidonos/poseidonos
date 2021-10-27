@@ -61,7 +61,7 @@ Map::Map(uint64_t numMpages, uint64_t mpageSize)
         assert(false);
     }
 }
-
+// LCOV_EXCL_START
 Map::~Map(void)
 {
     if (memPool != nullptr)
@@ -76,7 +76,7 @@ Map::~Map(void)
         mPageArr = nullptr;
     }
 }
-
+// LCOV_EXCL_STOP
 char*
 Map::AllocateMpage(uint64_t pageNr)
 {

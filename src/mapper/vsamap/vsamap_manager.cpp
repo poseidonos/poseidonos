@@ -46,7 +46,6 @@ VSAMapManager::VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, 
   numLoadIssuedCount(0)
 {
     // only for UT
-    vsaMaps[0] = vsaMap;
     eventScheduler = eventSched;
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
@@ -56,6 +55,7 @@ VSAMapManager::VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, 
         isVsaMapInternalAccessable[volId] = false;
         isVsaMapAccessable[volId] = false;
     }
+    vsaMaps[0] = vsaMap;
 }
 
 VSAMapManager::VSAMapManager(MapperAddressInfo* info)
@@ -107,10 +107,18 @@ VSAMapManager::Dispose(void)
 }
 
 int
-VSAMapManager::CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol)
+VSAMapManager::CreateVsaMapContent(VSAMapContent* vm, int volId, uint64_t volSizeByte, bool delVol)
 {
     assert(vsaMaps[volId] == nullptr);
-    vsaMaps[volId] = new VSAMapContent(volId, addrInfo);
+    if (vm != nullptr)
+    {
+        // for UT
+        vsaMaps[volId] = vm;
+    }
+    else
+    {
+        vsaMaps[volId] = new VSAMapContent(volId, addrInfo);
+    }
     uint64_t blkCnt = DivideUp(volSizeByte, (uint64_t)pos::BLOCK_SIZE);
     do
     {
@@ -326,7 +334,7 @@ void
 VSAMapManager::WaitVolumePendingIoDone(int volId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
-    while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
+    while ((addrInfo->IsUT() == false) && ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE)));
 }
 
 bool

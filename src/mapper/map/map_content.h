@@ -52,10 +52,11 @@ class MapContent
 {
 public:
     MapContent(void) = default;
+    MapContent(int mapId_, MapperAddressInfo* addrInfo, Map* map_, MapHeader* mapHeader_);
     MapContent(int mapId_, MapperAddressInfo* addrInfo);
     virtual ~MapContent(void);
 
-    virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
+    virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) = 0;
 
     virtual int Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize);
     virtual void Dispose(void);
@@ -73,8 +74,6 @@ public:
     virtual int DumpLoad(std::string fileName);
 
     virtual uint64_t GetEntriesPerPage(void);
-    virtual void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
-    virtual void SetMap(Map* map_) { map = map_; }
 
 protected:
     MapHeader* mapHeader;

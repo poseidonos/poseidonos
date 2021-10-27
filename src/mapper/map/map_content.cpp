@@ -49,12 +49,12 @@ MapContent::MapContent(int mapId_, MapperAddressInfo* addrInfo_)
   isInitialized(false)
 {
 }
-
+// LCOV_EXCL_START
 MapContent::~MapContent(void)
 {
     Dispose();
 }
-
+// LCOV_EXCL_STOP
 int
 MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
 {
@@ -70,8 +70,8 @@ MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
         if (mapHeader == nullptr)
         {
             mapHeader = new MapHeader(mapId);
-            mapHeader->Init(numMpages, mpageSize);
         }
+        mapHeader->Init(numMpages, mpageSize);
         if (mapIoHandler == nullptr)
         {
             mapIoHandler = new MapIoHandler(map, mapHeader, mapId, addrInfo);

@@ -46,7 +46,7 @@ public:
       meta(nullptr),
       inUseBitmap(nullptr),
       gcStripeManager(nullptr),
-      reverseMapPack(nullptr),
+      iReverseMap(nullptr),
       gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr),
       victimStripe(nullptr),
@@ -77,16 +77,15 @@ public:
         gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
-
-        victimStripe = new NiceMock<MockVictimStripe>(array, reverseMapPack, nullptr, nullptr, nullptr);
+        iReverseMap = new NiceMock<MockIReverseMap>();
+        victimStripe = new NiceMock<MockVictimStripe>(array, iReverseMap, nullptr, nullptr, nullptr);
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
         victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
         for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
         {
             for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
             {
-                reverseMapPack = new NiceMock<MockReverseMapPack>;
-                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMapPack, nullptr, nullptr, nullptr));
+                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, iReverseMap, nullptr, nullptr, nullptr));
             }
         }
 
@@ -100,7 +99,7 @@ public:
 
         inputFlushEvent = std::make_shared<MockGcFlushSubmission>(
                 array->GetName(), blkInfoList, testVolumeId, dataBuffer, gcStripeManager,
-                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+                nullptr, nullptr, nullptr, nullptr, nullptr);
         inputVolumeManager = new NiceMock<MockIVolumeManager>();
         inputEventScheduler = new NiceMock<MockEventScheduler>;
 
@@ -143,7 +142,7 @@ protected:
     NiceMock<MockBitMapMutex>* inUseBitmap;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
-    NiceMock<MockReverseMapPack>* reverseMapPack;
+    NiceMock<MockIReverseMap>* iReverseMap;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockVictimStripe>* victimStripe;
     NiceMock<MockIVolumeManager>* inputVolumeManager;

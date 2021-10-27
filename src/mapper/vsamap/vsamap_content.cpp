@@ -40,7 +40,7 @@
 
 namespace pos
 {
-VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_, FlushCmdManager* flm_)
+VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_, FlushCmdManager* flm_, Map* map_, MapHeader* mapHeader_)
 : MapContent(mapId, addrInfo),
   flushThreshold(0),
   internalFlushEnabled(false)
@@ -62,10 +62,12 @@ VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAlloc
     }
     flushThreshold = flushCmdManager->GetInternalFlushThreshold();
     internalFlushEnabled = flushCmdManager->IsInternalFlushEnabled();
+    map = map_;
+    mapHeader = mapHeader_;
 }
 
 VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo)
-: VSAMapContent(mapId, addrInfo, nullptr, nullptr)
+: VSAMapContent(mapId, addrInfo, nullptr, nullptr, nullptr, nullptr)
 {
 }
 
@@ -121,12 +123,12 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
 
     mpageMap[entNr] = vsa;
 
-    mapHeader->GetTouchedMpages()->SetBit(pageNr);
+    mapHeader->SetTouchedMpageBit(pageNr);
 
     if (internalFlushEnabled == true)
     {
-        uint32_t numBitsSet = mapHeader->GetTouchedMpages()->GetNumBitsSet();
-        uint32_t totalNumBits =  mapHeader->GetTouchedMpages()->GetNumBits();
+        uint32_t numBitsSet = mapHeader->GetNumTouchedMpagesSet();
+        uint32_t totalNumBits =  mapHeader->GetNumTotalTouchedMpages();
 
         if (((HUNDRED_PERCENT * numBitsSet) / totalNumBits) > flushThreshold)
         {
@@ -140,7 +142,7 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
 }
 
 MpageList
-VSAMapContent::GetDirtyPages(BlkAddr start, uint64_t numEntries)
+VSAMapContent::GetDirtyPages(uint64_t start, uint64_t numEntries)
 {
     uint64_t startPageNr = start / entriesPerMpage;
     uint64_t endPageNr = (start + numEntries) / entriesPerMpage;

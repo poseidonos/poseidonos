@@ -77,7 +77,7 @@ WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctx
 {
     wbStripeCtx = ctxMgr->GetWbStripeCtx();
 }
-
+// LCOV_EXCL_START
 WBStripeManager::~WBStripeManager(void)
 {
     if ((wbStripeArray.size() != 0) && (stripeBufferPool != nullptr))
@@ -85,7 +85,7 @@ WBStripeManager::~WBStripeManager(void)
         Dispose();
     }
 }
-
+// LCOV_EXCL_STOP
 void
 WBStripeManager::Init(void)
 {
@@ -235,6 +235,14 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 {
     Stripe* stripe;
     int ret = _ReconstructAS(tailVsa.stripeId, wbLsid, tailVsa.offset, volumeId, stripe);
+    if (ret >= 0)
+    {
+        uint64_t totalRbaNum = 0;
+        assert(volumeManager != nullptr);
+        volumeManager->GetVolumeSize(volumeId, totalRbaNum);
+        totalRbaNum = DivideUp(totalRbaNum, BLOCK_SIZE);
+        ret = iReverseMap->ReconstructReverseMap(volumeId, totalRbaNum, wbLsid, tailVsa.stripeId, tailVsa.offset, revMapInfos);
+    }
     return ret;
 }
 

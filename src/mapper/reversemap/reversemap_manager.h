@@ -40,6 +40,7 @@
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/volume/i_volume_manager.h"
+
 namespace pos
 {
 
@@ -57,9 +58,9 @@ public:
 
     virtual int UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset);
-    virtual void Assign(StripeId wblsid, StripeId vsid);
+    virtual ReverseMapPack* Assign(StripeId wblsid, StripeId vsid);
     virtual ReverseMapPack* AllocReverseMapPack(uint32_t vsid);
-    virtual int ReconstructReverseMap(uint32_t volumeId, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
+    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
 
     virtual void WaitForPendingIO(StripeId wblsid);
     virtual uint64_t GetReverseMapPerStripeFileSize(void);
@@ -69,7 +70,7 @@ public:
     virtual char* GetReverseMapPtrForWBT(void);
 
 private:
-    bool _FindRba(uint32_t volumeId, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba);
+    bool _FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba);
     int _SetNumMpages(void);
 
     uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)

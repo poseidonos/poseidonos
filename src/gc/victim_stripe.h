@@ -80,11 +80,6 @@ public:
         return validBlkInfos.size();
     };
 
-    virtual int
-    IsAsyncIoDone(void)
-    {
-        return revMapPack->IsAsyncIoDone();
-    }
     virtual bool LoadValidBlock(void);
 
 private:

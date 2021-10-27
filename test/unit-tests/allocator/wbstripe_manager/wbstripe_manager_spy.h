@@ -70,11 +70,6 @@ public:
         return 0;
     }
     int
-    _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
-    {
-        return WBStripeManager::_ReconstructReverseMap(volumeId, stripe, blockCount, revMapInfos);
-    }
-    int
     _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx tailarrayidx, Stripe*& stripe)
     {
         WBStripeManager::_ReconstructAS(vsid, wbLsid, blockCount, tailarrayidx, stripe);

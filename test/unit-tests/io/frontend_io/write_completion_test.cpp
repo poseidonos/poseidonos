@@ -7,6 +7,7 @@
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
+#include "test/unit-tests/mapper/i_reversemap_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -75,7 +76,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
-    Stripe stripe(nullptr, true);
+    Stripe stripe(nullptr, true, 1);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
@@ -100,9 +101,10 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
-    Stripe stripe(nullptr, true);
+    NiceMock<MockIReverseMap> rev;
+    Stripe stripe(&rev, true, 1);
     VirtualBlkAddr startVsa;
-
+    ON_CALL(rev, Flush).WillByDefault(Return(0));
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
@@ -152,7 +154,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
-    Stripe stripe(nullptr, true);
+    Stripe stripe(nullptr, true, 1);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));

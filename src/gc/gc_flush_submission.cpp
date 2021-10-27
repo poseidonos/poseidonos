@@ -123,7 +123,7 @@ GcFlushSubmission::Execute(void)
         std::advance(it, offset);
         BlkInfo blkInfo = *it;
         stripe->UpdateReverseMapEntry(offset, blkInfo.rba, volumeId);
-        stripe->UpdateVictimVsa(offset, blkInfo.vsa, blkInfo.rba, volumeId);
+        stripe->UpdateVictimVsa(offset, blkInfo.vsa);
     }
 
     blkInfoList->clear();

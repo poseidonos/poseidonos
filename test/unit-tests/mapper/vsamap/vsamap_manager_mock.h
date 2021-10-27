@@ -14,7 +14,7 @@ public:
     using VSAMapManager::VSAMapManager;
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
-    MOCK_METHOD(int, CreateVsaMapContent, (int volId, uint64_t volSizeByte, bool delVol), (override));
+    MOCK_METHOD(int, CreateVsaMapContent, (VSAMapContent * vsaMap, int volId, uint64_t volSizeByte, bool delVol), (override));
     MOCK_METHOD(int, LoadVSAMapFile, (int volId), (override));
     MOCK_METHOD(int, FlushDirtyPagesGiven, (int volId, MpageList list, EventSmartPtr cb), (override));
     MOCK_METHOD(int, FlushTouchedPages, (int volId, EventSmartPtr cb), (override));

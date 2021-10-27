@@ -17,71 +17,76 @@ namespace pos
 {
 TEST(VSAMapManager, CreateVsaMapContent_TestFail0)
 {
-    MapperAddressInfo info;
-    info.SetMPageSize(10);
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, &addrInfo);
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
+    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
-    bool ret = vsaMap->CreateVsaMapContent(0, 100, false);
+    int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
     EXPECT_EQ(-1, ret);
-    
-    delete vsaMap;
-}
 
-TEST(VSAMapManager, CreateVsaMapContent_TestFail0)
-{
-    MapperAddressInfo info;
-    info.SetMPageSize(10);
-    NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
-    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
-    EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
-    bool ret = vsaMap->CreateVsaMapContent(0, 100, false);
-    EXPECT_EQ(-1, ret);
-    
     delete vsaMap;
 }
 
 TEST(VSAMapManager, CreateVsaMapContent_TestFail1)
 {
-    MapperAddressInfo info;
-    info.SetMPageSize(10);
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
-    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(-1));
-    bool ret = vsaMap->CreateVsaMapContent(0, 100, false);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, &addrInfo);
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
+    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
+    EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
+    int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
     EXPECT_EQ(-1, ret);
-    
+
     delete vsaMap;
 }
 
 TEST(VSAMapManager, CreateVsaMapContent_TestFail2)
 {
-    MapperAddressInfo info;
-    info.SetMPageSize(10);
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
-    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
-    EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(EID(NEED_TO_INITIAL_STORE)));
-    EXPECT_CALL(*vcon, FlushHeader).WillOnce(Return(-1));
-    bool ret = vsaMap->CreateVsaMapContent(0, 100, false);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, &addrInfo);
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
+    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(-1));
+    int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
     EXPECT_EQ(-1, ret);
-    
+
     delete vsaMap;
 }
 
 TEST(VSAMapManager, CreateVsaMapContent_TestFail3)
 {
-    MapperAddressInfo info;
-    info.SetMPageSize(10);
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, &addrInfo);
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
+    EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(EID(NEED_TO_INITIAL_STORE)));
+    EXPECT_CALL(*vcon, FlushHeader).WillOnce(Return(-1));
+    int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
+    EXPECT_EQ(-1, ret);
+
+    delete vsaMap;
+}
+
+TEST(VSAMapManager, CreateVsaMapContent_TestFail4)
+{
+    NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, &addrInfo);
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
+    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
-    bool ret = vsaMap->CreateVsaMapContent(0, 100, false);
+    int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
     EXPECT_EQ(-1, ret);
-    
+
     delete vsaMap;
 }
 
@@ -133,9 +138,10 @@ TEST(VSAMapManager, GetVSAMapContent_TestFailSetVSA)
 
 TEST(VSAMapManager, GetVSAs_TestFailGetVSA)
 {
+    NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, nullptr);
-
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
     vsaMap->DisableVsaMapAccess(0);
     VirtualBlkAddr vsa;
     vsa.offset = 0;
@@ -164,51 +170,54 @@ TEST(VSAMapManager, NeedToDeleteFile_TestFailcase)
     EXPECT_CALL(*vcon, DoesFileExist).WillOnce(Return(false));
     bool ret = vsaMap->NeedToDeleteFile(0);
     EXPECT_EQ(false, ret);
-    
+
     delete vsaMap;
 }
 
 TEST(VSAMapManager, LoadVSAMapFile_TestFail)
 {
-    MapperAddressInfo info;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, Load).WillOnce(Return(-1));
-    MpageList d;
-    bool ret = vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
-    EXPECT_EQ(-EID(MAP_FLUSH_IN_PROGRESS), ret);
+    int ret = vsaMap->LoadVSAMapFile(0);
+    EXPECT_EQ(-1, ret);
     delete vsaMap;
 }
 
 TEST(VSAMapManager, FlushTouchedPages_TestSuccess)
 {
-    MapperAddressInfo info;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(0));
-    bool ret = vsaMap->FlushAllMaps();
-    EXPECT_EQ(-1, ret);
-    
+    int ret = vsaMap->FlushTouchedPages(0, nullptr);
+    EXPECT_EQ(0, ret);
+
     delete vsaMap;
 }
 
 TEST(VSAMapManager, FlushTouchedPages_TestFail)
 {
-    MapperAddressInfo info;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(-1));
-    bool ret = vsaMap->FlushAllMaps();
+    int ret = vsaMap->FlushTouchedPages(0, nullptr);
     EXPECT_EQ(-1, ret);
-    
+
     delete vsaMap;
 }
 
 TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail1)
 {
-    MapperAddressInfo info;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, FlushDirtyPagesGiven).WillOnce(Return(0));
     MpageList d;
     vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
@@ -219,24 +228,28 @@ TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail1)
 
 TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail2)
 {
-    MapperAddressInfo info;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &info);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, FlushDirtyPagesGiven).WillOnce(Return(-1));
     MpageList d;
-    bool ret = vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
-    EXPECT_EQ(-EID(MAP_FLUSH_IN_PROGRESS), ret);
+    int ret = vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
+    EXPECT_EQ(-1, ret);
     delete vsaMap;
 }
 
 TEST(VSAMapManager, FlushAllMaps_TestFailcase)
 {
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
-    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, nullptr);
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    VSAMapManager* vsaMap = new VSAMapManager(nullptr, vcon, &addrInfo);
+    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(-1));
-    bool ret = vsaMap->FlushAllMaps();
+    vsaMap->EnableVsaMapInternalAccess(0);
+    int ret = vsaMap->FlushAllMaps();
     EXPECT_EQ(-1, ret);
-    
+
     delete vsaMap;
 }
 

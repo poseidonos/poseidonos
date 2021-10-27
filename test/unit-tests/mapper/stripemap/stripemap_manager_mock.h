@@ -27,7 +27,6 @@ public:
     MOCK_METHOD(bool, IsInUserDataArea, (StripeAddr entry), (override));
     MOCK_METHOD(bool, IsInWriteBufferArea, (StripeAddr entry), (override));
     MOCK_METHOD(MpageList, GetDirtyStripeMapPages, (int vsid), (override));
-    MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
     MOCK_METHOD(StripeMapContent*, GetStripeMapContent, (), (override));
     MOCK_METHOD(void, SetStripeMapContent, (StripeMapContent * content), (override));
     MOCK_METHOD(int, Dump, (std::string fileName), (override));

@@ -56,23 +56,26 @@ public:
     explicit MapHeader(int mapId);
     MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_);
     virtual ~MapHeader(void);
-    void Init(uint64_t numMpages, uint64_t mpageSize);
+    virtual void Init(uint64_t numMpages, uint64_t mpageSize);
 
-    int CopyToBuffer(char* buffer);
-    BitMap* GetBitmapFromTempBuffer(char* buffer);
+    virtual int CopyToBuffer(char* buffer);
+    virtual BitMap* GetBitmapFromTempBuffer(char* buffer);
 
-    uint64_t GetSize(void) { return size; }
-    void ApplyHeader(char* srcBuf);
-    uint64_t GetNumValidMpages(void) { return mPageMap->GetNumBitsSet(); }
+    virtual uint64_t GetSize(void) { return size; }
+    virtual void ApplyHeader(char* srcBuf);
+    virtual uint64_t GetNumValidMpages(void) { return mPageMap->GetNumBitsSet(); }
 
     virtual BitMap* GetMpageMap(void) { return mPageMap; }
     virtual void SetMapAllocated(int pageNr);
     virtual BitMap* GetTouchedMpages(void) { return touchedMpages; }
 
-    void UpdateNumUsedBlks(VirtualBlkAddr vsa);
-    uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
+    virtual void UpdateNumUsedBlks(VirtualBlkAddr vsa);
+    virtual uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
 
-    int GetMapId(void) { return mapId; }
+    virtual int GetMapId(void) { return mapId; }
+    virtual uint32_t GetNumTouchedMpagesSet(void);
+    virtual uint32_t GetNumTotalTouchedMpages(void);
+    virtual void SetTouchedMpageBit(uint64_t pageNr);
 
 private:
     std::mutex mpageHeaderLock;

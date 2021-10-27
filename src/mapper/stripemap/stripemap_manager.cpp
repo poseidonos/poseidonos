@@ -43,8 +43,8 @@
 
 namespace pos
 {
-StripeMapManager::StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info)
-: stripeMap(nullptr),
+StripeMapManager::StripeMapManager(StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info)
+: stripeMap(cont),
   addrInfo(info),
   numLoadIssuedCount(0),
   numWriteIssuedCount(0),
@@ -58,17 +58,31 @@ StripeMapManager::StripeMapManager(EventScheduler* eventSched, MapperAddressInfo
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }
 
+StripeMapManager::StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info)
+: StripeMapManager(nullptr, eventSched, info)
+{
+    eventScheduler = eventSched;
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
+    pthread_rwlock_init(&stripeMapLock, nullptr);
+}
+// LCOV_EXCL_START
 StripeMapManager::~StripeMapManager(void)
 {
     Dispose();
 }
-
+// LCOV_EXCL_STOP
 int
 StripeMapManager::Init(void)
 {
     numWriteIssuedCount = 0;
     numLoadIssuedCount = 0;
-    stripeMap = new StripeMapContent(STRIPE_MAP_ID, addrInfo);
+    if (stripeMap == nullptr)
+    {
+        stripeMap = new StripeMapContent(STRIPE_MAP_ID, addrInfo);
+    }
     stripeMap->InMemoryInit(addrInfo->GetMaxVSID(), addrInfo->GetMpageSize());
     int ret = stripeMap->OpenMapFile();
     if (ret == EID(NEED_TO_INITIAL_STORE))

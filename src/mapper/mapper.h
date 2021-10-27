@@ -141,16 +141,17 @@ public:
     virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
 
     virtual int EnableInternalAccess(int volId);
-
     virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback);
     virtual int FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages);
     virtual int StoreAll(void);
+
+    virtual void SetVolumeState(int volId, VolState state, uint64_t size); // for UT
 
 private:
     void _Dispose(void);
     void _RegisterToMapperService(void);
     void _UnregisterFromMapperService(void);
-    bool _LoadVolumeMeta(int volId, bool delVol = false);
+    int _LoadVolumeMeta(int volId, bool delVol = false);
     void _ClearVolumeState(void);
     bool _ChangeVolumeStateDeleting(int volId);
     int _GetMpageSize(void);

@@ -7,7 +7,6 @@
 #include <test/unit-tests/lib/bitmap_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
-#include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
 #include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
@@ -27,7 +26,7 @@ public:
     : array(nullptr),
       inUseBitmap(nullptr),
       gcStripeManager(nullptr),
-      reverseMapPack(nullptr),
+      reverseMap(nullptr),
       gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr),
       victimStripes(nullptr),
@@ -59,8 +58,7 @@ public:
         {
             for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
             {
-                reverseMapPack = new NiceMock<MockReverseMapPack>;
-                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMapPack, nullptr, nullptr, nullptr));
+                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMap, nullptr, nullptr, nullptr));
             }
         }
 
@@ -87,7 +85,7 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockBitMapMutex>* inUseBitmap;
     NiceMock<MockGcStripeManager>* gcStripeManager;
-    NiceMock<MockReverseMapPack>* reverseMapPack;
+    NiceMock<MockIReverseMap>* reverseMap;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
 
