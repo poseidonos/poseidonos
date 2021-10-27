@@ -384,4 +384,13 @@ TEST(NvmPartition, Format_dummyTestForCoverage)
     // Then
 }
 
+TEST(NvmPartition, Include_testCopyOperatorOfIncludedStructure)
+{
+    // Given
+    PhysicalWriteEntry pwe1;
+    PhysicalWriteEntry pwe2;
+    // When
+    pwe1 = pwe2;
+}
+
 } // namespace pos

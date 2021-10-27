@@ -25,6 +25,7 @@ def run_tests(dirname):
             subprocess.call([working_dir+"/"+dirname+"/" +filename, args.fabric_ip], cwd=file_dir)
             time.sleep(30)
             subprocess.call(["/bin/bash", "rm /dev/shm/ibof_nvmf_trace.pid*"])
+            subprocess.call(["/bin/bash", "rm /tmp/*.uram.info"])
 
 
 def print_results(dirname):
