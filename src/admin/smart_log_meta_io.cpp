@@ -173,6 +173,11 @@ SmartLogMetaIo::_CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx)
     delete ctx;
 }
 void
+SmartLogMetaIo::DeleteAsyncIoCtx(AsyncMetaFileIoCtx* ctx)
+{
+    _CompleteSmartLogIo(ctx);
+}
+void
 SmartLogMetaIo::Flush(void)
 {
     return;

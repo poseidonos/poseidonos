@@ -60,7 +60,7 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
-
+    void DeleteAsyncIoCtx(AsyncMetaFileIoCtx* ctx);
 private:
     // Meta File
     int _CreateSmartLogFile(void);

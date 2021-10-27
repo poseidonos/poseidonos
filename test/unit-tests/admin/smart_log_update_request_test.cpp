@@ -92,7 +92,41 @@ TEST(SmartLogUpdateRequest, _DoSpecificJob_TempFromDiskNotZero)
 
     delete resultPage;
 }
+TEST(SmartLogUpdateRequest, _DoSpecificJob_TempFromDiskNotZero_ResultPageTempgreater)
+{
+    struct spdk_nvme_health_information_page* resultPage = new struct spdk_nvme_health_information_page();
+    struct spdk_nvme_health_information_page* page = new struct spdk_nvme_health_information_page();
 
+    resultPage->temperature = 10;
+    page->temperature = 8;
+
+    page->available_spare = 10;
+    resultPage->available_spare = 9;
+
+    page->available_spare_threshold = 11;
+    resultPage->available_spare_threshold = 9;
+
+    page->percentage_used = 10;
+    resultPage->percentage_used = 12;
+
+    page->warning_temp_time = 10;
+    resultPage->warning_temp_time = 12;
+
+    page->critical_temp_time = 9;
+    resultPage->critical_temp_time = 12;
+
+    page->temp_sensor[0] = 9;
+    resultPage->temp_sensor[0] = 19;
+    uint32_t originCore = 0;
+    pos_io ibofIo;
+    SmartLogUpdateRequest smartLogUpdateRequestTest(resultPage, page, &ibofIo, originCore);
+    bool actual;
+    bool expected = true;
+    actual = smartLogUpdateRequestTest.Execute();
+    ASSERT_EQ(expected, actual);
+
+    delete resultPage;
+}
 TEST(SmartLogUpdateRequest, _CalculateVarBasedVal_)
 {
 }
