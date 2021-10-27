@@ -66,7 +66,6 @@ public:
     int Empty(void);
 
     virtual const char* GetName(void);
-    std::string GetName(void) const;
     virtual uint64_t GetSize(void);
     virtual DeviceType GetType(void);
     virtual std::string GetSN(void) const;

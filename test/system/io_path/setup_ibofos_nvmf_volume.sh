@@ -21,6 +21,8 @@ DEFAULT_USER_DEVICE_LIST="-d unvme-ns-0,unvme-ns-1,unvme-ns-2"
 DEFAULT_SPARE_DEVICE_LIST="-s unvme-ns-3"
 PMEM_ENABLED=0
 ARRAYNAME=POSArray
+CLI=${ROOT_DIR}/bin/poseidonos-cli
+URAM_BLOCK_SIZE=512
 ############## ^^^ USER CONFIGURABLES ^^^ #################
 
 RED_COLOR="\033[1;31m"
@@ -43,7 +45,7 @@ ibofos_bringup(){
             sudo systemctl stop irqbalance.service
             sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${NET_IRQ_CPULIST} ${TARGET_NIC}
         fi
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n ${NUM_SHARED_BUFFER}
+        sudo ${CLI} subsystem create-transport -t ${TRANSPORT} -c 64 --num-shared-buf ${NUM_SHARED_BUFFER}
     else
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072
     fi
@@ -51,20 +53,20 @@ ibofos_bringup(){
     if [ ${PMEM_ENABLED} -eq 1 ]; then
         PMEM_POOL=/mnt/pmem0/pmem_pool
         if [ ! -e $PMEM_POOL ]; then
-            sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create_pool ${PMEM_POOL} $WRITE_BUFFER_SIZE_IN_MB 512
+            sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create_pool ${PMEM_POOL} $WRITE_BUFFER_SIZE_IN_MB ${URAM_BLOCK_SIZE}
         fi
         sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create ${PMEM_POOL} -n pmem0
     else
-        sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512
+        sudo ${CLI} device create -d uram0 --num-blocks $((WRITE_BUFFER_SIZE_IN_MB*1024*1024/URAM_BLOCK_SIZE)) --block-size ${URAM_BLOCK_SIZE} --device-type uram
     fi
 	
     sudo $ROOT_DIR/bin/poseidonos-cli device scan
 
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION
+        sudo ${CLI} subsystem create -q nqn.2019-04.pos:subsystem$i -m 256 --allow-any-host --serial-number POS0000000000000$i --model-number POS_VOLUME_EXTENTION
         port=`expr $i % $PORT_COUNT + 1158`
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP -s $port
+        sudo ${CLI} subsystem add-listener -q nqn.2019-04.pos:subsystem$i -t $TRANSPORT -i $TARGET_IP -p $port 
     done
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
@@ -81,9 +83,6 @@ ibofos_bringup(){
         do
 
             sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name  $ARRAYNAME
-
-
-
             sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name  $ARRAYNAME
         done
     else
@@ -96,8 +95,7 @@ ibofos_bringup(){
         done
     fi
 
-            
-    sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
+    sudo ${CLI} subsystem list
     sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level info
 
 }

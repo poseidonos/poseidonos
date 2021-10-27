@@ -362,12 +362,6 @@ UBlockDevice::GetName(void)
     return property->name.c_str();
 }
 
-string
-UBlockDevice::GetName(void) const
-{
-    return property->name;
-}
-
 uint64_t
 UBlockDevice::GetSize(void)
 {
