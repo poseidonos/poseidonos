@@ -65,7 +65,7 @@ def start_pos():
         with open(TEST.pos_log_path, "a") as log_file:
             pos_proc = subprocess.Popen(pos_execution, stdout=log_file, stderr=log_file)
 
-    subprocess.call(["sleep", "3"])
+    subprocess.call(["sleep", "10"])
 
     detect_pos_crash = True
 
