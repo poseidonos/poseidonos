@@ -40,7 +40,7 @@ namespace pos
 class IOController
 {
 public:
-    explicit IOController(IODispatcher* ioDispatcher = nullptr);
+    explicit IOController(IODispatcher* ioDispatcher = IODispatcherSingleton::Instance());
     ~IOController(void);
 
     static void _SendVolumeIo(VolumeIoSmartPtr volumeIo);

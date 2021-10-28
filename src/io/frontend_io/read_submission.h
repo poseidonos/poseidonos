@@ -44,13 +44,12 @@ namespace pos
 {
 class EventArgument;
 class VolumeIo;
-class IODispatcher;
 
 class ReadSubmission : public IOController, public Event
 {
 public:
     ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment = nullptr,
-        Merger* merger = nullptr, Translator* translator = nullptr, IODispatcher* ioDispatcher = nullptr);
+        Merger* merger = nullptr, Translator* translator = nullptr);
     ~ReadSubmission(void) override;
     bool Execute(void) override;
 
