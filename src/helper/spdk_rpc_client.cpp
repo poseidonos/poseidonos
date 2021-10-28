@@ -37,6 +37,7 @@
 #include <jsonrpccpp/common/exception.h>
 
 #include <string>
+#include <algorithm>
 
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
@@ -199,6 +200,11 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
 
     Json::Value param;
     param["trtype"] = trtype;
+
+    std::for_each(trtype.begin(), trtype.end(), [](char & c)
+    {
+        c = tolower(c);
+    });
 
     if ("tcp" == trtype)
     {

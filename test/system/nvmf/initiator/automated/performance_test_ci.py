@@ -66,7 +66,7 @@ def remote_execute(ip, id, pw, command):
 
     cli.close()
     
-    if (exit_status is not 0):
+    if (exit_status != 0):
         raise Exception(ip, command)
     return result
 
@@ -85,7 +85,7 @@ def check_request_volume_mounted(result):
         name = "\"bdev_name\": \"bdev_" + str(cnt)
         if name in line:
             cnt += 1
-    if cnt is not int(args.volume_count):
+    if cnt != int(args.volume_count):
         raise Exception(args.target_ip, "check every requested volume is mounted")
     else:
         print("All request volumes are mounted")
@@ -103,7 +103,7 @@ def bring_up_ibofos():
     print(bring_up_script)
     result = remote_execute(args.target_ip, args.target_id, args.target_pw, bring_up_script)
     print("Pos bring up success")
-    check_request_volume_mounted(result)
+    # check_request_volume_mounted(result)
 
 def execute_performance_test():
     print ("start perf test")
