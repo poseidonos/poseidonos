@@ -145,3 +145,13 @@ def subsystem_list(id, pw, ip, cli, dir):
         lib.printer.red(cli_cmd)
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
+
+
+def logger_setlevel(id, pw, ip, cli, dir, level):
+    try:
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} logger set-level --level {level}"
+        return lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1

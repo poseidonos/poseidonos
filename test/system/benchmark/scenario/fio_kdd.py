@@ -37,6 +37,7 @@ def play(json_targets, json_inits, json_scenario):
 
     # init prepare
     initiators = {}
+    test_target = targets[next(iter(targets))]
     for json_init in json_inits:
         try:
             init_obj = initiator.manager.Initiator(json_init)
@@ -44,13 +45,12 @@ def play(json_targets, json_inits, json_scenario):
         except KeyError:
             lib.printer.red(" InitiatorError: Initiator KEY is invalid")
             return
-        if not init_obj.Prepare():
+        if not init_obj.Prepare(True, test_target.subsystem_list):
             skip_workload = True
             break
         initiators[init_name] = init_obj
 
     # check auto generate
-    test_target = targets[next(iter(targets))]
     if "yes" != test_target.use_autogen:
         lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
@@ -76,7 +76,7 @@ def play(json_targets, json_inits, json_scenario):
             for key in initiators:
                 init = initiators[key]
                 test_fio = fio.manager.Fio(init.id, init.pw, init.nic_ssh)
-                test_fio.opt["ioengine"] = f"{init.spdk_dir}/examples/nvme/fio_plugin/fio_plugin"
+                test_fio.opt["ioengine"] = "libaio"
                 test_fio.opt["runtime"] = "15"
                 test_fio.opt["ramp_time"] = "5"
                 test_fio.opt["io_size"] = "8g"
@@ -105,12 +105,11 @@ def play(json_targets, json_inits, json_scenario):
                     if test_fio.opt.get("bsrange"):
                         del test_fio.opt["bsrange"]
 
-                for subsys in test_target.subsystem_list:
-                    if subsys[0] == init.name:
-                        test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
-                        if not test_fio.Prepare():
-                            skip_workload = True
-                            break
+                for test_device in init.device_list:
+                    test_fio.jobs.append(f" --name=job_{test_device} --filename={test_device}")
+                    if not test_fio.Prepare():
+                        skip_workload = True
+                        break
                 fio_cmdset.append(test_fio.cmd)
 
             if not skip_workload:
@@ -133,7 +132,7 @@ def play(json_targets, json_inits, json_scenario):
 
     # init wrapup
     for key in initiators:
-        initiators[key].Wrapup()
+        initiators[key].Wrapup(True, test_target.subsystem_list)
 
     # target warpup
     for key in targets:

@@ -43,6 +43,7 @@ class Target:
         if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
             return False
 
+        # create subsystem and add listener
         if "yes" == self.use_autogen:
             nqn_base = 0
             for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
@@ -197,5 +198,6 @@ class Target:
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
         print(subsys)
 
+        pos.cli.logger_setlevel(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "warning")
         lib.printer.green(f" '{self.name}' prepared")
         return True
