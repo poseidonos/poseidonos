@@ -62,7 +62,6 @@ public:
     virtual ReverseMapPack* AllocReverseMapPack(uint32_t vsid);
     virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
 
-    virtual void WaitForPendingIO(StripeId wblsid);
     virtual uint64_t GetReverseMapPerStripeFileSize(void);
     virtual uint64_t GetWholeReverseMapFileSize(void);
     virtual int LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset, uint32_t fileSize, char* buf);

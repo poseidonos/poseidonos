@@ -46,6 +46,12 @@ EventMpageAsyncIo::EventMpageAsyncIo(MapHeader* mapHeader_, Map* map_,
     startMpage = 0;
 }
 
+// LCOV_EXCL_START
+EventMpageAsyncIo::~EventMpageAsyncIo(void)
+{
+}
+// LCOV_EXCL_STOP
+
 bool
 EventMpageAsyncIo::Execute(void)
 {

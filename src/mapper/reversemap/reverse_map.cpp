@@ -58,6 +58,7 @@ ReverseMapPack::ReverseMapPack(void)
   callback(nullptr)
 {
 }
+
 // LCOV_EXCL_START
 ReverseMapPack::~ReverseMapPack(void)
 {
@@ -69,9 +70,9 @@ ReverseMapPack::~ReverseMapPack(void)
             revMap = nullptr;
         }
     }
-    revMaps.clear();
 }
 // LCOV_EXCL_STOP
+
 void
 ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
 {
@@ -193,24 +194,6 @@ ReverseMapPack::GetReverseMapEntry(uint32_t offset)
     uint32_t volumeId = entry.u.entry.volumeId;
 
     return std::make_tuple(rba, volumeId);
-}
-
-void
-ReverseMapPack::WaitForPendingIO(void)
-{
-    while(numMpagesPerStripe == mfsAsyncIoDonePages);
-}
-
-int
-ReverseMapPack::IsAsyncIoDone(void)
-{
-    if (unlikely(ioError != 0))
-    {
-        POS_TRACE_ERROR(EID(REVMAP_MFS_IO_ERROR), "RevMap MFS IO Error:{}  IoDirection:{}", ioError, ioDirection);
-        return ioError; // < 0
-    }
-
-    return numMpagesPerStripe - mfsAsyncIoDonePages; // 0: Done, > 0: Remaining pages
 }
 
 void

@@ -32,6 +32,7 @@ TEST(Mapper, Init_InitAndDispose)
     EXPECT_CALL(*strMan, Init).WillOnce(Return(0));
     EXPECT_CALL(*revMan, Init).Times(1);
     mapper->Init();
+    mapper->Flush();
     EXPECT_CALL(*strMan, FlushTouchedPages).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, FlushAllMaps).WillOnce(Return(0));
     EXPECT_CALL(*strMan, WaitAllPendingIoDone).Times(3);

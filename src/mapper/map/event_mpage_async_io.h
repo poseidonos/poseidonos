@@ -43,7 +43,7 @@ class EventMpageAsyncIo : public Event
 {
 public:
     EventMpageAsyncIo(MapHeader* mapHeader, Map* map, MetaFileIntf* file, MetaIoCbPtr asyncIoReqCB);
-    virtual ~EventMpageAsyncIo() = default;
+    virtual ~EventMpageAsyncIo(void);
     bool Execute(void) override;
 
 private:

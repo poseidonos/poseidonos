@@ -42,8 +42,6 @@ public:
     MOCK_METHOD(int, Flush, (Stripe * stripe, uint32_t fileOffset, EventSmartPtr cb), (override));
     MOCK_METHOD(int, SetReverseMapEntry, (uint32_t offset, BlkAddr rba, uint32_t volumeId), (override));
     MOCK_METHOD((std::tuple<BlkAddr, uint32_t>), GetReverseMapEntry, (uint32_t offset), (override));
-    MOCK_METHOD(void, WaitForPendingIO, (), (override));
-    MOCK_METHOD(int, IsAsyncIoDone, (), (override));
     MOCK_METHOD(char*, GetRevMapPtrForWBT, (), (override));
 };
 

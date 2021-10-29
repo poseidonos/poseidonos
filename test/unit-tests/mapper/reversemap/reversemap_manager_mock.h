@@ -21,7 +21,6 @@ public:
     MOCK_METHOD(ReverseMapPack*, Assign, (StripeId wblsid, StripeId vsid), (override));
     MOCK_METHOD(ReverseMapPack*, AllocReverseMapPack, (uint32_t vsid), (override));
     MOCK_METHOD(int, ReconstructReverseMap, (uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
-    MOCK_METHOD(void, WaitForPendingIO, (StripeId wblsid), (override));
     MOCK_METHOD(uint64_t, GetReverseMapPerStripeFileSize, (), (override));
     MOCK_METHOD(uint64_t, GetWholeReverseMapFileSize, (), (override));
     MOCK_METHOD(int, LoadReverseMapForWBT, (MetaFileIntf * fileLinux, uint32_t offset, uint32_t fileSize, char* buf), (override));

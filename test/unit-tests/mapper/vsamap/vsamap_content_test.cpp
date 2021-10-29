@@ -32,6 +32,7 @@ TEST(VSAMapContent, SetEntry_TestFailCase)
     vsa.offset = 0;
     vsa.stripeId = 0;
     vsacon.Init(5, 10, 4032);
+    vsacon.GetEntriesPerPage();
 
     EXPECT_CALL(*map, GetMpageLock).Times(1);
     EXPECT_CALL(*map, GetMpage).WillOnce(Return(nullptr));

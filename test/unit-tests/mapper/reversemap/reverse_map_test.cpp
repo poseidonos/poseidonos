@@ -12,31 +12,7 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(ReverseMapPack, ReverseMapPack_)
-{
-}
-
-TEST(ReverseMapPack, Init_)
-{
-}
-
-TEST(ReverseMapPack, Load_)
-{
-}
-
-TEST(ReverseMapPack, Flush_)
-{
-}
-
-TEST(ReverseMapPack, SetReverseMapEntry_)
-{
-}
-
-TEST(ReverseMapPack, GetReverseMapEntry_)
-{
-}
-
-TEST(ReverseMapPack, IsAsyncIoDone_)
+TEST(ReverseMapPack, TestSimpleCaller)
 {
 }
 

@@ -75,9 +75,11 @@ SequentialPageFinder::_UpdateSequentialPageList(MpageList& pages)
     }
 }
 
+// LCOV_EXCL_START
 SequentialPageFinder::~SequentialPageFinder(void)
 {
 }
+// LCOV_EXCL_STOP
 
 SequentialPageFinder::SequentialPageFinder(BitMap* pages)
 {

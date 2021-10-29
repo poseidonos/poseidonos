@@ -73,7 +73,9 @@ class SequentialPageFinder
 public:
     explicit SequentialPageFinder(MpageList& pages);
     explicit SequentialPageFinder(BitMap* pages);
+    // LCOV_EXCL_START
     virtual ~SequentialPageFinder(void);
+    // LCOV_EXCL_STOP
 
     MpageSet PopNextMpageSet(void);
     bool IsRemaining(void);

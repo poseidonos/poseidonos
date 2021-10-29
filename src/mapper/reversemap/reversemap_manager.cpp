@@ -163,12 +163,6 @@ ReverseMapManager::Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, S
     }
 }
 
-void
-ReverseMapManager::WaitForPendingIO(StripeId wblsid)
-{
-    revMapPacks[wblsid].WaitForPendingIO();
-}
-
 int
 ReverseMapManager::UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId)
 {

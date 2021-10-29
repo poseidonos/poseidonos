@@ -152,9 +152,6 @@ public:
 
     virtual int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
-    virtual void WaitForPendingIO(void);
-    virtual int IsAsyncIoDone(void);
-
     virtual char* GetRevMapPtrForWBT(void) { return reinterpret_cast<char*>(&revMaps[0]->sector[0]); }
 
 private:

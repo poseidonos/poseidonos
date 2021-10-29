@@ -280,5 +280,4 @@ TEST(Stripe, UpdateFlushIo_TestSimple)
     stripe.UpdateFlushIo(nullptr);
 }
 
-
 } // namespace pos
