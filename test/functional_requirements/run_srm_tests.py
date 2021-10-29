@@ -24,8 +24,9 @@ def run_tests(dirname):
             print("********************** Testing " + filename + "*****************************")
             subprocess.call([working_dir+"/"+dirname+"/" +filename, args.fabric_ip], cwd=file_dir)
             time.sleep(30)
-            subprocess.call(["/bin/bash", "rm /dev/shm/ibof_nvmf_trace.pid*"])
-            subprocess.call(["/bin/bash", "rm /tmp/*.uram.info"])
+            os.system("rm -rf /dev/shm/ibof*")
+            os.system("rm -rf /tmp/*.uram.*")
+            os.system("rm -rf /var/tmp/spdk.sock")
 
 
 def print_results(dirname):
