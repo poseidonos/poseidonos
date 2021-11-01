@@ -34,7 +34,6 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/helper/spdk_rpc_client.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/network/nvmf_target.h"
 
@@ -52,20 +51,17 @@ string
 CreateSubsystemCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-
+    string command = doc["command"].get<string>();
     int ret = 0;
     ret = _CreateSubsystem(doc);
     if (ret != SUCCESS)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_SUBSYSTEM;
         return jFormat.MakeResponse(
-            "CREATESUBSYSTEM", rid, static_cast<int>(eventId),
-            PosEventId::GetString(eventId), GetPosInfo());
+            command, rid, ERROR_CODE, errorMessage, GetPosInfo());
     }
 
     return jFormat.MakeResponse(
-        "CREATESUBSYSTEM", rid, SUCCESS,
-        "Subsystem ( " + doc["param"]["name"].get<string>() + " ) has been created.", GetPosInfo());
+        command, rid, SUCCESS, successMessage, GetPosInfo());
 }
 
 int
@@ -79,6 +75,7 @@ CreateSubsystemCommand::_CreateSubsystem(json& doc)
     {
         if (nullptr != target.FindSubsystem(subnqn))
         {
+            successMessage = "Requested volume will be mounted on Subsystem ( " + subnqn + " ).";
             return SUCCESS;
         }
         _SetDefaultOptions(doc);
@@ -87,7 +84,7 @@ CreateSubsystemCommand::_CreateSubsystem(json& doc)
     {
         if (nullptr != target.FindSubsystem(subnqn))
         {
-            errorMessage = "Failed to create subsystem. Suggested subnqn name already exists. ";
+            errorMessage = "Failed to create subsystem ( " + subnqn + " ). Suggested subnqn name already exists.";
             return FAIL;
         }
         if (doc["param"].contains("sn"))
@@ -119,9 +116,13 @@ CreateSubsystemCommand::_CreateSubsystem(json& doc)
         maxNamespaces,
         allowAnyHost,
         anaReporting);
-    if (ret.first != SUCCESS)
+    if (ret.first == SUCCESS)
     {
-        errorMessage = "Failed to create subsystem. " + ret.second;
+        successMessage = "Subsystem ( " + subnqn + " ) has been created.";
+    }
+    else if (ret.first != SUCCESS)
+    {
+        errorMessage = "Failed to create subsystem ( " + subnqn + " ). " + ret.second;
     }
     return ret.first;
 }
@@ -141,4 +142,5 @@ CreateSubsystemCommand::_SetDefaultOptions(json& doc)
     }
     allowAnyHost = true;
 }
+
 } // namespace pos_cli
