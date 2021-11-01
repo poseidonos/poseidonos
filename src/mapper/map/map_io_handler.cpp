@@ -574,8 +574,8 @@ MapIoHandler::_CompleteFlush(void)
 bool
 MapIoHandler::_IncreaseAsyncIoDonePageNum(int numMpagesDone)
 {
-    numPagesAsyncIoDone += numMpagesDone;
-    return (numPagesAsyncIoDone == numPagesToAsyncIo);
+    int res = numPagesAsyncIoDone.fetch_add(numMpagesDone);
+    return ((res + numMpagesDone) == numPagesToAsyncIo);
 }
 
 void

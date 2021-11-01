@@ -250,7 +250,8 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             revMapPageAsyncIoReq->mpageNum);
     }
 
-    if (++mfsAsyncIoDonePages == numMpagesPerStripe)
+    uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
+    if ((res + 1) == numMpagesPerStripe)
     {
         if (callback != nullptr)
         {
