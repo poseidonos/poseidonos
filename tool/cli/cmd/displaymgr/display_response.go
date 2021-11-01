@@ -376,8 +376,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		res := messages.POSInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
-
 		fmt.Println(res.RESULT.DATA.VERSION)
+
+	case "STARTPOS":
+		res := messages.Response{}
+		json.Unmarshal([]byte(resJSON), &res)
+		fmt.Println(res.RESULT.STATUS.DESCRIPTION)
 
 	default:
 		res := messages.Response{}
