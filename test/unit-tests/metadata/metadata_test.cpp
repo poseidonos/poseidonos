@@ -7,8 +7,10 @@
 #include "test/unit-tests/array_models/interface/i_mount_sequence_mock.h"
 #include "test/unit-tests/journal_manager/journal_manager_mock.h"
 #include "test/unit-tests/mapper/mapper_mock.h"
+#include "test/unit-tests/meta_service/meta_service_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
 
+using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 
@@ -27,14 +29,13 @@ TEST(Metadata, Metadata_testContructor)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
     // When 2
-    Metadata metaForUt(&arrayInfo, mapper, allocator, journal);
+    Metadata metaForUt(&arrayInfo, mapper, allocator, journal, &metaService);
 }
 
-// Disabled to avoid "segfault" at metafs_file_intf.cpp:161.
-// TODO(yyu): follow up with munseop.lim
-TEST(Metadata, DISABLED_Init_testIfEverySequenceIsInitialized)
+TEST(Metadata, Init_testIfEverySequenceIsInitialized)
 {
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -42,15 +43,18 @@ TEST(Metadata, DISABLED_Init_testIfEverySequenceIsInitialized)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    ON_CALL(arrayInfo, GetName).WillByDefault(Return("POSAarray"));
+    ON_CALL(arrayInfo, GetName).WillByDefault(Return("POSArray"));
     ON_CALL(arrayInfo, GetIndex).WillByDefault(Return(0));
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
     EXPECT_CALL(*allocator, Init).WillOnce(Return(0));
     EXPECT_CALL(*journal, Init).WillOnce(Return(0));
+
+    EXPECT_CALL(metaService, Register("POSArray", 0, _, _));
 
     // When
     int actual = meta.Init();
@@ -67,12 +71,15 @@ TEST(Metadata, Init_testIfMapperIsRolledBack)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     int MAPPER_FAILURE = 123;
     EXPECT_CALL(*mapper, Init).WillOnce(Return(MAPPER_FAILURE));
     EXPECT_CALL(*mapper, Dispose).Times(1);
+
+    EXPECT_CALL(metaService, Register).Times(0);
 
     // When
     int actual = meta.Init();
@@ -89,14 +96,17 @@ TEST(Metadata, Init_testIfMapperAndAllocatorAreRolledBack)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     int ALLOCATOR_FAILURE = 456;
     EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
     EXPECT_CALL(*allocator, Init).WillOnce(Return(ALLOCATOR_FAILURE));
     EXPECT_CALL(*allocator, Dispose).Times(1);
     EXPECT_CALL(*mapper, Dispose).Times(1);
+
+    EXPECT_CALL(metaService, Register).Times(0);
 
     // When
     int actual = meta.Init();
@@ -113,16 +123,19 @@ TEST(Metadata, Init_testIfMapperAndAllocatorAndJournalAreRolledBack)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     int JOURNAL_FAILURE = 456;
     EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
     EXPECT_CALL(*allocator, Init).WillOnce(Return(0));
+    EXPECT_CALL(metaService, Register).Times(1);
     EXPECT_CALL(*journal, Init).WillOnce(Return(JOURNAL_FAILURE));
     EXPECT_CALL(*journal, Dispose).Times(1);
     EXPECT_CALL(*allocator, Dispose).Times(1);
     EXPECT_CALL(*mapper, Dispose).Times(1);
+    EXPECT_CALL(metaService, Unregister).Times(1);
 
     // When
     int actual = meta.Init();
@@ -139,12 +152,14 @@ TEST(Metadata, Dispose_testIfAllSequenceInvokeDispose)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     EXPECT_CALL(*mapper, Dispose).Times(1);
     EXPECT_CALL(*allocator, Dispose).Times(1);
     EXPECT_CALL(*journal, Dispose).Times(1);
+    EXPECT_CALL(metaService, Unregister).Times(1);
 
     // When
     meta.Dispose();
@@ -160,8 +175,9 @@ TEST(Metadata, Shutdown_testIfAllComponentsAreDisposed)
     NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(nullptr, &arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
 
-    Metadata meta(&arrayInfo, mapper, allocator, journal);
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
     // Then
     EXPECT_CALL(*mapper, Shutdown);

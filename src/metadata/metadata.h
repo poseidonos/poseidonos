@@ -45,13 +45,14 @@ class JournalManager;
 
 class MetaUpdater;
 class MetaVolumeEventHandler;
+class MetaService;
 
 class Metadata : public IMountSequence
 {
 public:
     Metadata(void);
     Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
+    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaService* service);
     virtual ~Metadata(void);
 
     virtual int Init(void) override;
@@ -67,6 +68,7 @@ public:
 
 private:
     void _RegisterMetaServices(void);
+    void _UnregisterMetaSerivces(void);
 
     IArrayInfo* arrayInfo;
     Mapper* mapper;
@@ -74,5 +76,7 @@ private:
     JournalManager* journal;
     MetaUpdater* metaUpdater;
     MetaVolumeEventHandler* volumeEventHandler;
+
+    MetaService* metaService;
 };
 } // namespace pos
