@@ -58,10 +58,6 @@ Stripe::Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer_
   withDataBuffer(withDataBuffer_),
   iReverseMap(revMapMan)
 {
-    if (withDataBuffer == false)
-    {
-        POS_TRACE_INFO(EID(GC_STRIPE_ALLOCATED), "Gc stripe is allocated!");
-    }
     flushIo = nullptr;
 }
 

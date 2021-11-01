@@ -138,33 +138,33 @@ ReverseMapManager::Dispose(void)
 int
 ReverseMapManager::Load(ReverseMapPack* rev, StripeId wblsid, StripeId vsid, EventSmartPtr cb)
 {
-    uint32_t fileOffset = fileSizePerStripe * vsid;
+    uint64_t fileOffset = fileSizePerStripe * vsid;
     if (rev != nullptr)
     {
-        return rev->Load(fileOffset, cb);
+        return rev->Load(fileOffset, cb, vsid);
     }
     else
     {
-        return revMapPacks[wblsid].Load(fileOffset, cb);
+        return revMapPacks[wblsid].Load(fileOffset, cb, vsid);
     }
 }
 
 int
 ReverseMapManager::Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, StripeId vsid, EventSmartPtr cb)
 {
-    uint32_t fileOffset = fileSizePerStripe * stripe->GetVsid();
+    uint64_t fileOffset = fileSizePerStripe * vsid;
     if (rev != nullptr)
     {
-        return rev->Flush(stripe, fileOffset, cb);
+        return rev->Flush(stripe, fileOffset, cb, vsid);
     }
     else
     {
-        return revMapPacks[wblsid].Flush(stripe, fileOffset, cb);
+        return revMapPacks[wblsid].Flush(stripe, fileOffset, cb, vsid);
     }
 }
 
 int
-ReverseMapManager::UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId)
+ReverseMapManager::UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset, BlkAddr rba, uint32_t volumeId)
 {
     if (rev != nullptr)
     {
@@ -177,7 +177,7 @@ ReverseMapManager::UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, u
 }
 
 std::tuple<BlkAddr, uint32_t>
-ReverseMapManager::GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset)
+ReverseMapManager::GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset)
 {
     if (rev != nullptr)
     {
@@ -252,7 +252,7 @@ ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum
 }
 
 int
-ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset,  uint32_t fileSize, char* buf)
+ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset,  uint64_t fileSize, char* buf)
 {
     if (fileLinux == nullptr)
     {
@@ -262,7 +262,7 @@ ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset
 }
 
 int
-ReverseMapManager::StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset, uint32_t fileSize, char* buf)
+ReverseMapManager::StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf)
 {
     if (fileLinux == nullptr)
     {

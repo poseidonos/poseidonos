@@ -64,6 +64,7 @@ public:
 
     int error = 0;
     MetaFileIoCbPtr ioDoneCheckCallback;
+    uint32_t vsid;
 };
 
 } // namespace pos

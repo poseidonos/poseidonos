@@ -147,11 +147,11 @@ public:
     virtual void Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_);
     virtual void Assign(StripeId vsid);
 
-    virtual int Load(uint32_t fileOffset, EventSmartPtr cb);
-    virtual int Flush(Stripe* stripe, uint32_t fileOffset, EventSmartPtr cb);
+    virtual int Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid);
+    virtual int Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid);
 
-    virtual int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
+    virtual int SetReverseMapEntry(uint64_t offset, BlkAddr rba, uint32_t volumeId);
+    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint64_t offset);
     virtual char* GetRevMapPtrForWBT(void) { return reinterpret_cast<char*>(&revMaps[0]->sector[0]); }
 
 private:

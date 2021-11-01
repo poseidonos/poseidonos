@@ -56,16 +56,16 @@ public:
     virtual int Load(ReverseMapPack* rev, StripeId wblsid, StripeId vsid, EventSmartPtr cb);
     virtual int Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, StripeId vsid, EventSmartPtr cb);
 
-    virtual int UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint32_t offset);
+    virtual int UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset, BlkAddr rba, uint32_t volumeId);
+    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset);
     virtual ReverseMapPack* Assign(StripeId wblsid, StripeId vsid);
     virtual ReverseMapPack* AllocReverseMapPack(uint32_t vsid);
     virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
 
     virtual uint64_t GetReverseMapPerStripeFileSize(void);
     virtual uint64_t GetWholeReverseMapFileSize(void);
-    virtual int LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset, uint32_t fileSize, char* buf);
-    virtual int StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint32_t offset, uint32_t fileSize, char* buf);
+    virtual int LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
+    virtual int StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
     virtual char* GetReverseMapPtrForWBT(void);
 
 private:
