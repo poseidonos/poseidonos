@@ -48,7 +48,8 @@ MetaVolume::MetaVolume(void)
   inUse(false),
   sumOfRegionBaseLpns(0),
   metaStorage(nullptr),
-  arrayId(INT32_MAX)
+  arrayId(INT32_MAX),
+  trimBuffer(nullptr)
 {
 }
 
@@ -68,6 +69,9 @@ MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType,
     maxVolumeLpn = maxVolumePageNum;
     volumeType = metaVolumeType;
     this->arrayId = arrayId;
+
+    trimBuffer = Memory<MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES>::Alloc();
+    assert(trimBuffer != nullptr);
 }
 
 MetaVolume::~MetaVolume(void)
@@ -78,6 +82,9 @@ MetaVolume::~MetaVolume(void)
 
     delete inodeMgr;
     delete catalogMgr;
+
+    if (nullptr != trimBuffer)
+        Memory<>::Free(trimBuffer);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MetaVolume: {}: destructed",
@@ -564,24 +571,16 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "MFS file trim has been failed with NVMe Admin TRIM CMD.");
 
-        const FileSizeType pageSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
-        FileSizeType fileSize = count * pageSize;
-
-        buf = Memory<pageSize>::Alloc(fileSize / pageSize);
-        assert(buf != nullptr);
-
         // write all zeros
-        ret = metaStorage->WritePage(type, start, buf, count); // should be async.
+        ret = metaStorage->WritePage(type, start, trimBuffer, count); // should be async.
 
         if (ret != POS_EVENT_ID::SUCCESS)
         {
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "MFS file trim has been failed with zero writing.");
 
-            Memory<>::Free(buf);
             return false;
         }
-        Memory<>::Free(buf);
     }
 
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,

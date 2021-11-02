@@ -251,7 +251,10 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
         }
 
         currLpn += currLpnCnt;
-        currBuf += (currLpnCnt * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+        if (IODirection::TRIM != direction)
+        {
+            currBuf += (currLpnCnt * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+        }
         numPages -= currLpnCnt;
     }
 

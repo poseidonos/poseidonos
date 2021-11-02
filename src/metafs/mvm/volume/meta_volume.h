@@ -150,5 +150,6 @@ private:
     std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap;
 
     int arrayId;
+    void* trimBuffer;
 };
 } // namespace pos
