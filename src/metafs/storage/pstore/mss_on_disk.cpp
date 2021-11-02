@@ -221,22 +221,12 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
             {
                 break;
             }
-
-            if (ioStatus == IOSubmitHandlerStatus::TRYLOCK_FAIL ||
-                ioStatus == IOSubmitHandlerStatus::FAIL)
+            else
             {
-                if (IODirection::TRIM == direction)
-                {
-                    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                        "[SyncReq] Trim failed");
-                    status = POS_EVENT_ID::MFS_FILE_TRIM_FAILED;
-                    break;
-                }
-                else
-                {
-                    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                        "[SyncReq] Retry I/O Submit Hanlder...");
-                }
+                // IOSubmitHandlerStatus::FAIL
+                // IOSubmitHandlerStatus::TRYLOCK_FAIL
+                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                    "[SyncReq] Retry I/O Submit Hanlder...");
             }
         } while (1);
 
