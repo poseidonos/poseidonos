@@ -33,22 +33,23 @@
 #pragma once
 
 #include <atomic>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <map>
 
 #include "src/include/nvmf_const.h"
 #include "src/lib/singleton.h"
 #include "src/network/nvmf_target_spdk.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/caller/spdk_caller.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 using namespace std;
 class EventFrameworkApi;
 
 namespace pos
 {
+class ConfigManager;
 enum NvmfCallbackStatus
 {
     SUCCESS = 0,
@@ -60,7 +61,8 @@ class NvmfTarget
 {
 public:
     NvmfTarget(void);
-    NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
+    NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable,
+        EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller = nullptr, ConfigManager* configManager = nullptr);
     virtual ~NvmfTarget(void);
 
     virtual bool CreatePosBdev(const string& bdevName, const string uuid, uint32_t id, uint64_t volumeSizeInMb,
@@ -94,6 +96,7 @@ public:
     string GetPosBdevUuid(uint32_t id, string arrayName);
     virtual bool SetSubsystemArrayName(string& subnqn, string& arrayName);
     virtual string GetSubsystemArrayName(string& subnqn);
+
     virtual void RemoveSubsystemArrayName(string& subnqn);
 
 protected:
@@ -107,6 +110,7 @@ protected:
         EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
     static void _DetachNamespaceAllWithPause(void* arg1, void* arg2,
         EventFrameworkApi* eventFrameworkApi = nullptr, SpdkNvmfCaller* spdkNvmfCaller = nullptr);
+
 private:
     uint32_t nrVolumePerSubsystem = 1;
     static const char* BDEV_NAME_PREFIX;
@@ -115,6 +119,7 @@ private:
     bool feQosEnable;
     EventFrameworkApi* eventFrameworkApi;
     SpdkNvmfCaller* spdkNvmfCaller;
+    ConfigManager* configManager;
     map<string, string> subsystemToArrayName;
     static struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);

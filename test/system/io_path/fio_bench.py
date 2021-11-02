@@ -31,7 +31,8 @@ file_num = 1
 traddr='10.100.11.1'
 # could be either nvme or nvmf or bdev
 trtype="tcp"
-filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns=1:"
+port_num = "1158"
+filename = "trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=" + str(port_num) + " subnqn=nqn.2019-04.pos\:subsystem1 ns=1:"
 
 # the configuration below runs QD 1 & 128. 
 # To add set q_depth=['1', '32', '128']
@@ -154,9 +155,9 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     if file_num > 1:
         for i in range(file_base, file_base + file_num):
             if fio_plugin == "nvme":
-                command += " --name=test" + str(i) + " --filename='trtype="+str(trtype)+" adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
+                command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=" + str(port_num) + " subnqn=nqn.2019-04.pos\:subsystem" + str(i + 1) + " ns=1'"
             else:
-                command += " --name=test" + str(i) + "" + " --filename='Nvme" + str(i+1) + "n1'"
+                command += " --name=test" + str(i) + "" + " --filename='Nvme" + str(i + 1) + "n1'"
     else:
         command += " --name=test0 --filename='" + filename + "'" 
 
@@ -276,6 +277,7 @@ def parse_argument():
     global file_base
     global json_output_file
     global profile_mode
+    global port_num
 
     parser = argparse.ArgumentParser(description='Please add fio option to fio_full_bench.py')
     parser.add_argument('--iodepth', required=False, help='Set I/O Queue Depth. Please input without space  Ex) --iodepth="1,32,128"')
@@ -354,6 +356,8 @@ def parse_argument():
     if(args.json_output_file is not None):
         json_output_file = args.json_output_file
         profile_mode = True
+    if(args.port is not None):
+        port_num = args.port
 
 # set up for output file
 host_name = os.uname()[1]

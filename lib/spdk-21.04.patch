@@ -1,3 +1,25 @@
+diff --git .gitignore .gitignore
+index c9c85b925..59c9c6305 100644
+--- .gitignore
++++ .gitignore
+@@ -2,12 +2,17 @@
+ *.a
+ *.cmd
+ *.d
++*.dll
++*.exe
+ *.gcda
+ *.gcno
+ *.kdev4
+ *.ko
++*.lib
+ *.log
+ *.o
++*.obj
++*.pdb
+ *.pyc
+ *.so
+ *.so.*
 diff --git CONFIG CONFIG
 index 8c49c7d2b..fb6bf0eb3 100644
 --- CONFIG
@@ -48,6 +70,19 @@ index f5a8f73c9..0a0b31893 100644
  /**
   * This function returns the failed status of a given controller.
   *
+diff --git include/spdk/nvmf_transport.h include/spdk/nvmf_transport.h
+index f3af783fd..ac5d3a798 100644
+--- include/spdk/nvmf_transport.h
++++ include/spdk/nvmf_transport.h
+@@ -407,6 +407,8 @@ int spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req);
+  */
+ void spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair);
+ 
++void spdk_nvmf_tgt_new_qpair_with_nqn(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int hint);
++
+ /**
+  * A subset of struct spdk_nvme_registers that are emulated by a fabrics device.
+  */
 diff --git include/spdk/pos.h include/spdk/pos.h
 new file mode 100644
 index 000000000..158d85250
@@ -165,10 +200,10 @@ index 000000000..35b3df73b
 +#endif /* SPDK_POS_APP_H_ */
 diff --git include/spdk/pos_nvmf.h include/spdk/pos_nvmf.h
 new file mode 100644
-index 000000000..16bd942f3
+index 000000000..57d5a4b06
 --- /dev/null
 +++ include/spdk/pos_nvmf.h
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,114 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -271,6 +306,12 @@ index 000000000..16bd942f3
 +spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr);
 +
 +int spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem *subsystem);
++
++void spdk_nvmf_initialize_numa_aware_poll_group(void);
++
++struct spdk_nvmf_poll_group *
++spdk_nvmf_get_numa_aware_poll_group(struct spdk_nvmf_tgt *tgt,
++				    int numa);
 +
 +#ifdef __cplusplus
 +}
@@ -818,10 +859,47 @@ index 4fe815d06..cfcfc4a84 100644
  			nsid = req->cmd->nvme_cmd.nsid;
  
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
-index 05aaff048..8c73cc7a9 100644
+index 05aaff048..07bd568dd 100644
 --- lib/nvmf/nvmf.c
 +++ lib/nvmf/nvmf.c
-@@ -1055,7 +1055,14 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
+@@ -37,6 +37,7 @@
+ #include "spdk/bit_array.h"
+ #include "spdk/thread.h"
+ #include "spdk/nvmf.h"
++#include "spdk/pos_nvmf.h"
+ #include "spdk/trace.h"
+ #include "spdk/endian.h"
+ #include "spdk/string.h"
+@@ -816,11 +817,27 @@ _nvmf_poll_group_add(void *_ctx)
+ 
+ void
+ spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair)
++{
++	_spdk_nvmf_tgt_new_qpair(tgt, qpair, -1);
++}
++
++void
++spdk_nvmf_tgt_new_qpair_with_nqn(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int numa)
++{
++	_spdk_nvmf_tgt_new_qpair(tgt, qpair, numa);
++}
++
++void
++_spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int numa)
+ {
+ 	struct spdk_nvmf_poll_group *group;
+ 	struct nvmf_new_qpair_ctx *ctx;
+-
+ 	group = spdk_nvmf_get_optimal_poll_group(qpair);
++
++	if (group == NULL) {
++		group = spdk_nvmf_get_numa_aware_poll_group(tgt, numa);
++	}
++
+ 	if (group == NULL) {
+ 		if (tgt->next_poll_group == NULL) {
+ 			tgt->next_poll_group = TAILQ_FIRST(&tgt->poll_groups);
+@@ -1055,7 +1072,14 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
  
  	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
  	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
@@ -862,10 +940,10 @@ index d76b742a3..7a9fb03a9 100644
  	const struct spdk_nvme_transport_id *trid);
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
-index 000000000..713f410d6
+index 000000000..9afc35916
 --- /dev/null
 +++ lib/nvmf/pos_nvmf.c
-@@ -0,0 +1,161 @@
+@@ -0,0 +1,265 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -916,8 +994,11 @@ index 000000000..713f410d6
 +
 +#include "spdk/log.h"
 +
++#include <pthread.h>
++
 +//This will be Changed to getting info from POS reactor info
 +#define M_MAX_REACTOR (128)
++#define M_MAX_NUMA (8)
 +#define M_MAX_SUBSYSTEM (1024)
 +#define NVMF_CONNECT (0)
 +#define NVMF_DISCONNECT (1)
@@ -1027,6 +1108,107 @@ index 000000000..713f410d6
 +{
 +	return nvmf_subsystem_set_state(subsystem, SPDK_NVMF_SUBSYSTEM_PAUSED);
 +}
++
++static pthread_mutex_t g_poll_group_init_mutex = PTHREAD_MUTEX_INITIALIZER;
++static struct spdk_nvmf_poll_group *groups[M_MAX_NUMA][M_MAX_REACTOR]= {{NULL, },};
++static int groups_count[M_MAX_NUMA]= {0, };
++static int groups_ptr[M_MAX_NUMA]= {0, };
++
++void
++spdk_nvmf_initialize_numa_aware_poll_group(void)
++{
++    pthread_mutex_init(&g_poll_group_init_mutex, NULL);
++}
++
++static bool
++initialize_poll_group_information(struct spdk_nvmf_tgt *tgt)
++{
++    struct spdk_nvmf_poll_group *group = NULL;
++    for (group = TAILQ_FIRST(&tgt->poll_groups); group != NULL; group = TAILQ_NEXT(group, link))
++    {
++        struct spdk_cpuset* cpuset = spdk_thread_get_cpumask(group->thread);
++        uint32_t numa_count[M_MAX_NUMA] = {0, };
++        for (uint32_t core_index = 0; core_index < M_MAX_REACTOR; core_index++)
++        {
++            if (spdk_cpuset_get_cpu(cpuset, core_index))
++            {
++                uint32_t numa = spdk_env_get_socket_id(core_index);
++                numa_count[numa]++;
++            }
++        }
++        static const uint32_t INVALID_NUMA = 0xFFFF;
++        uint32_t max = 0, max_numa = INVALID_NUMA;
++        for (uint32_t numa_index = 0; numa_index < M_MAX_NUMA; numa_index++)
++        {
++            if (max < numa_count[numa_index])
++            {
++                max = numa_count[numa_index];
++                max_numa = numa_index;
++            }
++        }
++        if (max_numa == INVALID_NUMA)
++        {
++            SPDK_WARNLOG("Initializing core index is wrong.\n");
++            return false;
++        }
++        int tail = groups_count[max_numa];
++        groups[max_numa][tail] = group;
++        groups_count[max_numa]++;
++    }
++    return true;
++}
++
++struct spdk_nvmf_poll_group *
++spdk_nvmf_get_numa_aware_poll_group(struct spdk_nvmf_tgt *tgt, int numa)
++{
++	static int initialized = false;
++
++	if (numa < 0)
++	{
++		SPDK_NOTICELOG("numa aware is not supported\n");
++		return NULL;
++	}
++
++	if (numa >= M_MAX_NUMA)
++	{
++		SPDK_WARNLOG("Wrong numa information is given from App.\n");
++		return NULL;
++	}
++
++	// initialize groups information only once
++	pthread_mutex_lock(&g_poll_group_init_mutex);
++	if (initialized == false)
++	{
++		initialized = true;
++		bool ret = initialize_poll_group_information(tgt);
++		if (ret == false)
++		{
++			SPDK_NOTICELOG("numa aware is not supported\n");
++			pthread_mutex_unlock(&g_poll_group_init_mutex);
++			return NULL;
++		}
++	}
++	pthread_mutex_unlock(&g_poll_group_init_mutex);
++
++	pthread_mutex_lock(&g_poll_group_init_mutex);
++	int ptr = groups_ptr[numa];
++	struct spdk_nvmf_poll_group *target_group = groups[numa][ptr];
++	if (target_group == NULL)
++	{
++		ptr = 0;
++		groups_ptr[numa] = 0;
++		target_group = groups[numa][ptr];
++	}
++	groups_ptr[numa]++;
++	pthread_mutex_unlock(&g_poll_group_init_mutex);
++
++	if (target_group == NULL)
++	{
++		SPDK_WARNLOG("There are no support for max performance mode, the configuration support connection with round robin.\n");
++		return NULL;
++	}
++	return target_group;
++}
 diff --git lib/nvmf/rdma.c lib/nvmf/rdma.c
 index e7f3f8ea6..9b154437c 100644
 --- lib/nvmf/rdma.c
@@ -1083,10 +1265,34 @@ index 457fa64d6..1b9a2a084 100644
  	}
  
 diff --git lib/nvmf/tcp.c lib/nvmf/tcp.c
-index b16ed22a4..05c8661bb 100644
+index b16ed22a4..dbe514496 100644
 --- lib/nvmf/tcp.c
 +++ lib/nvmf/tcp.c
-@@ -2628,14 +2628,6 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
+@@ -49,6 +49,8 @@
+ 
+ #include "nvmf_internal.h"
+ 
++#include <numa.h>
++
+ #define NVMF_TCP_MAX_ACCEPT_SOCK_ONE_TIME 16
+ #define SPDK_NVMF_TCP_DEFAULT_MAX_SOCK_PRIORITY 16
+ #define SPDK_NVMF_TCP_DEFAULT_SOCK_PRIORITY 0
+@@ -1055,7 +1057,13 @@ nvmf_tcp_handle_connect(struct spdk_nvmf_transport *transport,
+ 		return;
+ 	}
+ 
+-	spdk_nvmf_tgt_new_qpair(transport->tgt, &tqpair->qpair);
++	int numa_count_in_system = numa_num_configured_nodes();
++	int numa = -1;
++	if (numa_count_in_system != 0)
++	{
++		numa = atoi(port->trid->trsvcid) % numa_count_in_system;
++	}
++	spdk_nvmf_tgt_new_qpair_with_nqn(transport->tgt, &tqpair->qpair, numa);
+ }
+ 
+ static uint32_t
+@@ -2628,14 +2636,6 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
  	tgroup = SPDK_CONTAINEROF(group, struct spdk_nvmf_tcp_poll_group, group);
  	tqpair = SPDK_CONTAINEROF(qpair, struct spdk_nvmf_tcp_qpair, qpair);
  
@@ -1101,7 +1307,7 @@ index b16ed22a4..05c8661bb 100644
  	rc =  nvmf_tcp_qpair_sock_init(tqpair);
  	if (rc != 0) {
  		SPDK_ERRLOG("Cannot set sock opt for tqpair=%p\n", tqpair);
-@@ -2654,6 +2646,14 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
+@@ -2654,6 +2654,14 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
  		return -1;
  	}
  
@@ -1244,15 +1450,16 @@ index 4c4b5da5a..4fd5799a8 100644
  		return -EIO;
  	}
 diff --git mk/spdk.common.mk mk/spdk.common.mk
-index 897be4d21..85f8dfc8e 100644
+index 897be4d21..e490e9a08 100644
 --- mk/spdk.common.mk
 +++ mk/spdk.common.mk
-@@ -299,6 +299,13 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
+@@ -299,6 +299,14 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
  SYS_LIBS += -l:libssp.a
  endif
  
 +ifeq ($(CONFIG_POS),y)
 +SYS_LIBS += -ltcmalloc
++SYS_LIBS += -lnuma
 +endif
 +
 +SYS_LIBS += -lair -lstdc++
@@ -3423,7 +3630,7 @@ index aa2912f6f..8115872c5 100644
  SPDK_LOG_REGISTER_COMPONENT(nvmf)
  
 diff --git test/unit/lib/nvmf/tcp.c/tcp_ut.c test/unit/lib/nvmf/tcp.c/tcp_ut.c
-index b96f9e854..eea41ae51 100644
+index b96f9e854..b989aeb96 100644
 --- test/unit/lib/nvmf/tcp.c/tcp_ut.c
 +++ test/unit/lib/nvmf/tcp.c/tcp_ut.c
 @@ -41,6 +41,7 @@
@@ -3434,3 +3641,11 @@ index b96f9e854..eea41ae51 100644
  #include "nvmf/tcp.c"
  
  #define UT_IPV4_ADDR "192.168.0.1"
+@@ -212,6 +213,7 @@ DEFINE_STUB_V(spdk_nvme_trid_populate_transport, (struct spdk_nvme_transport_id
+ DEFINE_STUB_V(spdk_nvmf_transport_register, (const struct spdk_nvmf_transport_ops *ops));
+ 
+ DEFINE_STUB_V(spdk_nvmf_tgt_new_qpair, (struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair));
++DEFINE_STUB_V(spdk_nvmf_tgt_new_qpair_with_nqn, (struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int numa));
+ 
+ DEFINE_STUB_V(nvmf_transport_qpair_abort_request,
+ 	      (struct spdk_nvmf_qpair *qpair, struct spdk_nvmf_request *req));

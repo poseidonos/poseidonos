@@ -24,6 +24,7 @@ public:
     MOCK_METHOD(int, SpdkNvmfSubsystemResume, (struct spdk_nvmf_subsystem * subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg), (override));
     MOCK_METHOD(struct spdk_bdev*, SpdkNvmfNsGetBdev, (struct spdk_nvmf_ns * ns), (override));
     MOCK_METHOD(uint32_t, SpdkNvmfNsGetId, (const struct spdk_nvmf_ns* ns), (override));
+    MOCK_METHOD(void, SpdkNvmfInitializeNumaAwarePollGroup, (), (override));
 };
 
 } // namespace pos

@@ -11,6 +11,7 @@ import threading
 import remote_control
 
 default_fabric_ip = ["10.100.2.16", "10.100.3.16"]
+default_port_num = ["1158", "1159"]
 default_initiator_ip = ["10.1.2.30", "10.1.2.31"]
 default_target_ip = "10.1.2.16"
 default_initiator_id = "root"
@@ -19,6 +20,7 @@ default_bringup = True
 
 fabric_ip = []
 initiator_ip = []
+port_num = []
 
 default_ibofos_root = "/home/ibof/ibofos"
 config_dir = "/etc/pos/"
@@ -39,10 +41,10 @@ def bring_up_ibofos_target():
                      "-a", fabric_ip[0],
                      "-A", fabric_ip[1],
                      "-s", "33",
-                     "-S", "32",
+                     "-S", "33",
                      "-B", "21474836480",
                      "-v", "33",
-                     "-V", "32",
+                     "-V", "33",
                      "-b", "8192",
                      "-w", "4096",
                      "-i", "TRUE",
@@ -84,24 +86,21 @@ def get_performance_bandwith_MB(node, ioType):
 
 
 def execute_fio_in_initiator(readwrite, block_size, qd, node):
-    global args, initiator_ip, fabric_ip
+    global args, initiator_ip, fabric_ip, port_num
     print("Execute fio at initiator readwrite=%s block_size=%s qd=%s" %
           (readwrite, block_size, qd))
     ramp_time = "30"
     run_time = "30"
     num_jobs = "1"
 
-    if (node == 0):
-        file_num = "33"
-    else:
-        file_num = "32"
+    file_num = "33"
     # initiator's result file
     result_file = "/tmp/fio_output.json"
     remote_control.remote_execute(initiator_ip[node], args.initiator_id,
                    args.initiator_pw, "rm -rf " + result_file)
     initiator_script = args.ibofos_root + "/test/system/io_path/fio_bench.py -i " + fabric_ip[node] + " --readwrite=" + readwrite +\
         " --ramp_time=" + ramp_time + " --bs=" + block_size + " --run_time=" + run_time + " --time_based=1 " + " --file_num=" + file_num + " --verify=" + "false" +\
-        " --iodepth=" + qd + " --numjobs=" + num_jobs + " --io_size=8g "
+        " --iodepth=" + qd + " --numjobs=" + num_jobs + " --io_size=8g --port=" + port_num[node] + " "
     if (node != 0):
         initiator_script += " --file_base=33"
 
@@ -114,7 +113,7 @@ def execute_fio_in_initiator(readwrite, block_size, qd, node):
 
 
 def parse_argument():
-    global fabric_ip, initiator_ip, args
+    global fabric_ip, initiator_ip, port_num, args
     parser = argparse.ArgumentParser(description='Filebench Test')
     parser.add_argument('-f1', '--fabric_ip1', default=default_fabric_ip[0],
                         help='Set target fabric IP, default: ' + default_fabric_ip[0])
@@ -124,6 +123,11 @@ def parse_argument():
                         help='Set initiator IP, default: ' + default_initiator_ip[0])
     parser.add_argument('-i2', '--initiator_ip2', default=default_initiator_ip[1],
                         help='Set initiator IP, default: ' + default_initiator_ip[0])
+
+    parser.add_argument('-p1', '--port_num1', default=default_port_num[0],
+                        help='Set port IP, default: ' + default_port_num[0])
+    parser.add_argument('-p2', '--port_num2', default=default_port_num[1],
+                        help='Set port IP, default: ' + default_port_num[0])
 
     parser.add_argument('--initiator_pw', default=default_initiator_pw,
                         help='Set initiator PW, default: ' + default_initiator_pw)
@@ -136,6 +140,11 @@ def parse_argument():
     args = parser.parse_args()
     fabric_ip.append(args.fabric_ip1)
     fabric_ip.append(args.fabric_ip2)
+
+    port_num.append(args.port_num1)
+    port_num.append(args.port_num2)
+    print(port_num[0], port_num[1])
+
     initiator_ip.append(args.initiator_ip1)
     initiator_ip.append(args.initiator_ip2)
     print(args)

@@ -1099,4 +1099,11 @@ TEST(NvmfTarget, DetachNamespaceAllWithPause_Success)
     nvmfTarget.DetachNamespaceAllWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
     delete mockEventFrameworkApi;
 }
+TEST(NvmfTarget, SpdkNvmfInitializeNumaAwarePollGroup)
+{
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfInitializeNumaAwarePollGroup()).Times(0);
+    delete mockSpdkNvmfCaller;
+}
+
 } // namespace pos

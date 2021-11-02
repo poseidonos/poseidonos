@@ -37,11 +37,14 @@
 #include <sstream>
 #include <string>
 
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
+#include "src/master_context/config_manager.h"
 #include "src/network/nvmf_target_spdk.h"
 #include "src/network/nvmf_volume_pos.h"
 #include "src/qos/qos_manager.h"
@@ -60,19 +63,39 @@ std::atomic<int> NvmfTarget::attachedNsid;
 NvmfTarget::NvmfTarget(void)
 : NvmfTarget(SpdkCallerSingleton::Instance(),
       QosManagerSingleton::Instance()->IsFeQosEnabled(),
-      EventFrameworkApiSingleton::Instance())
+      EventFrameworkApiSingleton::Instance(),
+      nullptr,
+      ConfigManagerSingleton::Instance())
 {
 }
 
-NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* inputSpdkNvmfCaller)
+NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable,
+    EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* inputSpdkNvmfCaller, ConfigManager* inputConfigManager)
 : spdkCaller(spdkCaller),
   feQosEnable(feQosEnable),
   eventFrameworkApi(eventFrameworkApi),
-  spdkNvmfCaller(inputSpdkNvmfCaller)
+  spdkNvmfCaller(inputSpdkNvmfCaller),
+  configManager(inputConfigManager)
 {
     if (nullptr == spdkNvmfCaller)
     {
         spdkNvmfCaller = new SpdkNvmfCaller();
+    }
+
+    bool enable = false;
+    if (nullptr != configManager)
+    {
+        int ret = configManager->GetValue("performance",
+            "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
+        if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS) && enable == true)
+        {
+            spdkNvmfCaller->SpdkNvmfInitializeNumaAwarePollGroup();
+        }
+    }
+    else
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_NO_CONFIG_MGR;
+        POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to get the configManager");
     }
     InitNvmfCallbacks(&nvmfCallbacks);
 }

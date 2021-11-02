@@ -80,8 +80,8 @@ SpdkNvmfCaller::SpdkNvmfSubsystemGetNext(struct spdk_nvmf_subsystem* subsystem)
     return spdk_nvmf_subsystem_get_next(subsystem);
 }
 
-struct spdk_nvmf_ns *
-SpdkNvmfCaller::SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem *subsystem, uint32_t nsid)
+struct spdk_nvmf_ns*
+SpdkNvmfCaller::SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid)
 {
     return spdk_nvmf_subsystem_get_ns(subsystem, nsid);
 }
@@ -101,8 +101,8 @@ SpdkNvmfCaller::SpdkNvmfSubsystemGetNextNs(
 }
 
 uint32_t
-SpdkNvmfCaller::SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem *subsystem, const char* bdevName,
-   const struct spdk_nvmf_ns_opts *user_opts, size_t opts_size, const char *ptpl_file)
+SpdkNvmfCaller::SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem* subsystem, const char* bdevName,
+    const struct spdk_nvmf_ns_opts* user_opts, size_t opts_size, const char* ptpl_file)
 {
     return spdk_nvmf_subsystem_add_ns_ext(subsystem, bdevName, user_opts, opts_size, ptpl_file);
 }
@@ -142,6 +142,12 @@ uint32_t
 SpdkNvmfCaller::SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns)
 {
     return spdk_nvmf_ns_get_id(ns);
+}
+
+void
+SpdkNvmfCaller::SpdkNvmfInitializeNumaAwarePollGroup(void)
+{
+    spdk_nvmf_initialize_numa_aware_poll_group();
 }
 
 } // namespace pos

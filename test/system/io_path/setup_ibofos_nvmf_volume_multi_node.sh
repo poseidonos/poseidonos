@@ -4,20 +4,19 @@
 ROOT_DIR=$(readlink -f $(dirname $0))/../../../
 SPDK_DIR=$ROOT_DIR/lib/spdk
 
-PORT_COUNT=1
 # Note: In case of tcp transport, network io irq can be manually controlled for better performance by issueing an option, "-i true" with given TARGET_NIC and NET_IRQ_CPULIST 
 DEFAULT_TARGET_NIC1=ens5f0
 DEFAULT_TARGET_NIC2=ens17f0
-DEFAULT_NET_IRQ_CPULIST1=67-71
-DEFAULT_NET_IRQ_CPULIST2=90-95
+DEFAULT_NET_IRQ_CPULIST1=65-71
+DEFAULT_NET_IRQ_CPULIST2=88-94
 DEFAULT_CLEAN_BRINGUP=1
 DEFAULT_TRANSPORT=TCP
 DEFAULT_TARGET_IP1=10.100.2.16 # CI Server VM IP
 DEFAULT_TARGET_IP2=10.100.3.16 # CI Server VM IP
 DEFAULT_SUBSYSTEM_COUNT1=33
-DEFAULT_SUBSYSTEM_COUNT2=32
+DEFAULT_SUBSYSTEM_COUNT2=33
 DEFAULT_VOLUME_COUNT1=33
-DEFAULT_VOLUME_COUNT2=32
+DEFAULT_VOLUME_COUNT2=33
 DEFAULT_WRITE_BUFFER_SIZE_IN_MB=4096
 DEFAULT_NUM_SHARED_BUFFER=8192
 DEFAULT_VOLUME_SIZE=2147483648
@@ -73,13 +72,13 @@ ibofos_bringup(){
     for i in `seq 1 $SUBSYSTEM_COUNT1`
     do
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION
-        port=`expr $i % $PORT_COUNT + 1158`
+        port=1158
         sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port
     done
     for i in `seq $SUBSYSTEM_COUNT_ARRAY_1_START $SUBSYSTEM_COUNT_ARRAY_1_END`
     do
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION:
-        port=`expr $i % $PORT_COUNT + 1158`
+        port=1159
         sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port
     done
 

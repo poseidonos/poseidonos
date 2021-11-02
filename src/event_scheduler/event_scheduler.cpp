@@ -33,8 +33,9 @@
 #include "src/event_scheduler/event_scheduler.h"
 
 #include <assert.h>
-#include <stdexcept>
 #include <unistd.h>
+
+#include <stdexcept>
 
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/event_scheduler/event.h"
@@ -75,7 +76,8 @@ EventScheduler::EventScheduler(QosManager* qosManagerArg,
         configManager = ConfigManagerSingleton::Instance();
     }
 
-    int ret = configManager->GetValue("event_scheduler",
+    // We fix the name of config as default
+    int ret = configManager->GetValue("performance",
         "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
     if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
@@ -139,7 +141,7 @@ EventScheduler::Initialize(uint32_t workerCountInput,
     {
         _BuildCpuSet(eventCPUSetInput);
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
         std::cerr << e.what() << '\n';
         return;
