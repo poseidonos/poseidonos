@@ -157,9 +157,9 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithValidAllBlocks)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillRepeatedly(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
-        EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
+        ON_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillByDefault(Return(virtualBlkAddr));
     }
 
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
@@ -253,7 +253,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapVsa)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = UNMAP_STRIPE, .offset = UNMAP_OFFSET};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -278,7 +278,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidVsa1)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = UNMAP_STRIPE, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -303,7 +303,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithInvalidVsa2)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = UNMAP_OFFSET};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -328,7 +328,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -355,7 +355,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentLsa)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -382,7 +382,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDiffrentBlkOffset)
     for (uint32_t blockOffset = 0; blockOffset < blocksPerStripe; blockOffset++)
     {
         EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-        int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+        int shouldRetry = OK_READY;
         VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset + 1};
         EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
     }
@@ -408,7 +408,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDeletedVolume)
     uint32_t volId = 1;
     uint32_t blockOffset = 0;
     EXPECT_CALL(*reverseMapPack, GetReverseMapEntry(blockOffset)).WillOnce(Return(std::tie(blockOffset, volId)));
-    int shouldRetry = CallerEventAndRetry::CALLER_EVENT;
+    int shouldRetry = OK_READY;
     VirtualBlkAddr virtualBlkAddr = {.stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID, .offset = blockOffset};
     EXPECT_CALL(*vsaMap, GetVSAInternal(volId, blockOffset, shouldRetry)).WillOnce(Return(virtualBlkAddr));
 

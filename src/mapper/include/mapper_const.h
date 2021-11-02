@@ -50,11 +50,8 @@ enum MapLoadState
 
 enum CallerEventAndRetry
 {
-    CALLER_NOT_EVENT = 0,
-    CALLER_EVENT,
-
-    NEED_RETRY,
-    OK_READY,
+    OK_READY = 0,
+    NEED_RETRY
 };
 
 } // namespace pos

@@ -116,7 +116,7 @@ GcMapUpdateRequest::_BuildMeta(void)
         std::tie(rba, volId) = stripe->GetReverseMapEntry(currentStripeOffset);
         if (likely(INVALID_RBA != rba))
         {
-            int shouldRetry = CALLER_EVENT;
+            int shouldRetry = OK_READY;
             currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
 
             if (NEED_RETRY == shouldRetry)
