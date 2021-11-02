@@ -420,7 +420,7 @@ setup_pos_single_array(){
 ###################################################
 # START POS WITH MULTI ARRAY and multi volume in a subsystem
 ###################################################
-start_ibofos_with_multi_array(){
+setup_pos_multi_array(){
     SUBSYSTEM_COUNT=2
     VOLUME_COUNT=8
     texecc $TARGET_ROOT_DIR/test/system/io_path/setup_multi_array.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
@@ -1036,7 +1036,7 @@ with_fe_qos_multi_array(){
     start_ibofos
     check_number_disks
     if [ $NUM_DISKS -ge 6 ]; then
-        setup_ibofos_with_multi_array
+        setup_pos_multi_array
         EXPECT_PASS "Successful POS Launch & Configuration" $?
         run_fio_tests fe_qos_multi_array with_fe_qos
         EXPECT_PASS "Successful Completion of FIO test cases" $?
