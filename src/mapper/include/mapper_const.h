@@ -50,10 +50,7 @@ enum MapLoadState
 
 enum CallerEventAndRetry
 {
-    CALLER_NOT_EVENT = 0,
-    CALLER_EVENT,
-
-    NEED_RETRY,
+    NEED_RETRY = 0,
     OK_READY,
 };
 

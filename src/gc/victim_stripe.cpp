@@ -144,14 +144,14 @@ VictimStripe::LoadValidBlock(void)
         }
 
 
-        int shouldRetry = CALLER_EVENT;
+        int shouldRetry = OK_READY;
         blkInfo.vsa = iVSAMap->GetVSAInternal(blkInfo.volID, blkInfo.rba, shouldRetry);
 
         if (NEED_RETRY == shouldRetry)
         {
             return false;
         }
-        if ((CALLER_EVENT == shouldRetry) && (true == IsUnMapVsa(blkInfo.vsa)))
+        if (true == IsUnMapVsa(blkInfo.vsa))
         {
             continue;
         }

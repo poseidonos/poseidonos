@@ -276,18 +276,21 @@ Mapper::EnableInternalAccess(int volId)
 VirtualBlkAddr
 Mapper::GetVSAInternal(int volId, BlkAddr rba, int& retry)
 {
-    retry = NEED_RETRY;
-    if (volState[volId].GetState() == VolState::VOLUME_LOADING)
-    {
-        return UNMAP_VSA;
-    }
-    int ret = EnableInternalAccess(volId);
-    if ((ret < 0) || (ret == NEED_RETRY))
-    {
-        return UNMAP_VSA;
-    }
     retry = OK_READY;
-    return vsaMapManager->GetVSAWoCond(volId, rba);
+    int ret = EnableInternalAccess(volId);
+    if (ret == NEED_RETRY)
+    {
+        retry = NEED_RETRY;
+        return UNMAP_VSA;
+    }
+    else if (ret < 0) 
+    {
+        return UNMAP_VSA;
+    }
+    else
+    {
+        return vsaMapManager->GetVSAWoCond(volId, rba);
+    }
 }
 
 int
