@@ -216,7 +216,8 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             "MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
     }
 
-    if (++mfsAsyncIoDonePages == numMpagesPerStripe)
+    uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
+    if ((res + 1) == numMpagesPerStripe)
     {
         if ((ioDirection == IO_LOAD) && (revMapPageAsyncIoReq->mpageNum == 0))
         {

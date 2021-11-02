@@ -283,7 +283,7 @@ Mapper::GetVSAInternal(int volId, BlkAddr rba, int& retry)
         retry = NEED_RETRY;
         return UNMAP_VSA;
     }
-    else if (ret < 0) 
+    else if (ret < 0)
     {
         return UNMAP_VSA;
     }

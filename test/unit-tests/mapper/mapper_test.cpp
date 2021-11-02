@@ -231,7 +231,7 @@ TEST(Mapper, TestEnableInternalAccess)
     EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
 
     mapper->SetVolumeState(5, VolState::VOLUME_LOADING, 10);
-    EXPECT_CALL(*vsaMan, IsVolumeLoaded).WillOnce(Return(false));
+    ON_CALL(*vsaMan, IsVolumeLoaded).WillByDefault(Return(false));
     ret = mapper->EnableInternalAccess(5);
     EXPECT_EQ(NEED_RETRY, ret);
 
