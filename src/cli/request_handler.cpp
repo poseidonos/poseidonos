@@ -131,6 +131,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CREATEQOSVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
     cmdDictionary["RESETQOSVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
     cmdDictionary["STARTTELEMETRY"] = new StartTelemetryCommand();
+    cmdDictionary["STOPTELEMETRY"] = new StopTelemetryCommand();
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
     cmdDictionary["RESETEVENTWRRPOLICY"] = new ResetEventWrrPolicyCommand();
