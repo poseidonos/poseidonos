@@ -49,7 +49,8 @@ Metadata::Metadata(void)
   allocator(nullptr),
   journal(nullptr),
   metaUpdater(nullptr),
-  volumeEventHandler(nullptr)
+  volumeEventHandler(nullptr),
+  metaService(nullptr)
 {
 }
 
@@ -215,6 +216,8 @@ Metadata::Shutdown(void)
 
     POS_TRACE_INFO(eventId, "Start shutdown journal of array {}", arrayName);
     journal->Shutdown();
+
+    _UnregisterMetaSerivces();
 }
 
 void

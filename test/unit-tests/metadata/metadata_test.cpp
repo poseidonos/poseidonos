@@ -183,6 +183,7 @@ TEST(Metadata, Shutdown_testIfAllComponentsAreDisposed)
     EXPECT_CALL(*mapper, Shutdown);
     EXPECT_CALL(*allocator, Shutdown);
     EXPECT_CALL(*journal, Shutdown);
+    EXPECT_CALL(metaService, Unregister).Times(1);
 
     // When
     meta.Shutdown();
