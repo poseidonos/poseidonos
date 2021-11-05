@@ -35,6 +35,7 @@
 #include "src/cli/command.h"
 #include "src/helper/json_helper.h"
 #include <string>
+#define ARRAY_ERROR_INDEX -1
 
 namespace pos_cli
 {

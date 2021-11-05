@@ -89,19 +89,20 @@ ListArrayCommand::Execute(json& doc, string rid)
             string createDatetime(abr.createDatetime);
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
-            IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
-            if (info != nullptr)
+            ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
+            if (CompInfo != nullptr && CompInfo->arrayInfo != nullptr)
             {
+                IArrayInfo* info = CompInfo->arrayInfo;
                 if (info->GetState() >= ArrayStateEnum::NORMAL)
                 {
                     arrayStatus = "Mounted";
                 }
-                arrayElement.SetAttribute(JsonAttribute("index", to_string(info->GetIndex())));
+                arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
             }
             else
             {
                 arrayStatus = "Fault";
-                arrayElement.SetAttribute(JsonAttribute("index", "no index"));
+                arrayElement.SetAttribute(JsonAttribute("index", ARRAY_ERROR_INDEX));
             }
 
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
