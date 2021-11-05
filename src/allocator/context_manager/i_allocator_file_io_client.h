@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "src/allocator/include/allocator_const.h"
 #include "src/meta_file_intf/async_context.h"
 
@@ -41,7 +43,8 @@ class IAllocatorFileIoClient
 {
 public:
     virtual void AfterLoad(char* buf) = 0;
-    virtual void BeforeFlush(int section, char* buf) = 0;
+    virtual void BeforeFlush(char* buf) = 0;
+    virtual std::mutex& GetCtxLock(void) = 0;
     virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx) = 0;
     virtual char* GetSectionAddr(int section) = 0;
     virtual int GetSectionSize(int section) = 0;

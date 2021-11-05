@@ -105,13 +105,13 @@ AllocatorCtx::Dispose(void)
     {
         return;
     }
-    
+
     if (allocWbLsidBitmap != nullptr)
     {
         delete allocWbLsidBitmap;
         allocWbLsidBitmap = nullptr;
     }
-    
+
     initialized = false;
 }
 
@@ -171,35 +171,31 @@ AllocatorCtx::AfterLoad(char* buf)
 }
 
 void
-AllocatorCtx::BeforeFlush(int section, char* buf)
+AllocatorCtx::BeforeFlush(char* buf)
 {
-    switch (section)
+    char* currentPtr = buf;
+
+    // AC_HEADER
+    ctxHeader.ctxVersion = ctxDirtyVersion++;
+    AllocatorCtxHeader* header = (AllocatorCtxHeader*)currentPtr;
+    header->numValidWbLsid = allocWbLsidBitmap->GetNumBitsSetWoLock();
+    currentPtr += GetSectionSize(AC_HEADER);
+
+    // AC_ALLOCATE_WBLSID_BITMAP
     {
-        case AC_HEADER:
-        {
-            ctxHeader.ctxVersion = ctxDirtyVersion++;
-
-            AllocatorCtxHeader* header = (AllocatorCtxHeader*)buf;
-            header->numValidWbLsid = allocWbLsidBitmap->GetNumBitsSetWoLock();
-
-            break;
-        }
-        case AC_ALLOCATE_WBLSID_BITMAP:
-        {
-            memcpy(buf, GetSectionAddr(section), GetSectionSize(section));
-            break;
-        }
-        case AC_ACTIVE_STRIPE_TAIL:
-        {
-            for (int index = 0; index < ACTIVE_STRIPE_TAIL_ARRAYLEN; index++)
-            {
-                std::unique_lock<std::mutex> volLock(activeStripeTailLock[index]);
-                int offset = sizeof(VirtualBlkAddr) * index;
-                memcpy(buf + offset, &activeStripeTail[index], sizeof(VirtualBlkAddr));
-            }
-            break;
-        }
+        std::lock_guard<std::mutex> lock(allocWbLsidBitmap->GetLock());
+        memcpy(currentPtr, GetSectionAddr(AC_ALLOCATE_WBLSID_BITMAP), GetSectionSize(AC_ALLOCATE_WBLSID_BITMAP));
     }
+    currentPtr += GetSectionSize(AC_ALLOCATE_WBLSID_BITMAP);
+
+    // AC_ACTIVE_STRIPE_TAIL
+    for (int index = 0; index < ACTIVE_STRIPE_TAIL_ARRAYLEN; index++)
+    {
+        std::unique_lock<std::mutex> volLock(activeStripeTailLock[index]);
+        int offset = sizeof(VirtualBlkAddr) * index;
+        memcpy(currentPtr + offset, &activeStripeTail[index], sizeof(VirtualBlkAddr));
+    }
+    currentPtr += GetSectionSize(AC_ACTIVE_STRIPE_TAIL);
 }
 
 void
@@ -330,13 +326,6 @@ void
 AllocatorCtx::SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa)
 {
     activeStripeTail[asTailArrayIdx] = vsa;
-}
-
-
-std::mutex&
-AllocatorCtx::GetAllocWbLsidBitmapLock(void)
-{
-    return allocWbLsidBitmap->GetLock();
 }
 
 std::mutex&

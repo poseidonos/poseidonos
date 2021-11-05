@@ -263,7 +263,7 @@ SegmentCtx::AfterLoad(char* buf)
 }
 
 void
-SegmentCtx::BeforeFlush(int section, char* buf)
+SegmentCtx::BeforeFlush(char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
     ctxHeader.numValidSegment = allocSegBitmap->GetNumBitsSet();

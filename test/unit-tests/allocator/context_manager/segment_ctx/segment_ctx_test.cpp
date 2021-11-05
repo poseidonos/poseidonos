@@ -48,10 +48,16 @@ TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
 
     // when
-    segCtx.BeforeFlush(SC_HEADER, (char*)buf);
+    segCtx.BeforeFlush((char*)buf);
 
     delete buf;
     delete segmentBitmap;
+}
+
+TEST(SegmentCtx, GetCtxLock_TestSimpleGetter)
+{
+    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    std::mutex& m = segCtx.GetCtxLock();
 }
 
 TEST(SegmentCtx, FinalizeIo_TestSimpleSetter)

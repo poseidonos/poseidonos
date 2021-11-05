@@ -97,12 +97,12 @@ TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
     allocCtx.SetNextSsdLsid(0);
 }
 
-TEST(AllocatorCtx, GetAllocatorCtxLock_TestSimpleGetter)
+TEST(AllocatorCtx, GetCtxLock_TestSimpleGetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
     // when
-    std::mutex& m = allocCtx.GetAllocatorCtxLock();
+    std::mutex& m = allocCtx.GetCtxLock();
 }
 
 TEST(AllocatorCtx, Init_InitAndClose)
@@ -149,28 +149,10 @@ TEST(AllocatorCtx, BeforeFlush_TestACHeader)
     // given
     NiceMock<MockBitMapMutex> allocBitmap(100);
     AllocatorCtx allocCtx(nullptr, &allocBitmap, nullptr);
-    AllocatorCtxHeader* buf = new AllocatorCtxHeader();
+    char* buf = new char[sizeof(AllocatorCtxHeader) + ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr)];
 
     EXPECT_CALL(allocBitmap, GetNumBitsSetWoLock).WillOnce(Return(10));
 
-    // when 1.
-    allocCtx.BeforeFlush(0, (char*)buf);
-
-    EXPECT_EQ(buf->numValidWbLsid, 10);
-
-    delete[] buf;
-}
-
-TEST(AllocatorCtx, BeforeFlush_TestEachMetaBufferFilled)
-{
-    // given
-    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
-    char* buf = new char[ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr)];
-
-    // when 2.
-    allocCtx.BeforeFlush(AC_ALLOCATE_WBLSID_BITMAP, (char*)buf);
-    // given 3.
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
         VirtualBlkAddr vsa;
@@ -178,10 +160,18 @@ TEST(AllocatorCtx, BeforeFlush_TestEachMetaBufferFilled)
         vsa.stripeId = i;
         allocCtx.SetActiveStripeTail(i, vsa);
     }
-    // when 3.
-    allocCtx.BeforeFlush(AC_ACTIVE_STRIPE_TAIL, (char*)buf);
-    // then 3.
-    VirtualBlkAddr* vList = reinterpret_cast<VirtualBlkAddr*>(buf);
+
+    std::mutex lock;
+    EXPECT_CALL(allocBitmap, GetLock).WillOnce(ReturnRef(lock));
+
+    // when
+    allocCtx.BeforeFlush((char*)buf);
+
+    // then
+    AllocatorCtxHeader* header = reinterpret_cast<AllocatorCtxHeader*>(buf);
+    EXPECT_EQ(header->numValidWbLsid, 10);
+
+    VirtualBlkAddr* vList = reinterpret_cast<VirtualBlkAddr*>(buf + sizeof(AllocatorCtxHeader));
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
         EXPECT_EQ(i, vList[i].offset);
@@ -189,7 +179,6 @@ TEST(AllocatorCtx, BeforeFlush_TestEachMetaBufferFilled)
     }
 
     delete[] buf;
-    delete allocBitmap;
 }
 
 TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
@@ -452,15 +441,4 @@ TEST(AllocatorCtx, GetAllActiveStripeTail_TestSimpleGetter)
     }
 }
 
-TEST(AllocatorCtx, GetAllocWbLsidBitmapLock_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
-    std::mutex m;
-    EXPECT_CALL(*allocBitmap, GetLock).WillOnce(ReturnRef(m));
-    // when
-    allocCtx.GetAllocWbLsidBitmapLock();
-    delete allocBitmap;
-}
 } // namespace pos

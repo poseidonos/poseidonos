@@ -63,7 +63,8 @@ public:
     virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
-    virtual void BeforeFlush(int section, char* buf);
+    virtual void BeforeFlush(char* buf);
+    virtual std::mutex& GetCtxLock(void) { return segCtxLock; }
     virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
     virtual char* GetSectionAddr(int section);
     virtual int GetSectionSize(int section);

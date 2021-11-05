@@ -56,35 +56,23 @@ class EventScheduler;
 
 const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
+class ContextIoManager;
+
 class ContextManager : public IContextManager
 {
 public:
-    enum IOTYPE
-    {
-        IOTYPE_READ,
-        IOTYPE_FLUSH,
-        IOTYPE_REBUILDFLUSH,
-        IOTYPE_ALL
-    };
-
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
-        AllocatorFileIoManager* fileMananager_,
-        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
-    ContextManager(TelemetryPublisher* tp, EventScheduler* eventScheduler_,
-        AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
-        AllocatorFileIoManager* fileMananager_,
-        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
+        ContextIoManager* ioManager,
+        ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
     virtual ~ContextManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
-    virtual int FlushRebuildContext(EventSmartPtr callback, bool sync);
     virtual void UpdateOccupiedStripeCount(StripeId lsid);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
@@ -115,32 +103,12 @@ public:
 
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
 
-    // for UT
-    void SetCallbackFunc(EventSmartPtr callback);
-    void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt);
-
 private:
-    void _UpdateSectionInfo(void);
-    int _LoadContexts(void);
-    int _Flush(int owner);
-    void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _WaitPendingIo(IOTYPE type);
-    MetaIoCbPtr _SetCallbackFunc(int owner, EventSmartPtr callbackEvent);
-    void _PrepareBuffer(int owner, char* buf);
     void _ResetSegmentStates(void);
     void _NotifySegmentFreed(SegmentId segId);
 
-    std::string fileNames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
-    IAllocatorFileIoClient* fileOwner[NUM_FILES];
-    std::atomic<int> numReadIoIssued;
-    std::atomic<int> numFlushIoIssued;
-    std::atomic<int> numRebuildFlushIoIssued;
-    std::atomic<bool> flushInProgress;
-    EventSmartPtr flushCallback;
+    ContextIoManager* ioManager;
 
-    AllocatorFileIoManager* fileIoManager;
     AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
@@ -155,7 +123,6 @@ private:
     std::mutex ctxLock;
 
     TelemetryPublisher* telPublisher;
-    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

@@ -34,6 +34,7 @@
 
 #include <cstdint>
 #include <set>
+#include <string>
 
 #include "src/include/address_type.h"
 #include "src/volume/volume_list.h"
@@ -92,6 +93,9 @@ enum WBTAllocatorMetaType
     WBT_SEGMENT_OCCUPIED_STRIPE,
     WBT_NUM_ALLOCATOR_META
 };
+
+const std::string filenames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
+const int numSections[NUM_FILES] = {NUM_SEGMENT_CTX_SECTION, NUM_ALLOCATOR_CTX_SECTION, NUM_REBUILD_CTX_SECTION};
 
 class CtxHeader
 {

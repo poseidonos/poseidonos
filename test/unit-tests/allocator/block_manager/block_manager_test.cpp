@@ -471,7 +471,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
     EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));

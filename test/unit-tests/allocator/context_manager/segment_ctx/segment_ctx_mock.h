@@ -13,7 +13,8 @@ public:
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, AfterLoad, (char* buf), (override));
-    MOCK_METHOD(void, BeforeFlush, (int section, char* buf), (override));
+    MOCK_METHOD(void, BeforeFlush, (char* buf), (override));
+    MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
     MOCK_METHOD(void, FinalizeIo, (AsyncMetaFileIoCtx* ctx), (override));
     MOCK_METHOD(char*, GetSectionAddr, (int section), (override));
     MOCK_METHOD(int, GetSectionSize, (int section), (override));

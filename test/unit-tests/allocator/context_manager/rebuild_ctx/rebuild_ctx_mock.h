@@ -1,9 +1,8 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
+#include <utility>
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 
 namespace pos
@@ -15,8 +14,9 @@ public:
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, AfterLoad, (char* buf), (override));
-    MOCK_METHOD(void, BeforeFlush, (int section, char* buf), (override));
-    MOCK_METHOD(void, FinalizeIo, (AsyncMetaFileIoCtx * ctx), (override));
+    MOCK_METHOD(void, BeforeFlush, (char* buf), (override));
+    MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
+    MOCK_METHOD(void, FinalizeIo, (AsyncMetaFileIoCtx* ctx), (override));
     MOCK_METHOD(char*, GetSectionAddr, (int section), (override));
     MOCK_METHOD(int, GetSectionSize, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
@@ -35,6 +35,8 @@ public:
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(void, EraseRebuildTargetSegment, (SegmentId segmentId), (override));
     MOCK_METHOD(std::mutex&, GetLock, (), (override));
+    MOCK_METHOD((std::pair<RTSegmentIter, bool>), EmplaceRebuildTargetSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(void, SetTargetSegmentCnt, (uint32_t val), (override));
 };
 
 } // namespace pos

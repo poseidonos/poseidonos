@@ -300,6 +300,12 @@ TEST(RebuildCtx, IsRebuildTargetSegment_TestSimpleSetter)
     delete allocCtx;
 }
 
+TEST(RebuildCtx, GetCtxLock_TestSimpleGetter)
+{
+    RebuildCtx rebuildCtx(nullptr, nullptr);
+    std::mutex& m = rebuildCtx.GetCtxLock();
+}
+
 TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
 {
     // given
@@ -325,7 +331,7 @@ TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)
     char buf[100];
     RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(buf);
     // when
-    rebuildCtx.BeforeFlush(0, buf);
+    rebuildCtx.BeforeFlush(buf);
     // then
     EXPECT_EQ(3, header->numTargetSegments);
     int* segId = reinterpret_cast<int*>(buf + sizeof(RebuildCtxHeader));

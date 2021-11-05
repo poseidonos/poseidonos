@@ -127,11 +127,13 @@ RebuildCtx::AfterLoad(char* buf)
 }
 
 void
-RebuildCtx::BeforeFlush(int section, char* buf)
+RebuildCtx::BeforeFlush(char* buf)
 {
     targetSegmentCount = targetSegmentList.size();
     ctxHeader.numTargetSegments = targetSegmentCount;
     ctxHeader.ctxVersion = ctxDirtyVersion++;
+
+    // TODO(huijeong.kim) to be copied using CopySectionData
     memcpy(buf, &ctxHeader, sizeof(RebuildCtxHeader));
 
     int idx = 0;

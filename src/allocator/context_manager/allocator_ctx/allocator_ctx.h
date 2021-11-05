@@ -54,7 +54,8 @@ public:
     virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
-    virtual void BeforeFlush(int section, char* buf);
+    virtual void BeforeFlush(char* buf);
+    virtual std::mutex& GetCtxLock(void) { return allocCtxLock; }
     virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
     virtual char* GetSectionAddr(int section);
     virtual int GetSectionSize(int section);
@@ -80,8 +81,6 @@ public:
     virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
     virtual void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
 
-    virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
-    virtual std::mutex& GetAllocWbLsidBitmapLock(void);
     virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
 
     static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
@@ -94,7 +93,7 @@ private:
 
     VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
-    BitMapMutex* allocWbLsidBitmap;
+    BitMapMutex* allocWbLsidBitmap = nullptr;
 
     StripeId prevSsdLsid;
     StripeId currentSsdLsid;
