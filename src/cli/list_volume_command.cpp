@@ -114,6 +114,8 @@ ListVolumeCommand::Execute(json& doc, string rid)
 
             elem.SetAttribute(JsonAttribute("maxiops", to_string(vol->MaxIOPS())));
             elem.SetAttribute(JsonAttribute("maxbw", to_string(vol->MaxBW())));
+            elem.SetAttribute(JsonAttribute("minbw", to_string(vol->MinBW())));
+            elem.SetAttribute(JsonAttribute("miniops", to_string(vol->MinIOPS())));
             array.AddElement(elem);
         }
 

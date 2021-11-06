@@ -49,17 +49,20 @@ Metadata::Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* stat
 : Metadata(info,
       new Mapper(info, nullptr),
       new Allocator(tp, info, state),
-      new JournalManager(info, state))
+      new JournalManager(info, state),
+      MetaServiceSingleton::Instance())
 {
 }
 
 Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
-    JournalManager* journal)
+    JournalManager* journal, MetaService* service)
 : arrayInfo(info),
   mapper(mapper),
   allocator(allocator),
   journal(journal),
-  metaUpdater(nullptr)
+  metaUpdater(nullptr),
+  volumeEventHandler(nullptr),
+  metaService(service)
 {
     volumeEventHandler = new MetaVolumeEventHandler(arrayInfo,
         mapper->GetVolumeEventHandler(),
@@ -136,6 +139,7 @@ Metadata::Init(void)
         journal->Dispose();
         allocator->Dispose();
         mapper->Dispose();
+        _UnregisterMetaSerivces();
         return result;
     }
 
@@ -155,8 +159,8 @@ Metadata::_RegisterMetaServices(void)
         EventSchedulerSingleton::Instance(),
         arrayInfo);
 
-    MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
-       arrayInfo->GetIndex(), metaUpdater, journal->GetJournalStatusProvider());
+    metaService->Register(arrayInfo->GetName(),
+        arrayInfo->GetIndex(), metaUpdater, journal->GetJournalStatusProvider());
 }
 
 void
@@ -173,6 +177,20 @@ Metadata::Dispose(void)
 
     POS_TRACE_INFO(eventId, "Start disposing journal of array {}", arrayName);
     journal->Dispose();
+
+    _UnregisterMetaSerivces();
+}
+
+void
+Metadata::_UnregisterMetaSerivces(void)
+{
+    metaService->Unregister(arrayInfo->GetName());
+
+    if (metaUpdater != nullptr)
+    {
+        delete metaUpdater;
+        metaUpdater = nullptr;
+    }
 }
 
 void
@@ -189,6 +207,8 @@ Metadata::Shutdown(void)
 
     POS_TRACE_INFO(eventId, "Start shutdown journal of array {}", arrayName);
     journal->Shutdown();
+
+    _UnregisterMetaSerivces();
 }
 
 void

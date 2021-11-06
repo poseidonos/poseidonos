@@ -54,7 +54,7 @@ VolumeCreator::~VolumeCreator(void)
 
 int
 VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
-        uint64_t maxBw)
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     VolumeNamePolicy namePolicy;
     int ret = namePolicy.CheckVolumeName(name);
@@ -84,7 +84,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         return static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL);
     }
 
-    ret = _SetVolumeQos(vol, maxIops, maxBw);
+    ret = _SetVolumeQos(vol, maxIops, maxBw, minIops, minBw);
     if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         delete vol;
@@ -133,7 +133,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         return ret;
     }
 
-    _PrintLogVolumeQos(vol, 0, 0);
+    _PrintLogVolumeQos(vol, 0, 0, 0, 0);
 
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }

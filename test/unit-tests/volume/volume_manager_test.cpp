@@ -177,6 +177,8 @@ TEST(VolumeManager, UpdateQoS_)
     uint64_t size = 1024;
     uint64_t maxIops = 100;
     uint64_t maxBw = 100;
+    uint64_t minIops = 0;
+    uint64_t minBw = 0;
 
     // When
     VolumeManager* volumeManager = new VolumeManager(iArrayInfo, iState);
@@ -186,7 +188,7 @@ TEST(VolumeManager, UpdateQoS_)
     volumeManager->StateChanged(nullptr, &nextState);
 
     int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
-    int actual = volumeManager->UpdateQoS(name, maxIops, maxBw);
+    int actual = volumeManager->UpdateQoS(name, maxIops, maxBw, minIops, minBw);
 
     ASSERT_EQ(actual, expected);
 

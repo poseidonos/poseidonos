@@ -54,8 +54,8 @@ public:
 
 protected:
     int _CheckVolumeSize(uint64_t volSize);
-    int _SetVolumeQos(VolumeBase* volume, uint64_t maxIops, uint64_t maxBw);
-    void _PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw);
+    int _SetVolumeQos(VolumeBase* volume, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw);
+    void _PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw, uint64_t originalMinIops, uint64_t originalMinBw);
     int _SaveVolumes(void);
 
     void _SetVolumeEventBase(VolumeBase* volume, std::string subnqn = "");

@@ -52,14 +52,16 @@ VolumeQosUpdater::~VolumeQosUpdater(void)
 
 
 int
-VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw)
+VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
     uint64_t originalMaxIops = vol->MaxIOPS();
     uint64_t originalMaxBw = vol->MaxBW();
+    uint64_t originalMinIops = vol->MinIOPS();
+    uint64_t originalMinBw = vol->MinBW();
 
-    int ret = _SetVolumeQos(vol, maxiops, maxbw);
+    int ret = _SetVolumeQos(vol, maxiops, maxbw, miniops, minbw);
     if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
@@ -81,10 +83,12 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw)
     {
         vol->SetMaxIOPS(originalMaxIops);
         vol->SetMaxBW(originalMaxBw);
+        vol->SetMinIOPS(originalMinIops);
+        vol->SetMinBW(originalMinBw);
         return ret;
     }
 
-    _PrintLogVolumeQos(vol, originalMaxIops, originalMaxBw);
+    _PrintLogVolumeQos(vol, originalMaxIops, originalMaxBw, miniops, minbw);
 
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }

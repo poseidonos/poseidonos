@@ -123,8 +123,20 @@ public:
     {
         return maxbw;
     }
+    uint64_t
+    MinIOPS(void)
+    {
+        return miniops;
+    }
+    uint64_t
+    MinBW(void)
+    {
+        return minbw;
+    }
     int SetMaxIOPS(uint64_t val);
     int SetMaxBW(uint64_t val);
+    int SetMinIOPS(uint64_t val);
+    int SetMinBW(uint64_t val);
     void
     Rename(std::string val)
     {
@@ -142,7 +154,8 @@ protected:
     std::string subNqn = "";
     uint64_t maxiops = 0; // 0 == unlimited
     uint64_t maxbw = 0;   // 0 == unlimited
-
+    uint64_t miniops = 0; // 0 == unlimited
+    uint64_t minbw = 0;   // 0 == unlimited
     bool isValid = true;
     uint64_t totalSize;
     std::mutex statusMutex;

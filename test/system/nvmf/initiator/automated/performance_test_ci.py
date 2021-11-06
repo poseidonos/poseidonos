@@ -103,7 +103,7 @@ def bring_up_ibofos():
     print(bring_up_script)
     result = remote_execute(args.target_ip, args.target_id, args.target_pw, bring_up_script)
     print("Pos bring up success")
-    #check_request_volume_mounted(result)
+    # check_request_volume_mounted(result)
 
 def execute_performance_test():
     print ("start perf test")

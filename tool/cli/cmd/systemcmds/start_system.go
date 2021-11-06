@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pnconnector/src/routers/m9k/model"
 	"pnconnector/src/util"
-	"time"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -28,7 +26,7 @@ Syntax:
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "RUNPOS"
+		var command = "STARTPOS"
 
 		uuid := globals.GenerateUUID()
 
@@ -45,29 +43,27 @@ Syntax:
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// TODO(mj): Here, we execute a script to run POS. This needs to be revised in the future.
-		res := model.Response{}
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			fmt.Println("Start system...")
-
 			// TODO(mj): Although go test for this command will be passed,
 			// it will print out some error commands because of the file path
 			// to the execution script. This needs to be fixed later.
 			path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+			// TODO(mj): The following script will not work when the client and the server are remote.
 			startCmd := fmt.Sprintf("/../script/start_poseidonos.sh")
 			err = util.ExecCmd(path+startCmd, false)
-
-			fmt.Println(err)
-
+			resJSON := ""
+			uuid := globals.GenerateUUID()
 			if err != nil {
-				res.Result.Status.Code = 11000
-				fmt.Println("PoseidonOS has failed to start with error code: ", res.Result.Status.Code)
+				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `"` + `,"result":{"status":{"code":11000,` +
+					`"description":"PoseidonOS has failed to start with error code: 11000"}}}`
 			} else {
-				res.Result.Status.Code = 0
-				res.LastSuccessTime = time.Now().UTC().Unix()
-				fmt.Println("PoseidonOS has successfully started")
+				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
+					`"description":"PoseidonOS has successfully started"}}}`
 			}
+
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 
 	},

@@ -63,6 +63,8 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     totalSize = volSizeByte;
     maxiops = _maxiops;
     maxbw = _maxbw;
+    miniops = 0;
+    minbw = 0;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} uuid:{} size:{} iops:{} bw:{} created",
         name, uuid, totalSize, maxiops, maxbw);
@@ -176,6 +178,28 @@ VolumeBase::SetMaxBW(uint64_t val)
         return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
     }
     maxbw = val;
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+}
+
+int
+VolumeBase::SetMinIOPS(uint64_t val)
+{
+    if (val != 0 && val > MAX_IOPS_LIMIT)
+    {
+        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+    }
+    miniops = val;
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+}
+
+int
+VolumeBase::SetMinBW(uint64_t val)
+{
+    if (val != 0 && val > MAX_BW_LIMIT)
+    {
+        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+    }
+    minbw = val;
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
