@@ -285,7 +285,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 				fmt.Println("Name: " + volume.VOLUMENAME)
 				fmt.Println("ID: ", volume.VOLUMEID)
-				fmt.Println("Minimim Iops: ", volume.MINIOPS)
+				fmt.Println("Minimum Iops: ", volume.MINIOPS)
 				fmt.Println("Maximum Iops: ", volume.MAXIOPS)
 				fmt.Println("Minimum Bw: ", volume.MINBW)
 				fmt.Println("Maximum Bw: ", volume.MAXBW)
