@@ -37,6 +37,7 @@
 #include "src/logger/logger.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -91,6 +92,9 @@ BlockMapUpdate::_DoSpecificJob(void)
     {
         VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
         blockAllocator->InvalidateBlks(vsaRange);
+
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, POS_EVENT_ID::MAPPER_SUCCESS,
+            "Invalidate rba {} vsid {}", ChangeSectorToBlock(volumeIo->GetSectorRba()), vsaRange.startVsa.stripeId);
     }
 
     blockAllocator->ValidateBlks(targetVsaRange);

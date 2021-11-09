@@ -150,6 +150,8 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 
     if (segmentFreed == true)
     {
+        POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
+            "[FreeSegment] segmentId:{} freed by occupied stripe count", segId);
         _NotifySegmentFreed(segId);
     }
 }
@@ -166,6 +168,8 @@ ContextManager::DecreaseValidBlockCount(SegmentId segId, uint32_t count)
     bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, count);
     if (segmentFreed == true)
     {
+        POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
+            "[FreeSegment] segmentId:{} freed by valid block count", segId);
         _NotifySegmentFreed(segId);
     }
 }
