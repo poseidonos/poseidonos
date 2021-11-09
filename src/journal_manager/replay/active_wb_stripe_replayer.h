@@ -51,7 +51,8 @@ class ActiveWBStripeReplayer
 {
 public:
     explicit ActiveWBStripeReplayer(PendingStripeList& pendingStripeList);
-    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
+    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator,
+        IStripeMap* stripeMap, PendingStripeList& pendingStripeList);
     virtual ~ActiveWBStripeReplayer(void);
 
     virtual int Replay(void);
@@ -82,6 +83,7 @@ private:
     PendingStripeList& pendingStripes;
     IContextReplayer* contextReplayer;
     IWBStripeAllocator* wbStripeAllocator;
+    IStripeMap* stripeMap;
 };
 
 } // namespace pos

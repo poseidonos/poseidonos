@@ -47,10 +47,12 @@ ActiveWBStripeReplayer::ActiveWBStripeReplayer(PendingStripeList& pendingStripeL
 }
 
 ActiveWBStripeReplayer::ActiveWBStripeReplayer(IContextReplayer* ctxReplayer,
-    IWBStripeAllocator* wbstripeAllocator, PendingStripeList& pendingStripeList)
+    IWBStripeAllocator* wbstripeAllocator, IStripeMap* stripeMap,
+    PendingStripeList& pendingStripeList)
 : pendingStripes(pendingStripeList),
   contextReplayer(ctxReplayer),
-  wbStripeAllocator(wbstripeAllocator)
+  wbStripeAllocator(wbstripeAllocator),
+  stripeMap(stripeMap)
 {
     readTails = contextReplayer->GetAllActiveStripeTail();
     foundActiveStripes.resize(readTails.size());
@@ -172,7 +174,18 @@ ActiveWBStripeReplayer::Replay(void)
     {
         if (foundActiveStripes[index].size() == 0)
         {
-            continue;
+            if (IsUnMapVsa(readTails[index]) == false)
+            {
+                StripeAddr stripeAddr = stripeMap->GetLSA(readTails[index].stripeId);
+                assert(stripeAddr.stripeLoc == IN_WRITE_BUFFER_AREA);
+
+                ActiveStripeAddr currentAddr(index, readTails[index], stripeAddr.stripeId);
+                foundActiveStripes[index].push_back(currentAddr);
+            }
+            else
+            {
+                continue;
+            }
         }
 
         ActiveStripeAddr current = _FindTargetActiveStripeAndRestore(index);
