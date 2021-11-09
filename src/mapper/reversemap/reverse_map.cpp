@@ -76,6 +76,7 @@ ReverseMapPack::~ReverseMapPack(void)
     revMaps.clear();
 
     revMapfile = nullptr;
+    callback = nullptr;
 }
 
 void
@@ -140,6 +141,7 @@ ReverseMapPack::UnLinkVsid(void)
     _HeaderInit(wbLsid);
 
     linkedToVsid = false;
+    callback = nullptr;
 
     return 0;
 }
@@ -256,7 +258,6 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         if (callback != nullptr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
-            callback = nullptr;
         }
     }
 
