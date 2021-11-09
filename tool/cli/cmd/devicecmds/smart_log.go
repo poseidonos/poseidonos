@@ -12,21 +12,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var SMARTCmd = &cobra.Command{
-	Use:   "smart",
-	Short: "Display SMART information.",
+var SMARTLOGCmd = &cobra.Command{
+	Use:   "smart-log",
+	Short: "Display SMART log information of a device.",
 	Long: `
-Display SMART information of a device.
+Display SMART log information of a device.
 
 Syntax:
-	poseidonos-cli device smart (--device-name | -d) DeviceName .
+	poseidonos-cli device smart-log (--device-name | -d) DeviceName .
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "SMART"
+		var command = "SMARTLOG"
 
-		param := messages.SMARTReqParam{
-			DEVICENAME: smart_deviceName,
+		param := messages.SMARTLOGReqParam{
+			DEVICENAME: smart_log_deviceName,
 		}
 
 		uuid := globals.GenerateUUID()
@@ -64,11 +64,11 @@ Syntax:
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var smart_deviceName = ""
+var smart_log_deviceName = ""
 
 func init() {
-	SMARTCmd.Flags().StringVarP(&smart_deviceName,
+	SMARTLOGCmd.Flags().StringVarP(&smart_log_deviceName,
 		"device-name", "d", "",
-		"The name of the device to display the SMART information.")
-	SMARTCmd.MarkFlagRequired("device-name")
+		"The name of the device to display the SMART log information.")
+	SMARTLOGCmd.MarkFlagRequired("device-name")
 }

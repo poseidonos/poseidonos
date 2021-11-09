@@ -39,11 +39,11 @@ struct spdk_nvme_cpl;
 
 namespace pos_cli
 {
-class SmartCommand : public Command
+class SMARTLOGCommand : public Command
 {
 public:
-    SmartCommand(void);
-    ~SmartCommand(void) override;
+    SMARTLOGCommand(void);
+    ~SMARTLOGCommand(void) override;
     string Execute(json& doc, string rid) override;
 
 private:

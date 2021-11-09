@@ -73,7 +73,7 @@
 #include "src/cli/reset_qos_volume_policy_command.h"
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
-#include "src/cli/smart_command.h"
+#include "src/cli/smart_log_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
 #include "src/cli/start_telemetry_command.h"
@@ -87,7 +87,7 @@ namespace pos_cli
 bool RequestHandler::isExit = false;
 RequestHandler::RequestHandler(void)
 {
-    cmdDictionary["SMART"] = new SmartCommand();
+    cmdDictionary["SMARTLOG"] = new SMARTLOGCommand();
     cmdDictionary["LOGGERINFO"] = new LoggerInfoCommand();
     cmdDictionary["SCANDEVICE"] = new ScanDeviceCommand();
     cmdDictionary["LISTDEVICE"] = new ListDeviceCommand();

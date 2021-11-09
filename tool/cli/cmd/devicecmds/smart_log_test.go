@@ -10,7 +10,7 @@ import (
 )
 
 // This testing tests if the request is created well in JSON form from the command line.
-func TestSMARTCommandReq(t *testing.T) {
+func TestSMARTLogCommandReq(t *testing.T) {
 
 	// Command creation
 	rootCmd := cmd.RootCmd
@@ -22,7 +22,7 @@ func TestSMARTCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "device", "smart", "--device-name", "dev_test", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "device", "smart-log", "--device-name", "dev_test", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -30,7 +30,7 @@ func TestSMARTCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"command":"SMART","rid":"fromfakeclient","param":{"name":"dev_test"}}`
+	expected := `{"command":"SMARTLOG","rid":"fromfakeclient","param":{"name":"dev_test"}}`
 
 	if expected != string(out) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))

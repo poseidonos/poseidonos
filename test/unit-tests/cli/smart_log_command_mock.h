@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/cli/smart_command.h"
+#include "src/cli/smart_log_command.h"
 
 namespace pos_cli
 {
-class MockSmartCommand : public SmartCommand
+class MockSMARTLOGCommand : public SMARTLOGCommand
 {
 public:
-    using SmartCommand::SmartCommand;
+    using SMARTLOGCommand::SMARTLOGCommand;
     MOCK_METHOD(string, Execute, (json & doc, string rid), (override));
 };
 

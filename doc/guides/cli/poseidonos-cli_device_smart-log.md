@@ -1,25 +1,25 @@
-## poseidonos-cli devel stop-rebuilding
+## poseidonos-cli device smart-log
 
-Stop rebulding.
+Display SMART log information of a device.
 
 ### Synopsis
 
 
-Stop rebuilding.
+Display SMART log information of a device.
 
 Syntax:
-	poseidonos-cli devel stop-rebuilding ( --array-name | -a ) ArrayName .
+	poseidonos-cli device smart-log (--device-name | -d) DeviceName .
           
 
 ```
-poseidonos-cli devel stop-rebuilding [flags]
+poseidonos-cli device smart-log [flags]
 ```
 
 ### Options
 
 ```
-  -a, --array-name string   Array name.
-  -h, --help                help for stop-rebuilding
+  -d, --device-name string   The name of the device to display the SMART log information.
+  -h, --help                 help for smart-log
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ poseidonos-cli devel stop-rebuilding [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli devel](poseidonos-cli_devel.md)	 - Commands for PoseidonOS developers.
+* [poseidonos-cli device](poseidonos-cli_device.md)	 - Device commands for PoseidonOS.
 

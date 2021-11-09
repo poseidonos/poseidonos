@@ -157,7 +157,7 @@ DeviceCmd = "device" ,
   ( CreateDeviceCmd
   | ScanDeviceCmd
   | ListDeviceCmd
-  | SMARTCmd
+  | SMARTLOGCmd
   ) ;
 
 CreateDeviceCmd = "create" , ( "--device-name" | "-d" ) ,
@@ -169,7 +169,7 @@ ScanDeviceCmd = "scan" ;
 
 ListDeviceCmd = "list" ;
 
-SMARTCmd = "smart" , ( "--device-name" | "-d" ) ,
+SMARTLOGCmd = "smart-log" , ( "--device-name" | "-d" ) ,
   DeviceName ;
 
 SystemCmd = "system" ,

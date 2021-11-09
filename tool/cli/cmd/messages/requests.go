@@ -54,7 +54,7 @@ type UnmountArrayParam struct {
 }
 
 // Device request messages
-type SMARTReqParam struct {
+type SMARTLOGReqParam struct {
 	DEVICENAME string `json:"name"`
 }
 
