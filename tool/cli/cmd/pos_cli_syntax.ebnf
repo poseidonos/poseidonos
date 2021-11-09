@@ -200,8 +200,8 @@ SetLogLevelCmd = "set-level" , "--level" , LogLevel ;
 LogLevel
   = "info"
   | "debug"
-  | "warn"
-  | "err"
+  | "warning"
+  | "error"
   | "critical"
   ;
 
