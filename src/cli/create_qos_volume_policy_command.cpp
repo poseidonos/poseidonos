@@ -229,7 +229,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         uint32_t prevMaxIops = ((prevVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
                         if (newVolPolicy.minIops >= prevMaxIops)
                         {
-                            errorMsg = "Max Iops less than min Iops";
+                            errorMsg = "Min Iops more that corrosponding maxBw. IoSize considered 4KB.";
                             return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                         }
                     }
@@ -272,7 +272,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         uint32_t prevMinIops = ((prevVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
                         if (newVolPolicy.maxIops <= prevMinIops)
                         {
-                            errorMsg = "Max Iops less than min Iops";
+                            errorMsg = "Max Iops less than corrsoponding min Bw. Io size considered 4KB.";
                             return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                         }
                     }
