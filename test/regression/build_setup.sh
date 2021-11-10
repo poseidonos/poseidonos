@@ -147,15 +147,10 @@ buildTest()
     then
         buildPos
     else
-        if [ $target_type == "VM" ]
+        echo "#### CHECK BINARY IN MASTER : ${master_bin_path}/${pos_bin_filename} ####"
+        if [ -f ${master_bin_path}/${pos_bin_filename} ]
         then
-            echo "#### CHECK BINARY IN MASTER : ${master_bin_path}/${pos_bin_filename} ####"
-            if [ -f ${master_bin_path}/${pos_bin_filename} ]
-            then
-                getPos
-            else
-                buildPos
-            fi
+            getPos
         else
             buildPos
         fi
