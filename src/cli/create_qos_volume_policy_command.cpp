@@ -151,21 +151,21 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 newVolPolicy.minBw = minBwFromCli;
                 if (newVolPolicy.minBw != prevVolPolicy.minBw)
                 {
-                    newVolPolicy.policyChange = true;
-                }
-                if (prevVolPolicy.maxBw != 0 && prevVolPolicy.maxBw <= newVolPolicy.minBw)
-                {
-                    errorMsg = "Min bw more than max bw";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                }
-                if (prevVolPolicy.maxIops != 0)
-                {
-                    uint32_t prevMaxBw = ((prevVolPolicy.maxIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
-                    if (newVolPolicy.minBw >= prevMaxBw)
+                    if (prevVolPolicy.maxBw != 0 && prevVolPolicy.maxBw <= newVolPolicy.minBw)
                     {
-                        errorMsg = "Min bw more than equivalent max bandwidth";
+                        errorMsg = "Min bw more than max bw";
                         return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                     }
+                    if (prevVolPolicy.maxIops != 0)
+                    {
+                        uint32_t prevMaxBw = ((prevVolPolicy.maxIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
+                        if (newVolPolicy.minBw >= prevMaxBw)
+                        {
+                            errorMsg = "Min bw more than corrosponding Max Iops. Io Size considered 4KB";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
+                    newVolPolicy.policyChange = true;
                 }
             }
         }
@@ -185,22 +185,22 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 newVolPolicy.maxBw = maxBw;
                 if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
                 {
-                    newVolPolicy.policyChange = true;
-                    newVolPolicy.maxValueChanged = true;
-                }
-                if ((prevVolPolicy.minBw != 0 && prevVolPolicy.minBw >= newVolPolicy.maxBw) || (newVolPolicy.minBw != 0 && newVolPolicy.minBw >= newVolPolicy.maxBw))
-                {
-                    errorMsg = "Max bw less than min bw";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                }
-                if (prevVolPolicy.minIops != 0)
-                {
-                    uint32_t prevMinBw = ((prevVolPolicy.minIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
-                    if (newVolPolicy.maxBw <= prevMinBw)
+                    if ((prevVolPolicy.minBw != 0 && prevVolPolicy.minBw >= newVolPolicy.maxBw) || (newVolPolicy.minBw != 0 && newVolPolicy.minBw >= newVolPolicy.maxBw))
                     {
-                        errorMsg = "Max bw less than equivalent min bandwidth";
+                        errorMsg = "Max bw less than min bw";
                         return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                     }
+                    if (prevVolPolicy.minIops != 0)
+                    {
+                        uint32_t prevMinBw = ((prevVolPolicy.minIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
+                        if (newVolPolicy.maxBw <= prevMinBw)
+                        {
+                            errorMsg = "Max bw less than corrosponding Min Iops. IO Size is considered 4KB";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
+                    newVolPolicy.policyChange = true;
+                    newVolPolicy.maxValueChanged = true;
                 }
             }
         }
@@ -219,30 +219,30 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 newVolPolicy.minIops = minIopsFromCli;
                 if (newVolPolicy.minIops != prevVolPolicy.minIops)
                 {
+                    if (prevVolPolicy.maxIops != 0 && prevVolPolicy.maxIops <= newVolPolicy.minIops)
+                    {
+                        errorMsg = "Min iops more than max iops";
+                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    }
+                    if (prevVolPolicy.maxBw != 0)
+                    {
+                        uint32_t prevMaxIops = ((prevVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
+                        if (newVolPolicy.minIops >= prevMaxIops)
+                        {
+                            errorMsg = "Max Iops less than min Iops";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
+                    if (newVolPolicy.maxBw != 0)
+                    {
+                        uint32_t newMaxIops = ((newVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
+                        if (newVolPolicy.minIops >= newMaxIops)
+                        {
+                            errorMsg = "Max Bw more than corrsoponding Min Iops.IO Size is considered 4KB.";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
                     newVolPolicy.policyChange = true;
-                }
-                if (prevVolPolicy.maxIops != 0 && prevVolPolicy.maxIops <= newVolPolicy.minIops)
-                {
-                    errorMsg = "Min iops more than max iops";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                }
-                if (prevVolPolicy.maxBw != 0)
-                {
-                    uint32_t prevMaxIops = ((prevVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
-                    if (newVolPolicy.minIops >= prevMaxIops)
-                    {
-                        errorMsg = "Max Iops less than min Iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                    }
-                }
-                if (newVolPolicy.maxBw != 0)
-                {
-                    uint32_t newMaxIops = ((newVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
-                    if (newVolPolicy.minIops >= newMaxIops)
-                    {
-                        errorMsg = "Min iops more than equivalent max iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                    }
                 }
             }
         }
@@ -262,31 +262,31 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 newVolPolicy.maxIops = maxIops;
                 if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
                 {
+                    if ((prevVolPolicy.minIops != 0 && prevVolPolicy.minIops >= newVolPolicy.maxIops) || (newVolPolicy.minIops != 0 && newVolPolicy.minIops >= newVolPolicy.maxIops))
+                    {
+                        errorMsg = "Max iops less than min iops";
+                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    }
+                    if (prevVolPolicy.minBw != 0)
+                    {
+                        uint32_t prevMinIops = ((prevVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
+                        if (newVolPolicy.maxIops <= prevMinIops)
+                        {
+                            errorMsg = "Max Iops less than min Iops";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
+                    if (newVolPolicy.minBw != 0)
+                    {
+                        uint32_t newMinIops = ((newVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
+                        if (newVolPolicy.maxIops <= newMinIops)
+                        {
+                            errorMsg = "Max Iops less than corrosponding Min Bw , IO Size is considered 4KB.";
+                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        }
+                    }
                     newVolPolicy.policyChange = true;
                     newVolPolicy.maxValueChanged = true;
-                }
-                if ((prevVolPolicy.minIops != 0 && prevVolPolicy.minIops >= newVolPolicy.maxIops) || (newVolPolicy.minIops != 0 && newVolPolicy.minIops >= newVolPolicy.maxIops))
-                {
-                    errorMsg = "Max iops less than min iops";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                }
-                if (prevVolPolicy.minBw != 0)
-                {
-                    uint32_t prevMinIops = ((prevVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
-                    if (newVolPolicy.maxIops <= prevMinIops)
-                    {
-                        errorMsg = "Max Iops less than min Iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                    }
-                }
-                if (newVolPolicy.minBw != 0)
-                {
-                    uint32_t newMinIops = ((newVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
-                    if (newVolPolicy.maxIops <= newMinIops)
-                    {
-                        errorMsg = "Max Iops less than equivalent min Iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-                    }
                 }
             }
         }
