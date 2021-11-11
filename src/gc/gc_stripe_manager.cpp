@@ -39,8 +39,8 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/resource_manager/buffer_pool.h"
 
 #include "src/include/branch_prediction.h"
 
@@ -53,19 +53,34 @@
 namespace pos
 {
 GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo)
-: GcStripeManager(iArrayInfo,
-                new FreeBufferPool(iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE),
-                VolumeEventPublisherSingleton::Instance())
+: GcStripeManager(iArrayInfo, VolumeEventPublisherSingleton::Instance())
 {
 }
 
+bool
+GcStripeManager::_SetBufferPool(void)
+{
+    BufferInfo info = {
+        .owner = typeid(this).name(),
+        .size = CHUNK_SIZE,
+        .count = udSize->chunksPerStripe * GC_WRITE_BUFFER_COUNT
+    };
+
+    gcWriteBufferPool = memoryManager->CreateBufferPool(info);
+    if (gcWriteBufferPool == nullptr)
+    {
+        return false;
+    }
+    return true;
+}
+
 GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
-                                FreeBufferPool* inputGcWriteBufferPool,
-                                VolumeEventPublisher* inputVolumeEventPublisher)
+                                VolumeEventPublisher* inputVolumeEventPublisher,
+                                MemoryManager* memoryManager)
 : VolumeEvent("GcStripeManager", iArrayInfo->GetName(), iArrayInfo->GetIndex()),
   iArrayInfo(iArrayInfo),
-  gcWriteBufferPool(inputGcWriteBufferPool),
-  volumeEventPublisher(inputVolumeEventPublisher)
+  volumeEventPublisher(inputVolumeEventPublisher),
+  memoryManager(memoryManager)
 {
     udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
@@ -77,6 +92,11 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
     }
     flushedStripeCnt = 0;
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
+    if (_SetBufferPool() == false)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::GC_ERROR_MSG,
+            "Failed to allocated memory in GC_STRIPE_MANAGER");
+    }
 }
 
 GcStripeManager::~GcStripeManager(void)
@@ -98,7 +118,7 @@ GcStripeManager::~GcStripeManager(void)
     }
     if (gcWriteBufferPool != nullptr)
     {
-        delete gcWriteBufferPool;
+        memoryManager->DeleteBufferPool(gcWriteBufferPool);
     }
 
     volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayId);
@@ -281,7 +301,7 @@ GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 
     for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
     {
-        void* buffer = gcWriteBufferPool->GetBuffer();
+        void* buffer = gcWriteBufferPool->TryGetBuffer();
         if (nullptr == buffer)
         {
             for (auto it = gcActiveWriteBuffers[volumeId]->begin(); it != gcActiveWriteBuffers[volumeId]->end(); it++)

@@ -7,9 +7,11 @@
 #include <test/unit-tests/lib/bitmap_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
-#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
+
+#include "src/include/meta_const.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -27,7 +29,6 @@ public:
       inUseBitmap(nullptr),
       gcStripeManager(nullptr),
       reverseMap(nullptr),
-      gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr),
       victimStripes(nullptr),
       gcBufferPool(nullptr)
@@ -45,11 +46,11 @@ public:
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
         EXPECT_CALL(*array, GetName).WillRepeatedly(Return("POSArray"));
 
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
+        BufferInfo info;
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
+        memoryManager = new MockMemoryManager();
+        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
         inUseBitmap = new NiceMock<MockBitMapMutex>(2);
 
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
@@ -62,14 +63,18 @@ public:
             }
         }
 
-        gcBufferPool = new std::vector<FreeBufferPool*>;
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(GC_BUFFER_COUNT);
+        gcBufferPool = new std::vector<BufferPool*>;
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
+            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
         }
 
-        copierMeta = new CopierMeta(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
+        EXPECT_CALL(*memoryManager, DeleteBufferPool).WillRepeatedly(
+            [](BufferPool* pool) -> bool {
+                delete pool;
+                return true;
+            });
+        copierMeta = new CopierMeta(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool, memoryManager);
     }
 
     virtual void
@@ -77,6 +82,7 @@ public:
     {
         delete copierMeta;
         delete array;
+        delete memoryManager;
     }
 
 protected:
@@ -86,12 +92,12 @@ protected:
     NiceMock<MockBitMapMutex>* inUseBitmap;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockIReverseMap>* reverseMap;
-    NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
 
-    std::vector<FreeBufferPool*>* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
+    MockMemoryManager* memoryManager;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
@@ -115,7 +121,7 @@ TEST_F(CopierMetaTestFixture, GetBuffer_testIfBufferIsReturnedFromGcBufferPoolBa
     uint32_t testArgs[] = {1, GC_BUFFER_COUNT, GC_BUFFER_COUNT + 1, GC_BUFFER_COUNT * 2 + 1};
     for (uint32_t stripeId : testArgs)
     {
-        EXPECT_CALL(*dynamic_cast<MockFreeBufferPool*>((*gcBufferPool)[stripeId % GC_BUFFER_COUNT]), GetBuffer).WillOnce(Return((void*)0x20000000));
+        EXPECT_CALL(*dynamic_cast<MockBufferPool*>((*gcBufferPool)[stripeId % GC_BUFFER_COUNT]), TryGetBuffer).WillOnce(Return((void*)0x20000000));
         void* bufferAddr;
         bufferAddr = copierMeta->GetBuffer(stripeId);
         EXPECT_TRUE((void*)0x20000000 == bufferAddr);
@@ -129,7 +135,7 @@ TEST_F(CopierMetaTestFixture, ReturnBuffer_testIfBufferIsReturnedBasedOnStripeId
     {
         uint32_t bufferAddr = 0x20000000;
         void* ptr = &bufferAddr;
-        EXPECT_CALL(*dynamic_cast<MockFreeBufferPool*>((*gcBufferPool)[stripeId % GC_BUFFER_COUNT]), ReturnBuffer(ptr)).Times(1);
+        EXPECT_CALL(*dynamic_cast<MockBufferPool*>((*gcBufferPool)[stripeId % GC_BUFFER_COUNT]), ReturnBuffer(ptr)).Times(1);
         copierMeta->ReturnBuffer(stripeId, ptr);
     }
 }

@@ -41,6 +41,7 @@
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/logger/logger.h"
 #include "src/include/backend_event.h"
+#include "src/include/meta_const.h"
 
 namespace pos
 {

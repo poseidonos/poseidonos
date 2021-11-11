@@ -4,10 +4,11 @@
 #include <src/include/address_type.h>
 #include "src/include/pos_event_id.h"
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
-#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
+
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -22,8 +23,8 @@ public:
     GcStripeManagerTestFixture(void)
     : gcStripeManager(nullptr),
       array(nullptr),
-      gcWriteBufferPool(nullptr),
-      volumeEventPublisher(nullptr)
+      volumeEventPublisher(nullptr),
+      memoryManager(nullptr)
     {
     }
 
@@ -39,13 +40,19 @@ public:
         EXPECT_CALL(*array, GetName()).WillRepeatedly(Return("POSArray"));
         EXPECT_CALL(*array, GetIndex()).WillRepeatedly(Return(0));
 
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
-
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-
-        gcStripeManager = new GcStripeManager(array, gcWriteBufferPool, volumeEventPublisher);
+        BufferInfo info;
+        gcWriteBufferPool = new NiceMock<MockBufferPool>(info, 0, nullptr);
+        memoryManager = new NiceMock<MockMemoryManager>();
+        EXPECT_CALL(*memoryManager, CreateBufferPool)
+            .WillRepeatedly(Return(gcWriteBufferPool));
+        EXPECT_CALL(*memoryManager, DeleteBufferPool).WillRepeatedly(
+            [](BufferPool* pool) -> bool {
+                delete pool;
+                return true;
+            });
+        gcStripeManager =
+            new GcStripeManager(array, volumeEventPublisher, memoryManager);
     }
 
     virtual void
@@ -53,14 +60,16 @@ public:
     {
         delete array;
         delete gcStripeManager;
+        delete memoryManager;
     }
 
 protected:
     GcStripeManager* gcStripeManager;
 
     NiceMock<MockIArrayInfo>* array;
-    NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
+    NiceMock<MockBufferPool>* gcWriteBufferPool;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
+    NiceMock<MockMemoryManager>* memoryManager;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
@@ -83,14 +92,14 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testAllocateGcWriteBufferBlksW
     GcAllocateBlks testGcAllocateBlks;
 
     // given not enough gc write buffer
-    EXPECT_CALL(*gcWriteBufferPool, GetBuffer).WillOnce(Return((void*)0x20000000)).WillOnce(Return(nullptr));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillOnce(Return((void*)0x20000000)).WillOnce(Return(nullptr));
     // when allocate write buffer blks
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // then return allocate 0 blk
     EXPECT_TRUE(testGcAllocateBlks.numBlks == 0);
 
     // given enough gc write buffer
-    EXPECT_CALL(*gcWriteBufferPool, GetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
     // when allocate write buffer blks
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // then return request blks cnt
@@ -105,7 +114,7 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testAllocateGcWriteBufferBlksB
     GcAllocateBlks testGcAllocateBlks;
 
     // given enough write buffer and request to allocate blks per stripe
-    EXPECT_CALL(*gcWriteBufferPool, GetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks/2);
     EXPECT_TRUE(testGcAllocateBlks.numBlks == numBlks / 2);
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
@@ -125,7 +134,7 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testIf)
     GcAllocateBlks testGcAllocateBlks;
 
     // given write buffer and allocate write buffer blks
-    EXPECT_CALL(*gcWriteBufferPool, GetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     EXPECT_TRUE(testGcAllocateBlks.numBlks == numBlks);
     // when get write buffer
@@ -178,7 +187,7 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_testVolumeDeleteWhenSetBlkInfo)
     GcAllocateBlks expectGcAllocateBlks = {.startOffset = 0, .numBlks = numBlks};
     GcAllocateBlks testGcAllocateBlks;
 
-    EXPECT_CALL(*gcWriteBufferPool, GetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
 
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // when get write buffer

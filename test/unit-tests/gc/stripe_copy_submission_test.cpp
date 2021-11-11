@@ -10,12 +10,13 @@
 #include <test/unit-tests/gc/stripe_copy_submission_mock.h>
 #include <test/unit-tests/gc/victim_stripe_mock.h>
 #include <test/unit-tests/lib/bitmap_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
-#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 #include <test/unit-tests/event_scheduler/event_scheduler_mock.h>
 #include <test/unit-tests/gc/stripe_copier_mock.h>
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
+
+#include "src/include/meta_const.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -66,14 +67,12 @@ public:
                 (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, nullptr, nullptr, nullptr, nullptr));
             }
         }
-        gcBufferPool = new std::vector<FreeBufferPool*>;
 
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(AtLeast(1));
-
+        gcBufferPool = new std::vector<BufferPool*>;
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
+            BufferInfo info;
+            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
         }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, nullptr, victimStripes, gcBufferPool);
@@ -101,7 +100,7 @@ protected:
     NiceMock<MockIReverseMap>* revMap;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    std::vector<FreeBufferPool*>* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
 
     EventSmartPtr mockCopyEvent;
     EventSmartPtr mockStripeCopier;

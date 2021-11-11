@@ -15,13 +15,14 @@
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
-#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 
 #include <test/unit-tests/gc/gc_flush_submission_mock.h>
 #include <test/unit-tests/volume/i_volume_manager_mock.h>
 #include <test/unit-tests/event_scheduler/event_scheduler_mock.h>
+
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -47,7 +48,6 @@ public:
       inUseBitmap(nullptr),
       gcStripeManager(nullptr),
       iReverseMap(nullptr),
-      gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr),
       victimStripe(nullptr),
       victimStripes(nullptr),
@@ -72,11 +72,10 @@ public:
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         gcStatus = new NiceMock<MockGcStatus>;
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(AtLeast(1));
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
+        memoryManager = new MockMemoryManager();
+        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
         iReverseMap = new NiceMock<MockIReverseMap>();
         victimStripe = new NiceMock<MockVictimStripe>(array, iReverseMap, nullptr, nullptr, nullptr);
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
@@ -89,10 +88,11 @@ public:
             }
         }
 
-        gcBufferPool = new std::vector<FreeBufferPool*>;
+        gcBufferPool = new std::vector<BufferPool*>;
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager));
+            BufferInfo info;
+            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
         }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
@@ -121,6 +121,7 @@ public:
         delete victimStripe;
         delete inputVolumeManager;
         delete inputEventScheduler;
+        delete memoryManager;
 
         inputFlushEvent = nullptr;
         mockBlkInfoList.clear();
@@ -143,17 +144,17 @@ protected:
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockIReverseMap>* iReverseMap;
-    NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockVictimStripe>* victimStripe;
     NiceMock<MockIVolumeManager>* inputVolumeManager;
     NiceMock<MockEventScheduler>* inputEventScheduler;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    std::vector<FreeBufferPool*>* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
 
     void* buffer;
     std::vector<BlkInfo>* blkInfoList;
     GcWriteBuffer* dataBuffer;
+    MockMemoryManager* memoryManager;
     EventSmartPtr inputFlushEvent;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;

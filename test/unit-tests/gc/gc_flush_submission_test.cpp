@@ -5,8 +5,6 @@
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
 #include <test/unit-tests/gc/gc_stripe_manager_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
-#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 
 #include <test/unit-tests/allocator/stripe/stripe_mock.h>
@@ -16,6 +14,8 @@
 #include <test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h>
 #include <test/unit-tests/gc/flow_control/flow_control_mock.h>
 #include <test/unit-tests/gc/gc_flush_completion_mock.h>
+
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -34,7 +34,6 @@ public:
     : gcFlushSubmission(nullptr),
       array(nullptr),
       gcStripeManager(nullptr),
-      gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr)
     {
     }
@@ -53,11 +52,10 @@ public:
         array = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
+        memoryManager = new MockMemoryManager();
+        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
 
         stripe = new NiceMock<MockStripe>();
         rbaStateManager = new NiceMock<MockRBAStateManager>(arrayName, 0);
@@ -82,6 +80,7 @@ public:
         delete blockAllocator;
         delete ioSubmitHandler;
         delete flowControl;
+        delete memoryManager;
 
         inputEvent = nullptr;
     }
@@ -96,7 +95,6 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
-    NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockStripe>* stripe;
     NiceMock<MockRBAStateManager>* rbaStateManager;
 
@@ -118,6 +116,7 @@ protected:
     .totalStripes = 3200,
     .totalSegments = 100,
     };
+    MockMemoryManager* memoryManager;
 };
 
 TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenGetTokenFail)

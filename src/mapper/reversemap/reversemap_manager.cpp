@@ -34,6 +34,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/mapper/reversemap/reversemap_manager.h"
 #include "src/meta_file_intf/mock_file_intf.h"
+#include "src/include/meta_const.h"
 #ifndef IBOF_CONFIG_USE_MOCK_FS
 #include "src/metafs/metafs_file_intf.h"
 #endif

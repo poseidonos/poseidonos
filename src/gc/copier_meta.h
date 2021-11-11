@@ -36,15 +36,16 @@
 #include <string>
 #include <vector>
 
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/address_type.h"
 #include "src/gc/gc_stripe_manager.h"
 #include "src/lib/bitmap.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/gc/victim_stripe.h"
+#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
+class BufferPool;
 
 class CopierMeta
 {
@@ -53,7 +54,10 @@ public:
     CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
                 BitMapMutex* inputInUseBitmap, GcStripeManager* inputGcStripeManager,
                 std::vector<std::vector<VictimStripe*>>* inputVictimStripes,
-                std::vector<FreeBufferPool*>* inputGcBufferPool);
+                std::vector<BufferPool*>* inputGcBufferPool,
+                MemoryManager* memoryManager =
+                    MemoryManagerSingleton::Instance());
+
 
     virtual ~CopierMeta(void);
 
@@ -107,7 +111,8 @@ private:
     unsigned int arrayIndex;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    std::vector<FreeBufferPool*>* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
+    MemoryManager* memoryManager;
 };
 
 } // namespace pos

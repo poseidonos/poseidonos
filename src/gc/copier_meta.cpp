@@ -34,6 +34,7 @@
 
 #include "src/include/meta_const.h"
 #include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 #include <string>
 
@@ -50,13 +51,15 @@ CopierMeta::CopierMeta(IArrayInfo* array)
 CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
                        BitMapMutex* inputInUseBitmap, GcStripeManager* inputGcStripeManager,
                        std::vector<std::vector<VictimStripe*>>* inputVictimStripes,
-                       std::vector<FreeBufferPool*>* inputGcBufferPool)
+                       std::vector<BufferPool*>* inputGcBufferPool,
+                       MemoryManager* memoryManager)
 : inUseBitmap(inputInUseBitmap),
   gcStripeManager(inputGcStripeManager),
   arrayName(array->GetName()),
   arrayIndex(array->GetIndex()),
   victimStripes(inputVictimStripes),
-  gcBufferPool(inputGcBufferPool)
+  gcBufferPool(inputGcBufferPool),
+  memoryManager(memoryManager)
 {
     stripesPerSegment = udSize->stripesPerSegment;
     blksPerStripe = udSize->blksPerStripe;
@@ -79,7 +82,7 @@ CopierMeta::~CopierMeta(void)
     {
         if (nullptr != (*gcBufferPool)[index])
         {
-            delete (*gcBufferPool)[index];
+            memoryManager->DeleteBufferPool((*gcBufferPool)[index]);
         }
     }
     if (nullptr != gcBufferPool)
@@ -115,7 +118,7 @@ CopierMeta::~CopierMeta(void)
 void*
 CopierMeta::GetBuffer(StripeId stripeId)
 {
-    return (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->GetBuffer();
+    return (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->TryGetBuffer();
 }
 
 void
@@ -267,10 +270,15 @@ CopierMeta::GetGcStripeManager(void)
 void
 CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
 {
-    gcBufferPool = new std::vector<FreeBufferPool*>;
+    BufferInfo info = {
+        .owner = typeid(this).name(),
+        .size = bufferSize,
+        .count = maxBufferCount
+    };
+    gcBufferPool = new std::vector<BufferPool*>;
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        gcBufferPool->push_back(new FreeBufferPool(maxBufferCount, bufferSize));
+        gcBufferPool->push_back(memoryManager->CreateBufferPool(info));
     }
 }
 

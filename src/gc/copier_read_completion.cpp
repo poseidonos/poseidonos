@@ -49,6 +49,7 @@
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/volume/volume_service.h"
+#include "src/include/meta_const.h"
 
 namespace pos
 {

@@ -37,6 +37,7 @@
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/victim_stripe.h"
 #include "src/sys_event/volume_event.h"
+#include "src/resource_manager/memory_manager.h"
 
 #include <string>
 #include <utility>
@@ -46,7 +47,7 @@ namespace pos
 class IBlockAllocator;
 class IWBStripeAllocator;
 class VolumeEventPublisher;
-class FreeBufferPool;
+class BufferPool;
 
 using GcWriteBuffer = std::vector<void*>;
 struct GcAllocateBlks
@@ -66,8 +67,9 @@ class GcStripeManager : public VolumeEvent
 public:
     explicit GcStripeManager(IArrayInfo* iArrayInfo);
     GcStripeManager(IArrayInfo* iArrayInfo,
-                    FreeBufferPool* inputGcWriteBufferPool,
-                    VolumeEventPublisher* inputVolumeEventPublisher);
+                    VolumeEventPublisher* inputVolumeEventPublisher,
+                    MemoryManager* memoryManager =
+                        MemoryManagerSingleton::Instance());
     ~GcStripeManager(void);
 
     virtual int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
@@ -88,7 +90,7 @@ public:
     virtual void SetFlushed(uint32_t volumeId);
     virtual bool IsAllFinished(void);
 
-    static const uint32_t GC_WRITE_BUFFER_CONUNT = 512;
+    static const uint32_t GC_WRITE_BUFFER_COUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
 private:
@@ -101,11 +103,12 @@ private:
     GcAllocateBlks _AllocateBlks(uint32_t volumeId, uint32_t numBlks);
     bool _IsWriteBufferFull(uint32_t volumeId);
     void _CreateBlkInfoList(uint32_t volumeId);
+    bool _SetBufferPool(void);
 
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
 
-    FreeBufferPool* gcWriteBufferPool = nullptr;
+    BufferPool* gcWriteBufferPool = nullptr;
     GcWriteBuffer* gcActiveWriteBuffers[GC_VOLUME_COUNT];
     uint32_t gcActiveStripeTail[GC_VOLUME_COUNT];
     uint32_t gcActiveStripeRemaining[GC_VOLUME_COUNT];
@@ -117,6 +120,7 @@ private:
     std::atomic<uint32_t> flushedStripeCnt;
 
     VolumeEventPublisher* volumeEventPublisher;
+    MemoryManager* memoryManager;
 };
 
 } // namespace pos

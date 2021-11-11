@@ -18,6 +18,8 @@
 #include <test/unit-tests/utils/mock_builder.h>
 #include <test/unit-tests/volume/i_volume_manager_mock.h>
 
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
+
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::NiceMock;
@@ -33,7 +35,6 @@ public:
     : gcMapUpdateCompletion(nullptr),
       array(nullptr),
       gcStripeManager(nullptr),
-      gcWriteBufferPool(nullptr),
       volumeEventPublisher(nullptr)
     {
     }
@@ -51,11 +52,10 @@ public:
         array = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
-        MockAffinityManager affinityManager = BuildDefaultAffinityManagerMock();
-        EXPECT_CALL(affinityManager, GetEventWorkerSocket).Times(1);
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, &affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
+        memoryManager = new MockMemoryManager();
+        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
 
         stripe = new NiceMock<MockStripe>();
         rbaStateManager = new NiceMock<MockRBAStateManager>(arrayName, 0);
@@ -83,6 +83,7 @@ public:
         delete blockAllocator;
         delete contextManager;
         delete volumeManager;
+        delete memoryManager;
     }
 
 protected:
@@ -94,7 +95,6 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
-    NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
     NiceMock<MockStripe>* stripe;
     NiceMock<MockRBAStateManager>* rbaStateManager;
 
@@ -107,6 +107,7 @@ protected:
     NiceMock<MockIBlockAllocator>* blockAllocator;
 
     NiceMock<MockIVolumeManager>* volumeManager;
+    MockMemoryManager* memoryManager;
 
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
