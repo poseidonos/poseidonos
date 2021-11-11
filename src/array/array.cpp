@@ -82,7 +82,7 @@ Array::~Array(void)
 }
 
 int
-Array::Load()
+Array::Load(void)
 {
     pthread_rwlock_wrlock(&stateLock);
     int ret = _LoadImpl();

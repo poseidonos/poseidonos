@@ -178,7 +178,8 @@ TEST(Array, Load_testIfDoneSuccessfully)
 
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(0)); // isLoadable will be true
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);             // devMgr_ will be able to invoked once
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](ArrayMeta& meta) {
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](ArrayMeta& meta)
+    {
         meta.id = 0;
         return 0;
     });                                                                           // loading array boot record will be successful
@@ -250,7 +251,8 @@ TEST(Array, Load_testIfLoadFailsWhenIndexIsWrong)
     int LOAD_SUCCESS = 0;
     int INVALID_INDEX = EID(ARRAY_INVALID_INDEX);
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(LOAD_SUCCESS));
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](ArrayMeta& meta) {
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](ArrayMeta& meta)
+    {
         meta.id = 100;
         return 0;
     });
@@ -282,7 +284,8 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta) {
+    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta)
+    {
         meta.id = 0;
         return 0;
     });
@@ -433,7 +436,8 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
-    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta) {
+    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta)
+    {
         meta.id = 0;
         return 0;
     });

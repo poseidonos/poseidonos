@@ -108,7 +108,7 @@ AbrManager::LoadAbr(ArrayMeta& meta)
 }
 
 int
-AbrManager::SaveAbr( ArrayMeta& meta)
+AbrManager::SaveAbr(ArrayMeta& meta)
 {
     struct ArrayBootRecord* abr = nullptr;
     unsigned int arrayIndex;
