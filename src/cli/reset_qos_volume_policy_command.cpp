@@ -62,7 +62,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     int retVal = -1;
     if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
     {
-        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, QosReturnCode::FAILURE, "Fe qos is disabled. So skipping QOS Settings.", GetPosInfo());
     }
     if (doc["param"].contains("array") == true)
     {
