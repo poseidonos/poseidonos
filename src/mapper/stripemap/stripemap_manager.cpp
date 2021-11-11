@@ -194,7 +194,7 @@ StripeMapManager::MapFlushDone(int mapId)
 void
 StripeMapManager::WaitAllPendingIoDone(void)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
     while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
 }
 

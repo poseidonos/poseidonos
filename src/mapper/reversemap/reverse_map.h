@@ -158,6 +158,7 @@ public:
     virtual int IsAsyncIoDone(void);
     virtual int GetIoError(void);
     virtual int WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirection);
+    virtual void WaitPendingIoDone(void);
 
 private:
     void _HeaderInit(StripeId wblsid);
@@ -177,6 +178,7 @@ private:
 
     MetaFileIntf* revMapfile; // MFS file
     std::atomic<uint32_t> mfsAsyncIoDonePages;
+    std::atomic<MapFlushState> mapFlushState;
     int ioError; // indicates if there is an Async-IO error among mpages
     int ioDirection;
     std::vector<RevMap*> revMaps;

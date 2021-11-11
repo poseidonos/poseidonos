@@ -20,6 +20,7 @@ public:
     MOCK_METHOD(uint64_t, GetWholeReverseMapFileSize, (), (override));
     MOCK_METHOD(int, LoadWholeReverseMap, (char* pBuffer), (override));
     MOCK_METHOD(int, StoreWholeReverseMap, (char* pBuffer), (override));
+    MOCK_METHOD(void, WaitAllPendingIoDone, (), (override));
 };
 
 } // namespace pos

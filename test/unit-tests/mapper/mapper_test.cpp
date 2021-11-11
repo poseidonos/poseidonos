@@ -36,6 +36,7 @@ TEST(Mapper, Init_InitAndDispose)
     EXPECT_CALL(*vsaMan, FlushAllMaps).WillOnce(Return(0));
     EXPECT_CALL(*strMan, WaitAllPendingIoDone).Times(3);
     EXPECT_CALL(*vsaMan, WaitAllPendingIoDone).Times(3);
+    EXPECT_CALL(*revMan, WaitAllPendingIoDone).Times(1);
     EXPECT_CALL(*strMan, Dispose).Times(1);
     EXPECT_CALL(*vsaMan, Dispose).Times(1);
     EXPECT_CALL(*revMan, Dispose).Times(1);
@@ -62,6 +63,7 @@ TEST(Mapper, TestInitAndShutdown)
     mapper->Init();
     EXPECT_CALL(*strMan, WaitAllPendingIoDone).Times(1);
     EXPECT_CALL(*vsaMan, WaitAllPendingIoDone).Times(1);
+    EXPECT_CALL(*revMan, WaitAllPendingIoDone).Times(1);
     EXPECT_CALL(*strMan, Dispose).Times(1);
     EXPECT_CALL(*vsaMan, Dispose).Times(1);
     EXPECT_CALL(*revMan, Dispose).Times(1);

@@ -49,6 +49,7 @@ namespace pos
 ReverseMapPack::ReverseMapPack(void)
 : linkedToVsid(false),
   vsid(UINT32_MAX),
+  mapFlushState(MapFlushState::FLUSH_DONE),
   ioError(0),
   ioDirection(0),
   callback(nullptr),
@@ -82,6 +83,7 @@ ReverseMapPack::~ReverseMapPack(void)
 void
 ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName)
 {
+    mapFlushState = MapFlushState::FLUSH_DONE;
     mpageSize = mpsize;
     numMpagesPerStripe = nmpPerStripe;
     fileSizePerStripe = mpageSize * numMpagesPerStripe;
@@ -159,6 +161,7 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
         return ioError;
     }
 
+    mapFlushState = MapFlushState::FLUSHING;
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
     assert(callback == nullptr);
@@ -185,6 +188,8 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
                 "Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
+            mapFlushState = MapFlushState::FLUSH_DONE;
+            break;
         }
     }
 
@@ -204,6 +209,7 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
         return ioError;
     }
 
+    mapFlushState = MapFlushState::FLUSHING;
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
     assert(callback == nullptr);
@@ -232,10 +238,20 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
             callback = nullptr;
+            mapFlushState = MapFlushState::FLUSH_DONE;
+            break;
         }
     }
 
     return ioError;
+}
+
+void
+ReverseMapPack::WaitPendingIoDone(void)
+{
+    while (mapFlushState == MapFlushState::FLUSHING)
+    {
+    }
 }
 
 void
@@ -255,6 +271,7 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
     if ((res + 1) == numMpagesPerStripe)
     {
+        mapFlushState = MapFlushState::FLUSH_DONE;
         if (callback != nullptr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(callback);

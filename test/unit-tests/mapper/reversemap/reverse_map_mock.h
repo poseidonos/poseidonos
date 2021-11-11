@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(int, IsAsyncIoDone, (), (override));
     MOCK_METHOD(int, GetIoError, (), (override));
     MOCK_METHOD(int, WbtFileSyncIo, (MetaFileIntf * fileLinux, MetaFsIoOpcode IoDirection), (override));
+    MOCK_METHOD(void, WaitPendingIoDone, (), (override));
 };
 
 } // namespace pos

@@ -60,6 +60,7 @@ public:
     virtual uint64_t GetWholeReverseMapFileSize(void);
     virtual int LoadWholeReverseMap(char* pBuffer);
     virtual int StoreWholeReverseMap(char* pBuffer);
+    virtual void WaitAllPendingIoDone(void);
 
 private:
     int _SetNumMpages(void);
