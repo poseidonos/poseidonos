@@ -22,7 +22,6 @@ func Connect() {
 
 func SendReqAndReceiveRes(reqJSON string) (string, error) {
 	if conn == nil {
-		println("Error: cannot connect to the PoseidonOS server!")
 		return "", errors.New("SocketMgr: not connected to the server")
 	}
 

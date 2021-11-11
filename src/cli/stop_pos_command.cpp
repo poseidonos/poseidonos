@@ -71,15 +71,16 @@ StopPosCommand::Execute(json& doc, string rid)
             POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
             for (const auto& abr : abrList)
             {
-                IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(abr.arrayName)->arrayInfo;
+                ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(abr.arrayName);
 
-                if (arrayInfo == nullptr)
+                if (CompInfo == nullptr || CompInfo->arrayInfo == nullptr)
                 {
                     eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
                     POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
                 }
                 else
                 {
+                    IArrayInfo* arrayInfo = CompInfo->arrayInfo;
                     eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
                     POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
                         abr.arrayName, arrayInfo->GetState().ToString());

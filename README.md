@@ -238,7 +238,6 @@ Wait poseidonos
 poseidonos is running in background...logfile=pos.log
 root@R2U14-PSD-3:/poseidonos/script#
 ```
-- Note:  Instead of "Wait poseidonos", "Error: cannot connect to the PoseidonOS server!" message can be displayed temporarily. If "poseidonos is running in background" has been displayed, PoseidonOS has successfully started.
 
 ```bash
 # Verify if the application is up and running
