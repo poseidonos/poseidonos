@@ -71,7 +71,7 @@ ReverseMapPack::~ReverseMapPack(void)
             revMap = nullptr;
         }
     }
-    revMaps.Clear();
+    revMaps.clear();
     callback = nullptr;
     revMapfile = nullptr;
 }
