@@ -76,8 +76,8 @@ public:
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
-    virtual int Load(unsigned int& arrayIndex);
-    virtual int Create(DeviceSet<string> nameSet, string dataRaidType , unsigned int& arrayIndex);
+    virtual int Load(void);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType);
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
@@ -115,7 +115,7 @@ public:
     IArrayDevMgr* GetArrayManager(void);
 
 private:
-    int _LoadImpl(unsigned int& arrayIndex);
+    int _LoadImpl(void);
     int _CreatePartitions(void);
     void _DeletePartitions(void);
     int _Flush(void);

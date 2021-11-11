@@ -90,7 +90,7 @@ public:
     virtual TelemetryPublisher* GetTelemetryPublisher(void) { return telPublisher; }
 
 private:
-    void _SetMountSequence(unsigned int arrayIndex);
+    void _SetMountSequence(void);
     void _InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded);
     void _DestructMetaComponentsInOrder(void);
 

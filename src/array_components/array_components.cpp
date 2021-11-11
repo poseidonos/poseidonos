@@ -168,15 +168,14 @@ int
 ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Creating array component for {}", arrayName);
-    unsigned int arrayIndex = -1;
-    int ret = array->Create(nameSet, dataRaidType, arrayIndex);
-    if (ret != 0 || arrayIndex >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    int ret = array->Create(nameSet, dataRaidType);
+    if (ret != 0)
     {
         return ret;
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
-    _SetMountSequence(arrayIndex);
+    _SetMountSequence();
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been created.", arrayName);
     return 0;
@@ -186,15 +185,14 @@ int
 ArrayComponents::Load(void)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Loading array components for " + arrayName);
-    unsigned int arrayIndex = -1;
-    int ret = array->Load(arrayIndex);
-    if (ret != 0 || arrayIndex >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    int ret = array->Load();
+    if (ret != 0)
     {
         return ret;
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
-    _SetMountSequence(arrayIndex);
+    _SetMountSequence();
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
     return 0;
@@ -260,7 +258,7 @@ ArrayComponents::RebuildDone(void)
 }
 
 void
-ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
+ArrayComponents::_SetMountSequence(void)
 {
     mountSequence.push_back(array);
     mountSequence.push_back(nvmf);
@@ -275,7 +273,7 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
-    arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayIndex, arrayRebuilder);
+    arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayRebuilder);
 }
 
 void

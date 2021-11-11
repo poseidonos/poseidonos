@@ -83,7 +83,8 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
     // When : LoadAbr
     ArrayMeta meta;
-    abrMgr->LoadAbr(mockArrayName, meta, arrayIndex);
+    meta.arrayName = mockArrayName;
+    abrMgr->LoadAbr(meta);
 
     // Then : meta have array data
     EXPECT_EQ(mockNvmDeviceName, meta.devs.nvm.at(0).uid);
@@ -116,10 +117,11 @@ TEST(AbrManager, SaveAbr_testAbrDataUpdateAndDataCheck)
     ArrayMeta meta = buildArrayMeta(mockArrayName, 3, 1); // array have own arraymeta in product code
     string builtDevName0 = mockArrayName + "_data_dev0";
     EXPECT_EQ(builtDevName0, meta.devs.data.at(0).uid);
-    abrMgr->SaveAbr(mockArrayName, meta);
+    abrMgr->SaveAbr(meta);
     // Then : abr data updated
     ArrayMeta newMeta;
-    abrMgr->LoadAbr(mockArrayName, newMeta, arrayIndex);
+    newMeta.arrayName = mockArrayName;
+    abrMgr->LoadAbr(newMeta);
     EXPECT_EQ(builtDevName0, newMeta.devs.data.at(0).uid);
     delete mockMbrManager;
 }
@@ -225,16 +227,16 @@ TEST(AbrManager, CreateAbr_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
+    arrayMeta.arrayName = mockArrayName;
     MockMbrMapManager mockMapManager;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, &mockMapManager);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
-    unsigned int arrayIndex;
 
     EXPECT_CALL(mockMapManager, CheckAllDevices).WillOnce(Return(0));
     EXPECT_CALL(mockMapManager, InsertDevices).Times(AtLeast(1));
 
     // When : Call CreateAbr
-    abrMgr->CreateAbr(mockArrayName, arrayMeta, arrayIndex);
+    abrMgr->CreateAbr(arrayMeta);
     // Then : Nothing
 }
 
@@ -243,11 +245,12 @@ TEST(AbrManager, DeleteAbr_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
+    arrayMeta.arrayName = mockArrayName;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
 
     // When : Call DeleteAbr
-    abrMgr->DeleteAbr(mockArrayName, arrayMeta);
+    abrMgr->DeleteAbr(arrayMeta);
     // Then : Nothing
 }
 

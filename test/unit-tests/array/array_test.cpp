@@ -175,12 +175,11 @@ TEST(Array, Load_testIfDoneSuccessfully)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock", nullptr, nullptr);
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
-    unsigned int arrayIndex;
 
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(0)); // isLoadable will be true
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);             // devMgr_ will be able to invoked once
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](string arrayName, ArrayMeta meta, unsigned int& arrayIndex) {
-        arrayIndex = 0;
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](ArrayMeta& meta) {
+        meta.id = 0;
         return 0;
     });                                                                           // loading array boot record will be successful
     EXPECT_CALL(*mockArrDevMgr, Import).WillOnce(Return(0));                      // import will be successful
@@ -190,7 +189,7 @@ TEST(Array, Load_testIfDoneSuccessfully)
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet)); // devMgr_ will be able to invoked once
 
     // When: array is loaded
-    int actual = array.Load(arrayIndex);
+    int actual = array.Load();
 
     // Then: we should receive zero from the return
     ASSERT_EQ(0, actual);
@@ -207,7 +206,7 @@ TEST(Array, Load_testIfLoadFailsWhenStateIsNotLoadable)
     unsigned int arrayIndex;
 
     // When
-    int actual = array.Load(arrayIndex);
+    int actual = array.Load();
 
     // Then
     ASSERT_EQ(LOAD_FAILURE, actual);
@@ -233,7 +232,7 @@ TEST(Array, Load_testIfLoadFailsWhenArrayBootRecordFailsToBeLoaded)
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPartMgr, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Load(arrayIndex);
+    int actual = array.Load();
 
     // Then
     ASSERT_EQ(ABR_FAILURE, actual);
@@ -251,8 +250,8 @@ TEST(Array, Load_testIfLoadFailsWhenIndexIsWrong)
     int LOAD_SUCCESS = 0;
     int INVALID_INDEX = EID(ARRAY_INVALID_INDEX);
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(LOAD_SUCCESS));
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](string name, ArrayMeta meta, unsigned int& index) {
-        index = 100;
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](ArrayMeta& meta) {
+        meta.id = 100;
         return 0;
     });
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
@@ -260,7 +259,7 @@ TEST(Array, Load_testIfLoadFailsWhenIndexIsWrong)
     unsigned int arrayIndex;
 
     // When
-    int actual = array.Load(arrayIndex);
+    int actual = array.Load();
 
     // Then
     ASSERT_EQ(INVALID_INDEX, actual);
@@ -278,14 +277,13 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     MockPartitionManager* mockPtnMgr = new MockPartitionManager(mockArrayName, mockAbrControl, &mockAffMgr);
-    unsigned int arrayIndex;
 
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) {
-        arrayIndex = 0;
+    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta) {
+        meta.id = 0;
         return 0;
     });
     EXPECT_CALL(*mockAbrControl, SaveAbr).WillOnce(Return(0));
@@ -296,7 +294,7 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     Array array(mockArrayName, NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "RAID5" /* is the only option at the moment */, arrayIndex);
+    int actual = array.Create(emptyDeviceSet, "RAID5" /* is the only option at the moment */);
 
     // Then
     ASSERT_EQ(0, actual);
@@ -318,7 +316,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayStateIsNotCreatable)
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter", arrayIndex);
+    int actual = array.Create(emptyDeviceSet, "doesn't matter");
 
     // Then
     ASSERT_EQ(STATE_ERROR, actual);
@@ -341,7 +339,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenDeviceImportFails)
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter", arrayIndex);
+    int actual = array.Create(emptyDeviceSet, "doesn't matter");
 
     // Then
     ASSERT_EQ(IMPORT_ERROR, actual);
@@ -364,7 +362,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
     Array array(BAD_ARRAY_NAME, NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter", arrayIndex);
+    int actual = array.Create(emptyDeviceSet, "doesn't matter");
 
     // Then
     ASSERT_EQ(EID(ARRAY_NAME_TOO_LONG), actual);
@@ -388,7 +386,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, BAD_RAID_TYPE, arrayIndex);
+    int actual = array.Create(emptyDeviceSet, BAD_RAID_TYPE);
 
     // Then
     ASSERT_EQ(EID(ARRAY_WRONG_FT_METHOD), actual);
@@ -415,7 +413,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeCreated)
     string GOOD_RAID_TYPE = "RAID5";
 
     // When
-    int actual = array.Create(emptyDeviceSet, GOOD_RAID_TYPE, arrayIndex);
+    int actual = array.Create(emptyDeviceSet, GOOD_RAID_TYPE);
 
     // Then
     ASSERT_EQ(ABR_CREATE_FAILURE, actual);
@@ -429,15 +427,14 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     MockIAbrControl mockAbrControl;
-    unsigned int arrayIndex;
 
     int ABR_SAVE_FAILURE = EID(MBR_ABR_NOT_FOUND);
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
-    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) {
-        arrayIndex = 0;
+    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](ArrayMeta& meta) {
+        meta.id = 0;
         return 0;
     });
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(ABR_SAVE_FAILURE));
@@ -445,7 +442,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     Array array("goodmockname", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "RAID5", arrayIndex);
+    int actual = array.Create(emptyDeviceSet, "RAID5");
 
     // Then
     ASSERT_EQ(ABR_SAVE_FAILURE, actual);

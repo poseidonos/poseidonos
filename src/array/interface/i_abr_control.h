@@ -46,10 +46,10 @@ public:
     {
     }
 // LCOV_EXCL_STOP
-    virtual int LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;
-    virtual int SaveAbr(string arrayName, ArrayMeta& meta) = 0;
-    virtual int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;
-    virtual int DeleteAbr(string arrayName, ArrayMeta& meta) = 0;
+    virtual int LoadAbr(ArrayMeta& meta) = 0;
+    virtual int SaveAbr(ArrayMeta& meta) = 0;
+    virtual int CreateAbr(ArrayMeta& meta) = 0;
+    virtual int DeleteAbr(ArrayMeta& meta) = 0;
     virtual bool GetMfsInit(string arrayName) = 0;
     virtual int SetMfsInit(string arrayName, bool value) = 0;
     virtual int ResetMbr(void) = 0;

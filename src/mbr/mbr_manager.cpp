@@ -458,12 +458,11 @@ MbrManager::_GetSystemUuid(void)
 }
 
 int
-MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
+MbrManager::CreateAbr(ArrayMeta& meta)
 {
-    int ret;
-    arrayIndex = -1;
+    int ret = 0;
     ArrayNamePolicy arrayNamePolicy;
-    ret = arrayNamePolicy.CheckArrayName(arrayName);
+    ret = arrayNamePolicy.CheckArrayName(meta.arrayName);
     if (ret != (int)POS_EVENT_ID::SUCCESS)
     {
         POS_TRACE_ERROR(ret, "Array name double check failed");
@@ -476,7 +475,7 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayInde
     }
 
     pthread_rwlock_wrlock(&mbrLock);
-    if (arrayIndexMap.find(arrayName) != arrayIndexMap.end())
+    if (arrayIndexMap.find(meta.arrayName) != arrayIndexMap.end())
     {
         pthread_rwlock_unlock(&mbrLock);
         return (int)POS_EVENT_ID::MBR_ABR_ALREADY_EXIST;
@@ -496,7 +495,7 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayInde
         if (systeminfo.arrayValidFlag[tempArrayIndex] == 0)
         {
             pair<map<string, unsigned int>::iterator, bool> ret;
-            ret = arrayIndexMap.insert(pair<string, unsigned int>(arrayName, tempArrayIndex));
+            ret = arrayIndexMap.insert(pair<string, unsigned int>(meta.arrayName, tempArrayIndex));
             if (ret.second == false)
             {
                 POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP,
@@ -509,13 +508,13 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayInde
             systeminfo.arrayNum++;
             memset(&systeminfo.arrayInfo[tempArrayIndex], '\0', sizeof(ArrayBootRecord));
             CopyData(systeminfo.arrayInfo[tempArrayIndex].arrayName,
-                arrayName, ARRAY_NAME_SIZE);
+                meta.arrayName, ARRAY_NAME_SIZE);
             CopyData(systeminfo.arrayInfo[tempArrayIndex].createDatetime,
                 GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             CopyData(systeminfo.arrayInfo[tempArrayIndex].updateDatetime,
                 GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             pthread_rwlock_unlock(&mbrLock);
-            arrayIndex = tempArrayIndex;
+            meta.id = tempArrayIndex;
             return 0;
         }
     }
@@ -525,13 +524,13 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayInde
 }
 
 int
-MbrManager::DeleteAbr(string arrayName, ArrayMeta& meta)
+MbrManager::DeleteAbr(ArrayMeta& meta)
 {
     pthread_rwlock_wrlock(&mbrLock);
     int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
     unsigned int arrayIndex;
     arrayIndexMapIter iter;
-    iter = arrayIndexMap.find(arrayName);
+    iter = arrayIndexMap.find(meta.arrayName);
     if (iter == arrayIndexMap.end())
     {
         pthread_rwlock_unlock(&mbrLock);
@@ -540,7 +539,7 @@ MbrManager::DeleteAbr(string arrayName, ArrayMeta& meta)
 
     arrayIndex = iter->second;
     string targetArrayName(systeminfo.arrayInfo[arrayIndex].arrayName);
-    if (arrayName == targetArrayName)
+    if (meta.arrayName == targetArrayName)
     {
         ArrayBootRecord* backup = new ArrayBootRecord;
         memcpy(backup, &(systeminfo.arrayInfo[arrayIndex]), sizeof(ArrayBootRecord));

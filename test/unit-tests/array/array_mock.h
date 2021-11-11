@@ -15,8 +15,8 @@ public:
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
-    MOCK_METHOD(int, Load, (unsigned int& arrayIndex), (override));
-    MOCK_METHOD(int, Create, (DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex), (override));
+    MOCK_METHOD(int, Load, (), (override));
+    MOCK_METHOD(int, Create, (DeviceSet<string> nameSet, string dataRaidType), (override));
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(int, AddSpare, (string devName), (override));
     MOCK_METHOD(int, RemoveSpare, (string devName), (override));

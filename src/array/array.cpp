@@ -82,10 +82,10 @@ Array::~Array(void)
 }
 
 int
-Array::Load(unsigned int& arrayIndex)
+Array::Load()
 {
     pthread_rwlock_wrlock(&stateLock);
-    int ret = _LoadImpl(arrayIndex);
+    int ret = _LoadImpl();
     pthread_rwlock_unlock(&stateLock);
     if (ret != 0)
     {
@@ -106,7 +106,7 @@ Array::Load(unsigned int& arrayIndex)
 }
 
 int
-Array::_LoadImpl(unsigned int& arrayIndex)
+Array::_LoadImpl(void)
 {
     int ret = state->IsLoadable();
     if (ret != 0)
@@ -116,14 +116,14 @@ Array::_LoadImpl(unsigned int& arrayIndex)
 
     devMgr_->Clear();
     _ResetMeta();
-    ret = abrControl->LoadAbr(name_, meta_, arrayIndex);
+    ret = abrControl->LoadAbr(meta_);
     if (ret != 0)
     {
         return ret;
     }
     else
     {
-        index_ = arrayIndex;
+        index_ = meta_.id;
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
@@ -148,13 +148,15 @@ Array::_LoadImpl(unsigned int& arrayIndex)
     state->SetLoad(rs);
     return ret;
 }
+
 IArrayDevMgr*
 Array::GetArrayManager(void)
 {
     return devMgr_;
 }
+
 int
-Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
+Array::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     int ret = 0;
     pthread_rwlock_wrlock(&stateLock);
@@ -189,14 +191,14 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arra
     SetMetaRaidType("RAID1");
     SetDataRaidType(dataRaidType);
 
-    ret = abrControl->CreateAbr(name_, meta_, arrayIndex);
+    ret = abrControl->CreateAbr(meta_);
     if (ret != 0)
     {
         goto error;
     }
     else
     {
-        index_ = arrayIndex;
+        index_ = meta_.id;
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
@@ -332,7 +334,7 @@ Array::Delete(void)
     _DeletePartitions();
 
     devMgr_->Clear();
-    ret = abrControl->DeleteAbr(name_, meta_);
+    ret = abrControl->DeleteAbr(meta_);
     if (ret != 0)
     {
         goto error;
@@ -518,7 +520,7 @@ Array::_Flush(void)
     meta_.dataRaidType = GetDataRaidType();
     meta_.devs = devMgr_->ExportToMeta();
 
-    return abrControl->SaveAbr(name_, meta_);
+    return abrControl->SaveAbr(meta_);
 }
 
 int

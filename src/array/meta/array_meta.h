@@ -45,6 +45,7 @@ class ArrayMeta
 {
 public:
     DeviceSet<DeviceMeta> devs;
+    unsigned int id;
     string arrayName;
     string metaRaidType;
     string dataRaidType;

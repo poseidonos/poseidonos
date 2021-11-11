@@ -454,13 +454,13 @@ int
 ArrayManager::_DeleteFaultArray(string arrayName)
 {
     ArrayMeta meta;
-    unsigned int arrayIndex = -1;
-    int result = abrManager->LoadAbr(arrayName, meta, arrayIndex);
+    meta.arrayName = arrayName;
+    int result = abrManager->LoadAbr(meta);
     if (result != 0)
     {
         return result;
     }
-    result = abrManager->DeleteAbr(arrayName, meta);
+    result = abrManager->DeleteAbr(meta);
 
     return result;
 }

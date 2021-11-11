@@ -40,7 +40,7 @@
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr)
+    IStateControl* iState, string name, IVolumeManager* volMgr, IArrayRebuilder* rbdr)
 : ArrayMountSequence(seq, iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
 {
     // delegated to other constructor.

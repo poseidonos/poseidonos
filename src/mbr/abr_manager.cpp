@@ -60,17 +60,18 @@ AbrManager::~AbrManager(void)
 }
 
 int
-AbrManager::LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
+AbrManager::LoadAbr(ArrayMeta& meta)
 {
     struct ArrayBootRecord* abr = nullptr;
-    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
+    unsigned int arrayIndex = -1;
+    mbrManager->GetAbr(meta.arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
         int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
-        POS_TRACE_WARN(result, "No array found with arrayName :{}", arrayName);
+        POS_TRACE_WARN(result, "No array found with arrayName :{}", meta.arrayName);
         return result;
     }
-
+    meta.id = arrayIndex;
     meta.arrayName = abr->arrayName;
     int nvmNum = abr->nvmDevNum;
     int dataNum = abr->dataDevNum;
@@ -107,11 +108,11 @@ AbrManager::LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
 }
 
 int
-AbrManager::SaveAbr(string arrayName, ArrayMeta& meta)
+AbrManager::SaveAbr( ArrayMeta& meta)
 {
     struct ArrayBootRecord* abr = nullptr;
     unsigned int arrayIndex;
-    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
+    mbrManager->GetAbr(meta.arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
         int ret = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
@@ -162,11 +163,11 @@ AbrManager::SaveAbr(string arrayName, ArrayMeta& meta)
             meta.devs.spares.at(i).uid, DEVICE_UID_SIZE);
     }
 
-    abr->mfsInit = GetMfsInit(arrayName);
+    abr->mfsInit = GetMfsInit(meta.arrayName);
 
     meta.createDatetime = abr->createDatetime;
     meta.updateDatetime = abr->updateDatetime;
-    mbrManager->UpdateDeviceIndexMap(arrayName);
+    mbrManager->UpdateDeviceIndexMap(meta.arrayName);
 
     int result = mbrManager->SaveMbr();
     return result;
@@ -195,15 +196,15 @@ AbrManager::SetMfsInit(string arrayName, bool value)
 }
 
 int
-AbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
+AbrManager::CreateAbr(ArrayMeta& meta)
 {
-    return mbrManager->CreateAbr(arrayName, meta, arrayIndex);
+    return mbrManager->CreateAbr(meta);
 }
 
 int
-AbrManager::DeleteAbr(string arrayName, ArrayMeta& meta)
+AbrManager::DeleteAbr(ArrayMeta& meta)
 {
-    return mbrManager->DeleteAbr(arrayName, meta);
+    return mbrManager->DeleteAbr(meta);
 }
 
 int
