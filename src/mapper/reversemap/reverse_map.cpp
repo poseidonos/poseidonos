@@ -52,6 +52,7 @@ ReverseMapPack::ReverseMapPack(void)
   revMapfile(nullptr),
   mpageSize(0),
   mfsAsyncIoDonePages(0),
+  mapFlushState(MapFlushState::FLUSH_DONE),
   numMpagesPerStripe(0),
   ioError(0),
   ioDirection(0),
@@ -76,6 +77,7 @@ ReverseMapPack::~ReverseMapPack(void)
 void
 ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
 {
+    mapFlushState = MapFlushState::FLUSH_DONE;
     revMapfile = file;
     wbLsid = wbLsid_;
     vsid = vsid_;
@@ -93,8 +95,10 @@ ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint3
 void
 ReverseMapPack::Assign(StripeId vsid_)
 {
+    assert(mapFlushState == MapFlushState::FLUSH_DONE);
     vsid = vsid_;
     _SetHeader(wbLsid, vsid);
+    callback = nullptr;
 }
 
 int
@@ -103,6 +107,7 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
     ioDirection = IO_LOAD;
     ioError = 0;
     mfsAsyncIoDonePages = 0;
+    mapFlushState = MapFlushState::FLUSHING;
     uint64_t pageNum = 0;
     assert(callback == nullptr);
     callback = cb;
@@ -121,10 +126,12 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
-                "Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
+            POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "[ReverseMap Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
+            mapFlushState = MapFlushState::FLUSH_DONE;
+            callback = nullptr;
+            break;
         }
     }
     return ioError;
@@ -159,7 +166,9 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
                 "Calling AsyncIO Failed at RevMap FLUSH, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
+            mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
+            break;
         }
     }
     return ioError;
@@ -196,6 +205,14 @@ ReverseMapPack::GetReverseMapEntry(uint64_t offset)
 }
 
 void
+ReverseMapPack::WaitPendingIoDone(void)
+{
+    while (mapFlushState == MapFlushState::FLUSHING)
+    {
+    }
+}
+
+void
 ReverseMapPack::_SetHeader(StripeId wblsid_, StripeId vsid_)
 {
     RevMapSector& hdr = revMaps[0]->sector[0];
@@ -203,7 +220,6 @@ ReverseMapPack::_SetHeader(StripeId wblsid_, StripeId vsid_)
     hdr.u.header.wbLsid = wblsid_;
     hdr.u.header.vsid = vsid_;
 }
-
 
 void
 ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
@@ -213,12 +229,13 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     {
         ioError = revMapPageAsyncIoReq->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
-            "MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
+            "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
     }
 
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
     if ((res + 1) == numMpagesPerStripe)
     {
+        mapFlushState = MapFlushState::FLUSH_DONE;
         if ((ioDirection == IO_LOAD) && (revMapPageAsyncIoReq->mpageNum == 0))
         {
             RevMapSector& hdr = revMaps[0]->sector[0];
@@ -245,7 +262,6 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         if (callback != nullptr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
-            callback = nullptr;
         }
     }
 
