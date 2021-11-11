@@ -116,6 +116,7 @@ Array::_LoadImpl(void)
 
     devMgr_->Clear();
     _ResetMeta();
+    meta_.arrayName = name_;
     ret = abrControl->LoadAbr(meta_);
     if (ret != 0)
     {
