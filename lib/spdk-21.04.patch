@@ -586,7 +586,7 @@ index 3eb31da30..f0d23886e 100644
  	memset(&g_spdk_app, 0, sizeof(g_spdk_app));
 diff --git lib/event/pos_app.c lib/event/pos_app.c
 new file mode 100644
-index 000000000..e2179a85d
+index 000000000..38ef38560
 --- /dev/null
 +++ lib/event/pos_app.c
 @@ -0,0 +1,57 @@
@@ -627,7 +627,7 @@ index 000000000..e2179a85d
 +
 +#define SPDK_APP_DEFAULT_CORE_FILTER_CMD_LENGTH 60
 +#define SPDK_APP_DEFAULT_CORE_FILTER 0x73 /*5, 6 bits are hugepage bit*/
-+#define SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR 65536
++#define SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR 131072
 +
 +void spdk_app_set_rlimit(bool enable_coredump)
 +{

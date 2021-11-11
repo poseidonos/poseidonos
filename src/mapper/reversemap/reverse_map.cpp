@@ -71,6 +71,9 @@ ReverseMapPack::~ReverseMapPack(void)
             revMap = nullptr;
         }
     }
+    revMaps.Clear();
+    callback = nullptr;
+    revMapfile = nullptr;
 }
 // LCOV_EXCL_STOP
 
@@ -126,7 +129,7 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "[ReverseMap Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
+            POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
@@ -163,7 +166,7 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
-                "Calling AsyncIO Failed at RevMap FLUSH, mpageNum:{}",
+                "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap FLUSH, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;

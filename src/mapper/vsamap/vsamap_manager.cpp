@@ -314,7 +314,7 @@ VSAMapManager::DeleteVSAMap(int volId)
 void
 VSAMapManager::WaitAllPendingIoDone(void)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
     while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
 }
 
@@ -333,7 +333,7 @@ VSAMapManager::WaitWritePendingIoDone(void)
 void
 VSAMapManager::WaitVolumePendingIoDone(int volId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] WaitPendingIoDone Vol:{}, PendingWriteCnt:{}, PendingReadCnt:{}", volId, numWriteIssuedCount, numLoadIssuedCount);
     while ((addrInfo->IsUT() == false) && ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE)));
 }
 

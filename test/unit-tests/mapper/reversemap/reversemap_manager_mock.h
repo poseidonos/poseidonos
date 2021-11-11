@@ -26,6 +26,7 @@ public:
     MOCK_METHOD(int, LoadReverseMapForWBT, (MetaFileIntf * fileLinux, uint64_t offset, uint64_t fileSize, char* buf), (override));
     MOCK_METHOD(int, StoreReverseMapForWBT, (MetaFileIntf * fileLinux, uint64_t offset, uint64_t fileSize, char* buf), (override));
     MOCK_METHOD(char*, GetReverseMapPtrForWBT, (), (override));
+    MOCK_METHOD(void, WaitAllPendingIoDone, (), (override));
 };
 
 } // namespace pos

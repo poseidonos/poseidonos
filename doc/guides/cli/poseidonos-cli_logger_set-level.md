@@ -8,7 +8,7 @@ Set the filtering level of logger.
 Set the filtering level of logger.
 
 Syntax:
-	poseidonos-cli logger set-level --level [debug | info | warn | err | critical]
+	poseidonos-cli logger set-level --level [debug | info | warning | error | critical]
           
 
 ```
@@ -22,9 +22,9 @@ poseidonos-cli logger set-level [flags]
       --level string   The level of logger to set.
                        	
                        - critical: events that make the system not available.
-                       - err: events when PoseidonOS cannot process the request
+                       - error: events when PoseidonOS cannot process the request
                        	because of an internal problem. 
-                       - warn: events when unexpected user input has been detected. 
+                       - warning: events when unexpected user input has been detected. 
                        - debug: logs when the system is working properly.
                        - info: logs for debug binary.
 ```
