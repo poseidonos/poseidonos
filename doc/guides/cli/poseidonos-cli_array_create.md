@@ -9,7 +9,7 @@ Create an array for PoseidonOS.
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
-	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RaidType] .
+	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RaidType]
 
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 

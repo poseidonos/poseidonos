@@ -8,7 +8,7 @@ Start the collection of telemetry data in PoseidonOS.
 Start the collection of telemetry data in PoseidonOS.
 
 Syntax:
-	poseidonos-cli telemetry start .
+	poseidonos-cli telemetry start
           
 
 ```

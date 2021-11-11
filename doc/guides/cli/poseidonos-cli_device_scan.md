@@ -9,7 +9,7 @@ Scan devices in the system. Use this command when PoseidonOS has
 (re)started.
 
 Syntax:
-	poseidonos-cli device scan .
+	poseidonos-cli device scan
           
 
 ```

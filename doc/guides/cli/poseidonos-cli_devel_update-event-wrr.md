@@ -8,7 +8,7 @@ Set the weights for backend events such as Flush, Rebuild, and GC.
 Set the weights for backend events such as Flush, Rebuild, and GC.
 
 Syntax:
-	poseidonos-cli devel update-event-wrr --name ( flush | fe_rebuild | rebuild | gc ) --weight ( 1 | 2 | 3 ) .
+	poseidonos-cli devel update-event-wrr --name ( flush | fe_rebuild | rebuild | gc ) --weight ( 1 | 2 | 3 )
           
 
 ```

@@ -11,7 +11,7 @@ the array. Otherwise, this command will display the brief information
 about all the arrays in PoseidonOS. 
 
 Syntax:
-	poseidonos-cli array list [(--array-name | -a) ArrayName] .
+	poseidonos-cli array list [(--array-name | -a) ArrayName]
 
 Example 1 (listing all arrays): 
 	poseidonos-cli array list

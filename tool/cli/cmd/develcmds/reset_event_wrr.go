@@ -20,7 +20,7 @@ var ResetEventWrrCmd = &cobra.Command{
 Reset the wieghts for backend events such as Flush, Rebuild, and GC to the default values.
 
 Syntax:
-	poseidonos-cli devel reset-event-wrr .
+	poseidonos-cli devel reset-event-wrr
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

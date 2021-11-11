@@ -21,7 +21,7 @@ var ListVolumeCmd = &cobra.Command{
 List all volumes of an array.
 
 Syntax:
-	poseidonos-cli volume list [(--array-name | -a) ArrayName] .
+	poseidonos-cli volume list [(--array-name | -a) ArrayName]
 
 Example (listing volumes from a specific array):
 	poseidonos-cli volume list --array-name Array0

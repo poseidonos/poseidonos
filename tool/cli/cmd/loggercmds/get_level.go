@@ -20,7 +20,7 @@ var GetLevelCmd = &cobra.Command{
 Get the filtering level of logger.
 
 Syntax:
-	poseidonos-cli logger get-level .
+	poseidonos-cli logger get-level
 
           `,
 	Run: func(cmd *cobra.Command, args []string) {

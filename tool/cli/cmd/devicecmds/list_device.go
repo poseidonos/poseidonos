@@ -21,7 +21,7 @@ try executing the device scan command and execute this command
 again. 
 
 Syntax:
-	poseidonos-cli device list .
+	poseidonos-cli device list
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

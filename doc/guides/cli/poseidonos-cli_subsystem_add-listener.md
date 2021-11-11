@@ -8,7 +8,7 @@ Add a listener to an NVMe-oF subsystem
 Add a listener to an NVMe-oF subsystem.
 
 Syntax:
-poseidonos-cli subsystem add-listener (--subnqn | -q) SubsystemNQN (--trtype | -t) TransportType (--traddr | -i) TargetAddress (--trsvcid | -p) TransportServiceId
+	poseidonos-cli subsystem add-listener (--subnqn | -q) SubsystemNQN (--trtype | -t) TransportType (--traddr | -i) TargetAddress (--trsvcid | -p) TransportServiceId
 
 Example:
 	poseidonos-cli subsystem add-listener -q nqn.2019-04.ibof:subsystem1 -t tcp -i 10.100.2.14 -p 1158

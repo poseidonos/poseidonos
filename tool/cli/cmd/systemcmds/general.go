@@ -12,7 +12,7 @@ System commands for PoseidonOS. Use this command category to start/stop
 PoseidonOS or get the information of PoseidonOS.
 
 Syntax: 
-  poseidonos-cli system [start|stop|info|set-property]
+  poseidonos-cli system [start|stop|info|set-property] [flags]
 
 Example (to start PoseidonOS):
   poseidonos-cli system start

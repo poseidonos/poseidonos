@@ -8,7 +8,7 @@ Stop PoseidonOS.
 Stop PoseidonOS.
 
 Syntax:
-	poseidonos-cli system stop .
+	poseidonos-cli system stop
           
 
 ```

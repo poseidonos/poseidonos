@@ -22,7 +22,7 @@ var StartSystemCmd = &cobra.Command{
 Start PoseidonOS.
 
 Syntax:
-	poseidonos-cli system start .
+	poseidonos-cli system start
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

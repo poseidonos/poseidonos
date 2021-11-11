@@ -8,7 +8,7 @@ Stop rebulding.
 Stop rebuilding.
 
 Syntax:
-	poseidonos-cli devel stop-rebuilding ( --array-name | -a ) ArrayName .
+	poseidonos-cli devel stop-rebuilding ( --array-name | -a ) ArrayName
           
 
 ```

@@ -19,7 +19,7 @@ var ApplyFilterCmd = &cobra.Command{
 Apply a filtering policy to the logger.
 
 Syntax:
-	poseidonos-cli logger apply-filter .
+	poseidonos-cli logger apply-filter
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var command = "APPLYLOGFILTER"

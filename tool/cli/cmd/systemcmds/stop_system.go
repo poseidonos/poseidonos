@@ -20,7 +20,7 @@ var StopSystemCmd = &cobra.Command{
 Stop PoseidonOS.
 
 Syntax:
-	poseidonos-cli system stop .
+	poseidonos-cli system stop
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

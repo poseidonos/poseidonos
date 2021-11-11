@@ -8,7 +8,7 @@ Reset QoS policy for a volume(s) of PoseidonOS.
 Reset QoS policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos reset (--volume-name | -v) VolumeName (--array-name | -a) ArrayName .
+	poseidonos-cli qos reset (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
 
 Example: 
 	poseidonos-cli qos reset --volume-name Volume0 --array-name Array0

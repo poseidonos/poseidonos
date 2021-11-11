@@ -8,7 +8,7 @@ Get the filtering level of logger.
 Get the filtering level of logger.
 
 Syntax:
-	poseidonos-cli logger get-level .
+	poseidonos-cli logger get-level
 
           
 

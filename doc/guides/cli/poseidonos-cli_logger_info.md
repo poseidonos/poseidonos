@@ -8,7 +8,7 @@ Get the current settings of the logger.
 Get the current settings of the logger.
 
 Syntax:
-	poseidonos-cli logger info .
+	poseidonos-cli logger info
           
 
 ```

@@ -8,7 +8,7 @@ Display information of PoseidonOS.
 Display the information of PoseidonOS.
 
 Syntax:
-	poseidonos-cli system info .
+	poseidonos-cli system info
           
 
 ```

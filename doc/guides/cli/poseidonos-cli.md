@@ -12,7 +12,7 @@ poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 	To see detailed information about the commands of PoseidonOS, type --help or -h for each command.
 
 Syntax: 
-  poseidonos-cli [global-flags] commands subcommand [flags] .
+  poseidonos-cli [global-flags] commands subcommand [flags]
 		
 
 ```

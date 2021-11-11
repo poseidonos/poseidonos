@@ -21,7 +21,7 @@ Rename a volume of PoseidonOS.
 
 Syntax:
 	poseidonos-cli volume rename (--volume-name | -v) VolumeName (--array-name | -a) ArrayName 
-	(--new-volume-name | -n) VolumeName .
+	(--new-volume-name | -n) VolumeName
 
 Example (renaming a volume): 
 	poseidonos-cli volume rename --volume-name OldVolumeName --array-name Array0 --new-volume-name NewVolumeName

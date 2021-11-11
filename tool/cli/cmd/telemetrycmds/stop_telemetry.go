@@ -19,7 +19,7 @@ var StopTelemetryCmd = &cobra.Command{
 Stop the collection of telemetry data in PoseidonOS.
 
 Syntax:
-	poseidonos-cli telemetry stop .
+	poseidonos-cli telemetry stop
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

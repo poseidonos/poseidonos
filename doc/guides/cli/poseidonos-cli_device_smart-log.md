@@ -8,7 +8,7 @@ Display SMART log information of a device.
 Display SMART log information of a device.
 
 Syntax:
-	poseidonos-cli device smart-log (--device-name | -d) DeviceName .
+	poseidonos-cli device smart-log (--device-name | -d) DeviceName
           
 
 ```

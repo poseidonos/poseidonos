@@ -19,7 +19,7 @@ var SystemInfoCmd = &cobra.Command{
 Display the information of PoseidonOS.
 
 Syntax:
-	poseidonos-cli system info .
+	poseidonos-cli system info
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

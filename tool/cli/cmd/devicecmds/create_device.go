@@ -19,7 +19,7 @@ var CreateDeviceCmd = &cobra.Command{
 Create a buffer device.
 
 Syntax:
-	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks Number --block-size BlockSize --device-type uram --numa Number.
+	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks Number --block-size BlockSize --device-type uram --numa Number
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

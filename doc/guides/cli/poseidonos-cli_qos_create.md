@@ -9,7 +9,7 @@ Create qos policy for a volume of PoseidonOS.
 
 Syntax: 
 	poseidonos-cli qos create (--volume-name | -v) VolumeName
-	(--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
+	(--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth]
 
 Example: 
 	poseidonos-cli qos create --volume-name vol1 --array-name Array0 --maxiops 500 --maxbw 100

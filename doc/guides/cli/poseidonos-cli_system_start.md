@@ -8,7 +8,7 @@ Start PoseidonOS.
 Start PoseidonOS.
 
 Syntax:
-	poseidonos-cli system start .
+	poseidonos-cli system start
           
 
 ```

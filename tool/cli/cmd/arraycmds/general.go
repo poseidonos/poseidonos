@@ -12,7 +12,7 @@ var ArrayCmd = &cobra.Command{
 	Long: `Array command for PoseidonOS. Use this command to create, delete, and control arrays.
 
 Syntax: 
-  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare|autocreate] [flags] .
+  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare|autocreate] [flags]
 
 Example (to create an array):
   poseidonos-cli array create --array-name array0 --buffer uram0 --data-devs nvme0,nvme1,nvme2,nvme3 --spare nvme4

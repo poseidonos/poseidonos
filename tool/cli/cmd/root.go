@@ -71,7 +71,7 @@ var RootCmd = &cobra.Command{
 	To see detailed information about the commands of PoseidonOS, type --help or -h for each command.
 
 Syntax: 
-  poseidonos-cli [global-flags] commands subcommand [flags] .
+  poseidonos-cli [global-flags] commands subcommand [flags]
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {

@@ -19,7 +19,7 @@ var LoggerInfoCmd = &cobra.Command{
 Get the current settings of the logger.
 
 Syntax:
-	poseidonos-cli logger info .
+	poseidonos-cli logger info
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

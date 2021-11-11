@@ -23,7 +23,7 @@ create an array with the devices in the same NUMA.
 
 Syntax: 
 	poseidonos-cli array autocreate (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
-	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType] .
+	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType]
 
 Example: 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1

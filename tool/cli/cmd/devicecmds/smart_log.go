@@ -19,7 +19,7 @@ var SMARTLOGCmd = &cobra.Command{
 Display SMART log information of a device.
 
 Syntax:
-	poseidonos-cli device smart-log (--device-name | -d) DeviceName .
+	poseidonos-cli device smart-log (--device-name | -d) DeviceName
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

@@ -9,7 +9,7 @@ Device commands for PoseidonOS. Use this command category to create,
 delete, and display devices. 
 
 Syntax: 
-  poseidonos-cli device [create|scan|list|smart] .
+  poseidonos-cli device [create|scan|list|smart] [flags]
 
 Example (to scan devices in the system):
   poseidonos-cli device scan

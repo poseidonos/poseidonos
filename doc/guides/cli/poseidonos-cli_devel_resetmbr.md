@@ -10,7 +10,7 @@ Use this command when you need to remove the all the arrays and
 reset the states of the devices. 
 
 Syntax:
-	poseidonos-cli devel resetmbr .
+	poseidonos-cli devel resetmbr
           
 
 ```

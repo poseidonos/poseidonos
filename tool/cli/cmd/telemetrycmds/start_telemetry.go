@@ -19,7 +19,7 @@ var StartTelemetryCmd = &cobra.Command{
 Start the collection of telemetry data in PoseidonOS.
 
 Syntax:
-	poseidonos-cli telemetry start .
+	poseidonos-cli telemetry start
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

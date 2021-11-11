@@ -21,7 +21,7 @@ var ListQosCmd = &cobra.Command{
 List QoS policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos list [(--volume-name | -v) VolumeName] [(--array-name | -a) ArrayName] .
+	poseidonos-cli qos list [(--volume-name | -v) VolumeName] [(--array-name | -a) ArrayName]
 
 Example: 
 	poseidonos-cli qos create --volume-name Volume0 --array-name Array0
