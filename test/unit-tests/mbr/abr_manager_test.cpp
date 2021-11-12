@@ -323,7 +323,7 @@ TEST(AbrManager, GetLastUpdatedDateTime_testIfLastUpdateDateTimeLoadedWell)
         return 0;
     });
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
-    // When : GetMfsInit
+    // When : GetLastUpdatedDateTime
     string lastUpdatedFromAbr = abrMgr->GetLastUpdatedDateTime(mockArrayName);
     // Then : The value is same as expected
     EXPECT_EQ(lastUpdated, lastUpdatedFromAbr);
@@ -347,7 +347,7 @@ TEST(AbrManager, GetCreatedDateTime_testIfCreatedDateTimeLoadedWell)
         return 0;
     });
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
-    // When : GetMfsInit
+    // When : GetCreatedDateTime
     string createdFromAbr = abrMgr->GetCreatedDateTime(mockArrayName);
     // Then : The value is same as expected
     EXPECT_EQ(created, createdFromAbr);
