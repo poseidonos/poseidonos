@@ -146,13 +146,13 @@ Allocator::Shutdown(void)
 {
     if (isInitialized == false)
     {
-        contextManager->Dispose();
-        _UnregisterFromAllocatorService();
-        isInitialized = false;
+        return;
     }
+
     wbStripeManager->FlushAllActiveStripes();
     wbStripeManager->Dispose();
 
+    contextManager->Dispose();
     _UnregisterFromAllocatorService();
     isInitialized = false;
 }
