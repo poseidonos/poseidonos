@@ -54,7 +54,6 @@
 #include "src/mapper/mapper.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/meta_service/meta_service.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
 
 namespace pos
 {

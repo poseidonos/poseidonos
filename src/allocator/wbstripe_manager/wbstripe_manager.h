@@ -41,20 +41,22 @@
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_wbstripe_internal.h"
 #include "src/mapper/i_stripemap.h"
+#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
 using StripeVec = std::vector<Stripe*>;
 class IVolumeManager;
 class IReverseMap;
-class FreeBufferPool;
+class BufferPool;
 class AllocatorCtx;
 
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+        MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
     WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
@@ -94,7 +96,7 @@ protected: // for UT
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
 
     std::vector<Stripe*> wbStripeArray;
-    FreeBufferPool* stripeBufferPool;
+    BufferPool* stripeBufferPool;
 
     std::vector<Stripe*> stripesToFlush4FlushCmd[MAX_VOLUME_COUNT];
     std::vector<StripeId> vsidToCheckFlushDone4FlushCmd[MAX_VOLUME_COUNT];
@@ -112,6 +114,7 @@ protected: // for UT
     IVolumeManager* volumeManager;
     IReverseMap* iReverseMap;
     uint32_t numVolumes;
+    MemoryManager* memoryManager;
 };
 
 } // namespace pos

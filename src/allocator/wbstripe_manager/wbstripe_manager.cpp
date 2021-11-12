@@ -42,11 +42,13 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/resource_manager/buffer_pool.h"
+#include "src/include/meta_const.h"
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
+WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+    MemoryManager* memoryManager)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
   iStripeMap(istripeMap_),
@@ -54,7 +56,8 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
   contextManager(ctxMgr),
   blockManager(blkMgr),
   arrayName(arrayName),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  memoryManager(memoryManager)
 {
     allocCtx = allocCtx_;
     volumeManager = volManager;
@@ -103,7 +106,12 @@ WBStripeManager::Init(void)
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
 
-    stripeBufferPool = new FreeBufferPool(totalNvmStripes * chunksPerStripe, CHUNK_SIZE);
+    BufferInfo info = {
+        .owner = typeid(this).name(),
+        .size = CHUNK_SIZE,
+        .count = totalNvmStripes * chunksPerStripe
+    };
+    stripeBufferPool = memoryManager->CreateBufferPool(info);
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
@@ -111,7 +119,7 @@ WBStripeManager::Init(void)
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {
-            void* buffer = stripeBufferPool->GetBuffer();
+            void* buffer = stripeBufferPool->TryGetBuffer();
             stripe->AddDataBuffer(buffer);
         }
         wbStripeArray.push_back(stripe);
@@ -133,7 +141,7 @@ WBStripeManager::Dispose(void)
 
     if (nullptr != stripeBufferPool)
     {
-        delete stripeBufferPool;
+        memoryManager->DeleteBufferPool(stripeBufferPool);
         stripeBufferPool = nullptr;
     }
 }

@@ -20,7 +20,6 @@ UT_TARGET_FILE =	$(IBOF_DIR)src/array/device/array_device.cpp \
 UT_FAKE_FILE = io_array_fake.cpp \
 			io_array_device_list_fake.cpp \
 			io_array_device_manager_fake.cpp \
-			io_free_buffer_pool_fake.cpp \
 			io_io_dispatcher_fake.cpp \
 			io_io_worker_fake.cpp \
 			io_ubio_fake.cpp

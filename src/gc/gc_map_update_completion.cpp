@@ -33,7 +33,6 @@
 #include "src/gc/gc_map_update_completion.h"
 
 #include "src/logger/logger.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/backend_event.h"
 #include "Air.h"
 #include "src/allocator/allocator.h"

@@ -13,7 +13,6 @@
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
 #include <test/unit-tests/mapper/i_stripemap_mock.h>
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
-#include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 #include <test/unit-tests/volume/i_volume_manager_mock.h>

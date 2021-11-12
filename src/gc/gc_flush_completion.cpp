@@ -36,7 +36,6 @@
 #include <string>
 #include <memory>
 
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/logger/logger.h"
 #include "src/include/backend_event.h"
 #include "src/allocator/allocator.h"

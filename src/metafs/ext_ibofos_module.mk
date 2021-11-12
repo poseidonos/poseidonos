@@ -41,7 +41,6 @@ ifeq ($(IBOFOS_DEP_SRC_INCLUDE), 1)
 SRCS += \
         json_helper.cpp \
         affinity_config_parser.cpp \
-        free_buffer_pool.cpp \
         affinity_manager.cpp \
         poverty_cpu_set_generator.cpp \
         cpu_set_generator.cpp \
