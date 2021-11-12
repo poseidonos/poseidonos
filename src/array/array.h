@@ -86,16 +86,6 @@ public:
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual int CheckDeletable(void);
-    virtual void
-    SetMetaRaidType(string raidType)
-    {
-        meta_.metaRaidType = raidType;
-    };
-    virtual void
-    SetDataRaidType(string raidType)
-    {
-        meta_.dataRaidType = raidType;
-    };
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
@@ -126,14 +116,12 @@ private:
     int _RegisterService(void);
     void _UnregisterService(void);
     void _CheckRebuildNecessity(void);
-    void _ResetMeta(void);
     bool _CheckIndexIsValid(void);
 
     ArrayState* state = nullptr;
     ArrayInterface* intf = nullptr;
     PartitionManager* ptnMgr = nullptr;
 
-    ArrayMeta meta_;
     string name_;
     unsigned int index_ = 0;
     pthread_rwlock_t stateLock;

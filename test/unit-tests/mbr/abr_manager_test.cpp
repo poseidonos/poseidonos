@@ -244,13 +244,11 @@ TEST(AbrManager, DeleteAbr_testCommandPassing)
 {
     // Given : AbrManger
     string mockArrayName = "POSArray";
-    ArrayMeta arrayMeta;
-    arrayMeta.arrayName = mockArrayName;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
 
     // When : Call DeleteAbr
-    abrMgr->DeleteAbr(arrayMeta);
+    abrMgr->DeleteAbr(mockArrayName);
     // Then : Nothing
 }
 
@@ -308,4 +306,51 @@ TEST(AbrManager, FindArrayWithDeviceSN_testCommandPassing)
     delete mockMbrManager;
 }
 
+TEST(AbrManager, GetLastUpdatedDateTime_testIfLastUpdateDateTimeLoadedWell)
+{
+    // Given : In mbr, array named with mockArrayname exists
+    string mockArrayName = "POSArray";
+    string lastUpdated = "2021-01-01";
+    
+    MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
+    unsigned int arrayindex;
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex)
+    {
+        using AbrPtr = struct ArrayBootRecord*;
+        AbrPtr newAbr = new struct ArrayBootRecord;
+        CopyData(newAbr->updateDatetime, lastUpdated.c_str(), DATE_SIZE);
+        *abr = newAbr;
+        return 0;
+    });
+    AbrManager* abrMgr = new AbrManager(mockMbrManager);
+    // When : GetMfsInit
+    string lastUpdatedFromAbr = abrMgr->GetLastUpdatedDateTime(mockArrayName);
+    // Then : The value is same as expected
+    EXPECT_EQ(lastUpdated, lastUpdatedFromAbr);
+    delete mockMbrManager;
+}
+
+TEST(AbrManager, GetCreatedDateTime_testIfCreatedDateTimeLoadedWell)
+{
+    // Given : In mbr, array named with mockArrayname exists
+    string mockArrayName = "POSArray";
+    string created = "2021-01-01";
+    
+    MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
+    unsigned int arrayindex;
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex)
+    {
+        using AbrPtr = struct ArrayBootRecord*;
+        AbrPtr newAbr = new struct ArrayBootRecord;
+        CopyData(newAbr->createDatetime, created.c_str(), DATE_SIZE);
+        *abr = newAbr;
+        return 0;
+    });
+    AbrManager* abrMgr = new AbrManager(mockMbrManager);
+    // When : GetMfsInit
+    string createdFromAbr = abrMgr->GetCreatedDateTime(mockArrayName);
+    // Then : The value is same as expected
+    EXPECT_EQ(created, createdFromAbr);
+    delete mockMbrManager;
+}
 } // namespace pos

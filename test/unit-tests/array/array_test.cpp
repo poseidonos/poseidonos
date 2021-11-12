@@ -383,7 +383,6 @@ TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)
 
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
@@ -1024,34 +1023,6 @@ TEST(Array, CheckDeletable_testIfStateIsQueriedOn)
 
     // Then: we should query state object and get the result
     ASSERT_EQ(expected, actual);
-}
-
-/***
- * These are trivial tests to achieve high code coverage.
- */
-TEST(Array, Set_testIfSettersAreInvoked)
-{
-    // Given: an array
-    NiceMock<MockIStateControl> mockIStateControl;
-    NiceMock<MockArrayState>* mockState = new NiceMock<MockArrayState>(&mockIStateControl);
-    Array array("mock", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
-
-    string expectedMRT = "mock-meta-raid-type";
-    string expectedDRT = "mock-data-raid-type";
-
-    // When: setters are called + a few trivial API invocations
-    array.SetMetaRaidType(expectedMRT);
-    array.SetDataRaidType(expectedDRT);
-    array.GetName();
-    array.GetIndex();
-    array.GetStateCtx();
-    array.GetCreateDatetime();
-    array.GetUpdateDatetime();
-    array.GetArrayManager(); // ADMIN_ENABLED
-
-    // Then:
-    ASSERT_EQ(expectedMRT, array.GetMetaRaidType());
-    ASSERT_EQ(expectedDRT, array.GetDataRaidType());
 }
 
 TEST(Array, GetSizeInfo_testIfPartitionManagerIsQueriedOn)

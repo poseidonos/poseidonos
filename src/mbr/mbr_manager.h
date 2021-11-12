@@ -64,7 +64,7 @@ public:
     virtual ~MbrManager(void);
 
     int CreateAbr(ArrayMeta& meta);
-    int DeleteAbr(ArrayMeta& meta);
+    int DeleteAbr(string arrayName);
     virtual void GetAbr(string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex);
     virtual int SaveMbr(void);
     int LoadMbr(void);

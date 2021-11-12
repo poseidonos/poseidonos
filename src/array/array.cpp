@@ -115,16 +115,16 @@ Array::_LoadImpl(void)
     }
 
     devMgr_->Clear();
-    _ResetMeta();
-    meta_.arrayName = name_;
-    ret = abrControl->LoadAbr(meta_);
+    ArrayMeta meta;
+    meta.arrayName = name_;
+    ret = abrControl->LoadAbr(meta);
     if (ret != 0)
     {
         return ret;
     }
     else
     {
-        index_ = meta_.id;
+        index_ = meta.id;
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
@@ -132,7 +132,7 @@ Array::_LoadImpl(void)
         }
     }
 
-    ret = devMgr_->Import(meta_.devs);
+    ret = devMgr_->Import(meta.devs);
     if (ret != 0)
     {
         state->SetDelete();
@@ -160,8 +160,10 @@ int
 Array::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     int ret = 0;
-    pthread_rwlock_wrlock(&stateLock);
+    ArrayMeta meta;
     ArrayNamePolicy namePolicy;
+
+    pthread_rwlock_wrlock(&stateLock);
     ret = state->IsCreatable();
     if (ret != 0)
     {
@@ -180,26 +182,25 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         goto error;
     }
 
-    meta_.arrayName = name_;
-    meta_.devs = devMgr_->ExportToMeta();
-
     if (dataRaidType != "RAID5")
     {
         ret = (int)POS_EVENT_ID::ARRAY_WRONG_FT_METHOD;
         goto error;
     }
 
-    SetMetaRaidType("RAID1");
-    SetDataRaidType(dataRaidType);
+    meta.arrayName = name_;
+    meta.devs = devMgr_->ExportToMeta();
+    meta.metaRaidType = "RAID1";
+    meta.dataRaidType = "dataRaidType";
 
-    ret = abrControl->CreateAbr(meta_);
+    ret = abrControl->CreateAbr(meta);
     if (ret != 0)
     {
         goto error;
     }
     else
     {
-        index_ = meta_.id;
+        index_ = meta.id;
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
@@ -333,9 +334,8 @@ Array::Delete(void)
     }
 
     _DeletePartitions();
-
     devMgr_->Clear();
-    ret = abrControl->DeleteAbr(meta_);
+    ret = abrControl->DeleteAbr(name_);
     if (ret != 0)
     {
         goto error;
@@ -474,25 +474,25 @@ Array::GetIndex(void)
 string
 Array::GetMetaRaidType(void)
 {
-    return meta_.metaRaidType;
+    return "RAID1";
 }
 
 string
 Array::GetDataRaidType(void)
 {
-    return meta_.dataRaidType;
+    return "RAID5";
 }
 
 string
 Array::GetCreateDatetime(void)
 {
-    return meta_.createDatetime;
+    return abrControl->GetCreatedDateTime(name_);
 }
 
 string
 Array::GetUpdateDatetime(void)
 {
-    return meta_.updateDatetime;
+    return abrControl->GetLastUpdatedDateTime(name_);
 }
 
 ArrayStateType
@@ -516,12 +516,13 @@ Array::GetRebuildingProgress(void)
 int
 Array::_Flush(void)
 {
-    meta_.arrayName = GetName();
-    meta_.metaRaidType = GetMetaRaidType();
-    meta_.dataRaidType = GetDataRaidType();
-    meta_.devs = devMgr_->ExportToMeta();
+    ArrayMeta meta;
+    meta.arrayName = GetName();
+    meta.metaRaidType = GetMetaRaidType();
+    meta.dataRaidType = GetDataRaidType();
+    meta.devs = devMgr_->ExportToMeta();
 
-    return abrControl->SaveAbr(meta_);
+    return abrControl->SaveAbr(meta);
 }
 
 int
@@ -919,17 +920,6 @@ Array::_UnregisterService(void)
     {
         IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
     }
-}
-
-void
-Array::_ResetMeta(void)
-{
-    meta_.arrayName = "";
-    meta_.createDatetime = "";
-    meta_.updateDatetime = "";
-    meta_.devs.nvm.clear();
-    meta_.devs.data.clear();
-    meta_.devs.spares.clear();
 }
 
 bool

@@ -460,7 +460,7 @@ ArrayManager::_DeleteFaultArray(string arrayName)
     {
         return result;
     }
-    result = abrManager->DeleteAbr(meta);
+    result = abrManager->DeleteAbr(arrayName);
 
     return result;
 }

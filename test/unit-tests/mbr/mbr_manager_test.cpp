@@ -270,7 +270,7 @@ TEST(MbrManager, DeleteAbr_testIfArrayIsProperlyDeletedAndVersionIsIncremented)
     int currMbrVersion = m.GetMbrVersionInMemory();
 
     // When: the manager deletes Array Boot Record
-    int deleteRes = m.DeleteAbr(arrayMeta);
+    int deleteRes = m.DeleteAbr(mockArrayName);
 
     // Then: the metadata should be updated accordingly. Also, the version should be incremented
     ASSERT_EQ(0, deleteRes);
@@ -297,8 +297,8 @@ TEST(MbrManager, DeleteAbr_testIfNonExistentArrayNameHandledProperly)
     int currMbrVersion = m.GetMbrVersionInMemory();
 
     // When: the manager deletes with a wrong name
-    arrayMeta.arrayName += "wrong";
-    int actual = m.DeleteAbr(arrayMeta);
+    mockArrayName += "wrong";
+    int actual = m.DeleteAbr(mockArrayName);
 
     // Then: the manager returns an error code and does not update version
     const int expected = EID(MBR_ABR_NOT_FOUND);
@@ -331,7 +331,7 @@ TEST(MbrManager, DeleteAbr_testIfDeviceIoFailureHandledProperly)
     int currMbrVersion = m.GetMbrVersionInMemory();
 
     // When: the manager runs into I/O error when updating MBR
-    int actual = m.DeleteAbr(arrayMeta);
+    int actual = m.DeleteAbr(mockArrayName);
 
     // Then: the manager should return an expected error code and should not update version
     const int expected = EID(ARRAY_MBR_WRITE_ERROR);

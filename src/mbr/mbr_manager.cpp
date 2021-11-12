@@ -524,13 +524,13 @@ MbrManager::CreateAbr(ArrayMeta& meta)
 }
 
 int
-MbrManager::DeleteAbr(ArrayMeta& meta)
+MbrManager::DeleteAbr(string arrayName)
 {
     pthread_rwlock_wrlock(&mbrLock);
     int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
     unsigned int arrayIndex;
     arrayIndexMapIter iter;
-    iter = arrayIndexMap.find(meta.arrayName);
+    iter = arrayIndexMap.find(arrayName);
     if (iter == arrayIndexMap.end())
     {
         pthread_rwlock_unlock(&mbrLock);
@@ -539,7 +539,7 @@ MbrManager::DeleteAbr(ArrayMeta& meta)
 
     arrayIndex = iter->second;
     string targetArrayName(systeminfo.arrayInfo[arrayIndex].arrayName);
-    if (meta.arrayName == targetArrayName)
+    if (arrayName == targetArrayName)
     {
         ArrayBootRecord* backup = new ArrayBootRecord;
         memcpy(backup, &(systeminfo.arrayInfo[arrayIndex]), sizeof(ArrayBootRecord));

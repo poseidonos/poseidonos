@@ -67,7 +67,7 @@ AbrManager::LoadAbr(ArrayMeta& meta)
     mbrManager->GetAbr(meta.arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
-        int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
+        int result = EID(MBR_ABR_NOT_FOUND);
         POS_TRACE_WARN(result, "No array found with arrayName :{}", meta.arrayName);
         return result;
     }
@@ -115,7 +115,7 @@ AbrManager::SaveAbr(ArrayMeta& meta)
     mbrManager->GetAbr(meta.arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
-        int ret = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
+        int ret = EID(MBR_ABR_NOT_FOUND);
         POS_TRACE_ERROR(ret, "Cannot save abr, abr not found");
         return ret;
     }
@@ -202,9 +202,9 @@ AbrManager::CreateAbr(ArrayMeta& meta)
 }
 
 int
-AbrManager::DeleteAbr(ArrayMeta& meta)
+AbrManager::DeleteAbr(string arrayName)
 {
-    return mbrManager->DeleteAbr(meta);
+    return mbrManager->DeleteAbr(arrayName);
 }
 
 int
@@ -224,6 +224,34 @@ AbrManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
     
     result = mbrManager->GetAbrList(abrList);
     return result;
+}
+
+string
+AbrManager::GetLastUpdatedDateTime(string arrayName)
+{
+    struct ArrayBootRecord* abr = nullptr;
+    unsigned int arrayIndex;
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
+    if (abr == nullptr)
+    {
+        POS_TRACE_ERROR(EID(MBR_ABR_NOT_FOUND), "Cannot get Abr for {}", arrayName);
+        return "";
+    }
+    return abr->updateDatetime;
+}
+
+string
+AbrManager::GetCreatedDateTime(string arrayName)
+{
+    struct ArrayBootRecord* abr = nullptr;
+    unsigned int arrayIndex;
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
+    if (abr == nullptr)
+    {
+        POS_TRACE_ERROR(EID(MBR_ABR_NOT_FOUND), "Cannot get Abr for {}", arrayName);
+        return "";
+    }
+    return abr->createDatetime;
 }
 
 string

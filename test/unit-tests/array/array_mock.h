@@ -24,8 +24,6 @@ public:
     MOCK_METHOD(void, MountDone, (), (override));
     MOCK_METHOD(int, CheckUnmountable, (), (override));
     MOCK_METHOD(int, CheckDeletable, (), (override));
-    MOCK_METHOD(void, SetMetaRaidType, (string raidType), (override));
-    MOCK_METHOD(void, SetDataRaidType, (string raidType), (override));
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
     MOCK_METHOD(DeviceSet<string>, GetDevNames, (), (override));
     MOCK_METHOD(string, GetName, (), (override));
