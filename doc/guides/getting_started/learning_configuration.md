@@ -6,7 +6,9 @@ POS provides a lot of knobs so that,
   1) The benefits of using fast NVMe-oF storage could be fully achieved with various environments and
   2) The integration efforts with existing infrastructure could be minimized.
 
-In this section, we will go over the list of configuration variables that can change the behavior of POS. Some of those are meaningful to POS developers only, unlikely to change by users. Though, we explicitly list them up here to share hidden assumptions and magic numbers to be able to diagnose any side effects quickly that could happen due to user-specific environment issues. The configuration is encoded in json at /etc/pos/pos.conf. The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). 
+In this section, we will go over the list of configuration variables that can change the behavior of POS. Some of those are meaningful to POS developers only, unlikely to change by users. Though, we explicitly list them up here to share hidden assumptions and magic numbers to be able to diagnose any side effects quickly that could happen due to user-specific environment issues.
+
+The configuration is encoded in json at /etc/pos/pos.conf. You can create one by yourself or just copy one from the ~/config directory. There is one more way to create a pos.conf file under /etc/pos. After you build the POS by the script or just by issuing "make" from the root of POS directory, issue "make install" then the binaries built will be installed to the install directory(usually under /usr/local/bin) and ~/config/pos.conf will be copied to /etc/pos/pos.conf as well. In case there is already one under /etc/pos, you need to delete it, first and do "make install". This should be done like this since there could be a case that the pos.conf which was already under /etc/pos is accidentally substituted without intent.
 
 The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). </br>
 

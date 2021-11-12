@@ -67,6 +67,7 @@ public:
     virtual int LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
     virtual int StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
     virtual char* GetReverseMapPtrForWBT(void);
+    virtual void WaitAllPendingIoDone(void);
 
 private:
     bool _FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba);

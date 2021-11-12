@@ -43,6 +43,7 @@ public:
     MOCK_METHOD(int, SetReverseMapEntry, (uint64_t offset, BlkAddr rba, uint32_t volumeId), (override));
     MOCK_METHOD((std::tuple<BlkAddr, uint32_t>), GetReverseMapEntry, (uint64_t offset), (override));
     MOCK_METHOD(char*, GetRevMapPtrForWBT, (), (override));
+    MOCK_METHOD(void, WaitPendingIoDone, (), (override));
 };
 
 } // namespace pos

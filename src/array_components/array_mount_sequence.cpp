@@ -185,6 +185,7 @@ ArrayMountSequence::Unmount(void)
         POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Disposed the IMountSequence for {}", arrayName);
     }
     // do array-dispose finally.
+    sequence.front()->Flush();
     sequence.front()->Dispose();
     state->Remove(normalState);
     state->Remove(unmountState);

@@ -153,6 +153,7 @@ public:
     virtual int SetReverseMapEntry(uint64_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint64_t offset);
     virtual char* GetRevMapPtrForWBT(void) { return reinterpret_cast<char*>(&revMaps[0]->sector[0]); }
+    virtual void WaitPendingIoDone(void);
 
 private:
     void _SetHeader(StripeId wblsid, StripeId vsid);
@@ -166,6 +167,7 @@ private:
     MetaFileIntf* revMapfile; // MFS file
     uint32_t mpageSize;
     std::atomic<uint32_t> mfsAsyncIoDonePages;
+    std::atomic<MapFlushState> mapFlushState;
     uint64_t numMpagesPerStripe; // It depends on block count per a stripe
     int ioError; // indicates if there is an Async-IO error among mpages
     int ioDirection;

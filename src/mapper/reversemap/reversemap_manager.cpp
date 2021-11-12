@@ -317,6 +317,17 @@ ReverseMapManager::_FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vs
     return false;
 }
 
+void
+ReverseMapManager::WaitAllPendingIoDone(void)
+{
+    uint32_t numWbStripes = addrInfo->GetNumWbStripes();
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper ReverseMapMAnager] Wait For Pending IO");
+    for (StripeId wbLsid = 0; wbLsid < numWbStripes; ++wbLsid)
+    {
+        revMapPacks[wbLsid].WaitPendingIoDone();
+    }
+}
+
 int
 ReverseMapManager::_SetNumMpages(void)
 {

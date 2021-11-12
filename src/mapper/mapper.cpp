@@ -490,6 +490,7 @@ Mapper::PrepareVolumeDelete(int volId)
     }
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} array:{}", volId, arrayName);
     vsaMapManager->DisableVsaMapInternalAccess(volId);
+    vsaMapManager->WaitVolumePendingIoDone(volId);
 
     // Unloaded case: Load & BG Mount
     if (volState[volId].GetState() == VolState::EXIST_UNLOADED)
@@ -574,6 +575,7 @@ Mapper::_Dispose(void)
         vsaMapManager->Dispose();
         stripeMapManager->WaitAllPendingIoDone();
         stripeMapManager->Dispose();
+        reverseMapManager->WaitAllPendingIoDone();
         reverseMapManager->Dispose();
         _UnregisterFromMapperService();
         _ClearVolumeState();
