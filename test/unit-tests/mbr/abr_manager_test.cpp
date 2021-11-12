@@ -311,7 +311,7 @@ TEST(AbrManager, GetLastUpdatedDateTime_testIfLastUpdateDateTimeLoadedWell)
     // Given : In mbr, array named with mockArrayname exists
     string mockArrayName = "POSArray";
     string lastUpdated = "2021-01-01";
-    
+
     MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     unsigned int arrayindex;
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex)
@@ -335,7 +335,7 @@ TEST(AbrManager, GetCreatedDateTime_testIfCreatedDateTimeLoadedWell)
     // Given : In mbr, array named with mockArrayname exists
     string mockArrayName = "POSArray";
     string created = "2021-01-01";
-    
+
     MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     unsigned int arrayindex;
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex)
