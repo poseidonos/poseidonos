@@ -42,7 +42,8 @@ namespace pos
 ActiveWBStripeReplayer::ActiveWBStripeReplayer(PendingStripeList& pendingStripeList)
 : pendingStripes(pendingStripeList),
   contextReplayer(nullptr),
-  wbStripeAllocator(nullptr)
+  wbStripeAllocator(nullptr),
+  stripeMap(nullptr)
 {
 }
 
