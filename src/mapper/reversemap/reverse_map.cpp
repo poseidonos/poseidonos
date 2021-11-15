@@ -164,7 +164,6 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
     mapFlushState = MapFlushState::FLUSHING;
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
-    assert(callback == nullptr);
     assert(numWriteIssued == 0);
     callback = inputCallback;
 

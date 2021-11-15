@@ -177,6 +177,7 @@ ContextManager::DecreaseValidBlockCount(SegmentId segId, uint32_t count)
 void
 ContextManager::Dispose(void)
 {
+    _WaitPendingIo(IOTYPE_ALL);
     segmentCtx->Dispose();
     wbStripeCtx->Dispose();
     rebuildCtx->Dispose();
@@ -523,6 +524,7 @@ ContextManager::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 void
 ContextManager::_WaitPendingIo(IOTYPE type)
 {
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[ContextManager] WaitPendingIoDone ReadIssueCnt:{}, FlushIssueCnt:{}, RebuildIssueCnt:{}", numReadIoIssued, numFlushIoIssued, numRebuildFlushIoIssued);
     while (type == IOTYPE_ALL)
     {
         if (((numReadIoIssued + numFlushIoIssued + numRebuildFlushIoIssued) == 0) || (addrInfo->IsUT() == true))
