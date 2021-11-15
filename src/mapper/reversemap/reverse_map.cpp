@@ -112,7 +112,6 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
     mfsAsyncIoDonePages = 0;
     mapFlushState = MapFlushState::FLUSHING;
     uint64_t pageNum = 0;
-    assert(callback == nullptr);
     callback = cb;
 
     for (auto& revMap : revMaps)
