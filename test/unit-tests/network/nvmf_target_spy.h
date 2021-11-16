@@ -45,19 +45,28 @@ public:
     {
     }
 
-    void AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.attachNamespacePauseDone(subsystem, arg, status);
     }
 
-    void DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.detachNamespacePauseDone(subsystem, arg, status);
     }
 
-    void DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.detachNamespaceAllPauseDone(subsystem, arg, status);
+    }
+
+    void
+    DeletePosBdevAllHandler(void* arg1, SpdkCaller* spdkCaller, SpdkBdevCaller* spdkBdevCaller)
+    {
+        NvmfTarget::_DeletePosBdevAllHandler(arg1, spdkCaller, spdkBdevCaller);
     }
 };
 } // namespace pos

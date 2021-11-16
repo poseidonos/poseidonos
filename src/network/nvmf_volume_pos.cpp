@@ -159,8 +159,6 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
                 POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         }
-        delete vInfo;
-        vInfo = nullptr;
     }
 }
 
@@ -175,6 +173,20 @@ NvmfVolumePos::VolumeCreated(struct pos_volume_info* vInfo, uint64_t time)
 
     bool ret = _WaitVolumeCreated(volId, arrayName, time);
     return ret;
+}
+
+bool
+NvmfVolumePos::VolumeLoaded(struct pos_volume_info* vInfo)
+{
+    uint32_t volId = vInfo->id;
+    string arrayName = vInfo->array_name;
+    string bdevName = target->GetBdevName(volId, arrayName);
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
+    if (nullptr == bdev)
+    {
+        return false;
+    }
+    return true;
 }
 
 void

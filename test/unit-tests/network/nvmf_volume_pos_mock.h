@@ -19,6 +19,7 @@ class MockNvmfVolumePos : public NvmfVolumePos
 public:
     using NvmfVolumePos::NvmfVolumePos;
     MOCK_METHOD(bool, VolumeCreated, (struct pos_volume_info * info, uint64_t time), (override));
+    MOCK_METHOD(bool, VolumeLoaded, (struct pos_volume_info * info), (override));
     MOCK_METHOD(bool, VolumeDeleted, (struct pos_volume_info * info, uint64_t time), (override));
     MOCK_METHOD(void, VolumeMounted, (struct pos_volume_info * info), (override));
     MOCK_METHOD(bool, VolumeUnmounted, (struct pos_volume_info * info, uint64_t time), (override));

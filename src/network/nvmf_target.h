@@ -43,6 +43,7 @@
 #include "src/network/nvmf_target_spdk.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk_caller.h"
+#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 using namespace std;
 
 namespace pos
@@ -64,6 +65,7 @@ public:
     virtual bool CreatePosBdev(const string& bdevName, const string uuid, uint32_t id, uint64_t volumeSizeInMb,
         uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId);
     virtual bool DeletePosBdev(const string& bdevName);
+    virtual bool DeletePosBdevAll(string arrayName, uint64_t time = NS_DELETE_TIMEOUT);
 
     virtual bool DetachNamespace(const string& nqn, uint32_t nsid,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
@@ -96,19 +98,27 @@ public:
 
 protected:
     static struct NvmfTargetCallbacks nvmfCallbacks;
+    static atomic<bool> deleteDone;
+    static void _DeletePosBdevAllHandler(void* arg1);
+    static void _DeletePosBdevAllHandler(void* arg1, SpdkCaller* spdkCaller,
+        SpdkBdevCaller* spdkBdevCaller = new SpdkBdevCaller());
 
 private:
     uint32_t nrVolumePerSubsystem = 1;
     static const char* BDEV_NAME_PREFIX;
     static atomic<int> attachedNsid;
+    static atomic<int> deletedBdev;
     SpdkCaller* spdkCaller;
     bool feQosEnable;
     EventFrameworkApi* eventFrameworkApi;
     map<string, string> subsystemToArrayName;
+
+    bool _InitPosBdev(string bdevName);
     static struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);
     static bool _IsTargetExist(void);
     static void _AttachDone(void* cbArg, int status);
+    static void _DeleteDone(void* cbArg, int status);
     static void _DetachNamespaceWithPause(void* arg1, void* arg2);
     static void _AttachNamespaceWithPause(void* arg1, void* arg2);
     static void _DetachNamespaceAllWithPause(void* arg1, void* arg2);

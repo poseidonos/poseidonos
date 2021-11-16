@@ -37,7 +37,8 @@
 
 namespace pos_cli
 {
-DeleteArrayCommand::DeleteArrayCommand(void)
+DeleteArrayCommand::DeleteArrayCommand(NvmfTarget* nvmfTarget)
+: nvmfTarget(nvmfTarget)
 {
 }
 
@@ -61,6 +62,13 @@ DeleteArrayCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse(
             "DELETEARRAY", rid, ret, "failed to delete " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+    }
+    bool deleteDone = nvmfTarget->DeletePosBdevAll(arrayName);
+    if (false == deleteDone)
+    {
+        return jFormat.MakeResponse(
+            "DELETEARRAY", rid, (int)POS_EVENT_ID::VOL_DELETE_FAILED,
+            "Some or every volumes in " + arrayName + " failed to delete.", GetPosInfo());
     }
     return jFormat.MakeResponse("DELETEARRAY", rid, SUCCESS,
         arrayName + " is deleted successfully", GetPosInfo());

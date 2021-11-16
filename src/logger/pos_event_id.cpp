@@ -51,6 +51,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED, "Failed to register Qos poller on reactor #: {}"},
             {POS_EVENT_ID::QOS_POLLER_UNREGISTRATION, "TBD"},
             {POS_EVENT_ID::QOS_POLLER_UNREGISTRATION_FAILED, "Failed to un-register Qos poller on reactor #: {}"},
+            {POS_EVENT_ID::QOS_MINIMUM_NOT_MET, "TBD"},
 };
 
 PosEventId::PosEventIdEntry
@@ -86,6 +87,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED, "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_SUBSYSTEM, "Fail to create subsystem {}"},
             {POS_EVENT_ID::IONVMF_SET_ARRAY_TO_SUBSYSTEM, "Successfully mapped array:{} to subsystem:{}"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_INIT_POS_BDEV, "Fail to init pos bdev({})"},
 };
 
 PosEventId::PosEventIdEntry
