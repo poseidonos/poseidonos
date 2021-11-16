@@ -53,7 +53,8 @@ namespace pos
 MioHandler::MioHandler(int threadId, int coreId, int coreCount)
 : ioSQ(nullptr),
   ioCQ(nullptr),
-  cpuStallCnt(0)
+  cpuStallCnt(0),
+  coreId(coreId)
 {
     ioCQ = new MetaFsIoQ<Mio*>();
     ioSQ = new MetaFsIoQ<MetaFsIoRequest*>();
@@ -78,7 +79,8 @@ MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* io
   ioCQ(ioCQ),
   mioPool(mioPool),
   mpioPool(mpioPool),
-  cpuStallCnt(0)
+  cpuStallCnt(0),
+  coreId(coreId)
 {
     std::string cqName("IoCQ-" + std::to_string(coreId));
     ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
