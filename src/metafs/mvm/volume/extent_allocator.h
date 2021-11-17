@@ -50,7 +50,6 @@ public:
     virtual void Init(MetaLpnType _base, MetaLpnType _last);
     virtual std::vector<MetaFileExtent> AllocExtents(MetaLpnType lpnCnt);
     virtual MetaLpnType GetAvailableLpnCount(void);
-    virtual MetaLpnType GetAvailableSpace(void);
 
     virtual std::vector<MetaFileExtent> GetAllocatedExtentList(void);
     virtual void SetAllocatedExtentList(std::vector<MetaFileExtent>& list);

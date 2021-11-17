@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -56,7 +56,7 @@ public:
     MOCK_METHOD(MetaLpnType, GetRegionSizeInLpn, (MetaRegionType regionType));
     MOCK_METHOD(MetaLpnType, GetMetaFileBaseLpn, ());
     MOCK_METHOD(void, CreateInitialInodeContent, (uint32_t maxInodeNum));
-    MOCK_METHOD(bool, LoadInodeContent, ());
+    MOCK_METHOD(bool, LoadContent, ());
     MOCK_METHOD(bool, BackupContent,
         (MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts,
             MetaLpnType iNodeTableLpnCnts));
@@ -72,10 +72,9 @@ public:
     MOCK_METHOD(void, PopulateFileNameWithVolumeType, (FileHashInVolume& dest));
     MOCK_METHOD(uint32_t, GetExtent,
         (const FileDescriptorType fd, std::vector<MetaFileExtent>& extents));
-    MOCK_METHOD(uint32_t, GetUtilizationInPercent, ());
+    MOCK_METHOD(MetaLpnType, GetAvailableLpnCount, ());
+    MOCK_METHOD(size_t, GetAvailableSpace, ());
     MOCK_METHOD(bool, IsFileInodeInUse, (const FileDescriptorType fd));
-    MOCK_METHOD(FileControlResult, CreateFileInode, (MetaFsFileControlRequest& reqMsg));
-    MOCK_METHOD(FileControlResult, DeleteFileInode, (MetaFsFileControlRequest& reqMsg));
     MOCK_METHOD(bool, IsGivenFileCreated, (StringHashType fileKey));
     MOCK_METHOD(FileSizeType, GetFileSize, (FileDescriptorType fd));
     MOCK_METHOD(FileSizeType, GetDataChunkSize, (FileDescriptorType fd));

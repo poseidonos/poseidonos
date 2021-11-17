@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -47,7 +47,6 @@ public:
     MOCK_METHOD(void, Init, (MetaLpnType _base, MetaLpnType _last));
     MOCK_METHOD(std::vector<MetaFileExtent>, AllocExtents, (MetaLpnType lpnCnt));
     MOCK_METHOD(MetaLpnType, GetAvailableLpnCount, ());
-    MOCK_METHOD(MetaLpnType, GetAvailableSpace, ());
     MOCK_METHOD(std::vector<MetaFileExtent>, GetAllocatedExtentList, ());
     MOCK_METHOD(void, SetAllocatedExtentList, (std::vector<MetaFileExtent>& list));
     MOCK_METHOD(void, SetFileBaseLpn, (MetaLpnType BaseLpn));

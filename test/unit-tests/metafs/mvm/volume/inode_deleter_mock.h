@@ -30,66 +30,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mvm/volume/catalog.h"
+#ifndef __INODE_DELETER_MOCK_H__
+#define __INODE_DELETER_MOCK_H__
 
-#include <gtest/gtest.h>
- // namespace pos
+#include <gmock/gmock.h>
+
+#include <list>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+#include "src/metafs/mvm/volume/inode_deleter.h"
+
 namespace pos
 {
-class CatalogTester : public Catalog
+class MockInodeDeleter : public InodeDeleter
 {
 public:
-    CatalogTester(MetaVolumeType volumeType, MetaLpnType baseLpn)
-    : Catalog(volumeType, baseLpn)
-    {
-    }
+    using InodeDeleter::InodeDeleter;
 
-    uint64_t GetSignature(void)
-    {
-        return VOLUME_CATALOG_SIGNATURE;
-    }
+    MOCK_METHOD(FileControlResult, Delete, (MetaFsFileControlRequest& reqMsg));
 };
 
-TEST(Catalog, CreateObject)
-{
-    MetaLpnType maxVolumeLpn = 1024;
-    uint32_t maxFileNumSupport = 30;
-
-    CatalogTester* catalog = new CatalogTester(MetaVolumeType::SsdVolume, 0);
-    CatalogContent* content = catalog->GetContent();
-
-    catalog->Create(maxVolumeLpn, maxFileNumSupport);
-
-    EXPECT_EQ(content->volumeInfo.maxVolPageNum, maxVolumeLpn);
-    EXPECT_EQ(content->volumeInfo.maxFileNumSupport, maxFileNumSupport);
-    EXPECT_EQ(content->signature, catalog->GetSignature());
-
-    EXPECT_TRUE(catalog->CheckValidity());
-
-    delete catalog;
-}
-
-TEST(Catalog, RegisterRegion)
-{
-    MetaLpnType maxVolumeLpn = 1024;
-    uint32_t maxFileNumSupport = 30;
-
-    CatalogTester* catalog = new CatalogTester(MetaVolumeType::SsdVolume, 0);
-    CatalogContent* content = catalog->GetContent();
-
-    catalog->Create(maxVolumeLpn, maxFileNumSupport);
-
-    for (int i = 0; i < (int)MetaRegionType::Max; ++i)
-    {
-        catalog->RegisterRegionInfo((MetaRegionType)i, i * 5 + 1, i * 5 + 5);
-    }
-
-    for (int i = 0; i < (int)MetaRegionType::Max; ++i)
-    {
-        EXPECT_EQ(content->regionMap[i].baseLpn, i * 5 + 1);
-        EXPECT_EQ(content->regionMap[i].maxLpn,  i * 5 + 5);
-    }
-
-    delete catalog;
-}
 } // namespace pos
+
+#endif // __INODE_DELETER_MOCK_H__

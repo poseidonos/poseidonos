@@ -228,19 +228,6 @@ ExtentAllocator::SetAllocatedExtentList(std::vector<MetaFileExtent>& list)
     }
 }
 
-MetaLpnType
-ExtentAllocator::GetAvailableSpace(void)
-{
-    MetaLpnType total = 0;
-
-    for (auto& extent : freeList)
-    {
-        total += extent.GetCount();
-    }
-
-    return total;
-}
-
 void
 ExtentAllocator::SetFileBaseLpn(MetaLpnType BaseLpn)
 {

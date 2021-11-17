@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -72,11 +72,9 @@ TEST(ExtentAllocator, AllocExtent_runCorrectly)
     // start lpn:0, last lpn: 100, available count: 101
     extentMgr.Init(0, 100);
     MetaLpnType availableLpn = extentMgr.GetAvailableLpnCount();
-    MetaLpnType biggestLpn = extentMgr.GetAvailableSpace();
 
     // Then
     EXPECT_EQ(availableLpn, 101);
-    EXPECT_EQ(biggestLpn, 101);
 
     // When
     // start lpn:1, last lpn: 100, available count: 100
@@ -117,10 +115,6 @@ TEST(ExtentAllocator, Control_Contents)
     // When
     extentMgr.SetAllocatedExtentList(list);
     list_temp = extentMgr.GetAllocatedExtentList();
-
-    // Then
-    MetaLpnType biggestLpn = extentMgr.GetAvailableSpace();
-    EXPECT_EQ(biggestLpn, 64);
 
     // Then
     int usedLpnCount = 0;

@@ -345,10 +345,59 @@ MetaVolumeContainer::DeleteFile(MetaVolumeType volType, MetaFsFileControlRequest
     return (result.second == POS_EVENT_ID::SUCCESS);
 }
 
-size_t
-MetaVolumeContainer::GetAvailableSpace(MetaVolumeType volType)
+MetaLpnType
+MetaVolumeContainer::GetMaxLpn(MetaVolumeType volType)
 {
-    return volumeContainer[volType]->GetAvailableSpace();
+    return volumeContainer[volType]->GetMaxLpn();
+}
+
+FileDescriptorType
+MetaVolumeContainer::LookupFileDescByName(std::string& fileName)
+{
+    FileDescriptorType fd = MetaFsCommonConst::INVALID_FD;
+    for (auto& it : volumeContainer)
+    {
+        fd = it.second->LookupDescriptorByName(fileName);
+        if (fd != MetaFsCommonConst::INVALID_FD)
+            break;
+    }
+    return fd;
+}
+
+void
+MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
+{
+    for (auto& it : volumeContainer)
+    {
+        it.second->GetInodeList(fileInfoList);
+    }
+}
+
+bool
+MetaVolumeContainer::CopyInodeToInodeInfo(FileDescriptorType fd,
+        MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */)
+{
+    return volumeContainer[volumeType]->CopyInodeToInodeInfo(fd, inodeInfo);
+}
+
+POS_EVENT_ID
+MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd, MetaVolumeType volumeType)
+{
+    auto name = volumeContainer[volumeType]->LookupNameByDescriptor(fd);
+    if (name != "")
+        return POS_EVENT_ID::SUCCESS;
+
+    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+}
+
+POS_EVENT_ID
+MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName, MetaVolumeType volumeType)
+{
+    auto fd = volumeContainer[volumeType]->LookupDescriptorByName(fileName);
+    if (fd != MetaFsCommonConst::INVALID_FD)
+        return POS_EVENT_ID::SUCCESS;
+
+    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
 }
 
 bool
@@ -403,65 +452,16 @@ MetaVolumeContainer::GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType f
     return volumeContainer[volType]->GetFileBaseLpn(fd);
 }
 
-MetaLpnType
-MetaVolumeContainer::GetMaxLpn(MetaVolumeType volType)
-{
-    return volumeContainer[volType]->GetMaxLpn();
-}
-
-FileDescriptorType
-MetaVolumeContainer::LookupFileDescByName(std::string& fileName)
-{
-    FileDescriptorType fd = MetaFsCommonConst::INVALID_FD;
-    for (auto& it : volumeContainer)
-    {
-        fd = it.second->LookupDescriptorByName(fileName);
-        if (fd != MetaFsCommonConst::INVALID_FD)
-            break;
-    }
-    return fd;
-}
-
-void
-MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
-{
-    for (auto& it : volumeContainer)
-    {
-        it.second->GetInodeList(fileInfoList);
-    }
-}
-
 MetaFileInode&
 MetaVolumeContainer::GetInode(FileDescriptorType fd, MetaVolumeType volumeType)
 {
     return volumeContainer[volumeType]->GetInode(fd);
 }
 
-bool
-MetaVolumeContainer::CopyInodeToInodeInfo(FileDescriptorType fd,
-        MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */)
+size_t
+MetaVolumeContainer::GetAvailableSpace(MetaVolumeType volType)
 {
-    return volumeContainer[volumeType]->CopyInodeToInodeInfo(fd, inodeInfo);
-}
-
-POS_EVENT_ID
-MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd, MetaVolumeType volumeType)
-{
-    auto name = volumeContainer[volumeType]->LookupNameByDescriptor(fd);
-    if (name != "")
-        return POS_EVENT_ID::SUCCESS;
-
-    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
-}
-
-POS_EVENT_ID
-MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName, MetaVolumeType volumeType)
-{
-    auto fd = volumeContainer[volumeType]->LookupDescriptorByName(fileName);
-    if (fd != MetaFsCommonConst::INVALID_FD)
-        return POS_EVENT_ID::SUCCESS;
-
-    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    return volumeContainer[volType]->GetAvailableSpace();
 }
 
 MetaLpnType
@@ -469,5 +469,4 @@ MetaVolumeContainer::GetTheLastValidLpn(MetaVolumeType volumeType)
 {
     return volumeContainer[volumeType]->GetTheLastValidLpn();
 }
-
 } // namespace pos

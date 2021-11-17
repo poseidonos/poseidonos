@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -230,7 +230,7 @@ TEST_F(InodeManagerFixture, CreateInodeContents)
     inodeMgr->CreateInitialInodeContent(10);
 }
 
-TEST_F(InodeManagerFixture, LoadInodeContents_Positive)
+TEST_F(InodeManagerFixture, LoadContents_Positive)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
 
@@ -238,19 +238,19 @@ TEST_F(InodeManagerFixture, LoadInodeContents_Positive)
     EXPECT_CALL(*inodeTable, GetBaseLpn()).WillOnce(Return(0));
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap).WillRepeatedly(ReturnRef(bitmap));
 
-    EXPECT_EQ(inodeMgr->LoadInodeContent(), true);
+    EXPECT_EQ(inodeMgr->LoadContent(), true);
 }
 
-TEST_F(InodeManagerFixture, LoadInodeContents_Negative0)
+TEST_F(InodeManagerFixture, LoadContents_Negative0)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
 
     EXPECT_CALL(*inodeHdr, Load()).WillOnce(Return(false));
 
-    EXPECT_EQ(inodeMgr->LoadInodeContent(), false);
+    EXPECT_EQ(inodeMgr->LoadContent(), false);
 }
 
-TEST_F(InodeManagerFixture, LoadInodeContents_Negative1)
+TEST_F(InodeManagerFixture, LoadContents_Negative1)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
     bitmap.set(0, true);
@@ -260,7 +260,7 @@ TEST_F(InodeManagerFixture, LoadInodeContents_Negative1)
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap).WillRepeatedly(ReturnRef(bitmap));
     EXPECT_CALL(*inodeTable, Load(_, _, _, _)).WillOnce(Return(false));
 
-    EXPECT_EQ(inodeMgr->LoadInodeContent(), false);
+    EXPECT_EQ(inodeMgr->LoadContent(), false);
 }
 
 TEST_F(InodeManagerFixture, CheckRegionBaseLpn0)
@@ -326,198 +326,30 @@ TEST_F(InodeManagerFixture, CheckHashMap)
     }
 }
 
-TEST_F(InodeManagerFixture, CheckFileCreation_Positive)
-{
-    std::string fileName = "TESTFILE";
-    MetaFileInode inode;
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
-
-    std::vector<MetaFileExtent> extents;
-    extents.push_back({0, 16});
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    EXPECT_CALL(*fdAllocator, Alloc(Matcher<std::string&>(_)))
-            .WillOnce(Return(0));
-
-    // _AllocNewInodeEntry()
-    EXPECT_CALL(*inodeHdr, GetFreeInodeEntryIdx);
-    EXPECT_CALL(*inodeHdr, SetInodeInUse);
-    EXPECT_CALL(*extentAllocator, AllocExtents)
-            .WillOnce(Return(extents));
-
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store())
-            .WillOnce(Return(true));
-    EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
-    EXPECT_CALL(*inodeTable, GetInode)
-            .WillRepeatedly(ReturnRef(inode));
-    EXPECT_CALL(*inodeTable, GetBaseLpn)
-            .WillOnce(Return(0));
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeMgr->CreateFileInode(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
-}
-
-TEST_F(InodeManagerFixture, CheckFileCreation_Negative)
-{
-    std::string fileName = "TESTFILE";
-    MetaFileInode inode;
-
-    std::vector<MetaFileExtent> extents;
-    extents.push_back({0, 16});
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    EXPECT_CALL(*fdAllocator, Alloc(Matcher<std::string&>(_)))
-            .WillOnce(Return(0));
-
-    // _AllocNewInodeEntry()
-    EXPECT_CALL(*inodeHdr, GetFreeInodeEntryIdx);
-    EXPECT_CALL(*inodeHdr, SetInodeInUse);
-    EXPECT_CALL(*inodeTable, GetInode)
-            .WillOnce(ReturnRef(inode));
-    EXPECT_CALL(*extentAllocator, AllocExtents)
-            .WillOnce(Return(extents));
-
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store())
-            .WillOnce(Return(false));
-
-    EXPECT_CALL(*extentAllocator, AddToFreeList);
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeMgr->CreateFileInode(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
-}
-
-TEST_F(InodeManagerFixture, CheckFileDeletion_Positive)
-{
-    std::string fileName = "TESTFILE";
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
-
-    std::vector<MetaFileExtent> extents;
-    extents.push_back({0, 16});
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    // LookupDescriptorByName()
-    EXPECT_CALL(*fdAllocator, FindFdByName)
-            .WillOnce(Return(0));
-
-    // GetExtent()
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeMgr->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    EXPECT_CALL(*inodeHdr, ClearInodeInUse);
-
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store())
-            .WillOnce(Return(true));
-    EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
-    EXPECT_CALL(*inodeTable, GetInode)
-            .WillRepeatedly(ReturnRef(inode));
-    EXPECT_CALL(*inodeTable, GetBaseLpn)
-            .WillOnce(Return(0));
-
-    EXPECT_CALL(*fdAllocator, Free(Matcher<std::string&>(_), _));
-    EXPECT_CALL(*extentAllocator, AddToFreeList);
-    // EXPECT_CALL(*inodeHdr, GetFileExtentContent);
-    EXPECT_CALL(*extentAllocator, PrintFreeExtentsList);
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeMgr->DeleteFileInode(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
-}
-
-TEST_F(InodeManagerFixture, CheckFileDeletion_Negative)
-{
-    std::string fileName = "TESTFILE";
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    // LookupDescriptorByName()
-    EXPECT_CALL(*fdAllocator, FindFdByName)
-            .WillOnce(Return(0));
-
-    // GetExtent()
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeMgr->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    EXPECT_CALL(*inodeHdr, ClearInodeInUse);
-
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store())
-            .WillOnce(Return(false));
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeMgr->DeleteFileInode(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
-}
-
 TEST_F(InodeManagerFixture, CheckUtilization)
 {
-    EXPECT_CALL(*extentAllocator, GetAvailableLpnCount)
-            .WillOnce(Return(100));
+    EXPECT_CALL(*extentAllocator, GetAvailableLpnCount).WillOnce(Return(100));
 
-    EXPECT_EQ(inodeMgr->GetUtilizationInPercent(), 50);
+    EXPECT_EQ(inodeMgr->GetAvailableLpnCount(), 100);
 }
 
 TEST_F(InodeManagerFixture, CheckAvailableSpaceInByteSize0)
 {
-    EXPECT_CALL(*extentAllocator, GetAvailableSpace)
-            .WillOnce(Return(7));
+    EXPECT_CALL(*extentAllocator, GetAvailableLpnCount).WillOnce(Return(7));
 
     EXPECT_EQ(inodeMgr->GetAvailableSpace(), 0);
 }
 
 TEST_F(InodeManagerFixture, CheckAvailableSpaceInByteSize1)
 {
-    EXPECT_CALL(*extentAllocator, GetAvailableSpace)
-            .WillOnce(Return(8));
+    EXPECT_CALL(*extentAllocator, GetAvailableLpnCount).WillOnce(Return(8));
 
     EXPECT_EQ(inodeMgr->GetAvailableSpace(), 8 * 4032);
 }
 
 TEST_F(InodeManagerFixture, CheckAvailableSpaceInByteSize2)
 {
-    EXPECT_CALL(*extentAllocator, GetAvailableSpace)
-            .WillOnce(Return(9));
+    EXPECT_CALL(*extentAllocator, GetAvailableLpnCount).WillOnce(Return(9));
 
     EXPECT_EQ(inodeMgr->GetAvailableSpace(), 8 * 4032);
 }
@@ -661,14 +493,6 @@ TEST_F(InodeManagerFixture, CheckInUseFlag)
             .WillOnce(Return(true));
 
     EXPECT_EQ(inodeMgr->IsFileInodeInUse(0), true);
-}
-
-TEST_F(InodeManagerFixture, CheckTotalAllocatedInodeCount)
-{
-    EXPECT_CALL(*inodeHdr, GetTotalAllocatedInodeCnt)
-            .WillOnce(Return(10));
-
-    EXPECT_EQ(inodeMgr->GetTotalAllocatedInodeCnt(), 10);
 }
 
 TEST_F(InodeManagerFixture, BackupContent_Positive)

@@ -25,6 +25,8 @@ SRCS += $(wildcard *.cpp) \
 	extent_allocator.cpp \
 	mf_inode.cpp \
 	inode_table_header.cpp \
+	inode_creator.cpp \
+	inode_deleter.cpp \
 	inode_manager.cpp \
 	inode_table.cpp \
 	on_volume_meta_region_mgr.cpp \

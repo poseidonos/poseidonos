@@ -41,18 +41,12 @@
 namespace pos
 {
 InodeManager::InodeManager(int arrayId)
-: OnVolumeMetaRegionManager(arrayId),
-  inodeHdr(nullptr),
-  inodeTable(nullptr),
-  metaStorage(nullptr),
-  fdAllocator(nullptr),
-  extentAllocator(nullptr)
+: OnVolumeMetaRegionManager(arrayId)
 {
 }
 
 InodeManager::InodeManager(InodeTableHeader* inodeHdr, InodeTable* inodeTable,
-        FileDescriptorAllocator* fdAllocator, ExtentAllocator* extentAllocator,
-        int arrayId)
+        FileDescriptorAllocator* fdAllocator, ExtentAllocator* extentAllocator, int arrayId)
 : InodeManager(arrayId)
 {
     this->inodeHdr = inodeHdr;
@@ -76,27 +70,15 @@ InodeManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType m
 
     MetaLpnType targetBaseLpn = baseLpn;
 
-    if (nullptr == inodeHdr)
-    {
-        inodeHdr = new InodeTableHeader(volumeType, targetBaseLpn);
-    }
+    inodeHdr = (nullptr == inodeHdr) ? new InodeTableHeader(volumeType, targetBaseLpn) : inodeHdr;
     targetBaseLpn += inodeHdr->GetLpnCntOfRegion();
 
-    if (nullptr == inodeTable)
-    {
-        inodeTable = new InodeTable(volumeType, targetBaseLpn);
-    }
+    inodeTable = (nullptr == inodeTable) ? new InodeTable(volumeType, targetBaseLpn) : inodeTable;
     targetBaseLpn += inodeTable->GetLpnCntOfRegion();
 
-    if (nullptr == fdAllocator)
-    {
-        fdAllocator = new FileDescriptorAllocator();
-    }
+    fdAllocator = (nullptr == fdAllocator) ? new FileDescriptorAllocator() : fdAllocator;
 
-    if (nullptr == extentAllocator)
-    {
-        extentAllocator = new ExtentAllocator();
-    }
+    extentAllocator = (nullptr == extentAllocator) ? new ExtentAllocator() : extentAllocator;
     extentAllocator->Init(targetBaseLpn, maxLpn);
 }
 
@@ -106,15 +88,11 @@ InodeManager::GetRegionBaseLpn(MetaRegionType regionType)
     switch (regionType)
     {
         case MetaRegionType::FileInodeHdr:
-        {
             return inodeHdr->GetBaseLpn();
-        }
-        break;
+
         case MetaRegionType::FileInodeTable:
-        {
             return inodeTable->GetBaseLpn();
-        }
-        break;
+
         default:
             assert(false);
     }
@@ -126,15 +104,11 @@ InodeManager::GetRegionSizeInLpn(MetaRegionType regionType)
     switch (regionType)
     {
         case MetaRegionType::FileInodeHdr:
-        {
             return inodeHdr->GetLpnCntOfRegion();
-        }
-        break;
+
         case MetaRegionType::FileInodeTable:
-        {
             return inodeTable->GetLpnCntOfRegion();
-        }
-        break;
+
         default:
             assert(false);
     }
@@ -163,13 +137,13 @@ InodeManager::_BuildF2InodeMap(void)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
                             inodeHdr->GetInodeInUseBitmap();
-    uint32_t size = inodeInUseBitmap.size();
-    for (uint32_t idx = 0; idx < size; idx++)
+
+    for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
         if (inodeInUseBitmap.test(idx))
         {
             MetaFileInode& inode = inodeTable->GetInode(idx);
-            _UpdateFd2InodeMap(inode.data.basic.field.fd, inode);
+            fd2InodeMap.insert(std::make_pair(inode.data.basic.field.fd, &inode));
         }
     }
 }
@@ -180,13 +154,12 @@ InodeManager::CreateInitialInodeContent(uint32_t maxInodeNum)
     inodeHdr->Create(maxInodeNum);
     inodeTable->Create(maxInodeNum);
 
-    std::vector<pos::MetaFileExtent> extentList =
-                            extentAllocator->GetAllocatedExtentList();
+    std::vector<pos::MetaFileExtent> extentList = extentAllocator->GetAllocatedExtentList();
     inodeHdr->SetFileExtentContent(extentList);
 }
 
 bool
-InodeManager::LoadInodeContent(void)
+InodeManager::LoadContent(void)
 {
     if (true != inodeHdr->Load())
     {
@@ -225,11 +198,9 @@ InodeManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
         "[Restore inode header content] from vol= {}, baseLpn={}, LpnCnts={}...",
         targetVol, baseLpn, iNodeHdrLpnCnts);
 
-    bool isSuccess;
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
 
-    isSuccess = inodeHdr->Load(media, baseLpn, 0 /*idx */, iNodeHdrLpnCnts);
-    if (!isSuccess)
+    if (false == inodeHdr->Load(media, baseLpn, 0 /*idx */, iNodeHdrLpnCnts))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
             "Restore I/O for MFS inode header of NVRAM meta vol. has failed...");
@@ -258,13 +229,12 @@ InodeManager::_LoadInodeFromMedia(MetaStorageType media, MetaLpnType baseLpn)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
                                     inodeHdr->GetInodeInUseBitmap();
-    uint32_t size = inodeInUseBitmap.size();
-    for (uint32_t idx = 0; idx < size; idx++)
+
+    for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
         if (inodeInUseBitmap.test(idx))
         {
-            if (false == inodeTable->Load(media, baseLpn,
-                                idx * MetaFsConfig::LPN_COUNT_PER_INODE,
+            if (false == inodeTable->Load(media, baseLpn, idx * MetaFsConfig::LPN_COUNT_PER_INODE,
                                 MetaFsConfig::LPN_COUNT_PER_INODE /*LpnCnts*/))
             {
                 return false;
@@ -315,11 +285,9 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
         "[Bakcup inode Header Content] to vol= {}, baseLpn={}, LpnCnts={}...",
         targetVol, baseLpn, iNodeHdrLpnCnts);
 
-    bool isSuccess;
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
 
-    isSuccess = inodeHdr->Store(media, baseLpn, 0 /*buf idx */, iNodeHdrLpnCnts);
-    if (!isSuccess)
+    if (false == inodeHdr->Store(media, baseLpn, 0 /*buf idx */, iNodeHdrLpnCnts))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Backup I/O for MFS inode header of NVRAM meta vol. has failed...");
@@ -348,8 +316,8 @@ InodeManager::_StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
                                     inodeHdr->GetInodeInUseBitmap();
-    uint32_t size = inodeInUseBitmap.size();
-    for (uint32_t idx = 0; idx < size; idx++)
+
+    for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
         if (inodeInUseBitmap.test(idx))
         {
@@ -380,140 +348,16 @@ InodeManager::SetMss(MetaStorageSubsystem* metaStorage)
     inodeTable->SetMss(metaStorage);
 }
 
-std::pair<FileDescriptorType, POS_EVENT_ID>
-InodeManager::CreateFileInode(MetaFsFileControlRequest& reqMsg)
+MetaLpnType
+InodeManager::GetAvailableLpnCount(void)
 {
-    MetaLpnType totalLpnCount = 0;
-    FileDescriptorType fd = fdAllocator->Alloc(*reqMsg.fileName);
-    MetaFileInode& newInode = _AllocNewInodeEntry(fd);
-
-    FileSizeType userDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
-    std::vector<MetaFileExtent> extents = extentAllocator->AllocExtents(requestLpnCnt);
-
-#if (PRINT_INFO == 1)
-    std::cout << "========= CreateFileInode: " << *reqMsg.fileName << std::endl;
-    for (auto& extent : extents)
-    {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
-        totalLpnCount += extent.GetCount();
-    }
-    std::cout << "lpn count: " << totalLpnCount << std::endl;
-#endif
-
-    MetaFileInodeCreateReq inodeReq;
-    inodeReq.Setup(reqMsg, fd, mediaType, &extents);
-
-    newInode.BuildNewEntry(inodeReq, MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
-
-    _UpdateFd2InodeMap(fd, newInode);
-
-    totalLpnCount = 0;
-    for (auto& extent : extents)
-    {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "[Metadata File] Allocate an extent, startLpn={}, count={}",
-            extent.GetStartLpn(), extent.GetCount());
-            totalLpnCount += extent.GetCount();
-    }
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Create volType={}, fd={}, fileName={}, totalLpnCnt={}",
-        (int)mediaType, fd, *reqMsg.fileName, totalLpnCount);
-
-    std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-                                    extentAllocator->GetAllocatedExtentList();
-    inodeHdr->SetFileExtentContent(usedExtentsInVolume);
-
-    if (true != SaveContent())
-    {
-        for (auto& extent : extents)
-        {
-            extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
-
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "[Metadata File] Release an extent, startLpn={}, count={}",
-                extent.GetStartLpn(), extent.GetCount());
-        }
-
-        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
-    }
-
-    return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
-}
-
-std::pair<FileDescriptorType, POS_EVENT_ID>
-InodeManager::DeleteFileInode(MetaFsFileControlRequest& reqMsg)
-{
-    MetaLpnType totalLpnCount = 0;
-    std::vector<MetaFileExtent> extents;
-    FileDescriptorType fd = LookupDescriptorByName(*reqMsg.fileName);
-    MetaLpnType count = GetExtent(fd, extents);
-    assert(count > 0);
-
-#if (PRINT_INFO == 1)
-    std::cout << "========= DeleteFileInode: " << *reqMsg.fileName << std::endl;
-    for (auto& extent : extents)
-    {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
-        totalLpnCount += extent.GetCount();
-    }
-    std::cout << "lpn count: " << totalLpnCount << std::endl;
-#endif
-
-    MetaFileInode& inode = GetFileInode(fd);
-    uint32_t entryIdx = inode.GetIndexInInodeTable();
-
-    inode.SetInUse(false);
-    inodeHdr->ClearInodeInUse(entryIdx);
-
-    fd2InodeMap.erase(fd);
-
-    totalLpnCount = 0;
-    for (auto& extent : extents)
-    {
-        extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
-
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Release an extent, startLpn={}, count={}",
-        extent.GetStartLpn(), extent.GetCount());
-        totalLpnCount += extent.GetCount();
-    }
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Delete volType={}, fd={}, fileName={}, totalLpnCnt={}",
-        (int)volumeType, fd, *reqMsg.fileName, totalLpnCount);
-
-    fdAllocator->Free(*reqMsg.fileName, fd);
-
-    extentAllocator->PrintFreeExtentsList();
-
-    std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-                                    extentAllocator->GetAllocatedExtentList();
-    inodeHdr->SetFileExtentContent(usedExtentsInVolume);
-
-    if (true != SaveContent())
-    {
-        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
-    }
-
-    return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
-}
-
-uint32_t
-InodeManager::GetUtilizationInPercent(void)
-{
-    return ((maxLpn - extentAllocator->GetAvailableLpnCount()) * 100) / maxLpn;
+    return extentAllocator->GetAvailableLpnCount();
 }
 
 size_t
 InodeManager::GetAvailableSpace(void)
 {
-    MetaLpnType maxSize = extentAllocator->GetAvailableSpace();
+    MetaLpnType maxSize = extentAllocator->GetAvailableLpnCount();
 
     maxSize -= maxSize % MetaFsConfig::LPN_COUNT_PER_EXTENT;
 
@@ -553,12 +397,6 @@ InodeManager::AddFileInActiveList(FileDescriptorType fd)
     return rc;
 }
 
-bool
-InodeManager::IsGivenFileCreated(StringHashType fileKey)
-{
-    return fdAllocator->IsGivenFileCreated(fileKey);
-}
-
 void
 InodeManager::RemoveFileFromActiveList(FileDescriptorType fd)
 {
@@ -575,24 +413,6 @@ InodeManager::GetFileCountInActive(void)
     return activeFiles.size();
 }
 
-MetaLpnType
-InodeManager::GetMetaFileBaseLpn(void)
-{
-    return extentAllocator->GetFileBaseLpn();
-}
-
-void
-InodeManager::SetMetaFileBaseLpn(MetaLpnType lpn)
-{
-    extentAllocator->SetFileBaseLpn(lpn);
-}
-
-FileDescriptorType
-InodeManager::LookupDescriptorByName(std::string& fileName)
-{
-    return fdAllocator->FindFdByName(fileName);
-}
-
 std::string
 InodeManager::LookupNameByDescriptor(FileDescriptorType fd)
 {
@@ -603,37 +423,22 @@ InodeManager::LookupNameByDescriptor(FileDescriptorType fd)
     return item->second->data.basic.field.fileName.ToString();
 }
 
-MetaFileInode&
-InodeManager::_AllocNewInodeEntry(FileDescriptorType& newFd)
-{
-    uint32_t entryIdx = inodeHdr->GetFreeInodeEntryIdx();
-    inodeHdr->SetInodeInUse(entryIdx);
-    MetaFileInode& freeInode = inodeTable->GetInode(entryIdx);
-    freeInode.CleanupEntry();
-    freeInode.SetIndexInInodeTable(entryIdx);
-
-    return freeInode;
-}
-
 FileSizeType
 InodeManager::GetFileSize(const FileDescriptorType fd)
 {
-    MetaFileInode& inode = GetFileInode(fd);
-    return inode.data.basic.field.fileByteSize;
+    return GetFileInode(fd).data.basic.field.fileByteSize;
 }
 
 FileSizeType
 InodeManager::GetDataChunkSize(const FileDescriptorType fd)
 {
-    MetaFileInode& inode = GetFileInode(fd);
-    return inode.data.basic.field.dataChunkSize;
+    return GetFileInode(fd).data.basic.field.dataChunkSize;
 }
 
 MetaLpnType
 InodeManager::GetFileBaseLpn(const FileDescriptorType fd)
 {
-    MetaFileInode& inode = GetFileInode(fd);
-    return inode.data.basic.field.pagemap[0].GetStartLpn();
+    return GetFileInode(fd).data.basic.field.pagemap[0].GetStartLpn();
 }
 
 uint32_t
@@ -657,18 +462,6 @@ InodeManager::GetFileInode(const FileDescriptorType fd)
     auto item = fd2InodeMap.find(fd);
     assert(item != fd2InodeMap.end());
     return *item->second;
-}
-
-MetaFileInode&
-InodeManager::GetInodeEntry(const uint32_t entryIdx)
-{
-    return inodeTable->GetInode(entryIdx);
-}
-
-void
-InodeManager::_UpdateFd2InodeMap(FileDescriptorType fd, MetaFileInode& inode)
-{
-    fd2InodeMap.insert(std::make_pair(fd, &inode));
 }
 
 void
@@ -710,8 +503,7 @@ InodeManager::_UpdateFdAllocator(void)
 void
 InodeManager::PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType, MetaVolumeType>& dest)
 {
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src =
-                                        inodeHdr->GetInodeInUseBitmap();
+    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src = inodeHdr->GetInodeInUseBitmap();
 
     int inodeEntryNum = src.size();
     for (int idx = inodeEntryNum - 1; idx >= 0; idx--)
@@ -741,22 +533,9 @@ InodeManager::PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, 
             StringHashType hashKey = MetaFileUtil::GetHashKeyFromFileName(inode.data.basic.field.fileName.ToString());
             dest.insert(std::make_pair(hashKey, volumeType));
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "fileKey2VolumeType populated: {}, {}",
-                hashKey, (int)volumeType);
+                "fileKey2VolumeType populated: {}, {}", hashKey, (int)volumeType);
         }
     }
-}
-
-bool
-InodeManager::IsFileInodeInUse(const FileDescriptorType fd)
-{
-    return inodeHdr->IsFileInodeInUse(fd);
-}
-
-size_t
-InodeManager::GetTotalAllocatedInodeCnt(void)
-{
-    return inodeHdr->GetTotalAllocatedInodeCnt();
 }
 
 MetaLpnType
@@ -771,5 +550,41 @@ InodeManager::GetTheLastValidLpn(void)
     lpn += extents[extents.size() - 1].GetCount() - 1;
 
     return lpn;
+}
+
+MetaLpnType
+InodeManager::GetMetaFileBaseLpn(void)
+{
+    return extentAllocator->GetFileBaseLpn();
+}
+
+void
+InodeManager::SetMetaFileBaseLpn(MetaLpnType lpn)
+{
+    extentAllocator->SetFileBaseLpn(lpn);
+}
+
+bool
+InodeManager::IsGivenFileCreated(StringHashType fileKey)
+{
+    return fdAllocator->IsGivenFileCreated(fileKey);
+}
+
+FileDescriptorType
+InodeManager::LookupDescriptorByName(std::string& fileName)
+{
+    return fdAllocator->FindFdByName(fileName);
+}
+
+MetaFileInode&
+InodeManager::GetInodeEntry(const uint32_t entryIdx)
+{
+    return inodeTable->GetInode(entryIdx);
+}
+
+bool
+InodeManager::IsFileInodeInUse(const FileDescriptorType fd)
+{
+    return inodeHdr->IsFileInodeInUse(fd);
 }
 } // namespace pos

@@ -49,6 +49,8 @@
 #include "os_header.h"
 #include "file_descriptor_allocator.h"
 #include "extent_allocator.h"
+#include "src/metafs/mvm/volume/inode_creator.h"
+#include "src/metafs/mvm/volume/inode_deleter.h"
 
 namespace pos
 {
@@ -79,17 +81,13 @@ public:
                 std::vector<MetaFileExtent>& extents /* output */);
 
     virtual void CreateInitialInodeContent(uint32_t maxInodeNum);
-    virtual bool LoadInodeContent(void);
+    virtual bool LoadContent(void);
     virtual MetaLpnType GetRegionBaseLpn(MetaRegionType regionType);
     virtual MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
     virtual void PopulateFDMapWithVolumeType(FileDescriptorInVolume& dest);
     virtual void PopulateFileNameWithVolumeType(FileHashInVolume& dest);
 
-    virtual std::pair<FileDescriptorType, POS_EVENT_ID> CreateFileInode(
-                MetaFsFileControlRequest& reqMsg);
-    virtual std::pair<FileDescriptorType, POS_EVENT_ID> DeleteFileInode(
-                MetaFsFileControlRequest& reqMsg);
-    virtual uint32_t GetUtilizationInPercent(void);
+    virtual MetaLpnType GetAvailableLpnCount(void);
     virtual size_t GetAvailableSpace(void);
 
     virtual bool CheckFileInActive(FileDescriptorType fd);
@@ -107,7 +105,6 @@ public:
     virtual MetaFileInode& GetFileInode(const FileDescriptorType fd);
     virtual MetaFileInode& GetInodeEntry(const uint32_t entryIdx);
     virtual bool IsFileInodeInUse(const FileDescriptorType fd);
-    virtual size_t GetTotalAllocatedInodeCnt(void);
     virtual MetaLpnType GetTheLastValidLpn(void);
 
     virtual bool BackupContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
@@ -126,19 +123,20 @@ public:
     }
 
 private:
-    MetaFileInode& _AllocNewInodeEntry(FileDescriptorType& newFd);
-    void _UpdateFd2InodeMap(FileDescriptorType fd, MetaFileInode& inode);
     void _BuildF2InodeMap(void);
     bool _LoadInodeFromMedia(MetaStorageType media, MetaLpnType baseLpn);
     bool _StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn);
     void _UpdateFdAllocator(void);
 
-    InodeTableHeader* inodeHdr;
-    InodeTable* inodeTable;
+    InodeTableHeader* inodeHdr = nullptr;
+    InodeTable* inodeTable = nullptr;
     std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap;
     std::unordered_set<FileDescriptorType> activeFiles;
-    MetaStorageSubsystem* metaStorage;
-    FileDescriptorAllocator* fdAllocator;
-    ExtentAllocator* extentAllocator;
+    MetaStorageSubsystem* metaStorage = nullptr;
+    FileDescriptorAllocator* fdAllocator = nullptr;
+    ExtentAllocator* extentAllocator = nullptr;
+
+    friend InodeCreator;
+    friend InodeDeleter;
 };
 } // namespace pos

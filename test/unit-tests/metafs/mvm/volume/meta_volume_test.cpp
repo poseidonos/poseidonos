@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -38,6 +38,8 @@
 #include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
 #include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
 #include "test/unit-tests/metafs/mvm/volume/catalog_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_creator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_deleter_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gmock/gmock.h>
@@ -60,8 +62,9 @@ class MetaVolumeTester : public MetaVolume
 public:
     MetaVolumeTester(int arrayId, MetaVolumeType volumeType,
             MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
-            CatalogManager* catalogMgr = nullptr)
-    : MetaVolume(arrayId, volumeType, maxVolumePageNum, inodeMgr, catalogMgr)
+            CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
+            InodeDeleter* inodeDeleter = nullptr)
+    : MetaVolume(arrayId, volumeType, maxVolumePageNum, inodeMgr, catalogMgr, inodeCreator, inodeDeleter)
     {
     }
     virtual ~MetaVolumeTester(void)
@@ -112,8 +115,11 @@ public:
         catalogMgr = new NiceMock<MockCatalogManager>(arrayId);
         metaStorage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
+        inodeCreator = new NiceMock<MockInodeCreator>(inodeMgr);
+        inodeDeleter = new NiceMock<MockInodeDeleter>(inodeMgr);
+
         metaVolume = new MetaVolumeTester(arrayId, volumeType, maxVolumePageNum,
-                                    inodeMgr, catalogMgr);
+                                    inodeMgr, catalogMgr, inodeCreator, inodeDeleter);
 
         EXPECT_CALL(*inodeMgr, Init);
         EXPECT_CALL(*inodeMgr, SetMss);
@@ -137,9 +143,12 @@ protected:
     const int DEFAULT_SIZE = 5;
 
     MetaVolumeTester* metaVolume = nullptr;
+
     NiceMock<MockInodeManager>* inodeMgr = nullptr;
     NiceMock<MockCatalogManager>* catalogMgr = nullptr;
     NiceMock<MockMetaStorageSubsystem>* metaStorage = nullptr;
+    NiceMock<MockInodeCreator>* inodeCreator = nullptr;
+    NiceMock<MockInodeDeleter>* inodeDeleter = nullptr;
 
     int arrayId = 0;
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
@@ -192,7 +201,7 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -208,7 +217,7 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadVolCatalog)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(false));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -219,12 +228,12 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadVolCatalog)
     EXPECT_FALSE(metaVolume->OpenVolume(info, false));
 }
 
-TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadInodeContent)
+TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadContent)
 {
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(false));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(false));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -240,7 +249,7 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive_Even_If_RestoreContent_CatalogMgr)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -256,7 +265,7 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive_Even_If_RestoreContent_InodeMgr)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -272,7 +281,7 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_RestoreContent_CatalogMgr)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -289,7 +298,7 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_RestoreContent_InodeMgr)
     EXPECT_CALL(*catalogMgr, LoadVolCatalog()).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, RestoreContent(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(*catalogMgr, Bringup()).WillRepeatedly(Return());
-    EXPECT_CALL(*inodeMgr, LoadInodeContent()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*inodeMgr, LoadContent()).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RestoreContent(_, _, _, _)).WillRepeatedly(Return(false));
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
@@ -487,7 +496,7 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Positive)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
 
-    EXPECT_CALL(*inodeMgr, CreateFileInode).WillOnce(Return(result));
+    EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
 
     result = metaVolume->CreateFile(reqMsg);
 
@@ -502,7 +511,7 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
 
-    EXPECT_CALL(*inodeMgr, CreateFileInode).WillOnce(Return(result));
+    EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
 
     result = metaVolume->CreateFile(reqMsg);
 
@@ -517,7 +526,7 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
 
-    EXPECT_CALL(*inodeMgr, DeleteFileInode).WillOnce(Return(result));
+    EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
 
     result = metaVolume->DeleteFile(reqMsg);
 
@@ -532,7 +541,7 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
 
-    EXPECT_CALL(*inodeMgr, DeleteFileInode).WillOnce(Return(result));
+    EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
 
     result = metaVolume->DeleteFile(reqMsg);
 

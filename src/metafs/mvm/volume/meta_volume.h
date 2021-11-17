@@ -40,6 +40,8 @@
 #include "catalog_manager.h"
 #include "meta_volume_state.h"
 #include "inode_manager.h"
+#include "src/metafs/mvm/volume/inode_creator.h"
+#include "src/metafs/mvm/volume/inode_deleter.h"
 
 namespace pos
 {
@@ -61,7 +63,8 @@ public:
     MetaVolume(void);
     MetaVolume(int arrayId, MetaVolumeType volumeType,
         MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
-        CatalogManager* catalogMgr = nullptr);
+        CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
+        InodeDeleter* inodeDeleter = nullptr);
     virtual ~MetaVolume(void);
 
     virtual void InitVolumeBaseLpn(void) = 0;
@@ -119,17 +122,14 @@ public:
     }
 
 protected:
-    MetaLpnType volumeBaseLpn;
-    MetaLpnType maxVolumeLpn;
-    MetaVolumeType volumeType;
-    MetaVolumeState volumeState;
+    MetaLpnType volumeBaseLpn = 0;
+    MetaLpnType maxVolumeLpn = 0;
+    MetaVolumeType volumeType = MetaVolumeType::Max;
+    MetaVolumeState volumeState = MetaVolumeState::Default;
     static const uint32_t META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT = 99;
 
 private:
     OnVolumeMetaRegionManager& _GetRegionMgr(MetaRegionManagerType region);
-    void _RegisterRegionMgr(MetaRegionManagerType region, OnVolumeMetaRegionManager& mgr);
-    void _BringupMgrs(void);
-    void _FinalizeMgrs(void);
     void _SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage);
     bool _LoadVolumeMeta(MetaLpnType* info, bool isNPOR);
 
@@ -139,17 +139,20 @@ private:
     bool _RestoreContents(MetaLpnType* info);
 
     std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap;
-    InodeManager* inodeMgr;
-    CatalogManager* catalogMgr;
-    bool inUse;
+    InodeManager* inodeMgr = nullptr;
+    CatalogManager* catalogMgr = nullptr;
+    bool inUse = false;
 
-    MetaLpnType sumOfRegionBaseLpns;
-    MetaStorageSubsystem* metaStorage;
+    MetaLpnType sumOfRegionBaseLpns = 0;
+    MetaStorageSubsystem* metaStorage = nullptr;
 
     std::unordered_map<FileDescriptorType, MetaVolumeType> fd2VolTypehMap;
     std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap;
 
-    int arrayId;
-    void* trimBuffer;
+    int arrayId = INT32_MAX;
+    void* trimBuffer = nullptr;
+
+    InodeCreator* inodeCreator = nullptr;
+    InodeDeleter* inodeDeleter = nullptr;
 };
 } // namespace pos
