@@ -31,7 +31,6 @@
  */
 
 #include "src/qos/qos_context.h"
-
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -444,7 +443,7 @@ QosContext::AllReactorsProcessed(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosContext::InsertInactiveReactors(std::vector<uint32_t> inactiveReactors)
+QosContext::InsertInactiveReactors(std::map<uint32_t, vector<uint32_t>> &inactiveReactors)
 {
     inactiveReactorsList = inactiveReactors;
 }
@@ -457,9 +456,14 @@ QosContext::InsertInactiveReactors(std::vector<uint32_t> inactiveReactors)
  */
 /* --------------------------------------------------------------------------*/
 std::vector<uint32_t>
-QosContext::GetInactiveReactorsList(void)
+QosContext::GetInactiveReactorsList(uint32_t volId)
 {
-    return inactiveReactorsList;
+    std::vector<uint32_t> reactorList;
+    if (inactiveReactorsList.find(volId) != inactiveReactorsList.end())
+    {
+        reactorList = inactiveReactorsList[volId];
+    }
+    return reactorList;
 }
 
 } // namespace pos

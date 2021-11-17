@@ -1,5 +1,4 @@
-/*
- *   BSD LICENSE
+/*   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
@@ -13,8 +12,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -29,49 +28,37 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #pragma once
-
-#include <map>
-#include <utility>
+#include <bits/stdc++.h>
+#include <functional>
+#include <queue>
 #include <vector>
-
-#include "src/qos/internal_manager.h"
-#include "src/qos/qos_common.h"
-#include "src/qos/reactor_heap.h"
+#include <utility>
 
 namespace pos
 {
-class QosContext;
-class VolumeParameter;
-class VolumeUserPolicy;
-class IThrottlingLogic;
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- */
-/* --------------------------------------------------------------------------*/
-class QosCorrectionManager : public QosInternalManager
+typedef std::pair <uint64_t, uint32_t> wtForReactor;
+
+struct IopsWeightCompare
+{
+    bool operator()(wtForReactor const &w1, wtForReactor const &w2)
+    {
+        return w1.first > w2.first;
+    }
+};
+
+class ReactorHeap
 {
 public:
-    explicit QosCorrectionManager(QosContext* qosCtx);
-    ~QosCorrectionManager(void);
-    void Execute(void) override;
-    QosInternalManagerType GetNextManagerType(void) override;
-    void Reset(void) override;
+    ReactorHeap(void);
+    ~ReactorHeap(void);
+    void ClearHeap();
+    void InsertPairInHeap(uint64_t weight, uint32_t reactorId);
+    std::vector<uint32_t> GetAllReactorIds(void);
+    uint32_t GetHeapSize(void);
 
 private:
-    void _SetNextManagerType(void);
-    void _HandleVolumeCorrection(void);
-    void _HandleMaxThrottling(void);
-    void _HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> volId);
-    void _HandleWrrCorrection(void);
-    uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
-    void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
-    QosContext* qosContext;
-    ReactorHeap* reactorMinHeap;
-    QosInternalManagerType nextManagerType;
-    IThrottlingLogic *throttlingLogic;
+    // default heap is ordered by the first element of the pair
+    std::priority_queue <wtForReactor, std::vector <wtForReactor>, IopsWeightCompare> reactorMinHeap;
 };
 } // namespace pos

@@ -62,7 +62,7 @@ private:
     void _UpdateContextUserVolumePolicy(void);
     void _UpdateContextUserRebuildPolicy(void);
     void _UpdateContextResourceDetails(void);
-    void _UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map, std::vector<uint32_t> &inactiveReactors);
+    void _UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map, std::map<uint32_t, vector<uint32_t>> &inactiveReactors);
     void _UpdateAllVolumeParameter(void);
     bool _GatherActiveVolumeParameters(void);
     void _GatherActiveEventParameters(void);
@@ -76,6 +76,6 @@ private:
     bw_iops_parameter eventParams[BackendEvent_Count];
     QosMonitoringManagerArray* qosMonitoringManagerArray[MAX_ARRAY_COUNT];
     std::map<uint32_t, uint32_t> prevActiveVolumeMap;
-    std::vector<uint32_t> inactiveReactors;
+    std::map<uint32_t, vector<uint32_t>> inactiveReactors;
 };
 } // namespace pos
