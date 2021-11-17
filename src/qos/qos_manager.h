@@ -41,13 +41,14 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "src/qos/exit_handler.h"
+
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
 #include "src/include/backend_event.h"
 #include "src/include/event_priority.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/lib/singleton.h"
+#include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
 #include "submission_adapter.h"
 #include "submission_notifier.h"
@@ -106,6 +107,8 @@ public:
     uint32_t GetGcFreeSegment(void);
     void GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId);
+    bool IsMinimumPolicyInEffectInSystem(void);
+    void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap);
 
 private:
     void _Finalize(void);

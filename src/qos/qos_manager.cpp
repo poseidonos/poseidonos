@@ -94,8 +94,8 @@ QosManager::QosManager(void)
     try
     {
         qosEventManager = new QosEventManager;
-        qosVolumeManager = new QosVolumeManager(feQosEnabled);
         qosContext = ContextFactory::CreateQosContext();
+        qosVolumeManager = new QosVolumeManager(qosContext, feQosEnabled);
         spdkManager = new QosSpdkManager(qosContext, feQosEnabled);
         monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext);
         policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext);
@@ -691,7 +691,6 @@ QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, boo
 {
     qosVolumeManager->SetVolumeLimit(reactor, volId, weight, iops);
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -759,4 +758,31 @@ QosManager::GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePolicyM
     volumePolicyMapCli.clear();
     volumePolicyUpdated = false;
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosManager::IsMinimumPolicyInEffectInSystem(void)
+{
+    return volMinPolicyInEffect;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap)
+{
+    qosVolumeManager->GetSubsystemVolumeMap(subsysVolMap);
+}
+
 } // namespace pos

@@ -49,10 +49,11 @@ class BwIopsRateLimit;
 class ParameterQueue;
 template<class T>
 class IoQueue;
+class QosContext;
 class QosVolumeManager : public VolumeEvent, public ExitQosHandler
 {
 public:
-    explicit QosVolumeManager(bool feQos);
+    explicit QosVolumeManager(QosContext* qosCtx, bool feQos);
     ~QosVolumeManager(void);
     bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
     bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
@@ -68,6 +69,7 @@ public:
     int VolumeQosPoller(struct poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
+    void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap);
 
 private:
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
@@ -78,6 +80,8 @@ private:
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw);
     pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
+    void _ClearVolumeParameters(uint32_t volId);
+    std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
@@ -85,8 +89,11 @@ private:
     std::atomic<int64_t> volReactorIopsWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     uint64_t pendingIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     bool feQosEnabled;
+    QosContext* qosContext;
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
     IoQueue<pos_io*>* ioQueue;
+    std::mutex subsysVolMapLock;
+    const char* BDEV_NAME_PREFIX = "bdev_";
 };
 } // namespace pos

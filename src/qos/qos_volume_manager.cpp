@@ -37,6 +37,7 @@
 #include "src/logger/logger.h"
 #include "src/qos/io_queue.h"
 #include "src/qos/parameter_queue.h"
+#include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
@@ -53,9 +54,10 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosVolumeManager::QosVolumeManager(bool feQos)
+QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos)
 : VolumeEvent("QosManager", ""),
-  feQosEnabled(feQos)
+  feQosEnabled(feQos),
+  qosContext(qosCtx)
 {
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
@@ -335,15 +337,14 @@ QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string ar
     {
         return true;
     }
+    string bdevName = _GetBdevName(volID, arrayName);
     uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(volName.c_str());
-    uint32_t i = 0;
-    for (i = 0; i < nqnVolumeMap[nqnId].size(); i++)
+    std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volID);
+    if (position != nqnVolumeMap[nqnId].end())
     {
-        if (volID == nqnVolumeMap[nqnId][i])
-        {
-            nqnVolumeMap[nqnId].erase(nqnVolumeMap[nqnId].begin() + i);
-        }
+        nqnVolumeMap[nqnId].erase(position);
     }
+    _ClearVolumeParameters(volID);
     return true;
 }
 
@@ -435,35 +436,26 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
     }
     double offset = (double)(now - next_tick) / param->qosTimeSlice;
     offset = offset + 1.0;
-    param->nextTimeStamp = now + param->qosTimeSlice;
-    if (SpdkConnection::IsReactorConnectionChanged(reactor) == true)
+    volList[reactor].clear();
+    for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
     {
-        SpdkConnection::ResetReactorConnection(reactor);
-        volList[reactor].clear();
-        for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
+        uint32_t subsys = it->first;
+        if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != M_INVALID_SUBSYSTEM)
         {
-            uint32_t subsys = it->first;
-            if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != M_INVALID_SUBSYSTEM)
-            {
-                volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
-            }
+            volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
         }
     }
     for (auto subsystem = volList[reactor].begin(); subsystem != volList[reactor].end(); subsystem++)
     {
         std::vector<int> volumeList = volList[reactor][subsystem->first];
+
         for (uint32_t i = 0; i < volumeList.size(); i++)
         {
             int volId = volumeList[i];
-            // Currently Qos supports just 1 Volume per subsystem, so default considers only 1st volume of subsystem list
-            // Fix for memory leak issue SHPOS-410
-            if (volId == volumeList[0])
-            {
-                _EnqueueVolumeParameter(reactor, volId, offset);
-            }
             currentBW = 0;
             currentIO = 0;
             _ResetRateLimit(reactor, volId, offset);
+            _EnqueueVolumeParameter(reactor, volId, offset);
             while (!IsExitQosSet())
             {
                 if (_RateLimit(reactor, volId) == true)
@@ -485,6 +477,9 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             volumeQosParam[reactor][volId].currentIOs = currentIO;
         }
     }
+    qosContext->SetReactorProcessed(reactor, true);
+    now = SpdkConnection::SpdkGetTicks();
+    param->nextTimeStamp = now + param->qosTimeSlice;
     return retVal;
 }
 
@@ -498,10 +493,29 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
 void
 QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset)
 {
-    volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
-    volumeQosParam[reactor][volId].currentBW = volumeQosParam[reactor][volId].currentBW / offset;
-    volumeQosParam[reactor][volId].currentIOs = volumeQosParam[reactor][volId].currentIOs / offset;
-    _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+    uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
+    uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
+    bool minimumPolicyInEffect = QosManagerSingleton::Instance()->IsMinimumPolicyInEffectInSystem();
+    qos_vol_policy volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId);
+    bool enqueueParameters = false;
+
+    enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
+    enqueueParameters = enqueueParameters && (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
+    // Condition (1) minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops)
+    // checks for some qos policy being present on the volume
+    // Condition (2) "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
+    // For any inactive volume the BW and well as pending IO count will be 0. Any other cases is active volume.
+    // BW (0), Pending (0) ==> Non Active Volume
+    // BW (0), Pending (!0) ==> Active, as 0 throttling would have been applied, so IO's in pending queue
+    // BW (!0), Pending (0) ==> Active, as IO's have been submitted but throttling value not reached
+    // BW (!0), Pending (!0) ==> Active, IO's have been submitted and throttling also active
+    if (enqueueParameters)
+    {
+        volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
+        volumeQosParam[reactor][volId].currentBW = currentBW;
+        volumeQosParam[reactor][volId].currentIOs = currentIops;
+        _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -523,7 +537,6 @@ QosVolumeManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t value
         volReactorWeight[reactor][volId] = value;
     }
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -542,6 +555,46 @@ QosVolumeManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
     {
         return volReactorWeight[reactor][volId];
     }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap)
+{
+    std::unique_lock<std::mutex> uniqueLock(subsysVolMapLock);
+    subSysVolMap = nqnVolumeMap;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+string
+QosVolumeManager::_GetBdevName(uint32_t volId, string arrayName)
+{
+    return BDEV_NAME_PREFIX + to_string(volId) + "_" + arrayName;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_ClearVolumeParameters(uint32_t volId)
+{
+    parameterQueue->ClearParameters(volId);
 }
 
 } // namespace pos

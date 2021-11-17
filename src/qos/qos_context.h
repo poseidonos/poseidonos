@@ -87,6 +87,11 @@ public:
     uint32_t GetTotalConnection(uint32_t volId);
     void UpdateReactorCoreList(uint32_t reactorCore);
     std::vector<uint32_t>& GetReactorCoreList(void);
+    void SetReactorProcessed(uint32_t reactorId, bool value);
+    bool AllReactorsProcessed(void);
+    void ResetAllReactorsProcessed(void);
+    void InsertInactiveReactors(std::vector<uint32_t> inactiveReactors);
+    std::vector<uint32_t> GetInactiveReactorsList(void);
 
 private:
     QosUserPolicy userPolicy;
@@ -106,5 +111,7 @@ private:
     uint32_t qosCorrectionCycle;
     uint32_t totalConnection[MAX_VOLUME_COUNT];
     std::vector<uint32_t> reactorCoreList;
+    std::vector<uint32_t> inactiveReactorsList;
+    std::atomic<bool> reactorProcessed[M_MAX_REACTORS];
 };
 } // namespace pos

@@ -39,6 +39,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/connection_management.h"
 
+#if 0
 #define VALID_ENTRY (1)
 #define INVALID_ENTRY (0)
 #define NVMF_CONNECT (0)
@@ -50,6 +51,7 @@ struct nvmfConnectEntry
     uint32_t subsysId;
     uint32_t connectType; // 0=Connect 1=Disconnect
 };
+#endif
 
 namespace pos
 {
@@ -296,9 +298,10 @@ QosMonitoringManager::_UpdateContextActiveReactorVolumes(uint32_t reactor, uint3
  */
 /* --------------------------------------------------------------------------*/
 void
-QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map)
+QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>>& activeReactors, std::vector<uint32_t>& inactiveReactors)
 {
-    qosContext->InsertActiveVolumeReactor(map);
+    qosContext->InsertActiveVolumeReactor(activeReactors);
+    qosContext->InsertInactiveReactors(inactiveReactors);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -388,8 +391,8 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     QosManager* qosManager = QosManagerSingleton::Instance();
     qosContext->ResetActiveVolume();
     qosContext->ResetActiveReactorVolume();
+    qosContext->ResetAllReactorsProcessed();
 
-    // Moved from VolumePolicy
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
     AllVolumeThrottle& allVolumeThrottle = qosCorrection.GetVolumeThrottlePolicy();
     allVolumeThrottle.Reset();
@@ -399,110 +402,76 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
 
     QosParameters& qosParameter = qosContext->GetQosParameters();
     qosParameter.Reset();
-    std::vector<int> subsystemVolList;
-    uint32_t activeConnectionCtr = 0;
-    map<uint32_t, uint32_t> volConnectionMap;
-    map<uint32_t, uint32_t> reactorConnectionMap;
     bool changeDetected = false;
+
     std::vector<uint32_t> reactorCoreList = qosContext->GetReactorCoreList();
-
-    do
+    std::unordered_map<int32_t, std::vector<int>> subsystemVolumeMap;
+    std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
+    while (!IsExitQosSet())
     {
-        activeConnectionCtr = M_RESET_TO_ZERO;
-
-        for (uint32_t index = 0; index < reactorCoreList.size(); index++)
-        {
-            if (true == IsExitQosSet())
-            {
-                activeConnectionCtr = M_RESET_TO_ZERO;
-                break;
-            }
-            uint32_t reactor = reactorCoreList[index];
-            while (!IsExitQosSet())
-            {
-                struct nvmfConnectEntry connectEntry;
-                bool entry = SpdkConnection::GetNvmfReactorConnection(reactor, &connectEntry);
-                if (false == entry)
-                {
-                    break;
-                }
-                else
-                {
-                    subsystemVolList = qosManager->GetVolumeFromActiveSubsystem(connectEntry.subsysId);
-                    if (0 == subsystemVolList.size())
-                    {
-                        break;
-                    }
-                    changeDetected = true;
-                    uint32_t volId = subsystemVolList[0]; // Currently Qos can handle only 1 NSID in subsystem
-                    int count = 0;
-                    if (connectEntry.connectType == NVMF_CONNECT)
-                    {
-                        reactorConnectionMap = volReactorMap[volId];
-                        count = reactorConnectionMap[reactor];
-                        count++;
-                        reactorConnectionMap[reactor] = count;
-                        volReactorMap[volId] = reactorConnectionMap;
-                        volConnectionMap = reactorVolMap[reactor];
-                        count = volConnectionMap[volId];
-                        count++;
-                        volConnectionMap[volId] = count;
-                        reactorVolMap[reactor] = volConnectionMap;
-                    }
-                    else
-                    {
-                        reactorConnectionMap = volReactorMap[volId];
-                        count = reactorConnectionMap[reactor];
-                        if (count <= 1)
-                        {
-                            reactorConnectionMap.erase(reactor);
-                        }
-                        else
-                        {
-                            count--;
-                            reactorConnectionMap[reactor] = count;
-                        }
-                        volReactorMap[volId] = reactorConnectionMap;
-                        volConnectionMap = reactorVolMap[reactor];
-                        count = volConnectionMap[volId];
-                        if (count <= 1)
-                        {
-                            volConnectionMap.erase(volId);
-                        }
-                        else
-                        {
-                            count--;
-                            volConnectionMap[volId] = count;
-                        }
-                        reactorVolMap[reactor] = volConnectionMap;
-                    }
-                }
-            }
-            activeConnectionCtr += reactorVolMap[reactor].size();
-        }
-        if (0 == activeConnectionCtr)
+        if (true == qosContext->AllReactorsProcessed())
         {
             break;
         }
-        for (uint32_t index = 0; index < reactorCoreList.size(); index++)
+    }
+    const std::map<uint32_t, map<uint32_t, uint32_t>> lastVolReactorMap = volReactorMap;
+    volReactorMap.clear();
+    reactorVolMap.clear();
+    inactiveReactors.clear();
+    for (auto& reactor : reactorCoreList)
+    {
+        bool reactorActive = false;
+        volList[reactor].clear();
+        if (true == IsExitQosSet())
         {
-            uint32_t reactor = reactorCoreList[index];
-            for (map<uint32_t, uint32_t>::iterator it = reactorVolMap[reactor].begin(); it != reactorVolMap[reactor].end(); it++)
+            break;
+        }
+        qosManager->GetSubsystemVolumeMap(subsystemVolumeMap);
+        for (auto& subsystemVolume : subsystemVolumeMap)
+        {
+            uint32_t subsystemId = subsystemVolume.first;
+            if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsystemId) != M_INVALID_SUBSYSTEM)
             {
-                uint32_t volId = it->first;
-                volParams[volId] = qosManager->DequeueVolumeParams(reactor, volId);
-                if (volParams[volId].valid == M_VALID_ENTRY)
+                volList[reactor][subsystemId] = qosManager->GetVolumeFromActiveSubsystem(subsystemId);
+            }
+            std::vector<int> volumeList = volList[reactor][subsystemId];
+            for (auto& volumeId : volumeList)
+            {
+                bool validParam = false;
+                while (true)
                 {
-                    _UpdateContextActiveVolumes(volId);
-                    _UpdateContextActiveReactorVolumes(reactor, volId);
-                    volParams[volId].valid = M_INVALID_ENTRY;
-                    _UpdateVolumeReactorParameter(volId, reactor);
+                    bool valid = _VolParamActivities(volumeId, reactor);
+                    if (valid == false)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        validParam = true;
+                    }
+                }
+                if (true == validParam)
+                {
+                    reactorVolMap[reactor].insert({volumeId, 1});
+                    volReactorMap[volumeId].insert({reactor, 1});
+                    reactorActive = true;
                 }
             }
         }
-        _UpdateContextActiveVolumeReactors(volReactorMap);
-    } while (!((activeConnectionCtr <= qosContext->GetActiveReactorVolumeCount()) && activeConnectionCtr));
-
+        if (reactorActive == false)
+        {
+            inactiveReactors.push_back(reactor);
+        }
+    }
+    if (lastVolReactorMap == volReactorMap)
+    {
+        changeDetected = false;
+    }
+    else
+    {
+        _UpdateContextActiveVolumeReactors(volReactorMap, inactiveReactors);
+        changeDetected = true;
+    }
     return changeDetected;
 }
 
@@ -626,4 +595,28 @@ QosMonitoringManager::_UpdateContextVolumeParameter(uint32_t volId)
     volParam.Reset();
     allVolumeParameter.InsertVolumeParameter(volId, volParam);
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosMonitoringManager::_VolParamActivities(uint32_t volId, uint32_t reactor)
+{
+    QosManager* qosManager = QosManagerSingleton::Instance();
+    volParams[volId] = qosManager->DequeueVolumeParams(reactor, volId);
+    if (volParams[volId].valid == M_VALID_ENTRY)
+    {
+        _UpdateContextActiveVolumes(volId);
+        _UpdateContextActiveReactorVolumes(reactor, volId);
+        volParams[volId].valid = M_INVALID_ENTRY;
+        _UpdateVolumeReactorParameter(volId, reactor);
+        return true;
+    }
+    return false;
+}
+
 } // namespace pos

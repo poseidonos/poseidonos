@@ -29,9 +29,9 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "src/qos/reactor_heap.h"
 
-#include "src/qos/parameter_queue.h"
-
+#include <iostream>
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -41,8 +41,9 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-ParameterQueue::ParameterQueue(void)
+ReactorHeap::ReactorHeap(void)
 {
+    ClearHeap();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -52,8 +53,59 @@ ParameterQueue::ParameterQueue(void)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-ParameterQueue::~ParameterQueue(void)
+ReactorHeap::~ReactorHeap(void)
 {
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+ReactorHeap::InsertPairInHeap(uint64_t bwWeight, uint32_t reactorId)
+{
+    reactorMaxHeap.push(std::make_pair(bwWeight, reactorId));
+    size++;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+std::vector<uint32_t>
+ReactorHeap::GetTopReactorIds(uint32_t size)
+{
+    int noOfElements = size;
+    int i = 0;
+    std::vector<uint32_t> reactors;
+    for (i = 0; i < noOfElements; i++)
+    {
+        reactors.push_back(reactorMaxHeap.top().second);
+        reactorMaxHeap.pop();
+    }
+    return reactors;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+std::vector<uint32_t>
+ReactorHeap::GetAllReactorIds(void)
+{
+    std::vector<uint32_t> reactors;
+    while (!reactorMaxHeap.empty())
+    {
+        reactors.push_back(reactorMaxHeap.top().second);
+        reactorMaxHeap.pop();
+    }
+    return reactors;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -64,12 +116,13 @@ ParameterQueue::~ParameterQueue(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-ParameterQueue::EnqueueParameter(uint32_t id1, uint32_t id2, bw_iops_parameter& param)
+ReactorHeap::ClearHeap()
 {
-    std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-    parameterQueue[id1][id2].push(param);
+    // re initiaize the max priority queue.
+    std::priority_queue<std::pair<uint64_t, uint32_t>> newHeap;
+    reactorMaxHeap = newHeap;
+    size = 0;
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -77,36 +130,10 @@ ParameterQueue::EnqueueParameter(uint32_t id1, uint32_t id2, bw_iops_parameter& 
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bw_iops_parameter
-ParameterQueue::DequeueParameter(uint32_t id1, uint32_t id2)
+uint32_t
+ReactorHeap::GetHeapSize()
 {
-    bw_iops_parameter ret;
-    ret.valid = M_INVALID_ENTRY;
-    std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-    if (false == parameterQueue[id1][id2].empty())
-    {
-        ret = parameterQueue[id1][id2].front();
-        parameterQueue[id1][id2].pop();
-    }
-    return ret;
+    return size;
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
-ParameterQueue::ClearParameters(uint32_t id2)
-{
-    std::queue<bw_iops_parameter> emptyQueue;
-    for (int id1 = 0; id1 < MAX_REACTOR_WORKER; id1++)
-    {
-        std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-        std::swap(parameterQueue[id1][id2], emptyQueue);
-    }
-}
 } // namespace pos
-

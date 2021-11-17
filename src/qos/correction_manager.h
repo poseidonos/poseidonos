@@ -36,7 +36,7 @@
 
 #include "src/qos/internal_manager.h"
 #include "src/qos/qos_common.h"
-
+#include "src/qos/reactor_heap.h"
 namespace pos
 {
 class QosContext;
@@ -65,6 +65,7 @@ private:
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
     void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
     QosContext* qosContext;
+    ReactorHeap* reactorMaxHeap;
     QosInternalManagerType nextManagerType;
 };
 } // namespace pos

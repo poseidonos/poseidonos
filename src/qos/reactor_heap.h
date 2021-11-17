@@ -29,28 +29,29 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #pragma once
+#include <bits/stdc++.h>
 
-#include "src/qos/qos_common.h"
-
-#include <stdint.h>
-#include <mutex>
 #include <queue>
+#include <vector>
+#include <utility>
 
 namespace pos
 {
-class ParameterQueue
+class ReactorHeap
 {
 public:
-    ParameterQueue(void);
-    ~ParameterQueue(void);
-    void EnqueueParameter(uint32_t id1, uint32_t id2, bw_iops_parameter& param);
-    bw_iops_parameter DequeueParameter(uint32_t id1, uint32_t id2);
-    void ClearParameters(uint32_t id2);
+    ReactorHeap(void);
+    ~ReactorHeap(void);
+    void ClearHeap();
+    void InsertPairInHeap(uint64_t bwWeight, uint32_t reactorId);
+    std::vector<uint32_t> GetTopReactorIds(uint32_t size);
+    std::vector<uint32_t> GetAllReactorIds(void);
+    uint32_t GetHeapSize(void);
 
 private:
-    std::mutex queueLock[MAX_REACTOR_WORKER][MAX_VOLUME_EVENT];
-    std::queue<bw_iops_parameter> parameterQueue[MAX_REACTOR_WORKER][MAX_VOLUME_EVENT];
+    // default heap is ordered by the first element of the pair
+    std::priority_queue<std::pair<uint64_t, uint32_t>> reactorMaxHeap;
+    uint32_t size = 0;
 };
 } // namespace pos

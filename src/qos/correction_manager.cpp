@@ -48,6 +48,7 @@ namespace pos
 QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx)
 {
     qosContext = qosCtx;
+    reactorMaxHeap = new ReactorHeap();
     nextManagerType = QosInternalManager_Unknown;
 }
 
@@ -60,6 +61,7 @@ QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx)
 /* --------------------------------------------------------------------------*/
 QosCorrectionManager::~QosCorrectionManager(void)
 {
+    delete reactorMaxHeap;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -308,33 +310,57 @@ QosCorrectionManager::_HandleMaxThrottling(void)
         {
             continue;
         }
+        reactorMaxHeap->ClearHeap();
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
             currentBwWeight += qosManager->GetVolumeLimit(it->first, volId, false);
             currentIopsWeight += qosManager->GetVolumeLimit(it->first, volId, true);
+            reactorMaxHeap->InsertPairInHeap(currentBwWeight, it->first);
         }
 
         uint64_t userSetBwWeight = volumeUserPolicy->GetMaxBandwidth();
         uint64_t userSetIopsWeight = volumeUserPolicy->GetMaxIops();
-        for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
+        uint64_t differenceInWeight = 0;
+        if (minVolId != DEFAULT_MIN_VOL)
         {
-            if (minVolId != DEFAULT_MIN_VOL)
+            currentBwWeight = currentBwWeight >= userSetBwWeight ? userSetBwWeight : currentBwWeight;
+            currentIopsWeight = currentIopsWeight >= userSetIopsWeight ? userSetIopsWeight : currentIopsWeight;
+        }
+        else
+        {
+            currentBwWeight = userSetBwWeight;
+            currentIopsWeight = userSetIopsWeight;
+        }
+        uint64_t newBwLimit = (currentBwWeight) / (totalConnection);
+        uint64_t newIopsLimit = (currentIopsWeight) / totalConnection;
+        if (0 == newIopsLimit)
+        {
+            newIopsLimit = 1;
+        }
+        uint64_t totalWeightSet = newIopsLimit * totalConnection;
+        differenceInWeight = userSetIopsWeight - totalWeightSet;
+        std::vector<uint32_t> reactors = reactorMaxHeap->GetAllReactorIds();
+        uint32_t extraIops = 1;
+        for (auto& it : reactors)
+        {
+            uint32_t reactorId = it;
+            qosManager->SetVolumeLimit(reactorId, volId, newBwLimit, false);
+            if (differenceInWeight == 0)
             {
-                currentBwWeight = currentBwWeight >= userSetBwWeight ? userSetBwWeight : currentBwWeight;
-                currentIopsWeight = currentIopsWeight >= userSetIopsWeight ? userSetIopsWeight : currentIopsWeight;
+                extraIops = 0;
             }
             else
             {
-                currentBwWeight = userSetBwWeight;
-                currentIopsWeight = userSetIopsWeight;
+                differenceInWeight--;
             }
-            qosManager->SetVolumeLimit(it->first, volId, (currentBwWeight * (it->second)) / (totalConnection), false);
-            int64_t weight = (currentIopsWeight * it->second) / totalConnection;
-            if (0 == weight)
-            {
-                weight = 1;
-            }
-            qosManager->SetVolumeLimit(it->first, volId, weight, true);
+            qosManager->SetVolumeLimit(reactorId, volId, newIopsLimit + extraIops, true);
+        }
+
+        std::vector<uint32_t> inactiveReactors = qosContext->GetInactiveReactorsList();
+        for (auto& it : inactiveReactors)
+        {
+            qosManager->SetVolumeLimit(it, volId, 0, false);
+            qosManager->SetVolumeLimit(it, volId, 0, true);
         }
     }
 }
