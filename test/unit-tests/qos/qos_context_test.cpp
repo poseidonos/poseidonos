@@ -209,4 +209,18 @@ TEST(QosContext, Test_GetSetVolumeOperationDone)
     bool actual = qosContext.GetVolumeOperationDone();
     ASSERT_EQ(actual, false);
 }
+TEST(QosContext, InactiveReactorInsertandGet)
+{
+    QosContext qosContext;
+    std::map<uint32_t, vector<uint32_t>> inactiveReactors;
+    std::vector<uint32_t> volumeInactiveReactors;
+    volumeInactiveReactors.push_back(1);
+    volumeInactiveReactors.push_back(2);
+    inactiveReactors[0].push_back(1);
+    inactiveReactors[0].push_back(2);
+    qosContext.InsertInactiveReactors(inactiveReactors);
+    std::vector<uint32_t> recdInactiveReactor;
+    recdInactiveReactor = qosContext.GetInactiveReactorsList(0);
+    ASSERT_EQ(recdInactiveReactor, volumeInactiveReactors);
+}
 } // namespace pos
