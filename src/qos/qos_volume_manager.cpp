@@ -147,7 +147,9 @@ QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
 {
     std::vector<int> volumeList;
     if (nqnVolumeMap.find(nqnId) != nqnVolumeMap.end())
+    {
         volumeList = nqnVolumeMap[nqnId];
+    }
     return volumeList;
 }
 
