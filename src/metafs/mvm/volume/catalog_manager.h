@@ -54,7 +54,6 @@ public:
     virtual void SetMss(MetaStorageSubsystem* metaStorage);
 
     virtual bool LoadVolCatalog(void);
-    virtual bool CheckVolumeValidity(void);
     virtual bool CreateCatalog(MetaLpnType maxVolumeLpn, uint32_t maxFileSupportNum, bool save = true);
     virtual void RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLpn, MetaLpnType maxLpn);
 
@@ -62,9 +61,6 @@ public:
     virtual bool RestoreContent(MetaVolumeType tgtVol, MetaLpnType baseLpn, MetaLpnType lpnCnts);
 
 protected:
-    MetaLpnType _GetLpnCnt(void);
-    bool _CheckContentVality(void);
-
     Catalog* catalog;
 };
 } // namespace pos

@@ -188,9 +188,6 @@ InodeManager::CreateInitialInodeContent(uint32_t maxInodeNum)
 bool
 InodeManager::LoadInodeContent(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Load inode header content...");
-
     if (true != inodeHdr->Load())
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
@@ -201,9 +198,6 @@ InodeManager::LoadInodeContent(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Total allocated FD count = {}",
         inodeHdr->GetTotalAllocatedInodeCnt());
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Load the valid inode table content...");
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(volumeType);
     MetaLpnType startBaseLpn = GetRegionBaseLpn(MetaRegionType::FileInodeTable);

@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -51,7 +51,6 @@ public:
     MOCK_METHOD(bool, SaveContent, (), (override));
     MOCK_METHOD(void, Finalize, (), (override));
     MOCK_METHOD(bool, LoadVolCatalog, ());
-    MOCK_METHOD(bool, CheckVolumeValidity, ());
     MOCK_METHOD(bool, BackupContent, (MetaVolumeType tgtVol, MetaLpnType baseLpn, MetaLpnType lpnCnts));
     MOCK_METHOD(bool, RestoreContent, (MetaVolumeType tgtVol, MetaLpnType baseLpn, MetaLpnType lpnCnts));
     MOCK_METHOD(bool, CreateCatalog, (MetaLpnType maxVolumeLpn, uint32_t maxFileSupportNum, bool save));

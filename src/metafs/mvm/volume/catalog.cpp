@@ -82,6 +82,12 @@ Catalog::RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLpn, Meta
 bool
 Catalog::CheckValidity(void)
 {
-    return (content->signature == VOLUME_CATALOG_SIGNATURE) ? true : false;
+    if (Catalog::VOLUME_CATALOG_SIGNATURE == content->signature)
+        return true;
+
+    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CATALOG_INVALID,
+        "The signature({}) in the buffer does not match for VOLUME_CATALOG_SIGNATURE.",
+        content->signature);
+    return false;
 }
 } // namespace pos

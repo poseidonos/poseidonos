@@ -222,16 +222,11 @@ MetaVolume::CreateVolume(void)
 bool
 MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Open volume: {}",
-        (int)volumeType);
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "Trying to open meta volume(type: {})", (int)volumeType);
 
     if (false == _LoadVolumeMeta(info, isNPOR))
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Load volume meta failed...");
         return false;
-    }
 
     _BringupMgrs();
 
@@ -240,8 +235,9 @@ MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 
     volumeState = MetaVolumeState::Open;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "OpenVolume done");
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "Finished opening meta volume(type: {})", (int)volumeType);
+
     return true;
 }
 
@@ -256,6 +252,8 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
         isSuccess = catalogMgr->LoadVolCatalog();
         if (false == isSuccess)
         {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+                "Failed to load volume catalog(volume type: {})", (int)volType);
             volumeState = MetaVolumeState::Error;
             return false;
         }
@@ -263,6 +261,8 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
         isSuccess = inodeMgr->LoadInodeContent();
         if (false == isSuccess)
         {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+                "Failed to load volume inode contents(volume type: {})", (int)volType);
             volumeState = MetaVolumeState::Error;
             return false;
         }
@@ -272,12 +272,15 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
         // The NVRAM volume meta loads from the backuped meta in SSD volume area.
         if (true != _RestoreContents(info))
         {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+                "Failed to store NVRAM meta volume");
             return false;
         }
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "All volume meta contents have been loaded. isNPOR={}", isNPOR);
+        "Successfully loaded the contents of meta volume(type: {}). isNPOR={}",
+        (int)volumeType, isNPOR);
 
     return true;
 }
@@ -655,6 +658,8 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
     isSuccess = catalogMgr->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts);
     if (!isSuccess)
     {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+            "Failed to restore NVRAM catalog from SSD meta volume");
         return false;
     }
 
@@ -663,6 +668,8 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
     isSuccess = inodeMgr->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts);
     if (!isSuccess)
     {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+            "Failed to restore NVRAM inode contents from SSD meta volume");
         return false;
     }
 

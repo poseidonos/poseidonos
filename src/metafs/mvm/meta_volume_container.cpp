@@ -87,17 +87,12 @@ MetaVolumeContainer::_InitVolume(MetaVolumeType volType, int arrayId,
         if (vol == nullptr)
             volume = new SsdMetaVolume(arrayId, maxLpnNum);
     }
-    else if (MetaVolumeType::NvRamVolume == volType)
+    else
     {
+        // MetaVolumeType::NvRamVolume
         if (vol == nullptr)
             volume = new NvRamMetaVolume(arrayId, maxLpnNum);
         nvramMetaVolAvailable = true;
-    }
-    else
-    {
-        MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Invalid volume type given!");
-        assert(false);
     }
 
     volume->Init(metaStorage);
@@ -116,6 +111,9 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
 {
     MetaLpnType* Info = new MetaLpnType[(int)BackupInfo::Max]();
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "Try to open {} meta volume(s)", volumeContainer.size());
+
     for (auto& item : volumeContainer)
     {
         MetaVolume* volume = item.second;
@@ -125,13 +123,33 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
             _SetBackupInfo(volume, Info);
         }
 
-        if (!volume->OpenVolume(Info, isNPOR))
+        if (false == volume->OpenVolume(Info, isNPOR))
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
-                "Meta volume open failed.");
-            delete[] Info;
-            return false;
+            // re-create only if nvram type
+            if (MetaVolumeType::NvRamVolume == volType)
+            {
+                if (false == volume->CreateVolume())
+                {
+                    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
+                        "Failed to re-create meta volume(type: {})", (int)volType);
+                    delete[] Info;
+                    return false;
+                }
+                else
+                {
+                    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+                        "Successfully re-created meta volume(type: {})", (int)volType);
+                }
+            }
+            else
+            {
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
+                    "Failed to open meta volume(type: {})", (int)volType);
+            }
         }
+
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "Opened meta volume(type: {})", (int)volType);
     }
 
     allVolumesOpened = true;

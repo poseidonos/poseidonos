@@ -82,7 +82,7 @@ CatalogManager::RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLp
 MetaLpnType
 CatalogManager::GetRegionSizeInLpn(void)
 {
-    return _GetLpnCnt();
+    return catalog->GetLpnCntOfRegion();
 }
 
 void
@@ -101,43 +101,15 @@ CatalogManager::SetMss(MetaStorageSubsystem* metaStorage)
     catalog->SetMss(metaStorage);
 }
 
-MetaLpnType
-CatalogManager::_GetLpnCnt(void)
-{
-    return catalog->GetLpnCntOfRegion();
-}
-
-bool
-CatalogManager::CheckVolumeValidity(void)
-{
-    return catalog->CheckValidity();
-}
-
-bool
-CatalogManager::_CheckContentVality(void)
-{
-    bool isSuccess = true;
-
-    // load is done but data doesn't exist somehow.
-    if (false == CheckVolumeValidity())
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CATALOG_INVALID,
-            "Volume catalog is invalid. Try to recover broken volume catalog catalogs..");
-        isSuccess = false;
-    }
-
-    return isSuccess;
-}
-
 bool
 CatalogManager::LoadVolCatalog(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Load volume catalog content...");
-    bool isSuccess = catalog->Load();
-    if (isSuccess)
+
+    if (true == catalog->Load())
     {
-        isSuccess = _CheckContentVality();
+        return catalog->CheckValidity();
     }
     else
     {
@@ -145,7 +117,7 @@ CatalogManager::LoadVolCatalog(void)
             "Load I/O for MFS catalog content has failed...");
     }
 
-    return isSuccess;
+    return false;
 }
 
 bool
@@ -157,7 +129,7 @@ CatalogManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn, Me
     bool isSuccess = catalog->Load(media, baseLpn, 0 /* idx */, lpnCnts);
     if (isSuccess)
     {
-        isSuccess = _CheckContentVality();
+        isSuccess = catalog->CheckValidity();
     }
     else
     {
@@ -192,7 +164,7 @@ CatalogManager::CreateCatalog(MetaLpnType maxVolumeLpn, uint32_t maxFileSupportN
 bool
 CatalogManager::SaveContent(void)
 {
-    assert(true == CheckVolumeValidity());
+    assert(true == catalog->CheckValidity());
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Save volume catalog content...");

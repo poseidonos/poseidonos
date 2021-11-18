@@ -186,18 +186,16 @@ MetaVolumeManager::CreateVolume(MetaVolumeType volumeType)
 bool
 MetaVolumeManager::OpenVolume(bool isNPOR)
 {
-    bool isSuccess = volContainer->OpenAllVolumes(isNPOR);
-
-    if (!isSuccess)
+    if (false == volContainer->OpenAllVolumes(isNPOR))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
-            "Meta volume open is failed. Volume is corrupted or isn't created yet");
+            "Failed to open meta volumes");
 
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "All volumes have been opened.");
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "Successfully opened all meta volumes");
 
     return true;
 }
@@ -205,9 +203,7 @@ MetaVolumeManager::OpenVolume(bool isNPOR)
 bool
 MetaVolumeManager::CloseVolume(bool& resetCxt)
 {
-    bool isSuccess = volContainer->CloseAllVolumes(resetCxt /* output */);
-
-    if (!isSuccess)
+    if (false == volContainer->CloseAllVolumes(resetCxt /* output */))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Meta volume close has been failed.");
