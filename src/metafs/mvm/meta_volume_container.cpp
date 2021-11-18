@@ -137,7 +137,7 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
                 }
                 else
                 {
-                    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+                    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
                         "Successfully re-created meta volume(type: {})", (int)volType);
                 }
             }
@@ -145,6 +145,8 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
             {
                 MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
                     "Failed to open meta volume(type: {})", (int)volType);
+                delete[] Info;
+                return false;
             }
         }
 
