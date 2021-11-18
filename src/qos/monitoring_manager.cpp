@@ -39,20 +39,6 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/connection_management.h"
 
-#if 0
-#define VALID_ENTRY (1)
-#define INVALID_ENTRY (0)
-#define NVMF_CONNECT (0)
-#define NVMF_DISCONNECT (1)
-
-struct nvmfConnectEntry
-{
-    uint32_t reactorId;
-    uint32_t subsysId;
-    uint32_t connectType; // 0=Connect 1=Disconnect
-};
-#endif
-
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -298,7 +284,7 @@ QosMonitoringManager::_UpdateContextActiveReactorVolumes(uint32_t reactor, uint3
  */
 /* --------------------------------------------------------------------------*/
 void
-QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>>& activeReactors, std::vector<uint32_t>& inactiveReactors)
+QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>>& activeReactors, std::map<uint32_t, vector<uint32_t>>& inactiveReactors)
 {
     qosContext->InsertActiveVolumeReactor(activeReactors);
     qosContext->InsertInactiveReactors(inactiveReactors);
@@ -418,9 +404,10 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     volReactorMap.clear();
     reactorVolMap.clear();
     inactiveReactors.clear();
+    bool reactorActive = false;
     for (auto& reactor : reactorCoreList)
     {
-        bool reactorActive = false;
+        reactorActive = false;
         volList[reactor].clear();
         if (true == IsExitQosSet())
         {
@@ -438,6 +425,7 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
             for (auto& volumeId : volumeList)
             {
                 bool validParam = false;
+                reactorActive = false;
                 while (true)
                 {
                     bool valid = _VolParamActivities(volumeId, reactor);
@@ -456,11 +444,11 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
                     volReactorMap[volumeId].insert({reactor, 1});
                     reactorActive = true;
                 }
+                if (reactorActive == false)
+                {
+                    inactiveReactors[volumeId].push_back(reactor);
+                }
             }
-        }
-        if (reactorActive == false)
-        {
-            inactiveReactors.push_back(reactor);
         }
     }
     if (lastVolReactorMap == volReactorMap)

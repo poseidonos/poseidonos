@@ -50,8 +50,5 @@ public:
     static uint64_t SpdkGetTicks(void);
     static uint32_t GetAttachedSubsystemId(const char* bdev_name);
     static void SetQosInSpdk(bool value);
-    static bool IsReactorConnectionChanged(uint32_t reactor);
-    static void ResetReactorConnection(uint32_t reactor);
-    static bool GetNvmfReactorConnection(uint32_t reactor, void* entry);
 };
 } // namespace pos

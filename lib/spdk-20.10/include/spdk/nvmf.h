@@ -595,17 +595,6 @@ void spdk_nvmf_configure_pos_qos(bool value);
 /**
  *
  */
-bool spdk_nvmf_connection_changed(uint32_t reactor);
-
-/**
- *
- */
-void spdk_nvmf_connection_reset(uint32_t reactor);
-
-/**
- *
- */
-bool spdk_nvmf_connection_pop(uint32_t reactorId, void *arg);
 
 /**
  * Accept new connections on the address provided.

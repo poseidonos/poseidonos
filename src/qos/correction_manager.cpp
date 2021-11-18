@@ -346,17 +346,12 @@ QosCorrectionManager::_HandleMaxThrottling(void)
             uint32_t reactorId = it;
             qosManager->SetVolumeLimit(reactorId, volId, newBwLimit, false);
             if (differenceInWeight == 0)
-            {
                 extraIops = 0;
-            }
             else
-            {
                 differenceInWeight--;
-            }
             qosManager->SetVolumeLimit(reactorId, volId, newIopsLimit + extraIops, true);
         }
-
-        std::vector<uint32_t> inactiveReactors = qosContext->GetInactiveReactorsList();
+        std::vector<uint32_t> inactiveReactors = qosContext->GetInactiveReactorsList(volId);
         for (auto& it : inactiveReactors)
         {
             qosManager->SetVolumeLimit(it, volId, 0, false);

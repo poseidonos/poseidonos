@@ -65,7 +65,7 @@ private:
     bool _GatherActiveVolumeParameters(void);
     void _UpdateContextActiveVolumes(uint32_t volId);
     void _UpdateContextActiveReactorVolumes(uint32_t reactor, uint32_t volId);
-    void _UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>>& activeReactors, std::vector<uint32_t>& inactiveReactors);
+    void _UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>>& activeReactors, std::map<uint32_t, vector<uint32_t>>& inactiveReactors);
     void _UpdateVolumeParameter(uint32_t volId);
     void _UpdateAllVolumeParameter(void);
     void _UpdateVolumeReactorParameter(uint32_t volId, uint32_t reactor);
@@ -81,6 +81,6 @@ private:
     uint32_t totalConnection[MAX_VOLUME_COUNT];
     bw_iops_parameter volParams[MAX_VOLUME_COUNT];
     bw_iops_parameter eventParams[BackendEvent_Count];
-    std::vector<uint32_t> inactiveReactors;
+    std::map<uint32_t, vector<uint32_t>> inactiveReactors;
 };
 } // namespace pos
