@@ -100,7 +100,6 @@ spdk_nvmf_initialize_reactor_subsystem_mapping(void)
 		for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEM; subsys++) {
 			reactorSubsystemIdMap[reactor][subsys] = M_INVALID_SUBSYSTEM;
 		}
-//		TAILQ_INIT(&spdkReactorConnections[reactor].nvmfConnections);
 	}
 }
 
