@@ -64,30 +64,9 @@ ReactorHeap::~ReactorHeap(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-ReactorHeap::InsertPairInHeap(uint64_t bwWeight, uint32_t reactorId)
+ReactorHeap::InsertPairInHeap(uint64_t weight, uint32_t reactorId)
 {
-    reactorMaxHeap.push(std::make_pair(bwWeight, reactorId));
-    size++;
-}
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-std::vector<uint32_t>
-ReactorHeap::GetTopReactorIds(uint32_t size)
-{
-    int noOfElements = size;
-    int i = 0;
-    std::vector<uint32_t> reactors;
-    for (i = 0; i < noOfElements; i++)
-    {
-        reactors.push_back(reactorMaxHeap.top().second);
-        reactorMaxHeap.pop();
-    }
-    return reactors;
+    reactorMinHeap.push(std::make_pair(weight, reactorId));
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -100,10 +79,10 @@ std::vector<uint32_t>
 ReactorHeap::GetAllReactorIds(void)
 {
     std::vector<uint32_t> reactors;
-    while (!reactorMaxHeap.empty())
+    while (!reactorMinHeap.empty())
     {
-        reactors.push_back(reactorMaxHeap.top().second);
-        reactorMaxHeap.pop();
+        reactors.push_back(reactorMinHeap.top().second);
+        reactorMinHeap.pop();
     }
     return reactors;
 }
@@ -118,10 +97,9 @@ ReactorHeap::GetAllReactorIds(void)
 void
 ReactorHeap::ClearHeap()
 {
-    // re initiaize the max priority queue.
-    std::priority_queue<std::pair<uint64_t, uint32_t>> newHeap;
-    reactorMaxHeap = newHeap;
-    size = 0;
+    // re initiaize the priority queue.
+    std::priority_queue <wtForReactor, std::vector <wtForReactor>, IopsWeightCompare> newHeap;
+    reactorMinHeap = newHeap;
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -133,7 +111,7 @@ ReactorHeap::ClearHeap()
 uint32_t
 ReactorHeap::GetHeapSize()
 {
-    return size;
+    return reactorMinHeap.size();
 }
 
 } // namespace pos

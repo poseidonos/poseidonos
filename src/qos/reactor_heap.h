@@ -33,25 +33,33 @@
 #include <bits/stdc++.h>
 
 #include <queue>
+#include <functional>
 #include <vector>
 #include <utility>
 
 namespace pos
 {
+typedef std::pair <uint64_t, uint32_t> wtForReactor;
+struct IopsWeightCompare
+{
+    bool operator ()(wtForReactor const &w1, wtForReactor const &w2)
+    {
+        return w1.first > w2.first;
+    }
+};
+
 class ReactorHeap
 {
 public:
     ReactorHeap(void);
     ~ReactorHeap(void);
     void ClearHeap();
-    void InsertPairInHeap(uint64_t bwWeight, uint32_t reactorId);
-    std::vector<uint32_t> GetTopReactorIds(uint32_t size);
+    void InsertPairInHeap(uint64_t weight, uint32_t reactorId);
     std::vector<uint32_t> GetAllReactorIds(void);
     uint32_t GetHeapSize(void);
 
 private:
     // default heap is ordered by the first element of the pair
-    std::priority_queue<std::pair<uint64_t, uint32_t>> reactorMaxHeap;
-    uint32_t size = 0;
+    std::priority_queue <wtForReactor, std::vector <wtForReactor>, IopsWeightCompare> reactorMinHeap;
 };
 } // namespace pos
