@@ -36,22 +36,15 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/include/partition_type.h"
 #include "src/include/array_config.h"
+#include "src/metafs/storage/pstore/mss_on_disk.h"
 
 namespace pos
 {
 MetaFs::MetaFs(void)
-: isNpor(false),
-  isLoaded(false),
-  isNormal(false),
-  arrayInfo(nullptr),
-  arrayName(""),
-  arrayId(INT32_MAX),
-  metaStorage(nullptr)
 {
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
-: MetaFs()
 {
     this->isLoaded = isLoaded;
     this->arrayInfo = arrayInfo;
@@ -59,9 +52,11 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     arrayName = arrayInfo->GetName();
     arrayId = arrayInfo->GetIndex();
 
-    mgmt = new MetaFsManagementApi(arrayId);
-    ctrl = new MetaFsFileControlApi(arrayId);
-    io = new MetaFsIoApi(arrayId, ctrl);
+    metaStorage = new MssOnDisk(arrayId);
+
+    mgmt = new MetaFsManagementApi(arrayId, metaStorage);
+    ctrl = new MetaFsFileControlApi(arrayId, metaStorage);
+    io = new MetaFsIoApi(arrayId, ctrl, metaStorage);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
@@ -70,7 +65,6 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
         MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
         MetaStorageSubsystem* metaStorage)
-: MetaFs()
 {
     this->isLoaded = isLoaded;
     this->arrayInfo = arrayInfo;
@@ -149,6 +143,7 @@ MetaFs::Dispose(void)
             "It's failed to close meta volume, arrayName={}", arrayName);
     }
 
+    // the storage will be close in mgmt mgr
     rc = mgmt->CloseSystem(arrayId);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
@@ -169,14 +164,13 @@ MetaFs::Shutdown(void)
 
     io->RemoveArray(arrayId);
 
-    // TODO(munseop.lim): refactoring requires
+    // the storage closes here
     if (nullptr != metaStorage)
     {
         metaStorage->Close();
         delete metaStorage;
+        metaStorage = nullptr;
     }
-
-    _ClearMss();
 }
 
 void
@@ -232,11 +226,6 @@ MetaFs::_Initialize(void)
 
     if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &mediaInfoList))
         return false;
-
-    if (nullptr == metaStorage)
-    {
-        _SetMss();
-    }
 
     return true;
 }
@@ -404,18 +393,9 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 }
 
 void
-MetaFs::_SetMss(void)
-{
-    metaStorage = mgmt->GetMss();
-    io->SetMss(metaStorage);
-    ctrl->SetMss(metaStorage);
-}
-
-void
 MetaFs::_ClearMss(void)
 {
+    delete metaStorage;
     metaStorage = nullptr;
-    io->SetMss(metaStorage);
-    ctrl->SetMss(metaStorage);
 }
 } // namespace pos

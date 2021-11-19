@@ -50,8 +50,7 @@ namespace pos
  * Constructor
  */
 MssOnDisk::MssOnDisk(int arrayId)
-: MetaStorageSubsystem(arrayId),
-  retryIoCnt(0)
+: MetaStorageSubsystem(arrayId)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
     {

@@ -40,12 +40,11 @@
 #include "metafs_system_manager.h"
 #include "src/metafs/msc/metafs_mbr_mgr.h"
 #include "meta_io_manager.h"
-#include "src/metafs/storage/pstore/mss_on_disk.h"
 
 namespace pos
 {
-MetaFsSystemManager::MetaFsSystemManager(int arrayId, MetaFsMBRManager* mbrMgr,
-        MetaStorageSubsystem* metaStorage)
+MetaFsSystemManager::MetaFsSystemManager(int arrayId,
+        MetaStorageSubsystem* metaStorage, MetaFsMBRManager* mbrMgr)
 : mbrMgr(mbrMgr),
   metaStorage(metaStorage)
 {
@@ -178,20 +177,9 @@ MetaFsSystemManager::CreateMbr(void)
     return mbrMgr->CreateMBR();
 }
 
-MetaStorageSubsystem*
-MetaFsSystemManager::GetMss(void)
-{
-    return metaStorage;
-}
-
 POS_EVENT_ID
 MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
-    if (nullptr == metaStorage)
-    {
-        metaStorage = new MssOnDisk(reqMsg.arrayId);
-    }
-
     if (true == Init(*reqMsg.mediaList))
         return POS_EVENT_ID::SUCCESS;
 
@@ -222,15 +210,6 @@ MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
             break;
         }
     } while (0);
-
-    if (nullptr != metaStorage)
-    {
-        // TODO(munseop.lim): refactoring requires
-        // in unmount case : mss is removed here
-        // in shutdown case: mss will be removed by metafs
-        delete metaStorage;
-        metaStorage = nullptr;
-    }
 
     return rc;
 }

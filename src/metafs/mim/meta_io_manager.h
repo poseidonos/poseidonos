@@ -53,8 +53,9 @@ using MetaIoReqHandler = POS_EVENT_ID (MetaIoManager::*)(MetaFsIoRequest& reqMsg
 class MetaIoManager : public MetaFsManagerBase
 {
 public:
-    MetaIoManager(void);
-    MetaIoManager(MetaFsIoScheduler* ioScheduler);
+    // only for test
+    MetaIoManager(MetaStorageSubsystem* storage = nullptr);
+    MetaIoManager(MetaFsIoScheduler* ioScheduler, MetaStorageSubsystem* storage);
     virtual ~MetaIoManager(void);
 
     bool IsSuccess(POS_EVENT_ID rc);
@@ -62,8 +63,6 @@ public:
     virtual void Init(void);
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
-    void SetMss(MetaStorageSubsystem* metaStorage);
-    MetaStorageSubsystem* GetMss(void);
     void Finalize(void);
 
     bool AddArrayInfo(int arrayId);
@@ -79,11 +78,11 @@ private:
 
     static const uint32_t NUM_IO_TYPE = static_cast<uint32_t>(MetaIoRequestType::Max);
     MetaIoReqHandler reqHandler[NUM_IO_TYPE];
-    MetaFsIoScheduler* ioScheduler;
+    MetaFsIoScheduler* ioScheduler = nullptr;
 
-    uint32_t totalMetaIoCoreCnt;
-    uint32_t mioHandlerCount;
-    bool finalized;
-    MetaStorageSubsystem* metaStorage;
+    uint32_t totalMetaIoCoreCnt = 0;
+    uint32_t mioHandlerCount = 0;
+    bool finalized = false;
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 } // namespace pos

@@ -122,7 +122,7 @@ private:
     std::vector<uint32_t> maxPageCntLimitPerIO;
 
     static const uint32_t MAX_DATA_TRANSFER_BYTE_SIZE = 4 * 1024; // 128 * 1024; temporary changed to 4KB due to FT layer IssueUbio
-    uint32_t retryIoCnt;
+    uint32_t retryIoCnt = 0;
 };
 } // namespace pos
 

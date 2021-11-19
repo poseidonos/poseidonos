@@ -78,18 +78,17 @@ private:
     POS_EVENT_ID _CreateMetaVolume(void);
     POS_EVENT_ID _OpenMetaVolume(void);
     POS_EVENT_ID _CloseMetaVolume(void);
-    void _SetMss(void);
     void _ClearMss(void);
 
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList);
     MetaStorageInfo _MakeMetaStorageMediaInfo(PartitionType ptnType);
 
-    bool isNpor;
-    bool isLoaded;
-    bool isNormal;
-    IArrayInfo* arrayInfo;
+    bool isNpor = false;
+    bool isLoaded = false;
+    bool isNormal = false;
+    IArrayInfo* arrayInfo = nullptr;
     std::string arrayName = "";
-    int arrayId;
-    MetaStorageSubsystem* metaStorage;
+    int arrayId = INT32_MAX;
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 } // namespace pos

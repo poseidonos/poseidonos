@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -65,13 +65,14 @@ public:
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
         mbr = new NiceMock<MockMetaFsMBRManager>(arrayId);
 
-        systemMgr = new MetaFsSystemManager(arrayId, mbr, mss);
+        systemMgr = new MetaFsSystemManager(arrayId, mss, mbr);
     }
 
     virtual void
     TearDown(void)
     {
         delete systemMgr;
+        delete mss;
     }
 
 protected:
@@ -195,11 +196,6 @@ TEST_F(MetaFsSystemManagerFixture, CreateMbr_Negative)
     EXPECT_EQ(systemMgr->CreateMbr(), false);
 }
 
-TEST_F(MetaFsSystemManagerFixture, CheckMss)
-{
-    EXPECT_EQ(systemMgr->GetMss(), mss);
-}
-
 TEST_F(MetaFsSystemManagerFixture, InitSystem_Positive)
 {
     MetaStorageInfo info;
@@ -225,7 +221,6 @@ TEST_F(MetaFsSystemManagerFixture, CloseSystem_Positive)
     EXPECT_CALL(*mbr, SetPowerStatus);
     EXPECT_CALL(*mbr, SaveContent).WillOnce(Return(true));
     EXPECT_CALL(*mbr, InvalidMBR);
-    EXPECT_CALL(*mss, Close).WillOnce(Return(POS_EVENT_ID::SUCCESS));
 
     EXPECT_EQ(systemMgr->ProcessNewReq(req), POS_EVENT_ID::SUCCESS);
 }

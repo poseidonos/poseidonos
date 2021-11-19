@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -32,6 +32,7 @@
 
 #include "src/metafs/mai/metafs_file_control_api.h"
 #include "test/unit-tests/metafs/mvm/meta_volume_manager_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gtest/gtest.h>
 
@@ -48,9 +49,10 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInfoListCanBeReturned)
 {
     int arrayId = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 
-    MetaFsFileControlApi api(arrayId, volMgr);
+    MetaFsFileControlApi api(arrayId, storage, volMgr);
 
     std::vector<MetaFileInfoDumpCxt> result;
 
@@ -65,9 +67,10 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInodeCanBeReturned)
     int arrayId = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
     std::string fileName = "TEST_FILE";
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 
-    MetaFsFileControlApi api(arrayId, volMgr);
+    MetaFsFileControlApi api(arrayId, storage, volMgr);
 
     MetaFileInodeInfo* result = nullptr;
 
@@ -82,9 +85,10 @@ TEST(MetaFsFileControlApi, Get_testIfFileIoSizeCanBeRetrieved)
     int arrayId = 0;
     int fd = 0;
     StorageOpt type = StorageOpt::SSD;
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 
-    MetaFsFileControlApi api(arrayId, volMgr);
+    MetaFsFileControlApi api(arrayId, storage, volMgr);
     api.SetStatus(true);
 
     EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
@@ -100,9 +104,10 @@ TEST(MetaFsFileControlApi, Get_TheLastValidLpn)
     int arrayId = 0;
     int fd = 0;
     StorageOpt type = StorageOpt::SSD;
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 
-    MetaFsFileControlApi api(arrayId, volMgr);
+    MetaFsFileControlApi api(arrayId, storage, volMgr);
 
     EXPECT_CALL(*volMgr, GetTheLastValidLpn).WillOnce(Return(0));
 

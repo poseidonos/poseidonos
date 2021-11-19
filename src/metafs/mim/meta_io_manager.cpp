@@ -49,23 +49,19 @@
 
 namespace pos
 {
-MetaIoManager::MetaIoManager(void)
-: ioScheduler(nullptr),
-  totalMetaIoCoreCnt(0),
-  mioHandlerCount(0),
-  metaStorage(nullptr)
+MetaIoManager::MetaIoManager(MetaStorageSubsystem* storage)
 {
     _InitReqHandler();
 
     ioScheduler = MetaFsServiceSingleton::Instance()->GetScheduler();
+    metaStorage = storage;
 }
 
-MetaIoManager::MetaIoManager(MetaFsIoScheduler* ioScheduler)
-: ioScheduler(ioScheduler),
-  totalMetaIoCoreCnt(0),
-  mioHandlerCount(0),
-  metaStorage(nullptr)
+MetaIoManager::MetaIoManager(MetaFsIoScheduler* ioScheduler, MetaStorageSubsystem* storage)
 {
+    this->ioScheduler = ioScheduler;
+    metaStorage = storage;
+
     _InitReqHandler();
 }
 
@@ -139,18 +135,6 @@ MetaIoManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
     MetaFsIoRequest* msg = static_cast<MetaFsIoRequest*>(&reqMsg);
     rc = (this->*(reqHandler[(uint32_t)(msg->reqType)]))(*msg);
     return rc;
-}
-
-void
-MetaIoManager::SetMss(MetaStorageSubsystem* metaStorage)
-{
-    this->metaStorage = metaStorage;
-}
-
-MetaStorageSubsystem*
-MetaIoManager::GetMss(void)
-{
-    return metaStorage;
 }
 
 POS_EVENT_ID

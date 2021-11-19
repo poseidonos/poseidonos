@@ -46,7 +46,8 @@ class MetaFsManagementApi
 {
 public:
     MetaFsManagementApi(void);
-    explicit MetaFsManagementApi(int arrayId, MetaFsSystemManager* sysMgr = nullptr);
+    explicit MetaFsManagementApi(int arrayId, MetaStorageSubsystem* storage,
+                        MetaFsSystemManager* sysMgr = nullptr);
     virtual ~MetaFsManagementApi(void);
 
     virtual POS_EVENT_ID InitializeSystem(int arrayId,
@@ -59,7 +60,6 @@ public:
     virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
     virtual bool CreateMbr(void);
     virtual bool IsMbrClean(void);
-    virtual MetaStorageSubsystem* GetMss(void);
     virtual void SetStatus(bool isNormal);
 
 private:

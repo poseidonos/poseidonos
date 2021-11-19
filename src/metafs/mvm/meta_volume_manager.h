@@ -61,7 +61,8 @@ using GlobalMetaReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaFsFileContr
 class MetaVolumeManager : public MetaFsManagerBase
 {
 public:
-    MetaVolumeManager(MetaVolumeHandler* _volHandler = nullptr,
+    MetaVolumeManager(MetaStorageSubsystem* metaStorage,
+        MetaVolumeHandler* _volHandler = nullptr,
         MetaVolumeContainer* _volContainer = nullptr);
     virtual ~MetaVolumeManager(void);
 

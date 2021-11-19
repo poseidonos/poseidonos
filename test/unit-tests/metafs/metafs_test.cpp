@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -135,8 +135,6 @@ TEST_F(MetaFsFixture, CheckDispose)
     EXPECT_CALL(*ctrl, CloseVolume(_)).WillOnce(Return(true));
 
     metaFs->Dispose();
-
-    EXPECT_EQ(metaFs->GetMss(), nullptr);
 }
 
 TEST_F(MetaFsFixture, CheckShutdown_Without_Storage)
@@ -144,16 +142,12 @@ TEST_F(MetaFsFixture, CheckShutdown_Without_Storage)
     EXPECT_CALL(*io, RemoveArray(_));
 
     metaFs->Shutdown();
-
-    EXPECT_EQ(metaFs->GetMss(), nullptr);
 }
 
 TEST_F(MetaFsFixture, CheckShutdown_With_Storage)
 {
     EXPECT_CALL(*mgmt, InitializeSystem(_, _))
         .WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*io, SetMss).WillRepeatedly(Return());
-    EXPECT_CALL(*ctrl, SetMss).WillRepeatedly(Return());
     EXPECT_CALL(*arrayInfo, GetSizeInfo).WillRepeatedly(Return(&ptnSize));
     EXPECT_CALL(*mgmt, GetAllStoragePartitionInfo)
         .WillRepeatedly(ReturnRef(mediaInfoList));
@@ -172,8 +166,6 @@ TEST_F(MetaFsFixture, CheckShutdown_With_Storage)
     EXPECT_CALL(*mss, Close);
 
     metaFs->Shutdown();
-
-    EXPECT_EQ(metaFs->GetMss(), nullptr);
 }
 
 TEST_F(MetaFsFixture, CheckEpochSignature)

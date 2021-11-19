@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -53,9 +53,9 @@ TEST(MetaFsManagementApi, Check_testIfTheMbrIsCleaned)
     NiceMock<MockMetaFsMBR>* mbr = new NiceMock<MockMetaFsMBR>(MetaFsAnchorRegionType::MasterBootRecord, 0);
     NiceMock<MockMetaFsMBRManager>* mbrMgr = new NiceMock<MockMetaFsMBRManager>(arrayId, mbr);
     NiceMock<MockMetaStorageSubsystem>* metaStorage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaFsSystemManager>* sysMgr = new NiceMock<MockMetaFsSystemManager>(arrayId, mbrMgr, metaStorage);
+    NiceMock<MockMetaFsSystemManager>* sysMgr = new NiceMock<MockMetaFsSystemManager>(arrayId, metaStorage, mbrMgr);
 
-    MetaFsManagementApi api(arrayId, sysMgr);
+    MetaFsManagementApi api(arrayId, metaStorage, sysMgr);
 
     EXPECT_CALL(*sysMgr, IsMbrClean).WillOnce(Return(true));
     // EXPECT_CALL(*mbrMgr, GetEpochSignature()).WillOnce(Return(0));

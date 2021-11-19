@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -32,6 +32,7 @@
 
 #include "src/metafs/mai/metafs_wbt_api.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gtest/gtest.h>
 
@@ -49,7 +50,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileListWillNotBeReturnedWhenTheModuleIsAb
     int arrayId = 0;
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     std::vector<MetaFileInfoDumpCxt> result;
@@ -66,7 +68,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileListWillNotBeReturnedWhenThereIsNoMeta
     int arrayId = 0;
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     std::vector<MetaFileInfoDumpCxt> original;
@@ -87,7 +90,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileListWillBeReturned)
     int arrayId = 0;
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     std::vector<MetaFileInfoDumpCxt> original;
@@ -117,7 +121,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileInodeWillNotBeReturnedWhenTheModuleIsA
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
     std::string fileName = "TEST_FILE";
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     MetaFileInodeDumpCxt result;
@@ -135,7 +140,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileInodeWillNotBeReturnedWhenThereIsNoMet
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
     std::string fileName = "TEST_FILE";
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     MetaFileInodeDumpCxt result;
@@ -154,7 +160,8 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileInodeWillBeReturned)
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
     std::string fileName = "TEST_FILE";
 
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
     MetaFsWBTApi api(arrayId, ctrl);
 
     MetaFileInodeInfo original;

@@ -39,8 +39,8 @@ MetaFsFileControlApi::MetaFsFileControlApi(void)
 {
 }
 
-MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaVolumeManager* volMgr)
-: MetaFsFileControlApi()
+MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaStorageSubsystem* storage,
+                                MetaVolumeManager* volMgr)
 {
     this->arrayId = arrayId;
 
@@ -50,7 +50,7 @@ MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaVolumeManager* volMg
     nameMapByfd.clear();
     idxMapByName.clear();
 
-    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager() : volMgr;
+    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager(storage) : volMgr;
 }
 
 MetaFsFileControlApi::~MetaFsFileControlApi(void)
@@ -471,12 +471,6 @@ MetaFsFileControlApi::_GetTranslateVolumeType(StorageOpt storageOpt)
         return MetaVolumeType::SsdVolume;
     else
         return MetaVolumeType::NvRamVolume;
-}
-
-void
-MetaFsFileControlApi::SetMss(MetaStorageSubsystem* metaStorage)
-{
-    volMgr->SetMss(metaStorage);
 }
 
 void

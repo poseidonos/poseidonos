@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -31,6 +31,7 @@
  */
 
 #include "src/metafs/metafs_file_intf.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
@@ -97,8 +98,9 @@ public:
         ctrl = new NiceMock<MockMetaFsFileControlApi>;
         io = new NiceMock<MockMetaFsIoApi>;
         wbt = new NiceMock<MockMetaFsWBTApi>;
+        mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, nullptr);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss);
 
         metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs);
     }
@@ -117,6 +119,7 @@ protected:
     NiceMock<MockMetaFsFileControlApi>* ctrl;
     NiceMock<MockMetaFsIoApi>* io;
     NiceMock<MockMetaFsWBTApi>* wbt;
+    NiceMock<MockMetaStorageSubsystem>* mss;
 
     MetaFsFileIntfTester* metaFile;
 

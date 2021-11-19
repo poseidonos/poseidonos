@@ -43,12 +43,12 @@ MetaFsIoApi::MetaFsIoApi(void)
 {
 }
 
-MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl, MetaIoManager* io)
-: MetaFsIoApi()
+MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
+            MetaStorageSubsystem* storage, MetaIoManager* io)
 {
     this->arrayId = arrayId;
     ctrlMgr = ctrl;
-    ioMgr = (nullptr == io) ? new MetaIoManager() : io;
+    ioMgr = (nullptr == io) ? new MetaIoManager(storage) : io;
 }
 
 MetaFsIoApi::~MetaFsIoApi(void)
@@ -255,12 +255,6 @@ bool
 MetaFsIoApi::RemoveArray(int arrayId)
 {
     return ioMgr->RemoveArrayInfo(arrayId);
-}
-
-void
-MetaFsIoApi::SetMss(MetaStorageSubsystem* metaStorage)
-{
-    ioMgr->SetMss(metaStorage);
 }
 
 void

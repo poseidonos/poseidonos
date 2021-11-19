@@ -48,8 +48,8 @@ using MetaFsControlReqHandlerPointer = POS_EVENT_ID (MetaFsSystemManager::*)(Met
 class MetaFsSystemManager : public MetaFsManagerBase
 {
 public:
-    explicit MetaFsSystemManager(int arrayId, MetaFsMBRManager* mbrMgr = nullptr,
-        MetaStorageSubsystem* metaStorage = nullptr);
+    explicit MetaFsSystemManager(int arrayId, MetaStorageSubsystem* metaStorage,
+        MetaFsMBRManager* mbrMgr = nullptr);
     virtual ~MetaFsSystemManager(void);
 
     virtual bool Init(MetaStorageMediaInfoList& mediaInfoList);
@@ -62,7 +62,6 @@ public:
     virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
     virtual bool CreateMbr(void);
     virtual bool IsMbrClean(void);
-    virtual MetaStorageSubsystem* GetMss(void);
 
 private:
     void _InitReqHandler(void);
@@ -73,7 +72,7 @@ private:
 
     MetaFsControlReqHandlerPointer reqHandler[(uint32_t)MetaFsControlReqType::Max];
 
-    MetaFsMBRManager* mbrMgr;
-    MetaStorageSubsystem* metaStorage;
+    MetaFsMBRManager* mbrMgr = nullptr;
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 } // namespace pos

@@ -36,11 +36,12 @@
 
 namespace pos
 {
-MetaVolumeManager::MetaVolumeManager(MetaVolumeHandler* _volHandler,
+MetaVolumeManager::MetaVolumeManager(MetaStorageSubsystem* metaStorage,
+        MetaVolumeHandler* _volHandler,
         MetaVolumeContainer* _volContainer)
 : volumeSpcfReqHandler{},
   globalRequestHandler{},
-  metaStorage(nullptr)
+  metaStorage(metaStorage)
 {
     volHandler = _volHandler;
     volContainer = _volContainer;

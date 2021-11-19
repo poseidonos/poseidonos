@@ -48,7 +48,8 @@ class MetaFsIoApi
 {
 public:
     MetaFsIoApi(void);
-    MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl, MetaIoManager* io = nullptr);
+    MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
+                    MetaStorageSubsystem* storage, MetaIoManager* io = nullptr);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,
@@ -67,7 +68,6 @@ public:
     virtual bool AddArray(int arrayId);
     virtual bool RemoveArray(int arrayId);
 
-    virtual void SetMss(MetaStorageSubsystem* metaStorage);
     virtual void SetStatus(bool isNormal);
 
 private:

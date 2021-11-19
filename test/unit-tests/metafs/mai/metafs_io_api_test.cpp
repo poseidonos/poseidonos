@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -33,6 +33,7 @@
 #include "src/metafs/mai/metafs_io_api.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mim/meta_io_manager_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gtest/gtest.h>
 
@@ -47,9 +48,10 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Fully)
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(false);
 
@@ -63,9 +65,10 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Partia
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(false);
 
@@ -79,9 +82,10 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Fully)
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(true);
 
@@ -97,9 +101,10 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Partiall
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(true);
 
@@ -116,10 +121,11 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
 
-    MetaFsIoApi api(arrayId, ctrl, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, io);
 
     api.SetStatus(true);
 
@@ -155,10 +161,11 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
 
-    MetaFsIoApi api(arrayId, ctrl, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, io);
 
     api.SetStatus(true);
 
@@ -193,9 +200,10 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Fully)
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(false);
 
@@ -209,9 +217,10 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Partial
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(false);
 
@@ -225,9 +234,10 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Fully)
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(true);
 
@@ -243,9 +253,10 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Partially
     int arrayId = 0;
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
 
-    MetaFsIoApi api(arrayId, ctrl);
+    MetaFsIoApi api(arrayId, ctrl, storage);
 
     api.SetStatus(true);
 
@@ -262,10 +273,11 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
 
-    MetaFsIoApi api(arrayId, ctrl, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, io);
 
     api.SetStatus(true);
 
@@ -301,10 +313,11 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
     FileDescriptorType fd = 0;
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
 
-    MetaFsIoApi api(arrayId, ctrl, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, io);
 
     api.SetStatus(true);
 

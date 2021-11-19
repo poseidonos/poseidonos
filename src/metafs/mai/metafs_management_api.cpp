@@ -40,11 +40,11 @@ MetaFsManagementApi::MetaFsManagementApi(void)
 {
 }
 
-MetaFsManagementApi::MetaFsManagementApi(int arrayId, MetaFsSystemManager* sysMgr)
-: MetaFsManagementApi()
+MetaFsManagementApi::MetaFsManagementApi(int arrayId, MetaStorageSubsystem* storage,
+                                MetaFsSystemManager* sysMgr)
 {
     this->arrayId = arrayId;
-    this->sysMgr = (nullptr == sysMgr) ? new MetaFsSystemManager(arrayId) : sysMgr;
+    this->sysMgr = (nullptr == sysMgr) ? new MetaFsSystemManager(arrayId, storage) : sysMgr;
 }
 
 MetaFsManagementApi::~MetaFsManagementApi(void)
@@ -116,12 +116,6 @@ bool
 MetaFsManagementApi::IsMbrClean(void)
 {
     return sysMgr->IsMbrClean();
-}
-
-MetaStorageSubsystem*
-MetaFsManagementApi::GetMss(void)
-{
-    return sysMgr->GetMss();
 }
 
 void
