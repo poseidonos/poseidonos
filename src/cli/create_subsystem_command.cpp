@@ -33,7 +33,7 @@
 #include "src/cli/create_subsystem_command.h"
 
 #include "src/cli/cli_event_code.h"
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/logger/logger.h"
 #include "src/network/nvmf_target.h"
 

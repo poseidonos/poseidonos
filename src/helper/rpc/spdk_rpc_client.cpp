@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 
 #include <jsoncpp/json/json.h>
 #include <jsonrpccpp/client/connectors/unixdomainsocketclient.h>

@@ -44,7 +44,7 @@
 
 #include "proto/generated/cpp/telemetry.grpc.pb.h"
 #include "proto/generated/cpp/telemetry.pb.h"
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 #include "src/telemetry/telemetry_client/i_global_publisher.h"
 #include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/helper/string_checker.h"
+#include "src/helper/string/string_checker.h"
 
 class MockStringChecker : public StringChecker
 {

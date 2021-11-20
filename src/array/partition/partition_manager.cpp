@@ -44,7 +44,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/logger/logger.h"
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 #include "stripe_partition.h"
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))

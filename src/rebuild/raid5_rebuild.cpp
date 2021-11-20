@@ -148,7 +148,7 @@ Raid5Rebuild::Read(void)
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid5Rebuild - from:{}, cnt:{}", baseStripe, strCnt);
+        "Raid5Rebuild - segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;
@@ -186,7 +186,6 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
     airlog("LAT_Raid5RebuildWrite", "AIR_BEGIN", 0, objAddr);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Write, target segment:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_UserdataRebuild);

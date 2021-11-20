@@ -37,7 +37,6 @@
 
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
-#include "src/helper/time_helper.h"
 #include "src/mbr/mbr_info.h"
 namespace pos_cli
 {

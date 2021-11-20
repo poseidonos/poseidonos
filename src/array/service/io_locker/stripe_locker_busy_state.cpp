@@ -47,6 +47,8 @@ StripeLockerBusyState::TryLock(StripeId id)
         return true;
     }
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+                "StripeLockerBusyState::TryLock, Stripe {} is busy", id);
     return false;
 }
 

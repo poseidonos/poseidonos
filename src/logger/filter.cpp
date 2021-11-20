@@ -36,7 +36,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "src/helper/string_helper.h"
+#include "src/helper/string/string_helper.h"
 #include "src/include/pos_event_id.h"
 
 namespace pos_logger

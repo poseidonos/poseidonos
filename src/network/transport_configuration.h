@@ -33,7 +33,7 @@
 #pragma once
 #include <string>
 
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/master_context/config_manager.h"
 
 namespace pos

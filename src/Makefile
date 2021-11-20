@@ -61,6 +61,12 @@ SUBDIRS = allocator \
         meta_file_intf \
         journal_manager \
         helper \
+        helper/enumerable \
+        helper/file \
+        helper/json \
+        helper/rpc \
+        helper/string \
+        helper/time \
         sys_info \
         dump \
         qos \

@@ -46,8 +46,8 @@
 #include <rapidjson/writer.h>
 
 #include "src/include/pos_event_id.h"
-#include "src/helper/json_helper.h"
-#include "src/helper/directory.h"
+#include "src/helper/json/json_helper.h"
+#include "src/helper/file/directory.h"
 
 namespace pos
 {

@@ -42,7 +42,7 @@
 
 #include "proto/generated/cpp/telemetry.grpc.pb.h"
 #include "proto/generated/cpp/telemetry.pb.h"
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 

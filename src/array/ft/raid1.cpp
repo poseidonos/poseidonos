@@ -35,7 +35,7 @@
 #include <list>
 
 #include "raid1.h"
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"

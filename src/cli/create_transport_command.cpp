@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/cli/cli_event_code.h"
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 
 namespace pos_cli
 {

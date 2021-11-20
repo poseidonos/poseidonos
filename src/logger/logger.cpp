@@ -37,7 +37,7 @@
 
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include "src/helper/directory.h"
+#include "src/helper/file/directory.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 

@@ -35,7 +35,7 @@
 #include <memory>
 
 #include "stripe_partition.h"
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 #include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/pos_event_id.h"

@@ -35,7 +35,7 @@
 
 #include "filter.h"
 #include "spdlog/spdlog.h"
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 
 using namespace std;
 namespace pos_logger

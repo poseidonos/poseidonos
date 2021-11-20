@@ -2,4 +2,4 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"

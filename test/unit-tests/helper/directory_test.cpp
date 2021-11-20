@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
-#include "src/helper/directory.h"
+#include "src/helper/file/directory.h"
 
 using ::testing::_;
 using ::testing::Return;

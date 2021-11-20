@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "src/helper/string_checker.h"
+#include "src/helper/string/string_checker.h"
 
 using namespace std;
 

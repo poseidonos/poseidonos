@@ -33,6 +33,7 @@
 #include "rebuild_logger.h"
 #include "src/include/array_config.h"
 #include "src/logger/logger.h"
+#include "src/helper/time/time_helper.h"
 
 #include <fstream>
 #include <iostream>
@@ -71,8 +72,6 @@ void RebuildLogger::SetResult(string result)
 void RebuildLogger::WriteLog(void)
 {
     chrono::duration<double> duration = end - start;
-    auto t_start = std::chrono::system_clock::to_time_t(start);
-    auto t_end = std::chrono::system_clock::to_time_t(end);
     uint64_t mb = 1024 * 1024;
     uint64_t restoredSizeMB = rebuiltSegCnt * ArrayConfig::SSD_SEGMENT_SIZE_BYTE / mb;
     string logDir = LoggerSingleton::Instance()->GetLogDir();
@@ -82,19 +81,18 @@ void RebuildLogger::WriteLog(void)
     if (ofile.is_open())
     {
         ofile << "=======Rebuild Result=======" << endl;
-        ofile << "array: " << array <<endl;
-        ofile << "start: " << put_time(localtime(&t_start), "%F %T")  <<endl;
+        ofile << "Name: " << array <<endl;
+        ofile << "Start: " << GetCurrentTimeStr("%Y-%m-%d %X %z")  <<endl;
         for (auto it : partStart)
         {
-            auto time = std::chrono::system_clock::to_time_t(it.second);
-            ofile << "partition(" << it.first << ") rebuild starts: " << put_time(localtime(&time), "%F %T")  <<endl;
+            ofile << "partition(" << it.first << ") rebuild starts: " << GetCurrentTimeStr("%Y-%m-%d %X %z") <<endl;
         }
-        ofile << "end: " << put_time(localtime(&t_end), "%F %T")  <<endl;
-        ofile << "duration: " << duration.count() << " (s)"  <<endl;
-        ofile << "result: " << rebuildResult <<endl;
-        ofile << "number of rebuilt segments: " << rebuiltSegCnt <<endl;
-        ofile << "total restoration size: " << restoredSizeMB << " MB" << endl;
-        ofile << "speed: " << (double)restoredSizeMB / (double)(duration.count()) << " MB/s" <<endl;
+        ofile << "End: " << GetCurrentTimeStr("%Y-%m-%d %X %z") <<endl;
+        ofile << "Duration: " << duration.count() << " (s)"  <<endl;
+        ofile << "Result: " << rebuildResult <<endl;
+        ofile << "Number of rebuilt segments: " << rebuiltSegCnt <<endl;
+        ofile << "Total restoration size: " << restoredSizeMB << " MB" << endl;
+        ofile << "Restoration Speed: " << (double)restoredSizeMB / (double)(duration.count()) << " MB/s" <<endl;
         ofile << "============================" << endl;
         ofile.close();
     }

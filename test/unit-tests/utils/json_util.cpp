@@ -32,7 +32,7 @@
 
 #include <vector>
 
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 #include "src/volume/volume.h"
 #include "test/unit-tests/utils/test_util.h"
 

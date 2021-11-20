@@ -33,7 +33,7 @@
 #include "src/cli/add_listener_command.h"
 
 #include "src/cli/cli_event_code.h"
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/network/nvmf_target.h"
 
 namespace pos_cli

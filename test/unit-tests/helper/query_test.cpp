@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <vector>
 #include <string>
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 
 using ::testing::_;
 using ::testing::Return;

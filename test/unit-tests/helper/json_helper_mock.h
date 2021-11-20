@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 
 class MockJsonAttribute : public JsonAttribute
 {

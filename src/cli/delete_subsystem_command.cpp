@@ -37,7 +37,7 @@
 #include <vector>
 
 #include "src/cli/cli_event_code.h"
-#include "src/helper/spdk_rpc_client.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/network/nvmf_target.h"
 #include "src/volume/volume_service.h"
 

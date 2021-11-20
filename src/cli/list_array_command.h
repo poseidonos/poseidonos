@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/cli/command.h"
-#include "src/helper/json_helper.h"
+#include "src/helper/json/json_helper.h"
 #include <string>
 #define ARRAY_ERROR_INDEX -1
 

@@ -39,12 +39,12 @@ using namespace std;
 class StringChecker
 {
 public:
-    StringChecker(string s)
+    explicit StringChecker(string s)
     : str(s)
     {
     }
     size_t
-    Length()
+    Length(void)
     {
         return str.size();
     }

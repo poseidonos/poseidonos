@@ -36,7 +36,7 @@
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 
 #include <string>
 

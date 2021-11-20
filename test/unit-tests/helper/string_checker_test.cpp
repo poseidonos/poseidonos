@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
-#include "src/helper/string_checker.h"
+#include "src/helper/string/string_checker.h"
 
 using ::testing::_;
 using ::testing::Return;

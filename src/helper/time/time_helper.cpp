@@ -30,17 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TIME_HELPER_H
-#define TIME_HELPER_H
+#include "time_helper.h"
 
-#include <time.h>
-
-#include <string>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 using namespace std;
 
-string GetCurrentTimeStr(string timeFormat, int maxBufferSize);
+string
+GetCurrentTimeStr(string timeFormat, int maxBufferSize)
+{
+    time_t currentTime = time(0);
+    struct tm timeStruct;
+    char* timeBuf = new char[maxBufferSize];
+    localtime_r(&currentTime, &timeStruct);
+    strftime(timeBuf, maxBufferSize, timeFormat.c_str(), &timeStruct);
+    string result(timeBuf);
+    delete[] timeBuf;
+    return result;
+}
 
-time_t GetTimeT(string datetime, string timeFormat);
+string
+GetCurrentTimeStr(string timeFormat)
+{
+    int dateTimeSize = 32;
+    return GetCurrentTimeStr(timeFormat, dateTimeSize);
+}
 
-#endif // TIME_HELPER_H
+time_t
+GetTimeT(string datetime, string timeFormat)
+{
+    time_t currentTime = time(0);
+    time_t ret;
+    struct tm timeStruct;
+    localtime_r(&currentTime, &timeStruct); // timezone bug bypass
+    strptime(datetime.c_str(), timeFormat.c_str(), &timeStruct);
+    ret = mktime(&timeStruct);
+    if (ret == -1)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_TIME_CALC_ERROR,
+            "Time calculation error");
+    }
+    return ret;
+}

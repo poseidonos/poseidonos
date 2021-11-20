@@ -34,7 +34,7 @@
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/helper/query.h"
+#include "src/helper/enumerable/query.h"
 
 namespace pos
 {
