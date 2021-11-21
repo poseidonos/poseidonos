@@ -168,7 +168,8 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidC
 
     // when
     EXPECT_CALL(*segInfos, IncreaseOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*segInfos, GetValidBlockCount).WillOnce(Return(0));
+    EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillOnce(Return(100));
+    EXPECT_CALL(*segInfos, GetValidBlockCount).WillRepeatedly(Return(0));
     EXPECT_CALL(*segStates, GetState).WillOnce(Return(SegmentState::SSD));
 
     // then
@@ -198,12 +199,6 @@ TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
     int ret = segCtx.IncreaseValidBlockCount(0, 1);
     // then 1.
     EXPECT_EQ(3, ret);
-    // given 2.
-    EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(6));
-    EXPECT_CALL(addrInfo, GetblksPerSegment).WillOnce(Return(5));
-    EXPECT_CALL(addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
-    // when 2.
-    ret = segCtx.IncreaseValidBlockCount(0, 1);
 
     delete segInfos;
 }
@@ -270,8 +265,8 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValueWhenValidCountZeroAndS
     // given 1.
     EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(0));
     EXPECT_CALL(*segStates, GetState).WillOnce(Return(SegmentState::SSD));
-    EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillOnce(Return(100));
+    EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillRepeatedly(Return(100));
+    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillRepeatedly(Return(100));
     EXPECT_CALL(*segInfos, SetOccupiedStripeCount(0)).Times(1);
     EXPECT_CALL(*segStates, SetState(SegmentState::FREE)).Times(1);
 
@@ -634,7 +629,7 @@ TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
 {
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>[100]();
+    SegmentInfo* segInfos = new SegmentInfo[100]();
     SegmentStates* segStates = new SegmentStates[100]();
     NiceMock<MockSegmentLock>* segStateLock = new NiceMock<MockSegmentLock>();
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -655,6 +650,10 @@ TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
     // given 2.
     EXPECT_CALL(*segmentBitmap, SetNextZeroBit).WillOnce(Return(33));
     EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(false));
+
+    segInfos[22].SetOccupiedStripeCount(0);
+    segInfos[22].SetValidBlockCount(0);
+
     // when 2.
     ret = segCtx.AllocateFreeSegment();
     // then 2.

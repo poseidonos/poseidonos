@@ -167,11 +167,9 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     uint32_t blksPerSegment = addrInfo->GetblksPerSegment();
     if (validCount > blksPerSegment)
     {
-        POS_TRACE_ERROR(EID(VALID_COUNT_OVERFLOWED), "segmentId:{} increasedCount:{} total validCount:{} : OVERFLOWED", segId, cnt, validCount);
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
+        POS_TRACE_ERROR(EID(VALID_COUNT_OVERFLOWED),
+            "segmentId:{} increasedCount:{} total validCount:{} : OVERFLOWED", segId, cnt, validCount);
+        assert(false);
     }
     return validCount;
 }
@@ -184,11 +182,9 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     int32_t validCount = segmentInfos[segId].DecreaseValidBlockCount(cnt);
     if (validCount < 0)
     {
-        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED), "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, validCount);
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
+        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
+            "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, validCount);
+        assert(false);
     }
 
     if (validCount == 0)
@@ -210,6 +206,9 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 void
 SegmentCtx::_FreeSegment(SegmentId segId)
 {
+    assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
+    assert(segmentInfos[segId].GetValidBlockCount() == 0);
+
     segmentInfos[segId].SetOccupiedStripeCount(0);
     segmentStates[segId].SetState(SegmentState::FREE);
     allocSegBitmap->ClearBit(segId);
@@ -422,6 +421,7 @@ SegmentCtx::AllocateFreeSegment(void)
                 rebuildCtx->GetRebuildTargetSegmentCount());
 
             segId = UNMAP_SEGMENT;
+            POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
             break;
         }
         else if (rebuildCtx->IsRebuildTargetSegment(segId) == true)
@@ -433,6 +433,9 @@ SegmentCtx::AllocateFreeSegment(void)
         else
         {
             segmentStates[segId].SetState(SegmentState::NVRAM);
+
+            assert(segmentInfos[segId].GetOccupiedStripeCount() == 0);
+            assert(segmentInfos[segId].GetValidBlockCount() == 0);
             break;
         }
     }

@@ -55,6 +55,7 @@ enum class ModuleInDebugLogDump
     CALLBACK_TIMEOUT,
     FLUSH_CMD,
     JOURNAL,
+    META,
     MAX_SIZE,
 };
 
