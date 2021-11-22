@@ -57,6 +57,11 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, Me
 }
 SmartLogMetaIo::~SmartLogMetaIo(void)
 {
+    if (nullptr != smartLogFile)
+    {
+        delete smartLogFile;
+        smartLogFile = nullptr;
+    }
 }
 int
 SmartLogMetaIo::Init(void)

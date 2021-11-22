@@ -80,7 +80,6 @@ TEST(SmartLogMetaIo, Init_CreateFileCreationSuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_CreateFileCreationUnsuccessful)
@@ -99,7 +98,6 @@ TEST(SmartLogMetaIo, Init_CreateFileCreationUnsuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful)
@@ -120,7 +118,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful_Close_Unsuccessful)
@@ -148,7 +145,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful_Close_Unsuccessf
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOUnsuccessful)
@@ -168,7 +164,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOUnsuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOsuccessful)
@@ -189,7 +184,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOsuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOUnsuccessful)
@@ -209,7 +203,6 @@ TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOUnsuccessful)
     uint32_t expected = 0;
     uint32_t actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Dispose_SmartLogEnabledFalse)
@@ -252,7 +245,6 @@ TEST(SmartLogMetaIo, Dispose_FileOpenedAsyncIOSuccessful)
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
     smartLogMetaIo.Dispose();
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Dispose_FileOpenedAsyncIOUnsuccessful)
@@ -269,7 +261,6 @@ TEST(SmartLogMetaIo, Dispose_FileOpenedAsyncIOUnsuccessful)
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(-1));
     smartLogMetaIo.Dispose();
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOSuccessful)
@@ -287,7 +278,6 @@ TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOSuccessful)
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
     smartLogMetaIo.Dispose();
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOUnsuccessful)
@@ -305,7 +295,6 @@ TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOUnsuccessful)
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
     smartLogMetaIo.Dispose();
-    delete metaFile;
 }
 
 TEST(SmartLogMetaIo, Shutdown_Run)

@@ -55,16 +55,16 @@ public:
     virtual int GetError(void);
     virtual uint64_t GetLength(void);
 
-    MetaFsIoOpcode opcode;
-    int fd;
-    uint64_t fileOffset;
-    uint64_t length;
-    char* buffer;
-    MetaIoCbPtr callback;
+    MetaFsIoOpcode opcode = MetaFsIoOpcode::Write;
+    int fd = -1;
+    uint64_t fileOffset = 0;
+    uint64_t length = 0;
+    char* buffer = nullptr;
+    MetaIoCbPtr callback = nullptr;
 
     int error = 0;
-    MetaFileIoCbPtr ioDoneCheckCallback;
-    uint32_t vsid;
+    MetaFileIoCbPtr ioDoneCheckCallback = nullptr;
+    uint32_t vsid = 0;
 };
 
 } // namespace pos

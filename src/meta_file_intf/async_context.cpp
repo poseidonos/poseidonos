@@ -35,11 +35,6 @@
 namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
-: opcode(MetaFsIoOpcode::Write),
-  fd(-1),
-  fileOffset(0),
-  length(0),
-  buffer(nullptr)
 {
 }
 

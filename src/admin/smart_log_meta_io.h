@@ -54,6 +54,7 @@ class SmartLogMetaIo : public IMountSequence
 {
 public:
     SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr);
+    // only for test
     SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile);
     virtual ~SmartLogMetaIo(void);
     virtual int Init(void) override;

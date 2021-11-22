@@ -80,8 +80,8 @@ public:
 
 private:
     struct SmartLogEntry logPage[MAX_ARRAYS][MAX_VOLUME_COUNT];
-    bool smartLogEnable;
-    ConfigManager* configManager;
+    bool smartLogEnable = false;
+    ConfigManager* configManager = nullptr;
 };
 using SmartLogMgrSingleton = Singleton<SmartLogMgr>;
 } // namespace pos
