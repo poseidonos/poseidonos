@@ -302,7 +302,7 @@ StripeMapManager::DumpLoad(std::string fileName)
 void
 StripeMapManager::_MapLoadDone(int param)
 {
-    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper StripeMap] volId:{} arrayName:{} load done, so wake up! @_MapLoadDone", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper StripeMap] arrayName:{} load done, so wake up! @_MapLoadDone", addrInfo->GetArrayName());
     assert(numLoadIssuedCount > 0);
     numLoadIssuedCount--;
 }

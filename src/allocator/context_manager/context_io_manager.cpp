@@ -192,7 +192,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
     numFilesFlushing += NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        MetaIoCbPtr curCb = (owner == REBUILD_CTX) ? std::bind(&ContextIoManager::_RebuildFlushCompletedThenCB, this, std::placeholders::_1) : std::bind(&ContextIoManager::_FlushCompletedThenCB, this, std::placeholders::_1);
+        MetaIoCbPtr curCb = std::bind(&ContextIoManager::_FlushCompletedThenCB, this, std::placeholders::_1);
 
         ret = fileIo[owner]->Flush(curCb);
         if (ret != 0)

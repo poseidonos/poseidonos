@@ -159,7 +159,7 @@ ContextManager::AllocateFreeSegment(void)
     int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
     if (segId != UNMAP_SEGMENT)
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] free segmentId:{}, free segment count:{}", segId, freeSegCount);
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
     }
 
     telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
@@ -311,7 +311,7 @@ ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
     int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
     telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
-    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
     {
