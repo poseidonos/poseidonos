@@ -97,17 +97,15 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     alloc.Init();
-    // given 1.
-    EXPECT_CALL(*ctxManager, Dispose).Times(0);;
+    // given 1. - Allocator initialized
+    EXPECT_CALL(*ctxManager, Dispose).Times(1);
     EXPECT_CALL(*wbManager, FlushAllActiveStripes);
     EXPECT_CALL(*wbManager, Dispose);
     // when 1.
     alloc.Shutdown();
 
-    // given 2.
-    EXPECT_CALL(*ctxManager, Dispose).Times(1);
-    EXPECT_CALL(*wbManager, FlushAllActiveStripes);
-    EXPECT_CALL(*wbManager, Dispose);
+    // given 2. - Allocator NOT initialized
+    EXPECT_CALL(*ctxManager, Dispose).Times(0);
     // when 2.
     alloc.Shutdown();
 

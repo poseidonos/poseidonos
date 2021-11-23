@@ -39,6 +39,7 @@
 #include "pending_stripe.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/mapper/i_stripemap.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/statistics/stripe_info.h"
 
@@ -51,7 +52,8 @@ class ActiveWBStripeReplayer
 {
 public:
     explicit ActiveWBStripeReplayer(PendingStripeList& pendingStripeList);
-    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
+    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator,
+        IStripeMap* stripeMap, PendingStripeList& pendingStripeList);
     virtual ~ActiveWBStripeReplayer(void);
 
     virtual int Replay(void);
@@ -82,6 +84,7 @@ private:
     PendingStripeList& pendingStripes;
     IContextReplayer* contextReplayer;
     IWBStripeAllocator* wbStripeAllocator;
+    IStripeMap* stripeMap;
 };
 
 } // namespace pos

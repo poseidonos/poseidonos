@@ -143,6 +143,7 @@ ContextManager::DecreaseValidBlockCount(SegmentId segId, uint32_t count)
 void
 ContextManager::Dispose(void)
 {
+    ioManager->WaitPendingIo(ContextIoManager::IOTYPE_ALL);
     segmentCtx->Dispose();
     rebuildCtx->Dispose();
     allocatorCtx->Dispose();

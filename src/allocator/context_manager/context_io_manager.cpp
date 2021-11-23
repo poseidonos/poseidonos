@@ -109,7 +109,7 @@ ContextIoManager::Init(void)
             ret = fileIo[owner]->Flush(cbPtr);
             if (ret == 0)
             {
-                _WaitPendingIo(IOTYPE_ALL);
+                WaitPendingIo(IOTYPE_ALL);
                 POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD),
                     "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}, pendingRebuildIo:{}",
                     owner, numFilesFlushing + numFilesFlushing, numRebuildFlushInProgress);
@@ -121,7 +121,7 @@ ContextIoManager::Init(void)
         }
         else if (ret == 1) // loading
         {
-            _WaitPendingIo(IOTYPE_READ);
+            WaitPendingIo(IOTYPE_READ);
         }
         else
         {
@@ -207,14 +207,14 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
     {
         for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
         {
-            _WaitPendingIo(IOTYPE_FLUSH);
+            WaitPendingIo(IOTYPE_FLUSH);
         }
     }
     return ret;
 }
 
 void
-ContextIoManager::_WaitPendingIo(IOTYPE type)
+ContextIoManager::WaitPendingIo(IOTYPE type)
 {
     while (type == IOTYPE_ALL)
     {
@@ -307,7 +307,7 @@ ContextIoManager::FlushRebuildContext(EventSmartPtr callback, bool sync)
     int ret = fileIo[REBUILD_CTX]->Flush(curCb);
     if (sync == true)
     {
-        _WaitPendingIo(IOTYPE_FLUSH);
+        WaitPendingIo(IOTYPE_FLUSH);
     }
     return ret;
 }
@@ -358,7 +358,7 @@ ContextIoManager::TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt
     else
     {
         numFilesFlushing = cnt;
-        _WaitPendingIo(IOTYPE_ALL);
+        WaitPendingIo(IOTYPE_ALL);
     }
 }
 

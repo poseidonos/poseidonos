@@ -65,6 +65,8 @@ public:
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
     virtual int FlushRebuildContext(EventSmartPtr callback, bool sync);
 
+    virtual void WaitPendingIo(IOTYPE type);
+
     virtual uint64_t GetStoredContextVersion(int owner);
 
     virtual char* GetContextSectionAddr(int owner, int section);
@@ -80,8 +82,6 @@ private:
     void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-
-    void _WaitPendingIo(IOTYPE type);
 
     std::atomic<bool> flushInProgress;
     std::atomic<int> numFilesFlushing;
