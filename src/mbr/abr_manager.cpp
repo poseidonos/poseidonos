@@ -132,7 +132,7 @@ AbrManager::SaveAbr(ArrayMeta& meta)
     CopyData(abr->arrayName, meta.arrayName, ARRAY_NAME_SIZE);
     CopyData(abr->metaRaidType, meta.metaRaidType, META_RAID_TYPE_SIZE);
     CopyData(abr->dataRaidType, meta.dataRaidType, DATA_RAID_TYPE_SIZE);
-    CopyData(abr->updateDatetime, GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
+    CopyData(abr->updateDatetime, Time::GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
 
     for (int i = 0; i < nvmNum; i++)
     {

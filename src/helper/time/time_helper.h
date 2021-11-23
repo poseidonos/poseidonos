@@ -34,15 +34,14 @@
 #define TIME_HELPER_H
 
 #include <time.h>
-
 #include <string>
 
 using namespace std;
 
-string GetCurrentTimeStr(string timeFormat, int maxBufferSize);
-
-string GetCurrentTimeStr(string timeFormat);
-
-time_t GetTimeT(string datetime, string timeFormat);
+namespace Time
+{
+string GetCurrentTimeStr(string format, int bufSize = 32);
+string ToString(time_t time, string format = "%Y-%m-%d %X %z", int bufSize = 32);
+};
 
 #endif // TIME_HELPER_H

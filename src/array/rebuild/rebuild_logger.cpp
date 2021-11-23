@@ -77,17 +77,17 @@ void RebuildLogger::WriteLog(void)
     string logDir = LoggerSingleton::Instance()->GetLogDir();
     string fileName = "rebuild_log";
     ofstream ofile;
-    ofile.open(logDir + fileName, std::ios_base::app);
+    ofile.open(logDir + fileName, ios_base::app);
     if (ofile.is_open())
     {
         ofile << "=======Rebuild Result=======" << endl;
         ofile << "Name: " << array <<endl;
-        ofile << "Start: " << GetCurrentTimeStr("%Y-%m-%d %X %z")  <<endl;
+        ofile << "Start: " << Time::ToString(chrono::system_clock::to_time_t(start)) << endl;
         for (auto it : partStart)
         {
-            ofile << "partition(" << it.first << ") rebuild starts: " << GetCurrentTimeStr("%Y-%m-%d %X %z") <<endl;
+            ofile << it.first << " rebuild starts: " << Time::ToString(chrono::system_clock::to_time_t(it.second)) <<endl;
         }
-        ofile << "End: " << GetCurrentTimeStr("%Y-%m-%d %X %z") <<endl;
+        ofile << "End: " << Time::ToString(chrono::system_clock::to_time_t(end)) <<endl;
         ofile << "Duration: " << duration.count() << " (s)"  <<endl;
         ofile << "Result: " << rebuildResult <<endl;
         ofile << "Number of rebuilt segments: " << rebuiltSegCnt <<endl;
