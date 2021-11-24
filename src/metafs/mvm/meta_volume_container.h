@@ -91,7 +91,7 @@ public:
     virtual MetaLpnType GetMaxLpn(MetaVolumeType volType);
     virtual FileDescriptorType LookupFileDescByName(std::string& fileName);
     virtual MetaFileInode& GetInode(FileDescriptorType fd, MetaVolumeType volumeType);
-    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList);
+    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList, MetaVolumeType volumeType);
     virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
                     MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
 

@@ -32,48 +32,43 @@
 
 #pragma once
 
+#include "src/metafs/metafs.h"
+
 #include <string>
 
-#include "mfs_top_base_test.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
-class UtMetaFsWBT : public UtMetaFsTop
+class MetaFsTestFixture
 {
 public:
-    void
-    SetUp(void) override
-    {
-        UtMetaFsTop::SetUp();
-        EstablishFilesystem();
-    }
-    void
-    TearDown(void) override
-    {
-        UtMetaFsTop::TearDown();
-    }
+    MetaFsTestFixture(void);
+    virtual ~MetaFsTestFixture(void);
 
-    FileDescriptorType
-    CreateFileAndOpen(std::string& fileName, FileSizeType fileSize)
-    {
-        FileDescriptorType fd;
-        const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+protected:
+    NiceMock<MockIArrayInfo>* arrayInfo = nullptr;
 
-        MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
-        rc_mgmt = metaFs.ctrl.CreateVolume(fileName, fileSize);
-        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
+    MetaFs* metaFs = nullptr;
 
-        rc_mgmt = metaFs.ctrl.Open(fileName);
-        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
-        fd = rc_mgmt.returnData;
-        EXPECT_NE(fd, INVALID_FD);
+    MetaFsManagementApi* mgmt = nullptr;
+    MetaFsFileControlApi* ctrl = nullptr;
+    MetaFsIoApi* io = nullptr;
+    MetaFsWBTApi* wbt = nullptr;
+    NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
 
-        FileSizeType fileByteSize = metaFs.ctrl.GetFileSize(fd);
-        EXPECT_EQ(fileSize, fileByteSize);
-
-        return fd;
-    }
+    bool isLoaded = false;
+    int arrayId = INT32_MAX;
+    std::string arrayName = "";
+    PartitionLogicalSize ptnSize[PartitionType::PARTITION_TYPE_MAX];
 
 private:
+    void _SetArrayInfo(void);
+    void _SetThreadModel(void);
+    cpu_set_t _GetCpuSet(int from, int to);
 };
+
 } // namespace pos

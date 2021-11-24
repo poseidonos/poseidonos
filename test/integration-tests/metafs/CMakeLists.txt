@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(metafs_wbt_test_it metafs_wbt_test.cpp)

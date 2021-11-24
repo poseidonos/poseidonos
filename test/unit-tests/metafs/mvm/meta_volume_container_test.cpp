@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -371,17 +371,19 @@ TEST_F(MetaVolumeContainerTexture, CheckInodeList)
             fileInfoList->push_back(ctx);
         });
 
-    container->GetInodeList(fileInfoList);
+    fileInfoList->clear();
+    container->GetInodeList(fileInfoList, MetaVolumeType::SsdVolume);
 
-    EXPECT_EQ(fileInfoList->size(), 2);
+    EXPECT_EQ(fileInfoList->size(), 1);
+    EXPECT_EQ(fileInfoList->at(0).fileName, "111");
+    EXPECT_EQ(fileInfoList->at(0).fd, 0);
 
-    if (fileInfoList->size() == 2)
-    {
-        EXPECT_EQ(fileInfoList->at(0).fileName, "111");
-        EXPECT_EQ(fileInfoList->at(0).fd, 0);
-        EXPECT_EQ(fileInfoList->at(1).fileName, "222");
-        EXPECT_EQ(fileInfoList->at(1).fd, 1);
-    }
+    fileInfoList->clear();
+    container->GetInodeList(fileInfoList, MetaVolumeType::NvRamVolume);
+
+    EXPECT_EQ(fileInfoList->size(), 1);
+    EXPECT_EQ(fileInfoList->at(0).fileName, "222");
+    EXPECT_EQ(fileInfoList->at(0).fd, 1);
 
     delete ssdVolume;
     delete nvramVolume;

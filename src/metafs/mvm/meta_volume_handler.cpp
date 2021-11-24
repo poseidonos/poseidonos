@@ -257,7 +257,7 @@ MetaVolumeHandler::HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMs
     }
 
     // find all valid files and get the inode entry
-    volContainer->GetInodeList(fileInfoList);
+    volContainer->GetInodeList(fileInfoList, reqMsg.volType);
 
     return POS_EVENT_ID::SUCCESS;
 }

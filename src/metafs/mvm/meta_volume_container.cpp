@@ -365,12 +365,9 @@ MetaVolumeContainer::LookupFileDescByName(std::string& fileName)
 }
 
 void
-MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
+MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList, MetaVolumeType volumeType)
 {
-    for (auto& it : volumeContainer)
-    {
-        it.second->GetInodeList(fileInfoList);
-    }
+    volumeContainer[volumeType]->GetInodeList(fileInfoList);
 }
 
 bool
