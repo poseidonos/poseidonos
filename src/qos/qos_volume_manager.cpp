@@ -478,7 +478,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
         }
     }
     qosContext->SetReactorProcessed(reactor, true);
-    param->nextTimeStamp = next_tick + param->qosTimeSlice;
+    param->nextTimeStamp = now + param->qosTimeSlice;
     return retVal;
 }
 
