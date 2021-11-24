@@ -1,16 +1,54 @@
-# Metrics Reference
+# **Metrics Reference**
 
-## Allocator
+## **Allocator**
+Allocator group contains the metrics of allocator. 
 
-### SegmentInfo
-세그먼트 인포에 대한 설명 작성하기
-| Monitoring | Introduced | Type    |
-|------------|------------|---------|
-| Optional   | v0.10      | Integer |
+---
 
-&nbsp;
-### SegmentInfo
-세그먼트 인포에 대한 설명 작성하기
-| Monitoring | Introduced | Type    |
-|------------|------------|---------|
-| Optional   | v0.10      | Integer |
+### _**SegmentID**_
+
+**Type**: Integer
+
+**Monitoring**: Optional
+
+**Introduced**: v0.10.0
+
+The identifier of the segment.
+
+---
+
+### _**SegmentState**_
+
+**Type**: Integer
+
+**Monitoring**: Optional
+
+**Introduced**: v0.10.0
+
+The state of the segment.
+
+---
+
+### _**InvalidBlockCount**_
+
+**Type**: Integer
+
+**Monitoring**: Optional
+
+**Introduced**: v0.10.0
+
+The number of invalid blocks in the segment.
+
+---
+
+### _**TotalSegments**_
+
+**Type**: Integer
+
+**Monitoring**: Optional
+
+**Introduced**: v0.10.0
+
+The total number of segments in the allocator. 
+
+---
