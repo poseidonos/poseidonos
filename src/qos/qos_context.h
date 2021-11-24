@@ -92,6 +92,8 @@ public:
     void ResetAllReactorsProcessed(void);
     void SetVolumeOperationDone(bool value);
     virtual bool GetVolumeOperationDone(void);
+    void InsertInactiveReactors(std::vector<uint32_t> inactiveReactors);
+    std::vector<uint32_t> GetInactiveReactorsList(void);
 
 private:
     QosUserPolicy userPolicy;
@@ -113,5 +115,6 @@ private:
     std::atomic<bool> reactorProcessed[M_MAX_REACTORS];
     std::vector<uint32_t> reactorCoreList;
     std::atomic<bool> volumeOperationDone;
+    std::vector<uint32_t> inactiveReactorsList;
 };
 } // namespace pos

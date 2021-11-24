@@ -204,9 +204,10 @@ QosMonitoringManager::_UpdateContextResourceDetails(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map)
+QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map, std::vector<uint32_t> &inactiveReactors)
 {
     qosContext->InsertActiveVolumeReactor(map);
+    qosContext->InsertInactiveReactors(inactiveReactors);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -266,8 +267,10 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     const std::map<uint32_t, map<uint32_t, uint32_t>> lastVolReactorMap = volReactorMap;
     volReactorMap.clear();
     reactorVolMap.clear();
+    inactiveReactors.clear();
     for (auto& reactor : reactorCoreList)
     {
+        bool reactorActive = false;
         volList[reactor].clear();
         for (uint32_t arrayId = 0; arrayId < qosManager->GetNumberOfArrays(); arrayId++)
         {
@@ -305,9 +308,14 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
                         uint32_t globalVolId = arrayId * MAX_VOLUME_COUNT + volumeId;
                         reactorVolMap[reactor].insert({globalVolId, 1});
                         volReactorMap[globalVolId].insert({reactor, 1});
+                        reactorActive = true;
                     }
                 }
             }
+        }
+        if (reactorActive == false)
+        {
+            inactiveReactors.push_back(reactor);
         }
     }
     if (lastVolReactorMap == volReactorMap)
@@ -316,7 +324,7 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     }
     else
     {
-        _UpdateContextActiveVolumeReactors(volReactorMap);
+        _UpdateContextActiveVolumeReactors(volReactorMap, inactiveReactors);
         changeDetected = true;
     }
 

@@ -306,6 +306,12 @@ QosCorrectionManager::_HandleMaxThrottling(void)
             }
             qosManager->SetVolumeLimit(it->first, volumeId, weight, true, arrayId);
         }
+        std::vector<uint32_t> inactiveReactors = qosContext->GetInactiveReactorsList();
+        for (auto& it : inactiveReactors)
+        {
+            qosManager->SetVolumeLimit(it, volumeId, 0, false, arrayId);
+            qosManager->SetVolumeLimit(it, volumeId, 0, true, arrayId);
+        }
     }
 }
 

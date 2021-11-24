@@ -688,7 +688,15 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
     bool enqueueParameters = false;
 
     enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
-    enqueueParameters = enqueueParameters && currentBW;
+    enqueueParameters = enqueueParameters &&  (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
+    // Condition (1) minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops)
+    // checks for some qos policy being present on the volume
+    // Condition (2) "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
+    // For any inactive volume the BW and well as pending IO count will be 0. Any other cases would be active volume.
+    // BW (0), Pending (0) ==> Non Active Volume
+    // BW (0), Pending (!0) ==> Active, as 0 throttling would have been applied, so IO's in pending queue
+    // BW (!0), Pending (0) ==> Active, as IO's have been submitted but throttling value not reached
+    // BW (!0), Pending (!0) ==> Active, IO's have been submitted and throttling also active
     if (enqueueParameters)
     {
         volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;

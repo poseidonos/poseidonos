@@ -459,5 +459,30 @@ QosContext::GetVolumeOperationDone(void)
 {
     return volumeOperationDone;
 }
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosContext::InsertInactiveReactors(std::vector<uint32_t> inactiveReactors)
+{
+    inactiveReactorsList = inactiveReactors;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+std::vector<uint32_t>
+QosContext::GetInactiveReactorsList(void)
+{
+    return inactiveReactorsList;
+}
 
 } // namespace pos
