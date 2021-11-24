@@ -39,7 +39,7 @@ $ sudo ./script/backup_latest_hugepages_for_uram.sh
 $ sudo ./script/start_poseidonos.sh
  
 # Create write buffer. Please make sure the same parameters should be used as before the crash.
-$ ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 16777216 --block-size 512
+$ ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 8388608 --block-size 512
  
 # Scan the devices and load the array automatically
 $ bin/poseidonos-cli device scan
