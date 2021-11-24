@@ -183,7 +183,5 @@ TEST_F(MetaFsFixture, CheckTheLastStripeId)
     EXPECT_CALL(*mss, TranslateAddress(_, _)).WillOnce(Return(addr));
 
     EXPECT_EQ(metaFs->GetTheLastValidStripeId(), 1);
-
-    delete mss;
 }
 } // namespace pos

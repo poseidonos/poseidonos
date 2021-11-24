@@ -72,7 +72,7 @@ MssOnDisk::~MssOnDisk(void)
 void
 MssOnDisk::_Finalize(void)
 {
-    for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
+    for (int i = mssDiskPlace.size() - 1; i >=0 ; --i)
     {
         if (mssDiskPlace[i] != nullptr)
         {
