@@ -1,4 +1,8 @@
-# **Metrics Reference**
+- [**Allocator**](#allocator)
+  - [_**SegmentID**_](#segmentid)
+  - [_**SegmentState**_](#segmentstate)
+  - [_**InvalidBlockCount**_](#invalidblockcount)
+  - [_**TotalSegments**_](#totalsegments)
 
 ## **Allocator**
 Allocator group contains the metrics of allocator. 
