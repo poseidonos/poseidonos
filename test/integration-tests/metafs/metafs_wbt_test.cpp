@@ -99,7 +99,7 @@ TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
 
     EXPECT_EQ(1, fileList.size());
 
-    for(auto item : fileList)
+    for (auto item : fileList)
     {
         EXPECT_EQ(item.fileName, fileName);
         EXPECT_EQ(item.size, fileSize);
