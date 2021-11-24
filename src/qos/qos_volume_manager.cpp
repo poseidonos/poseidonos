@@ -682,15 +682,10 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
 {
     uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
     uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
-    bool minimumPolicyInEffect = QosManagerSingleton::Instance()->IsMinimumPolicyInEffectInSystem();
-    qos_vol_policy volPolicy = qosArrayManager->GetVolumePolicy(volId);
     bool enqueueParameters = false;
 
-    enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
-    enqueueParameters = enqueueParameters && (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
-    // Condition (1) minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops)
-    // checks for some qos policy being present on the volume
-    // Condition (2) "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
+    enqueueParameters = !((currentBW == 0) && (pendingIO[reactor][volId] == 0));
+    // Condition "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
     // For any inactive volume the BW and well as pending IO count will be 0. Any other cases would be active volume.
     // BW (0), Pending (0) ==> Non Active Volume
     // BW (0), Pending (!0) ==> Active, as 0 throttling would have been applied, so IO's in pending queue
