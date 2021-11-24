@@ -85,14 +85,24 @@ MetaFs::~MetaFs(void)
 {
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
 
-    if (mgmt != nullptr)
+    if (nullptr != mgmt)
         delete mgmt;
-    if (io != nullptr)
+
+    if (nullptr != io)
         delete io;
-    if (ctrl != nullptr)
+
+    if (nullptr != ctrl)
         delete ctrl;
-    if (wbt != nullptr)
+
+    if (nullptr != wbt)
         delete wbt;
+
+    if (nullptr != metaStorage)
+    {
+        metaStorage->Close();
+        delete metaStorage;
+        metaStorage = nullptr;
+    }
 }
 
 int
@@ -152,8 +162,6 @@ MetaFs::Dispose(void)
     }
 
     io->RemoveArray(arrayId);
-
-    _ClearMss();
 }
 
 void
@@ -163,14 +171,6 @@ MetaFs::Shutdown(void)
             "Shutdown metafs, arrayName={}", arrayName);
 
     io->RemoveArray(arrayId);
-
-    // the storage closes here
-    if (nullptr != metaStorage)
-    {
-        metaStorage->Close();
-        delete metaStorage;
-        metaStorage = nullptr;
-    }
 }
 
 void
@@ -390,12 +390,5 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
     newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
 
     return newInfo;
-}
-
-void
-MetaFs::_ClearMss(void)
-{
-    delete metaStorage;
-    metaStorage = nullptr;
 }
 } // namespace pos
