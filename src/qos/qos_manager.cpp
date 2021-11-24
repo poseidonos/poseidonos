@@ -473,7 +473,6 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
             qosArrayManager[i]->VolumeQosPoller(reactor, aioSubmission, offset);
         }
         qosContext->SetReactorProcessed(reactor, true);
-        now = spdkEnvCaller->SpdkGetTicks();
         param->nextTimeStamp = now + param->qosTimeSlice;
     }
     return 0;
