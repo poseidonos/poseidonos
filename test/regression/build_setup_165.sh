@@ -51,6 +51,7 @@ processKill()
 
 repositorySetup()
 {
+    cd ${pos_working_dir}
     echo "Setting git repository..."
     git fetch -p
     git clean -dff

@@ -15,6 +15,7 @@ texecc()
 
 processCheck()
 {
+    cd ${pos_working_dir}
     rm -rf processList_${target_ip}
     ps -ef | grep poseidonos > processList_${target_ip}
     cat processList_${target_ip}
