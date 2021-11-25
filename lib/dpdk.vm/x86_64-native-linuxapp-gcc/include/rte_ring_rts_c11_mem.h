@@ -1,1 +1,0 @@
-../../lib/librte_ring/rte_ring_rts_c11_mem.h
