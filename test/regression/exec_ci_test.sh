@@ -41,14 +41,29 @@ printVariable()
 
 build_setup()
 {
-    
+    real_ip=$(ip -o addr show up primary scope global |
+    while read -r num dev fam addr rest; do echo ${addr%/*}; done)
+    cmp_ip=${real_ip:0:3}
+    echo "real IP:${real_ip}, compare:${cmp_ip}"   
     if [ $config_option == 0 ]
     then
-        echo "./build_setup.sh -i $target_ip -t $target_type -r $test_rev"
-        $test_dir/build_setup.sh -i $target_ip -t $target_type -r $test_rev
+        if [ ${cmp_ip} == "165" ]
+        then
+            echo "./build_setup_165.sh -i $target_ip -t $target_type -r $test_rev"
+            $test_dir/build_setup_165.sh -i $target_ip -t $target_type -r $test_rev
+        else
+            echo "./build_setup.sh -i $target_ip -t $target_type -r $test_rev"
+            $test_dir/build_setup.sh -i $target_ip -t $target_type -r $test_rev
+        fi
     else
-        echo "./build_setup.sh -i $target_ip -t $target_type -r $test_rev -c $config_option"
-        $test_dir/build_setup.sh -i $target_ip -t $target_type -r $test_rev -c $config_option
+        if [ ${cmp_ip} == "165" ]
+        then
+            echo "./build_setup_165.sh -i $target_ip -t $target_type -r $test_rev -c $config_option"
+            $test_dir/build_setup_165.sh -i $target_ip -t $target_type -r $test_rev -c $config_option
+        else
+            echo "./build_setup.sh -i $target_ip -t $target_type -r $test_rev -c $config_option"
+            $test_dir/build_setup.sh -i $target_ip -t $target_type -r $test_rev -c $config_option
+        fi
     fi
 }
 
@@ -67,8 +82,18 @@ exec_test()
 
 clean_backup()
 {
-    echo "./clean_backup.sh -i $target_ip -n $test_name -r $test_rev"
-    $test_dir/clean_backup.sh -i $target_ip -n $test_name -r $test_rev
+    real_ip=$(ip -o addr show up primary scope global |
+        while read -r num dev fam addr rest; do echo ${addr%/*}; done)
+    cmp_ip=${real_ip:0:3}
+    echo "real IP:${real_ip}, compare:${cmp_ip}"
+    if [ ${cmp_ip} == "165" ]
+    then
+        echo "./clean_backup_165.sh -i $target_ip -n $test_name -r $test_rev"
+        $test_dir/clean_backup_165.sh -i $target_ip -n $test_name -r $test_rev
+    else
+        echo "./clean_backup.sh -i $target_ip -n $test_name -r $test_rev"
+        $test_dir/clean_backup.sh -i $target_ip -n $test_name -r $test_rev
+    fi
 }
 
 print_help()

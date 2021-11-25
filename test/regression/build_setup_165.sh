@@ -1,5 +1,5 @@
 #!/bin/bash
-pos_root_dir="/home/ibof/"
+pos_root_dir="/home/psd/"
 pos_working_dir="${pos_root_dir}ibofos"
 pos_conf="/etc/pos"
 target_ip=127.0.0.1
@@ -46,16 +46,16 @@ printVariable()
 processKill()
 {
     echo "Killing previously-running poseidonos..."
-    texecc $pos_working_dir/test/script/kill_poseidonos.sh
+    $pos_working_dir/test/script/kill_poseidonos.sh
 }
 
 repositorySetup()
 {
     echo "Setting git repository..."
-    texecc git fetch -p
-    texecc git clean -dff
-    texecc rm -rf *
-    texecc git reset --hard $test_rev
+    git fetch -p
+    git clean -dff
+    rm -rf *
+    git reset --hard $test_rev
     echo "Setting git repository done"
 }
 
@@ -76,34 +76,33 @@ setJobNumber()
 buildLib()
 {
     echo "Build lib For $target_type"
-    texecc make CACHE=Y -j ${job_number} -C lib
+    make CACHE=Y -j ${job_number} -C lib
 }
 
 buildPos()
 {
     echo "Build For $target_type"
-    texecc make CACHE=Y -j ${job_number}
+    make CACHE=Y -j ${job_number}
 }
 
 getPos()
 {
     echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${target_ip}:${pos_working_dir}/bin ##"
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -d ${pos_working_dir}/bin ]]
-    if [ ! $? -eq 0 ]
+    if [ ! -d ${pos_working_dir}/bin ]
     then
         echo "## mkdir ${target_ip}:${pos_working_dir}/bin"
-        texecc mkdir ${pos_working_dir}/bin
+        mkdir ${pos_working_dir}/bin
     else
         echo "## rm old ${target_ip}:${pos_working_dir}/bin files"
-        texecc rm ${pos_working_dir}/bin/*
+        rm ${pos_working_dir}/bin/*
     fi
-    sshpass -p bamboo sudo scp ${master_bin_path}/* root@${target_ip}:${pos_working_dir}/bin
+    cp ${master_bin_path}/* ${pos_working_dir}/bin
 }
 
 backupPos()
 {
     echo "## START TO COPY BIN FILES INTO MASTER : from ${target_ip}:${pos_working_dir}/bin to ${master_bin_path} ##"
-    sshpass -p bamboo sudo scp root@${target_ip}:${pos_working_dir}/bin/* ${master_bin_path}/
+    cp ${pos_working_dir}/bin/* ${master_bin_path}/
 
     if [ -f ${master_bin_path}/${pos_bin_filename} ]
     then
@@ -118,22 +117,22 @@ buildTest()
 {
     if [ $build_optimization == "OFF" ]
     then
-        texecc sed -i 's/O2/O0/g' $pos_working_dir/Makefile
+        sed -i 's/O2/O0/g' $pos_working_dir/Makefile
     fi
 
-    texecc $pos_working_dir/script/pkgdep.sh
-    texecc rm -rf /dev/shm/*
-    texecc rm $pos_working_dir/bin/poseidonos
+    $pos_working_dir/script/pkgdep.sh
+    rm -rf /dev/shm/*
+    rm $pos_working_dir/bin/poseidonos
 
-    texecc ./configure $config_option
+    ./configure $config_option
     cwd=""
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
-    texecc make -j ${job_number} clean
+    cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y
+    make -j ${job_number} clean
 
     if [ $target_type == "VM" ]
     then
         echo "copy air.cfg"
-        texecc cp -f ${pos_working_dir}/config/air_ci.cfg ${pos_working_dir}/config/air.cfg
+        cp -f ${pos_working_dir}/config/air_ci.cfg ${pos_working_dir}/config/air.cfg
     fi
 
     if [ ! -d ${master_bin_path} ]
@@ -156,8 +155,7 @@ buildTest()
         fi
     fi
 
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f ${pos_working_dir}/bin/${pos_bin_filename} ]]
-    if [ ! $? -eq 0 ]
+    if [ ! -f ${pos_working_dir}/bin/${pos_bin_filename} ]
     then
         echo "## ERROR: NO BUILT BINARY  ${target_ip}:/${pos_working_dir}/bin/${pos_bin_filename} "
         exit 1
@@ -168,12 +166,11 @@ buildTest()
         backupPos
     fi
 
-    texecc rm $pos_conf/pos.conf
-    texecc make install
-    texecc make udev_install
+    rm $pos_conf/pos.conf
+    make install
+    make udev_install
 
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $pos_working_dir/bin/poseidonos ]]
-    if [ $? -eq 0 ]
+    if [ -f $pos_working_dir/bin/poseidonos ]
     then
         echo "Build Success"
     else
@@ -184,20 +181,20 @@ buildTest()
 
 setupTest()
 {
-    texecc 'echo 1 > /proc/sys/vm/drop_caches'
-    texecc ./script/setup_env.sh
+    echo 1 > /proc/sys/vm/drop_caches
+    ./script/setup_env.sh
 
     if [ $target_type == "VM" ]
     then
-        texecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
+        xecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
     fi
 
-    texecc rmmod nvme_tcp
-    texecc rmmod nvme_rdma
-    texecc rmmod nvme_fabrics
+    rmmod nvme_tcp
+    rmmod nvme_rdma
+    rmmod nvme_fabrics
 
-    texecc modprobe nvme_tcp
-    texecc modprobe nvme_rdma
+    modprobe nvme_tcp
+    modprobe nvme_rdma
 }
 
 print_help()
@@ -212,7 +209,7 @@ print_help()
         echo "./build_setup_165.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option] -d [working directory]"
     else
         echo "./build_setup.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option] -d [working directory]"
-    fi    
+    fi
 }
 
 while getopts "i:h:t:c:r:d:o:" opt
