@@ -16,7 +16,7 @@ texecc()
 processCheck()
 {
     rm -rf processList_${target_ip}
-    sshpass -p bamboo ssh -q -tt root@${target_ip} ps -ef | grep poseidonos > processList_${target_ip}
+    ps -ef | grep poseidonos > processList_${target_ip}
     cat processList_${target_ip}
     rm -rf processList_${target_ip}
 }
@@ -45,8 +45,8 @@ printVariable()
 coreDump()
 {
     echo "Kill poseidonos to generate core dump files.."
-    texecc pkill -11 poseidonos
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd $pos_working_dir/tool/dump/; sudo ./trigger_core_dump.sh crashed"
+    pkill -11 poseidonos
+    cd $pos_working_dir/tool/dump/; sudo ./trigger_core_dump.sh crashed
 
     if [ -d $pos_core/$plan_name/$test_name/$test_rev ]
     then
@@ -56,11 +56,11 @@ coreDump()
     fi
 
     echo "Copying core dump files to service server $pos_core/$plan_name/$test_name/$test_rev"
-    sshpass -p bamboo scp -r root@${target_ip}:/$pos_working_dir/tool/dump/*.tar.gz* $pos_core/$plan_name/$test_name/$test_rev
+    cp -r $pos_working_dir/tool/dump/*.tar.gz* $pos_core/$plan_name/$test_name/$test_rev
 
     echo "Deleting core dump files in ${target_ip} since files are copied to service server"
-    texecc rm /etc/pos/core/*
-    texecc rm $pos_working_dir/tool/dump/*.tar.gz*
+    rm /etc/pos/core/*
+    rm $pos_working_dir/tool/dump/*.tar.gz*
 }
 
 backupLog()
@@ -73,8 +73,8 @@ backupLog()
     fi
 
     echo "Copying log files to service server $pos_log/$plan_name/$test_name/$test_rev"
-    sshpass -p bamboo scp -r root@${target_ip}:/var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "rm -rf /var/log/pos/*"
+    cp -r root@${target_ip}:/var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
+    rm -rf /var/log/pos/*
 }
 
 resetConfig()
