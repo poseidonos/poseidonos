@@ -147,6 +147,7 @@ LDEXTRAFLAGS = -rdynamic
 
 CONFIG_DIR = /etc/pos/
 CONFIG_FILE = $(CONFIG_DIR)/pos.conf
+TELEMETRY_CONFIG_FILE = $(CONFIG_DIR)/telemetry_default.yaml
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 LDEXTRAFLAGS += -shared -Wl,-z,nodelete
 endif
@@ -178,7 +179,17 @@ install:
         echo "copy default config file"; \
 		cp ./config/pos.conf ${CONFIG_FILE}; \
 	fi
-	
+
+	@echo "copy default telemetry config file"
+	@if test -e ${TELEMETRY_CONFIG_FILE}; then \
+		echo "exist file"; \
+        echo "if you want to change default config file, remove file first"; \
+	else \
+		echo "not exist the file"; \
+        echo "copy default telemetry config file"; \
+		cp ./config/telemetry_default.yaml ${TELEMETRY_CONFIG_FILE}; \
+	fi
+
 #	@echo "make cert dir" \
 	@if test -d ${CLI_CERT_DIR}; then \
 		echo "exist dir"; \

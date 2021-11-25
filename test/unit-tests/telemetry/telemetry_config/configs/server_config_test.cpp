@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -65,5 +65,19 @@ TEST(ServerConfig, Update_testIfServerConfigCanContainOwnValues)
     EXPECT_EQ(server.GetIp(), value_1);
     EXPECT_EQ(server.GetPort(), value_2);
     EXPECT_EQ(server.IsEnabled(), value_3);
+}
+
+TEST(ServerConfig, Update_testIfClientConfigCanUpdateValue)
+{
+    ServerConfig server;
+
+    std::string key = "enabled";
+    server.UpdateConfig(key, true);
+
+    EXPECT_EQ(server.IsEnabled(), true);
+
+    server.UpdateConfig(key, false);
+
+    EXPECT_EQ(server.IsEnabled(), false);
 }
 } // namespace pos

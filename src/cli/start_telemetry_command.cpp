@@ -40,6 +40,7 @@
 #include "src/logger/logger.h"
 #include "src/mbr/mbr_info.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_config/telemetry_config.h"
 
 namespace pos_cli
 {
@@ -66,6 +67,13 @@ StartTelemetryCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
             "Telemetry could not start ", data, GetPosInfo());
+    }
+
+    TelemetryConfig* config = TelemetryConfigSingleton::Instance();
+    if (!config->GetClient().UpdateConfig("enabled", true))
+    {
+        return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
+            "The config for telemetry client could not be set as true ", data, GetPosInfo());
     }
 
     return jFormat.MakeResponse("STARTTELEMETRY", rid, SUCCESS,

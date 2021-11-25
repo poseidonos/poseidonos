@@ -30,24 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/env_variable_config_reader.h"
+#pragma once
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <execinfo.h>
+#include <sys/stat.h>
 
 #include <string>
 
-using ::testing::_;
-using ::testing::Matcher;
-using ::testing::NiceMock;
-using ::testing::Return;
-using ::testing::ReturnRef;
-
 using namespace std;
 
-namespace pos
+static bool
+FileExists(const std::string& path)
 {
-TEST(EnvVariableConfigReader, test)
-{
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+    {
+        return false;
+    }
+    return (info.st_mode & S_IFREG) != 0;
 }
-} // namespace pos

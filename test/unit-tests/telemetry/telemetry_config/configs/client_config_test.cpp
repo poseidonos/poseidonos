@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -69,5 +69,19 @@ TEST(ClientConfig, Update_testIfClientConfigCanContainOwnValues)
     EXPECT_EQ(client.GetTimeoutSec(), 1);
     EXPECT_EQ(client.GetCircuitBreakPolicy(), "circuit_break_policy");
     EXPECT_EQ(client.IsEnabled(), true);
+}
+
+TEST(ClientConfig, Update_testIfClientConfigCanUpdateValue)
+{
+    ClientConfig client;
+
+    std::string key = "enabled";
+    client.UpdateConfig(key, true);
+
+    EXPECT_EQ(client.IsEnabled(), true);
+
+    client.UpdateConfig(key, false);
+
+    EXPECT_EQ(client.IsEnabled(), false);
 }
 } // namespace pos

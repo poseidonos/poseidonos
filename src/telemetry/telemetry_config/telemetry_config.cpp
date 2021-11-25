@@ -34,33 +34,71 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <map>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
 
+#include "src/helper/file/directory.h"
+#include "src/helper/file/file.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-TelemetryConfig::TelemetryConfig(void)
-: cliReader(nullptr),
-  envReader(nullptr),
-  fileReader(nullptr)
+TelemetryConfig::TelemetryConfig(std::string path, std::string fileName)
 {
-}
+    // make default telemetry config
+    defaultConfiguration = "telemetry:\n"
+                    "    client:\n"
+                    "        target:\n"
+                    "            ip: localhost\n"
+                    "            port: 10101\n"
+                    "        enabled: true\n"
+                    "        rate_limit: 60\n"
+                    "        timeout_sec: 1\n"
+                    "        circuit_break_policy: none\n"
+                    "    server:\n"
+                    "        ip: localhost\n"
+                    "        port: 10101\n"
+                    "        enabled: true\n"
+                    "        buffer_size:\n"
+                    "            counters: 10000\n"
+                    "            histograms: 10000\n"
+                    "            gauges: 10000\n"
+                    "            latencies: 10000\n"
+                    "            typed_objects: 10000\n"
+                    "            influxdb_rows: 10000";
 
-TelemetryConfig::TelemetryConfig(std::string fileName)
-: TelemetryConfig()
-{
     cliReader = new CliConfigReader();
     envReader = new EnvVariableConfigReader();
     fileReader = new FileConfigReader();
 
-    fileReader->Init(fileName);
-
     readers.insert({ConfigPriority::Priority_1st, cliReader});
     readers.insert({ConfigPriority::Priority_2nd, envReader});
     readers.insert({ConfigPriority::Priority_3rd, fileReader});
+
+    std::string fileFullPath = path + fileName;
+
+    if (!path.compare("") && !fileName.compare(""))
+    {
+        CreateFile(ConfiguratinDir(), ConfigurationFileName());
+        fileFullPath = ConfiguratinDir() + ConfigurationFileName();
+    }
+
+    if (!fileReader->Init(fileFullPath))
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::TELEMETRY_ERROR_MSG,
+                    "Default Telemetry Config will be used.");
+
+        RemoveFile(ConfiguratinDir(), ConfigurationFileName());
+        CreateFile(ConfiguratinDir(), ConfigurationFileName());
+    }
 }
 
 TelemetryConfig::~TelemetryConfig(void)
@@ -84,6 +122,34 @@ TelemetryConfig::Register(std::string key, ConfigObserver* observer)
     observers.insert({key, observer});
 
     return true;
+}
+
+void
+TelemetryConfig::CreateFile(std::string path, std::string fileName)
+{
+    string filePath = path + fileName;
+
+    if (false == DirExists(path))
+        MakeDir(path);
+
+    if (true == FileExists(filePath))
+        return;
+
+    std::ofstream outfile(filePath.data());
+
+    outfile << defaultConfiguration << std::endl;
+    outfile.close();
+}
+
+void
+TelemetryConfig::RemoveFile(std::string path, std::string fileName)
+{
+    string filePath = path + fileName;
+
+    if (false == FileExists(filePath))
+        return;
+
+    remove(filePath.c_str());
 }
 
 bool

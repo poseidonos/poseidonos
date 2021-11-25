@@ -36,6 +36,7 @@
 #include <string>
 
 #include "src/lib/singleton.h"
+#include "src/master_context/default_configuration.h"
 #include "src/telemetry/common/config_observer.h"
 #include "src/telemetry/common/config_reader.h"
 #include "src/telemetry/telemetry_config/cli_config_reader.h"
@@ -47,8 +48,7 @@ namespace pos
 class TelemetryConfig
 {
 public:
-    TelemetryConfig(void);
-    explicit TelemetryConfig(std::string fileName);
+    TelemetryConfig(std::string path = "", std::string fileName = "");
     virtual ~TelemetryConfig(void);
 
     virtual bool Register(std::string key, ConfigObserver* observer);
@@ -62,6 +62,20 @@ public:
     {
         return fileReader->GetServer();
     }
+
+    virtual std::string ConfiguratinDir(void)
+    {
+        DefaultConfiguration conf;
+        return conf.ConfiguratinDir();
+    }
+
+    virtual std::string ConfigurationFileName(void)
+    {
+        return TelemetryConfig::CONFIGURATION_NAME;
+    }
+
+    virtual void CreateFile(std::string path, std::string fileName);
+    virtual void RemoveFile(std::string path, std::string fileName);
 
     // only for test
     std::map<ConfigPriority, ConfigReader*>& GetReadersMap(void)
@@ -78,9 +92,12 @@ public:
 private:
     bool _Find(std::string key, ConfigObserver* observer);
 
-    CliConfigReader* cliReader;
-    EnvVariableConfigReader* envReader;
-    FileConfigReader* fileReader;
+    CliConfigReader* cliReader = nullptr;
+    EnvVariableConfigReader* envReader = nullptr;
+    FileConfigReader* fileReader = nullptr;
+
+    std::string defaultConfiguration = "";
+    const std::string CONFIGURATION_NAME = "telemetry_default.yaml";
 
     // priority to reader
     std::map<ConfigPriority, ConfigReader*> readers;

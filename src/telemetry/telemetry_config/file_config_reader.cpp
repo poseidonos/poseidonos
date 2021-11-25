@@ -80,16 +80,7 @@ FileConfigReader::Init(std::string fileName)
             }
         }
     }
-    catch (YAML::BadFile& e)
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
-            "Invalid config file: {}", fileName);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::TELEMETRY_DEBUG_MSG,
-            "{}", e.msg);
-
-        return false;
-    }
-    catch (YAML::BadConversion& e)
+    catch (YAML::Exception& e)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
             "Invalid config file: {}", fileName);

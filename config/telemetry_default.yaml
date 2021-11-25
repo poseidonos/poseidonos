@@ -1,0 +1,54 @@
+system:
+    journal:
+        enable: false
+        buffer_size_in_mb: 0
+    logger:
+        logfile_size_in_mb: 50
+        logfile_rotation_count: 20
+        min_allowable_log_level: debug
+        deduplication_enabled: true
+        deduplication_sensitivity_in_msec: 20
+    debug:
+        memory_checker: true
+    ioat:
+        enable: true
+        ioat_cnt_numa0: 8
+        ioat_cnt_numa1: 8
+    affinity_manager:
+        use_config: true
+        reactor: 0
+        udd_io_worker: 1
+        event_scheduler: 2
+        event_worker: 3-5
+        general_usage: 6
+        qos: 7
+        meta_scheduler: 8
+        meta_io: 9
+    user_nvme_driver:
+        use_config: true
+        ssd_timeout_us: 8000000
+        retry_count_backend_io: 5
+        retry_count_frontend_io: 3
+    perf_impact:
+        gc: high
+        rebuild: low
+telemetry:
+    client:
+        target:
+            ip: localhost
+            port: 10101
+        enabled: true
+        rate_limit: 60
+        timeout_sec: 1
+        circuit_break_policy: none
+    server:
+        ip: localhost
+        port: 10101
+        enabled: true
+        buffer_size:
+            counters: 10000
+            histograms: 10000
+            gauges: 10000
+            latencies: 10000
+            typed_objects: 10000
+            influxdb_rows: 10000

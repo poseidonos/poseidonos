@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -31,6 +31,8 @@
  */
 
 #include "src/telemetry/telemetry_config/telemetry_config.h"
+#include "src/helper/file/directory.h"
+#include "src/helper/file/file.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -61,7 +63,7 @@ public:
     virtual void
     SetUp(void)
     {
-        config = new TelemetryConfig(fileName);
+        config = new TelemetryConfig(path, fileName);
     }
 
     virtual void
@@ -72,7 +74,8 @@ public:
 
 protected:
     TelemetryConfig* config;
-    std::string fileName = "./unit-tests/telemetry/telemetry_config/test.yaml";
+    std::string path = "./unit-tests/telemetry/telemetry_config/";
+    std::string fileName = "test.yaml";
 };
 
 TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCanBeAddedTwiceWithDifferentKeys)
@@ -120,5 +123,48 @@ TEST_F(TelemetryConfigFixture, Getter_testIfGrpcClientIsEnabledByDefault)
 TEST_F(TelemetryConfigFixture, Getter_testIfGrpcServerIsEnabledByDefault)
 {
     EXPECT_EQ(config->GetServer().IsEnabled(), true);
+}
+
+TEST_F(TelemetryConfigFixture, ConfiguratinDir_testIfThePathIsCorrect)
+{
+    DefaultConfiguration conf;
+    EXPECT_EQ(0, config->ConfiguratinDir().compare(conf.ConfiguratinDir()));
+}
+
+TEST_F(TelemetryConfigFixture, ConfigurationFileName_testIfThePathIsCorrect)
+{
+    EXPECT_EQ(0, config->ConfigurationFileName().compare("telemetry_default.yaml"));
+}
+
+TEST_F(TelemetryConfigFixture, CreateFile_testIfThePathWillBeCreated)
+{
+    std::string path = "./";
+    std::string fileName = "test.txt";
+
+    EXPECT_EQ(false, FileExists(path + fileName));
+
+    config->CreateFile(path, fileName);
+
+    EXPECT_EQ(true, FileExists(path + fileName));
+
+    config->RemoveFile(path, fileName);
+
+    EXPECT_EQ(false, FileExists(path + fileName));
+
+}
+
+TEST_F(TelemetryConfigFixture, RemoveFile_testIfThePathWillBeRemoved)
+{
+    std::string path = "./";
+    std::string fileName = "test.txt";
+
+    config->CreateFile(path, fileName);
+
+    EXPECT_EQ(true, FileExists(path + fileName));
+
+    config->RemoveFile(path, fileName);
+
+    EXPECT_EQ(false, FileExists(path + fileName));
+
 }
 } // namespace pos

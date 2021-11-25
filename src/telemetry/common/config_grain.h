@@ -34,6 +34,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 #define DEFAULT_YAML_VALUE ""
 
@@ -55,12 +56,18 @@ public:
 
     virtual bool UpdateConfig(std::string key, std::string value)
     {
+        if (values.count(key))
+            values.erase(key);
+
         auto result = values.insert({ key, value });
         return result.second;
     }
 
     virtual bool UpdateConfig(std::string key, uint64_t value)
     {
+        if (values.count(key))
+            values.erase(key);
+
         auto result = values.insert({ key, std::to_string(value) });
         return result.second;
     }
@@ -68,6 +75,10 @@ public:
     virtual bool UpdateConfig(std::string key, bool value)
     {
         std::string str = value ? "true" : "false";
+
+        if (values.count(key))
+            values.erase(key);
+
         auto result = values.insert({ key, str });
         return result.second;
     }
@@ -85,7 +96,7 @@ protected:
     {
         if (values.count(key))
             return values[key];
-        return "";
+        return DEFAULT_YAML_VALUE;
     }
 
     std::unordered_map<std::string, std::string> values;

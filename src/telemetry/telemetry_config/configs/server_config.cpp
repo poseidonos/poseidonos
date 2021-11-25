@@ -120,7 +120,7 @@ ServerConfig::IsEnabled(void)
 {
     std::string value = _GetValue("enabled");
 
-    return (value == DEFAULT_YAML_VALUE) ? false : true;
+    return (value == DEFAULT_YAML_VALUE || !value.compare("false")) ? false : true;
 }
 
 BufferSizeConfig&
