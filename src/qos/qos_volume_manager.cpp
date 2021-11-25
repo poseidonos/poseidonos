@@ -494,12 +494,9 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
 {
     uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
     uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
-    bool minimumPolicyInEffect = QosManagerSingleton::Instance()->IsMinimumPolicyInEffectInSystem();
-    qos_vol_policy volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId);
     bool enqueueParameters = false;
 
-    enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
-    enqueueParameters = enqueueParameters && (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
+    enqueueParameters = (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
     // Condition (1) minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops)
     // checks for some qos policy being present on the volume
     // Condition (2) "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
