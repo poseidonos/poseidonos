@@ -35,23 +35,16 @@ Example 2 (listing a specific array):
 
 			uuid := globals.GenerateUUID()
 
-			ListSubsystemReq = messages.Request{
-				RID:     uuid,
-				COMMAND: command,
-			}
+			ListSubsystemReq = messages.BuildReq(command, uuid)
 		} else {
 			command = "SUBSYSTEMINFO"
-			listSubsystemParam := messages.ListSubsystemParam{
+			param := messages.ListSubsystemParam{
 				SUBNQN: list_subsystem_subnqn,
 			}
 
 			uuid := globals.GenerateUUID()
 
-			ListSubsystemReq = messages.Request{
-				RID:     uuid,
-				COMMAND: command,
-				PARAM:   listSubsystemParam,
-			}
+			ListSubsystemReq = messages.BuildReqWithParam(command, uuid, param)
 		}
 
 		reqJSON, err := json.Marshal(ListSubsystemReq)

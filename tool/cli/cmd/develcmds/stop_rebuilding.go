@@ -33,9 +33,10 @@ Syntax:
 		uuid := globals.GenerateUUID()
 
 		req := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-			PARAM:   param,
+			RID:       uuid,
+			COMMAND:   command,
+			PARAM:     param,
+			REQUESTOR: "cli",
 		}
 
 		reqJSON, err := json.Marshal(req)

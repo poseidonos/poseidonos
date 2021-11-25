@@ -36,7 +36,7 @@ NOTE:
 
 		var command = "CREATEQOSVOLUMEPOLICY"
 
-		req := formVolumePolicyReq()
+		req := formVolumePolicyReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -61,7 +61,7 @@ NOTE:
 	},
 }
 
-func formVolumePolicyReq() messages.Request {
+func formVolumePolicyReq(command string) messages.Request {
 
 	volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
 	var volumeNames []messages.VolumeNameList
@@ -81,11 +81,7 @@ func formVolumePolicyReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.Request{
-		RID:     uuid,
-		COMMAND: "CREATEQOSVOLUMEPOLICY",
-		PARAM:   param,
-	}
+	req := messages.BuildReqWithParam(command, uuid, param)
 
 	return req
 }

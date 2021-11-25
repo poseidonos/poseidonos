@@ -10,7 +10,7 @@ import (
 )
 
 // This testing tests if the request is created well in JSON form from the command line.
-func TestResetMBRCommandReq(t *testing.T) {
+func TestEventWRRCommandReq(t *testing.T) {
 
 	// Command creation
 	rootCmd := cmd.RootCmd

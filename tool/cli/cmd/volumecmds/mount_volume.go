@@ -29,6 +29,7 @@ Example:
          `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var requestList []messages.Request
+		command := "CREATESUBSYSTEMAUTO"
 
 		CheckSubsystemParam(cmd)
 
@@ -47,17 +48,13 @@ Example:
 				}
 			}
 
-			createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
+			param := messages.CreateSubsystemAutoParam{
 				SUBNQN: mount_volume_subNqnName,
 			}
 
 			uuid := globals.GenerateUUID()
 
-			createSubsystemReq := messages.Request{
-				RID:     uuid,
-				COMMAND: "CREATESUBSYSTEMAUTO",
-				PARAM:   createSubsystemAutoParam,
-			}
+			createSubsystemReq := messages.BuildReqWithParam(command, uuid, param)
 			requestList = append(requestList, createSubsystemReq)
 		}
 

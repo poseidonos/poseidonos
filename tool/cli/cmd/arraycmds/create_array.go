@@ -32,7 +32,7 @@ Example:
 
 		var command = "CREATEARRAY"
 
-		req := buildCreateArrayReq()
+		req := buildCreateArrayReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -57,7 +57,7 @@ Example:
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildCreateArrayReq() messages.Request {
+func buildCreateArrayReq(command string) messages.Request {
 
 	// Split a string (comma separate) that contains comma-separated device names into strings
 	// and add them to a string array.
@@ -77,11 +77,7 @@ func buildCreateArrayReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.Request{
-		RID:     uuid,
-		COMMAND: "CREATEARRAY",
-		PARAM:   param,
-	}
+	req := messages.BuildReqWithParam(command, uuid, param)
 
 	return req
 }

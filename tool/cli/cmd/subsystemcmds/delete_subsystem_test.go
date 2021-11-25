@@ -22,7 +22,7 @@ func TestDeleteSubsysCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "subsystem", "delete", "--subnqn", "nqn.2019-04.pos:subsystem", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "subsystem", "delete", "--subnqn", "nqn.2019-04.pos:subsystem", "--json-req", "--force")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

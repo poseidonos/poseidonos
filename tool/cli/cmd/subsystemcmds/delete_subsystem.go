@@ -46,11 +46,7 @@ Example:
 
 		uuid := globals.GenerateUUID()
 
-		req := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-			PARAM:   param,
-		}
+		req := messages.BuildReqWithParam(command, uuid, param)
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {

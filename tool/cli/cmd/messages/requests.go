@@ -2,9 +2,29 @@ package messages
 
 // Request message and param formats of all commands in JSON form.
 type Request struct {
-	COMMAND string      `json:"command"`
-	RID     string      `json:"rid"`
-	PARAM   interface{} `json:"param"`
+	COMMAND   string      `json:"command"`
+	RID       string      `json:"rid"`
+	PARAM     interface{} `json:"param"`
+	REQUESTOR string      `json:"requestor`
+}
+
+func BuildReq(command string, rid string) Request {
+	req := Request{
+		COMMAND:   command,
+		RID:       rid,
+		REQUESTOR: "cli",
+	}
+	return req
+}
+
+func BuildReqWithParam(command string, rid string, param interface{}) Request {
+	req := Request{
+		COMMAND:   command,
+		RID:       rid,
+		PARAM:     param,
+		REQUESTOR: "cli",
+	}
+	return req
 }
 
 // Array request params

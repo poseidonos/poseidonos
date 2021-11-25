@@ -24,10 +24,9 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 		var command = "APPLYLOGFILTER"
 
-		applyFilterReq := messages.Request{
-			RID:     "fromfakeclient",
-			COMMAND: command,
-		}
+		uuid := globals.GenerateUUID()
+
+		applyFilterReq := messages.BuildReq(command, uuid)
 
 		reqJSON, err := json.Marshal(applyFilterReq)
 		if err != nil {

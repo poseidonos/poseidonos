@@ -27,10 +27,9 @@ Syntax:
 
 		var command = "GETLOGLEVEL"
 
-		getLevelReq := messages.Request{
-			RID:     "fromfakeclient",
-			COMMAND: command,
-		}
+		uuid := globals.GenerateUUID()
+
+		getLevelReq := messages.BuildReq(command, uuid)
 
 		reqJSON, err := json.Marshal(getLevelReq)
 		if err != nil {

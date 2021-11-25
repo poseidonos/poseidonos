@@ -25,17 +25,13 @@ Syntax:
 
 		var command = "SETLOGLEVEL"
 
-		setLevelReqParam := messages.SetLevelReqParam{
+		param := messages.SetLevelReqParam{
 			LEVEL: set_level_loggerLevel,
 		}
 
 		uuid := globals.GenerateUUID()
 
-		setLevelReq := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-			PARAM:   setLevelReqParam,
-		}
+		setLevelReq := messages.BuildReqWithParam(command, uuid, param)
 
 		reqJSON, err := json.Marshal(setLevelReq)
 		if err != nil {

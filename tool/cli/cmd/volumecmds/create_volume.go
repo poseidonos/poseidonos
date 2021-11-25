@@ -33,7 +33,7 @@ Example:
 
 		var command = "CREATEVOLUME"
 
-		req := formCreateVolumeReq()
+		req := formCreateVolumeReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -58,7 +58,7 @@ Example:
 	},
 }
 
-func formCreateVolumeReq() messages.Request {
+func formCreateVolumeReq(command string) messages.Request {
 
 	volumeSize := strings.TrimSpace(create_volume_volumeSize)
 	volumeSize = strings.ToUpper(create_volume_volumeSize)
@@ -82,11 +82,7 @@ func formCreateVolumeReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.Request{
-		RID:     uuid,
-		COMMAND: "CREATEVOLUME",
-		PARAM:   param,
-	}
+	req := messages.BuildReqWithParam(command, uuid, param)
 
 	return req
 }

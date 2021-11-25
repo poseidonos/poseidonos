@@ -33,7 +33,7 @@ Example:
 
 		var command = "AUTOCREATEARRAY"
 
-		req := buildAutocreateArrayReq()
+		req := buildAutoCreateArrayReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -58,7 +58,7 @@ Example:
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildAutocreateArrayReq() messages.Request {
+func buildAutoCreateArrayReq(command string) messages.Request {
 
 	// Assume that at most one device is used as a buffer.
 	var buffer [1]messages.DeviceNameList
@@ -74,11 +74,7 @@ func buildAutocreateArrayReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.Request{
-		RID:     uuid,
-		COMMAND: "AUTOCREATEARRAY",
-		PARAM:   param,
-	}
+	req := messages.BuildReqWithParam(command, uuid, param)
 
 	return req
 }

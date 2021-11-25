@@ -31,20 +31,18 @@ Example:
 
 		var requestList [3]messages.Request
 
-		createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
+		createSubsysCmd := "CREATESUBSYSTEMAUTO"
+		createSubsysParam := messages.CreateSubsystemAutoParam{
 			SUBNQN: mount_volume_with_subsystem_subnqn,
 		}
 
 		uuid := globals.GenerateUUID()
 
-		createSubsystemReq := messages.Request{
-			RID:     uuid,
-			COMMAND: "CREATESUBSYSTEMAUTO",
-			PARAM:   createSubsystemAutoParam,
-		}
+		createSubsystemReq := messages.BuildReqWithParam(createSubsysCmd, uuid, createSubsysParam)
 		requestList[0] = createSubsystemReq
 
-		addListenerParam := messages.AddListenerParam{
+		AddListenerCmd := "ADDLISTENER"
+		AddListenerParam := messages.AddListenerParam{
 			SUBNQN:             mount_volume_with_subsystem_subnqn,
 			TRANSPORTTYPE:      mount_volume_with_subsystem_trtype,
 			TARGETADDRESS:      mount_volume_with_subsystem_traddr,
@@ -53,13 +51,10 @@ Example:
 
 		uuid = globals.GenerateUUID()
 
-		addListenerReq := messages.Request{
-			RID:     uuid,
-			COMMAND: "ADDLISTENER",
-			PARAM:   addListenerParam,
-		}
+		addListenerReq := messages.BuildReqWithParam(AddListenerCmd, uuid, AddListenerParam)
 		requestList[1] = addListenerReq
 
+		mountVolCmd := "MOUNTVOLUME"
 		mountVolumeParam := messages.MountVolumeParam{
 			VOLUMENAME: mount_volume_with_subsystem_volumeName,
 			SUBNQN:     mount_volume_with_subsystem_subnqn,
@@ -68,11 +63,7 @@ Example:
 
 		uuid = globals.GenerateUUID()
 
-		mountVolumeReq := messages.Request{
-			RID:     uuid,
-			COMMAND: "MOUNTVOLUME",
-			PARAM:   mountVolumeParam,
-		}
+		mountVolumeReq := messages.BuildReqWithParam(mountVolCmd, uuid, mountVolumeParam)
 		requestList[2] = mountVolumeReq
 
 		// Do not send request to server and print response when testing request build.

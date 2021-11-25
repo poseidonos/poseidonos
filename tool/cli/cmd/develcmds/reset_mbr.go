@@ -30,10 +30,7 @@ Syntax:
 
 		uuid := globals.GenerateUUID()
 
-		req := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-		}
+		req := messages.BuildReq(command, uuid)
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {

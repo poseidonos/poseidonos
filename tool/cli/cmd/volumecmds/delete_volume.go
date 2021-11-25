@@ -46,16 +46,14 @@ Example:
 
 		var command = "DELETEVOLUME"
 
-		deleteVolumeParam := messages.DeleteVolumeParam{
+		param := messages.DeleteVolumeParam{
 			VOLUMENAME: delete_volume_volumeName,
 			ARRAYNAME:  delete_volume_arrayName,
 		}
 
-		deleteVolumeReq := messages.Request{
-			RID:     "fromfakeclient",
-			COMMAND: command,
-			PARAM:   deleteVolumeParam,
-		}
+		uuid := globals.GenerateUUID()
+
+		deleteVolumeReq := messages.BuildReqWithParam(command, uuid, param)
 
 		reqJSON, err := json.Marshal(deleteVolumeReq)
 		if err != nil {

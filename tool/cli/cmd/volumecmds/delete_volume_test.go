@@ -22,7 +22,7 @@ func TestDeleteVolumeCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "volume", "delete", "--volume-name", "vol01", "--array-name", "Array0", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "volume", "delete", "--volume-name", "vol01", "--array-name", "Array0", "--json-req", "--force")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

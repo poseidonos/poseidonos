@@ -31,7 +31,7 @@ Example:
 
 		var command = "LISTQOSPOLICIES"
 
-		req := formListQosReq()
+		req := formListQosReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -56,7 +56,7 @@ Example:
 	},
 }
 
-func formListQosReq() messages.Request {
+func formListQosReq(command string) messages.Request {
 
 	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
 	var volumeNames []messages.VolumeNameList
@@ -73,11 +73,7 @@ func formListQosReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	qosListReq := messages.Request{
-		RID:     uuid,
-		COMMAND: "LISTQOSPOLICIES",
-		PARAM:   param,
-	}
+	qosListReq := messages.BuildReqWithParam(command, uuid, param)
 
 	return qosListReq
 }

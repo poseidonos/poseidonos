@@ -30,15 +30,13 @@ Example (listing volumes from a specific array):
 
 		var command = "LISTVOLUME"
 
-		listVolumeParam := messages.ListVolumeParam{
+		param := messages.ListVolumeParam{
 			ARRAYNAME: list_volume_arrayName,
 		}
 
-		listVolumeReq := messages.Request{
-			RID:     "fromfakeclient",
-			COMMAND: command,
-			PARAM:   listVolumeParam,
-		}
+		uuid := globals.GenerateUUID()
+
+		listVolumeReq := messages.BuildReqWithParam(command, uuid, param)
 
 		reqJSON, err := json.Marshal(listVolumeReq)
 		if err != nil {

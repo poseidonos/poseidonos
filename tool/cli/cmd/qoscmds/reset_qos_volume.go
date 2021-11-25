@@ -30,7 +30,7 @@ Example:
 
 		var command = "RESETQOSVOLUMEPOLICY"
 
-		req := formVolumeResetReq()
+		req := formVolumeResetReq(command)
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -55,7 +55,7 @@ Example:
 	},
 }
 
-func formVolumeResetReq() messages.Request {
+func formVolumeResetReq(command string) messages.Request {
 
 	volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
 	var volumeNames []messages.VolumeNameList
@@ -72,11 +72,7 @@ func formVolumeResetReq() messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.Request{
-		RID:     uuid,
-		COMMAND: "RESETQOSVOLUMEPOLICY",
-		PARAM:   param,
-	}
+	req := messages.BuildReqWithParam(command, uuid, param)
 
 	return req
 }

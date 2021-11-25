@@ -45,8 +45,9 @@ Example 2 (listing a specific array):
 			uuid := globals.GenerateUUID()
 
 			req = messages.Request{
-				RID:     uuid,
-				COMMAND: command,
+				RID:       uuid,
+				COMMAND:   command,
+				REQUESTOR: "cli",
 			}
 		} else {
 			command = "ARRAYINFO"
@@ -56,11 +57,7 @@ Example 2 (listing a specific array):
 
 			uuid := globals.GenerateUUID()
 
-			req = messages.Request{
-				RID:     uuid,
-				COMMAND: command,
-				PARAM:   param,
-			}
+			req = messages.BuildReqWithParam(command, uuid, param)
 		}
 
 		reqJSON, err := json.Marshal(req)

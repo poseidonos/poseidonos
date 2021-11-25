@@ -22,7 +22,7 @@ func TestStopSystemCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "system", "stop", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "system", "stop", "--json-req", "--force")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

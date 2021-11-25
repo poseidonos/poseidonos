@@ -22,7 +22,7 @@ func TestDeleteArrayCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "array", "delete", "--array-name", "Array0", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "array", "delete", "--array-name", "Array0", "--json-req", "--force")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

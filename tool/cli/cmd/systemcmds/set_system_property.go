@@ -38,11 +38,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 
 		uuid := globals.GenerateUUID()
 
-		req := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-			PARAM:   param,
-		}
+		req := messages.BuildReqWithParam(command, uuid, param)
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {

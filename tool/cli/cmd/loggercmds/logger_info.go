@@ -27,10 +27,7 @@ Syntax:
 
 		uuid := globals.GenerateUUID()
 
-		logerInfoReq := messages.Request{
-			RID:     uuid,
-			COMMAND: command,
-		}
+		logerInfoReq := messages.BuildReq(command, uuid)
 
 		reqJSON, err := json.Marshal(logerInfoReq)
 		if err != nil {
