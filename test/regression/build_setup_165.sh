@@ -12,12 +12,6 @@ pos_bin_filename="poseidonos"
 build_optimization="ON"
 job_number=12
 
-texecc()
-{
-    echo "[target]" $@;
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}; sudo $@"
-}
-
 printVariable()
 {
     if [ $test_rev == 0 ]
@@ -88,13 +82,13 @@ buildPos()
 
 getPos()
 {
-    echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${target_ip}:${pos_working_dir}/bin ##"
+    echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${pos_working_dir}/bin ##"
     if [ ! -d ${pos_working_dir}/bin ]
     then
-        echo "## mkdir ${target_ip}:${pos_working_dir}/bin"
+        echo "## mkdir ${pos_working_dir}/bin"
         mkdir ${pos_working_dir}/bin
     else
-        echo "## rm old ${target_ip}:${pos_working_dir}/bin files"
+        echo "## rm old ${pos_working_dir}/bin files"
         rm ${pos_working_dir}/bin/*
     fi
     cp ${master_bin_path}/* ${pos_working_dir}/bin
@@ -102,7 +96,7 @@ getPos()
 
 backupPos()
 {
-    echo "## START TO COPY BIN FILES INTO MASTER : from ${target_ip}:${pos_working_dir}/bin to ${master_bin_path} ##"
+    echo "## START TO COPY BIN FILES INTO MASTER : from ${pos_working_dir}/bin to ${master_bin_path} ##"
     cp ${pos_working_dir}/bin/* ${master_bin_path}/
 
     if [ -f ${master_bin_path}/${pos_bin_filename} ]
@@ -142,6 +136,7 @@ buildTest()
         sudo mkdir ${master_bin_path}
     fi
 
+    cd ${pos_working_dir}
     buildLib
     if [ $build_optimization == "OFF" ]
     then
@@ -158,7 +153,7 @@ buildTest()
 
     if [ ! -f ${pos_working_dir}/bin/${pos_bin_filename} ]
     then
-        echo "## ERROR: NO BUILT BINARY  ${target_ip}:/${pos_working_dir}/bin/${pos_bin_filename} "
+        echo "## ERROR: NO BUILT BINARY  ${pos_working_dir}/bin/${pos_bin_filename} "
         exit 1
     fi
 

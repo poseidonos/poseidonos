@@ -7,19 +7,13 @@ target_ip=0
 trtype="tcp"
 port=1158
 
-texecc()
-{
-    echo "[target]" $@;
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}; sudo $@"
-}
-
 processCheck()
 {
     cd ${pos_working_dir}
-    rm -rf processList_${target_ip}
-    ps -ef | grep poseidonos > processList_${target_ip}
-    cat processList_${target_ip}
-    rm -rf processList_${target_ip}
+    rm -rf processList
+    ps -ef | grep poseidonos > processList
+    cat processList
+    rm -rf processList
 }
 
 printVariable()
@@ -74,7 +68,7 @@ backupLog()
     fi
 
     echo "Copying log files to service server $pos_log/$plan_name/$test_name/$test_rev"
-    cp -r root@${target_ip}:/var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
+    cp -r /var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
     rm -rf /var/log/pos/*
 }
 
