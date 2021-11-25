@@ -150,7 +150,6 @@ TEST_F(TelemetryConfigFixture, CreateFile_testIfThePathWillBeCreated)
     config->RemoveFile(path, fileName);
 
     EXPECT_EQ(false, FileExists(path + fileName));
-
 }
 
 TEST_F(TelemetryConfigFixture, RemoveFile_testIfThePathWillBeRemoved)
@@ -165,6 +164,5 @@ TEST_F(TelemetryConfigFixture, RemoveFile_testIfThePathWillBeRemoved)
     config->RemoveFile(path, fileName);
 
     EXPECT_EQ(false, FileExists(path + fileName));
-
 }
 } // namespace pos
