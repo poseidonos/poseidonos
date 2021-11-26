@@ -12,7 +12,7 @@ TEST(DefaultConfiguration, Restore_)
 {
 }
 
-TEST(DefaultConfiguration, ConfiguratinDir_)
+TEST(DefaultConfiguration, ConfigurationDir_)
 {
 }
 

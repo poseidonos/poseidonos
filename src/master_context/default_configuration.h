@@ -49,7 +49,7 @@ public:
 
     void Restore(void);
     string
-    ConfiguratinDir(void)
+    ConfigurationDir(void)
     {
         return DefaultConfiguration::CONFIGURATION_PATH;
     }

@@ -36,6 +36,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <map>
 #include <string>
@@ -54,26 +55,9 @@ namespace pos
 TelemetryConfig::TelemetryConfig(std::string path, std::string fileName)
 {
     // make default telemetry config
-    defaultConfiguration = "telemetry:\n"
-                    "    client:\n"
-                    "        target:\n"
-                    "            ip: localhost\n"
-                    "            port: 10101\n"
-                    "        enabled: true\n"
-                    "        rate_limit: 60\n"
-                    "        timeout_sec: 1\n"
-                    "        circuit_break_policy: none\n"
-                    "    server:\n"
-                    "        ip: localhost\n"
-                    "        port: 10101\n"
-                    "        enabled: true\n"
-                    "        buffer_size:\n"
-                    "            counters: 10000\n"
-                    "            histograms: 10000\n"
-                    "            gauges: 10000\n"
-                    "            latencies: 10000\n"
-                    "            typed_objects: 10000\n"
-                    "            influxdb_rows: 10000";
+    defaultConfiguration = "- default telemetry config -\n"
+                    "if you want to create default config,\n"
+                    "please use this string and call CreateFile()";
 
     cliReader = new CliConfigReader();
     envReader = new EnvVariableConfigReader();
@@ -87,17 +71,17 @@ TelemetryConfig::TelemetryConfig(std::string path, std::string fileName)
 
     if (!path.compare("") && !fileName.compare(""))
     {
-        CreateFile(ConfiguratinDir(), ConfigurationFileName());
-        fileFullPath = ConfiguratinDir() + ConfigurationFileName();
+        fileFullPath = ConfigurationDir() + ConfigurationFileName();
     }
 
     if (!fileReader->Init(fileFullPath))
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::TELEMETRY_ERROR_MSG,
-                    "Default Telemetry Config will be used.");
+        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
+            "Poseidon OS will stop by invalid telemetry config.");
+        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
+            "Please type \"make install\" before running pos.");
 
-        RemoveFile(ConfiguratinDir(), ConfigurationFileName());
-        CreateFile(ConfiguratinDir(), ConfigurationFileName());
+        assert(false);
     }
 }
 

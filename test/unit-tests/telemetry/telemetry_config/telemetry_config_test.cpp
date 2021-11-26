@@ -125,10 +125,10 @@ TEST_F(TelemetryConfigFixture, Getter_testIfGrpcServerIsEnabledByDefault)
     EXPECT_EQ(config->GetServer().IsEnabled(), true);
 }
 
-TEST_F(TelemetryConfigFixture, ConfiguratinDir_testIfThePathIsCorrect)
+TEST_F(TelemetryConfigFixture, ConfigurationDir_testIfThePathIsCorrect)
 {
     DefaultConfiguration conf;
-    EXPECT_EQ(0, config->ConfiguratinDir().compare(conf.ConfiguratinDir()));
+    EXPECT_EQ(0, config->ConfigurationDir().compare(conf.ConfigurationDir()));
 }
 
 TEST_F(TelemetryConfigFixture, ConfigurationFileName_testIfThePathIsCorrect)

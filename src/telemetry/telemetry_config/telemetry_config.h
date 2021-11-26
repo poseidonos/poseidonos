@@ -63,10 +63,10 @@ public:
         return fileReader->GetServer();
     }
 
-    virtual std::string ConfiguratinDir(void)
+    virtual std::string ConfigurationDir(void)
     {
         DefaultConfiguration conf;
-        return conf.ConfiguratinDir();
+        return conf.ConfigurationDir();
     }
 
     virtual std::string ConfigurationFileName(void)

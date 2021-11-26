@@ -58,9 +58,9 @@ DefaultConfiguration::DefaultConfiguration(void)
 void
 DefaultConfiguration::Restore(void)
 {
-    if (DirExists(ConfiguratinDir()) == false)
+    if (DirExists(ConfigurationDir()) == false)
     {
-        MakeDir(ConfiguratinDir());
+        MakeDir(ConfigurationDir());
     }
     string filePath = DefaultConfigurationFilePath();
     std::ofstream outfile(filePath.data());
