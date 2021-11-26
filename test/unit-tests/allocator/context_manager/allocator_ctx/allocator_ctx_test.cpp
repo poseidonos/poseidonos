@@ -19,6 +19,7 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
     // given
     AllocatorCtxHeader header;
     header.sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    header.ctxVersion = 12;
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     AllocatorCtx allocCtx(&header, allocBitmap, nullptr);
 
@@ -29,6 +30,7 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
     buf->numValidWbLsid = 100;
 
     allocCtx.AfterLoad((char*)buf);
+    EXPECT_EQ(allocCtx.GetStoredVersion(), header.ctxVersion);
 
     delete buf;
     delete allocBitmap;
