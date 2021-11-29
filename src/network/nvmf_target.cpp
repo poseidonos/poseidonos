@@ -59,6 +59,8 @@ namespace pos
 struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
 const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
 std::atomic<int> NvmfTarget::attachedNsid;
+std::atomic<int> NvmfTarget::deletedBdev;
+std::atomic<bool> NvmfTarget::deleteDone;
 
 NvmfTarget::NvmfTarget(void)
 : NvmfTarget(SpdkCallerSingleton::Instance(),
@@ -116,14 +118,14 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
     uint64_t numBlocks = volumeSizeInByte / blockSize;
     struct spdk_uuid* bdev_uuid = nullptr;
 
-    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
-    if (nullptr != bdev)
+    bool ret = _InitPosBdev(bdevName);
+    if (false == ret)
     {
-        POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST;
-        POS_TRACE_INFO(static_cast<int>(eventId), "Requested bdev{} already exist", bdevName);
+        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_INIT_POS_BDEV;
+        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         return false;
     }
+
     if (false == uuid.empty())
     {
         bdev_uuid = new spdk_uuid;
@@ -141,7 +143,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
         }
     }
 
-    bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
         numBlocks, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
     if (nullptr != bdev_uuid)
     {
@@ -166,6 +168,17 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
 }
 
 bool
+NvmfTarget::_InitPosBdev(string bdevName)
+{
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
+    if (nullptr != bdev)
+    {
+        return DeletePosBdev(bdevName);
+    }
+    return true;
+}
+
+bool
 NvmfTarget::DeletePosBdev(const string& bdevName)
 {
     struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
@@ -183,6 +196,72 @@ NvmfTarget::DeletePosBdev(const string& bdevName)
     }
     spdkCaller->SpdkBdevDeletePosDisk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
     return true;
+}
+
+bool
+NvmfTarget::DeletePosBdevAll(string arrayName, uint64_t time)
+{
+    deleteDone = false;
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
+        _DeletePosBdevAllHandler, &arrayName);
+
+    SystemTimeoutChecker timeChecker;
+    timeChecker.SetTimeout(time);
+    while (deletedBdev > 0 || deleteDone == false)
+    {
+        if (true == timeChecker.CheckTimeout())
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT;
+            POS_TRACE_WARN(static_cast<int>(eventId),
+                "Timeout occured during deleting all volumes in array:{}", arrayName);
+            deletedBdev = 0;
+            return false;
+        }
+        usleep(1);
+    }
+    deletedBdev = 0;
+    return true;
+}
+
+void
+NvmfTarget::_DeletePosBdevAllHandler(void* arg1)
+{
+    _DeletePosBdevAllHandler(arg1, SpdkCallerSingleton::Instance());
+}
+
+void
+NvmfTarget::_DeletePosBdevAllHandler(void* arg1, SpdkCaller* spdkCaller, SpdkBdevCaller* spdkBdevCaller)
+{
+    string arrayName = *(static_cast<string*>(arg1));
+    struct spdk_bdev* bdev = spdkBdevCaller->SpdkBdevFirst();
+    while (bdev != nullptr)
+    {
+        string bdevName = bdev->name;
+        size_t found = bdevName.rfind("_");
+        if (found == string::npos)
+        {
+            bdev = spdkBdevCaller->SpdkBdevNext(bdev);
+            continue;
+        }
+        string bdevArrayName = bdevName.substr(found + 1, bdevName.length() - found - 1);
+        if (arrayName == bdevArrayName)
+        {
+            struct EventContext* ctx = _CreateEventContext(_DeleteDone, nullptr, nullptr, nullptr);
+            spdkCaller->SpdkBdevDeletePosDisk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
+            deletedBdev++;
+        }
+        bdev = spdkBdevCaller->SpdkBdevNext(bdev);
+    }
+    deleteDone = true;
+}
+
+void
+NvmfTarget::_DeleteDone(void* cbArg, int status)
+{
+    if (status == NvmfCallbackStatus::SUCCESS)
+    {
+        deletedBdev--;
+    }
 }
 
 void
@@ -291,7 +370,7 @@ NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
     int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.attachNamespacePauseDone, ctx);
     if (ret != 0)
     {
-        _AttachNamespaceWithPause(subsystem, ctx);
+        _AttachNamespaceWithPause(subsystem, ctx, nullptr, nullptr);
     }
 
     if (spdkNvmfCaller != nullptr)
@@ -317,7 +396,7 @@ NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
         {
             eventFrameworkApi = EventFrameworkApiSingleton::Instance();
         }
-        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), _AttachNamespaceWithPause, subsystem, arg2);
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_AttachNamespaceWithPause, subsystem, arg2);
     }
 
     if (nullptr != spdkNvmfCaller)
@@ -394,7 +473,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.detachNamespacePauseDone, ctx);
     if (ret != 0)
     {
-        _DetachNamespaceWithPause(subsystem, ctx);
+        _DetachNamespaceWithPause(subsystem, ctx, nullptr, nullptr);
     }
 
     return true;
@@ -436,7 +515,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
             eventFrameworkApi = EventFrameworkApiSingleton::Instance();
         }
         SPDK_NOTICELOG("failed to pause subsystem during detaching namespace : retrying \n");
-        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), _DetachNamespaceWithPause, subsystem, arg2);
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_DetachNamespaceWithPause, subsystem, arg2);
     }
 
     if (nullptr != spdkNvmfCaller)
@@ -470,7 +549,7 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
     int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
     if (ret != 0)
     {
-        _DetachNamespaceAllWithPause(subsystem, ctx);
+        _DetachNamespaceAllWithPause(subsystem, ctx, nullptr, nullptr);
     }
 
     return true;
@@ -499,7 +578,7 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2, EventFrameworkA
             eventFrameworkApi = EventFrameworkApiSingleton::Instance();
         }
         eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
-            _DetachNamespaceAllWithPause, subsystem, arg2);
+            (EventFuncFourParams)_DetachNamespaceAllWithPause, subsystem, arg2);
     }
 
     if (nullptr != spdkNvmfCaller)

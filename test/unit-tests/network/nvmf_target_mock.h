@@ -16,6 +16,7 @@ public:
         uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName,
         uint64_t arrayId), (override));
     MOCK_METHOD(bool, DeletePosBdev, (const string& bdevName), (override));
+    MOCK_METHOD(bool, DeletePosBdevAll, (string bdevName, uint64_t time), (override));
     MOCK_METHOD(bool, DetachNamespace, (const string& nqn, uint32_t nsid, PosNvmfEventDoneCallback_t cb, void* cbArg), (override));
     MOCK_METHOD(bool, DetachNamespaceAll, (const string& nqn, PosNvmfEventDoneCallback_t cb, void* cbArg), (override));
     MOCK_METHOD(struct spdk_nvmf_ns*, GetNamespace, (struct spdk_nvmf_subsystem * subsystem, const string& bdevName), (override));

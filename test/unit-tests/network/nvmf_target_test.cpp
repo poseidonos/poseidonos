@@ -10,6 +10,7 @@
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_caller_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_nvmf_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_bdev_caller_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -17,6 +18,8 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Matcher;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 namespace pos
@@ -76,18 +79,25 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevSuccess)
     delete mockSpdkCaller;
 }
 
-TEST(NvmfTarget, CreatePosBdev_BdevAlreadyExist)
+TEST(NvmfTarget, CreatePosBdev_DeleteAlreadyExistingBdevAndCreateNewSuccess)
 {
     // Given
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     struct spdk_bdev bdev;
     memset(&bdev, 0, sizeof(bdev));
-    bool actual, expected{false};
+    bool actual, expected{true};
 
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(&bdev));
+    EXPECT_CALL(*mockSpdkCaller, SpdkBdevDeletePosDisk(_, _, _)).Times(1);
+    ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(&bdev));
+    EXPECT_CALL(*mockSpdkCaller, SpdkUuidParse).WillOnce([=](struct spdk_uuid* uuid, const char* uuid_str)
+    {
+        uuid = new struct spdk_uuid;
+        return 0;
+    });
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
+    actual = nvmfTarget.CreatePosBdev("bdev", "9aa0802f-761d-4330-930d-6c77a904f5e8", 0, 1024, 512, false, "array", 0);
 
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
@@ -151,13 +161,44 @@ TEST(NvmfTarget, DeletePosBdev_DeleteBdevFail)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     bool actual, expected{false};
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
-    ON_CALL(*mockSpdkCaller, SpdkBdevDeletePosDisk(_, _, _)).WillByDefault(Return());
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
     actual = nvmfTarget.DeletePosBdev("bdev");
 
+
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, DeletePosBdevAll_Timeout)
+{
+    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
+    string arrayName = "POSArray";
+    bool expected = false;
+    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _)).Times(1);
+    NvmfTarget nvmfTarget(nullptr, false, mockEventFrameworkApi);
+
+    bool actual = nvmfTarget.DeletePosBdevAll(arrayName, 500000000ULL);
+    ASSERT_EQ(actual, expected);
+    delete mockEventFrameworkApi;
+}
+
+TEST(NvmfTarget, _DeletePosBdevHandler_Success)
+{
+    NiceMock<MockSpdkCaller> mockSpdkCaller;
+    NiceMock<MockSpdkBdevCaller> mockSpdkBdevCaller;
+    string arrayName = "POSArray";
+    char bdevName[16] = "bdev_0_POSArray";
+    struct spdk_bdev bdev;
+    memset(&bdev, 0, sizeof(bdev));
+    bdev.name = "bdev_0_POSArray";
+
+    EXPECT_CALL(mockSpdkBdevCaller, SpdkBdevFirst()).WillOnce(Return(&bdev));
+    EXPECT_CALL(mockSpdkBdevCaller, SpdkBdevNext)
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(mockSpdkCaller, SpdkBdevDeletePosDisk).Times(1);
+    NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
+    nvmfTarget.DeletePosBdevAllHandler(&arrayName, &mockSpdkCaller, &mockSpdkBdevCaller);
 }
 
 TEST(NvmfTarget, TryToAttachNamespace_Fail)

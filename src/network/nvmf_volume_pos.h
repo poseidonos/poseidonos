@@ -59,6 +59,7 @@ public:
     virtual ~NvmfVolumePos(void);
 
     virtual bool VolumeCreated(struct pos_volume_info* info, uint64_t time = NS_CREATE_TIMEOUT);
+    virtual bool VolumeLoaded(struct pos_volume_info* info);
     virtual bool VolumeDeleted(struct pos_volume_info* info, uint64_t time = NS_DELETE_TIMEOUT);
     virtual void VolumeMounted(struct pos_volume_info* info);
     virtual bool VolumeUnmounted(struct pos_volume_info* info, uint64_t time = NS_DETACH_TIMEOUT);

@@ -45,37 +45,49 @@ public:
     {
     }
 
-    void AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.attachNamespacePauseDone(subsystem, arg, status);
     }
 
-    void DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.detachNamespacePauseDone(subsystem, arg, status);
     }
 
-    void DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    void
+    DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
     {
         nvmfCallbacks.detachNamespaceAllPauseDone(subsystem, arg, status);
     }
 
-    void AttachNamespaceWithPause(void* arg1, void* arg2,
+    void
+    AttachNamespaceWithPause(void* arg1, void* arg2,
         EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
     {
         _AttachNamespaceWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
     }
 
-    void DetachNamespaceWithPause(void* arg1, void* arg2,
+    void
+    DetachNamespaceWithPause(void* arg1, void* arg2,
         EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
     {
         _DetachNamespaceWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
     }
 
-    void DetachNamespaceAllWithPause(void* arg1, void* arg2,
+    void
+    DetachNamespaceAllWithPause(void* arg1, void* arg2,
         EventFrameworkApi* eventFrameworkApi, SpdkNvmfCaller* spdkNvmfCaller)
     {
         _DetachNamespaceAllWithPause(arg1, arg2, eventFrameworkApi, spdkNvmfCaller);
+    }
+    
+    void
+    DeletePosBdevAllHandler(void* arg1, SpdkCaller* spdkCaller, SpdkBdevCaller* spdkBdevCaller)
+    {
+        NvmfTarget::_DeletePosBdevAllHandler(arg1, spdkCaller, spdkBdevCaller);
     }
 };
 } // namespace pos

@@ -344,7 +344,7 @@ TEST(Nvmf, VolumeUnmounted_Fail)
     delete mockNvmfVolumePos;
 }
 
-TEST(Nvmf, VolumeLoaded_Success)
+TEST(Nvmf, VolumeLoaded_SuccessWithVolumeCreate)
 {
     // Given
     NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
@@ -367,7 +367,8 @@ TEST(Nvmf, VolumeLoaded_Success)
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
     // When: CAll VolumeLoaded
-    ON_CALL(*mockNvmfVolumePos, VolumeCreated(_, _)).WillByDefault(Return(true));
+    ON_CALL(*mockNvmfVolumePos, VolumeLoaded(_)).WillByDefault(Return(false));
+    ON_CALL(*mockNvmfVolumePos, VolumeCreated).WillByDefault(Return(true));
     actual = nvmf.VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 
     // Then: Expect result as true

@@ -147,6 +147,7 @@ Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         bool ret = volume->VolumeCreated(vInfo);
         if (true == ret)
         {
+            delete vInfo;
             return (int)POS_EVENT_ID::VOL_EVENT_OK;
         }
     }
@@ -209,7 +210,28 @@ Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayIn
 int
 Nvmf::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
+    struct pos_volume_info* vInfo = new pos_volume_info;
+    bool ret = false;
+    if (vInfo)
+    {
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeEventPerf(vInfo, volEventPerf);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
+        ret = volume->VolumeLoaded(vInfo);
+        if (false == ret)
+        {
+            int rid = (int)POS_EVENT_ID::VOL_NOT_EXIST;
+            POS_TRACE_WARN(rid, "Volume {} does not exist. Unable to load, start creating new volume.", vInfo->name);
+            ret = volume->VolumeCreated(vInfo);
+        }
+        delete vInfo;
+    }
+    if (true == ret)
+    {
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    }
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
 int

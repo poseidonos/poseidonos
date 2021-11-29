@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/cli/command.h"
+#include "src/network/nvmf_target.h"
 #include <string>
 
 namespace pos_cli
@@ -40,8 +41,9 @@ namespace pos_cli
 class DeleteArrayCommand : public Command
 {
 public:
-    DeleteArrayCommand(void);
+    DeleteArrayCommand(NvmfTarget* nvmfTarget = NvmfTargetSingleton::Instance());
     ~DeleteArrayCommand(void) override;
     string Execute(json& doc, string rid) override;
+    NvmfTarget* nvmfTarget;
 };
 }; // namespace pos_cli
