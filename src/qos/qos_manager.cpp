@@ -187,7 +187,9 @@ QosManager::_Finalize(void)
 {
     if (true == feQosEnabled)
     {
+#ifndef POS_QOS_UT
         spdkManager->Finalize();
+#endif
     }
     POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
     SetExitQos();
