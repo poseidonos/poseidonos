@@ -293,4 +293,14 @@ TEST(QosManager, Test_HandleEventUbioSubmission)
     qosManager.HandleEventUbioSubmission(&mockSubmissionAdapter, &mockSubmissionNotifier, id, ubio);
 }
 
+TEST(QosManager, Test_Delete_ArrayName_Map)
+{
+    QosManager qosManager;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    qosManager.DeleteEntryArrayMap(arrayName);
+    uint32_t noOfArrays = qosManager.GetNumberOfArrays();
+    ASSERT_EQ(noOfArrays, 0);
+}
+
 } // namespace pos

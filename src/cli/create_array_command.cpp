@@ -34,7 +34,6 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
-#include "src/qos/qos_manager.h"
 
 namespace pos_cli
 {
@@ -103,7 +102,6 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     }
     else
     {
-        QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
         return jFormat.MakeResponse("CREATEARRAY", rid, SUCCESS,
             arrayName + " is created successfully", GetPosInfo());
     }
