@@ -34,6 +34,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos_cli
 {
@@ -65,6 +66,7 @@ MountArrayCommand::Execute(json& doc, string rid)
             "failed to mount array (code:" + to_string(ret) + ")",
             GetPosInfo());
     }
+    QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
     return jFormat.MakeResponse(
         "MOUNTARRAY", rid, SUCCESS,
         "Array is mounted successfully", GetPosInfo());

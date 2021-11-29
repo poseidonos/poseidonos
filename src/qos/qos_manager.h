@@ -112,10 +112,11 @@ public:
     uint32_t GetGcFreeSegment(uint32_t arrayId);
     void GetVolumePolicyMap(uint32_t arrayId, std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, uint32_t arrayId);
-    uint32_t GetArrayIdFromMap(std::string arrayName);
+    int32_t GetArrayIdFromMap(std::string arrayName);
     std::string GetArrayNameFromMap(uint32_t arrayId);
     uint32_t GetNumberOfArrays(void);
     void UpdateArrayMap(string arrayName);
+    void DeleteEntryArrayMap(std::string arrayName);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
     uint32_t GetNoContentionCycles(void);
     bool IsMinimumPolicyInEffectInSystem(void);
@@ -146,6 +147,7 @@ private:
     QosInternalManager* processingManager;
     QosInternalManager* correctionManager;
     uint32_t currentNumberOfArrays;
+    std::vector<uint32_t> prevIndexDeleted;
     std::mutex mapUpdateLock;
     bool systemMinPolicy;
 };

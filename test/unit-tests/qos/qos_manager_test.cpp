@@ -15,6 +15,16 @@ TEST(QosManager, QosManager_Constructor_One_Heap)
     delete qosManager;
 }
 
+TEST(QosManager, Test_Delete_ArrayName_Map)
+{
+    QosManager qosManager;
+    std::string arrayName = "POSArray";
+    qosManager.UpdateArrayMap(arrayName);
+    qosManager.DeleteEntryArrayMap(arrayName);
+    uint32_t noOfArrays = qosManager.GetNumberOfArrays();
+    ASSERT_EQ(noOfArrays, 0);
+}
+
 TEST(QosManager, Initialize_)
 {
 }

@@ -304,8 +304,11 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 errorMsg = "QoS update in Volume Manager failed";
                 return retVal;
             }
-            uint32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
-            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
+            int32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
+            if (arrayId != -1)
+            {
+                retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
+            }
             if (retVal != SUCCESS)
             {
                 errorMsg = "Qos Volume Policy Updated in QosManager failed";

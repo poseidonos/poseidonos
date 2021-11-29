@@ -34,6 +34,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos_cli
 {
@@ -65,6 +66,7 @@ UnmountArrayCommand::Execute(json& doc, string rid)
             "failed to unmount array (code:" + to_string(ret) + ")",
             GetPosInfo());
     }
+    QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
     return jFormat.MakeResponse("UNMOUNTARRAY", rid, SUCCESS,
         "Array is unmounted successfully", GetPosInfo());
 }

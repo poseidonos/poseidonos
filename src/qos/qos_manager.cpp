@@ -123,6 +123,10 @@ QosManager::~QosManager(void)
 {
     _Finalize();
     initialized = false;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        delete qosArrayManager[i];
+    }
     delete qosThread;
     delete spdkManager;
     delete qosEventManager;
@@ -214,8 +218,14 @@ void
 QosManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
 {
     std::string arrayName(volIo->arrayName);
-    uint32_t arrayId = arrayNameMap[arrayName];
-    qosArrayManager[arrayId]->HandlePosIoSubmission(aioSubmission, volIo);
+    if (arrayNameMap.size() != 0)
+    {
+        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+        {
+            uint32_t arrayId = arrayNameMap[arrayName];
+            qosArrayManager[arrayId]->HandlePosIoSubmission(aioSubmission, volIo);
+        }
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -385,8 +395,14 @@ QosManager::IncreaseUsedStripeCnt(uint32_t arrayId)
 void
 QosManager::DecreaseUsedStripeCnt(std::string arrayName)
 {
-    uint32_t arrayId = arrayNameMap[arrayName];
-    qosArrayManager[arrayId]->DecreaseUsedStripeCnt();
+    if (arrayNameMap.size() != 0)
+    {
+        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+        {
+            uint32_t arrayId = arrayNameMap[arrayName];
+            qosArrayManager[arrayId]->DecreaseUsedStripeCnt();
+        }
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -425,8 +441,11 @@ QosManager::GetVolumeFromActiveSubsystem(uint32_t nqnId, uint32_t arrayId)
 void
 QosManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId, std::string arrayName)
 {
-    uint32_t arrayId = GetArrayIdFromMap(arrayName);
-    qosArrayManager[arrayId]->UpdateSubsystemToVolumeMap(nqnId, volId);
+    int32_t arrayId = GetArrayIdFromMap(arrayName);
+    if (arrayId != -1)
+    {
+        qosArrayManager[arrayId]->UpdateSubsystemToVolumeMap(nqnId, volId);
+    }
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -438,8 +457,11 @@ QosManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId, std::stri
 void
 QosManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId, std::string arrayName)
 {
-    uint32_t arrayId = GetArrayIdFromMap(arrayName);
-    qosArrayManager[arrayId]->DeleteVolumeFromSubsystemMap(nqnId, volId);
+    int32_t arrayId = GetArrayIdFromMap(arrayName);
+    if (arrayId != -1)
+    {
+        qosArrayManager[arrayId]->DeleteVolumeFromSubsystemMap(nqnId, volId);
+    }
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -540,9 +562,17 @@ QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t a
 qos_vol_policy
 QosManager::GetVolumePolicy(uint32_t volId, std::string arrayName)
 {
-    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    uint32_t arrayId = arrayNameMap[arrayName];
-    return qosArrayManager[arrayId]->GetVolumePolicy(volId);
+    if (arrayNameMap.size() != 0)
+    {
+        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+        {
+            std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+            uint32_t arrayId = arrayNameMap[arrayName];
+            return qosArrayManager[arrayId]->GetVolumePolicy(volId);
+        }
+    }
+    qos_vol_policy qosVolumePolicyDefault;
+    return qosVolumePolicyDefault;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -636,9 +666,17 @@ QosManager::GetEventLog(BackendEvent event)
 qos_rebuild_policy
 QosManager::GetRebuildPolicy(std::string arrayName)
 {
-    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    uint32_t arrayId = arrayNameMap[arrayName];
-    return qosArrayManager[arrayId]->GetRebuildPolicy();
+    if (arrayNameMap.size() != 0)
+    {
+        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+        {
+            std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+            uint32_t arrayId = arrayNameMap[arrayName];
+            return qosArrayManager[arrayId]->GetRebuildPolicy();
+        }
+    }
+    qos_rebuild_policy qosRebuildPolicyDefault;
+    return qosRebuildPolicyDefault;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -744,10 +782,17 @@ QosManager::GetVolumePolicyMap(uint32_t arrayId, std::map<uint32_t, qos_vol_poli
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-uint32_t
+int32_t
 QosManager::GetArrayIdFromMap(std::string arrayName)
 {
-    return arrayNameMap[arrayName];
+    if (arrayNameMap.size() != 0)
+    {
+        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+        {
+            return arrayNameMap[arrayName];
+        }
+    }
+    return -1;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -785,18 +830,62 @@ QosManager::GetNumberOfArrays(void)
 void
 QosManager::UpdateArrayMap(std::string arrayName)
 {
+    if (currentNumberOfArrays >= MAX_ARRAY_COUNT)
+    {
+        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::QOS_MAX_ARRAYS_EXCEEDED), "Trying to create more arrays than maximum possible arrays");
+    }
     if (arrayNameMap.find(arrayName) != arrayNameMap.end())
     {
         return;
     }
     else
     {
+        if (prevIndexDeleted.size() == 0)
+        {
+            mapUpdateLock.lock();
+            arrayNameMap.insert({arrayName, currentNumberOfArrays});
+            qosArrayManager[currentNumberOfArrays]->SetArrayName(arrayName);
+            arrayIdMap.insert({currentNumberOfArrays, arrayName});
+            currentNumberOfArrays++;
+            mapUpdateLock.unlock();
+        }
+        else
+        {
+            mapUpdateLock.lock();
+            uint32_t index = prevIndexDeleted.front();
+            prevIndexDeleted.erase(prevIndexDeleted.begin());
+            arrayNameMap.insert({arrayName, index});
+            qosArrayManager[index]->SetArrayName(arrayName);
+            arrayIdMap.insert({index, arrayName});
+            currentNumberOfArrays++;
+            mapUpdateLock.unlock();
+        }
+    }
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::DeleteEntryArrayMap(std::string arrayName)
+{
+    if (arrayNameMap.find(arrayName) == arrayNameMap.end())
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::QOS_ARRAY_DOES_NOT_EXIST), "Deleting array which does not exist");
+        return;
+    }
+    else
+    {
         mapUpdateLock.lock();
-        arrayNameMap.insert({arrayName, currentNumberOfArrays});
-        qosArrayManager[currentNumberOfArrays]->SetArrayName(arrayName);
-        arrayIdMap.insert({currentNumberOfArrays, arrayName});
+        uint32_t index = arrayNameMap[arrayName];
+        arrayNameMap.erase(arrayName);
+        arrayIdMap.erase(index);
+        prevIndexDeleted.push_back(index);
+        currentNumberOfArrays--;
         mapUpdateLock.unlock();
-        currentNumberOfArrays++;
     }
 }
 /* --------------------------------------------------------------------------*/
