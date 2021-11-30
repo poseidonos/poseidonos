@@ -113,8 +113,10 @@ public:
 private:
     void _Finalize(void);
     void _QosWorker(void);
+    void _QosTimeChecker(void);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
     std::thread* qosThread;
+    std::thread* qosTimeThrottling;
     cpu_set_t cpuSet;
     volatile uint64_t eventWeight[BackendEvent_Count];
     uint32_t oldLog[BackendEvent_Count];

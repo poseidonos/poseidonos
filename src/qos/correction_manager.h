@@ -67,5 +67,7 @@ private:
     QosContext* qosContext;
     ReactorHeap* reactorMinHeap;
     QosInternalManagerType nextManagerType;
+    int64_t currentVolumeBw[MAX_VOLUME_COUNT];
+    int64_t currentVolumeIops[MAX_VOLUME_COUNT];
 };
 } // namespace pos

@@ -38,6 +38,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <pthread.h>
+
 #include "src/qos/qos_common.h"
 #include "src/sys_event/volume_event.h"
 #include "src/qos/exit_handler.h"
@@ -63,15 +65,18 @@ public:
     bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
     void VolumeDetached(vector<int> volList, std::string arrayName) override;
     void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId);
-    std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId);
+    std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock = true);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     bw_iops_parameter DequeueParams(uint32_t reactor, uint32_t volId);
     int VolumeQosPoller(struct poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap);
+    void ResetVolumeThrottling(int volId);
+    void SetUserInitiator(bool enabled);
 
 private:
+    bool _GlobalRateLimit(uint32_t reactor, int volId);
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
     void _ResetRateLimit(uint32_t reactor, int volId, double offset);
     bool _RateLimit(uint32_t reactor, int volId);
@@ -89,11 +94,15 @@ private:
     std::atomic<int64_t> volReactorIopsWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     uint64_t pendingIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     bool feQosEnabled;
+    bool userInitEnabled;
     QosContext* qosContext;
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
     IoQueue<pos_io*>* ioQueue;
+    static std::atomic<int64_t> remainingVolumeBw[MAX_VOLUME_COUNT];
+    static std::atomic<int64_t> remainingVolumeIops[MAX_VOLUME_COUNT];
     std::mutex subsysVolMapLock;
+    pthread_rwlock_t nqnLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
 };
 } // namespace pos

@@ -67,6 +67,7 @@ namespace pos
 QosManager::QosManager(void)
 {
     qosThread = nullptr;
+    qosTimeThrottling = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
     volMinPolicyInEffect = false;
@@ -90,6 +91,7 @@ QosManager::QosManager(void)
         feQosEnabled = enabled;
     }
     SpdkConnection::SetQosInSpdk(feQosEnabled);
+
     initialized = false;
     try
     {
@@ -106,6 +108,12 @@ QosManager::QosManager(void)
     {
         assert(0);
     }
+    ret = configManager.GetValue("fe_qos", "user_initiator", &enabled,
+        CONFIG_TYPE_BOOL);
+    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    {
+        qosVolumeManager->SetUserInitiator(enabled);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -120,6 +128,7 @@ QosManager::~QosManager(void)
     _Finalize();
     initialized = false;
     delete qosThread;
+    delete qosTimeThrottling;
     delete spdkManager;
     delete qosVolumeManager;
     delete qosEventManager;
@@ -152,6 +161,7 @@ QosManager::Initialize(void)
     AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
+    qosTimeThrottling = new std::thread(&QosManager::_QosTimeChecker, this);
     initialized = true;
 }
 
@@ -193,6 +203,7 @@ QosManager::_Finalize(void)
     if (nullptr != qosThread)
     {
         qosThread->join();
+        qosTimeThrottling->join();
     }
     POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
 }
@@ -234,6 +245,41 @@ QosManager::HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
+void
+QosManager::_QosTimeChecker(void)
+{
+    cpu_set_t cpuSetLocal;
+    CPU_ZERO(&cpuSetLocal);
+    uint32_t totalCore = AffinityManagerSingleton::Instance()->GetTotalCore();
+    CPU_SET(totalCore - 1, &cpuSetLocal);
+    sched_setaffinity(0, sizeof(cpuSetLocal), &cpuSetLocal);
+    pthread_setname_np(pthread_self(), "QoSWorker");
+    uint64_t next_tick = 0;
+    while (true)
+    {
+        uint64_t now = SpdkConnection::SpdkGetTicks();
+        if (true == IsExitQosSet())
+        {
+            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
+            break;
+        }
+        if (next_tick < now)
+        {
+            for (int volId = 0; volId < MAX_VOLUME_COUNT; volId++)
+            {
+                 qosVolumeManager->ResetVolumeThrottling(volId);
+            }
+            if (next_tick == 0)
+            {
+                next_tick = now;
+            }
+            next_tick = next_tick + IBOF_QOS_TIMESLICE_IN_USEC * SpdkConnection::SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+        }
+    }
+}
+
+
 void
 QosManager::_QosWorker(void)
 {
@@ -691,6 +737,7 @@ QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, boo
 {
     qosVolumeManager->SetVolumeLimit(reactor, volId, weight, iops);
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

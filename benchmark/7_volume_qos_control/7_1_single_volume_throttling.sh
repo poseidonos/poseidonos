@@ -22,6 +22,7 @@ start_and_bringup()
 	echo "clean initiator complete"
 	sudo cp ../1_psd_bringup/pos.conf /etc/pos/
 	jq -r '.fe_qos.enable = true' /etc/pos/pos.conf > /tmp/temp.json && mv /tmp/temp.json /etc/pos/pos.conf
+	jq -r '.fe_qos.user_initiator = true' /etc/pos/pos.conf > /tmp/temp.json && mv /tmp/temp.json /etc/pos/pos.conf
 
 	sudo ../1_psd_bringup/1_start_pos.sh
 
@@ -38,6 +39,7 @@ let INIT1_VOL_CNT=${VOLUME_CNT}
 echo
 sshpass -p "${INIT_1_PW}" scp ../2_fio_perf_test/${INIT1_FIO_SCRIPT_FILE} ../2_fio_perf_test/${INIT1_PARSE_RESULT_FILE} ${INIT_1_ID}@${INIT_1_IP}:${INIT1_FIO_SCRIPT_DIR}/
 # basic performance and throttle with specific value.
+
 
 echo "1. throttling for sequential write"
 echo "seq_write for "$TOT_TIME "sec without throttling"
