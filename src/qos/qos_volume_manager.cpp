@@ -32,6 +32,7 @@
 
 #include "src/qos/qos_volume_manager.h"
 
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
@@ -42,7 +43,6 @@
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
-#include "src/event_scheduler/event_scheduler.h"
 #include "src/qos/qos_context.h"
 
 namespace pos
@@ -151,7 +151,12 @@ QosVolumeManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId)
 std::vector<int>
 QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
 {
-    return nqnVolumeMap[nqnId];
+    std::vector<int> volumeList;
+    if (nqnVolumeMap.find(nqnId) != nqnVolumeMap.end())
+    {
+        volumeList = nqnVolumeMap[nqnId];
+    }
+    return volumeList;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -202,7 +207,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
 
     currentBw = volumeQosParam[reactorId][volId].currentBW;
     currentIO = volumeQosParam[reactorId][volId].currentIOs;
-    blockSize  = volIo->length;
+    blockSize = volIo->length;
 
     if ((pendingIO[reactorId][volId] == 0) && (_RateLimit(reactorId, volId) == false))
     {
@@ -363,7 +368,7 @@ QosVolumeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* 
 int
 QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    struct pos_volume_info *vInfo = new (struct pos_volume_info);
+    struct pos_volume_info* vInfo = new (struct pos_volume_info);
     _CopyVolumeInfo(vInfo->array_name, (volArrayInfo->arrayName).c_str(), (volArrayInfo->arrayName).size());
     vInfo->id = volEventBase->volId;
     vInfo->iops_limit = volEventPerf->maxiops;
@@ -372,7 +377,7 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
 
     // enqueue in same reactor as NvmfVolumePos::VolumeMounted so that pos_disk structure is populated with correct values before qos tries to access it.
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
-            _VolumeMountHandler, vInfo, this);
+        _VolumeMountHandler, vInfo, this);
 
     while (qosContext->GetVolumeOperationDone() == false)
     {
@@ -391,10 +396,10 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager:: _VolumeMountHandler(void *arg1, void *arg2)
+QosVolumeManager::_VolumeMountHandler(void* arg1, void* arg2)
 {
     struct pos_volume_info* volInfo = static_cast<pos_volume_info*>(arg1);
-    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager *>(arg2);
+    QosVolumeManager* qosVolumeManager = static_cast<QosVolumeManager*>(arg2);
     qosVolumeManager->_InternalVolMountHandlerQos(volInfo);
 }
 /* --------------------------------------------------------------------------*/
@@ -405,7 +410,7 @@ QosVolumeManager:: _VolumeMountHandler(void *arg1, void *arg2)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info *volMountInfo)
+QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info* volMountInfo)
 {
     if (volMountInfo)
     {
@@ -441,7 +446,7 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
     qosContext->SetVolumeOperationDone(false);
 
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
-            _VolumeUnmountHandler, vInfo, this);
+        _VolumeUnmountHandler, vInfo, this);
 
     while (qosContext->GetVolumeOperationDone() == false)
     {
@@ -460,10 +465,10 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_VolumeUnmountHandler(void *arg1, void *arg2)
+QosVolumeManager::_VolumeUnmountHandler(void* arg1, void* arg2)
 {
-    struct pos_volume_info *volUnmountInfo = static_cast <struct pos_volume_info*>(arg1);
-    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager *>(arg2);
+    struct pos_volume_info* volUnmountInfo = static_cast<struct pos_volume_info*>(arg1);
+    QosVolumeManager* qosVolumeManager = static_cast<QosVolumeManager*>(arg2);
     qosVolumeManager->_InternalVolUnmountHandlerQos(volUnmountInfo);
 }
 /* --------------------------------------------------------------------------*/
@@ -568,10 +573,10 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_VolumeDetachHandler(void *arg1, void *arg2)
+QosVolumeManager::_VolumeDetachHandler(void* arg1, void* arg2)
 {
-    struct pos_volume_info *volDetachInfo = static_cast <struct pos_volume_info*>(arg1);
-    QosVolumeManager *qosVolumeManager = static_cast<QosVolumeManager*>(arg2);
+    struct pos_volume_info* volDetachInfo = static_cast<struct pos_volume_info*>(arg1);
+    QosVolumeManager* qosVolumeManager = static_cast<QosVolumeManager*>(arg2);
     qosVolumeManager->_InternalVolDetachHandlerQos(volDetachInfo);
 }
 /* --------------------------------------------------------------------------*/
@@ -688,7 +693,7 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
     bool enqueueParameters = false;
 
     enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
-    enqueueParameters = enqueueParameters &&  (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
+    enqueueParameters = enqueueParameters && (!((currentBW == 0) && (pendingIO[reactor][volId] == 0)));
     // Condition (1) minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops)
     // checks for some qos policy being present on the volume
     // Condition (2) "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
