@@ -54,11 +54,6 @@ namespace pos
 {
 TelemetryConfig::TelemetryConfig(std::string path, std::string fileName)
 {
-    // make default telemetry config
-    defaultConfiguration = "- default telemetry config -\n"
-                    "if you want to create default config,\n"
-                    "please use this string and call CreateFile()";
-
     cliReader = new CliConfigReader();
     envReader = new EnvVariableConfigReader();
     fileReader = new FileConfigReader();
@@ -121,7 +116,6 @@ TelemetryConfig::CreateFile(std::string path, std::string fileName)
 
     std::ofstream outfile(filePath.data());
 
-    outfile << defaultConfiguration << std::endl;
     outfile.close();
 }
 

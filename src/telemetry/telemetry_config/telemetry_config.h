@@ -96,7 +96,6 @@ private:
     EnvVariableConfigReader* envReader = nullptr;
     FileConfigReader* fileReader = nullptr;
 
-    std::string defaultConfiguration = "";
     const std::string CONFIGURATION_NAME = "telemetry_default.yaml";
 
     // priority to reader
