@@ -126,13 +126,6 @@ ArrayComponents::~ArrayComponents(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "ArrayMountSequence for {} has been deleted.", arrayName);
     }
 
-    if (rbaStateMgr != nullptr)
-    {
-        delete rbaStateMgr;
-        rbaStateMgr = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "RbaStateManager for {} has been deleted.", arrayName);
-    }
-
     if (array != nullptr)
     {
         delete array;
@@ -266,6 +259,7 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
     mountSequence.push_back(meta);
+    mountSequence.push_back(rbaStateMgr);
     mountSequence.push_back(flowControl);
     mountSequence.push_back(gc);
     mountSequence.push_back(smartLogMetaIo);
@@ -284,6 +278,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || volMgr != nullptr
         || nvmf != nullptr
         || meta != nullptr
+        || rbaStateMgr != nullptr
         || flowControl != nullptr
         || gc != nullptr
         || info != nullptr
@@ -321,6 +316,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         delete flowControl;
         flowControl = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "FlowControl for {} has been deleted.", arrayName);
+    }
+
+    if (rbaStateMgr != nullptr)
+    {
+        delete rbaStateMgr;
+        rbaStateMgr = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "RbaStateManager for {} has been deleted.", arrayName);
     }
 
     if (meta != nullptr)

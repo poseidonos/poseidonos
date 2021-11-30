@@ -44,11 +44,11 @@
 
 namespace pos
 {
-RBAStateManager::RBAStateManager(std::string arrayName, int arrayId)
-: VolumeEvent("RBAStateManager", arrayName, arrayId)
+RBAStateManager::RBAStateManager(std::string arrayName, int arrayID)
+: VolumeEvent("RBAStateManager", arrayName, arrayID)
 {
-    RBAStateServiceSingleton::Instance()->Register(arrayId, this);
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
+    RBAStateServiceSingleton::Instance()->Register(arrayID, this);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayID);
 }
 
 RBAStateManager::~RBAStateManager()
@@ -59,6 +59,33 @@ RBAStateManager::~RBAStateManager()
     }
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
     RBAStateServiceSingleton::Instance()->Unregister(arrayId);
+}
+
+int
+RBAStateManager::Init(void)
+{
+    return (int)POS_EVENT_ID::SUCCESS;
+}
+
+void
+RBAStateManager::Dispose(void)
+{
+    for (auto& vol : rbaStatesInArray)
+    {
+        vol.SetSize(0);
+    }
+}
+
+void
+RBAStateManager::Shutdown(void)
+{
+    Dispose();
+}
+
+void
+RBAStateManager::Flush(void)
+{
+    // no-op for IMountSequence
 }
 
 void
