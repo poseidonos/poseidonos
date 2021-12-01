@@ -42,7 +42,7 @@ MetaFS ID Range : 40000 ~ 49999
 ---
 
 ## **Volume**
-Volume ID Range : 40000 ~ 49999
+Volume ID Range : 50000 ~ 59999
 
 ---
 ---
