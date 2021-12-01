@@ -50,7 +50,7 @@ Logger::Logger(void)
         MakeDir(preferences.LogDir());
     }
 
-    const string pattern = "[%d %b %H:%M:%S.%e][%q][%l] %v   %@"; // [19 Aug 07:00:01.234][1001][info] blah blah ~   file.cpp:43
+    const string pattern = "[%Y-%m-%d %H:%M:%S.%e][%q][%l] %v at %@"; // Format: [2021-12-01 07:00:01.234][EventID]][LogLevel] Message at SourceFile and LineNumber
     std::vector<spdlog::sink_ptr> sinks;
     auto console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::trace);

@@ -5,7 +5,7 @@ type Request struct {
 	COMMAND   string      `json:"command"`
 	RID       string      `json:"rid"`
 	PARAM     interface{} `json:"param"`
-	REQUESTOR string      `json:"requestor`
+	REQUESTOR string      `json:"requestor"`
 }
 
 func BuildReq(command string, rid string) Request {
