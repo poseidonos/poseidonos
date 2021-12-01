@@ -1,5 +1,5 @@
 - [**Array**](#array)
-- [**Cli**](#cli)
+- [**CLI**](#cli)
 - [**Device**](#device)
 - [**Meta**](#meta)
 - [**MetaFS**](#metafs)
@@ -11,12 +11,12 @@ Rules for telemetry entry naming in "/src/telemetry/telemetry_id.h"
 ---
 
 ## **Array**
-Arra ID Range : 0 ~ 9999
+Array ID Range : 0 ~ 9999
 
 ---
 
-## **Cli**
-Device ID Range : 10000 ~ 19999
+## **CLI**
+CLI ID Range : 10000 ~ 19999
 
 ---
 
