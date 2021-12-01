@@ -48,6 +48,9 @@ public:
     virtual void StartPublishing(void);
     virtual void StopPublishing(void);
     virtual bool IsRunning(void);
+    virtual void StartUsingDataPool(void);
+    virtual void StopUsingDataPool(void);
+
     virtual void SetMaxEntryLimit(int limit);
     virtual int GetNumEntries(void);
 
@@ -64,6 +67,7 @@ private:
     IGlobalPublisher* globalPublisher;
     TelemetryDataPool dataPool;
     bool turnOn;
+    bool useDataPool;
 };
 
 } // namespace pos

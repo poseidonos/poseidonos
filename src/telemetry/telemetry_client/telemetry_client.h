@@ -56,6 +56,10 @@ public:
     virtual bool IsPublisherRunning(std::string name);
     virtual bool StartAllPublisher(void);
     virtual bool StopAllPublisher(void);
+    virtual bool StartUsingDataPool(std::string name);
+    virtual bool StopUsingDataPool(std::string name);
+    virtual bool StartUsingDataPoolForAllPublisher(void);
+    virtual bool StopUsingDataPoolForAllPublisher(void);
 
     virtual int CollectValue(std::string name, std::string id, MetricUint32& outLog);
     virtual list<MetricUint32> CollectList(std::string name);

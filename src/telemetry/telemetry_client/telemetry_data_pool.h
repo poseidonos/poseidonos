@@ -38,7 +38,7 @@
 #include "src/telemetry/telemetry_client/telemetry_metrics.h"
 
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 namespace pos
@@ -58,7 +58,7 @@ public:
 
 private:
     std::mutex poolLock;
-    std::map<std::string, MetricUint32> pool;
+    std::unordered_map<std::string, MetricUint32> pool;
     int maxEntry;
 };
 

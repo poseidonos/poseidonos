@@ -81,6 +81,7 @@ TEST(TelemetryClient, CollectValue_TestData)
     TelemetryClient telClient;
     telClient.RegisterPublisher("a", tp);
     telClient.StartPublisher("a");
+    tp->StartUsingDataPool();
     tp->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 10);
     MetricUint32 log;
     // when 1.

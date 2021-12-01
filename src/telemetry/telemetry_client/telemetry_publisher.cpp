@@ -36,7 +36,8 @@ namespace pos
 {
 TelemetryPublisher::TelemetryPublisher(void)
 : globalPublisher(nullptr),
-  turnOn(false) // todo: change default true or using config
+  turnOn(false), // todo: change default true or using config
+  useDataPool(false) // todo: change default true or using config
 {
 }
 
@@ -74,6 +75,18 @@ TelemetryPublisher::IsRunning(void)
     return turnOn;
 }
 
+void
+TelemetryPublisher::StartUsingDataPool(void)
+{
+    useDataPool = true;
+}
+
+void
+TelemetryPublisher::StopUsingDataPool(void)
+{
+    useDataPool = false;
+}
+
 int
 TelemetryPublisher::PublishData(std::string id, uint32_t value)
 {
@@ -86,9 +99,11 @@ TelemetryPublisher::PublishData(std::string id, uint32_t value)
     time_t time = std::time(nullptr);
     metric.SetMetric(id, time, value, _GetTimeString(time));
 
-    dataPool.SetLog(metric);
+    if (useDataPool == true)
+    {
+        dataPool.SetLog(metric);
+    }
     int ret = globalPublisher->PublishToServer(metric);
-
     return ret;
 }
 

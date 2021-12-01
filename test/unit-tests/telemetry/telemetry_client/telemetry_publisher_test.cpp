@@ -17,6 +17,7 @@ TEST(TelemetryPublisher, PublishData_TestUpdateAndCollectItem)
     TelemetryPublisher tp;
     NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
     tp.SetGlobalPublisher(igp);
+    tp.StartUsingDataPool();
     // given 1.
     tp.StopPublishing();
     // when 1.
@@ -65,6 +66,7 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     TelemetryPublisher tp;
     tp.SetMaxEntryLimit(2);
     tp.StartPublishing();
+    tp.StartUsingDataPool();
 
     NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
     tp.SetGlobalPublisher(igp);
@@ -83,6 +85,7 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     MetricUint32 log;
     tp.CollectData(TEL001_ALCT_FREE_SEG_CNT, log);
     EXPECT_EQ(300, log.GetValue());
+    tp.StopUsingDataPool();
 }
 
 } // namespace pos

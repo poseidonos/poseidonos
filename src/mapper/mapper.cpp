@@ -262,8 +262,13 @@ Mapper::EnableInternalAccess(int volId)
     {
         if (vsaMapManager->IsVolumeLoaded(volId) == true)
         {
-            volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper EnableInternalAccess] VolumeId:{} was loaded LOADING >> BG_MOUNTED, arrayName:{} @VolumeMounted", volId, arrayName);
+            std::unique_lock<std::mutex> lock(volState[volId].GetVolStateLock());
+            state = volState[volId].GetState();
+            if (state != VolState::FOREGROUND_MOUNTED)
+            {
+                volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper EnableInternalAccess] VolumeId:{} was loaded LOADING >> BG_MOUNTED, arrayName:{} @VolumeMounted", volId, arrayName);
+            }
         }
         else
         {

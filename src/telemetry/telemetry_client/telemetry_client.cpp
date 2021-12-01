@@ -132,6 +132,46 @@ TelemetryClient::StopAllPublisher(void)
     return true;
 }
 
+bool
+TelemetryClient::StartUsingDataPool(std::string name)
+{
+    publisherList[name]->StartUsingDataPool();
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start Using DataPool Publisher:{}", name);
+    return true;
+}
+
+bool
+TelemetryClient::StopUsingDataPool(std::string name)
+{
+    publisherList[name]->StopUsingDataPool();
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop Using DataPool Publisher:{}", name);
+    return true;
+}
+
+bool
+TelemetryClient::StartUsingDataPoolForAllPublisher(void)
+{
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start using DataPool for all publishers");
+    for (auto &p : publisherList)
+    {
+        p.second->StartUsingDataPool();
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start using DataPool for publisher:{}", p.first);
+    }
+    return true;
+}
+
+bool
+TelemetryClient::StopUsingDataPoolForAllPublisher(void)
+{
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop using DataPool for all publishers");
+    for (auto &p : publisherList)
+    {
+        p.second->StopUsingDataPool();
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop using DataPool for publisher:{}", p.first);
+    }
+    return true;
+}
+
 int
 TelemetryClient::CollectValue(std::string name, std::string id, MetricUint32& outLog)
 {
