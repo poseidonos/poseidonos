@@ -41,23 +41,25 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
 : addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
   allocStatus(allocStatus),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  tp(tp_)
 {
     allocCtx = allocCtx_;
     iReverseMap = iReverseMap_;
     iStripeMap = stripeMap_;
 }
 
-BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
-: BlockManager(nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
+BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+: BlockManager(tp_, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
 {
     allocCtx = contextManager->GetAllocatorCtx();
     allocStatus = contextManager->GetAllocationStatus();
@@ -134,12 +136,14 @@ BlockManager::ValidateBlks(VirtualBlks blks)
 void
 BlockManager::ProhibitUserBlkAlloc(void)
 {
+    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, 1);
     allocStatus->ProhibitUserBlockAllocation();
 }
 
 void
 BlockManager::PermitUserBlkAlloc(void)
 {
+    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, 0);
     allocStatus->PermitUserBlockAllocation();
 }
 

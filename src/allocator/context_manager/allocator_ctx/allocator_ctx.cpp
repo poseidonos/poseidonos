@@ -41,13 +41,15 @@
 #include "src/include/pos_event_id.h"
 #include "src/lib/bitmap.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)
+AllocatorCtx::AllocatorCtx(TelemetryPublisher* tp_, AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
+  tp(tp_),
   initialized(false)
 {
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
@@ -66,8 +68,8 @@ AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocWbLsidB
     allocWbLsidBitmap = allocWbLsidBitmap_;
 }
 
-AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
-: AllocatorCtx(nullptr, nullptr, info)
+AllocatorCtx::AllocatorCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info)
+: AllocatorCtx(tp_, nullptr, nullptr, info)
 {
 }
 

@@ -42,13 +42,14 @@
 namespace pos
 {
 class AllocatorAddressInfo;
+class TelemetryPublisher;
 
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
     AllocatorCtx(void) = default;
-    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info);
-    explicit AllocatorCtx(AllocatorAddressInfo* info);
+    AllocatorCtx(TelemetryPublisher* tp_, AllocatorCtxHeader* header, BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info);
+    explicit AllocatorCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -86,7 +87,6 @@ public:
     static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
 
 private:
-    // File
     AllocatorCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -98,12 +98,10 @@ private:
     StripeId prevSsdLsid;
     StripeId currentSsdLsid;
 
-    // DOCs
     AllocatorAddressInfo* addrInfo;
+    TelemetryPublisher* tp;
 
-    // Lock
     std::mutex allocCtxLock;
-
     bool initialized;
 };
 

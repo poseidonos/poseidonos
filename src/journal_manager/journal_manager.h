@@ -81,13 +81,14 @@ class IStateControl;
 class IVolumeManager;
 class MetaFsFileControlApi;
 class EventScheduler;
+class TelemetryPublisher;
 
 class JournalManager : public IMountSequence, public IJournalManager
 {
 public:
     JournalManager(void);
-    JournalManager(IArrayInfo* info, IStateControl* iState);
-    JournalManager(JournalConfiguration* config,
+    JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState);
+    JournalManager(TelemetryPublisher* tp, JournalConfiguration* config,
         JournalStatusProvider* journalStatusProvider,
         LogWriteContextFactory* logWriteContextFactory,
         JournalEventFactory* journalEventFactory,
@@ -172,6 +173,7 @@ protected:
     CallbackSequenceController* sequenceController;
 
     ReplayHandler* replayHandler;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

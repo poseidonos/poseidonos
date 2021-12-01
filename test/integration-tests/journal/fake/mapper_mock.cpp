@@ -9,7 +9,7 @@ using ::testing::StrictMock;
 namespace pos
 {
 MockMapper::MockMapper(TestInfo* testInfo, IArrayInfo* info, IStateControl* iState)
-: Mapper(info, nullptr),
+: Mapper(nullptr, info, nullptr),
   testInfo(testInfo)
 {
     flushHandler.resize(testInfo->numMap);

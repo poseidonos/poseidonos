@@ -50,14 +50,15 @@ class IVolumeManager;
 class IReverseMap;
 class BufferPool;
 class AllocatorCtx;
+class TelemetryPublisher;
 
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+    WBStripeManager(TelemetryPublisher* tp_, StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
-    WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -109,6 +110,7 @@ protected: // for UT
     ContextManager* contextManager;
     AllocatorCtx* allocCtx;
     BlockManager* blockManager;
+    TelemetryPublisher* tp;
     std::string arrayName;
     int arrayId;
     IVolumeManager* volumeManager;

@@ -47,7 +47,7 @@
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
     MemoryManager* memoryManager)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
@@ -55,6 +55,7 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
   addrInfo(info),
   contextManager(ctxMgr),
   blockManager(blkMgr),
+  tp(tp_),
   arrayName(arrayName),
   arrayId(arrayId),
   memoryManager(memoryManager)
@@ -74,8 +75,8 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
     }
 }
 
-WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
-: WBStripeManager(nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
+WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
+: WBStripeManager(tp_, nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
 {
     allocCtx = ctxMgr->GetAllocatorCtx();
 }

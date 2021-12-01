@@ -21,7 +21,7 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
     header.sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     header.ctxVersion = 12;
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(&header, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, &header, allocBitmap, nullptr);
 
     EXPECT_CALL(*allocBitmap, SetNumBitsSet(100));
 
@@ -39,7 +39,7 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
 TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.GetStoredVersion();
 }
@@ -47,7 +47,7 @@ TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
 TEST(AllocatorCtx, ResetDirtyVersion_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.ResetDirtyVersion();
 }
@@ -55,7 +55,7 @@ TEST(AllocatorCtx, ResetDirtyVersion_TestSimpleSetter)
 TEST(AllocatorCtx, UpdatePrevLsid_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.UpdatePrevLsid();
 }
@@ -63,7 +63,7 @@ TEST(AllocatorCtx, UpdatePrevLsid_TestSimpleSetter)
 TEST(AllocatorCtx, SetCurrentSsdLsid_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.SetCurrentSsdLsid(10);
 }
@@ -71,7 +71,7 @@ TEST(AllocatorCtx, SetCurrentSsdLsid_TestSimpleSetter)
 TEST(AllocatorCtx, RollbackCurrentSsdLsid_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.RollbackCurrentSsdLsid();
 }
@@ -79,7 +79,7 @@ TEST(AllocatorCtx, RollbackCurrentSsdLsid_TestSimpleSetter)
 TEST(AllocatorCtx, SetPrevSsdLsid_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.SetPrevSsdLsid(10);
     // then
@@ -93,7 +93,7 @@ TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(100);
 
-    AllocatorCtx allocCtx(nullptr, nullptr, &addrInfo);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, &addrInfo);
 
     // when
     allocCtx.SetNextSsdLsid(0);
@@ -102,7 +102,7 @@ TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
 TEST(AllocatorCtx, GetCtxLock_TestSimpleGetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     std::mutex& m = allocCtx.GetCtxLock();
 }
@@ -113,7 +113,7 @@ TEST(AllocatorCtx, Init_InitAndClose)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
     addrInfo.SetnumWbStripes(10);
-    AllocatorCtx allocCtx(&addrInfo);
+    AllocatorCtx allocCtx(nullptr, &addrInfo);
     allocCtx.Dispose();
 
     // when
@@ -129,7 +129,7 @@ TEST(AllocatorCtx, Init_InitAndClose)
 TEST(AllocatorCtx, GetPrevSsdLsid_TestSimpleGetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     allocCtx.SetPrevSsdLsid(10);
     // when
     int ret = allocCtx.GetPrevSsdLsid();
@@ -140,7 +140,7 @@ TEST(AllocatorCtx, GetPrevSsdLsid_TestSimpleGetter)
 TEST(AllocatorCtx, GetCurrentSsdLsid_TestSimpleGetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
 
     // when
     allocCtx.GetCurrentSsdLsid();
@@ -150,7 +150,7 @@ TEST(AllocatorCtx, BeforeFlush_TestACHeader)
 {
     // given
     NiceMock<MockBitMapMutex> allocBitmap(100);
-    AllocatorCtx allocCtx(nullptr, &allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, &allocBitmap, nullptr);
     char* buf = new char[sizeof(AllocatorCtxHeader) + ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr)];
 
     EXPECT_CALL(allocBitmap, GetNumBitsSetWoLock).WillOnce(Return(10));
@@ -186,7 +186,7 @@ TEST(AllocatorCtx, BeforeFlush_TestACHeader)
 TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
 
     AllocatorCtxHeader* buf = new AllocatorCtxHeader();
     buf->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
@@ -207,7 +207,7 @@ TEST(AllocatorCtx, GetSectionAddr_TestGetEachSectionAddr)
 {
     // given
     NiceMock<MockBitMapMutex> allocBitmap(100);
-    AllocatorCtx allocCtx(nullptr, &allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, &allocBitmap, nullptr);
 
     // when 1.
     char* ret = allocCtx.GetSectionAddr(AC_HEADER);
@@ -232,7 +232,7 @@ TEST(AllocatorCtx, GetSectionSize_TestGetEachSectionSize)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, &addrInfo);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, &addrInfo);
 
     // when 1.
     int ret = allocCtx.GetSectionSize(AC_HEADER);
@@ -262,7 +262,7 @@ TEST(AllocatorCtx, AllocWbStripeWithParam_TestSimpleInterfaceFunc)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
     EXPECT_CALL(*allocBitmap, SetBit(10));
     // when
     allocCtx.AllocWbStripe(10);
@@ -273,7 +273,7 @@ TEST(AllocatorCtx, AllocFreeWbStripe_TestAllocStripeWithConditions)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     // given 1.
     EXPECT_CALL(*allocBitmap, SetNextZeroBit).WillOnce(Return(10));
@@ -298,7 +298,7 @@ TEST(AllocatorCtx, ReleaseWbStripe_TestSimpleSetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     EXPECT_CALL(*allocBitmap, ClearBit);
 
@@ -312,7 +312,7 @@ TEST(AllocatorCtx, SetAllocatedWbStripeCount_TestSimpleSetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     EXPECT_CALL(*allocBitmap, SetNumBitsSet);
 
@@ -326,7 +326,7 @@ TEST(AllocatorCtx, GetAllocatedWbStripeCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     EXPECT_CALL(*allocBitmap, GetNumBitsSet).WillOnce(Return(50));
 
@@ -342,7 +342,7 @@ TEST(AllocatorCtx, GetNumTotalWbStripe_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     EXPECT_CALL(*allocBitmap, GetNumBits).WillOnce(Return(100));
 
@@ -358,7 +358,7 @@ TEST(AllocatorCtx, GetActiveStripeTail_TestGetDataAndCheckData)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
@@ -384,7 +384,7 @@ TEST(AllocatorCtx, SetActiveStripeTail_TestSetDataAndCheckData)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, allocBitmap, nullptr);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
 
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
@@ -411,7 +411,7 @@ TEST(AllocatorCtx, GetActiveStripeTailLock_TestSimpleGetter)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(10);
-    AllocatorCtx allocCtx(&addrInfo);
+    AllocatorCtx allocCtx(nullptr, &addrInfo);
 
     // when
     std::mutex& m = allocCtx.GetActiveStripeTailLock(0);
@@ -422,7 +422,7 @@ TEST(AllocatorCtx, GetAllActiveStripeTail_TestSimpleGetter)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(10);
-    AllocatorCtx allocCtx(&addrInfo);
+    AllocatorCtx allocCtx(nullptr, &addrInfo);
 
     for (int i = 0; i < 10; i++)
     {

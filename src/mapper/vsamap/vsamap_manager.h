@@ -46,12 +46,14 @@
 namespace pos
 {
 class EventScheduler;
+class TelemetryPublisher;
+
 class VSAMapManager : public IMapManagerInternal
 {
 public:
     VSAMapManager(void) = default;
-    VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, MapperAddressInfo* info);
-    explicit VSAMapManager(MapperAddressInfo* info);
+    VSAMapManager(TelemetryPublisher* tp_, EventScheduler* eventSched, VSAMapContent* vsaMap, MapperAddressInfo* info);
+    explicit VSAMapManager(TelemetryPublisher* tp_, MapperAddressInfo* info);
     virtual ~VSAMapManager(void);
     virtual int Init(void);
     virtual void Dispose(void);
@@ -105,6 +107,7 @@ private:
     std::atomic<int> numWriteIssuedCount;
     std::atomic<int> numLoadIssuedCount;
     EventScheduler* eventScheduler;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

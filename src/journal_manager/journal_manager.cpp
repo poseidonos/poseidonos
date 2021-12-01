@@ -81,12 +81,13 @@ JournalManager::JournalManager(void)
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
-  replayHandler(nullptr)
+  replayHandler(nullptr),
+  tp(nullptr)
 {
 }
 
 // Constructor for injecting dependencies in unit tests
-JournalManager::JournalManager(JournalConfiguration* configuration,
+JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* configuration,
     JournalStatusProvider* journalStatusProvider,
     LogWriteContextFactory* logWriteContextFactory,
     JournalEventFactory* journalEventFactory,
@@ -126,13 +127,14 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     sequenceController = callbackSequenceController;
 
     replayHandler = replay;
+    tp = tp_;
 
     arrayInfo = info;
 }
 
 // Constructor for injecting mock module dependencies in product code
-JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
-: JournalManager(new JournalConfiguration(),
+JournalManager::JournalManager(TelemetryPublisher* tp_, IArrayInfo* info, IStateControl* state)
+: JournalManager(tp_, new JournalConfiguration(),
     new JournalStatusProvider(),
     new LogWriteContextFactory(),
     new JournalEventFactory(),

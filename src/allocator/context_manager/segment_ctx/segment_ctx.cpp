@@ -41,15 +41,16 @@
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(header, segmentInfo_, nullptr, nullptr, nullptr, rebuildCtx_, addrInfo_)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, nullptr, nullptr, rebuildCtx_, addrInfo_)
 {
 }
 
-SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
     BitMapMutex* segmentBitmap_,
     RebuildCtx* rebuildCtx_,
@@ -62,7 +63,8 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
   initialized(false),
   addrInfo(addrInfo_),
   segStateLocks(segmentStateLocks_),
-  rebuildCtx(rebuildCtx_)
+  rebuildCtx(rebuildCtx_),
+  tp(tp_)
 {
     segmentInfos = segmentInfo_;
     if (header != nullptr)
@@ -80,8 +82,8 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     }
 }
 
-SegmentCtx::SegmentCtx(RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info)
-: SegmentCtx(nullptr, nullptr, rebuildCtx_, info)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info)
+: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info)
 {
 }
 
@@ -212,6 +214,7 @@ SegmentCtx::_FreeSegment(SegmentId segId)
     segmentInfos[segId].SetOccupiedStripeCount(0);
     segmentStates[segId].SetState(SegmentState::FREE);
     allocSegBitmap->ClearBit(segId);
+    tp->PublishData(TEL30005_ALCT_FREED_SEG, segId);
 }
 
 uint32_t
@@ -241,6 +244,7 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
         {
             segmentStates[segId].SetState(SegmentState::SSD);
         }
+        tp->PublishData(TEL30008_ALCT_ALL_OCCUIPIED_SEG, segId);
     }
 
     return segmentFreed;
@@ -505,6 +509,10 @@ SegmentCtx::FindMostInvalidSSDSegment(void)
         }
     }
 
+    if(victimSegment != UNMAP_SEGMENT)
+    {
+        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, minValidCount);
+    }
     return victimSegment;
 }
 
@@ -543,6 +551,7 @@ SegmentCtx::MakeRebuildTarget(void)
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
     rebuildCtx->ClearRebuildTargetList();
 
+    int cnt = 0;
     SegmentId segmentId = 0;
     while (true)
     {
@@ -555,9 +564,12 @@ SegmentCtx::MakeRebuildTarget(void)
         else
         {
             rebuildCtx->AddRebuildTargetSegment(segmentId);
+            ++cnt;
         }
         ++segmentId;
     }
+    tp->PublishData(TEL30009_ALCT_REBUILD_TARGET_SEG_CNT, cnt);
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget Done, target cnt:{}", cnt);
     return 1;
 }
 

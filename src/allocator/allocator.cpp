@@ -50,7 +50,7 @@
 
 namespace pos
 {
-Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
+Allocator::Allocator(TelemetryPublisher* tp_, AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
     WBStripeManager* wbStripeManager_, IArrayInfo* info_, IStateControl* iState_)
 : addrInfo(addrInfo_),
   contextManager(contextManager_),
@@ -59,12 +59,13 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
   isInitialized(false),
   iArrayInfo(info_),
   iStateControl(iState_),
+  tp(tp_),
   arrayName(info_->GetName())
 {
 }
 
 Allocator::Allocator(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState)
-: Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
+: Allocator(tp, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules(tp);
     POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
@@ -99,8 +100,8 @@ Allocator::_CreateSubmodules(TelemetryPublisher* tp)
 {
     addrInfo = new AllocatorAddressInfo();
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
-    blockManager = new BlockManager(addrInfo, contextManager, iArrayInfo->GetIndex());
-    wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
+    blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
+    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }
 
 void

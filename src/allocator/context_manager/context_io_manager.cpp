@@ -201,7 +201,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
         }
     }
 
-    telPublisher->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, numFilesFlushing);
+    telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, numFilesFlushing);
 
     if (sync == true)
     {
@@ -247,7 +247,7 @@ ContextIoManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
     CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
     assert(numFilesFlushing > 0);
-    telPublisher->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, numFilesFlushing);
+    telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, numFilesFlushing);
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
         "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}",
         header->sig, header->ctxVersion, numFilesFlushing);

@@ -130,7 +130,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreed)
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
+    EXPECT_CALL(tc, PublishData).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
 
@@ -155,7 +155,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
+    EXPECT_CALL(tc, PublishData).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*ioManager, FlushRebuildContext);
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
@@ -181,7 +181,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
+    EXPECT_CALL(tc, PublishData).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*ioManager, FlushRebuildContext);
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
@@ -207,11 +207,10 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*ioManager, FlushRebuildContext);
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
-    EXPECT_CALL(tc, PublishData(TEL004_ALCT_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData).Times(2);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -234,12 +233,12 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
+
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*ioManager, FlushRebuildContext);
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NORMAL_GC));
     EXPECT_CALL(*blockAllocStatus, PermitUserBlockAllocation).Times(1);
-    EXPECT_CALL(tc, PublishData(TEL004_ALCT_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData).Times(2);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -290,7 +289,7 @@ TEST(ContextManager, AllocateGCVictimSegment_TestIfVictimIsUpdated)
 
     EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(15));
     EXPECT_CALL(*segCtx, SetSegmentState(15, SegmentState::VICTIM, true));
-    EXPECT_CALL(tc, PublishData(TEL003_ALCT_GCVICTIM_SEG, 15));
+    EXPECT_CALL(tc, PublishData);
 
     // when 1
     int ret = ctxManager.AllocateGCVictimSegment();
@@ -299,7 +298,7 @@ TEST(ContextManager, AllocateGCVictimSegment_TestIfVictimIsUpdated)
 
     EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(UNMAP_SEGMENT));
     EXPECT_CALL(*segCtx, SetSegmentState).Times(0);
-    EXPECT_CALL(tc, PublishData(TEL003_ALCT_GCVICTIM_SEG, _)).Times(0);
+    EXPECT_CALL(tc, PublishData).Times(0);
 
     // when 2.
     ret = ctxManager.AllocateGCVictimSegment();

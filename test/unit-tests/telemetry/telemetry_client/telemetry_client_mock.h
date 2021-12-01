@@ -19,6 +19,10 @@ public:
     MOCK_METHOD(bool, IsPublisherRunning, (std::string name), (override));
     MOCK_METHOD(bool, StartAllPublisher, (), (override));
     MOCK_METHOD(bool, StopAllPublisher, (), (override));
+    MOCK_METHOD(bool, StartUsingDataPool, (std::string name), (override));
+    MOCK_METHOD(bool, StopUsingDataPool, (std::string name), (override));
+    MOCK_METHOD(bool, StartUsingDataPoolForAllPublisher, (), (override));
+    MOCK_METHOD(bool, StopUsingDataPoolForAllPublisher, (), (override));
     MOCK_METHOD(int, CollectValue, (std::string name, std::string id, MetricUint32& outLog), (override));
     MOCK_METHOD(list<MetricUint32>, CollectList, (std::string name), (override));
 };

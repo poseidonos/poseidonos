@@ -46,18 +46,19 @@
 
 namespace pos
 {
+class TelemetryPublisher;
 class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
     SegmentCtx(void) = default;
-    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
-    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
         BitMapMutex* segmentBitmap,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
-    explicit SegmentCtx(RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
+    explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -127,6 +128,7 @@ private:
     SegmentLock* segStateLocks;
 
     RebuildCtx* rebuildCtx;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

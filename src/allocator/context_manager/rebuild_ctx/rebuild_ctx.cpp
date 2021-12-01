@@ -37,10 +37,11 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
+RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
 : addrInfo(info),
   ctxStoredVersion(0),
   ctxDirtyVersion(0),
@@ -48,6 +49,7 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
   targetSegmentCount(0),
   currentTarget(UINT32_MAX),
   allocatorCtx(allocCtx),
+  tp(tp_),
   initialized(false)
 {
     if (header != nullptr)
@@ -64,8 +66,8 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
         ctxHeader.numTargetSegments = 0;
     }
 }
-RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
-: RebuildCtx(nullptr, allocCtx, info)
+RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
+: RebuildCtx(tp, nullptr, allocCtx, info)
 {
 }
 

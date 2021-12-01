@@ -52,6 +52,7 @@ namespace pos
 {
 class IStateControl;
 class MetaFs;
+class TelemetryPublisher;
 
 enum VolState
 {
@@ -102,8 +103,8 @@ public:
 class Mapper : public IMapFlush, public IMountSequence, public IMapperVolumeEventHandler, public IVSAMap
 {
 public:
-    Mapper(MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan, StripeMapManager* stripeMan, ReverseMapManager* revMapMan, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
-    Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_);
+    Mapper(TelemetryPublisher* tp, MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan, StripeMapManager* stripeMan, ReverseMapManager* revMapMan, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
+    Mapper(TelemetryPublisher* tp, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
     virtual ~Mapper(void);
 
     virtual int Init(void);
@@ -162,9 +163,12 @@ private:
     ReverseMapManager* reverseMapManager;
     MapperWbt* mapperWbt;
     MetaFs* metaFs;
+    TelemetryPublisher* tp;
 
     bool isInitialized;
     VolumeMountState volState[MAX_VOLUME_COUNT];
+    std::atomic<uint32_t> numMapLoadedVol;
+    std::atomic<uint32_t> numMountedVol;
     std::string arrayName;
 };
 

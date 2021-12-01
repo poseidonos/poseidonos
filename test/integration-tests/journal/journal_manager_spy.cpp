@@ -21,7 +21,7 @@ using ::testing::NiceMock;
 namespace pos
 {
 JournalManagerSpy::JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub, std::string logFileName)
-: JournalManager(array, stateSub)
+: JournalManager(nullptr, array, stateSub)
 {
     delete logGroupReleaser;
     logGroupReleaser = new LogGroupReleaserSpy();

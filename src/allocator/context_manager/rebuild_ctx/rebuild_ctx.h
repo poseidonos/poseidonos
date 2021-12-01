@@ -44,12 +44,14 @@
 
 namespace pos
 {
+class TelemetryPublisher;
+
 class RebuildCtx : public IAllocatorFileIoClient
 {
 public:
     RebuildCtx(void) = default;
-    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info); // for UT
-    RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info);
+    RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info); // for UT
+    RebuildCtx(TelemetryPublisher* tp_, AllocatorCtx* allocCtx, AllocatorAddressInfo* info);
     virtual ~RebuildCtx(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -96,6 +98,7 @@ private:
     std::mutex rebuildLock;
 
     AllocatorCtx* allocatorCtx;
+    TelemetryPublisher* tp;
     bool initialized;
 };
 

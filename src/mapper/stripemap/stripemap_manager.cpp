@@ -37,18 +37,20 @@
 #include "src/mapper/stripemap/stripemap_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 #include <string>
 #include <tuple>
 
 namespace pos
 {
-StripeMapManager::StripeMapManager(StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info)
+StripeMapManager::StripeMapManager(TelemetryPublisher* tp_, StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info)
 : stripeMap(cont),
   addrInfo(info),
   numLoadIssuedCount(0),
   numWriteIssuedCount(0),
-  callback(nullptr)
+  callback(nullptr),
+  tp(tp_)
 {
     eventScheduler = eventSched;
     if (eventScheduler == nullptr)
@@ -58,8 +60,8 @@ StripeMapManager::StripeMapManager(StripeMapContent* cont, EventScheduler* event
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }
 
-StripeMapManager::StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info)
-: StripeMapManager(nullptr, eventSched, info)
+StripeMapManager::StripeMapManager(TelemetryPublisher* tp_, EventScheduler* eventSched, MapperAddressInfo* info)
+: StripeMapManager(tp_, nullptr, eventSched, info)
 {
     eventScheduler = eventSched;
     if (eventScheduler == nullptr)
@@ -89,11 +91,13 @@ StripeMapManager::Init(void)
     {
         EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
         numWriteIssuedCount++;
+        tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
         POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Flush Header, array:{}", addrInfo->GetArrayName());
         ret = stripeMap->FlushHeader(eventStripeMap);
         if (ret < 0)
         {
             numWriteIssuedCount--;
+            tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StripeMap] Failed to Initial Store StripeMap File, array:{}", addrInfo->GetArrayName());
         }
         else
@@ -159,11 +163,13 @@ StripeMapManager::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr cb)
     callback = cb;
     EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
     numWriteIssuedCount++;
+    tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushDirtyPagesGiven] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
     int ret = stripeMap->FlushDirtyPagesGiven(dirtyPages, eventStripeMap);
     if (ret < 0)
     {
         numWriteIssuedCount--;
+        tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
         POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "[Mapper StripeMap FlushDirtyPagesGiven] failed to FlushMap for stripeMap Failed");
     }
     return ret;
@@ -182,11 +188,13 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
     callback = cb;
     EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
     numWriteIssuedCount++;
+    tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushTouchedPages] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
     int ret = stripeMap->FlushTouchedPages(eventStripeMap);
     if (ret < 0)
     {
         numWriteIssuedCount--;
+        tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
         POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "[Mapper StripeMap FlushTouchedPages] failed to FlushMap for stripeMap Failed");
     }
     return ret;
@@ -203,6 +211,7 @@ StripeMapManager::MapFlushDone(int mapId)
     }
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
+    tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
 }
 
 void

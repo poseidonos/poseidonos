@@ -44,13 +44,14 @@ namespace pos
 class IReverseMap;
 class IStripeMap;
 class BlockAllocationStatus;
+class TelemetryPublisher;
 
 class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
-    BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
 
@@ -103,6 +104,7 @@ protected: // for UT
     AllocatorCtx* allocCtx;
     IReverseMap* iReverseMap;
     IStripeMap* iStripeMap;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

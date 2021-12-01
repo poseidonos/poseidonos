@@ -82,15 +82,15 @@ TEST(TelemetryClient, CollectValue_TestData)
     telClient.RegisterPublisher("a", tp);
     telClient.StartPublisher("a");
     tp->StartUsingDataPool();
-    tp->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 10);
+    tp->PublishData("2", 10);
     MetricUint32 log;
     // when 1.
-    int ret = telClient.CollectValue("a", TEL002_ALCT_ALCTX_PENDINGIO_CNT, log);
+    int ret = telClient.CollectValue("a", "2", log);
     // then 1.
     EXPECT_EQ(0, ret);
     EXPECT_EQ(10, log.GetValue());
     // when 2.
-    ret = telClient.CollectValue("b", TEL002_ALCT_ALCTX_PENDINGIO_CNT, log);
+    ret = telClient.CollectValue("b", "2", log);
     // then 2.
     EXPECT_EQ(-1, ret);
     // when 3.
@@ -108,28 +108,28 @@ TEST(TelemetryClient, CollectList_TestData)
     telClient.RegisterPublisher("a", tp);
     telClient.StartPublisher("a");
 
-    tp->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 10);
-    tp->PublishData(TEL001_ALCT_FREE_SEG_CNT, 20);
-    tp->PublishData(TEL003_ALCT_GCVICTIM_SEG, 30);
-    tp->PublishData(TEL004_ALCT_GCMODE, 1);
+    tp->PublishData("2", 10);
+    tp->PublishData("1", 20);
+    tp->PublishData("3", 30);
+    tp->PublishData("$", 1);
     // when
     list<MetricUint32> retList = telClient.CollectList("a");
     // then
     for (auto& p : retList)
     {
-        if (p.GetId() == TEL002_ALCT_ALCTX_PENDINGIO_CNT)
+        if (p.GetId() == "2")
         {
             EXPECT_EQ(10, p.GetValue());
         }
-        else if (p.GetId() == TEL001_ALCT_FREE_SEG_CNT)
+        else if (p.GetId() == "1")
         {
             EXPECT_EQ(20, p.GetValue());
         }
-        else if (p.GetId() == TEL003_ALCT_GCVICTIM_SEG)
+        else if (p.GetId() == "3")
         {
             EXPECT_EQ(30, p.GetValue());
         }
-        else if (p.GetId() == TEL004_ALCT_GCMODE)
+        else if (p.GetId() == "4")
         {
             EXPECT_EQ(1, p.GetValue());
         }

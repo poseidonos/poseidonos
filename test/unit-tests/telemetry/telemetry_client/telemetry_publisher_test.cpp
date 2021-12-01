@@ -21,21 +21,21 @@ TEST(TelemetryPublisher, PublishData_TestUpdateAndCollectItem)
     // given 1.
     tp.StopPublishing();
     // when 1.
-    int ret = tp.PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 100);
+    int ret = tp.PublishData("2", 100);
     // then 1.
     EXPECT_EQ(-1, ret);
     // given 2.
     tp.StartPublishing();
     // when 2.
-    ret = tp.PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 200);
+    ret = tp.PublishData("2", 200);
     // then 2.
     EXPECT_EQ(0, ret);
     // given 3.
-    tp.PublishData(TEL001_ALCT_FREE_SEG_CNT, 10);
-    tp.PublishData(TEL001_ALCT_FREE_SEG_CNT, 9);
+    tp.PublishData("1", 10);
+    tp.PublishData("1", 9);
     MetricUint32 log;
     // when 3.
-    ret = tp.CollectData(TEL001_ALCT_FREE_SEG_CNT, log);
+    ret = tp.CollectData("1", log);
     // then 3.
     EXPECT_EQ(9, log.GetValue());
     // when 4.
@@ -71,19 +71,19 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
     tp.SetGlobalPublisher(igp);
     // given 1.
-    int ret = tp.PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, 100);
-    ret = tp.PublishData(TEL001_ALCT_FREE_SEG_CNT, 200);
+    int ret = tp.PublishData("2", 100);
+    ret = tp.PublishData("1", 200);
     // when 1.
-    ret = tp.PublishData(TEL004_ALCT_GCMODE, 3);
+    ret = tp.PublishData("4", 3);
     ret = tp.GetNumEntries();
     // then 1.
     EXPECT_EQ(2, ret);
     // when 2.
-    ret = tp.PublishData(TEL001_ALCT_FREE_SEG_CNT, 300);
+    ret = tp.PublishData("1", 300);
     // then 2.
     EXPECT_EQ(0, ret);
     MetricUint32 log;
-    tp.CollectData(TEL001_ALCT_FREE_SEG_CNT, log);
+    tp.CollectData("1", log);
     EXPECT_EQ(300, log.GetValue());
     tp.StopUsingDataPool();
 }

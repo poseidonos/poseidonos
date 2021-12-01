@@ -84,8 +84,8 @@ Map::AllocateMpage(uint64_t pageNr)
     if (mPageArr[pageNr].data != nullptr)
     {
         POS_TRACE_ERROR(EID(MPAGE_ALREADY_EXIST),
-            "mpage exists but tried to allocate, pageNr:{} Mpage.data:{0:x}", pageNr,
-            mPageArr[pageNr].data);
+            "mpage exists but tried to allocate, pageNr:{} Mpage.data:{}", pageNr,
+            *((uint32_t*)mPageArr[pageNr].data));
         return nullptr;
     }
 

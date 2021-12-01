@@ -47,13 +47,14 @@
 namespace pos
 {
 class EventScheduler;
+class TelemetryPublisher;
 
 class StripeMapManager : public IMapManagerInternal, public IStripeMap
 {
 public:
     StripeMapManager(void) = default;
-    StripeMapManager(StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info);
-    StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info);
+    StripeMapManager(TelemetryPublisher* tp_, StripeMapContent* cont, EventScheduler* eventSched, MapperAddressInfo* info);
+    StripeMapManager(TelemetryPublisher* tp_, EventScheduler* eventSched, MapperAddressInfo* info);
     virtual ~StripeMapManager(void);
 
     virtual int Init(void);
@@ -92,6 +93,7 @@ private:
 
     EventSmartPtr callback;
     EventScheduler* eventScheduler;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

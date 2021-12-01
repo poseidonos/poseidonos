@@ -53,6 +53,7 @@
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -67,7 +68,8 @@ class JournalManagerTestFixture : public ::testing::Test
 {
 public:
     JournalManagerTestFixture(void)
-    : config(nullptr),
+    : tp(nullptr),
+      config(nullptr),
       statusProvider(nullptr),
       logWriteHandler(nullptr),
       logWriteContextFactory(nullptr),
@@ -107,8 +109,9 @@ public:
         callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
+        tp = new NiceMock<MockTelemetryPublisher>;
 
-        journal = new JournalManager(config, statusProvider,
+        journal = new JournalManager(tp, config, statusProvider,
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
@@ -144,6 +147,7 @@ protected:
     NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
+    NiceMock<MockTelemetryPublisher>* tp;
 };
 
 TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
@@ -275,7 +279,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(nullptr, config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization

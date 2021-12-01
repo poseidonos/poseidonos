@@ -60,7 +60,7 @@ class Allocator : public IAllocatorWbt, public IMountSequence
 {
 public:
     Allocator(void) = default;
-    Allocator(AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
+    Allocator(TelemetryPublisher* telPublisher, AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
         WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
     Allocator(TelemetryPublisher* telPublisher, IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
@@ -100,6 +100,7 @@ private:
 
     IArrayInfo* iArrayInfo;
     IStateControl* iStateControl;
+    TelemetryPublisher* tp;
     std::string arrayName;
 };
 
