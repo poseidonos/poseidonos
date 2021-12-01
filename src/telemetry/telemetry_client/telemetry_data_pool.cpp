@@ -43,6 +43,7 @@ TelemetryDataPool::TelemetryDataPool(void)
 
 TelemetryDataPool::~TelemetryDataPool(void)
 {
+    pool.clear();
 }
 
 void
