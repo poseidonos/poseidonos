@@ -830,12 +830,13 @@ QosManager::GetNumberOfArrays(void)
 void
 QosManager::UpdateArrayMap(std::string arrayName)
 {
+    if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+    {
+        return;
+    }
     if (currentNumberOfArrays >= MAX_ARRAY_COUNT)
     {
         POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::QOS_MAX_ARRAYS_EXCEEDED), "Trying to create more arrays than maximum possible arrays");
-    }
-    if (arrayNameMap.find(arrayName) != arrayNameMap.end())
-    {
         return;
     }
     else
