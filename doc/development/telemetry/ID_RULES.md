@@ -44,5 +44,21 @@ MetaFS ID Range : 40000 ~ 49999
 ## **Volume**
 Volume ID Range : 50000 ~ 59999
 
+50000 ReadIops
+
+50001 ReadBandwidth
+
+50002 ReadLatencyMean
+
+50003 ReadLatencyMax
+
+50010 WriteIops
+
+50011 WriteBandwidth
+
+50012 WriteLatencyMean
+
+50013 WriteLatencyMax
+
 ---
 ---
