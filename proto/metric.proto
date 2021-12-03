@@ -1,0 +1,61 @@
+syntax="proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pos.telemetry";
+
+enum MetricTypes {
+  COUNTER = 0;
+  GUAGE = 1;
+  HISTOGRAM = 2;
+}
+
+service MetricManager {
+  rpc MetricPublish(MetricPublishRequest) returns (MetricPublishResponse) {}
+  rpc MetricCollect(MetricCollectRequest) returns (MetricCollectResponse) {}
+}
+
+message MetricPublishRequest
+{
+    repeated Metric metrics = 1;
+}
+
+message MetricPublishResponse
+{
+    int64 totalReceivedMetrics = 1;
+}
+
+message MetricCollectRequest
+{
+}
+
+message MetricCollectResponse
+{
+    repeated Metric metrics = 1;
+}
+
+message Metric
+{
+  MetricTypes type = 1;
+  google.protobuf.Timestamp time = 2;
+  string name = 3;
+  MetricData value = 4;
+}
+message MetricData
+{
+    optional HistogramData histogramData = 1;
+    optional uint64 counterData = 2;
+    optional int64 guageData = 3;
+}
+
+message HistogramData
+{
+  message HistogramBucket
+  {
+    string le = 1; //upper inclusive bound
+    uint64 value = 2;
+  }
+  repeated HistogramBucket buckets = 2;
+  int64 sum = 3;
+  uint64 count = 4;
+}
