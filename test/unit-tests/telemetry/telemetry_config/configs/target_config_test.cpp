@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -49,8 +49,8 @@ TEST(TargetConfig, Update_testIfTargetConfigCanContainOwnValues0)
     std::string test2 = "port";
     uint64_t test2_value = 1234;
 
-    EXPECT_EQ(target.UpdateConfig(test1, test1_value), true);
-    EXPECT_EQ(target.UpdateConfig(test2, test2_value), true);
+    EXPECT_EQ(target.UpdateConfig(TelemetryConfigType::Client_Target, test1, test1_value), true);
+    EXPECT_EQ(target.UpdateConfig(TelemetryConfigType::Client_Target, test2, test2_value), true);
 
     EXPECT_EQ(target.GetIp(), test1_value);
     EXPECT_EQ(target.GetPort(), test2_value);
@@ -65,8 +65,8 @@ TEST(TargetConfig, Update_testIfTargetConfigCanContainOwnValues1)
     std::string test2 = "port";
     uint64_t test2_value = 1234;
 
-    EXPECT_EQ(target->UpdateConfig(test1, test1_value), true);
-    EXPECT_EQ(target->UpdateConfig(test2, test2_value), true);
+    EXPECT_EQ(target->UpdateConfig(TelemetryConfigType::Client_Target, test1, test1_value), true);
+    EXPECT_EQ(target->UpdateConfig(TelemetryConfigType::Client_Target, test2, test2_value), true);
 
     EXPECT_EQ(target->GetIp(), test1_value);
     EXPECT_EQ(target->GetPort(), test2_value);

@@ -33,6 +33,7 @@
 #pragma once
 #include "src/telemetry/telemetry_client/grpc_global_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_config/telemetry_config.h"
 #include <list>
 #include <map>
 #include <memory>
@@ -43,7 +44,7 @@ namespace pos
 {
 class GrpcGlobalPublisher;
 
-class TelemetryClient
+class TelemetryClient : public ConfigObserver
 {
 public:
     TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_);
@@ -60,6 +61,7 @@ public:
     virtual bool StopUsingDataPool(std::string name);
     virtual bool StartUsingDataPoolForAllPublisher(void);
     virtual bool StopUsingDataPoolForAllPublisher(void);
+    virtual bool Notify(std::string key, std::string value);
 
     virtual int CollectValue(std::string name, std::string id, MetricUint32& outLog);
     virtual list<MetricUint32> CollectList(std::string name);

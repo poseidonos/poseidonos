@@ -91,16 +91,33 @@ TelemetryConfig::~TelemetryConfig(void)
 }
 
 bool
-TelemetryConfig::Register(std::string key, ConfigObserver* observer)
+TelemetryConfig::Register(TelemetryConfigType type, std::string key, ConfigObserver* observer)
 {
-    if (true == _Find(key, observer))
+    std::string newKey = GetKey(type, key);
+
+    if (true == _Find(newKey, observer))
     {
         return false;
     }
 
-    observers.insert({key, observer});
+    observers.insert({newKey, observer});
 
     return true;
+}
+
+bool
+TelemetryConfig::RequestToNotify(TelemetryConfigType type, std::string key, std::string value)
+{
+    std::string newKey = GetKey(type, key);
+    bool existed = false;
+
+    for (auto it = observers.lower_bound(newKey); it != observers.upper_bound(newKey); ++it)
+    {
+        it->second->Notify(key, value);
+        existed = true;
+    }
+
+    return existed;
 }
 
 void
@@ -130,12 +147,16 @@ TelemetryConfig::RemoveFile(std::string path, std::string fileName)
     remove(filePath.c_str());
 }
 
+std::string
+TelemetryConfig::GetKey(TelemetryConfigType type, std::string key)
+{
+    return (to_string(type) + "|" + key);
+}
+
 bool
 TelemetryConfig::_Find(std::string key, ConfigObserver* observer)
 {
-    std::multimap<std::string, ConfigObserver*>& mm = observers;
-
-    for (auto it = mm.lower_bound(key); it != mm.upper_bound(key); ++it)
+    for (auto it = observers.lower_bound(key); it != observers.upper_bound(key); ++it)
     {
         if (it->second == observer)
         {

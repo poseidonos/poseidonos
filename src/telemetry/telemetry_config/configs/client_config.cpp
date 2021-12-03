@@ -42,6 +42,7 @@ namespace pos
 {
 ClientConfig::ClientConfig(void)
 {
+    this->type = type;
     values.clear();
 }
 
@@ -56,27 +57,27 @@ ClientConfig::Init(YAML::Node& node)
     {
         std::string key = "ip";
         std::string value = node["target"][key].as<std::string>();
-        target.UpdateConfig(key, value);
+        target.UpdateConfig(TelemetryConfigType::Client_Target, key, value);
 
         key = "port";
         value = node["target"][key].as<std::string>();
-        target.UpdateConfig(key, value);
+        target.UpdateConfig(TelemetryConfigType::Client_Target, key, value);
 
         key = "enabled";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
 
         key = "rate_limit";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
 
         key = "timeout_sec";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
 
         key = "circuit_break_policy";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
     }
     catch (YAML::BadConversion& e)
     {

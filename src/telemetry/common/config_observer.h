@@ -41,8 +41,5 @@ class ConfigObserver
 {
 public:
     virtual bool Notify(std::string key, std::string value) = 0;
-
-protected:
-    std::unordered_set<std::string> keys;
 };
 } // namespace pos

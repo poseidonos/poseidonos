@@ -52,18 +52,18 @@ TEST(ClientConfig, Update_testIfClientConfigCanContainOwnValues)
 
     std::string key = "rate_limit";
     uint64_t value_int = 10;
-    client.UpdateConfig(key, value_int);
+    client.UpdateConfig(TelemetryConfigType::Client, key, value_int);
 
     key = "timeout_sec";
     value_int = 1;
-    client.UpdateConfig(key, value_int);
+    client.UpdateConfig(TelemetryConfigType::Client, key, value_int);
 
     key = "circuit_break_policy";
     std::string value_str = "circuit_break_policy";
-    client.UpdateConfig(key, value_str);
+    client.UpdateConfig(TelemetryConfigType::Client, key, value_str);
 
     key = "enabled";
-    client.UpdateConfig(key, true);
+    client.UpdateConfig(TelemetryConfigType::Client, key, true);
 
     EXPECT_EQ(client.GetRateLimit(), 10);
     EXPECT_EQ(client.GetTimeoutSec(), 1);
@@ -76,11 +76,11 @@ TEST(ClientConfig, Update_testIfClientConfigCanUpdateValue)
     ClientConfig client;
 
     std::string key = "enabled";
-    client.UpdateConfig(key, true);
+    client.UpdateConfig(TelemetryConfigType::Client, key, true);
 
     EXPECT_EQ(client.IsEnabled(), true);
 
-    client.UpdateConfig(key, false);
+    client.UpdateConfig(TelemetryConfigType::Client, key, false);
 
     EXPECT_EQ(client.IsEnabled(), false);
 }

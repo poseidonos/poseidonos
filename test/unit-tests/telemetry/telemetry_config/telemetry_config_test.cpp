@@ -89,15 +89,35 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCanBeAddedTwiceWith
     std::string key3 = "key3";
     std::string key4 = "key4";
 
-    EXPECT_EQ(config->Register(key1, observer), true);
-    EXPECT_EQ(config->Register(key2, observer), true);
-    EXPECT_EQ(config->Register(key3, observer), true);
-    EXPECT_EQ(config->Register(key3, observer2), true);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key1, observer), true);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key2, observer), true);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key3, observer), true);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key3, observer2), true);
 
-    EXPECT_EQ(oMap.count(key1), 1);
-    EXPECT_EQ(oMap.count(key2), 1);
-    EXPECT_EQ(oMap.count(key3), 2);
-    EXPECT_EQ(oMap.count(key4), 0);
+    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key1)), 1);
+    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key2)), 1);
+    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key3)), 2);
+    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key4)), 0);
+
+    delete observer;
+}
+
+TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotification)
+{
+    MockConfigObserver* observer = new MockConfigObserver();
+    ClientConfig client;
+    std::string key = "enabled";
+
+    TelemetryConfigSingleton::ResetInstance();
+    EXPECT_EQ(TelemetryConfigSingleton::Instance()->Register(TelemetryConfigType::Client, key, observer), true);
+
+    // config won't call the observer due to last flag
+    client.UpdateConfig(TelemetryConfigType::Client, key, true, false);
+
+    EXPECT_CALL(*observer, Notify);
+
+    // config will call the observer
+    client.UpdateConfig(TelemetryConfigType::Client, key, true, true);
 
     delete observer;
 }
@@ -109,8 +129,8 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCannotBeRegisteredT
 
     std::string key = "key";
 
-    EXPECT_EQ(config->Register(key, observer), true);
-    EXPECT_EQ(config->Register(key, observer), false);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key, observer), true);
+    EXPECT_EQ(config->Register(TelemetryConfigType::Client, key, observer), false);
 
     delete observer;
 }

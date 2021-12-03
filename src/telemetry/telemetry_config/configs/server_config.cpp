@@ -42,6 +42,7 @@ namespace pos
 {
 ServerConfig::ServerConfig(void)
 {
+    this->type = type;
     values.clear();
 }
 
@@ -56,39 +57,39 @@ ServerConfig::Init(YAML::Node& node)
     {
         std::string key = "counters";
         std::string value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "histograms";
         value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "gauges";
         value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "latencies";
         value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "typed_objects";
         value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "influxdb_rows";
         value = node["buffer_size"][key].as<std::string>();
-        bufferSize.UpdateConfig(key, value);
+        bufferSize.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
         key = "ip";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
 
         key = "port";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
 
         key = "enabled";
         value = node[key].as<std::string>();
-        UpdateConfig(key, value);
+        UpdateConfig(type, key, value);
     }
     catch (YAML::BadConversion& e)
     {

@@ -40,65 +40,34 @@
 
 namespace pos
 {
+enum TelemetryConfigType
+{
+    Client,
+    Client_Target,
+    Server,
+    Server_BufferSize,
+    Max
+};
+
 class ConfigGrain
 {
 public:
-    ConfigGrain(void)
-    {
-        values.clear();
-    }
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-    virtual ~ConfigGrain(void)
-    {
-    }
-// LCOV_EXCL_STOP
+    ConfigGrain(void);
+    virtual ~ConfigGrain(void);
 
-    virtual bool UpdateConfig(std::string key, std::string value)
-    {
-        if (values.count(key))
-            values.erase(key);
-
-        auto result = values.insert({ key, value });
-        return result.second;
-    }
-
-    virtual bool UpdateConfig(std::string key, uint64_t value)
-    {
-        if (values.count(key))
-            values.erase(key);
-
-        auto result = values.insert({ key, std::to_string(value) });
-        return result.second;
-    }
-
-    virtual bool UpdateConfig(std::string key, bool value)
-    {
-        std::string str = value ? "true" : "false";
-
-        if (values.count(key))
-            values.erase(key);
-
-        auto result = values.insert({ key, str });
-        return result.second;
-    }
+    virtual bool UpdateConfig(TelemetryConfigType type, std::string key, std::string value, bool notify = false);
+    virtual bool UpdateConfig(TelemetryConfigType type, std::string key, uint64_t value, bool notify = false);
+    virtual bool UpdateConfig(TelemetryConfigType type, std::string key, bool value, bool notify = false);
 
     // only for test
-    std::unordered_map<std::string, std::string>& GetValues(void)
-    {
-        return values;
-    }
+    std::unordered_map<std::string, std::string>& GetValues(void);
 
     static const std::string DEFAULT_VALUE;
 
 protected:
-    std::string _GetValue(std::string key)
-    {
-        if (values.count(key))
-            return values[key];
-        return DEFAULT_YAML_VALUE;
-    }
+    std::string _GetValue(std::string key);
 
     std::unordered_map<std::string, std::string> values;
+    TelemetryConfigType type;
 };
 } // namespace pos

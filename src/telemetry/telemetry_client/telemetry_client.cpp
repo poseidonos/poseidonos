@@ -41,6 +41,7 @@ namespace pos
 TelemetryClient::TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_)
 {
     globalPublisher = new GrpcGlobalPublisher(telemetryManager_, channel_);
+    TelemetryConfigSingleton::Instance()->Register(TelemetryConfigType::Client, "enabled", this);
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -193,4 +194,17 @@ TelemetryClient::CollectList(std::string name)
     return publisherList[name]->CollectAll();
 }
 
+bool
+TelemetryClient::Notify(std::string key, std::string value)
+{
+    if (0 == key.compare("enabled"))
+    {
+        if (0 == value.compare("true"))
+            StartAllPublisher();
+        else
+            StopAllPublisher();
+    }
+
+    return true;
+}
 } // namespace pos

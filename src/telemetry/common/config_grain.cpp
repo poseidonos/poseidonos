@@ -30,53 +30,82 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/start_telemetry_command.h"
-
-#include <vector>
-
-#include "src/array_mgmt/array_manager.h"
-#include "src/cli/cli_event_code.h"
-#include "src/cli/request_handler.h"
-#include "src/logger/logger.h"
-#include "src/mbr/mbr_info.h"
-#include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/common/config_grain.h"
 #include "src/telemetry/telemetry_config/telemetry_config.h"
 
-namespace pos_cli
+#include <string>
+
+namespace pos
 {
-StartTelemetryCommand::StartTelemetryCommand(void)
+ConfigGrain::ConfigGrain(void)
 {
+    type = TelemetryConfigType::Max;
+    values.clear();
 }
 
 // Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
 // LCOV_EXCL_START
-StartTelemetryCommand::~StartTelemetryCommand(void)
+ConfigGrain::~ConfigGrain(void)
 {
 }
 // LCOV_EXCL_STOP
 
-string
-StartTelemetryCommand::Execute(json& doc, string rid)
+bool
+ConfigGrain::UpdateConfig(TelemetryConfigType type, std::string key, std::string value, bool notify)
 {
-    JsonFormat jFormat;
-    JsonElement data("data");
+    if (values.count(key))
+        values.erase(key);
 
-    TelemetryClient* tc = TelemetryClientSingleton::Instance();
-    bool result = tc->StartAllPublisher();
-    if (!result)
-    {
-        return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
-            "Telemetry could not start ", data, GetPosInfo());
-    }
+    auto result = values.insert({ key, value });
 
-    TelemetryConfig* config = TelemetryConfigSingleton::Instance();
-    if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", true, true))
-    {
-        return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
-            "The config for telemetry client could not be set as true ", data, GetPosInfo());
-    }
+    if (notify)
+        TelemetryConfigSingleton::Instance()->RequestToNotify(type, key, value);
 
-    return jFormat.MakeResponse("STARTTELEMETRY", rid, SUCCESS,
-        "Telemetry has started ", data, GetPosInfo());
+    return result.second;
 }
-}; // namespace pos_cli
+
+bool
+ConfigGrain::UpdateConfig(TelemetryConfigType type, std::string key, uint64_t value, bool notify)
+{
+    if (values.count(key))
+        values.erase(key);
+
+    auto result = values.insert({ key, std::to_string(value) });
+
+    if (notify)
+        TelemetryConfigSingleton::Instance()->RequestToNotify(type, key, std::to_string(value));
+
+    return result.second;
+}
+
+bool
+ConfigGrain::UpdateConfig(TelemetryConfigType type, std::string key, bool value, bool notify)
+{
+    std::string str = value ? "true" : "false";
+
+    if (values.count(key))
+        values.erase(key);
+
+    auto result = values.insert({ key, str });
+
+    if (notify)
+        TelemetryConfigSingleton::Instance()->RequestToNotify(type, key, str);
+
+    return result.second;
+}
+
+// only for test
+std::unordered_map<std::string, std::string>&
+ConfigGrain::GetValues(void)
+{
+    return values;
+}
+
+std::string
+ConfigGrain::_GetValue(std::string key)
+{
+    if (values.count(key))
+        return values[key];
+    return DEFAULT_YAML_VALUE;
+}
+} // namespace pos

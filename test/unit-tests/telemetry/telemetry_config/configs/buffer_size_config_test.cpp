@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -52,22 +52,22 @@ TEST(BufferSizeConfig, Update_testIfBufferSizeConfigCanContainOwnValues)
 
     std::string key = "counters";
     uint64_t value = 10000;
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     key = "gauges";
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     key = "histograms";
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     key = "influxdb_rows";
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     key = "latencies";
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     key = "typed_objects";
-    obj.UpdateConfig(key, value);
+    obj.UpdateConfig(TelemetryConfigType::Server_BufferSize, key, value);
 
     EXPECT_EQ(obj.GetCounters(), value);
     EXPECT_EQ(obj.GetGauges(), value);

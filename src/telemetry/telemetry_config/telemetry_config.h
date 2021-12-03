@@ -51,7 +51,8 @@ public:
     TelemetryConfig(std::string path = "", std::string fileName = "");
     virtual ~TelemetryConfig(void);
 
-    virtual bool Register(std::string key, ConfigObserver* observer);
+    virtual bool Register(TelemetryConfigType type, std::string key, ConfigObserver* observer);
+    virtual bool RequestToNotify(TelemetryConfigType type, std::string key, std::string value);
 
     virtual ClientConfig& GetClient(void)
     {
@@ -76,6 +77,7 @@ public:
 
     virtual void CreateFile(std::string path, std::string fileName);
     virtual void RemoveFile(std::string path, std::string fileName);
+    virtual std::string GetKey(TelemetryConfigType type, std::string key);
 
     // only for test
     std::map<ConfigPriority, ConfigReader*>& GetReadersMap(void)

@@ -52,15 +52,15 @@ TEST(ServerConfig, Update_testIfServerConfigCanContainOwnValues)
 
     std::string key_1 = "ip";
     std::string value_1 = "10.10.10.10";
-    server.UpdateConfig(key_1, value_1);
+    server.UpdateConfig(TelemetryConfigType::Server, key_1, value_1);
 
     std::string key_2 = "port";
     uint64_t value_2 = 1234;
-    server.UpdateConfig(key_2, value_2);
+    server.UpdateConfig(TelemetryConfigType::Server, key_2, value_2);
 
     std::string key_3 = "enabled";
     bool value_3 = true;
-    server.UpdateConfig(key_3, value_3);
+    server.UpdateConfig(TelemetryConfigType::Server, key_3, value_3);
 
     EXPECT_EQ(server.GetIp(), value_1);
     EXPECT_EQ(server.GetPort(), value_2);
@@ -72,11 +72,11 @@ TEST(ServerConfig, Update_testIfClientConfigCanUpdateValue)
     ServerConfig server;
 
     std::string key = "enabled";
-    server.UpdateConfig(key, true);
+    server.UpdateConfig(TelemetryConfigType::Server, key, true);
 
     EXPECT_EQ(server.IsEnabled(), true);
 
-    server.UpdateConfig(key, false);
+    server.UpdateConfig(TelemetryConfigType::Server, key, false);
 
     EXPECT_EQ(server.IsEnabled(), false);
 }
