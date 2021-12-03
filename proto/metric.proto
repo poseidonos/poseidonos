@@ -40,7 +40,7 @@ message Metric
   google.protobuf.Timestamp time = 2;
   string name = 3;
   MetricData value = 4;
-  repeated AdditionalData additionalData = 5;
+  repeated Label labels = 5;
 }
 
 message MetricData
@@ -50,9 +50,9 @@ message MetricData
     optional int64 guageData = 3;
 }
 
-message AdditionalData
+message Label
 {
-  string key = 1;
+  string label = 1;
   string value = 2;
 }
 

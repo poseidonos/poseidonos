@@ -65,7 +65,7 @@ struct MetricCollectResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricCollectResponseDefaultTypeInternal _MetricCollectResponse_default_instance_;
 constexpr Metric::Metric(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : additionaldata_()
+  : labels_()
   , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , time_(nullptr)
   , value_(nullptr)
@@ -94,19 +94,19 @@ struct MetricDataDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricDataDefaultTypeInternal _MetricData_default_instance_;
-constexpr AdditionalData::AdditionalData(
+constexpr Label::Label(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : key_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : label_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , value_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
-struct AdditionalDataDefaultTypeInternal {
-  constexpr AdditionalDataDefaultTypeInternal()
+struct LabelDefaultTypeInternal {
+  constexpr LabelDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~AdditionalDataDefaultTypeInternal() {}
+  ~LabelDefaultTypeInternal() {}
   union {
-    AdditionalData _instance;
+    Label _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AdditionalDataDefaultTypeInternal _AdditionalData_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT LabelDefaultTypeInternal _Label_default_instance_;
 constexpr HistogramData_HistogramBucket::HistogramData_HistogramBucket(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : le_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -171,7 +171,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::Metric, time_),
   PROTOBUF_FIELD_OFFSET(::Metric, name_),
   PROTOBUF_FIELD_OFFSET(::Metric, value_),
-  PROTOBUF_FIELD_OFFSET(::Metric, additionaldata_),
+  PROTOBUF_FIELD_OFFSET(::Metric, labels_),
   PROTOBUF_FIELD_OFFSET(::MetricData, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::MetricData, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -184,12 +184,12 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   1,
   2,
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::AdditionalData, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Label, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::AdditionalData, key_),
-  PROTOBUF_FIELD_OFFSET(::AdditionalData, value_),
+  PROTOBUF_FIELD_OFFSET(::Label, label_),
+  PROTOBUF_FIELD_OFFSET(::Label, value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::HistogramData_HistogramBucket, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -213,7 +213,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 17, -1, sizeof(::MetricCollectResponse)},
   { 23, -1, sizeof(::Metric)},
   { 33, 41, sizeof(::MetricData)},
-  { 44, -1, sizeof(::AdditionalData)},
+  { 44, -1, sizeof(::Label)},
   { 51, -1, sizeof(::HistogramData_HistogramBucket)},
   { 58, -1, sizeof(::HistogramData)},
 };
@@ -225,7 +225,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricCollectResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_Metric_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricData_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_AdditionalData_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_Label_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_HistogramData_HistogramBucket_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_HistogramData_default_instance_),
 };
@@ -236,33 +236,32 @@ const char descriptor_table_protodef_metric_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "cs\030\001 \003(\0132\007.Metric\"5\n\025MetricPublishRespon"
   "se\022\034\n\024totalReceivedMetrics\030\001 \001(\003\"\026\n\024Metr"
   "icCollectRequest\"1\n\025MetricCollectRespons"
-  "e\022\030\n\007metrics\030\001 \003(\0132\007.Metric\"\241\001\n\006Metric\022\032"
+  "e\022\030\n\007metrics\030\001 \003(\0132\007.Metric\"\220\001\n\006Metric\022\032"
   "\n\004type\030\001 \001(\0162\014.MetricTypes\022(\n\004time\030\002 \001(\013"
   "2\032.google.protobuf.Timestamp\022\014\n\004name\030\003 \001"
-  "(\t\022\032\n\005value\030\004 \001(\0132\013.MetricData\022\'\n\016additi"
-  "onalData\030\005 \003(\0132\017.AdditionalData\"\232\001\n\nMetr"
-  "icData\022*\n\rhistogramData\030\001 \001(\0132\016.Histogra"
-  "mDataH\000\210\001\001\022\030\n\013counterData\030\002 \001(\004H\001\210\001\001\022\026\n\t"
-  "guageData\030\003 \001(\003H\002\210\001\001B\020\n\016_histogramDataB\016"
-  "\n\014_counterDataB\014\n\n_guageData\",\n\016Addition"
-  "alData\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\212\001\n\rH"
-  "istogramData\022/\n\007buckets\030\002 \003(\0132\036.Histogra"
-  "mData.HistogramBucket\022\013\n\003sum\030\003 \001(\003\022\r\n\005co"
-  "unt\030\004 \001(\004\032,\n\017HistogramBucket\022\n\n\002le\030\001 \001(\t"
-  "\022\r\n\005value\030\002 \001(\004*4\n\013MetricTypes\022\013\n\007COUNTE"
-  "R\020\000\022\t\n\005GUAGE\020\001\022\r\n\tHISTOGRAM\020\0022\223\001\n\rMetric"
-  "Manager\022@\n\rMetricPublish\022\025.MetricPublish"
-  "Request\032\026.MetricPublishResponse\"\000\022@\n\rMet"
-  "ricCollect\022\025.MetricCollectRequest\032\026.Metr"
-  "icCollectResponse\"\000B\017Z\rpos.telemetryb\006pr"
-  "oto3"
+  "(\t\022\032\n\005value\030\004 \001(\0132\013.MetricData\022\026\n\006labels"
+  "\030\005 \003(\0132\006.Label\"\232\001\n\nMetricData\022*\n\rhistogr"
+  "amData\030\001 \001(\0132\016.HistogramDataH\000\210\001\001\022\030\n\013cou"
+  "nterData\030\002 \001(\004H\001\210\001\001\022\026\n\tguageData\030\003 \001(\003H\002"
+  "\210\001\001B\020\n\016_histogramDataB\016\n\014_counterDataB\014\n"
+  "\n_guageData\"%\n\005Label\022\r\n\005label\030\001 \001(\t\022\r\n\005v"
+  "alue\030\002 \001(\t\"\212\001\n\rHistogramData\022/\n\007buckets\030"
+  "\002 \003(\0132\036.HistogramData.HistogramBucket\022\013\n"
+  "\003sum\030\003 \001(\003\022\r\n\005count\030\004 \001(\004\032,\n\017HistogramBu"
+  "cket\022\n\n\002le\030\001 \001(\t\022\r\n\005value\030\002 \001(\004*4\n\013Metri"
+  "cTypes\022\013\n\007COUNTER\020\000\022\t\n\005GUAGE\020\001\022\r\n\tHISTOG"
+  "RAM\020\0022\223\001\n\rMetricManager\022@\n\rMetricPublish"
+  "\022\025.MetricPublishRequest\032\026.MetricPublishR"
+  "esponse\"\000\022@\n\rMetricCollect\022\025.MetricColle"
+  "ctRequest\032\026.MetricCollectResponse\"\000B\017Z\rp"
+  "os.telemetryb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_metric_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2ftimestamp_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_metric_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto = {
-  false, false, 964, descriptor_table_protodef_metric_2eproto, "metric.proto", 
+  false, false, 940, descriptor_table_protodef_metric_2eproto, "metric.proto", 
   &descriptor_table_metric_2eproto_once, descriptor_table_metric_2eproto_deps, 1, 9,
   schemas, file_default_instances, TableStruct_metric_2eproto::offsets,
   file_level_metadata_metric_2eproto, file_level_enum_descriptors_metric_2eproto, file_level_service_descriptors_metric_2eproto,
@@ -1049,14 +1048,14 @@ void Metric::clear_time() {
 }
 Metric::Metric(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  additionaldata_(arena) {
+  labels_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:Metric)
 }
 Metric::Metric(const Metric& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
-      additionaldata_(from.additionaldata_) {
+      labels_(from.labels_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_name().empty()) {
@@ -1114,7 +1113,7 @@ void Metric::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  additionaldata_.Clear();
+  labels_.Clear();
   name_.ClearToEmpty();
   if (GetArena() == nullptr && time_ != nullptr) {
     delete time_;
@@ -1166,13 +1165,13 @@ const char* Metric::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated .AdditionalData additionalData = 5;
+      // repeated .Label labels = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr -= 1;
           do {
             ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_additionaldata(), ptr);
+            ptr = ctx->ParseMessage(_internal_add_labels(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
@@ -1239,12 +1238,12 @@ failure:
         4, _Internal::value(this), target, stream);
   }
 
-  // repeated .AdditionalData additionalData = 5;
+  // repeated .Label labels = 5;
   for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_additionaldata_size()); i < n; i++) {
+      n = static_cast<unsigned int>(this->_internal_labels_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, this->_internal_additionaldata(i), target, stream);
+      InternalWriteMessage(5, this->_internal_labels(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1263,9 +1262,9 @@ size_t Metric::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .AdditionalData additionalData = 5;
-  total_size += 1UL * this->_internal_additionaldata_size();
-  for (const auto& msg : this->additionaldata_) {
+  // repeated .Label labels = 5;
+  total_size += 1UL * this->_internal_labels_size();
+  for (const auto& msg : this->labels_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -1328,7 +1327,7 @@ void Metric::MergeFrom(const Metric& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  additionaldata_.MergeFrom(from.additionaldata_);
+  labels_.MergeFrom(from.labels_);
   if (from.name().size() > 0) {
     _internal_set_name(from._internal_name());
   }
@@ -1364,7 +1363,7 @@ bool Metric::IsInitialized() const {
 void Metric::InternalSwap(Metric* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  additionaldata_.InternalSwap(&other->additionaldata_);
+  labels_.InternalSwap(&other->labels_);
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(Metric, type_)
@@ -1674,22 +1673,22 @@ void MetricData::InternalSwap(MetricData* other) {
 
 // ===================================================================
 
-class AdditionalData::_Internal {
+class Label::_Internal {
  public:
 };
 
-AdditionalData::AdditionalData(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+Label::Label(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:AdditionalData)
+  // @@protoc_insertion_point(arena_constructor:Label)
 }
-AdditionalData::AdditionalData(const AdditionalData& from)
+Label::Label(const Label& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_key().empty()) {
-    key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_key(), 
+  label_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_label().empty()) {
+    label_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_label(), 
       GetArena());
   }
   value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -1697,60 +1696,60 @@ AdditionalData::AdditionalData(const AdditionalData& from)
     value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_value(), 
       GetArena());
   }
-  // @@protoc_insertion_point(copy_constructor:AdditionalData)
+  // @@protoc_insertion_point(copy_constructor:Label)
 }
 
-void AdditionalData::SharedCtor() {
-key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+void Label::SharedCtor() {
+label_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-AdditionalData::~AdditionalData() {
-  // @@protoc_insertion_point(destructor:AdditionalData)
+Label::~Label() {
+  // @@protoc_insertion_point(destructor:Label)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AdditionalData::SharedDtor() {
+void Label::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  key_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  label_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   value_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void AdditionalData::ArenaDtor(void* object) {
-  AdditionalData* _this = reinterpret_cast< AdditionalData* >(object);
+void Label::ArenaDtor(void* object) {
+  Label* _this = reinterpret_cast< Label* >(object);
   (void)_this;
 }
-void AdditionalData::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void Label::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void AdditionalData::SetCachedSize(int size) const {
+void Label::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void AdditionalData::Clear() {
-// @@protoc_insertion_point(message_clear_start:AdditionalData)
+void Label::Clear() {
+// @@protoc_insertion_point(message_clear_start:Label)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  key_.ClearToEmpty();
+  label_.ClearToEmpty();
   value_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AdditionalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Label::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // string key = 1;
+      // string label = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_key();
+          auto str = _internal_mutable_label();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "AdditionalData.key"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Label.label"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1759,7 +1758,7 @@ const char* AdditionalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_value();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "AdditionalData.value"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Label.value"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1785,20 +1784,20 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AdditionalData::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* Label::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:AdditionalData)
+  // @@protoc_insertion_point(serialize_to_array_start:Label)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string key = 1;
-  if (this->key().size() > 0) {
+  // string label = 1;
+  if (this->label().size() > 0) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_key().data(), static_cast<int>(this->_internal_key().length()),
+      this->_internal_label().data(), static_cast<int>(this->_internal_label().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "AdditionalData.key");
+      "Label.label");
     target = stream->WriteStringMaybeAliased(
-        1, this->_internal_key(), target);
+        1, this->_internal_label(), target);
   }
 
   // string value = 2;
@@ -1806,7 +1805,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_value().data(), static_cast<int>(this->_internal_value().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "AdditionalData.value");
+      "Label.value");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_value(), target);
   }
@@ -1815,23 +1814,23 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:AdditionalData)
+  // @@protoc_insertion_point(serialize_to_array_end:Label)
   return target;
 }
 
-size_t AdditionalData::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:AdditionalData)
+size_t Label::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Label)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string key = 1;
-  if (this->key().size() > 0) {
+  // string label = 1;
+  if (this->label().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_key());
+        this->_internal_label());
   }
 
   // string value = 2;
@@ -1850,62 +1849,62 @@ size_t AdditionalData::ByteSizeLong() const {
   return total_size;
 }
 
-void AdditionalData::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:AdditionalData)
+void Label::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Label)
   GOOGLE_DCHECK_NE(&from, this);
-  const AdditionalData* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AdditionalData>(
+  const Label* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Label>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:AdditionalData)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Label)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:AdditionalData)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Label)
     MergeFrom(*source);
   }
 }
 
-void AdditionalData::MergeFrom(const AdditionalData& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:AdditionalData)
+void Label::MergeFrom(const Label& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Label)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.key().size() > 0) {
-    _internal_set_key(from._internal_key());
+  if (from.label().size() > 0) {
+    _internal_set_label(from._internal_label());
   }
   if (from.value().size() > 0) {
     _internal_set_value(from._internal_value());
   }
 }
 
-void AdditionalData::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:AdditionalData)
+void Label::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Label)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void AdditionalData::CopyFrom(const AdditionalData& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:AdditionalData)
+void Label::CopyFrom(const Label& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Label)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool AdditionalData::IsInitialized() const {
+bool Label::IsInitialized() const {
   return true;
 }
 
-void AdditionalData::InternalSwap(AdditionalData* other) {
+void Label::InternalSwap(Label* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  key_.Swap(&other->key_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  label_.Swap(&other->label_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   value_.Swap(&other->value_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata AdditionalData::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata Label::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -2413,8 +2412,8 @@ template<> PROTOBUF_NOINLINE ::Metric* Arena::CreateMaybeMessage< ::Metric >(Are
 template<> PROTOBUF_NOINLINE ::MetricData* Arena::CreateMaybeMessage< ::MetricData >(Arena* arena) {
   return Arena::CreateMessageInternal< ::MetricData >(arena);
 }
-template<> PROTOBUF_NOINLINE ::AdditionalData* Arena::CreateMaybeMessage< ::AdditionalData >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::AdditionalData >(arena);
+template<> PROTOBUF_NOINLINE ::Label* Arena::CreateMaybeMessage< ::Label >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Label >(arena);
 }
 template<> PROTOBUF_NOINLINE ::HistogramData_HistogramBucket* Arena::CreateMaybeMessage< ::HistogramData_HistogramBucket >(Arena* arena) {
   return Arena::CreateMessageInternal< ::HistogramData_HistogramBucket >(arena);

@@ -56,15 +56,15 @@ struct TableStruct_metric_2eproto {
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_metric_2eproto_metadata_getter(int index);
-class AdditionalData;
-struct AdditionalDataDefaultTypeInternal;
-extern AdditionalDataDefaultTypeInternal _AdditionalData_default_instance_;
 class HistogramData;
 struct HistogramDataDefaultTypeInternal;
 extern HistogramDataDefaultTypeInternal _HistogramData_default_instance_;
 class HistogramData_HistogramBucket;
 struct HistogramData_HistogramBucketDefaultTypeInternal;
 extern HistogramData_HistogramBucketDefaultTypeInternal _HistogramData_HistogramBucket_default_instance_;
+class Label;
+struct LabelDefaultTypeInternal;
+extern LabelDefaultTypeInternal _Label_default_instance_;
 class Metric;
 struct MetricDefaultTypeInternal;
 extern MetricDefaultTypeInternal _Metric_default_instance_;
@@ -84,9 +84,9 @@ class MetricPublishResponse;
 struct MetricPublishResponseDefaultTypeInternal;
 extern MetricPublishResponseDefaultTypeInternal _MetricPublishResponse_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
-template<> ::AdditionalData* Arena::CreateMaybeMessage<::AdditionalData>(Arena*);
 template<> ::HistogramData* Arena::CreateMaybeMessage<::HistogramData>(Arena*);
 template<> ::HistogramData_HistogramBucket* Arena::CreateMaybeMessage<::HistogramData_HistogramBucket>(Arena*);
+template<> ::Label* Arena::CreateMaybeMessage<::Label>(Arena*);
 template<> ::Metric* Arena::CreateMaybeMessage<::Metric>(Arena*);
 template<> ::MetricCollectRequest* Arena::CreateMaybeMessage<::MetricCollectRequest>(Arena*);
 template<> ::MetricCollectResponse* Arena::CreateMaybeMessage<::MetricCollectResponse>(Arena*);
@@ -789,29 +789,29 @@ class Metric PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAdditionalDataFieldNumber = 5,
+    kLabelsFieldNumber = 5,
     kNameFieldNumber = 3,
     kTimeFieldNumber = 2,
     kValueFieldNumber = 4,
     kTypeFieldNumber = 1,
   };
-  // repeated .AdditionalData additionalData = 5;
-  int additionaldata_size() const;
+  // repeated .Label labels = 5;
+  int labels_size() const;
   private:
-  int _internal_additionaldata_size() const;
+  int _internal_labels_size() const;
   public:
-  void clear_additionaldata();
-  ::AdditionalData* mutable_additionaldata(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >*
-      mutable_additionaldata();
+  void clear_labels();
+  ::Label* mutable_labels(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label >*
+      mutable_labels();
   private:
-  const ::AdditionalData& _internal_additionaldata(int index) const;
-  ::AdditionalData* _internal_add_additionaldata();
+  const ::Label& _internal_labels(int index) const;
+  ::Label* _internal_add_labels();
   public:
-  const ::AdditionalData& additionaldata(int index) const;
-  ::AdditionalData* add_additionaldata();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >&
-      additionaldata() const;
+  const ::Label& labels(int index) const;
+  ::Label* add_labels();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label >&
+      labels() const;
 
   // string name = 3;
   void clear_name();
@@ -881,7 +881,7 @@ class Metric PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData > additionaldata_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label > labels_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   PROTOBUF_NAMESPACE_ID::Timestamp* time_;
   ::MetricData* value_;
@@ -1068,24 +1068,24 @@ class MetricData PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class AdditionalData PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:AdditionalData) */ {
+class Label PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Label) */ {
  public:
-  inline AdditionalData() : AdditionalData(nullptr) {}
-  virtual ~AdditionalData();
-  explicit constexpr AdditionalData(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline Label() : Label(nullptr) {}
+  virtual ~Label();
+  explicit constexpr Label(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  AdditionalData(const AdditionalData& from);
-  AdditionalData(AdditionalData&& from) noexcept
-    : AdditionalData() {
+  Label(const Label& from);
+  Label(Label&& from) noexcept
+    : Label() {
     *this = ::std::move(from);
   }
 
-  inline AdditionalData& operator=(const AdditionalData& from) {
+  inline Label& operator=(const Label& from) {
     CopyFrom(from);
     return *this;
   }
-  inline AdditionalData& operator=(AdditionalData&& from) noexcept {
+  inline Label& operator=(Label&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1103,20 +1103,20 @@ class AdditionalData PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const AdditionalData& default_instance() {
+  static const Label& default_instance() {
     return *internal_default_instance();
   }
-  static inline const AdditionalData* internal_default_instance() {
-    return reinterpret_cast<const AdditionalData*>(
-               &_AdditionalData_default_instance_);
+  static inline const Label* internal_default_instance() {
+    return reinterpret_cast<const Label*>(
+               &_Label_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     6;
 
-  friend void swap(AdditionalData& a, AdditionalData& b) {
+  friend void swap(Label& a, Label& b) {
     a.Swap(&b);
   }
-  inline void Swap(AdditionalData* other) {
+  inline void Swap(Label* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1124,7 +1124,7 @@ class AdditionalData PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(AdditionalData* other) {
+  void UnsafeArenaSwap(Label* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1132,17 +1132,17 @@ class AdditionalData PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline AdditionalData* New() const final {
-    return CreateMaybeMessage<AdditionalData>(nullptr);
+  inline Label* New() const final {
+    return CreateMaybeMessage<Label>(nullptr);
   }
 
-  AdditionalData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<AdditionalData>(arena);
+  Label* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Label>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const AdditionalData& from);
-  void MergeFrom(const AdditionalData& from);
+  void CopyFrom(const Label& from);
+  void MergeFrom(const Label& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1156,13 +1156,13 @@ class AdditionalData PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(AdditionalData* other);
+  void InternalSwap(Label* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "AdditionalData";
+    return "Label";
   }
   protected:
-  explicit AdditionalData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit Label(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1181,23 +1181,23 @@ class AdditionalData PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kKeyFieldNumber = 1,
+    kLabelFieldNumber = 1,
     kValueFieldNumber = 2,
   };
-  // string key = 1;
-  void clear_key();
-  const std::string& key() const;
-  void set_key(const std::string& value);
-  void set_key(std::string&& value);
-  void set_key(const char* value);
-  void set_key(const char* value, size_t size);
-  std::string* mutable_key();
-  std::string* release_key();
-  void set_allocated_key(std::string* key);
+  // string label = 1;
+  void clear_label();
+  const std::string& label() const;
+  void set_label(const std::string& value);
+  void set_label(std::string&& value);
+  void set_label(const char* value);
+  void set_label(const char* value, size_t size);
+  std::string* mutable_label();
+  std::string* release_label();
+  void set_allocated_label(std::string* label);
   private:
-  const std::string& _internal_key() const;
-  void _internal_set_key(const std::string& value);
-  std::string* _internal_mutable_key();
+  const std::string& _internal_label() const;
+  void _internal_set_label(const std::string& value);
+  std::string* _internal_mutable_label();
   public:
 
   // string value = 2;
@@ -1216,14 +1216,14 @@ class AdditionalData PROTOBUF_FINAL :
   std::string* _internal_mutable_value();
   public:
 
-  // @@protoc_insertion_point(class_scope:AdditionalData)
+  // @@protoc_insertion_point(class_scope:Label)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr label_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_metric_2eproto;
@@ -1919,43 +1919,43 @@ inline void Metric::set_allocated_value(::MetricData* value) {
   // @@protoc_insertion_point(field_set_allocated:Metric.value)
 }
 
-// repeated .AdditionalData additionalData = 5;
-inline int Metric::_internal_additionaldata_size() const {
-  return additionaldata_.size();
+// repeated .Label labels = 5;
+inline int Metric::_internal_labels_size() const {
+  return labels_.size();
 }
-inline int Metric::additionaldata_size() const {
-  return _internal_additionaldata_size();
+inline int Metric::labels_size() const {
+  return _internal_labels_size();
 }
-inline void Metric::clear_additionaldata() {
-  additionaldata_.Clear();
+inline void Metric::clear_labels() {
+  labels_.Clear();
 }
-inline ::AdditionalData* Metric::mutable_additionaldata(int index) {
-  // @@protoc_insertion_point(field_mutable:Metric.additionalData)
-  return additionaldata_.Mutable(index);
+inline ::Label* Metric::mutable_labels(int index) {
+  // @@protoc_insertion_point(field_mutable:Metric.labels)
+  return labels_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >*
-Metric::mutable_additionaldata() {
-  // @@protoc_insertion_point(field_mutable_list:Metric.additionalData)
-  return &additionaldata_;
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label >*
+Metric::mutable_labels() {
+  // @@protoc_insertion_point(field_mutable_list:Metric.labels)
+  return &labels_;
 }
-inline const ::AdditionalData& Metric::_internal_additionaldata(int index) const {
-  return additionaldata_.Get(index);
+inline const ::Label& Metric::_internal_labels(int index) const {
+  return labels_.Get(index);
 }
-inline const ::AdditionalData& Metric::additionaldata(int index) const {
-  // @@protoc_insertion_point(field_get:Metric.additionalData)
-  return _internal_additionaldata(index);
+inline const ::Label& Metric::labels(int index) const {
+  // @@protoc_insertion_point(field_get:Metric.labels)
+  return _internal_labels(index);
 }
-inline ::AdditionalData* Metric::_internal_add_additionaldata() {
-  return additionaldata_.Add();
+inline ::Label* Metric::_internal_add_labels() {
+  return labels_.Add();
 }
-inline ::AdditionalData* Metric::add_additionaldata() {
-  // @@protoc_insertion_point(field_add:Metric.additionalData)
-  return _internal_add_additionaldata();
+inline ::Label* Metric::add_labels() {
+  // @@protoc_insertion_point(field_add:Metric.labels)
+  return _internal_add_labels();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >&
-Metric::additionaldata() const {
-  // @@protoc_insertion_point(field_list:Metric.additionalData)
-  return additionaldata_;
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label >&
+Metric::labels() const {
+  // @@protoc_insertion_point(field_list:Metric.labels)
+  return labels_;
 }
 
 // -------------------------------------------------------------------
@@ -2106,120 +2106,120 @@ inline void MetricData::set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value) {
 
 // -------------------------------------------------------------------
 
-// AdditionalData
+// Label
 
-// string key = 1;
-inline void AdditionalData::clear_key() {
-  key_.ClearToEmpty();
+// string label = 1;
+inline void Label::clear_label() {
+  label_.ClearToEmpty();
 }
-inline const std::string& AdditionalData::key() const {
-  // @@protoc_insertion_point(field_get:AdditionalData.key)
-  return _internal_key();
+inline const std::string& Label::label() const {
+  // @@protoc_insertion_point(field_get:Label.label)
+  return _internal_label();
 }
-inline void AdditionalData::set_key(const std::string& value) {
-  _internal_set_key(value);
-  // @@protoc_insertion_point(field_set:AdditionalData.key)
+inline void Label::set_label(const std::string& value) {
+  _internal_set_label(value);
+  // @@protoc_insertion_point(field_set:Label.label)
 }
-inline std::string* AdditionalData::mutable_key() {
-  // @@protoc_insertion_point(field_mutable:AdditionalData.key)
-  return _internal_mutable_key();
+inline std::string* Label::mutable_label() {
+  // @@protoc_insertion_point(field_mutable:Label.label)
+  return _internal_mutable_label();
 }
-inline const std::string& AdditionalData::_internal_key() const {
-  return key_.Get();
+inline const std::string& Label::_internal_label() const {
+  return label_.Get();
 }
-inline void AdditionalData::_internal_set_key(const std::string& value) {
+inline void Label::_internal_set_label(const std::string& value) {
   
-  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+  label_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void AdditionalData::set_key(std::string&& value) {
+inline void Label::set_label(std::string&& value) {
   
-  key_.Set(
+  label_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:AdditionalData.key)
+  // @@protoc_insertion_point(field_set_rvalue:Label.label)
 }
-inline void AdditionalData::set_key(const char* value) {
+inline void Label::set_label(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:AdditionalData.key)
+  label_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Label.label)
 }
-inline void AdditionalData::set_key(const char* value,
+inline void Label::set_label(const char* value,
     size_t size) {
   
-  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+  label_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:AdditionalData.key)
+  // @@protoc_insertion_point(field_set_pointer:Label.label)
 }
-inline std::string* AdditionalData::_internal_mutable_key() {
+inline std::string* Label::_internal_mutable_label() {
   
-  return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+  return label_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* AdditionalData::release_key() {
-  // @@protoc_insertion_point(field_release:AdditionalData.key)
-  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* Label::release_label() {
+  // @@protoc_insertion_point(field_release:Label.label)
+  return label_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void AdditionalData::set_allocated_key(std::string* key) {
-  if (key != nullptr) {
+inline void Label::set_allocated_label(std::string* label) {
+  if (label != nullptr) {
     
   } else {
     
   }
-  key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
+  label_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), label,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:AdditionalData.key)
+  // @@protoc_insertion_point(field_set_allocated:Label.label)
 }
 
 // string value = 2;
-inline void AdditionalData::clear_value() {
+inline void Label::clear_value() {
   value_.ClearToEmpty();
 }
-inline const std::string& AdditionalData::value() const {
-  // @@protoc_insertion_point(field_get:AdditionalData.value)
+inline const std::string& Label::value() const {
+  // @@protoc_insertion_point(field_get:Label.value)
   return _internal_value();
 }
-inline void AdditionalData::set_value(const std::string& value) {
+inline void Label::set_value(const std::string& value) {
   _internal_set_value(value);
-  // @@protoc_insertion_point(field_set:AdditionalData.value)
+  // @@protoc_insertion_point(field_set:Label.value)
 }
-inline std::string* AdditionalData::mutable_value() {
-  // @@protoc_insertion_point(field_mutable:AdditionalData.value)
+inline std::string* Label::mutable_value() {
+  // @@protoc_insertion_point(field_mutable:Label.value)
   return _internal_mutable_value();
 }
-inline const std::string& AdditionalData::_internal_value() const {
+inline const std::string& Label::_internal_value() const {
   return value_.Get();
 }
-inline void AdditionalData::_internal_set_value(const std::string& value) {
+inline void Label::_internal_set_value(const std::string& value) {
   
   value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void AdditionalData::set_value(std::string&& value) {
+inline void Label::set_value(std::string&& value) {
   
   value_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:AdditionalData.value)
+  // @@protoc_insertion_point(field_set_rvalue:Label.value)
 }
-inline void AdditionalData::set_value(const char* value) {
+inline void Label::set_value(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:AdditionalData.value)
+  // @@protoc_insertion_point(field_set_char:Label.value)
 }
-inline void AdditionalData::set_value(const char* value,
+inline void Label::set_value(const char* value,
     size_t size) {
   
   value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:AdditionalData.value)
+  // @@protoc_insertion_point(field_set_pointer:Label.value)
 }
-inline std::string* AdditionalData::_internal_mutable_value() {
+inline std::string* Label::_internal_mutable_value() {
   
   return value_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* AdditionalData::release_value() {
-  // @@protoc_insertion_point(field_release:AdditionalData.value)
+inline std::string* Label::release_value() {
+  // @@protoc_insertion_point(field_release:Label.value)
   return value_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void AdditionalData::set_allocated_value(std::string* value) {
+inline void Label::set_allocated_value(std::string* value) {
   if (value != nullptr) {
     
   } else {
@@ -2227,7 +2227,7 @@ inline void AdditionalData::set_allocated_value(std::string* value) {
   }
   value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:AdditionalData.value)
+  // @@protoc_insertion_point(field_set_allocated:Label.value)
 }
 
 // -------------------------------------------------------------------
