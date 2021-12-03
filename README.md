@@ -253,7 +253,7 @@ Create a write buffer within DRAM using the device create command. This write bu
  
 This command will create write buffer with the total size of 8192 MB, the block size of 512 B, and the name of "uram0". The command will request a SPDK server to create a SPDK block device called "malloc bdev", which is a userspace ramdisk.
 ```bash
-root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 16777216 --block-size 512
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 8388608 --block-size 512
 ```
 
 - Note: the recommended size of uram0 may differ by environment. Please refer to "bdev" section in Learning POS Environment for further details.

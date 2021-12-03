@@ -40,7 +40,7 @@
                         {
                             "NAME": "uram0",
                             "TYPE": "uram",
-                            "NUM_BLOCKS": 16777216,
+                            "NUM_BLOCKS": 8388608,
                             "BLOCK_SIZE": 512,
                             "NUMA": 0
                         },
@@ -57,7 +57,7 @@
                         {
                             "NAME": "uram1",
                             "TYPE": "uram",
-                            "NUM_BLOCKS": 16777216,
+                            "NUM_BLOCKS": 8388608,
                             "BLOCK_SIZE": 512,
                             "NUMA": 1
                         },
