@@ -40,12 +40,20 @@ message Metric
   google.protobuf.Timestamp time = 2;
   string name = 3;
   MetricData value = 4;
+  repeated AdditionalData additionalData = 5;
 }
+
 message MetricData
 {
     optional HistogramData histogramData = 1;
     optional uint64 counterData = 2;
     optional int64 guageData = 3;
+}
+
+message AdditionalData
+{
+  string key = 1;
+  string value = 2;
 }
 
 message HistogramData

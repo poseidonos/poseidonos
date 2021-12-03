@@ -65,7 +65,8 @@ struct MetricCollectResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricCollectResponseDefaultTypeInternal _MetricCollectResponse_default_instance_;
 constexpr Metric::Metric(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : additionaldata_()
+  , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , time_(nullptr)
   , value_(nullptr)
   , type_(0)
@@ -93,6 +94,19 @@ struct MetricDataDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricDataDefaultTypeInternal _MetricData_default_instance_;
+constexpr AdditionalData::AdditionalData(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : key_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , value_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct AdditionalDataDefaultTypeInternal {
+  constexpr AdditionalDataDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~AdditionalDataDefaultTypeInternal() {}
+  union {
+    AdditionalData _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AdditionalDataDefaultTypeInternal _AdditionalData_default_instance_;
 constexpr HistogramData_HistogramBucket::HistogramData_HistogramBucket(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : le_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -120,7 +134,7 @@ struct HistogramDataDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT HistogramDataDefaultTypeInternal _HistogramData_default_instance_;
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_metric_2eproto[8];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_metric_2eproto[9];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_metric_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_metric_2eproto = nullptr;
 
@@ -157,6 +171,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::Metric, time_),
   PROTOBUF_FIELD_OFFSET(::Metric, name_),
   PROTOBUF_FIELD_OFFSET(::Metric, value_),
+  PROTOBUF_FIELD_OFFSET(::Metric, additionaldata_),
   PROTOBUF_FIELD_OFFSET(::MetricData, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::MetricData, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -168,6 +183,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   0,
   1,
   2,
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::AdditionalData, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::AdditionalData, key_),
+  PROTOBUF_FIELD_OFFSET(::AdditionalData, value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::HistogramData_HistogramBucket, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -190,9 +212,10 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 12, -1, sizeof(::MetricCollectRequest)},
   { 17, -1, sizeof(::MetricCollectResponse)},
   { 23, -1, sizeof(::Metric)},
-  { 32, 40, sizeof(::MetricData)},
-  { 43, -1, sizeof(::HistogramData_HistogramBucket)},
-  { 50, -1, sizeof(::HistogramData)},
+  { 33, 41, sizeof(::MetricData)},
+  { 44, -1, sizeof(::AdditionalData)},
+  { 51, -1, sizeof(::HistogramData_HistogramBucket)},
+  { 58, -1, sizeof(::HistogramData)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -202,6 +225,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricCollectResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_Metric_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricData_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_AdditionalData_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_HistogramData_HistogramBucket_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_HistogramData_default_instance_),
 };
@@ -212,31 +236,34 @@ const char descriptor_table_protodef_metric_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "cs\030\001 \003(\0132\007.Metric\"5\n\025MetricPublishRespon"
   "se\022\034\n\024totalReceivedMetrics\030\001 \001(\003\"\026\n\024Metr"
   "icCollectRequest\"1\n\025MetricCollectRespons"
-  "e\022\030\n\007metrics\030\001 \003(\0132\007.Metric\"x\n\006Metric\022\032\n"
-  "\004type\030\001 \001(\0162\014.MetricTypes\022(\n\004time\030\002 \001(\0132"
-  "\032.google.protobuf.Timestamp\022\014\n\004name\030\003 \001("
-  "\t\022\032\n\005value\030\004 \001(\0132\013.MetricData\"\232\001\n\nMetric"
-  "Data\022*\n\rhistogramData\030\001 \001(\0132\016.HistogramD"
-  "ataH\000\210\001\001\022\030\n\013counterData\030\002 \001(\004H\001\210\001\001\022\026\n\tgu"
-  "ageData\030\003 \001(\003H\002\210\001\001B\020\n\016_histogramDataB\016\n\014"
-  "_counterDataB\014\n\n_guageData\"\212\001\n\rHistogram"
-  "Data\022/\n\007buckets\030\002 \003(\0132\036.HistogramData.Hi"
-  "stogramBucket\022\013\n\003sum\030\003 \001(\003\022\r\n\005count\030\004 \001("
-  "\004\032,\n\017HistogramBucket\022\n\n\002le\030\001 \001(\t\022\r\n\005valu"
-  "e\030\002 \001(\004*4\n\013MetricTypes\022\013\n\007COUNTER\020\000\022\t\n\005G"
-  "UAGE\020\001\022\r\n\tHISTOGRAM\020\0022\223\001\n\rMetricManager\022"
-  "@\n\rMetricPublish\022\025.MetricPublishRequest\032"
-  "\026.MetricPublishResponse\"\000\022@\n\rMetricColle"
-  "ct\022\025.MetricCollectRequest\032\026.MetricCollec"
-  "tResponse\"\000B\017Z\rpos.telemetryb\006proto3"
+  "e\022\030\n\007metrics\030\001 \003(\0132\007.Metric\"\241\001\n\006Metric\022\032"
+  "\n\004type\030\001 \001(\0162\014.MetricTypes\022(\n\004time\030\002 \001(\013"
+  "2\032.google.protobuf.Timestamp\022\014\n\004name\030\003 \001"
+  "(\t\022\032\n\005value\030\004 \001(\0132\013.MetricData\022\'\n\016additi"
+  "onalData\030\005 \003(\0132\017.AdditionalData\"\232\001\n\nMetr"
+  "icData\022*\n\rhistogramData\030\001 \001(\0132\016.Histogra"
+  "mDataH\000\210\001\001\022\030\n\013counterData\030\002 \001(\004H\001\210\001\001\022\026\n\t"
+  "guageData\030\003 \001(\003H\002\210\001\001B\020\n\016_histogramDataB\016"
+  "\n\014_counterDataB\014\n\n_guageData\",\n\016Addition"
+  "alData\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\212\001\n\rH"
+  "istogramData\022/\n\007buckets\030\002 \003(\0132\036.Histogra"
+  "mData.HistogramBucket\022\013\n\003sum\030\003 \001(\003\022\r\n\005co"
+  "unt\030\004 \001(\004\032,\n\017HistogramBucket\022\n\n\002le\030\001 \001(\t"
+  "\022\r\n\005value\030\002 \001(\004*4\n\013MetricTypes\022\013\n\007COUNTE"
+  "R\020\000\022\t\n\005GUAGE\020\001\022\r\n\tHISTOGRAM\020\0022\223\001\n\rMetric"
+  "Manager\022@\n\rMetricPublish\022\025.MetricPublish"
+  "Request\032\026.MetricPublishResponse\"\000\022@\n\rMet"
+  "ricCollect\022\025.MetricCollectRequest\032\026.Metr"
+  "icCollectResponse\"\000B\017Z\rpos.telemetryb\006pr"
+  "oto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_metric_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2ftimestamp_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_metric_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto = {
-  false, false, 876, descriptor_table_protodef_metric_2eproto, "metric.proto", 
-  &descriptor_table_metric_2eproto_once, descriptor_table_metric_2eproto_deps, 1, 8,
+  false, false, 964, descriptor_table_protodef_metric_2eproto, "metric.proto", 
+  &descriptor_table_metric_2eproto_once, descriptor_table_metric_2eproto_deps, 1, 9,
   schemas, file_default_instances, TableStruct_metric_2eproto::offsets,
   file_level_metadata_metric_2eproto, file_level_enum_descriptors_metric_2eproto, file_level_service_descriptors_metric_2eproto,
 };
@@ -1021,13 +1048,15 @@ void Metric::clear_time() {
   time_ = nullptr;
 }
 Metric::Metric(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  additionaldata_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:Metric)
 }
 Metric::Metric(const Metric& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      additionaldata_(from.additionaldata_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_name().empty()) {
@@ -1085,6 +1114,7 @@ void Metric::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  additionaldata_.Clear();
   name_.ClearToEmpty();
   if (GetArena() == nullptr && time_ != nullptr) {
     delete time_;
@@ -1134,6 +1164,18 @@ const char* Metric::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_value(), ptr);
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .AdditionalData additionalData = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_additionaldata(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -1197,6 +1239,14 @@ failure:
         4, _Internal::value(this), target, stream);
   }
 
+  // repeated .AdditionalData additionalData = 5;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_additionaldata_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, this->_internal_additionaldata(i), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1212,6 +1262,13 @@ size_t Metric::ByteSizeLong() const {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // repeated .AdditionalData additionalData = 5;
+  total_size += 1UL * this->_internal_additionaldata_size();
+  for (const auto& msg : this->additionaldata_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
 
   // string name = 3;
   if (this->name().size() > 0) {
@@ -1271,6 +1328,7 @@ void Metric::MergeFrom(const Metric& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  additionaldata_.MergeFrom(from.additionaldata_);
   if (from.name().size() > 0) {
     _internal_set_name(from._internal_name());
   }
@@ -1306,6 +1364,7 @@ bool Metric::IsInitialized() const {
 void Metric::InternalSwap(Metric* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  additionaldata_.InternalSwap(&other->additionaldata_);
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(Metric, type_)
@@ -1609,6 +1668,244 @@ void MetricData::InternalSwap(MetricData* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata MetricData::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class AdditionalData::_Internal {
+ public:
+};
+
+AdditionalData::AdditionalData(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:AdditionalData)
+}
+AdditionalData::AdditionalData(const AdditionalData& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_key().empty()) {
+    key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_key(), 
+      GetArena());
+  }
+  value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_value().empty()) {
+    value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_value(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:AdditionalData)
+}
+
+void AdditionalData::SharedCtor() {
+key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+AdditionalData::~AdditionalData() {
+  // @@protoc_insertion_point(destructor:AdditionalData)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void AdditionalData::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  key_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  value_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void AdditionalData::ArenaDtor(void* object) {
+  AdditionalData* _this = reinterpret_cast< AdditionalData* >(object);
+  (void)_this;
+}
+void AdditionalData::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void AdditionalData::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void AdditionalData::Clear() {
+// @@protoc_insertion_point(message_clear_start:AdditionalData)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  key_.ClearToEmpty();
+  value_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* AdditionalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string key = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_key();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "AdditionalData.key"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_value();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "AdditionalData.value"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* AdditionalData::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:AdditionalData)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string key = 1;
+  if (this->key().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_key().data(), static_cast<int>(this->_internal_key().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "AdditionalData.key");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_key(), target);
+  }
+
+  // string value = 2;
+  if (this->value().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_value().data(), static_cast<int>(this->_internal_value().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "AdditionalData.value");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:AdditionalData)
+  return target;
+}
+
+size_t AdditionalData::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:AdditionalData)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string key = 1;
+  if (this->key().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_key());
+  }
+
+  // string value = 2;
+  if (this->value().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_value());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void AdditionalData::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:AdditionalData)
+  GOOGLE_DCHECK_NE(&from, this);
+  const AdditionalData* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AdditionalData>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:AdditionalData)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:AdditionalData)
+    MergeFrom(*source);
+  }
+}
+
+void AdditionalData::MergeFrom(const AdditionalData& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:AdditionalData)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.key().size() > 0) {
+    _internal_set_key(from._internal_key());
+  }
+  if (from.value().size() > 0) {
+    _internal_set_value(from._internal_value());
+  }
+}
+
+void AdditionalData::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:AdditionalData)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void AdditionalData::CopyFrom(const AdditionalData& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:AdditionalData)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AdditionalData::IsInitialized() const {
+  return true;
+}
+
+void AdditionalData::InternalSwap(AdditionalData* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  key_.Swap(&other->key_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  value_.Swap(&other->value_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata AdditionalData::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -2115,6 +2412,9 @@ template<> PROTOBUF_NOINLINE ::Metric* Arena::CreateMaybeMessage< ::Metric >(Are
 }
 template<> PROTOBUF_NOINLINE ::MetricData* Arena::CreateMaybeMessage< ::MetricData >(Arena* arena) {
   return Arena::CreateMessageInternal< ::MetricData >(arena);
+}
+template<> PROTOBUF_NOINLINE ::AdditionalData* Arena::CreateMaybeMessage< ::AdditionalData >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::AdditionalData >(arena);
 }
 template<> PROTOBUF_NOINLINE ::HistogramData_HistogramBucket* Arena::CreateMaybeMessage< ::HistogramData_HistogramBucket >(Arena* arena) {
   return Arena::CreateMessageInternal< ::HistogramData_HistogramBucket >(arena);

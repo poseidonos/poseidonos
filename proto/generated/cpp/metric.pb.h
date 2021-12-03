@@ -48,7 +48,7 @@ struct TableStruct_metric_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[8]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[9]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -56,6 +56,9 @@ struct TableStruct_metric_2eproto {
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_metric_2eproto_metadata_getter(int index);
+class AdditionalData;
+struct AdditionalDataDefaultTypeInternal;
+extern AdditionalDataDefaultTypeInternal _AdditionalData_default_instance_;
 class HistogramData;
 struct HistogramDataDefaultTypeInternal;
 extern HistogramDataDefaultTypeInternal _HistogramData_default_instance_;
@@ -81,6 +84,7 @@ class MetricPublishResponse;
 struct MetricPublishResponseDefaultTypeInternal;
 extern MetricPublishResponseDefaultTypeInternal _MetricPublishResponse_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
+template<> ::AdditionalData* Arena::CreateMaybeMessage<::AdditionalData>(Arena*);
 template<> ::HistogramData* Arena::CreateMaybeMessage<::HistogramData>(Arena*);
 template<> ::HistogramData_HistogramBucket* Arena::CreateMaybeMessage<::HistogramData_HistogramBucket>(Arena*);
 template<> ::Metric* Arena::CreateMaybeMessage<::Metric>(Arena*);
@@ -785,11 +789,30 @@ class Metric PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kAdditionalDataFieldNumber = 5,
     kNameFieldNumber = 3,
     kTimeFieldNumber = 2,
     kValueFieldNumber = 4,
     kTypeFieldNumber = 1,
   };
+  // repeated .AdditionalData additionalData = 5;
+  int additionaldata_size() const;
+  private:
+  int _internal_additionaldata_size() const;
+  public:
+  void clear_additionaldata();
+  ::AdditionalData* mutable_additionaldata(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >*
+      mutable_additionaldata();
+  private:
+  const ::AdditionalData& _internal_additionaldata(int index) const;
+  ::AdditionalData* _internal_add_additionaldata();
+  public:
+  const ::AdditionalData& additionaldata(int index) const;
+  ::AdditionalData* add_additionaldata();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >&
+      additionaldata() const;
+
   // string name = 3;
   void clear_name();
   const std::string& name() const;
@@ -858,6 +881,7 @@ class Metric PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData > additionaldata_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   PROTOBUF_NAMESPACE_ID::Timestamp* time_;
   ::MetricData* value_;
@@ -1044,6 +1068,168 @@ class MetricData PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class AdditionalData PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:AdditionalData) */ {
+ public:
+  inline AdditionalData() : AdditionalData(nullptr) {}
+  virtual ~AdditionalData();
+  explicit constexpr AdditionalData(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AdditionalData(const AdditionalData& from);
+  AdditionalData(AdditionalData&& from) noexcept
+    : AdditionalData() {
+    *this = ::std::move(from);
+  }
+
+  inline AdditionalData& operator=(const AdditionalData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AdditionalData& operator=(AdditionalData&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AdditionalData& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AdditionalData* internal_default_instance() {
+    return reinterpret_cast<const AdditionalData*>(
+               &_AdditionalData_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(AdditionalData& a, AdditionalData& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AdditionalData* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AdditionalData* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AdditionalData* New() const final {
+    return CreateMaybeMessage<AdditionalData>(nullptr);
+  }
+
+  AdditionalData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AdditionalData>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AdditionalData& from);
+  void MergeFrom(const AdditionalData& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AdditionalData* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "AdditionalData";
+  }
+  protected:
+  explicit AdditionalData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_metric_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kKeyFieldNumber = 1,
+    kValueFieldNumber = 2,
+  };
+  // string key = 1;
+  void clear_key();
+  const std::string& key() const;
+  void set_key(const std::string& value);
+  void set_key(std::string&& value);
+  void set_key(const char* value);
+  void set_key(const char* value, size_t size);
+  std::string* mutable_key();
+  std::string* release_key();
+  void set_allocated_key(std::string* key);
+  private:
+  const std::string& _internal_key() const;
+  void _internal_set_key(const std::string& value);
+  std::string* _internal_mutable_key();
+  public:
+
+  // string value = 2;
+  void clear_value();
+  const std::string& value() const;
+  void set_value(const std::string& value);
+  void set_value(std::string&& value);
+  void set_value(const char* value);
+  void set_value(const char* value, size_t size);
+  std::string* mutable_value();
+  std::string* release_value();
+  void set_allocated_value(std::string* value);
+  private:
+  const std::string& _internal_value() const;
+  void _internal_set_value(const std::string& value);
+  std::string* _internal_mutable_value();
+  public:
+
+  // @@protoc_insertion_point(class_scope:AdditionalData)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_metric_2eproto;
+};
+// -------------------------------------------------------------------
+
 class HistogramData_HistogramBucket PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:HistogramData.HistogramBucket) */ {
  public:
@@ -1087,7 +1273,7 @@ class HistogramData_HistogramBucket PROTOBUF_FINAL :
                &_HistogramData_HistogramBucket_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(HistogramData_HistogramBucket& a, HistogramData_HistogramBucket& b) {
     a.Swap(&b);
@@ -1242,7 +1428,7 @@ class HistogramData PROTOBUF_FINAL :
                &_HistogramData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(HistogramData& a, HistogramData& b) {
     a.Swap(&b);
@@ -1733,6 +1919,45 @@ inline void Metric::set_allocated_value(::MetricData* value) {
   // @@protoc_insertion_point(field_set_allocated:Metric.value)
 }
 
+// repeated .AdditionalData additionalData = 5;
+inline int Metric::_internal_additionaldata_size() const {
+  return additionaldata_.size();
+}
+inline int Metric::additionaldata_size() const {
+  return _internal_additionaldata_size();
+}
+inline void Metric::clear_additionaldata() {
+  additionaldata_.Clear();
+}
+inline ::AdditionalData* Metric::mutable_additionaldata(int index) {
+  // @@protoc_insertion_point(field_mutable:Metric.additionalData)
+  return additionaldata_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >*
+Metric::mutable_additionaldata() {
+  // @@protoc_insertion_point(field_mutable_list:Metric.additionalData)
+  return &additionaldata_;
+}
+inline const ::AdditionalData& Metric::_internal_additionaldata(int index) const {
+  return additionaldata_.Get(index);
+}
+inline const ::AdditionalData& Metric::additionaldata(int index) const {
+  // @@protoc_insertion_point(field_get:Metric.additionalData)
+  return _internal_additionaldata(index);
+}
+inline ::AdditionalData* Metric::_internal_add_additionaldata() {
+  return additionaldata_.Add();
+}
+inline ::AdditionalData* Metric::add_additionaldata() {
+  // @@protoc_insertion_point(field_add:Metric.additionalData)
+  return _internal_add_additionaldata();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::AdditionalData >&
+Metric::additionaldata() const {
+  // @@protoc_insertion_point(field_list:Metric.additionalData)
+  return additionaldata_;
+}
+
 // -------------------------------------------------------------------
 
 // MetricData
@@ -1877,6 +2102,132 @@ inline void MetricData::_internal_set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 v
 inline void MetricData::set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_guagedata(value);
   // @@protoc_insertion_point(field_set:MetricData.guageData)
+}
+
+// -------------------------------------------------------------------
+
+// AdditionalData
+
+// string key = 1;
+inline void AdditionalData::clear_key() {
+  key_.ClearToEmpty();
+}
+inline const std::string& AdditionalData::key() const {
+  // @@protoc_insertion_point(field_get:AdditionalData.key)
+  return _internal_key();
+}
+inline void AdditionalData::set_key(const std::string& value) {
+  _internal_set_key(value);
+  // @@protoc_insertion_point(field_set:AdditionalData.key)
+}
+inline std::string* AdditionalData::mutable_key() {
+  // @@protoc_insertion_point(field_mutable:AdditionalData.key)
+  return _internal_mutable_key();
+}
+inline const std::string& AdditionalData::_internal_key() const {
+  return key_.Get();
+}
+inline void AdditionalData::_internal_set_key(const std::string& value) {
+  
+  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AdditionalData::set_key(std::string&& value) {
+  
+  key_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:AdditionalData.key)
+}
+inline void AdditionalData::set_key(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:AdditionalData.key)
+}
+inline void AdditionalData::set_key(const char* value,
+    size_t size) {
+  
+  key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:AdditionalData.key)
+}
+inline std::string* AdditionalData::_internal_mutable_key() {
+  
+  return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AdditionalData::release_key() {
+  // @@protoc_insertion_point(field_release:AdditionalData.key)
+  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AdditionalData::set_allocated_key(std::string* key) {
+  if (key != nullptr) {
+    
+  } else {
+    
+  }
+  key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:AdditionalData.key)
+}
+
+// string value = 2;
+inline void AdditionalData::clear_value() {
+  value_.ClearToEmpty();
+}
+inline const std::string& AdditionalData::value() const {
+  // @@protoc_insertion_point(field_get:AdditionalData.value)
+  return _internal_value();
+}
+inline void AdditionalData::set_value(const std::string& value) {
+  _internal_set_value(value);
+  // @@protoc_insertion_point(field_set:AdditionalData.value)
+}
+inline std::string* AdditionalData::mutable_value() {
+  // @@protoc_insertion_point(field_mutable:AdditionalData.value)
+  return _internal_mutable_value();
+}
+inline const std::string& AdditionalData::_internal_value() const {
+  return value_.Get();
+}
+inline void AdditionalData::_internal_set_value(const std::string& value) {
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AdditionalData::set_value(std::string&& value) {
+  
+  value_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:AdditionalData.value)
+}
+inline void AdditionalData::set_value(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:AdditionalData.value)
+}
+inline void AdditionalData::set_value(const char* value,
+    size_t size) {
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:AdditionalData.value)
+}
+inline std::string* AdditionalData::_internal_mutable_value() {
+  
+  return value_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AdditionalData::release_value() {
+  // @@protoc_insertion_point(field_release:AdditionalData.value)
+  return value_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AdditionalData::set_allocated_value(std::string* value) {
+  if (value != nullptr) {
+    
+  } else {
+    
+  }
+  value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:AdditionalData.value)
 }
 
 // -------------------------------------------------------------------
@@ -2050,6 +2401,8 @@ inline void HistogramData::set_count(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
