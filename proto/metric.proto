@@ -39,15 +39,12 @@ message Metric
   MetricTypes type = 1;
   google.protobuf.Timestamp time = 2;
   string name = 3;
-  MetricData value = 4;
-  repeated Label labels = 5;
-}
-
-message MetricData
-{
-    optional HistogramData histogramData = 1;
-    optional uint64 counterData = 2;
-    optional int64 guageData = 3;
+  oneof value {
+    HistogramData histogramValue = 4;
+    uint64 counterValue = 5;
+    int64 guageValue = 6;
+  }
+  repeated Label labels = 7;
 }
 
 message Label

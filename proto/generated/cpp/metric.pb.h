@@ -48,7 +48,7 @@ struct TableStruct_metric_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[9]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[8]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -74,9 +74,6 @@ extern MetricCollectRequestDefaultTypeInternal _MetricCollectRequest_default_ins
 class MetricCollectResponse;
 struct MetricCollectResponseDefaultTypeInternal;
 extern MetricCollectResponseDefaultTypeInternal _MetricCollectResponse_default_instance_;
-class MetricData;
-struct MetricDataDefaultTypeInternal;
-extern MetricDataDefaultTypeInternal _MetricData_default_instance_;
 class MetricPublishRequest;
 struct MetricPublishRequestDefaultTypeInternal;
 extern MetricPublishRequestDefaultTypeInternal _MetricPublishRequest_default_instance_;
@@ -90,7 +87,6 @@ template<> ::Label* Arena::CreateMaybeMessage<::Label>(Arena*);
 template<> ::Metric* Arena::CreateMaybeMessage<::Metric>(Arena*);
 template<> ::MetricCollectRequest* Arena::CreateMaybeMessage<::MetricCollectRequest>(Arena*);
 template<> ::MetricCollectResponse* Arena::CreateMaybeMessage<::MetricCollectResponse>(Arena*);
-template<> ::MetricData* Arena::CreateMaybeMessage<::MetricData>(Arena*);
 template<> ::MetricPublishRequest* Arena::CreateMaybeMessage<::MetricPublishRequest>(Arena*);
 template<> ::MetricPublishResponse* Arena::CreateMaybeMessage<::MetricPublishResponse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -714,6 +710,13 @@ class Metric PROTOBUF_FINAL :
   static const Metric& default_instance() {
     return *internal_default_instance();
   }
+  enum ValueCase {
+    kHistogramValue = 4,
+    kCounterValue = 5,
+    kGuageValue = 6,
+    VALUE_NOT_SET = 0,
+  };
+
   static inline const Metric* internal_default_instance() {
     return reinterpret_cast<const Metric*>(
                &_Metric_default_instance_);
@@ -789,13 +792,15 @@ class Metric PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kLabelsFieldNumber = 5,
+    kLabelsFieldNumber = 7,
     kNameFieldNumber = 3,
     kTimeFieldNumber = 2,
-    kValueFieldNumber = 4,
     kTypeFieldNumber = 1,
+    kHistogramValueFieldNumber = 4,
+    kCounterValueFieldNumber = 5,
+    kGuageValueFieldNumber = 6,
   };
-  // repeated .Label labels = 5;
+  // repeated .Label labels = 7;
   int labels_size() const;
   private:
   int _internal_labels_size() const;
@@ -847,24 +852,6 @@ class Metric PROTOBUF_FINAL :
       PROTOBUF_NAMESPACE_ID::Timestamp* time);
   PROTOBUF_NAMESPACE_ID::Timestamp* unsafe_arena_release_time();
 
-  // .MetricData value = 4;
-  bool has_value() const;
-  private:
-  bool _internal_has_value() const;
-  public:
-  void clear_value();
-  const ::MetricData& value() const;
-  ::MetricData* release_value();
-  ::MetricData* mutable_value();
-  void set_allocated_value(::MetricData* value);
-  private:
-  const ::MetricData& _internal_value() const;
-  ::MetricData* _internal_mutable_value();
-  public:
-  void unsafe_arena_set_allocated_value(
-      ::MetricData* value);
-  ::MetricData* unsafe_arena_release_value();
-
   // .MetricTypes type = 1;
   void clear_type();
   ::MetricTypes type() const;
@@ -874,9 +861,61 @@ class Metric PROTOBUF_FINAL :
   void _internal_set_type(::MetricTypes value);
   public:
 
+  // .HistogramData histogramValue = 4;
+  bool has_histogramvalue() const;
+  private:
+  bool _internal_has_histogramvalue() const;
+  public:
+  void clear_histogramvalue();
+  const ::HistogramData& histogramvalue() const;
+  ::HistogramData* release_histogramvalue();
+  ::HistogramData* mutable_histogramvalue();
+  void set_allocated_histogramvalue(::HistogramData* histogramvalue);
+  private:
+  const ::HistogramData& _internal_histogramvalue() const;
+  ::HistogramData* _internal_mutable_histogramvalue();
+  public:
+  void unsafe_arena_set_allocated_histogramvalue(
+      ::HistogramData* histogramvalue);
+  ::HistogramData* unsafe_arena_release_histogramvalue();
+
+  // uint64 counterValue = 5;
+  bool has_countervalue() const;
+  private:
+  bool _internal_has_countervalue() const;
+  public:
+  void clear_countervalue();
+  ::PROTOBUF_NAMESPACE_ID::uint64 countervalue() const;
+  void set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_countervalue() const;
+  void _internal_set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // int64 guageValue = 6;
+  bool has_guagevalue() const;
+  private:
+  bool _internal_has_guagevalue() const;
+  public:
+  void clear_guagevalue();
+  ::PROTOBUF_NAMESPACE_ID::int64 guagevalue() const;
+  void set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_guagevalue() const;
+  void _internal_set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  void clear_value();
+  ValueCase value_case() const;
   // @@protoc_insertion_point(class_scope:Metric)
  private:
   class _Internal;
+  void set_has_histogramvalue();
+  void set_has_countervalue();
+  void set_has_guagevalue();
+
+  inline bool has_value() const;
+  inline void clear_has_value();
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
@@ -884,186 +923,17 @@ class Metric PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label > labels_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   PROTOBUF_NAMESPACE_ID::Timestamp* time_;
-  ::MetricData* value_;
   int type_;
+  union ValueUnion {
+    constexpr ValueUnion() : _constinit_{} {}
+      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
+    ::HistogramData* histogramvalue_;
+    ::PROTOBUF_NAMESPACE_ID::uint64 countervalue_;
+    ::PROTOBUF_NAMESPACE_ID::int64 guagevalue_;
+  } value_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_metric_2eproto;
-};
-// -------------------------------------------------------------------
+  ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
 
-class MetricData PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MetricData) */ {
- public:
-  inline MetricData() : MetricData(nullptr) {}
-  virtual ~MetricData();
-  explicit constexpr MetricData(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  MetricData(const MetricData& from);
-  MetricData(MetricData&& from) noexcept
-    : MetricData() {
-    *this = ::std::move(from);
-  }
-
-  inline MetricData& operator=(const MetricData& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline MetricData& operator=(MetricData&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const MetricData& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const MetricData* internal_default_instance() {
-    return reinterpret_cast<const MetricData*>(
-               &_MetricData_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    5;
-
-  friend void swap(MetricData& a, MetricData& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(MetricData* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(MetricData* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline MetricData* New() const final {
-    return CreateMaybeMessage<MetricData>(nullptr);
-  }
-
-  MetricData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<MetricData>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const MetricData& from);
-  void MergeFrom(const MetricData& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(MetricData* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "MetricData";
-  }
-  protected:
-  explicit MetricData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_metric_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kHistogramDataFieldNumber = 1,
-    kCounterDataFieldNumber = 2,
-    kGuageDataFieldNumber = 3,
-  };
-  // .HistogramData histogramData = 1;
-  bool has_histogramdata() const;
-  private:
-  bool _internal_has_histogramdata() const;
-  public:
-  void clear_histogramdata();
-  const ::HistogramData& histogramdata() const;
-  ::HistogramData* release_histogramdata();
-  ::HistogramData* mutable_histogramdata();
-  void set_allocated_histogramdata(::HistogramData* histogramdata);
-  private:
-  const ::HistogramData& _internal_histogramdata() const;
-  ::HistogramData* _internal_mutable_histogramdata();
-  public:
-  void unsafe_arena_set_allocated_histogramdata(
-      ::HistogramData* histogramdata);
-  ::HistogramData* unsafe_arena_release_histogramdata();
-
-  // uint64 counterData = 2;
-  bool has_counterdata() const;
-  private:
-  bool _internal_has_counterdata() const;
-  public:
-  void clear_counterdata();
-  ::PROTOBUF_NAMESPACE_ID::uint64 counterdata() const;
-  void set_counterdata(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_counterdata() const;
-  void _internal_set_counterdata(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // int64 guageData = 3;
-  bool has_guagedata() const;
-  private:
-  bool _internal_has_guagedata() const;
-  public:
-  void clear_guagedata();
-  ::PROTOBUF_NAMESPACE_ID::int64 guagedata() const;
-  void set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_guagedata() const;
-  void _internal_set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:MetricData)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::HistogramData* histogramdata_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 counterdata_;
-  ::PROTOBUF_NAMESPACE_ID::int64 guagedata_;
   friend struct ::TableStruct_metric_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1111,7 +981,7 @@ class Label PROTOBUF_FINAL :
                &_Label_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    5;
 
   friend void swap(Label& a, Label& b) {
     a.Swap(&b);
@@ -1273,7 +1143,7 @@ class HistogramData_HistogramBucket PROTOBUF_FINAL :
                &_HistogramData_HistogramBucket_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    6;
 
   friend void swap(HistogramData_HistogramBucket& a, HistogramData_HistogramBucket& b) {
     a.Swap(&b);
@@ -1428,7 +1298,7 @@ class HistogramData PROTOBUF_FINAL :
                &_HistogramData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    7;
 
   friend void swap(HistogramData& a, HistogramData& b) {
     a.Swap(&b);
@@ -1836,90 +1706,156 @@ inline void Metric::set_allocated_name(std::string* name) {
   // @@protoc_insertion_point(field_set_allocated:Metric.name)
 }
 
-// .MetricData value = 4;
-inline bool Metric::_internal_has_value() const {
-  return this != internal_default_instance() && value_ != nullptr;
+// .HistogramData histogramValue = 4;
+inline bool Metric::_internal_has_histogramvalue() const {
+  return value_case() == kHistogramValue;
 }
-inline bool Metric::has_value() const {
-  return _internal_has_value();
+inline bool Metric::has_histogramvalue() const {
+  return _internal_has_histogramvalue();
 }
-inline void Metric::clear_value() {
-  if (GetArena() == nullptr && value_ != nullptr) {
-    delete value_;
-  }
-  value_ = nullptr;
+inline void Metric::set_has_histogramvalue() {
+  _oneof_case_[0] = kHistogramValue;
 }
-inline const ::MetricData& Metric::_internal_value() const {
-  const ::MetricData* p = value_;
-  return p != nullptr ? *p : reinterpret_cast<const ::MetricData&>(
-      ::_MetricData_default_instance_);
-}
-inline const ::MetricData& Metric::value() const {
-  // @@protoc_insertion_point(field_get:Metric.value)
-  return _internal_value();
-}
-inline void Metric::unsafe_arena_set_allocated_value(
-    ::MetricData* value) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(value_);
-  }
-  value_ = value;
-  if (value) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Metric.value)
-}
-inline ::MetricData* Metric::release_value() {
-  
-  ::MetricData* temp = value_;
-  value_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::MetricData* Metric::unsafe_arena_release_value() {
-  // @@protoc_insertion_point(field_release:Metric.value)
-  
-  ::MetricData* temp = value_;
-  value_ = nullptr;
-  return temp;
-}
-inline ::MetricData* Metric::_internal_mutable_value() {
-  
-  if (value_ == nullptr) {
-    auto* p = CreateMaybeMessage<::MetricData>(GetArena());
-    value_ = p;
-  }
-  return value_;
-}
-inline ::MetricData* Metric::mutable_value() {
-  // @@protoc_insertion_point(field_mutable:Metric.value)
-  return _internal_mutable_value();
-}
-inline void Metric::set_allocated_value(::MetricData* value) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete value_;
-  }
-  if (value) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(value);
-    if (message_arena != submessage_arena) {
-      value = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, value, submessage_arena);
+inline void Metric::clear_histogramvalue() {
+  if (_internal_has_histogramvalue()) {
+    if (GetArena() == nullptr) {
+      delete value_.histogramvalue_;
     }
-    
-  } else {
-    
+    clear_has_value();
   }
-  value_ = value;
-  // @@protoc_insertion_point(field_set_allocated:Metric.value)
+}
+inline ::HistogramData* Metric::release_histogramvalue() {
+  // @@protoc_insertion_point(field_release:Metric.histogramValue)
+  if (_internal_has_histogramvalue()) {
+    clear_has_value();
+      ::HistogramData* temp = value_.histogramvalue_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    value_.histogramvalue_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::HistogramData& Metric::_internal_histogramvalue() const {
+  return _internal_has_histogramvalue()
+      ? *value_.histogramvalue_
+      : reinterpret_cast< ::HistogramData&>(::_HistogramData_default_instance_);
+}
+inline const ::HistogramData& Metric::histogramvalue() const {
+  // @@protoc_insertion_point(field_get:Metric.histogramValue)
+  return _internal_histogramvalue();
+}
+inline ::HistogramData* Metric::unsafe_arena_release_histogramvalue() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:Metric.histogramValue)
+  if (_internal_has_histogramvalue()) {
+    clear_has_value();
+    ::HistogramData* temp = value_.histogramvalue_;
+    value_.histogramvalue_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Metric::unsafe_arena_set_allocated_histogramvalue(::HistogramData* histogramvalue) {
+  clear_value();
+  if (histogramvalue) {
+    set_has_histogramvalue();
+    value_.histogramvalue_ = histogramvalue;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Metric.histogramValue)
+}
+inline ::HistogramData* Metric::_internal_mutable_histogramvalue() {
+  if (!_internal_has_histogramvalue()) {
+    clear_value();
+    set_has_histogramvalue();
+    value_.histogramvalue_ = CreateMaybeMessage< ::HistogramData >(GetArena());
+  }
+  return value_.histogramvalue_;
+}
+inline ::HistogramData* Metric::mutable_histogramvalue() {
+  // @@protoc_insertion_point(field_mutable:Metric.histogramValue)
+  return _internal_mutable_histogramvalue();
 }
 
-// repeated .Label labels = 5;
+// uint64 counterValue = 5;
+inline bool Metric::_internal_has_countervalue() const {
+  return value_case() == kCounterValue;
+}
+inline bool Metric::has_countervalue() const {
+  return _internal_has_countervalue();
+}
+inline void Metric::set_has_countervalue() {
+  _oneof_case_[0] = kCounterValue;
+}
+inline void Metric::clear_countervalue() {
+  if (_internal_has_countervalue()) {
+    value_.countervalue_ = PROTOBUF_ULONGLONG(0);
+    clear_has_value();
+  }
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Metric::_internal_countervalue() const {
+  if (_internal_has_countervalue()) {
+    return value_.countervalue_;
+  }
+  return PROTOBUF_ULONGLONG(0);
+}
+inline void Metric::_internal_set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  if (!_internal_has_countervalue()) {
+    clear_value();
+    set_has_countervalue();
+  }
+  value_.countervalue_ = value;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Metric::countervalue() const {
+  // @@protoc_insertion_point(field_get:Metric.counterValue)
+  return _internal_countervalue();
+}
+inline void Metric::set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_countervalue(value);
+  // @@protoc_insertion_point(field_set:Metric.counterValue)
+}
+
+// int64 guageValue = 6;
+inline bool Metric::_internal_has_guagevalue() const {
+  return value_case() == kGuageValue;
+}
+inline bool Metric::has_guagevalue() const {
+  return _internal_has_guagevalue();
+}
+inline void Metric::set_has_guagevalue() {
+  _oneof_case_[0] = kGuageValue;
+}
+inline void Metric::clear_guagevalue() {
+  if (_internal_has_guagevalue()) {
+    value_.guagevalue_ = PROTOBUF_LONGLONG(0);
+    clear_has_value();
+  }
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::_internal_guagevalue() const {
+  if (_internal_has_guagevalue()) {
+    return value_.guagevalue_;
+  }
+  return PROTOBUF_LONGLONG(0);
+}
+inline void Metric::_internal_set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  if (!_internal_has_guagevalue()) {
+    clear_value();
+    set_has_guagevalue();
+  }
+  value_.guagevalue_ = value;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::guagevalue() const {
+  // @@protoc_insertion_point(field_get:Metric.guageValue)
+  return _internal_guagevalue();
+}
+inline void Metric::set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_guagevalue(value);
+  // @@protoc_insertion_point(field_set:Metric.guageValue)
+}
+
+// repeated .Label labels = 7;
 inline int Metric::_internal_labels_size() const {
   return labels_.size();
 }
@@ -1958,152 +1894,15 @@ Metric::labels() const {
   return labels_;
 }
 
-// -------------------------------------------------------------------
-
-// MetricData
-
-// .HistogramData histogramData = 1;
-inline bool MetricData::_internal_has_histogramdata() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  PROTOBUF_ASSUME(!value || histogramdata_ != nullptr);
-  return value;
+inline bool Metric::has_value() const {
+  return value_case() != VALUE_NOT_SET;
 }
-inline bool MetricData::has_histogramdata() const {
-  return _internal_has_histogramdata();
+inline void Metric::clear_has_value() {
+  _oneof_case_[0] = VALUE_NOT_SET;
 }
-inline void MetricData::clear_histogramdata() {
-  if (GetArena() == nullptr && histogramdata_ != nullptr) {
-    delete histogramdata_;
-  }
-  histogramdata_ = nullptr;
-  _has_bits_[0] &= ~0x00000001u;
+inline Metric::ValueCase Metric::value_case() const {
+  return Metric::ValueCase(_oneof_case_[0]);
 }
-inline const ::HistogramData& MetricData::_internal_histogramdata() const {
-  const ::HistogramData* p = histogramdata_;
-  return p != nullptr ? *p : reinterpret_cast<const ::HistogramData&>(
-      ::_HistogramData_default_instance_);
-}
-inline const ::HistogramData& MetricData::histogramdata() const {
-  // @@protoc_insertion_point(field_get:MetricData.histogramData)
-  return _internal_histogramdata();
-}
-inline void MetricData::unsafe_arena_set_allocated_histogramdata(
-    ::HistogramData* histogramdata) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(histogramdata_);
-  }
-  histogramdata_ = histogramdata;
-  if (histogramdata) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:MetricData.histogramData)
-}
-inline ::HistogramData* MetricData::release_histogramdata() {
-  _has_bits_[0] &= ~0x00000001u;
-  ::HistogramData* temp = histogramdata_;
-  histogramdata_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::HistogramData* MetricData::unsafe_arena_release_histogramdata() {
-  // @@protoc_insertion_point(field_release:MetricData.histogramData)
-  _has_bits_[0] &= ~0x00000001u;
-  ::HistogramData* temp = histogramdata_;
-  histogramdata_ = nullptr;
-  return temp;
-}
-inline ::HistogramData* MetricData::_internal_mutable_histogramdata() {
-  _has_bits_[0] |= 0x00000001u;
-  if (histogramdata_ == nullptr) {
-    auto* p = CreateMaybeMessage<::HistogramData>(GetArena());
-    histogramdata_ = p;
-  }
-  return histogramdata_;
-}
-inline ::HistogramData* MetricData::mutable_histogramdata() {
-  // @@protoc_insertion_point(field_mutable:MetricData.histogramData)
-  return _internal_mutable_histogramdata();
-}
-inline void MetricData::set_allocated_histogramdata(::HistogramData* histogramdata) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete histogramdata_;
-  }
-  if (histogramdata) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(histogramdata);
-    if (message_arena != submessage_arena) {
-      histogramdata = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, histogramdata, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  histogramdata_ = histogramdata;
-  // @@protoc_insertion_point(field_set_allocated:MetricData.histogramData)
-}
-
-// uint64 counterData = 2;
-inline bool MetricData::_internal_has_counterdata() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool MetricData::has_counterdata() const {
-  return _internal_has_counterdata();
-}
-inline void MetricData::clear_counterdata() {
-  counterdata_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricData::_internal_counterdata() const {
-  return counterdata_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricData::counterdata() const {
-  // @@protoc_insertion_point(field_get:MetricData.counterData)
-  return _internal_counterdata();
-}
-inline void MetricData::_internal_set_counterdata(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00000002u;
-  counterdata_ = value;
-}
-inline void MetricData::set_counterdata(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_counterdata(value);
-  // @@protoc_insertion_point(field_set:MetricData.counterData)
-}
-
-// int64 guageData = 3;
-inline bool MetricData::_internal_has_guagedata() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool MetricData::has_guagedata() const {
-  return _internal_has_guagedata();
-}
-inline void MetricData::clear_guagedata() {
-  guagedata_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 MetricData::_internal_guagedata() const {
-  return guagedata_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 MetricData::guagedata() const {
-  // @@protoc_insertion_point(field_get:MetricData.guageData)
-  return _internal_guagedata();
-}
-inline void MetricData::_internal_set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000004u;
-  guagedata_ = value;
-}
-inline void MetricData::set_guagedata(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_guagedata(value);
-  // @@protoc_insertion_point(field_set:MetricData.guageData)
-}
-
 // -------------------------------------------------------------------
 
 // Label
@@ -2401,8 +2200,6 @@ inline void HistogramData::set_count(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
