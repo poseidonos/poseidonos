@@ -47,6 +47,7 @@ namespace pos
 {
 TelemetryManagerService::TelemetryManagerService(void)
 {
+    // TODO read telemetry config
     string server_address("0.0.0.0:50051");
 
     // new grpc server setting
@@ -55,12 +56,20 @@ TelemetryManagerService::TelemetryManagerService(void)
     server = nullptr;
     serverAddress = server_address;
     enabledService = true;
+
+    metricList = new MetricPublishRequest;
+    curMetricListHead = 0;
 }
 
 TelemetryManagerService::~TelemetryManagerService(void)
 {
     // close grpc server
     server->Shutdown();
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::TELEMETRY_DISABLED,
+        "Close Telemetry manger & shut down gRPC Server");
+
+    delete metricList;
 }
 
 void
@@ -74,140 +83,108 @@ TelemetryManagerService::CreateTelemetryServer(std::string address)
     server->Wait();
 }
 
-::grpc::Status
-TelemetryManagerService::configure(
-    ::grpc::ServerContext* context,
-    const ConfigureMetadataRequest* request,
-    ConfigureMetadataResponse* response)
+void
+TelemetryManagerService::_IncreaseMetricListHead(void)
 {
-    ::grpc::Status ret = ::grpc::Status::OK;
+    curMetricListHead++;
 
-    if (enabledService == true)
+    if(curMetricListHead >= MAX_SAVE_METRIC_COUNT)
     {
-        response->set_successful(true);
-        response->set_collect_latency_ms(1);
-        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "configure has been called");
+        POS_TRACE_INFO((int)POS_EVENT_ID::TELEMETRY_ERROR_MSG,
+        "overlap telemety metric");
     }
-    else
-    {
-        response->set_successful(false);
-        response->set_collect_latency_ms(1);
 
-        POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
-        const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
+    curMetricListHead = curMetricListHead % MAX_SAVE_METRIC_COUNT;
+}
+
+int
+TelemetryManagerService::_FindMetric(string metricName)
+{
+    int ret = NOT_FOUND;
+
+    auto it = metricMap.find(metricName);
+    if (it != metricMap.end())
+    {
+        ret = it->second;
     }
 
     return ret;
 }
 
+// Publisher -> Manager
 ::grpc::Status
-TelemetryManagerService::publish(
-    ::grpc::ServerContext* context,
-    const PublishRequest* request,
-    PublishResponse* response)
+TelemetryManagerService::MetricPublish(::grpc::ServerContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response)
 {
     ::grpc::Status ret = ::grpc::Status::OK;
+    int totalReceivedMetricCnt = 0;
 
-    if (enabledService == true)
-    {
-        response->set_successful(true);
-        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "publish has been called");
-    }
-    else
-    {
-        response->set_successful(false);
+    int requesetedMetricsSize = request->metrics_size();
 
-        POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
-        const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
+    for (int iterator = 0; iterator < requesetedMetricsSize; iterator++)
+    {
+        const Metric& metric = request->metrics(iterator);
+
+        int metricIdx = _FindMetric(metric.name());
+
+        if (metricIdx == NOT_FOUND)
+        {
+            Metric* newMetric = metricList->add_metrics();
+
+            metricMap.insert({metric.name(), curMetricListHead});
+            newMetric->CopyFrom(metric);
+
+            continue;
+        }
+
+        MetricTypes type = metric.type();
+        Metric* metricFound = metricList->mutable_metrics(metricIdx);
+
+        switch (type)
+        {
+            case MetricTypes::COUNTER:
+            {
+                int counterValue = metricFound->countervalue() + metric.countervalue();
+                metricFound->CopyFrom(metric);
+
+                metricFound->set_countervalue(counterValue);
+                break;
+            }
+
+            case MetricTypes::GUAGE:
+            {
+                metricFound->CopyFrom(metric);
+                break;
+            }
+
+            default:
+            {
+                POS_TRACE_WARN(EID(TELEMETRY_ERROR_MSG), "no avaliable space");
+                const string errorMsg = "no avaliable space";
+                return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
+                break;
+            }
+        }
     }
+
+    response->set_totalreceivedmetrics(totalReceivedMetricCnt);
 
     return ret;
 }
 
+// Collector -> Manager
 ::grpc::Status
-TelemetryManagerService::collect(
-    ::grpc::ServerContext* context,
-    const ::CollectRequest* request,
-    ::CollectResponse* response)
-{
-    ConfigureMetadataRequest* collectReq = new ConfigureMetadataRequest();
-    ::grpc::Status ret = ::grpc::Status::OK;
-
-    if (enabledService == true)
-    {
-        collectReq->set_git_hash("some-git");
-        collectReq->set_host_name("some-host");
-        collectReq->set_host_type("some-type");
-        collectReq->set_ip_addr("some-ip");
-        collectReq->set_application_name("some-app");
-    }
-    else
-    {
-        collectReq->set_git_hash("");
-        collectReq->set_host_name("");
-        collectReq->set_host_type("");
-        collectReq->set_ip_addr("");
-        collectReq->set_application_name("");
-
-        POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
-        const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
-    }
-
-    response->set_allocated_metadata(collectReq);
-
-    POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "collect has been called");
-    return ret;
-}
-
-::grpc::Status
-TelemetryManagerService::enable(
-    ::grpc::ServerContext* context,
-    const ::EnableRequest* request,
-    ::EnableResponse* response)
+TelemetryManagerService::MetricCollect(::grpc::ServerContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response)
 {
     ::grpc::Status ret = ::grpc::Status::OK;
 
-    if (enabledService == true)
+    for (int iter = 0; iter < metricList->metrics_size(); iter++)
     {
-        response->set_successful(true);
-        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "enable has been called");
-    }
-    else
-    {
-        response->set_successful(false);
-
-        POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
-        const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
+        Metric* metric = response->add_metrics();
+        metric->CopyFrom(metricList->metrics(iter));
     }
 
-    return ret;
-}
-
-::grpc::Status
-TelemetryManagerService::disable(
-    ::grpc::ServerContext* context,
-    const ::DisableRequest* request,
-    ::DisableResponse* response)
-{
-    ::grpc::Status ret = ::grpc::Status::OK;
-
-    if (enabledService == true)
-    {
-        response->set_successful(true);
-        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "disable has been called");
-    }
-    else
-    {
-        response->set_successful(false);
-
-        POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
-        const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
-    }
+    metricMap.clear();
+    curMetricListHead = 0;
 
     return ret;
 }

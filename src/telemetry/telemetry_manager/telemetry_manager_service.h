@@ -38,46 +38,41 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
-#include "proto/generated/cpp/telemetry.grpc.pb.h"
-#include "proto/generated/cpp/telemetry.pb.h"
+#include "proto/generated/cpp/metric.grpc.pb.h"
+#include "proto/generated/cpp/metric.pb.h"
 #include "src/helper/json/json_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
+#define MAX_SAVE_METRIC_COUNT (100000)
+#define NOT_FOUND (-1)
+
 namespace pos
 {
-class TelemetryManagerService final : public TelemetryManager::Service
+
+class TelemetryManagerService final : public MetricManager::Service
 {
+typedef struct
+{
+    int idx;
+    int type;
+    uint64_t counterValue;
+    int64_t guageValue;
+    time_t time;
+    bool needUpdate;
+}LoggedMetricValue;
+
 public:
     TelemetryManagerService(void);
     virtual ~TelemetryManagerService(void);
 
-    virtual ::grpc::Status configure(
-        ::grpc::ServerContext* context,
-        const ConfigureMetadataRequest* request,
-        ConfigureMetadataResponse* response) override;
-
-    virtual ::grpc::Status publish(
-        ::grpc::ServerContext* context,
-        const PublishRequest* request,
-        PublishResponse* response) override;
-
-    virtual ::grpc::Status collect(
-        ::grpc::ServerContext* context,
-        const ::CollectRequest* request,
-        ::CollectResponse* response) override;
-
-    virtual ::grpc::Status enable(
-        ::grpc::ServerContext* context,
-        const ::EnableRequest* request,
-        ::EnableResponse* response) override;
-
-    virtual ::grpc::Status disable(
-        ::grpc::ServerContext* context,
-        const ::DisableRequest* request,
-        ::DisableResponse* response) override;
+    // Publisher -> Manager
+    virtual ::grpc::Status MetricPublish(::grpc::ServerContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response) override;
+    // Collector -> Manager
+    virtual ::grpc::Status MetricCollect(::grpc::ServerContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response) override;
 
     void CreateTelemetryServer(std::string address);
 
@@ -91,8 +86,16 @@ protected:
     std::unique_ptr<::grpc::Server> server;
 
 private:
+    void _IncreaseMetricListHead(void);
+    int _FindMetric(string metricName);
+
     bool enabledService;
     std::string serverAddress;
+
+    int curMetricListHead;
+    std::unordered_map<std::string, int> metricMap;
+
+    MetricPublishRequest* metricList;
 };
 using TelemetryManagerServiceSingletone = Singleton<TelemetryManagerService>;
 } // namespace pos
