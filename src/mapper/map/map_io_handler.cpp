@@ -591,7 +591,7 @@ int
 MapIoHandler::_IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo, char* headerBuf)
 {
     // Used by WBT only
-    int ret = fileToIo->IssueIO(opType, 0, map->GetSize(), headerBuf);
+    int ret = fileToIo->IssueIO(opType, 0, mapHeader->GetSize(), headerBuf);
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MFS_SYNCIO_ERROR), "MapHeader AppendIO Error, retMFS:{}  fileName:{}  fd:{}", ret, fileToIo->GetFileName(), fileToIo->GetFd());
