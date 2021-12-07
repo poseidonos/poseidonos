@@ -199,3 +199,23 @@ def set_rebuild_impact(id, pw, ip, cli, dir, impact):
         lib.printer.red(cli_cmd)
         lib.printer.red(f"{__name__} [Error] {e}")
     return ret
+
+
+def set_qos(id, pw, ip, cli, dir, array_name, vol_name, limit_type, limit_value=0):
+    try:
+        min_limit_value = 10
+        limit_value = int(limit_value)
+        if (limit_type.lower() != "reset" and limit_value < 10):
+            lib.printer.red(f"Cannot throttle {limit_type} to {limit_value} (minimum_limit_value: {min_limit_value}). Qos Command is ignored")
+            return -1
+        if (limit_type.lower() == "reset"):
+            cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} qos reset --array-name {array_name} --volume-name {vol_name}"
+        elif (limit_type.lower() == "iops"):
+            cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} qos create --array-name {array_name} --volume-name {vol_name} --maxiops {limit_value}"
+        else:
+            cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} qos create --array-name {array_name} --volume-name {vol_name} --maxbw {limit_value}"
+        return lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1

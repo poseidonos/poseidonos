@@ -22,6 +22,7 @@ class Target:
         self.pos_log = json["POS"]["LOG"]
         self.use_autogen = json["AUTO_GENERATE"]["USE"]
         self.subsystem_list = []
+        self.array_volume_list = {}
 
     def Prepare(self):
         result = pos.env.check_pos_running(self.id, self.pw, self.nic_ssh, self.pos_bin)
@@ -96,9 +97,11 @@ class Target:
             nqn_base = 0
             for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
                 for vol in subsys["VOLUMEs"]:
+                    volume_list = []
                     for i in range(vol["NUM"]):
                         nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
                         volume_name = f"VOL{i+nqn_base+1}"
+                        volume_list.append(volume_name)
                         if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
                                                        vol["SIZE"], vol["ARRAY"]):
                             return False
@@ -106,6 +109,7 @@ class Target:
                                                       nqn, vol["ARRAY"]):
                             return False
                     nqn_base += vol["NUM"]
+                    self.array_volume_list[vol["ARRAY"]] = volume_list
 
         # print subsystems
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
@@ -185,13 +189,16 @@ class Target:
             nqn_base = 0
             for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
                 for vol in subsys["VOLUMEs"]:
+                    volume_list = []
                     for i in range(vol["NUM"]):
                         nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
                         volume_name = f"VOL{i+nqn_base+1}"
+                        volume_list.append(volume_name)
                         if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
                                                       nqn, vol["ARRAY"]):
                             return False
                     nqn_base += vol["NUM"]
+                    self.array_volume_list[vol["ARRAY"]] = volume_list
 
         # print subsystems
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)

@@ -14,6 +14,7 @@ class Initiator:
         self.spdk_tp = json["SPDK"]["TRANSPORT"]
         self.output_dir = json["SPDK"]["DIR"] + "/tmp"
         self.device_list = []
+        self.vdbench_dir = json["VDBENCH"]["DIR"]
 
     def Prepare(self, connect_nvme=False, subsystem_list=[]):
         if -1 == pos.env.remove_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
@@ -48,3 +49,12 @@ class Initiator:
         for subsystem in subsystem_list:
             if self.name == subsystem[0]:
                 lib.subproc.sync_run(f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} sudo nohup nvme disconnect -n {subsystem[1]}")
+
+    def GetVolumeIdOfDevice(self, device_list):
+        volume_id_list = {}
+        for key in device_list:
+            cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} sudo nohup nvme list | awk '{{if ($1 == \"{key}\") print $2}}' "
+            serial_number = lib.subproc.sync_run(cmd)
+            volId = int(serial_number[3:])
+            volume_id_list[key] = volId
+        return volume_id_list
