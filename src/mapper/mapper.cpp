@@ -258,7 +258,9 @@ Mapper::EnableInternalAccess(int volId)
         }
         else
         {
-            tp->PublishData(TEL33001_MAP_LOADED_INTERNAL_VOL, volId);
+            POSMetricValue v;
+            v.gauge = volId;
+            tp->PublishData(TEL33001_MAP_LOADED_INTERNAL_VOL, v, MT_GAUGE);
             POS_TRACE_INFO(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] Load VolumeId:{}, state:{} array:{} Issued (ret:NEED_RETRY)", volId, volState[volId].GetState(), arrayName);
             return NEED_RETRY;
         }
@@ -439,8 +441,11 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
     volState[volId].SetState(VolState::FOREGROUND_MOUNTED);
     vsaMapManager->WaitVolumePendingIoDone(volId);
     ++numMountedVol;
-    tp->PublishData(TEL33003_MAP_MOUNTED_VOL, numMountedVol);
-    tp->PublishData(TEL33000_MAP_LOADED_EXTERNAL_VOL, volId);
+    POSMetricValue v;
+    v.gauge = numMountedVol;
+    tp->PublishData(TEL33003_MAP_MOUNTED_VOL, v, MT_GAUGE);
+    v.gauge = volId;
+    tp->PublishData(TEL33000_MAP_LOADED_EXTERNAL_VOL, v, MT_GAUGE);
     vsaMapManager->EnableVsaMapAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] VolumeId:{} array:{} was FG_MOUNTED @VolumeMounted", volId, arrayName);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
@@ -473,8 +478,11 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
         POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} array:{} was FG_MOUNTED >> BG_MOUNTED @VolumeUnmounted", volId, arrayName);
         volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
         --numMountedVol;
-        tp->PublishData(TEL33003_MAP_MOUNTED_VOL, numMountedVol);
-        tp->PublishData(TEL33004_MAP_UNMOUNTED_VOL, volId);
+        POSMetricValue v;
+        v.gauge = numMountedVol;
+        tp->PublishData(TEL33003_MAP_MOUNTED_VOL, v, MT_GAUGE);
+        v.gauge = volId;
+        tp->PublishData(TEL33004_MAP_UNMOUNTED_VOL, v, MT_GAUGE);
         if (flushMapRequired == true)
         {
             int ret = vsaMapManager->FlushTouchedPages(volId, nullptr);
@@ -539,7 +547,9 @@ Mapper::PrepareVolumeDelete(int volId)
     }
 
     --numMapLoadedVol;
-    tp->PublishData(TEL33002_MAP_LOADED_VOL_CNT, numMapLoadedVol);
+    POSMetricValue v;
+    v.gauge = numMapLoadedVol;
+    tp->PublishData(TEL33002_MAP_LOADED_VOL_CNT, v, MT_GAUGE);
     return 0;
 }
 
@@ -552,7 +562,9 @@ Mapper::DeleteVolumeMap(int volId)
         return -EID(MFS_FILE_DELETE_FAILED);
     }
     volState[volId].SetState(VolState::NOT_EXIST);
-    tp->PublishData(TEL33005_MAP_DELETED_VOL, volId);
+    POSMetricValue v;
+    v.gauge = volId;
+    tp->PublishData(TEL33005_MAP_DELETED_VOL, v, MT_GAUGE);
     return 0;
 }
 
@@ -572,8 +584,11 @@ Mapper::VolumeDetached(vector<int> volList)
         {
             volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
             --numMountedVol;
-            tp->PublishData(TEL33003_MAP_MOUNTED_VOL, numMountedVol);
-            tp->PublishData(TEL33004_MAP_UNMOUNTED_VOL, volId);
+            POSMetricValue v;
+            v.gauge = numMountedVol;
+            tp->PublishData(TEL33003_MAP_MOUNTED_VOL, v, MT_GAUGE);
+            v.gauge = volId;
+            tp->PublishData(TEL33004_MAP_UNMOUNTED_VOL, v, MT_GAUGE);
             POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDetached] VolumeId:{} array:{} was FG_MOUNTED >> BG_MOUNTED @VolumeDetached", volId, arrayName);
         }
     }
@@ -634,7 +649,9 @@ Mapper::_LoadVolumeMeta(int volId, bool delVol)
             return -1;
         }
         ++numMapLoadedVol;
-        tp->PublishData(TEL33002_MAP_LOADED_VOL_CNT, numMapLoadedVol);
+        POSMetricValue v;
+        v.gauge = numMapLoadedVol;
+        tp->PublishData(TEL33002_MAP_LOADED_VOL_CNT, v, MT_GAUGE);
     }
     else
     {

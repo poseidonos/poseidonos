@@ -214,7 +214,9 @@ SegmentCtx::_FreeSegment(SegmentId segId)
     segmentInfos[segId].SetOccupiedStripeCount(0);
     segmentStates[segId].SetState(SegmentState::FREE);
     allocSegBitmap->ClearBit(segId);
-    tp->PublishData(TEL30005_ALCT_FREED_SEG, segId);
+    POSMetricValue v;
+    v.gauge = segId;
+    tp->PublishData(TEL30005_ALCT_FREED_SEG, v, MT_GAUGE);
 }
 
 uint32_t
@@ -244,9 +246,10 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
         {
             segmentStates[segId].SetState(SegmentState::SSD);
         }
-        tp->PublishData(TEL30008_ALCT_ALL_OCCUIPIED_SEG, segId);
+        POSMetricValue v;
+        v.gauge = segId;
+        tp->PublishData(TEL30008_ALCT_ALL_OCCUIPIED_SEG, v, MT_GAUGE);
     }
-
     return segmentFreed;
 }
 
@@ -508,10 +511,11 @@ SegmentCtx::FindMostInvalidSSDSegment(void)
             minValidCount = cnt;
         }
     }
-
     if(victimSegment != UNMAP_SEGMENT)
     {
-        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, minValidCount);
+        POSMetricValue v;
+        v.gauge = minValidCount;
+        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, v, MT_GAUGE);
     }
     return victimSegment;
 }
@@ -568,7 +572,9 @@ SegmentCtx::MakeRebuildTarget(void)
         }
         ++segmentId;
     }
-    tp->PublishData(TEL30009_ALCT_REBUILD_TARGET_SEG_CNT, cnt);
+    POSMetricValue v;
+    v.gauge = cnt;
+    tp->PublishData(TEL30009_ALCT_REBUILD_TARGET_SEG_CNT, v, MT_GAUGE);
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget Done, target cnt:{}", cnt);
     return 1;
 }

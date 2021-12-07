@@ -32,15 +32,16 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client/telemetry_metrics.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
+#include <string>
+#include <vector>
 
 namespace pos
 {
 class IGlobalPublisher
 {
 public:
-    virtual int PublishToServer(MetricUint32& metric) = 0;
-    virtual int PublishToServer(MetricString& metric) = 0;
+    virtual int PublishToServer(std::string ownerName, std::vector<POSMetric>* metricList) = 0;
 };
 
 } // namespace pos

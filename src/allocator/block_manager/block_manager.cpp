@@ -136,14 +136,18 @@ BlockManager::ValidateBlks(VirtualBlks blks)
 void
 BlockManager::ProhibitUserBlkAlloc(void)
 {
-    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, 1);
+    POSMetricValue v;
+    v.gauge = 1;
+    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, v, MT_GAUGE);
     allocStatus->ProhibitUserBlockAllocation();
 }
 
 void
 BlockManager::PermitUserBlkAlloc(void)
 {
-    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, 0);
+    POSMetricValue v;
+    v.gauge = 0;
+    tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, v, MT_GAUGE);
     allocStatus->PermitUserBlockAllocation();
 }
 

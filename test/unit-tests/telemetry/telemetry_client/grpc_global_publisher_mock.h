@@ -12,7 +12,7 @@ class MockGrpcGlobalPublisher : public GrpcGlobalPublisher
 {
 public:
     using GrpcGlobalPublisher::GrpcGlobalPublisher;
-    MOCK_METHOD(int, PublishToServer, (MetricUint32 & metric), (override));
+    MOCK_METHOD(int, PublishToServer, (POSMetric & metric), (override));
     MOCK_METHOD(int, PublishToServer, (MetricString & metric), (override));
 };
 

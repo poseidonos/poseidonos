@@ -165,8 +165,11 @@ ContextManager::AllocateFreeSegment(void)
     if (segId != UNMAP_SEGMENT)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
-        telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, segId);
-        telPublisher->PublishData(TEL30004_ALCT_ALLOC_SEG, freeSegCount);
+        POSMetricValue v;
+        v.gauge = segId;
+        telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
+        v.gauge = freeSegCount;
+        telPublisher->PublishData(TEL30004_ALCT_ALLOC_SEG, v, MT_GAUGE);
     }
     return segId;
 }
@@ -180,7 +183,9 @@ ContextManager::AllocateGCVictimSegment(void)
         segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
 
         POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, segmentCtx->GetNumOfFreeSegmentWoLock());
-        telPublisher->PublishData(TEL30002_ALCT_GCVICTIM_SEG, victimSegment);
+        POSMetricValue v;
+        v.gauge = victimSegment;
+        telPublisher->PublishData(TEL30002_ALCT_GCVICTIM_SEG, v, MT_GAUGE);
     }
     return victimSegment;
 }
@@ -194,7 +199,9 @@ ContextManager::GetCurrentGcMode(void)
     curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
     if (prevGcMode != curGcMode)
     {
-        telPublisher->PublishData(TEL30003_ALCT_GCMODE, curGcMode);
+        POSMetricValue v;
+        v.gauge = curGcMode;
+        telPublisher->PublishData(TEL30003_ALCT_GCMODE, v, MT_GAUGE);
     }
     return curGcMode;
 }
@@ -243,9 +250,11 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
-    SegmentId segmentId = segmentCtx->GetRebuildTargetSegment();
-    telPublisher->PublishData(TEL30006_ALCT_ALLOC_REBUILD_SEG, segmentId);
-    return segmentId;
+    SegmentId segId = segmentCtx->GetRebuildTargetSegment();
+    POSMetricValue v;
+    v.gauge = segId;
+    telPublisher->PublishData(TEL30006_ALCT_ALLOC_REBUILD_SEG, v, MT_GAUGE);
+    return segId;
 }
 
 bool
@@ -255,12 +264,14 @@ ContextManager::NeedRebuildAgain(void)
 }
 
 int
-ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
+ContextManager::ReleaseRebuildSegment(SegmentId segId)
 {
-    int ret = rebuildCtx->ReleaseRebuildSegment(segmentId);
+    int ret = rebuildCtx->ReleaseRebuildSegment(segId);
     if (ret == 1) // need to flush
     {
-        telPublisher->PublishData(TEL30007_ALCT_RELEASE_REBUILD_SEG, segmentId);
+        POSMetricValue v;
+        v.gauge = segId;
+        telPublisher->PublishData(TEL30007_ALCT_RELEASE_REBUILD_SEG, v, MT_GAUGE);
         ioManager->FlushRebuildContext(nullptr, false);
         ret = 0;
     }
@@ -317,7 +328,9 @@ void
 ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
     int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
-    telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, freeSegCount);
+    POSMetricValue v;
+    v.gauge = freeSegCount;
+    telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)

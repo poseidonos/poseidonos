@@ -136,13 +136,16 @@ VSAMapManager::CreateVsaMapContent(VSAMapContent* vm, int volId, uint64_t volSiz
             EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
             mapFlushState[volId] = MapFlushState::FLUSHING;
             numWriteIssuedCount++;
-            tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+            POSMetricValue v;
+            v.gauge = numWriteIssuedCount;
+            tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
             POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush Header, volume:{} array:{}", volId, addrInfo->GetArrayName());
             ret = vsaMaps[volId]->FlushHeader(callBackVSAMap);
             if (ret < 0)
             {
                 numWriteIssuedCount--;
-                tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+                v.gauge = numWriteIssuedCount;
+                tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
                 mapFlushState[volId] = MapFlushState::FLUSH_DONE;
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] Failed to Initial Store VSAMap File, array:{}", addrInfo->GetArrayName());
                 break;
@@ -177,13 +180,16 @@ VSAMapManager::LoadVSAMapFile(int volId)
     AsyncLoadCallBack cbLoadDone = std::bind(&VSAMapManager::_MapLoadDone, this, std::placeholders::_1);
     mapLoadState[volId] = MapLoadState::LOADING;
     numLoadIssuedCount++;
-    tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, numLoadIssuedCount);
+    POSMetricValue v;
+    v.gauge = numLoadIssuedCount;
+    tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, v, MT_GAUGE);
     int ret = vsaMaps[volId]->Load(cbLoadDone);
     if (ret < 0)
     {
         mapLoadState[volId] = MapLoadState::LOAD_DONE;
         numLoadIssuedCount--;
-        tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, numLoadIssuedCount);
+        v.gauge = numLoadIssuedCount;
+        tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, v, MT_GAUGE);
         if (-EID(MAP_LOAD_COMPLETED) == ret)
         {
             ret = 0; // This is a normal case
@@ -207,7 +213,9 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
     }
     int cnt = dirtyPages.size();
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, array:{}, numdirtyPages:{}", volId, addrInfo->GetArrayName(), cnt);
-    tp->PublishData(TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT, cnt);
+    POSMetricValue v;
+    v.count = cnt;
+    tp->PublishData(TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT, v, MT_COUNT);
     assert(vsaMaps[volId] != nullptr);
     assert(vsaMaps[volId]->GetCallback() == nullptr);
     vsaMaps[volId]->SetCallback(cb);
@@ -215,13 +223,15 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
     EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
     mapFlushState[volId] = MapFlushState::FLUSHING;
     numWriteIssuedCount++;
-    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+    v.gauge = numWriteIssuedCount;
+    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
     int ret = vsaMaps[volId]->FlushDirtyPagesGiven(dirtyPages, callBackVSAMap);
     if (ret < 0)
     {
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         numWriteIssuedCount--;
-        tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+        v.gauge = numWriteIssuedCount;
+        tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] failed to flush vsamap, volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
     }
     else
@@ -247,13 +257,16 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
     EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
     mapFlushState[volId] = MapFlushState::FLUSHING;
     numWriteIssuedCount++;
-    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+    POSMetricValue v;
+    v.gauge = numWriteIssuedCount;
+    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
     int ret = vsaMaps[volId]->FlushTouchedPages(callBackVSAMap);
     if (ret < 0)
     {
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         numWriteIssuedCount--;
-        tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+        v.gauge = numWriteIssuedCount;
+        tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap FlushTouchedPages] failed to flush vsamap, volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
     }
     else
@@ -275,13 +288,17 @@ VSAMapManager::FlushAllMaps(void)
             EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
             mapFlushState[volId] = MapFlushState::FLUSHING;
             numWriteIssuedCount++;
-            tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+            POSMetricValue v;
+            v.gauge = numWriteIssuedCount;
+            tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
             ret = vsaMaps[volId]->FlushTouchedPages(callBackVSAMap);
             if (ret < 0)
             {
                 mapFlushState[volId] = MapFlushState::FLUSH_DONE;
                 numWriteIssuedCount--;
-                tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+                POSMetricValue v;
+                v.gauge = numWriteIssuedCount;
+                tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap FlushAllMaps] failed to flush vsamap, volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
             }
             else
@@ -368,7 +385,9 @@ VSAMapManager::MapFlushDone(int mapId)
     }
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
-    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, numWriteIssuedCount);
+    POSMetricValue v;
+    v.gauge = numWriteIssuedCount;
+    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_COUNT);
     mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
 }
 
@@ -520,7 +539,9 @@ VSAMapManager::_MapLoadDone(int volId)
     assert(numLoadIssuedCount > 0);
     numLoadIssuedCount--;
     mapLoadState[volId] = MapLoadState::LOAD_DONE;
-    tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, numLoadIssuedCount);
+    POSMetricValue v;
+    v.gauge = numLoadIssuedCount;
+    tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, v, MT_GAUGE);
 }
 
 int

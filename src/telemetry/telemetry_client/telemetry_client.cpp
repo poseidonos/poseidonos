@@ -38,14 +38,13 @@
 namespace pos
 {
 
-TelemetryClient::TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_)
+TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
 {
-    globalPublisher = new GrpcGlobalPublisher(telemetryManager_, channel_);
-    TelemetryConfigSingleton::Instance()->Register(TelemetryConfigType::Client, "enabled", this);
+    globalPublisher = new GrpcGlobalPublisher(channel_);
 }
 
 TelemetryClient::TelemetryClient(void)
-: TelemetryClient(nullptr, nullptr)
+: TelemetryClient(nullptr)
 {
 }
 
@@ -173,27 +172,6 @@ TelemetryClient::StopUsingDataPoolForAllPublisher(void)
     return true;
 }
 
-int
-TelemetryClient::CollectValue(std::string name, std::string id, MetricUint32& outLog)
-{
-    auto it = publisherList.find(name);
-    if (it == publisherList.end())
-    {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! Requested CollectData, but there is no publisher id:{}", name);
-        return -1;
-    }
-    else
-    {
-        return publisherList[name]->CollectData(id, outLog);
-    }
-}
-
-list<MetricUint32>
-TelemetryClient::CollectList(std::string name)
-{
-    return publisherList[name]->CollectAll();
-}
-
 bool
 TelemetryClient::Notify(std::string key, std::string value)
 {
@@ -207,4 +185,5 @@ TelemetryClient::Notify(std::string key, std::string value)
 
     return true;
 }
+
 } // namespace pos

@@ -42,28 +42,28 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 
-#include "proto/generated/cpp/telemetry.grpc.pb.h"
-#include "proto/generated/cpp/telemetry.pb.h"
+#include "proto/generated/cpp/metric.grpc.pb.h"
+#include "proto/generated/cpp/metric.pb.h"
 #include "src/helper/json/json_helper.h"
 #include "src/telemetry/telemetry_client/i_global_publisher.h"
 #include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 
 namespace pos
 {
-class TelemetryManagerService;
+#define TEL_SERVER_IP "0.0.0.0:50051"
+
 class GrpcGlobalPublisher : public IGlobalPublisher
 {
 public:
     GrpcGlobalPublisher(void) = default;
-    GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_);
+    explicit GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_);
     virtual ~GrpcGlobalPublisher(void);
-    virtual int PublishToServer(MetricUint32& metric);
-    virtual int PublishToServer(MetricString& metric);
+    virtual int PublishToServer(std::string ownerName, POSMetricVector* metricList);
 
 private:
-    int _SendMessage(PublishRequest* req);
-    std::unique_ptr<TelemetryManager::Stub> tmStub;
-    TelemetryManagerService* telemetryManager;
+    int _SendMessage(MetricPublishRequest* request, uint32_t numMetrics);
+
+    std::unique_ptr<MetricManager::Stub> stub;
 };
 
 } // namespace pos

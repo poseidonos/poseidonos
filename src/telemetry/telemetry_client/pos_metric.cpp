@@ -29,69 +29,102 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#pragma once
-
+#include "src/telemetry/telemetry_client/pos_metric.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 #include <map>
 #include <chrono>
-#include <iomanip>
-#include <list>
-#include <sstream>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace pos
 {
-class Metric
+POSMetric::POSMetric(std::string name_, POSMetricTypes type_)
 {
-public:
-    Metric(void) {}
-    ~Metric(void) {}
-    virtual std::string GetId(void) { return id; }
-    virtual time_t GetTime(void) { return time; }
-    virtual std::string GetTimeString(void) { return strTime; }
-    virtual void SetCommonMetric(std::string id_, time_t t_, std::string st_)
-    {
-        id = id_;
-        time = t_;
-        strTime = st_;
-    }
+    name = name_;
+    type = type_;
+    time = std::time(nullptr);
+}
 
-protected:
-    std::string id;
-    time_t time;
-    std::string strTime;
-};
-
-class MetricUint32 : public Metric
+void
+POSMetric::SetName(std::string name_)
 {
-public:
-    MetricUint32(void) { value = 0; }
-    ~MetricUint32(void) {}
-    uint32_t GetValue(void) { return value; }
-    void SetMetric(std::string id_, time_t t_, uint32_t v_, std::string st_)
-    {
-        SetCommonMetric(id_, t_, st_);
-        value = v_;
-    }
+    name = name_;
+}
 
-private:
-    uint32_t value;
-};
-
-class MetricString : public Metric
+void
+POSMetric::SetTime(time_t time_)
 {
-public:
-    MetricString(void) { value = ""; }
-    ~MetricString(void) {}
-    std::string GetValue(void) { return value; }
-    void SetMetric(std::string id_, time_t t_, std::string v_, std::string st_)
-    {
-        SetCommonMetric(id_, t_, st_);
-        value = v_;
-    }
+    time = time_;
+}
 
-private:
-    std::string value;
-};
+void
+POSMetric::SetType(POSMetricTypes type_)
+{
+    type = type_;
+}
+
+void
+POSMetric::SetCountValue(uint64_t count_)
+{
+    type = MT_COUNT;
+    value.count = count_;
+}
+
+void
+POSMetric::SetGaugeValue(int64_t gauge_)
+{
+    type = MT_GAUGE;
+    value.gauge = gauge_;
+}
+
+int
+POSMetric::AddLabel(std::string label, std::string key)
+{
+    if (labelList.size() == MAX_NUM_LABEL)
+    {
+        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add Label, numLabel is overflowed!!!!, label:{}, key:{}", label, key);
+        return -1;
+    }
+    labelList.emplace(label, key);
+    return 0;
+}
+
+std::string
+POSMetric::GetName(void)
+{
+    return name;
+}
+
+POSMetricTypes
+POSMetric::GetType(void)
+{
+    return type;
+}
+
+time_t
+POSMetric::GetTime(void)
+{
+    return time;
+}
+
+uint64_t
+POSMetric::GetCountValue(void)
+{
+    return value.count;
+}
+
+int64_t
+POSMetric::GetGaugeValue(void)
+{
+    return value.gauge;
+}
+
+MetricLabelMap*
+POSMetric::GetLabelList(void)
+{
+    return (&labelList);
+}
 
 } // namespace pos

@@ -47,7 +47,7 @@ class GrpcGlobalPublisher;
 class TelemetryClient : public ConfigObserver
 {
 public:
-    TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_);
+    explicit TelemetryClient(std::shared_ptr<grpc::Channel> channel_);
     TelemetryClient(void);
     virtual ~TelemetryClient(void);
     virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
@@ -62,9 +62,6 @@ public:
     virtual bool StartUsingDataPoolForAllPublisher(void);
     virtual bool StopUsingDataPoolForAllPublisher(void);
     virtual bool Notify(std::string key, std::string value);
-
-    virtual int CollectValue(std::string name, std::string id, MetricUint32& outLog);
-    virtual list<MetricUint32> CollectList(std::string name);
 
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;

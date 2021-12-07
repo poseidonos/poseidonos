@@ -59,9 +59,9 @@ TelemetryDataPool::GetNumEntries(void)
 }
 
 int
-TelemetryDataPool::SetLog(MetricUint32& metric)
+TelemetryDataPool::SetLog(POSMetric& metric)
 {
-    std::string id = metric.GetId();
+    std::string id = metric.GetName();
     auto entry = pool.find(id);
     if (entry == pool.end())
     {
@@ -85,7 +85,7 @@ TelemetryDataPool::SetLog(MetricUint32& metric)
 }
 
 int
-TelemetryDataPool::GetLog(std::string id, MetricUint32& outLog)
+TelemetryDataPool::GetLog(std::string id, POSMetric& outLog)
 {
     auto entry = pool.find(id);
     if (entry == pool.end())
@@ -100,10 +100,10 @@ TelemetryDataPool::GetLog(std::string id, MetricUint32& outLog)
     }
 }
 
-list<MetricUint32>
+list<POSMetric>
 TelemetryDataPool::GetAll(void)
 {
-    list<MetricUint32> retList;
+    list<POSMetric> retList;
     for (auto &p : pool)
     {
         retList.push_back(p.second);

@@ -93,7 +93,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_ValidData)
 {
     // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData(_, _)).WillByDefault(Return(0));
+    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
     TelemetryAirDelegator telAirDelegator {&mockTelPub};
     auto& air_data = air::json("air_data");
     auto& node_arr_vol = air::json("arr_vol");
@@ -119,7 +119,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 {
     // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData(_, _)).WillByDefault(Return(0));
+    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
     TelemetryAirDelegator telAirDelegator {&mockTelPub};
     auto& air_data = air::json("air_data");
     auto& node_arr_vol = air::json("arr_vol");
@@ -138,7 +138,7 @@ TEST(TelemetryAirDelegator, dataHandler_EndState)
 {
     // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData(_, _)).WillByDefault(Return(0));
+    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
     TelemetryAirDelegator telAirDelegator {&mockTelPub};
     auto& air_data = air::json("air_data");
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);

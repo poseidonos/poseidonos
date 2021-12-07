@@ -12,8 +12,7 @@ class MockIGlobalPublisher : public IGlobalPublisher
 {
 public:
     using IGlobalPublisher::IGlobalPublisher;
-    MOCK_METHOD(int, PublishToServer, (MetricUint32 & metric), (override));
-    MOCK_METHOD(int, PublishToServer, (MetricString & metric), (override));
+    MOCK_METHOD(int, PublishToServer, (std::string ownerName, std::vector<POSMetric>* metricList), (override));
 };
 
 } // namespace pos

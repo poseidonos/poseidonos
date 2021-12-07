@@ -35,7 +35,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
-#include "src/telemetry/telemetry_client/telemetry_metrics.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
 #include <list>
 #include <unordered_map>
@@ -49,16 +49,16 @@ public:
     TelemetryDataPool(void);
     ~TelemetryDataPool(void);
     void SetMaxEntryLimit(int limit);
-    int SetLog(MetricUint32& metric);
-    int GetLog(std::string id, MetricUint32& outLog);
-    list<MetricUint32> GetAll(void);
+    int SetLog(POSMetric& metric);
+    int GetLog(std::string id, POSMetric& outLog);
+    list<POSMetric> GetAll(void);
     int GetNumEntries(void);
 
     static const int LIMIT_NUM_MAX_ENTRY = 100000;
 
 private:
     std::mutex poolLock;
-    std::unordered_map<std::string, MetricUint32> pool;
+    std::unordered_map<std::string, POSMetric> pool;
     int maxEntry;
 };
 

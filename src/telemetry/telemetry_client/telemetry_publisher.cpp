@@ -34,9 +34,10 @@
 
 namespace pos
 {
-TelemetryPublisher::TelemetryPublisher(void)
-: globalPublisher(nullptr),
-  turnOn(false), // todo: change default true or using config
+TelemetryPublisher::TelemetryPublisher(std::string ownerName_)
+: ownerName(ownerName_),
+  globalPublisher(nullptr),
+  turnOn(false),
   useDataPool(false) // todo: change default true or using config
 {
 }
@@ -87,55 +88,57 @@ TelemetryPublisher::StopUsingDataPool(void)
     useDataPool = false;
 }
 
-int
-TelemetryPublisher::PublishData(std::string id, uint32_t value)
+POSMetricVector*
+TelemetryPublisher::AllocatePOSMetricVector(void)
 {
-    if (turnOn == false)
-    {
-        return -1;
-    }
-
-    MetricUint32 metric;
-    time_t time = std::time(nullptr);
-    metric.SetMetric(id, time, value, _GetTimeString(time));
-
-    if (useDataPool == true)
-    {
-        dataPool.SetLog(metric);
-    }
-    int ret = globalPublisher->PublishToServer(metric);
+    POSMetricVector* ret = new POSMetricVector();
     return ret;
 }
 
 int
-TelemetryPublisher::PublishData(std::string id, std::string value)
+TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricTypes type)
 {
-    if (turnOn == false)
+    POSMetric metric(id, type);
+    if (type == MT_COUNT)
     {
-        return -1;
+        metric.SetCountValue(value.count);
     }
-
-    MetricString metric;
-    time_t time = std::time(nullptr);
-    metric.SetMetric(id, time, value, _GetTimeString(time));
-
-    // string type log wouldn't be stored in client's data pool to minimize the memory usage
-    // dataPool.SetLog(metric);
-    int ret = globalPublisher->PublishToServer(metric);
-
+    else if (type == MT_GAUGE)
+    {
+        metric.SetGaugeValue(value.gauge);
+    }
+    POSMetricVector* metricList = AllocatePOSMetricVector();
+    metricList->push_back(metric);
+    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    metricList->clear();
+    delete metricList;
     return ret;
 }
 
 int
-TelemetryPublisher::CollectData(std::string id, MetricUint32& outLog)
+TelemetryPublisher::PublishMetric(POSMetric metric)
 {
-    return dataPool.GetLog(id, outLog);
+    POSMetricVector* metricList = AllocatePOSMetricVector();
+    metricList->push_back(metric);
+    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    metricList->clear();
+    delete metricList;
+    return ret;
 }
 
-list<MetricUint32>
-TelemetryPublisher::CollectAll(void)
+int
+TelemetryPublisher::PublishDataList(std::vector<POSMetric>* metricList)
 {
-    return dataPool.GetAll();
+    if (turnOn == false)
+    {
+        metricList->clear();
+        delete metricList;
+        return -1;
+    }
+    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    metricList->clear();
+    delete metricList;
+    return ret;
 }
 
 void

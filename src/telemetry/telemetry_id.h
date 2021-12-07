@@ -34,6 +34,9 @@
 #include <string>
 namespace pos
 {
+#define MAX_NUM_METRICLIST 1000
+#define MAX_NUM_LABEL 100
+
     // ID = "modulecode_itemname_collectiontype(count/history)"
     static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";
     static const std::string TEL30001_ALCT_ALCTX_PENDINGIO_CNT = "alct_allocctx_pendio_cnt";

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/telemetry/telemetry_client/telemetry_metrics.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
 namespace pos
 {
@@ -18,10 +18,10 @@ public:
     MOCK_METHOD(void, SetCommonMetric, (std::string id_, time_t t_, std::string st_), (override));
 };
 
-class MockMetricUint32 : public MetricUint32
+class MockPOSMetric : public POSMetric
 {
 public:
-    using MetricUint32::MetricUint32;
+    using POSMetric::POSMetric;
 };
 
 class MockMetricString : public MetricString

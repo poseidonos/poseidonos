@@ -74,7 +74,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     // metafs -> volume manager -> mapper/allocator -> journal -> gc.
     // Given that "metafs" object creation depends on runtime information (i.e., array is loaded or not)
     // I'll move those the objection to Create()/Load() instead.
-    this->telPublisher = new TelemetryPublisher();
+    this->telPublisher = new TelemetryPublisher(arrayName);
 }
 
 ArrayComponents::ArrayComponents(string arrayName,

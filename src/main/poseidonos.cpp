@@ -155,7 +155,7 @@ Poseidonos::_InitAIR(void)
 
     if (nullptr == telemtryPublisherForAir)
     {
-        telemtryPublisherForAir = new TelemetryPublisher{};
+        telemtryPublisherForAir = new TelemetryPublisher{"air_deletator"};
         telemtryPublisherForAir->StartPublishing();
         TelemetryClientSingleton::Instance()->RegisterPublisher("air_deletator", telemtryPublisherForAir);
     }

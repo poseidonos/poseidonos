@@ -32,43 +32,77 @@
 
 #pragma once
 
+#include "src/telemetry/telemetry_id.h"
+#include <map>
+#include <chrono>
+#include <iomanip>
 #include <list>
-#include "src/telemetry/telemetry_client/i_global_publisher.h"
-#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
+#include <sstream>
 #include <string>
+#include <unordered_map>
+#include <set>
 #include <vector>
 
 namespace pos
 {
-class TelemetryPublisher
+struct POSHistogramValue
+{
+    // TODO: RESERVED
+    std::map<std::string, uint64_t> buckets; // insert duplicated key?
+    int64_t sum;
+    uint64_t count;
+};
+
+enum POSMetricTypes {
+    MT_COUNTER,
+    MT_GAUGE,
+    MT_HISTOGRAM, // TODO: RESERVED
+    MT_COUNT = MT_HISTOGRAM
+};
+
+class POSMetricValue
 {
 public:
-    TelemetryPublisher(void) = default;
-    explicit TelemetryPublisher(std::string ownerName);
-    virtual ~TelemetryPublisher(void);
-    virtual void StartPublishing(void);
-    virtual void StopPublishing(void);
-    virtual bool IsRunning(void);
-    virtual void StartUsingDataPool(void);
-    virtual void StopUsingDataPool(void);
+    POSMetricValue(void)
+    {
+        count = 0;
+        gauge = 0;
+        // histogram = nullptr
+    }
+    // POSHistogramValue* histogram;
+    uint64_t count;
+    int64_t gauge;
+};
 
-    virtual void SetMaxEntryLimit(int limit);
-    virtual int GetNumEntries(void);
+typedef std::unordered_map<std::string, std::string> MetricLabelMap;
 
-    virtual int PublishData(std::string id_, POSMetricValue value_, POSMetricTypes type_);
-    virtual int PublishMetric(POSMetric metric);
-    virtual int PublishDataList(std::vector<POSMetric>* metricList);
-    virtual POSMetricVector* AllocatePOSMetricVector(void);
-    virtual void SetGlobalPublisher(IGlobalPublisher* gp);
+class POSMetric
+{
+public:
+    POSMetric(std::string name, POSMetricTypes type);
+    virtual ~POSMetric(void) = default;
+    virtual void SetName(std::string name_);
+    virtual void SetTime(time_t time_);
+    virtual void SetType(POSMetricTypes type_);
+    virtual void SetCountValue(uint64_t count_);
+    virtual void SetGaugeValue(int64_t gauge_);
+    virtual int AddLabel(std::string label, std::string key);
+
+    virtual std::string GetName(void);
+    virtual POSMetricTypes GetType(void);
+    virtual time_t GetTime(void);
+    virtual uint64_t GetCountValue(void);
+    virtual int64_t GetGaugeValue(void);
+    virtual MetricLabelMap* GetLabelList(void);
 
 private:
-    std::string _GetTimeString(time_t time);
-
-    std::string ownerName;
-    IGlobalPublisher* globalPublisher;
-    TelemetryDataPool dataPool;
-    bool turnOn;
-    bool useDataPool;
+    POSMetricTypes type;       // Mandatory
+    std::string name;          // Mandatory
+    time_t time;               // optional (preset)
+    POSMetricValue value;      // Mandatory
+    MetricLabelMap labelList;  // optional (default: publisher's name)
 };
+
+typedef std::vector<POSMetric> POSMetricVector;
 
 } // namespace pos

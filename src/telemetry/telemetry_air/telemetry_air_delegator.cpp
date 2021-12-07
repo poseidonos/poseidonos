@@ -65,7 +65,9 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         stream_iops << obj["iops"];
                         uint32_t iops = 0;
                         stream_iops >> iops;
-                        this->telPub->PublishData(TEL50000_VOLUME_IOPS_READ, iops);
+                        POSMetricValue v;
+                        v.gauge = iops;
+                        this->telPub->PublishData(TEL50000_VOLUME_IOPS_READ, v, MT_GAUGE);
                         /* TODO: Need more params in PublishData not only iops
                         but thread id, array id and volume id
                         obj["index"] => 0x0104 (array id = 1, volume id = 4)
