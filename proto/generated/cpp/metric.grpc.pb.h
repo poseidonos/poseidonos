@@ -34,6 +34,7 @@ class MetricManager final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
+    // Publisher -> Manager
     virtual ::grpc::Status MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::MetricPublishResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>> AsyncMetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>>(AsyncMetricPublishRaw(context, request, cq));
@@ -41,6 +42,7 @@ class MetricManager final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>> PrepareAsyncMetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>>(PrepareAsyncMetricPublishRaw(context, request, cq));
     }
+    // Collector -> Manager
     virtual ::grpc::Status MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::MetricCollectResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>> AsyncMetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>>(AsyncMetricCollectRaw(context, request, cq));
@@ -51,12 +53,14 @@ class MetricManager final {
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
+      // Publisher -> Manager
       virtual void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      // Collector -> Manager
       virtual void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -133,7 +137,9 @@ class MetricManager final {
    public:
     Service();
     virtual ~Service();
+    // Publisher -> Manager
     virtual ::grpc::Status MetricPublish(::grpc::ServerContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response);
+    // Collector -> Manager
     virtual ::grpc::Status MetricCollect(::grpc::ServerContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response);
   };
   template <class BaseClass>
