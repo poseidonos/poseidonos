@@ -38,11 +38,16 @@ TEST(TelemetryPublisher, PublishData_TestUpdateData)
     POSMetricValue v;
     v.gauge = 1;
     // given 1.
-    // int ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
+    int ret = tp.PublishData("cc", v, MT_GAUGE);
     // given 2.
     tp.StartPublishing();
     // when 2.
-    // ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
+    ret = tp.PublishData("cc", v, MT_GAUGE);
+    // when 3.
+    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
+    ret = tp.PublishMetric(m);
 }
 
 TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
@@ -69,26 +74,25 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     uint64_t cnt = m.GetCountValue();
     int64_t gg = m.GetGaugeValue();
 
-    int ret = 0;
     POSMetricValue v;
     v.gauge = 1;
     // given 1.
-    // ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    int ret = tp.PublishData("cc", v, MT_GAUGE);
     v.count = 0;
     // when 1.
-    // ret = tp.PublishData("cc", v, MT_COUNT); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    ret = tp.PublishData("cc", v, MT_COUNT);
     // when 2.
-    // ret = tp.PublishMetric(m); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    ret = tp.PublishMetric(m);
     // when 3.
     std::vector<POSMetric>* list = tp.AllocatePOSMetricVector();
     list->push_back(m);
     m.SetName("aaa");
     list->push_back(m);
     // when 4.
-    // ret = tp.PublishDataList(list); // TODO: Activate after MetricManager applied to TelemetryManager Server
-    delete list;
+    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
+    ret = tp.PublishDataList(list);
     // then 2.
-    // EXPECT_EQ(0, ret);
+    EXPECT_EQ(0, ret);
 
     // USAGE SAMPLE FOR PUBLISH METRIC LIST
     POSMetricVector* metricList = tp.AllocatePOSMetricVector();
@@ -100,11 +104,11 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
         metric.AddLabel("label0", "k1"); // optional
         metric.AddLabel("label1", "k2"); // optional
         metricList->push_back(metric);
-        // tp.PublishDataList(metricList); // TODO: Activate after MetricManager applied to TelemetryManager Server
     }
+    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
+    tp.PublishDataList(metricList);
     ////////////////////////////////////////
     tp.StopUsingDataPool();
-    delete metricList;
     delete igp;
 }
 
