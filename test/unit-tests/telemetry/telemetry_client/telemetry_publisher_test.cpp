@@ -38,11 +38,11 @@ TEST(TelemetryPublisher, PublishData_TestUpdateData)
     POSMetricValue v;
     v.gauge = 1;
     // given 1.
-    int ret = tp.PublishData("cc", v, MT_GAUGE);
+    // int ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
     // given 2.
     tp.StartPublishing();
     // when 2.
-    ret = tp.PublishData("cc", v, MT_GAUGE);
+    // ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
 }
 
 TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
@@ -69,15 +69,16 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     uint64_t cnt = m.GetCountValue();
     int64_t gg = m.GetGaugeValue();
 
+    int ret = 0;
     POSMetricValue v;
     v.gauge = 1;
     // given 1.
-    int ret = tp.PublishData("cc", v, MT_GAUGE);
+    // ret = tp.PublishData("cc", v, MT_GAUGE); // TODO: Activate after MetricManager applied to TelemetryManager Server
     v.count = 0;
     // when 1.
-    ret = tp.PublishData("cc", v, MT_COUNT);
+    // ret = tp.PublishData("cc", v, MT_COUNT); // TODO: Activate after MetricManager applied to TelemetryManager Server
     // when 2.
-    ret = tp.PublishMetric(m);
+    // ret = tp.PublishMetric(m); // TODO: Activate after MetricManager applied to TelemetryManager Server
     // when 3.
     std::vector<POSMetric>* list = tp.AllocatePOSMetricVector();
     list->push_back(m);

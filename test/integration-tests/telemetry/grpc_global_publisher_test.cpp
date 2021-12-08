@@ -28,6 +28,7 @@ TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServer)
 
     // Then 1
     // EXPECT_EQ(0, ret); // TODO: Activate after MetricManager applied to TelemetryManager Server
+    delete v;
     delete grpcClient;
     delete tmServer;
 }
