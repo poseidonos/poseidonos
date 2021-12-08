@@ -40,6 +40,7 @@
 #include "src/helper/file/directory.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
+#include "src/master_context/instance_id_provider.h"
 
 namespace pos
 {
@@ -50,7 +51,10 @@ Logger::Logger(void)
         MakeDir(preferences.LogDir());
     }
 
-    const string pattern = "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@"; // Format: [2021-12-01 07:00:01.234134][EventID]][LogLevel] Message at SourceFile and LineNumber
+    id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
+
+    // Format: [POSInstanceId][2021-12-01 07:00:01.234134][EventID]][LogLevel] Message at SourceFile and LineNumber
+    const string pattern = '[' + std::to_string(instanceId) + ']' + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
     std::vector<spdlog::sink_ptr> sinks;
     auto console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::trace);
