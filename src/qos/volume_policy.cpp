@@ -261,6 +261,8 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
 
     if (allNotMetMinPolicy == true && allExceedThreshold == true && allMetMinPolicy == true)
     {
+        qosContext->SetApplyCorrection(true);
+        qosCorrection.SetCorrectionType(QosCorrection_VolumeThrottle, true);
         return;
     }
     else if (allNotMetMinPolicy == true)

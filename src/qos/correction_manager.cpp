@@ -35,8 +35,8 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/qos/throttling_policy_deficit.h"
 #include "src/qos/reactor_heap.h"
+#include "src/qos/throttling_policy_deficit.h"
 
 namespace pos
 {
@@ -48,8 +48,8 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx, QosManager* qosManager)
-    : qosContext(qosCtx),
-    qosManager(qosManager)
+: qosContext(qosCtx),
+  qosManager(qosManager)
 {
     reactorMinHeap = new ReactorHeap();
     nextManagerType = QosInternalManager_Unknown;
@@ -296,12 +296,21 @@ QosCorrectionManager::_HandleMaxThrottling(void)
         {
             currentBwWeight = currentBwWeight >= userSetBwWeight ? userSetBwWeight : currentBwWeight;
             currentIopsWeight = currentIopsWeight >= userSetIopsWeight ? userSetIopsWeight : currentIopsWeight;
+            if (currentBwWeight == 0)
+            {
+                currentBwWeight = userSetBwWeight;
+            }
+            if (currentIopsWeight == 0)
+            {
+                currentIopsWeight = userSetIopsWeight;
+            }
         }
         else
         {
             currentBwWeight = userSetBwWeight;
             currentIopsWeight = userSetIopsWeight;
         }
+
         uint64_t newBwLimit = currentBwWeight / totalConnection;
         uint64_t newIopsLimit = currentIopsWeight / totalConnection;
 
