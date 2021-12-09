@@ -37,14 +37,34 @@ namespace pos
 ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCount, TelemetryPublisher* tp)
 : MetaFsIoHandlerBase(threadId, coreId)
 {
-    tophalfHandler = new MioHandler(threadId, coreId, coreCount, tp);
-    bottomhalfHandler = new MpioHandler(threadId, coreId, tp);
+    telemetryPublisher = tp;
+    nameForTelemetry = "metafs_io_" + to_string(coreId);
+    if (nullptr == telemetryPublisher)
+    {
+        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
+        needToDeleteTelemetryPublisher = true;
+    }
+    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+
+    tophalfHandler = new MioHandler(threadId, coreId, coreCount, telemetryPublisher);
+    bottomhalfHandler = new MpioHandler(threadId, coreId, telemetryPublisher);
 
     tophalfHandler->BindPartialMpioHandler(bottomhalfHandler);
 }
 
 ScalableMetaIoWorker::~ScalableMetaIoWorker(void)
 {
+    if (nullptr != telemetryPublisher)
+    {
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
+
+        if (true == needToDeleteTelemetryPublisher)
+        {
+            delete telemetryPublisher;
+            telemetryPublisher = nullptr;
+        }
+    }
+
     delete tophalfHandler;
     delete bottomhalfHandler;
 }

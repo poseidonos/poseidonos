@@ -36,6 +36,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <chrono>
 
 #include "metafs_io_multi_q.h"
 #include "mfs_io_handler_base.h"
@@ -55,20 +56,20 @@ public:
     MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
         MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp);
-    ~MioHandler(void);
+    virtual ~MioHandler(void);
 
-    void TophalfMioProcessing(void);
-    void BindPartialMpioHandler(MpioHandler* ptMpioHandler);
+    virtual void TophalfMioProcessing(void);
+    virtual void BindPartialMpioHandler(MpioHandler* ptMpioHandler);
 
-    bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
-    Mio* DispatchMio(MetaFsIoRequest& reqMsg);
-    void ExecuteMio(Mio& mio);
+    virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
+    virtual void ExecuteMio(Mio& mio);
 
-    bool AddArrayInfo(int arrayId);
-    bool RemoveArrayInfo(int arrayId);
+    virtual bool AddArrayInfo(int arrayId);
+    virtual bool RemoveArrayInfo(int arrayId);
 
     // for test
-    bool AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker);
+    virtual bool AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker);
 
 private:
     void _HandleIoSQ(void);
@@ -110,6 +111,5 @@ private:
 
     TelemetryPublisher* telemetryPublisher = nullptr;
     std::chrono::steady_clock::time_point lastTime;
-    std::string nameForTelemetry = "";
 };
 } // namespace pos

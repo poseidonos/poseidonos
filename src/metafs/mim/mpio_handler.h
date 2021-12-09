@@ -38,6 +38,7 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 #include <string>
+#include <chrono>
 
 namespace pos
 {
@@ -47,11 +48,11 @@ public:
     explicit MpioHandler(int threadId, int coreId,
                     TelemetryPublisher* tp = nullptr,
                     MetaFsIoQ<Mpio*>* doneQ = nullptr);
-    ~MpioHandler(void);
+    virtual ~MpioHandler(void);
 
-    void EnqueuePartialMpio(Mpio* mpio);
-    void BindMpioPool(MpioPool* mpioPool);
-    void BottomhalfMioProcessing(void);
+    virtual void EnqueuePartialMpio(Mpio* mpio);
+    virtual void BindMpioPool(MpioPool* mpioPool);
+    virtual void BottomhalfMioProcessing(void);
 
 private:
     void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
@@ -62,6 +63,5 @@ private:
     int coreId;
     TelemetryPublisher* telemetryPublisher = nullptr;
     std::chrono::steady_clock::time_point lastTime;
-    std::string nameForTelemetry = "";
 };
 } // namespace pos

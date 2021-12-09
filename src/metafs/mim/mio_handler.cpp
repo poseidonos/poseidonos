@@ -71,10 +71,6 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
-    nameForTelemetry = "metafs_mio_" + to_string(coreId);
-    if (nullptr == telemetryPublisher)
-        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
-    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
     lastTime = std::chrono::steady_clock::now();
 
     this->bottomhalfHandler = nullptr;
@@ -100,8 +96,6 @@ MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* io
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     lastTime = std::chrono::steady_clock::now();
-    if (nullptr != telemetryPublisher)
-        TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
 
     this->bottomhalfHandler = nullptr;
 }
@@ -127,9 +121,6 @@ MioHandler::~MioHandler(void)
 
     if (nullptr != ioSQ)
         delete ioSQ;
-
-    if (nullptr != telemetryPublisher)
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
 }
 
 void
@@ -195,7 +186,7 @@ MioHandler::_SendMetric(uint32_t size)
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
         POSMetric metric(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_COUNT);
-        metric.AddLabel("thread_name", nameForTelemetry);
+        metric.AddLabel("thread_name", to_string(coreId));
         metric.SetCountValue(size);
         telemetryPublisher->PublishMetric(metric);
         lastTime = currentTime;

@@ -49,10 +49,6 @@ MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaF
     if (nullptr == doneQ)
         partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
 
-    nameForTelemetry = "metafs_mpio_" + to_string(coreId);
-    if (nullptr == telemetryPublisher)
-        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
-    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
     lastTime = std::chrono::steady_clock::now();
 }
 
@@ -63,9 +59,6 @@ MpioHandler::~MpioHandler(void)
 
     if (nullptr != partialMpioDoneQ)
         delete partialMpioDoneQ;
-
-    if (nullptr != telemetryPublisher)
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
 }
 
 void
@@ -120,7 +113,7 @@ MpioHandler::_SendMetric(uint32_t size)
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
         POSMetric metric(TEL40101_METAFS_PENDING_MPIO_CNT, POSMetricTypes::MT_COUNT);
-        metric.AddLabel("thread_name", nameForTelemetry);
+        metric.AddLabel("thread_name", to_string(coreId));
         metric.SetCountValue(size);
         telemetryPublisher->PublishMetric(metric);
         lastTime = currentTime;

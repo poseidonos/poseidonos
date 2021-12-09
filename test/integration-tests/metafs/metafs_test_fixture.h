@@ -60,7 +60,8 @@ protected:
     MetaFsIoApi* io = nullptr;
     MetaFsWBTApi* wbt = nullptr;
     NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
-    NiceMock<MockTelemetryPublisher>* tp = nullptr;
+    NiceMock<MockTelemetryPublisher>* tpForMetaIo = nullptr;
+    NiceMock<MockTelemetryPublisher>* tpForMetafs = nullptr;
 
     bool isLoaded = false;
     int arrayId = INT32_MAX;

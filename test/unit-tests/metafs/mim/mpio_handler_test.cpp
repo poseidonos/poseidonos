@@ -78,6 +78,7 @@ TEST(MpioHandler, Normal)
     delete handler;
     delete pool;
     delete mpio;
+    delete tp;
 }
 
 } // namespace pos

@@ -48,7 +48,8 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     arrayId = 0;
     arrayName = "TestArray";
 
-    tp = new NiceMock<MockTelemetryPublisher>;
+    tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
+    tpForMetafs = new NiceMock<MockTelemetryPublisher>;
 
     _SetArrayInfo();
     _SetThreadModel();
@@ -60,12 +61,14 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     io = new MetaFsIoApi(arrayId, ctrl, storage);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
 
-    metaFs = new MetaFs(arrayInfo, isLoaded, mgmt, ctrl, io, wbt, storage, tp);
+    metaFs = new MetaFs(arrayInfo, isLoaded, mgmt, ctrl, io, wbt, storage, tpForMetafs);
 }
 
 MetaFsTestFixture::~MetaFsTestFixture(void)
 {
     delete arrayInfo;
+    delete metaFs;
+    MetaFsServiceSingleton::ResetInstance();
 }
 
 void
@@ -92,7 +95,7 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
     cpu_set_t workerCPUSet = _GetCpuSet(1, 2);
 
-    MetaFsServiceSingleton::Instance()->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tp);
+    MetaFsServiceSingleton::Instance()->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 
 cpu_set_t

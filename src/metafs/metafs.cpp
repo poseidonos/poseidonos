@@ -97,7 +97,11 @@ MetaFs::~MetaFs(void)
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
 
     if (nullptr != telemetryPublisher)
+    {
         TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
+        delete telemetryPublisher;
+        telemetryPublisher = nullptr;
+    }
 
     if (nullptr != mgmt)
         delete mgmt;

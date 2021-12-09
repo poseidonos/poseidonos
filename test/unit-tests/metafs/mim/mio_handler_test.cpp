@@ -90,7 +90,7 @@ public:
         ioSQ = new NiceMock<MockMetaFsIoQ<MetaFsIoRequest*>>;
         ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
         doneQ = new MockMetaFsIoQ<Mpio*>();
-        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, tp, doneQ);
+        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, nullptr, doneQ);
         mpioPool = new NiceMock<MockMpioPool>(POOL_SIZE);
         mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
@@ -104,7 +104,7 @@ public:
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
         io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss);
 
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, tp);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
         handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool, tp);
     }
@@ -116,8 +116,7 @@ public:
         delete metaFs;
         delete arrayInfo;
         delete bottomhalfHandler;
-
-        TelemetryClientSingleton::ResetInstance();
+        delete tp;
     }
 
 protected:
@@ -153,7 +152,6 @@ TEST_F(MioHandlerTestFixture, Normal)
     EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
     EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
     EXPECT_CALL(*ioSQ, Dequeue).WillRepeatedly(Return(msg));
-    EXPECT_CALL(*doneQ, Init);
     EXPECT_CALL(*doneQ, GetItemCnt).WillRepeatedly(Return(0));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
@@ -193,7 +191,6 @@ TEST_F(MioHandlerTestFixture, Normal_PushToRetryQueue)
     EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
     EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
     EXPECT_CALL(*ioSQ, Dequeue).Times(MAX_COUNT).WillRepeatedly(Return(msg));
-    EXPECT_CALL(*doneQ, Init);
     EXPECT_CALL(*checker, IsRangeOverlapConflicted).WillRepeatedly(Return(true));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);
