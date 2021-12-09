@@ -108,12 +108,6 @@ QosManager::QosManager(void)
     {
         assert(0);
     }
-    ret = configManager.GetValue("fe_qos", "user_initiator", &enabled,
-        CONFIG_TYPE_BOOL);
-    if (ret == (int)POS_EVENT_ID::SUCCESS)
-    {
-        qosVolumeManager->SetUserInitiator(enabled);
-    }
 }
 
 /* --------------------------------------------------------------------------*/

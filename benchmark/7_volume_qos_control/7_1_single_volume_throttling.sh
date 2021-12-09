@@ -22,7 +22,6 @@ start_and_bringup()
 	echo "clean initiator complete"
 	sudo cp ../1_psd_bringup/pos.conf /etc/pos/
 	jq -r '.fe_qos.enable = true' /etc/pos/pos.conf > /tmp/temp.json && mv /tmp/temp.json /etc/pos/pos.conf
-	jq -r '.fe_qos.user_initiator = true' /etc/pos/pos.conf > /tmp/temp.json && mv /tmp/temp.json /etc/pos/pos.conf
 
 	sudo ../1_psd_bringup/1_start_pos.sh
 

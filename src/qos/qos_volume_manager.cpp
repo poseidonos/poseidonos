@@ -70,6 +70,7 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos)
             SetVolumeLimit(reactor, volId, DEFAULT_MAX_BW_IOPS, true);
             pendingIO[reactor][volId] = 0;
         }
+        previousDelay[reactor] = 0;
     }
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "");
     try
@@ -83,7 +84,6 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos)
         assert(0);
     }
     pthread_rwlock_init(&nqnLock, nullptr);
-    userInitEnabled = false;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -144,11 +144,6 @@ QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock)
     return nqnMap;
 }
 
-void
-QosVolumeManager::SetUserInitiator(bool enabled)
-{
-    userInitEnabled = enabled;
-}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -159,10 +154,6 @@ QosVolumeManager::SetUserInitiator(bool enabled)
 bool
 QosVolumeManager::_RateLimit(uint32_t reactor, int volId)
 {
-    if (userInitEnabled == false)
-    {
-        return false;
-    }
     return bwIopsRateLimit->IsLimitExceeded(reactor, volId);
 }
 
@@ -200,7 +191,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     currentBw = volumeQosParam[reactorId][volId].currentBW;
     currentIO = volumeQosParam[reactorId][volId].currentIOs;
     if ((pendingIO[reactorId][volId] == 0) &&
-        (_RateLimit(reactorId, volId) == false && _GlobalRateLimit(reactorId, volId) == false))
+        (_GlobalRateLimit(reactorId, volId) == false))
     {
         currentBw = currentBw + volIo->length;
         currentIO++;
@@ -215,7 +206,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
         _EnqueueVolumeUbio(reactorId, volId, volIo);
         while (!IsExitQosSet())
         {
-             if (_RateLimit(reactorId, volId) == true || _GlobalRateLimit(reactorId, volId) == true)
+             if (_GlobalRateLimit(reactorId, volId) == true)
             {
                 break;
             }
@@ -432,10 +423,6 @@ bool
 QosVolumeManager::_GlobalRateLimit(uint32_t reactor, int volId)
 {
     bool results = false;
-    if (userInitEnabled == true)
-    {
-        return false;
-    }
     if ((remainingVolumeBw[volId] < 0) || (remainingVolumeIops[volId] < 0))
     {
         results = true;
@@ -514,8 +501,8 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
     {
         return 0;
     }
-    double offset = (double)(now - next_tick) / param->qosTimeSlice;
-    offset = 1;
+    double offset = (double)(now - next_tick + previousDelay[reactor]) / param->qosTimeSlice;
+    offset = offset + 1.0;
     volList[reactor].clear();
     pthread_rwlock_rdlock(&nqnLock);
     for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
@@ -541,9 +528,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             _EnqueueVolumeParameter(reactor, volId, offset);
             while (!IsExitQosSet())
             {
-                if (_RateLimit(reactor, volId) == true ||
-                    _GlobalRateLimit(reactor, volId) == true)
-                   
+                if (_GlobalRateLimit(reactor, volId) == true)
                 {
                     break;
                 }
@@ -565,7 +550,9 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
         }
     }
     qosContext->SetReactorProcessed(reactor, true);
-    param->nextTimeStamp = next_tick + param->qosTimeSlice / POLLING_FREQ_PER_QOS_SLICE;
+    uint64_t after = SpdkConnection::SpdkGetTicks();
+    previousDelay[reactor] = after - now;
+    param->nextTimeStamp = after + param->qosTimeSlice / POLLING_FREQ_PER_QOS_SLICE;
     return retVal;
 }
 

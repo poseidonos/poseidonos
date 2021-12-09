@@ -73,7 +73,6 @@ public:
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap);
     void ResetVolumeThrottling(int volId);
-    void SetUserInitiator(bool enabled);
 
 private:
     bool _GlobalRateLimit(uint32_t reactor, int volId);
@@ -94,13 +93,13 @@ private:
     std::atomic<int64_t> volReactorIopsWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     uint64_t pendingIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     bool feQosEnabled;
-    bool userInitEnabled;
     QosContext* qosContext;
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
     IoQueue<pos_io*>* ioQueue;
     static std::atomic<int64_t> remainingVolumeBw[MAX_VOLUME_COUNT];
     static std::atomic<int64_t> remainingVolumeIops[MAX_VOLUME_COUNT];
+    uint64_t previousDelay[M_MAX_REACTORS];
     std::mutex subsysVolMapLock;
     pthread_rwlock_t nqnLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
