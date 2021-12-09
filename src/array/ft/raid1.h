@@ -46,9 +46,8 @@ class RebuildBehavior;
 class Raid1 : public Method
 {
 public:
-    Raid1(const PartitionPhysicalSize* physicalSize);
+    explicit Raid1(const PartitionPhysicalSize* pSize);
     virtual ~Raid1();
-
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;

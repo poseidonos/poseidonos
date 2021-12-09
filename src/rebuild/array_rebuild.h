@@ -53,8 +53,9 @@ class ArrayRebuild
 {
 public:
     ArrayRebuild(void) {}
-    ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
-        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory);
+    ArrayRebuild(string arrayName, uint32_t arrayId,
+            ArrayDevice* dev, RebuildComplete cb,
+            list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory);
     virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
         list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
     virtual ~ArrayRebuild(void);

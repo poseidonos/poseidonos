@@ -51,12 +51,11 @@ class Raid5 : public Method
     friend class ParityLocationWbtCommand;
 
 public:
-    Raid5(const PartitionPhysicalSize* physicalSize,
-        const uint64_t maxParityBufferCountPerNuma,
-        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
-        MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
+    explicit Raid5(const PartitionPhysicalSize* pSize);
     virtual ~Raid5();
-    virtual bool AllocParityPools();
+    virtual bool AllocParityPools(uint64_t maxParityBufferCntPerNuma,
+        AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
+        MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
     virtual void ClearParityPools();
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
@@ -73,8 +72,6 @@ private:
     void _XorBlocks(void* dst, const void* src, uint32_t memSize);
     void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
     uint32_t _GetParityOffset(StripeId lsid);
-
-    const uint64_t MAX_PARITY_BUFFER_COUNT_PER_NUMA;
 
     vector<BufferPool*> parityPools;
 

@@ -74,7 +74,7 @@ MetaFsTestFixture::~MetaFsTestFixture(void)
 void
 MetaFsTestFixture::_SetArrayInfo(void)
 {
-    memset(ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::PARTITION_TYPE_MAX);
+    memset(ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::TYPE_COUNT);
     ptnSize[PartitionType::META_NVM].totalStripes = 2048;
     ptnSize[PartitionType::META_NVM].blksPerStripe = 64;
     ptnSize[PartitionType::META_SSD].totalStripes = 293888;

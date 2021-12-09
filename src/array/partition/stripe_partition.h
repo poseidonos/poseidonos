@@ -53,29 +53,21 @@ class StripePartition : public Partition, public IRecover, public RebuildTarget
     friend class ParityLocationWbtCommand;
 
 public:
-    StripePartition(string array,
-                    uint32_t arrayIndex,
-                    PartitionType type,
-                    PartitionPhysicalSize physicalSize,
+    StripePartition(PartitionType type,
                     vector<ArrayDevice *> devs,
-                    Method *method);
-    StripePartition(string array,
-                    uint32_t arrayIndex,
-                    PartitionType type,
-                    PartitionPhysicalSize physicalSize,
-                    vector<ArrayDevice *> devs,
-                    Method *method,
-                    IODispatcher* ioDispatcher);
-    virtual ~StripePartition();
+                    RaidTypeEnum raid);
+    virtual ~StripePartition(void);
+    virtual int Create(uint64_t startLba, uint64_t totalNvmBlks);
+    void RegisterService(IPartitionServices* svc) override;
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
     int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
     int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) override;
     unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
-    void Format(void) override;
     bool IsByteAccessSupported(void) override;
     RaidState GetRaidState(void) override;
+    Method* GetMethod(void) { return method; }
 
 private:
     FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);
@@ -83,11 +75,12 @@ private:
     int _ConvertToPhysical(list<PhysicalWriteEntry>& dst, FtWriteEntry& src);
     list<BufferEntry> _SpliceBuffer(
         list<BufferEntry>& src, uint32_t start, uint32_t remain);
-    int _SetLogicalSize(void);
+    int _SetPhysicalAddress(uint64_t startLba);
+    void _SetLogicalAddress(void);
+    int _SetMethod(uint64_t totalNvmBlks);
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
-    void _Trim(void);
-    int _CheckTrimValue(void);
-    IODispatcher* ioDispatcher_;
+    RaidTypeEnum raidType;
+    Method* method = nullptr;
 };
 
 } // namespace pos

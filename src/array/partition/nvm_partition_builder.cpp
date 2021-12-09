@@ -30,105 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "partition.h"
-
-#include "src/include/array_config.h"
-#include "../device/array_device.h"
-#include "src/logger/logger.h"
+#include "nvm_partition_builder.h"
+#include "src/array/partition/nvm_partition.h"
 #include "src/include/pos_event_id.h"
+#include "src/include/array_config.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-Partition::Partition(vector<ArrayDevice*> d, PartitionType type)
-: devs(d),
-  type(type)
-{
-}
-
-// LCOV_EXCL_START
-Partition::~Partition(void)
-{
-}
-// LCOV_EXCL_STOP
 
 int
-Partition::FindDevice(ArrayDevice* target)
+NvmPartitionBuilder::Build(uint64_t startLba, Partitions& out)
 {
-    int i = 0;
-    for (ArrayDevice* dev : devs)
+    vector<ArrayDevice*> nvm {option.nvm};
+    NvmPartition* impl = new NvmPartition(option.partitionType, nvm);
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "NvmPartitionBuilder::Build, part:{} blksPerChunk:{}",
+        PARTITION_TYPE_STR[option.partitionType], option.blksPerChunk);
+    int ret = impl->Create(startLba, option.blksPerChunk);
+    if (ret != 0)
     {
-        if (dev == target)
-        {
-            return i;
-        }
-        i++;
+        return ret;
     }
-
-    return -1;
-}
-
-const PartitionLogicalSize*
-Partition::GetLogicalSize(void)
-{
-    return &logicalSize;
-}
-
-const PartitionPhysicalSize*
-Partition::GetPhysicalSize(void)
-{
-    return &physicalSize;
-}
-
-bool
-Partition::IsValidLba(uint64_t lba)
-{
-    if (physicalSize.startLba > lba || lastLba <= lba)
+    out[option.partitionType] = impl;
+    if (next != nullptr)
     {
-        return false;
+        uint64_t nextLba = impl->GetLastLba();
+        return next->Build(nextLba, out);
     }
-    else
-    {
-        return true;
-    }
-}
-
-bool
-Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
-{
-    if (lsa.stripeId < logicalSize.totalStripes && lsa.offset < logicalSize.blksPerStripe)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool
-Partition::_IsValidEntry(const LogicalWriteEntry& entry)
-{
-    if (entry.addr.stripeId < logicalSize.totalStripes &&
-        entry.addr.offset + entry.blkCnt <= logicalSize.blksPerStripe &&
-        entry.blkCnt >= logicalSize.minWriteBlkCnt)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void
-Partition::_UpdateLastLba(void)
-{
-    lastLba = physicalSize.startLba +
-        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
-        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
-        physicalSize.totalSegments;
-
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
+    return 0;
 }
 
 } // namespace pos

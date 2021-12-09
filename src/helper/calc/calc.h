@@ -32,46 +32,11 @@
 
 #pragma once
 
-#include "src/metafs/metafs.h"
+#include <stdint.h>
 
-#include <string>
-
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-
-using ::testing::NiceMock;
-
-namespace pos
+template<typename T>
+inline auto
+DIV_ROUND_UP(T n, T d)
 {
-class MetaFsTestFixture
-{
-public:
-    MetaFsTestFixture(void);
-    virtual ~MetaFsTestFixture(void);
-
-protected:
-    NiceMock<MockIArrayInfo>* arrayInfo = nullptr;
-
-    MetaFs* metaFs = nullptr;
-
-    MetaFsManagementApi* mgmt = nullptr;
-    MetaFsFileControlApi* ctrl = nullptr;
-    MetaFsIoApi* io = nullptr;
-    MetaFsWBTApi* wbt = nullptr;
-    NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetaIo = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetafs = nullptr;
-
-    bool isLoaded = false;
-    int arrayId = INT32_MAX;
-    std::string arrayName = "";
-    PartitionLogicalSize ptnSize[PartitionType::TYPE_COUNT];
-
-private:
-    void _SetArrayInfo(void);
-    void _SetThreadModel(void);
-    cpu_set_t _GetCpuSet(int from, int to);
-};
-
-} // namespace pos
+    return (n + d - 1) / d;
+}

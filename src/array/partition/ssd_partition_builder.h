@@ -30,57 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "array_interface.h"
-#include "src/include/pos_event_id.h"
+#pragma once
+
+#include "src/include/partition_type.h"
+#include "src/include/raid_type.h"
+#include "src/array/partition/partition.h"
 #include "src/logger/logger.h"
+
+#include <vector>
+using namespace std;
 
 namespace pos
 {
-void ArrayInterface::AddTranslator(PartitionType type, ITranslator* trans)
+class ArrayDevice;
+
+class SsdPartitionOptions
 {
-    if (translator.find(type) == translator.end())
+public:
+    SsdPartitionOptions(PartitionType type, RaidTypeEnum raid, vector<ArrayDevice*> devs, ArrayDevice* dev)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG,
-            "ArrayInterface::AddTranslator, type:{}, trans:{}, size:{}",
-            type, (void*)(trans), translator.size());
-        translator.emplace(type, trans);
+        partitionType = type;
+        raidType = raid;
+        devices = devs;
+        nvm = dev;
     }
-}
 
-void ArrayInterface::AddRecover(PartitionType type, IRecover* recov)
-{
-    if (recover.find(type) == recover.end())
+    SsdPartitionOptions(const SsdPartitionOptions& opt)
     {
-        recover.emplace(type, recov);
+        partitionType = opt.partitionType;
+        raidType = opt.raidType;
+        devices = opt.devices;
+        nvm = opt.nvm;
     }
-}
 
-void ArrayInterface::AddRebuildTarget(RebuildTarget* tgt)
-{
-    rebuildTargets.push_back(tgt);
-}
+    PartitionType partitionType;
+    RaidTypeEnum raidType = RaidTypeEnum::NONE;
+    vector<ArrayDevice*> devices;
+    ArrayDevice* nvm = nullptr;
+};
 
-void ArrayInterface::ClearInterface(void)
+class SsdPartitionBuilder
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG,
-        "ArrayInterface::ClearInterface");
-    translator.clear();
-    recover.clear();
-    rebuildTargets.clear();
-}
+public:
+    explicit SsdPartitionBuilder(SsdPartitionOptions opt)
+    : option(opt)
+    {
+    }
+    int Build(uint64_t startLba, Partitions& out);
+    void SetNext(SsdPartitionBuilder* builder) { next = builder; }
 
-list<RebuildTarget*> ArrayInterface::GetRebuildTargets(void)
-{
-    return rebuildTargets;
-}
-
-map<PartitionType, ITranslator*> ArrayInterface::GetTranslator(void)
-{
-    return translator;
-}
-
-map<PartitionType, IRecover*> ArrayInterface::GetRecover(void)
-{
-    return recover;
-}
+private:
+    SsdPartitionBuilder* next = nullptr;
+    SsdPartitionOptions option;
+};
 } // namespace pos

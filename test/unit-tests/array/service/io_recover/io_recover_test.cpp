@@ -52,7 +52,7 @@ TEST(IORecover, GetRecoverMethod_testWhenMethodIsSet)
         .stripesPerSegment = 20,
         .totalSegments = 30};
     Raid1* method = new Raid1(&physicalSize);
-    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
+    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
     recover.emplace(mockPartitionType, mockPart);
     unsigned int arrayIndex = 0;
     ioRecover.Register(arrayIndex, recover);
@@ -82,8 +82,7 @@ TEST(IORecover, Register_testIfArgumentsAreValid)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 30};
-    Raid1* method = new Raid1(&physicalSize);
-    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
+    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
     recover.emplace(mockPartitionType, mockPart);
 
     // When
@@ -109,8 +108,7 @@ TEST(IORecover, Unregister_testIfArgumentsAreValid)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 30};
-    Raid1* method = new Raid1(&physicalSize);
-    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
+    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
     recover.emplace(mockPartitionType, mockPart);
     unsigned int arrayIndex = 0;
     ioRecover.Register(arrayIndex, recover);

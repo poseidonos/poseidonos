@@ -42,22 +42,15 @@
 
 namespace pos
 {
-Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
-    const uint64_t maxParityBufferCountPerNuma,
-    AffinityManager* affinityManager,
-    MemoryManager* memoryManager)
-: MAX_PARITY_BUFFER_COUNT_PER_NUMA(maxParityBufferCountPerNuma),
-  affinityManager(affinityManager),
-  memoryManager(memoryManager)
+
+Raid5::Raid5(const PartitionPhysicalSize* pSize)
 {
-    raidType = RaidTypeEnum::RAID5;
     ftSize_ = {
         .minWriteBlkCnt = 0,
-        .backupBlkCnt = physicalSize->blksPerChunk,
-        .blksPerChunk = physicalSize->blksPerChunk,
-        .blksPerStripe =
-            physicalSize->chunksPerStripe * physicalSize->blksPerChunk,
-        .chunksPerStripe = physicalSize->chunksPerStripe};
+        .backupBlkCnt = pSize->blksPerChunk,
+        .blksPerChunk = pSize->blksPerChunk,
+        .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,
+        .chunksPerStripe = pSize->chunksPerStripe};
     ftSize_.minWriteBlkCnt = ftSize_.blksPerStripe - ftSize_.backupBlkCnt;
     _BindRecoverFunc();
 }
@@ -123,8 +116,6 @@ Raid5::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
     ftEntry.addr = {.stripeId = src.addr.stripeId,
         .offset = 0};
     ftEntry.buffers = *(src.buffers);
-
-    // 버퍼의 크기는 chunk 크기와 같아야 함
     BufferEntry parity = _AllocBuffer();
     _ComputeParity(parity, *(src.buffers));
     uint32_t parityOffset = _GetParityOffset(ftEntry.addr.stripeId);
@@ -231,8 +222,11 @@ Raid5::_RebuildData(void* dst, void* src, uint32_t dstSize)
 }
 
 bool
-Raid5::AllocParityPools()
+Raid5::AllocParityPools(uint64_t maxParityBufferCntPerNuma,
+        AffinityManager* affMgr, MemoryManager* memoryMgr)
 {
+    affinityManager = affMgr;
+    memoryManager = memoryMgr;
     const string NUMA_PREFIX = "_NUMA_";
     const uint64_t ARRAY_CHUNK_SIZE = ArrayConfig::BLOCK_SIZE_BYTE
         * ArrayConfig::BLOCKS_PER_CHUNK;
@@ -245,7 +239,7 @@ Raid5::AllocParityPools()
         BufferInfo info = {
             .owner = typeid(this).name() + NUMA_PREFIX + to_string(numa),
             .size = ARRAY_CHUNK_SIZE,
-            .count = MAX_PARITY_BUFFER_COUNT_PER_NUMA
+            .count = maxParityBufferCntPerNuma
         };
         BufferPool* pool = memoryManager->CreateBufferPool(info, numa);
         if (pool == nullptr)

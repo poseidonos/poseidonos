@@ -372,7 +372,7 @@ ArrayManager::ResetMbr(void)
             result = array->GetArray()->CheckDeletable();
             if (result != 0)
             {
-                POS_TRACE_WARN(deleteResult, "Cannot delete array " + iter.first);
+                POS_TRACE_WARN(result, "Cannot delete array " + iter.first);
                 return result;
             }
         }

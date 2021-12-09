@@ -32,46 +32,37 @@
 
 #pragma once
 
-#include "src/metafs/metafs.h"
+#include "i_partition_services.h"
+#include "src/include/partition_type.h"
+#include "src/array/service/io_translator/i_translator.h"
+#include "src/array/service/io_recover/i_recover.h"
+#include "src/array/rebuild/rebuild_target.h"
 
-#include <string>
 
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
+#include <map>
+#include <list>
 
-using ::testing::NiceMock;
+using namespace std;
 
 namespace pos
 {
-class MetaFsTestFixture
+
+class PartitionServices : public IPartitionServices
 {
 public:
-    MetaFsTestFixture(void);
-    virtual ~MetaFsTestFixture(void);
-
-protected:
-    NiceMock<MockIArrayInfo>* arrayInfo = nullptr;
-
-    MetaFs* metaFs = nullptr;
-
-    MetaFsManagementApi* mgmt = nullptr;
-    MetaFsFileControlApi* ctrl = nullptr;
-    MetaFsIoApi* io = nullptr;
-    MetaFsWBTApi* wbt = nullptr;
-    NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetaIo = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetafs = nullptr;
-
-    bool isLoaded = false;
-    int arrayId = INT32_MAX;
-    std::string arrayName = "";
-    PartitionLogicalSize ptnSize[PartitionType::TYPE_COUNT];
+    virtual ~PartitionServices(void) = default;
+    virtual void AddTranslator(PartitionType type, ITranslator* trans) override;
+    virtual void AddRecover(PartitionType type, IRecover* recov) override;
+    virtual void AddRebuildTarget(RebuildTarget* tgt) override;
+    virtual void Clear(void) override;
+    virtual map<PartitionType, ITranslator*> GetTranslator(void);
+    virtual map<PartitionType, IRecover*> GetRecover(void);
+    virtual list<RebuildTarget*> GetRebuildTargets(void);
 
 private:
-    void _SetArrayInfo(void);
-    void _SetThreadModel(void);
-    cpu_set_t _GetCpuSet(int from, int to);
+    map<PartitionType, ITranslator*> translator;
+    map<PartitionType, IRecover*> recover;
+    list<RebuildTarget*> rebuildTargets;
 };
 
 } // namespace pos

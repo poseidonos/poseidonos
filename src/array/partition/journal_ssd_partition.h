@@ -32,46 +32,33 @@
 
 #pragma once
 
-#include "src/metafs/metafs.h"
+#include <list>
+#include <memory>
+#include <vector>
 
-#include <string>
+#include "partition.h"
 
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-
-using ::testing::NiceMock;
+using namespace std;
 
 namespace pos
 {
-class MetaFsTestFixture
+
+class JournalSsdPartition : public Partition
 {
 public:
-    MetaFsTestFixture(void);
-    virtual ~MetaFsTestFixture(void);
-
-protected:
-    NiceMock<MockIArrayInfo>* arrayInfo = nullptr;
-
-    MetaFs* metaFs = nullptr;
-
-    MetaFsManagementApi* mgmt = nullptr;
-    MetaFsFileControlApi* ctrl = nullptr;
-    MetaFsIoApi* io = nullptr;
-    MetaFsWBTApi* wbt = nullptr;
-    NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetaIo = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetafs = nullptr;
-
-    bool isLoaded = false;
-    int arrayId = INT32_MAX;
-    std::string arrayName = "";
-    PartitionLogicalSize ptnSize[PartitionType::TYPE_COUNT];
+    explicit JournalSsdPartition(vector<ArrayDevice *> devs);
+    virtual ~JournalSsdPartition();
+    int Create(uint64_t startLba);
+    void RegisterService(IPartitionServices* svc) override;
+    int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
+    int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
+    int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
+    bool IsByteAccessSupported(void) override;
 
 private:
-    void _SetArrayInfo(void);
-    void _SetThreadModel(void);
-    cpu_set_t _GetCpuSet(int from, int to);
+    int _SetPhysicalAddress(uint64_t startLba);
+    void _SetLogicalAddress(void);
 };
 
 } // namespace pos

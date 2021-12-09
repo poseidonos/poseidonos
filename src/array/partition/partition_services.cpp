@@ -30,105 +30,62 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "partition.h"
-
-#include "src/include/array_config.h"
-#include "../device/array_device.h"
-#include "src/logger/logger.h"
+#include "partition_services.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-Partition::Partition(vector<ArrayDevice*> d, PartitionType type)
-: devs(d),
-  type(type)
+void PartitionServices::AddTranslator(PartitionType type, ITranslator* trans)
 {
-}
-
-// LCOV_EXCL_START
-Partition::~Partition(void)
-{
-}
-// LCOV_EXCL_STOP
-
-int
-Partition::FindDevice(ArrayDevice* target)
-{
-    int i = 0;
-    for (ArrayDevice* dev : devs)
+    if (translator.find(type) == translator.end())
     {
-        if (dev == target)
-        {
-            return i;
-        }
-        i++;
-    }
-
-    return -1;
-}
-
-const PartitionLogicalSize*
-Partition::GetLogicalSize(void)
-{
-    return &logicalSize;
-}
-
-const PartitionPhysicalSize*
-Partition::GetPhysicalSize(void)
-{
-    return &physicalSize;
-}
-
-bool
-Partition::IsValidLba(uint64_t lba)
-{
-    if (physicalSize.startLba > lba || lastLba <= lba)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG),
+            "PartitionServices::AddTranslator, type:{}, trans:{}, size:{}",
+            type, (void*)(trans), translator.size());
+        translator.emplace(type, trans);
     }
 }
 
-bool
-Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
+void PartitionServices::AddRecover(PartitionType type, IRecover* recov)
 {
-    if (lsa.stripeId < logicalSize.totalStripes && lsa.offset < logicalSize.blksPerStripe)
+    if (recover.find(type) == recover.end())
     {
-        return true;
-    }
-    else
-    {
-        return false;
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG),
+            "PartitionServices::AddRebuildTarget, type:{}, recov:{}",
+            type, (void*)(recov));
+        recover.emplace(type, recov);
     }
 }
 
-bool
-Partition::_IsValidEntry(const LogicalWriteEntry& entry)
+void PartitionServices::AddRebuildTarget(RebuildTarget* tgt)
 {
-    if (entry.addr.stripeId < logicalSize.totalStripes &&
-        entry.addr.offset + entry.blkCnt <= logicalSize.blksPerStripe &&
-        entry.blkCnt >= logicalSize.minWriteBlkCnt)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG),
+            "PartitionServices::AddRebuildTarget, tgt:{}",
+             (void*)(tgt));
+    rebuildTargets.push_back(tgt);
 }
 
-void
-Partition::_UpdateLastLba(void)
+void PartitionServices::Clear(void)
 {
-    lastLba = physicalSize.startLba +
-        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
-        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
-        physicalSize.totalSegments;
-
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "PartitionServices::Clear");
+    translator.clear();
+    recover.clear();
+    rebuildTargets.clear();
 }
 
+list<RebuildTarget*> PartitionServices::GetRebuildTargets(void)
+{
+    return rebuildTargets;
+}
+
+map<PartitionType, ITranslator*> PartitionServices::GetTranslator(void)
+{
+    return translator;
+}
+
+map<PartitionType, IRecover*> PartitionServices::GetRecover(void)
+{
+    return recover;
+}
 } // namespace pos

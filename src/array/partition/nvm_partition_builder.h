@@ -33,34 +33,49 @@
 #pragma once
 
 #include "src/include/partition_type.h"
-#include "src/array/service/io_translator/i_translator.h"
-#include "src/array/service/io_recover/i_recover.h"
-#include "src/array/rebuild/rebuild_target.h"
+#include "src/array/partition/partition.h"
+#include "src/logger/logger.h"
 
-#include <map>
-#include <list>
-
+#include <vector>
 using namespace std;
 
 namespace pos
 {
 
-class ArrayInterface
+class NvmPartitionOptions
 {
 public:
-    virtual ~ArrayInterface(void) = default;
-    virtual void AddTranslator(PartitionType type, ITranslator* trans);
-    virtual void AddRecover(PartitionType type, IRecover* recov);
-    virtual void AddRebuildTarget(RebuildTarget* tgt);
-    virtual void ClearInterface(void);
-    virtual map<PartitionType, ITranslator*> GetTranslator(void);
-    virtual map<PartitionType, IRecover*> GetRecover(void);
-    virtual list<RebuildTarget*> GetRebuildTargets(void);
-
-private:
-    map<PartitionType, ITranslator*> translator;
-    map<PartitionType, IRecover*> recover;
-    list<RebuildTarget*> rebuildTargets;
+    NvmPartitionOptions(PartitionType type, ArrayDevice* dev, uint32_t bpc)
+    {
+        partitionType = type;
+        nvm = dev;
+        blksPerChunk = bpc;
+    }
+    NvmPartitionOptions(const NvmPartitionOptions& opt)
+    {
+        partitionType = opt.partitionType;
+        nvm = opt.nvm;
+        blksPerChunk = opt.blksPerChunk;
+    }
+    PartitionType partitionType;
+    ArrayDevice* nvm = nullptr;
+    uint32_t blksPerChunk = 0;
 };
 
+
+class NvmPartitionBuilder
+{
+public:
+    explicit NvmPartitionBuilder(NvmPartitionOptions opt)
+    : option(opt)
+    {
+    }
+
+    int Build(uint64_t startLba, Partitions& out);
+    void SetNext(NvmPartitionBuilder* builder) { next = builder; }
+
+private:
+    NvmPartitionBuilder* next = nullptr;
+    NvmPartitionOptions option;
+};
 } // namespace pos

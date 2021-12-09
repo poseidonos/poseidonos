@@ -45,6 +45,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/master_context/instance_id_provider.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
 namespace pos
 {
@@ -52,16 +53,16 @@ const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
 : Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name),
-      DeviceManagerSingleton::Instance(), new PartitionManager(name, abr), new ArrayState(iState),
-      new ArrayInterface(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
+      DeviceManagerSingleton::Instance(), new PartitionManager(), new ArrayState(iState),
+      new PartitionServices(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
 {
 }
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
     ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState,
-    ArrayInterface* arrayInterface, EventScheduler* eventScheduler, ArrayServiceLayer* arrayService)
+    PartitionServices* svc, EventScheduler* eventScheduler, ArrayServiceLayer* arrayService)
 : state(arrayState),
-  intf(arrayInterface),
+  svc(svc),
   ptnMgr(ptnMgr),
   name_(name),
   devMgr_(devMgr) /*initialize with devMgr*/,
@@ -76,7 +77,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
 
 Array::~Array(void)
 {
-    delete intf;
+    delete svc;
     delete ptnMgr;
     delete state;
     delete devMgr_;
@@ -224,7 +225,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         goto error;
     }
 
-    ptnMgr->FormatMetaPartition();
+    ptnMgr->FormatPartition(PartitionType::META_SSD, index_, IODispatcherSingleton::Instance());
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
@@ -538,13 +539,18 @@ int
 Array::_CreatePartitions(void)
 {
     DeviceSet<ArrayDevice*> devs = devMgr_->Export();
-    return ptnMgr->CreateAll(devs.nvm, devs.data, intf, index_);
+    ArrayDevice* nvm = nullptr;
+    if (devs.nvm.size() > 0)
+    {
+        nvm = devs.nvm.front();
+    }
+    return ptnMgr->CreatePartitions(nvm, devs.data, RaidTypeEnum::RAID1, RaidTypeEnum::RAID5, svc);
 }
 
 void
 Array::_DeletePartitions(void)
 {
-    ptnMgr->DeleteAll(intf);
+    ptnMgr->DeletePartitions();
 }
 
 bool
@@ -857,12 +863,13 @@ Array::TriggerRebuild(ArrayDevice* target)
     POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
+    uint32_t arrId = index_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
-    list<RebuildTarget*> tasks = intf->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, target, cb, tasks]()
+    list<RebuildTarget*> tasks = svc->GetRebuildTargets();
+    thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
     });
 
     t.detach();
@@ -891,12 +898,13 @@ Array::ResumeRebuild(ArrayDevice* target)
     POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
+    uint32_t arrId = index_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
-    list<RebuildTarget*> tasks = intf->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, target, cb, tasks]()
+    list<RebuildTarget*> tasks = svc->GetRebuildTargets();
+    thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
     });
 
     t.detach();
@@ -908,7 +916,7 @@ int
 Array::_RegisterService(void)
 {
     auto ret = arrayService->Setter()->Register(name_, index_,
-        intf->GetTranslator(), intf->GetRecover(), this);
+        svc->GetTranslator(), svc->GetRecover(), this);
     if (ret)
     {
         if (devMgr_ != nullptr)

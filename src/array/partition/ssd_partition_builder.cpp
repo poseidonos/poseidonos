@@ -30,105 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "partition.h"
-
+#include "ssd_partition_builder.h"
+#include "src/device/base/ublock_device.h"
+#include "src/array/partition/stripe_partition.h"
+#include "src/array/partition/journal_ssd_partition.h"
 #include "src/include/array_config.h"
-#include "../device/array_device.h"
-#include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-Partition::Partition(vector<ArrayDevice*> d, PartitionType type)
-: devs(d),
-  type(type)
-{
-}
-
-// LCOV_EXCL_START
-Partition::~Partition(void)
-{
-}
-// LCOV_EXCL_STOP
 
 int
-Partition::FindDevice(ArrayDevice* target)
+SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
 {
-    int i = 0;
-    for (ArrayDevice* dev : devs)
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {} ",
+        option.devices.size());
+    int ret = EID(ARRAY_PARTITION_CREATION_ERROR);
+    Partition* base = nullptr;
+    if (option.partitionType == PartitionType::JOURNAL_SSD)
     {
-        if (dev == target)
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create JournalSsdPartition");
+        JournalSsdPartition* impl = new JournalSsdPartition(option.devices);
+        ret = impl->Create(startLba);
+        base = impl;
+    }
+    else if (option.partitionType == PartitionType::META_SSD ||
+        option.partitionType == PartitionType::USER_DATA)
+    {
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create StripePartition ({})",
+            PARTITION_TYPE_STR[option.partitionType]);
+        StripePartition* impl = new StripePartition(
+            option.partitionType, option.devices, option.raidType);
+        uint64_t totalNvmBlks = 0;
+        if (option.nvm != nullptr)
         {
-            return i;
+            totalNvmBlks = option.nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
         }
-        i++;
+        ret = impl->Create(startLba, totalNvmBlks);
+        base = impl;
     }
-
-    return -1;
-}
-
-const PartitionLogicalSize*
-Partition::GetLogicalSize(void)
-{
-    return &logicalSize;
-}
-
-const PartitionPhysicalSize*
-Partition::GetPhysicalSize(void)
-{
-    return &physicalSize;
-}
-
-bool
-Partition::IsValidLba(uint64_t lba)
-{
-    if (physicalSize.startLba > lba || lastLba <= lba)
+    if (ret != 0)
     {
-        return false;
+        return ret;
     }
     else
     {
-        return true;
+        out[option.partitionType] = base;
+        if (next != nullptr)
+        {
+            uint64_t nextLba = base->GetLastLba();
+            return next->Build(nextLba, out);
+        }
     }
-}
 
-bool
-Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
-{
-    if (lsa.stripeId < logicalSize.totalStripes && lsa.offset < logicalSize.blksPerStripe)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool
-Partition::_IsValidEntry(const LogicalWriteEntry& entry)
-{
-    if (entry.addr.stripeId < logicalSize.totalStripes &&
-        entry.addr.offset + entry.blkCnt <= logicalSize.blksPerStripe &&
-        entry.blkCnt >= logicalSize.minWriteBlkCnt)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void
-Partition::_UpdateLastLba(void)
-{
-    lastLba = physicalSize.startLba +
-        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
-        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
-        physicalSize.totalSegments;
-
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
+    return 0;
 }
 
 } // namespace pos

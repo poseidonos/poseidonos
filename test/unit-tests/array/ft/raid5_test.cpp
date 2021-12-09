@@ -69,7 +69,7 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
 
     // When
-    Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */, &mockAffMgr, nullptr);
+    Raid5 raid5(&physicalSize);
 }
 
 TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
@@ -89,7 +89,7 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
         .offset = OFFSET};
 
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10, &mockAffMgr, nullptr);
+    Raid5 raid5(&physicalSize);
     FtBlkAddr dest;
 
     // When
@@ -125,8 +125,8 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     EXPECT_CALL(mockBufferPool, TryGetBuffer).WillOnce(Return(&mem));
     MockMemoryManager mockMemoryManager;
     EXPECT_CALL(mockMemoryManager, CreateBufferPool).WillOnce(Return(&mockBufferPool));
-    Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */, &mockAffMgr, &mockMemoryManager);
-    raid5.AllocParityPools();
+    Raid5 raid5(&physicalSize);
+    raid5.AllocParityPools(physicalSize.blksPerChunk * 2, &mockAffMgr, &mockMemoryManager);
 
     std::list<BufferEntry> buffers;
     int NUM_BLOCKS = physicalSize.blksPerChunk;
@@ -168,7 +168,7 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
         .stripesPerSegment = 0/* not interesting */,
         .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
+    Raid5 raid5(&physicalSize);
     StripeId STRIPE_ID = 1234;
     BlkOffset BLK_OFFSET = 400;
 
@@ -195,10 +195,9 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
         .stripesPerSegment = 0/* not interesting */,
         .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
+    Raid5 raid5(&physicalSize);
 
     // When & Then
-    ASSERT_EQ(RaidTypeEnum::RAID5, raid5.GetRaidType());
     ASSERT_EQ(27, raid5.GetSizeInfo()->blksPerChunk);
     ASSERT_EQ(100, raid5.GetSizeInfo()->chunksPerStripe);
 }
@@ -226,10 +225,10 @@ TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
         .Times(numaCount)
         .WillRepeatedly(Return(&mockBufferPool));
     EXPECT_CALL(mockMemoryManager, DeleteBufferPool).Times(numaCount);
-    Raid5 raid5(&physicalSize, 10, &mockAffinityManager, &mockMemoryManager);
+    Raid5 raid5(&physicalSize);
     
     // When : Alloc Pools
-    bool ret = raid5.AllocParityPools();
+    bool ret = raid5.AllocParityPools(0, &mockAffinityManager, &mockMemoryManager);
 
     // Then
     EXPECT_TRUE(ret);
@@ -257,7 +256,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsFailure)
         .stripesPerSegment = 0/* not interesting */,
         .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+    Raid5 raid5(&physicalSize);
 
     // When
     RaidState actual = raid5.GetRaidState(devs);
@@ -282,7 +281,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsDegraded)
         .stripesPerSegment = 0/* not interesting */,
         .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+    Raid5 raid5(&physicalSize);
 
     // When
 
@@ -309,7 +308,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsNormal)
         .stripesPerSegment = 0/* not interesting */,
         .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+    Raid5 raid5(&physicalSize);
 
     // When
     RaidState actual = raid5.GetRaidState(devs);

@@ -41,6 +41,7 @@
 #include "src/include/raid_type.h"
 #include "src/include/raid_state.h"
 #include "src/include/array_device_state.h"
+#include "src/array_models/dto/partition_physical_size.h"
 
 using namespace std;
 
@@ -58,9 +59,6 @@ struct FtSizeInfo
 class Method
 {
 public:
-    Method()
-    {
-    }
 // LCOV_EXCL_START
     virtual ~Method()
     {
@@ -69,12 +67,10 @@ public:
 
     RecoverFunc& GetRecoverFunc(void);
     const FtSizeInfo* GetSizeInfo(void);
-
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) = 0;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
-    RaidType GetRaidType(void);
 
 protected:
     virtual void _BindRecoverFunc(void) = 0;
@@ -83,7 +79,6 @@ protected:
         0,
     };
     RecoverFunc recoverFunc_ = nullptr;
-    RaidType raidType;
 };
 
 } // namespace pos

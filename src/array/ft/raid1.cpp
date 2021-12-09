@@ -43,18 +43,15 @@
 
 namespace pos
 {
-Raid1::Raid1(const PartitionPhysicalSize* physicalSize)
+Raid1::Raid1(const PartitionPhysicalSize* pSize)
 {
-    raidType = RaidTypeEnum::RAID1;
-    mirrorDevCnt = physicalSize->chunksPerStripe / 2;
-
+    mirrorDevCnt = pSize->chunksPerStripe / 2;
     ftSize_ = {
         .minWriteBlkCnt = ArrayConfig::RAID1_MIN_WRITE_BLOCK_COUNT,
-        .backupBlkCnt = mirrorDevCnt * physicalSize->blksPerChunk,
-        .blksPerChunk = physicalSize->blksPerChunk,
-        .blksPerStripe =
-            physicalSize->chunksPerStripe * physicalSize->blksPerChunk,
-        .chunksPerStripe = physicalSize->chunksPerStripe};
+        .backupBlkCnt = mirrorDevCnt * pSize->blksPerChunk,
+        .blksPerChunk = pSize->blksPerChunk,
+        .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,
+        .chunksPerStripe = pSize->chunksPerStripe};
     _BindRecoverFunc();
 }
 

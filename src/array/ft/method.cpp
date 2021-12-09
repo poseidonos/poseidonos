@@ -47,10 +47,4 @@ Method::GetRecoverFunc(void)
     return recoverFunc_;
 }
 
-RaidType
-Method::GetRaidType(void)
-{
-    return raidType;
-}
-
 } // namespace pos

@@ -36,7 +36,7 @@
 #include <list>
 #include <string>
 
-#include "array_interface.h"
+#include "src/array/partition/partition_services.h"
 #include "src/array/device/array_device_manager.h"
 #include "src/array/meta/array_meta.h"
 #include "src/array/partition/partition_manager.h"
@@ -70,7 +70,7 @@ class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
-        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler,
+        PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
         ArrayServiceLayer* arrayservice);
     virtual ~Array(void);
     virtual int Init(void) override;
@@ -120,7 +120,7 @@ private:
     bool _CheckIndexIsValid(void);
 
     ArrayState* state = nullptr;
-    ArrayInterface* intf = nullptr;
+    PartitionServices* svc = nullptr;
     PartitionManager* ptnMgr = nullptr;
 
     string name_;

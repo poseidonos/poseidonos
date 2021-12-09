@@ -51,16 +51,16 @@ class ArrayRebuilder : public IArrayRebuilder
 public:
     ArrayRebuilder(IRebuildNotification* noti);
     virtual ~ArrayRebuilder() {}
-    void Rebuild(string array, ArrayDevice* dev,
+    void Rebuild(string arrayname, uint32_t arrayId, ArrayDevice* dev,
                 RebuildComplete cb, list<RebuildTarget*>& tgt) override;
-    void StopRebuild(string array) override;
+    void StopRebuild(string arrayname) override;
     void RebuildDone(RebuildResult result) override;
-    void WaitRebuildDone(string array) override;
-    bool IsRebuilding(string array) override;
-    uint32_t GetRebuildProgress(string array) override;
+    void WaitRebuildDone(string arrayname) override;
+    bool IsRebuilding(string arrayname) override;
+    uint32_t GetRebuildProgress(string arrayname) override;
 
 private:
-    ArrayRebuild* _Find(string array);
+    ArrayRebuild* _Find(string arrayname);
     map<string, ArrayRebuild*> jobsInProgress;
     IRebuildNotification* iRebuildNoti = nullptr;
     std::mutex mtxStart;

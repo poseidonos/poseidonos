@@ -32,46 +32,25 @@
 
 #pragma once
 
-#include "src/metafs/metafs.h"
+#include "partition.h"
+#include "src/array/device/array_device.h"
+#include <vector>
 
-#include <string>
-
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-
-using ::testing::NiceMock;
+using namespace std;
 
 namespace pos
 {
-class MetaFsTestFixture
+
+class PartitionFactory
 {
 public:
-    MetaFsTestFixture(void);
-    virtual ~MetaFsTestFixture(void);
-
-protected:
-    NiceMock<MockIArrayInfo>* arrayInfo = nullptr;
-
-    MetaFs* metaFs = nullptr;
-
-    MetaFsManagementApi* mgmt = nullptr;
-    MetaFsFileControlApi* ctrl = nullptr;
-    MetaFsIoApi* io = nullptr;
-    MetaFsWBTApi* wbt = nullptr;
-    NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetaIo = nullptr;
-    NiceMock<MockTelemetryPublisher>* tpForMetafs = nullptr;
-
-    bool isLoaded = false;
-    int arrayId = INT32_MAX;
-    std::string arrayName = "";
-    PartitionLogicalSize ptnSize[PartitionType::TYPE_COUNT];
+    static int CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
+        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions /* OUT PARAM */);
 
 private:
-    void _SetArrayInfo(void);
-    void _SetThreadModel(void);
-    cpu_set_t _GetCpuSet(int from, int to);
+    static int _SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nvm,
+        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions /* OUT PARAM */);
+    static int _SplitNvmPartitions(ArrayDevice* nvm, Partitions& partitions /* OUT PARAM */);
 };
 
 } // namespace pos

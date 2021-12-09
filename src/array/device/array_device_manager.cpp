@@ -161,7 +161,6 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 
             dev = new ArrayDevice(uBlock, meta.state);
         }
-
         devs_->AddData(dev);
     }
 

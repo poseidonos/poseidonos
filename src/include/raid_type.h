@@ -40,8 +40,8 @@ namespace pos
 
 enum class RaidTypeEnum
 {
+    NONE,
     RAID5,
-    // It is not good to be managed as 'INT' index because RAID1 can be removed. Also it is recommended to place before RAID1 when adding new items.
     RAID1,
     TYPE_COUNT,
 };
@@ -49,7 +49,7 @@ enum class RaidTypeEnum
 class RaidType
 {
 public:
-    RaidType(void) { val = RaidTypeEnum::RAID5; }
+    RaidType(void) { val = RaidTypeEnum::NONE; }
     RaidType(RaidTypeEnum t) : val(t) { }
     operator RaidTypeEnum(void) const { return val; }
     bool operator == (const RaidType t) const { return val == t.val; }
@@ -62,6 +62,7 @@ private:
     RaidTypeEnum val;
     string RAID_STR[(int)RaidTypeEnum::TYPE_COUNT] =
     {
+        "NONE",
         "RAID5",
         "RAID1",
     };
