@@ -36,11 +36,20 @@
 
 namespace pos
 {
+
+using AllocatorCtxIoCompletion = std::function<void(void)>;
+
 class AllocatorIoCtx : public AsyncMetaFileIoCtx
 {
 public:
-    AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb);
+    AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len,
+        char* buf, MetaIoCbPtr cb);
+    AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len,
+        char* buf, MetaIoCbPtr cb, AllocatorCtxIoCompletion clientCallback);
+
     virtual ~AllocatorIoCtx(void) = default;
+
+    AllocatorCtxIoCompletion clientCallback;
 };
 
 } // namespace pos

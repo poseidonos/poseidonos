@@ -50,6 +50,9 @@ public:
     virtual int GetSectionSize(int section) = 0;
     virtual uint64_t GetStoredVersion(void) = 0;
     virtual void ResetDirtyVersion(void) = 0;
+    virtual std::string GetFilename(void) = 0;
+    virtual uint32_t GetSignature(void) = 0;
+    virtual int GetNumSections(void) = 0;
 };
 
 } // namespace pos

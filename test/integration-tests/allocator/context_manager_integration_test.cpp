@@ -148,7 +148,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     allocCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(allocCtxFlush->buffer))->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](MetaIoCbPtr callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -167,7 +167,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     segCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(segCtxFlush->buffer))->sig = SegmentCtx::SIG_SEGMENT_CTX;
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](MetaIoCbPtr callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -192,9 +192,9 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     rebuildCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(rebuildCtxFlush->buffer))->sig = RebuildCtx::SIG_REBUILD_CTX;
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](MetaIoCbPtr callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback)
         {
-            callback(rebuildCtxFlush);
+            callback();
 
             rebuildFlushCompleted = true;
             cv.notify_all();

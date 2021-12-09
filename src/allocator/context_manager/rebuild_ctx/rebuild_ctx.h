@@ -64,6 +64,9 @@ public:
     virtual int GetSectionSize(int section);
     virtual uint64_t GetStoredVersion(void);
     virtual void ResetDirtyVersion(void);
+    virtual std::string GetFilename(void);
+    virtual uint32_t GetSignature(void);
+    virtual int GetNumSections(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);

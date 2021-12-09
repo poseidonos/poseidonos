@@ -33,7 +33,6 @@
 #include "src/allocator/context_manager/allocator_file_io.h"
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/meta_file_include.h"
@@ -55,6 +54,8 @@ AllocatorFileIo::AllocatorFileIo(int owner, IAllocatorFileIoClient* client_, All
   owner(owner),
   file(file_),
   fileSize(0),
+  numFilesReading(0),
+  numFilesFlushing(0),
   initialized(false)
 {
 }
@@ -82,7 +83,7 @@ void
 AllocatorFileIo::_UpdateSectionInfo(void)
 {
     int currentOffset = 0;
-    for (int sectionId = 0; sectionId < numSections[owner]; sectionId++)
+    for (int sectionId = 0; sectionId < client->GetNumSections(); sectionId++)
     {
         int size = client->GetSectionSize(sectionId);
 
@@ -100,14 +101,14 @@ AllocatorFileIo::_CreateFile(void)
 {
     if (file == nullptr)
     {
-        file = new MetaFsFileIntf(filenames[owner], arrayId);
+        file = new MetaFsFileIntf(client->GetFilename(), arrayId);
     }
 }
 
 void
 AllocatorFileIo::_LoadSectionData(char* buf)
 {
-    for (int sectionId = 0; sectionId < numSections[owner]; sectionId++)
+    for (int sectionId = 0; sectionId < client->GetNumSections(); sectionId++)
     {
         if (sections[sectionId].addr != nullptr)
         {
@@ -140,21 +141,20 @@ AllocatorFileIo::Dispose(void)
 }
 
 int
-AllocatorFileIo::LoadContext(MetaIoCbPtr callback)
+AllocatorFileIo::LoadContext(void)
 {
     char* buf = new char[fileSize]();
 
-    int ret = _Load(buf, callback);
+    int ret = _Load(buf);
     if (ret != 1) // case for creating new file
     {
         delete[] buf;
     }
-
     return ret;
 }
 
 int
-AllocatorFileIo::_Load(char* buf, MetaIoCbPtr callback)
+AllocatorFileIo::_Load(char* buf)
 {
     if (file->DoesFileExist() == false)
     {
@@ -168,13 +168,17 @@ AllocatorFileIo::_Load(char* buf, MetaIoCbPtr callback)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
                 "[AllocatorFileIo] Failed to create file:{}, size:{}",
-                filenames[owner], fileSize);
+                client->GetFilename(), fileSize);
             return -1;
         }
     }
     else
     {
         file->Open();
+
+        numFilesReading++;
+
+        MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_LoadCompletedThenCB, this, std::placeholders::_1);
         AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Read,
             file->GetFd(), 0, fileSize, buf, callback);
         int ret = file->AsyncIO(request);
@@ -184,35 +188,55 @@ AllocatorFileIo::_Load(char* buf, MetaIoCbPtr callback)
         }
         else
         {
+            numFilesReading--;
             delete request;
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
                 "[AllocatorFileIo] Failed to issue load:{}, fname:{}, size:{}",
-                ret, filenames[owner], fileSize);
+                ret, client->GetFilename(), fileSize);
             return -1;
         }
     }
 }
 
 void
-AllocatorFileIo::AfterLoad(char* buffer)
+AllocatorFileIo::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
+    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    assert(header->sig == client->GetSignature());
+
+    _AfterLoad(ctx->buffer);
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] Async allocator file:{} load done!", owner);
+
+    delete[] ctx->buffer;
+    delete ctx;
+}
+
+void
+AllocatorFileIo::_AfterLoad(char* buffer)
+{
+    assert(numFilesReading > 0);
+    numFilesReading--;
+
     _LoadSectionData(buffer);
     client->AfterLoad(buffer);
 }
 
 int
-AllocatorFileIo::Flush(MetaIoCbPtr callback)
+AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback)
 {
     char* buf = new char[fileSize]();
     _PrepareBuffer(buf);
 
+    numFilesFlushing++;
+    MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
     AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Write,
-        file->GetFd(), 0, fileSize, buf, callback);
+        file->GetFd(), 0, fileSize, buf, callback, clientCallback);
     int ret = file->AsyncIO(request);
     if (ret != 0)
     {
+        numFilesFlushing--;
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO),
-            "[AllocatorFileIo] Failed to issue store:{}, fname:{}", ret, filenames[owner]);
+            "[AllocatorFileIo] Failed to issue store:{}, fname:{}", ret, client->GetFilename());
 
         delete request;
         delete[] buf;
@@ -223,8 +247,28 @@ AllocatorFileIo::Flush(MetaIoCbPtr callback)
 }
 
 void
-AllocatorFileIo::AfterFlush(AsyncMetaFileIoCtx* ctx)
+AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
+    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    assert(header->sig == client->GetSignature());
+
+    _AfterFlush(ctx);
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
+        "[AllocatorFlush] File flushed, sig:{}, version:{}", header->sig, header->ctxVersion);
+
+    AllocatorIoCtx* ioContext = reinterpret_cast<AllocatorIoCtx*>(ctx);
+    ioContext->clientCallback();
+    
+    delete[] ctx->buffer;
+    delete ctx;
+}
+
+void
+AllocatorFileIo::_AfterFlush(AsyncMetaFileIoCtx* ctx)
+{
+    assert(numFilesFlushing > 0);
+    numFilesFlushing--;
+
     client->FinalizeIo(ctx);
 }
 
@@ -236,7 +280,7 @@ AllocatorFileIo::_PrepareBuffer(char* buf)
     if (owner != REBUILD_CTX)
     {
         std::lock_guard<std::mutex> lock(client->GetCtxLock());
-        _CopySectionData(buf, 0, numSections[owner]);
+        _CopySectionData(buf, 0, client->GetNumSections());
     }
 }
 
@@ -269,4 +313,17 @@ AllocatorFileIo::_CopySectionData(char* buf, int startSection, int endSection)
         }
     }
 }
+
+int
+AllocatorFileIo::GetNumFilesReading(void)
+{
+    return numFilesReading;
+}
+
+int
+AllocatorFileIo::GetNumFilesFlushing(void)
+{
+    return numFilesFlushing;
+}
+
 } // namespace pos

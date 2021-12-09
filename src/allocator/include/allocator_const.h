@@ -94,9 +94,6 @@ enum WBTAllocatorMetaType
     WBT_NUM_ALLOCATOR_META
 };
 
-const std::string filenames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
-const int numSections[NUM_FILES] = {NUM_SEGMENT_CTX_SECTION, NUM_ALLOCATOR_CTX_SECTION, NUM_REBUILD_CTX_SECTION};
-
 class CtxHeader
 {
 public:

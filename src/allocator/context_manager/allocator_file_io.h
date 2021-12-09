@@ -33,9 +33,11 @@
 #pragma once
 
 #include <vector>
+#include <atomic>
 
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 
 namespace pos
 {
@@ -53,15 +55,15 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual int LoadContext(MetaIoCbPtr callback);
-    virtual void AfterLoad(char* buffer);
-
-    virtual int Flush(MetaIoCbPtr callback);
-    virtual void AfterFlush(AsyncMetaFileIoCtx* ctx);
+    virtual int LoadContext(void);
+    virtual int Flush(AllocatorCtxIoCompletion clientCallback);
 
     virtual uint64_t GetStoredVersion(void);
     virtual char* GetSectionAddr(int section);
     virtual int GetSectionSize(int section);
+
+    virtual int GetNumFilesReading(void);
+    virtual int GetNumFilesFlushing(void);
 
 private:
     class ContextSection
@@ -77,16 +79,20 @@ private:
         int offset;
     };
 
+    void _AfterLoad(char* buffer);
+    void _AfterFlush(AsyncMetaFileIoCtx* ctx);
+
     void _UpdateSectionInfo(void);
     void _CreateFile(void);
 
     void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
 
     void _PrepareBuffer(char* buf);
 
     void _LoadSectionData(char* buf);
 
-    int _Load(char* buf, MetaIoCbPtr callback);
+    int _Load(char* buf);
     void _CopySectionData(char* buf, int startSection, int endSection);
 
     uint32_t arrayId;
@@ -97,6 +103,9 @@ private:
     MetaFileIntf* file;
     std::vector<ContextSection> sections;
     int fileSize;
+
+    std::atomic<int> numFilesReading;
+    std::atomic<int> numFilesFlushing;
 
     bool initialized;
 };

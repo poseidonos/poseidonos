@@ -348,4 +348,22 @@ AllocatorCtx::ResetDirtyVersion(void)
     ctxDirtyVersion = 0;
 }
 
+std::string
+AllocatorCtx::GetFilename(void)
+{
+    return "AllocatorContexts";
+}
+
+uint32_t
+AllocatorCtx::GetSignature(void)
+{
+    return SIG_ALLOCATOR_CTX;
+}
+
+int
+AllocatorCtx::GetNumSections(void)
+{
+    return NUM_ALLOCATOR_CTX_SECTION;
+}
+
 }  // namespace pos

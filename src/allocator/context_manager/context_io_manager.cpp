@@ -48,8 +48,6 @@ ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublishe
 
 ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp, EventScheduler* scheduler)
 : flushInProgress(false),
-  numFilesFlushing(0),
-  numFilesReading(0),
   addrInfo(info),
   telPublisher(tp),
   eventScheduler(scheduler)
@@ -86,33 +84,17 @@ ContextIoManager::Init(void)
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         fileIo[owner]->Init();
-        numFilesReading++;
 
-        MetaIoCbPtr loadCallback = std::bind(&ContextIoManager::_LoadCompletedThenCB, this, std::placeholders::_1);
-        ret = fileIo[owner]->LoadContext(loadCallback);
+        ret = fileIo[owner]->LoadContext();
         if (ret == 0) // new file created
         {
-            numFilesReading--;
-
-            MetaIoCbPtr cbPtr;
-            if (owner == REBUILD_CTX)
-            {
-                numRebuildFlushInProgress++;
-                cbPtr = std::bind(&ContextIoManager::_RebuildFlushCompletedThenCB, this, std::placeholders::_1);
-            }
-            else
-            {
-                numFilesFlushing++;
-                cbPtr = std::bind(&ContextIoManager::_FlushCompletedThenCB, this, std::placeholders::_1);
-            }
-
-            ret = fileIo[owner]->Flush(cbPtr);
+            AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
+            ret = fileIo[owner]->Flush(completion);
             if (ret == 0)
             {
                 WaitPendingIo(IOTYPE_ALL);
                 POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD),
-                    "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}, pendingRebuildIo:{}",
-                    owner, numFilesFlushing + numFilesFlushing, numRebuildFlushInProgress);
+                    "[AllocatorLoad] initial flush allocator file:{}", owner);
             }
             else
             {
@@ -139,36 +121,6 @@ ContextIoManager::Init(void)
 }
 
 void
-ContextIoManager::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
-{
-    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
-
-    int owner = _FindOwner(header->sig);
-    assert(numFilesReading > 0);
-    numFilesReading--;
-    if (owner == -1)
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
-            "[AllocatorLoad] Error!! Loaded Allocator file signature is not matched:{}", header->sig);
-        delete[] ctx->buffer;
-        delete ctx;
-
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
-        return;
-    }
-    else
-    {
-        fileIo[owner]->AfterLoad(ctx->buffer);
-        POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] Async allocator file:{} load done!", owner);
-        delete[] ctx->buffer;
-        delete ctx;
-    }
-}
-
-void
 ContextIoManager::Dispose(void)
 {
     for (int owner = 0; owner < NUM_FILES; owner++)
@@ -189,19 +141,17 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
     int ret = 0;
     flushCallback = callback;
 
-    numFilesFlushing += NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        MetaIoCbPtr curCb = std::bind(&ContextIoManager::_FlushCompletedThenCB, this, std::placeholders::_1);
-
-        ret = fileIo[owner]->Flush(curCb);
+        AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
+        ret = fileIo[owner]->Flush(completion);
         if (ret != 0)
         {
             break;
         }
     }
     POSMetricValue v;
-    v.gauge = numFilesFlushing;
+    v.gauge = _GetNumFilesFlushing();
     telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, v, MT_GAUGE);
 
     if (sync == true)
@@ -219,7 +169,7 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
 {
     while (type == IOTYPE_ALL)
     {
-        if ((numFilesReading + numFilesFlushing == 0) || (addrInfo->IsUT() == true))
+        if ((_GetNumFilesReading() + _GetNumFilesFlushing() == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -227,7 +177,7 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
     }
     while (type == IOTYPE_READ)
     {
-        if ((numFilesReading == 0) || (addrInfo->IsUT() == true))
+        if ((_GetNumFilesReading() == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -235,7 +185,7 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
     }
     while (type == IOTYPE_FLUSH)
     {
-        if ((numFilesFlushing == 0) || (addrInfo->IsUT() == true))
+        if ((_GetNumFilesFlushing() == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -244,71 +194,35 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
 }
 
 void
-ContextIoManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
+ContextIoManager::_FlushCompleted(void)
 {
-    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
-    assert(numFilesFlushing > 0);
+    int remaining = _GetNumFilesFlushing();
     POSMetricValue v;
-    v.gauge = numFilesFlushing;
+    v.gauge = remaining;
     telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, v, MT_GAUGE);
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
-        "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}",
-        header->sig, header->ctxVersion, numFilesFlushing);
 
-    int owner = _FindOwner(header->sig);
-    if (owner == -1)
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE),
-            "[AllocatorFlush] Wrong context returned, signature is {}", header->sig);
-        return;
-    }
-
-    fileIo[owner]->AfterFlush(ctx);
-
-    int remaining = numFilesFlushing.fetch_sub(1) - 1;
-    if (remaining == 0)
+    if (remaining == 0 && flushInProgress.exchange(false) == true)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to flush allocator files");
-        flushInProgress = false;
         if (flushCallback != nullptr)
         {
             eventScheduler->EnqueueEvent(flushCallback);
             flushCallback = nullptr;
         }
     }
-
-    delete[] ctx->buffer;
-    delete ctx;
-}
-
-void
-ContextIoManager::_RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
-{
-    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
-    int owner = _FindOwner(header->sig);
-    assert(owner == REBUILD_CTX);
-
-    fileIo[owner]->AfterFlush(ctx);
-    assert(numRebuildFlushInProgress > 0);
-    numRebuildFlushInProgress--;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
-        "[RebuildCtx Flush] Complete to flush RebuildCtx files, sig:{}, version:{}, RebuildIoCount:{}",
-        header->sig, header->ctxVersion, numRebuildFlushInProgress);
-    delete[] ctx->buffer;
-    delete ctx;
 }
 
 int
 ContextIoManager::FlushRebuildContext(EventSmartPtr callback, bool sync)
 {
-    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
-        "[RebuildCtxFlush] sync:{}, rebuildIssuedCount:{}, FlushIssuedCount:{}, start to flush",
-        sync, numRebuildFlushInProgress, numFilesFlushing);
-    numRebuildFlushInProgress++;
+    AllocatorCtxIoCompletion completion = [](){}; // Do nothing on completion
+    int ret = fileIo[REBUILD_CTX]->Flush(completion);
 
-    MetaIoCbPtr curCb = std::bind(&ContextIoManager::_RebuildFlushCompletedThenCB, this, std::placeholders::_1);
-    int ret = fileIo[REBUILD_CTX]->Flush(curCb);
-    if (sync == true)
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
+        "[RebuildCtxFlush] sync:{}, rebuildIssuedCount:{}, start to flush",
+        sync, _GetNumRebuildFlush());
+
+    if (ret == 0 && sync == true)
     {
         WaitPendingIo(IOTYPE_FLUSH);
     }
@@ -333,48 +247,35 @@ ContextIoManager::GetContextSectionSize(int owner, int section)
     return fileIo[owner]->GetSectionSize(section);
 }
 
-void
-ContextIoManager::SetCallbackFunc(EventSmartPtr callback)
+int
+ContextIoManager::_GetNumFilesReading(void)
 {
-    flushCallback = callback;
-}
+    int numFilesReading = 0;
 
-void
-ContextIoManager::TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt)
-{
-    // only for UT
-    if (type == IOTYPE_READ)
+    for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        numFilesReading = cnt;
-        _LoadCompletedThenCB(ctx);
+        numFilesReading += fileIo[owner]->GetNumFilesReading();
     }
-    else if (type == IOTYPE_FLUSH)
-    {
-        numFilesFlushing = cnt;
-        _FlushCompletedThenCB(ctx);
-    }
-    else if (type == IOTYPE_REBUILDFLUSH)
-    {
-        numRebuildFlushInProgress = cnt;
-        _RebuildFlushCompletedThenCB(ctx);
-    }
-    else
-    {
-        numFilesFlushing = cnt;
-        WaitPendingIo(IOTYPE_ALL);
-    }
+
+    return numFilesReading;
 }
 
 int
-ContextIoManager::_FindOwner(uint32_t signature)
+ContextIoManager::_GetNumFilesFlushing(void)
 {
-    if (signature == RebuildCtx::SIG_REBUILD_CTX)
-        return REBUILD_CTX;
-    else if (signature == SegmentCtx::SIG_SEGMENT_CTX)
-        return SEGMENT_CTX;
-    else if (signature == AllocatorCtx::SIG_ALLOCATOR_CTX)
-        return ALLOCATOR_CTX;
-    else
-        return -1;
+    int numFilesFlushing = 0;
+    for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
+    {
+        numFilesFlushing += fileIo[owner]->GetNumFilesFlushing();
+    }
+
+    return numFilesFlushing;
 }
+
+int
+ContextIoManager::_GetNumRebuildFlush(void)
+{
+    return fileIo[REBUILD_CTX]->GetNumFilesFlushing();
+}
+
 } // namespace pos

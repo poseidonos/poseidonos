@@ -72,22 +72,14 @@ public:
     virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
 
-    // for UT
-    void SetCallbackFunc(EventSmartPtr callback);
-    void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt);
-
 private:
-    int _FindOwner(uint32_t signature);
+    void _FlushCompleted(void);
 
-    void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    int _GetNumFilesReading(void);
+    int _GetNumFilesFlushing(void);
+    int _GetNumRebuildFlush(void);
 
     std::atomic<bool> flushInProgress;
-    std::atomic<int> numFilesFlushing;
-    std::atomic<int> numFilesReading;
-
-    std::atomic<int> numRebuildFlushInProgress;
 
     EventSmartPtr flushCallback;
 

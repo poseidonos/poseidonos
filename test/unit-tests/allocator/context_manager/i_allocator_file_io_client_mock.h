@@ -18,6 +18,9 @@ public:
     MOCK_METHOD(int, GetSectionSize, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(void, ResetDirtyVersion, (), (override));
+    MOCK_METHOD(std::string, GetFilename, (), (override));
+    MOCK_METHOD(uint32_t, GetSignature, (), (override));
+    MOCK_METHOD(int, GetNumSections, (), (override));
 };
 
 } // namespace pos

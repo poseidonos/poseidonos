@@ -347,6 +347,24 @@ SegmentCtx::ResetDirtyVersion(void)
     ctxDirtyVersion = 0;
 }
 
+std::string
+SegmentCtx::GetFilename(void)
+{
+    return "SegmentContext";
+}
+
+uint32_t
+SegmentCtx::GetSignature(void)
+{
+    return SIG_SEGMENT_CTX;
+}
+    
+int
+SegmentCtx::GetNumSections(void)
+{
+    return NUM_SEGMENT_CTX_SECTION;
+}
+
 void
 SegmentCtx::SetSegmentState(SegmentId segId, SegmentState state, bool needlock)
 {

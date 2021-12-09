@@ -207,6 +207,24 @@ RebuildCtx::ResetDirtyVersion(void)
     ctxDirtyVersion = 0;
 }
 
+std::string
+RebuildCtx::GetFilename(void)
+{
+    return "RebuildContext";
+}
+
+uint32_t
+RebuildCtx::GetSignature(void)
+{
+    return SIG_REBUILD_CTX;
+}
+    
+int
+RebuildCtx::GetNumSections(void)
+{
+    return NUM_REBUILD_CTX_SECTION;
+}
+
 SegmentId
 RebuildCtx::GetRebuildTargetSegment(void)
 {

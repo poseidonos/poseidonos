@@ -34,7 +34,14 @@
 
 namespace pos
 {
-AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb)
+AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset,
+    uint64_t len, char* buf, MetaIoCbPtr cb)
+: AllocatorIoCtx(op, fdesc, fOffset, len, buf, cb, [](){})
+{
+}
+
+AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset,
+    uint64_t len, char* buf, MetaIoCbPtr cb, AllocatorCtxIoCompletion clientCallback_)
 {
     opcode = op;
     fd = fdesc;
@@ -42,6 +49,7 @@ AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, u
     length = len;
     buffer = buf;
     callback = cb;
+    clientCallback = clientCallback_;
 }
 
 } // namespace pos
