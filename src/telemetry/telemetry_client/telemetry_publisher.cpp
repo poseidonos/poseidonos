@@ -127,7 +127,7 @@ TelemetryPublisher::PublishMetric(POSMetric metric)
 }
 
 int
-TelemetryPublisher::PublishDataList(std::vector<POSMetric>* metricList)
+TelemetryPublisher::PublishMetricList(std::vector<POSMetric>* metricList)
 {
     if (turnOn == false)
     {

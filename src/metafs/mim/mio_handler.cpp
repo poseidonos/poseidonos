@@ -34,6 +34,8 @@
 #include "mio_handler.h"
 #include <string>
 #include <utility>
+#include <chrono>
+#include <ctime>
 #include "Air.h"
 #include "src/metafs/include/metafs_service.h"
 #include "metafs_aiocb_cxt.h"
@@ -43,6 +45,7 @@
 #include "meta_volume_manager.h"
 #include "src/metafs/storage/mss.h"
 #include "src/event_scheduler/event.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #if defined(IBOFOS_BACKEND_IO)
 #include "metafs_aio_completer.h"
@@ -50,11 +53,12 @@
 
 namespace pos
 {
-MioHandler::MioHandler(int threadId, int coreId, int coreCount)
+MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp)
 : ioSQ(nullptr),
   ioCQ(nullptr),
   cpuStallCnt(0),
-  coreId(coreId)
+  coreId(coreId),
+  telemetryPublisher(tp)
 {
     ioCQ = new MetaFsIoQ<Mio*>();
     ioSQ = new MetaFsIoQ<MetaFsIoRequest*>();
@@ -67,6 +71,12 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
+    nameForTelemetry = "metafs_mio_" + to_string(coreId);
+    if (nullptr == telemetryPublisher)
+        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
+    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+    lastTime = std::chrono::steady_clock::now();
+
     this->bottomhalfHandler = nullptr;
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "mio handler constructed. threadId={}, coreId={}",
@@ -74,18 +84,24 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
 }
 
 MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
-        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool)
+        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+        TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
   mioPool(mioPool),
   mpioPool(mpioPool),
   cpuStallCnt(0),
-  coreId(coreId)
+  coreId(coreId),
+  telemetryPublisher(tp)
 {
     std::string cqName("IoCQ-" + std::to_string(coreId));
     ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
+
+    lastTime = std::chrono::steady_clock::now();
+    if (nullptr != telemetryPublisher)
+        TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
 
     this->bottomhalfHandler = nullptr;
 }
@@ -111,6 +127,9 @@ MioHandler::~MioHandler(void)
 
     if (nullptr != ioSQ)
         delete ioSQ;
+
+    if (nullptr != telemetryPublisher)
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
 }
 
 void
@@ -163,6 +182,24 @@ MioHandler::_HandleIoSQ(void)
     _RegisterRangeLockInfo(reqMsg);
 #endif
     ExecuteMio(*mio);
+
+    _SendMetric(ioSQ->GetItemCnt());
+}
+
+void
+MioHandler::_SendMetric(uint32_t size)
+{
+    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+
+    if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
+    {
+        POSMetric metric(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("thread_name", nameForTelemetry);
+        metric.SetCountValue(size);
+        telemetryPublisher->PublishMetric(metric);
+        lastTime = currentTime;
+    }
 }
 
 void

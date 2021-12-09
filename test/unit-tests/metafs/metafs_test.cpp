@@ -37,6 +37,7 @@
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_wbt_api_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 #include <gtest/gtest.h>
 #include <string>
@@ -75,12 +76,14 @@ public:
         wbt = new NiceMock<MockMetaFsWBTApi>;
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
+        tp = new NiceMock<MockTelemetryPublisher>;
+
         for (int i = 0; i < MetaFsGeometryInfo::MAX_INFO_COUNT; ++i)
         {
             mediaInfoList[i].valid = false;
         }
 
-        metaFs = new MetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss);
+        metaFs = new MetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, tp);
     }
 
     virtual void
@@ -98,6 +101,7 @@ protected:
     NiceMock<MockMetaFsIoApi>* io;
     NiceMock<MockMetaFsWBTApi>* wbt;
     NiceMock<MockMetaStorageSubsystem>* mss;
+    NiceMock<MockTelemetryPublisher>* tp;
 
     PartitionLogicalSize ptnSize;
     MetaFsStorageIoInfoList mediaInfoList;

@@ -32,6 +32,7 @@
 
 #include "src/metafs/mim/mio_handler.h"
 #include "src/metafs/mim/mpio_handler.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_q_mock.h"
 #include "test/unit-tests/metafs/mim/mio_pool_mock.h"
@@ -40,6 +41,7 @@
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
@@ -83,10 +85,12 @@ public:
     {
         const uint32_t POOL_SIZE = 1024;
 
+        tp = new NiceMock<MockTelemetryPublisher>;
+
         ioSQ = new NiceMock<MockMetaFsIoQ<MetaFsIoRequest*>>;
         ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
         doneQ = new MockMetaFsIoQ<Mpio*>();
-        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, doneQ);
+        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, tp, doneQ);
         mpioPool = new NiceMock<MockMpioPool>(POOL_SIZE);
         mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
@@ -99,9 +103,10 @@ public:
         ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss);
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
         io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss);
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss);
 
-        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, tp);
+
+        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool, tp);
     }
 
     virtual void
@@ -111,6 +116,8 @@ public:
         delete metaFs;
         delete arrayInfo;
         delete bottomhalfHandler;
+
+        TelemetryClientSingleton::ResetInstance();
     }
 
 protected:
@@ -123,6 +130,7 @@ protected:
     NiceMock<MockMioPool>* mioPool;
     NiceMock<MockMpioPool>* mpioPool;
     NiceMock<MockMetaStorageSubsystem>* mss;
+    NiceMock<MockTelemetryPublisher>* tp;
 
     MockIArrayInfo* arrayInfo;
     MockMetaFsManagementApi* mgmt;
@@ -146,6 +154,7 @@ TEST_F(MioHandlerTestFixture, Normal)
     EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
     EXPECT_CALL(*ioSQ, Dequeue).WillRepeatedly(Return(msg));
     EXPECT_CALL(*doneQ, Init);
+    EXPECT_CALL(*doneQ, GetItemCnt).WillRepeatedly(Return(0));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);

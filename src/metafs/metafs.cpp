@@ -37,6 +37,7 @@
 #include "src/include/partition_type.h"
 #include "src/include/array_config.h"
 #include "src/metafs/storage/pstore/mss_on_disk.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -59,12 +60,17 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     io = new MetaFsIoApi(arrayId, ctrl, metaStorage);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
 
+    nameForTelemetry = "metafs_" + to_string(arrayId);
+
+    telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
+    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
         MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
-        MetaStorageSubsystem* metaStorage)
+        MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp)
 {
     this->isLoaded = isLoaded;
     this->arrayInfo = arrayInfo;
@@ -78,12 +84,20 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
     this->wbt = wbt;
     this->metaStorage = metaStorage;
 
+    telemetryPublisher = tp;
+
+    if (nullptr != telemetryPublisher)
+        TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
 
 MetaFs::~MetaFs(void)
 {
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+
+    if (nullptr != telemetryPublisher)
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
 
     if (nullptr != mgmt)
         delete mgmt;
@@ -304,6 +318,12 @@ MetaFs::_OpenMetaVolume(void)
 {
     // MetaFsSystemState::Open
     POS_EVENT_ID rc = mgmt->LoadMbr(isNpor);
+
+    POSMetric metric(TEL40000_METAFS_NORMAL_SHUTDOWN, POSMetricTypes::MT_GAUGE);
+    metric.AddLabel("array_id", to_string(arrayId));
+    metric.SetGaugeValue((int)isNpor);
+    telemetryPublisher->PublishMetric(metric);
+
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         if (true == mgmt->IsMbrClean())

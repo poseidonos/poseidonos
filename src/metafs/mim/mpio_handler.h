@@ -35,6 +35,9 @@
 #include "mfs_io_handler_base.h"
 #include "metafs_io_q.h"
 #include "mpio_pool.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+
+#include <string>
 
 namespace pos
 {
@@ -42,6 +45,7 @@ class MpioHandler
 {
 public:
     explicit MpioHandler(int threadId, int coreId,
+                    TelemetryPublisher* tp = nullptr,
                     MetaFsIoQ<Mpio*>* doneQ = nullptr);
     ~MpioHandler(void);
 
@@ -51,9 +55,13 @@ public:
 
 private:
     void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
+    void _SendMetric(uint32_t size);
 
     MetaFsIoQ<Mpio*>* partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
+    TelemetryPublisher* telemetryPublisher = nullptr;
+    std::chrono::steady_clock::time_point lastTime;
+    std::string nameForTelemetry = "";
 };
 } // namespace pos

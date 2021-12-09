@@ -54,10 +54,10 @@ struct POSHistogramValue
 };
 
 enum POSMetricTypes {
-    MT_COUNTER,
+    MT_COUNT,
     MT_GAUGE,
     MT_HISTOGRAM, // TODO: RESERVED
-    MT_COUNT = MT_HISTOGRAM
+    MT_NUM_TYPE = MT_HISTOGRAM
 };
 
 class POSMetricValue

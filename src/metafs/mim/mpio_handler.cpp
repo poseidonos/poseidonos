@@ -31,21 +31,29 @@
  */
 
 #include "mpio_handler.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #include <string>
 
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId, MetaFsIoQ<Mpio*>* doneQ)
+MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoQ<Mpio*>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioPool(nullptr),
-  coreId(coreId)
+  coreId(coreId),
+  telemetryPublisher(tp)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
         partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
+
+    nameForTelemetry = "metafs_mpio_" + to_string(coreId);
+    if (nullptr == telemetryPublisher)
+        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
+    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+    lastTime = std::chrono::steady_clock::now();
 }
 
 MpioHandler::~MpioHandler(void)
@@ -55,6 +63,9 @@ MpioHandler::~MpioHandler(void)
 
     if (nullptr != partialMpioDoneQ)
         delete partialMpioDoneQ;
+
+    if (nullptr != telemetryPublisher)
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
 }
 
 void
@@ -91,10 +102,28 @@ MpioHandler::BottomhalfMioProcessing(void)
         {
             mpioPool->Release(mpio);
         }
+
+        _SendMetric(partialMpioDoneQ->GetItemCnt());
     }
 
 #if MPIO_CACHE_EN
     mpioPool->ReleaseCache();
 #endif
+}
+
+void
+MpioHandler::_SendMetric(uint32_t size)
+{
+    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+
+    if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
+    {
+        POSMetric metric(TEL40101_METAFS_PENDING_MPIO_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("thread_name", nameForTelemetry);
+        metric.SetCountValue(size);
+        telemetryPublisher->PublishMetric(metric);
+        lastTime = currentTime;
+    }
 }
 } // namespace pos

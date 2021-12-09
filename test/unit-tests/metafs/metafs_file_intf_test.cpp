@@ -100,7 +100,7 @@ public:
         wbt = new NiceMock<MockMetaFsWBTApi>;
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
         metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs);
     }

@@ -63,9 +63,9 @@ MetaFsService::~MetaFsService(void)
 }
 
 void
-MetaFsService::Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet)
+MetaFsService::Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp)
 {
-    _PrepareThreads(totalCount, schedSet, workSet);
+    _PrepareThreads(totalCount, schedSet, workSet, tp);
 }
 
 void
@@ -112,7 +112,7 @@ MetaFsService::GetMetaFs(int arrayId)
 }
 
 void
-MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet)
+MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp)
 {
     uint32_t availableMetaIoCoreCnt = CPU_COUNT(&workSet);
     uint32_t handlerId = 0;
@@ -133,7 +133,7 @@ MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_
     {
         if (CPU_ISSET(coreId, &workSet))
         {
-            _InitiateMioHandler(handlerId++, coreId, totalCount);
+            _InitiateMioHandler(handlerId++, coreId, totalCount, tp);
             availableMetaIoCoreCnt--;
 
             if (availableMetaIoCoreCnt == 0)
@@ -145,10 +145,10 @@ MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_
 }
 
 ScalableMetaIoWorker*
-MetaFsService::_InitiateMioHandler(int handlerId, int coreId, int coreCount)
+MetaFsService::_InitiateMioHandler(int handlerId, int coreId, int coreCount, TelemetryPublisher* tp)
 {
     ScalableMetaIoWorker* mioHandler =
-        new ScalableMetaIoWorker(handlerId, coreId, coreCount);
+        new ScalableMetaIoWorker(handlerId, coreId, coreCount, tp);
     mioHandler->StartThread();
     ioScheduler->RegisterMioHandler(mioHandler);
 

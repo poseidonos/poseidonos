@@ -3,7 +3,7 @@
 - [**CLI**](#cli)
 - [**Device**](#device)
 - [**Meta**](#meta)
-- [**MetaFS**](#metafs)
+- [**MetaFs**](#metafs)
 - [**Volume**](#volume)
 - [**Array**](#array)
 
@@ -35,8 +35,14 @@ Meta ID Range : 30000 ~ 39999
 
 ---
 
-## **MetaFS**
-MetaFS ID Range : 40000 ~ 49999
+## **MetaFs**
+MetaFs ID Range : 40000 ~ 49999
+
+40000 NormalShutdown
+
+40100 PendingMioCount
+
+40101 PendingMpioCount
 
 ---
 

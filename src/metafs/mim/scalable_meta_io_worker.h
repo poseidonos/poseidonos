@@ -36,13 +36,14 @@
 #include "mfs_io_handler_base.h"
 #include "mio_handler.h"
 #include "mpio_handler.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
 class ScalableMetaIoWorker : public MetaFsIoHandlerBase
 {
 public:
-    explicit ScalableMetaIoWorker(int threadId, int coreId, int coreCount);
+    explicit ScalableMetaIoWorker(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;

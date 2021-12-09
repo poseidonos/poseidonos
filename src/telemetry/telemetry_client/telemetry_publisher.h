@@ -57,7 +57,7 @@ public:
 
     virtual int PublishData(std::string id_, POSMetricValue value_, POSMetricTypes type_);
     virtual int PublishMetric(POSMetric metric);
-    virtual int PublishDataList(std::vector<POSMetric>* metricList);
+    virtual int PublishMetricList(std::vector<POSMetric>* metricList);
     virtual POSMetricVector* AllocatePOSMetricVector(void);
     virtual void SetGlobalPublisher(IGlobalPublisher* gp);
 

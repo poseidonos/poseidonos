@@ -34,11 +34,11 @@
 
 namespace pos
 {
-ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCount)
+ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCount, TelemetryPublisher* tp)
 : MetaFsIoHandlerBase(threadId, coreId)
 {
-    tophalfHandler = new MioHandler(threadId, coreId, coreCount);
-    bottomhalfHandler = new MpioHandler(threadId, coreId);
+    tophalfHandler = new MioHandler(threadId, coreId, coreCount, tp);
+    bottomhalfHandler = new MpioHandler(threadId, coreId, tp);
 
     tophalfHandler->BindPartialMpioHandler(bottomhalfHandler);
 }

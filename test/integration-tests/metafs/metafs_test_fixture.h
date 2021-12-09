@@ -36,6 +36,7 @@
 
 #include <string>
 
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 
@@ -59,6 +60,7 @@ protected:
     MetaFsIoApi* io = nullptr;
     MetaFsWBTApi* wbt = nullptr;
     NiceMock<MockMetaStorageSubsystem>* storage = nullptr;
+    NiceMock<MockTelemetryPublisher>* tp = nullptr;
 
     bool isLoaded = false;
     int arrayId = INT32_MAX;

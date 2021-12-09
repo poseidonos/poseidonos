@@ -47,6 +47,7 @@
 #include "src/metafs/metafs.h"
 #include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -59,7 +60,7 @@ class MetaFsService
 public:
     MetaFsService(void);
     ~MetaFsService(void);
-    void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
+    void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
     void Register(std::string& arrayName, int arrayId, MetaFs* fileSystem);
     void Deregister(std::string& arrayName);
     MetaFs* GetMetaFs(std::string& arrayName);
@@ -71,8 +72,8 @@ public:
     }
 
 private:
-    void _PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
-    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount);
+    void _PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp);
+    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount, TelemetryPublisher* tp);
 
     std::unordered_map<std::string, int> arrayNameToId;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems;

@@ -58,6 +58,8 @@ public:
     // char: A55A
     static const uint16_t SIGNATURE_INODE_VERSION = 42330;
     static const uint16_t CURRENT_INODE_VERSION = 1;
+    // for telemetry
+    static const int64_t  INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC = 5000; // 5s
 };
 
 class MetaFsIoConfig

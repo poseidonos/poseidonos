@@ -1,3 +1,7 @@
+- [**MetaFs**](#metafs)
+  - [_**NormalShutdown**_](#normalshutdown)
+  - [_**PendingMioCount**_](#pendingmiocount)
+  - [_**PendingMpioCount**_](#pendingmpiocount)
 - [**Volume**](#volume)
   - [_**ReadIops**_](#readiops)
   - [_**ReadBandwidth**_](#readbandwidth)
@@ -15,12 +19,65 @@
 
 ---
 
+## **MetaFs**
+
+MetaFs group contains the metrics of the Meta Filsystem.
+
+---
+
+### _**NormalShutdown**_
+
+**ID**: 40000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer}
+
+**Introduced**: v0.10.0
+
+Whether the previous shutdown was normal.
+
+---
+
+### _**PendingMioCount**_
+
+**ID**: 40100
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The number of requests requested by user modules per a MetaLpn.
+
+---
+
+### _**PendingMpioCount**_
+
+**ID**: 40101
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Count of requests for follow-up because the event worker has finished processing.
+
+---
+
 ## **Volume**
 
 Volume group contains the metrics of volume.
 
 ---
-
 ### _**ReadIops**_
 
 **ID**: 50000

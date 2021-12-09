@@ -41,6 +41,7 @@
 #include "src/metafs/mai/metafs_wbt_api.h"
 #include "src/metafs/storage/mss.h"
 
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
@@ -54,7 +55,7 @@ public:
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
             MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
-            MetaStorageSubsystem* metaStorage);
+            MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp);
     virtual ~MetaFs(void);
 
     virtual int Init(void) override;
@@ -89,5 +90,7 @@ private:
     std::string arrayName = "";
     int arrayId = INT32_MAX;
     MetaStorageSubsystem* metaStorage = nullptr;
+    TelemetryPublisher* telemetryPublisher = nullptr;
+    std::string nameForTelemetry = "";
 };
 } // namespace pos

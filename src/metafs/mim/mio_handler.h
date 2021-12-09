@@ -36,22 +36,25 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+
 #include "metafs_io_multi_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
 #include "mio_pool.h"
 #include "mpio.h"
 #include "mpio_handler.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 class MioHandler
 {
 public:
-    MioHandler(int threadId, int coreId, int coreCount);
+    MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
     MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
-        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool);
+        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+        TelemetryPublisher* tp);
     ~MioHandler(void);
 
     void TophalfMioProcessing(void);
@@ -81,6 +84,7 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
+    void _SendMetric(uint32_t size);
 #if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif
@@ -103,5 +107,9 @@ private:
 
     static const uint32_t MAX_CONCURRENT_MIO_PROC_THRESHOLD = MetaFsConfig::MAX_CONCURRENT_IO_CNT;
     int coreId;
+
+    TelemetryPublisher* telemetryPublisher = nullptr;
+    std::chrono::steady_clock::time_point lastTime;
+    std::string nameForTelemetry = "";
 };
 } // namespace pos
