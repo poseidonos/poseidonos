@@ -74,13 +74,14 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     NiceMock<MockTelemetryPublisher>* telemetryPublisher = new NiceMock<MockTelemetryPublisher>();
 
     // RebuildCtx (Real)
-    RebuildCtx* rebuildCtx = new RebuildCtx(nullptr, allocatorCtx, allocatorAddressInfo);
+    RebuildCtx* rebuildCtx = new RebuildCtx(nullptr, allocatorAddressInfo);
 
     // Context IO Manager (Real)
-    ContextIoManager* contextIoManager = new ContextIoManager(allocatorAddressInfo, telemetryPublisher);
-    contextIoManager->SetAllocatorFileIo(SEGMENT_CTX, new AllocatorFileIo(SEGMENT_CTX, segmentCtx, allocatorAddressInfo, ARRAY_ID));
-    contextIoManager->SetAllocatorFileIo(ALLOCATOR_CTX, new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, allocatorAddressInfo, ARRAY_ID));
-    contextIoManager->SetAllocatorFileIo(REBUILD_CTX, new AllocatorFileIo(REBUILD_CTX, rebuildCtx, allocatorAddressInfo, ARRAY_ID));
+    // Allocator File Io (Real)
+    AllocatorFileIo* rebuildFileIo = new NiceMock<AllocatorFileIo>;
+    AllocatorFileIo* segmentFileIo = new NiceMock<AllocatorFileIo>;
+    AllocatorFileIo* allocatorFileIo = new NiceMock<AllocatorFileIo>;
+    ContextIoManager* contextIoManager = new ContextIoManager(allocatorAddressInfo, telemetryPublisher, rebuildFileIo, segmentFileIo, allocatorFileIo);
 
     // ContextManager (Real)
     ContextManager contextManager(telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
@@ -119,15 +120,11 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     NiceMock<MockTelemetryPublisher> telemetryPublisher;
     NiceMock<MockEventScheduler> eventScheduler;
 
-    ContextIoManager ioManager(&allocatorAddressInfo, &telemetryPublisher);
-
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&allocatorAddressInfo, &telemetryPublisher, &eventScheduler, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
         event->Execute();

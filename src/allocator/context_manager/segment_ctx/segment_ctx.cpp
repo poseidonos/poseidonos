@@ -358,7 +358,7 @@ SegmentCtx::GetSignature(void)
 {
     return SIG_SEGMENT_CTX;
 }
-    
+
 int
 SegmentCtx::GetNumSections(void)
 {
@@ -523,7 +523,7 @@ SegmentCtx::FindMostInvalidSSDSegment(void)
             minValidCount = cnt;
         }
     }
-    if(victimSegment != UNMAP_SEGMENT)
+    if (victimSegment != UNMAP_SEGMENT)
     {
         POSMetricValue v;
         v.gauge = minValidCount;

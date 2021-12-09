@@ -41,21 +41,22 @@
 
 namespace pos
 {
-ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp)
-: ContextIoManager(info, tp, EventSchedulerSingleton::Instance())
+ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp,
+    AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo)
+: ContextIoManager(info, tp, EventSchedulerSingleton::Instance(), segmentFileIo, allocatorFileIo, rebuildFileIo)
 {
 }
 
-ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp, EventScheduler* scheduler)
+ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp, EventScheduler* scheduler,
+    AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo)
 : flushInProgress(false),
   addrInfo(info),
   telPublisher(tp),
   eventScheduler(scheduler)
 {
-    for (int owner = 0; owner < NUM_FILES; owner++)
-    {
-        fileIo[owner] = nullptr;
-    }
+    fileIo[SEGMENT_CTX] = segmentFileIo;
+    fileIo[ALLOCATOR_CTX] = allocatorFileIo;
+    fileIo[REBUILD_CTX] = rebuildFileIo;
 }
 
 ContextIoManager::~ContextIoManager(void)
@@ -70,16 +71,9 @@ ContextIoManager::~ContextIoManager(void)
 }
 
 void
-ContextIoManager::SetAllocatorFileIo(int owner, AllocatorFileIo* io)
-{
-    fileIo[owner] = io;
-}
-
-void
 ContextIoManager::Init(void)
 {
     int ret = 0;
-
     POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] start to init and load allocator files");
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
@@ -215,7 +209,7 @@ ContextIoManager::_FlushCompleted(void)
 int
 ContextIoManager::FlushRebuildContext(EventSmartPtr callback, bool sync)
 {
-    AllocatorCtxIoCompletion completion = [](){}; // Do nothing on completion
+    AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
     int ret = fileIo[REBUILD_CTX]->Flush(completion);
 
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),

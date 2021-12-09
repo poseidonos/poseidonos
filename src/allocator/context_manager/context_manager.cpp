@@ -76,16 +76,16 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 : ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(tp, info);
-    rebuildCtx = new RebuildCtx(tp, allocatorCtx, info);
+    rebuildCtx = new RebuildCtx(tp, info);
     segmentCtx = new SegmentCtx(tp, rebuildCtx, info);
     gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
 
-    ioManager = new ContextIoManager(info, tp);
-    ioManager->SetAllocatorFileIo(SEGMENT_CTX, new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo, arrayId));
-    ioManager->SetAllocatorFileIo(ALLOCATOR_CTX, new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo, arrayId));
-    ioManager->SetAllocatorFileIo(REBUILD_CTX, new AllocatorFileIo(REBUILD_CTX, rebuildCtx, addrInfo, arrayId));
+    AllocatorFileIo* rebuildFileIo = new AllocatorFileIo(REBUILD_CTX, rebuildCtx, addrInfo, arrayId);
+    AllocatorFileIo* segmentFileIo = new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo, arrayId);
+    AllocatorFileIo* allocatorFileIo = new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo, arrayId);
+    ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 }
 
 ContextManager::~ContextManager(void)

@@ -33,6 +33,7 @@
 #pragma once
 
 #include <mutex>
+#include <string>
 
 #include "src/allocator/include/allocator_const.h"
 #include "src/meta_file_intf/async_context.h"

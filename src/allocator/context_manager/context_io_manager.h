@@ -41,6 +41,7 @@
 namespace pos
 {
 class TelemetryPublisher;
+class AllocatorFileIo;
 
 class ContextIoManager
 {
@@ -53,11 +54,11 @@ public:
         IOTYPE_ALL
     };
     ContextIoManager(void) = default;
-    ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp);
-    ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp, EventScheduler* scheduler);
+    ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp,
+        AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo);
+    ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp, EventScheduler* scheduler,
+        AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo);
     virtual ~ContextIoManager(void);
-
-    void SetAllocatorFileIo(int owner, AllocatorFileIo* io);
 
     virtual void Init(void);
     virtual void Dispose(void);

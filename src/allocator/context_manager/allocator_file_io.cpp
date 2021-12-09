@@ -214,8 +214,8 @@ AllocatorFileIo::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 void
 AllocatorFileIo::_AfterLoad(char* buffer)
 {
-    assert(numFilesReading > 0);
-    numFilesReading--;
+    int result = numFilesReading.fetch_sub(1) - 1;
+    assert(result >= 0);
 
     _LoadSectionData(buffer);
     client->AfterLoad(buffer);
@@ -258,7 +258,7 @@ AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 
     AllocatorIoCtx* ioContext = reinterpret_cast<AllocatorIoCtx*>(ctx);
     ioContext->clientCallback();
-    
+
     delete[] ctx->buffer;
     delete ctx;
 }
@@ -266,8 +266,8 @@ AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 void
 AllocatorFileIo::_AfterFlush(AsyncMetaFileIoCtx* ctx)
 {
-    assert(numFilesFlushing > 0);
-    numFilesFlushing--;
+    int result = numFilesFlushing.fetch_sub(1) - 1;
+    assert(result >= 0);
 
     client->FinalizeIo(ctx);
 }

@@ -20,37 +20,34 @@ TEST(ContextIoManager, ContextIoManager_testConstructor)
     NiceMock<MockEventScheduler> scheduler;
 
     {
-        ContextIoManager ioManager(&info, &tp);
+        NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
+        ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
     }
 
     {
-        ContextIoManager* ioManager = new ContextIoManager(&info, &tp);
+        NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
+        ContextIoManager* ioManager = new ContextIoManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
         delete ioManager;
     }
 
     {
-        ContextIoManager ioManager(&info, &tp, &scheduler);
+        NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
+        ContextIoManager ioManager(&info, &tp, &scheduler, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
     }
 
     {
-        ContextIoManager* ioManager = new ContextIoManager(&info, &tp, &scheduler);
+        NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
+        NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
+        ContextIoManager* ioManager = new ContextIoManager(&info, &tp, &scheduler, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
         delete ioManager;
     }
-}
-
-TEST(ContextIoManager, SetAllocatorFileIo_testAdd)
-{
-    NiceMock<MockAllocatorAddressInfo> info;
-    NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
-
-    NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
-    NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
-    NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
 }
 
 TEST(ContextIoManager, Init_testFileCreate)
@@ -58,15 +55,12 @@ TEST(ContextIoManager, Init_testFileCreate)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(0));
@@ -90,15 +84,12 @@ TEST(ContextIoManager, Init_testFileLoad)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(1));
@@ -117,15 +108,12 @@ TEST(ContextIoManager, Init_testFileFlushFail)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(0));
@@ -140,15 +128,12 @@ TEST(ContextIoManager, Init_testFileLoadFail)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(-1));
@@ -161,15 +146,12 @@ TEST(ContextIoManager, Dispose_testIfAllFileIsDisposed)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Dispose);
     EXPECT_CALL(*allocatorCtxIo, Dispose);
@@ -185,12 +167,12 @@ TEST(ContextIoManager, FlushContexts_IfSyncSuccessAllFile)
     addrInfo.SetUT(true);
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
+    NiceMock<MockEventScheduler> scheduler;
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, &scheduler, segmentCtxIo, allocatorCtxIo, nullptr);
 
     EXPECT_CALL(*segmentCtxIo, Flush)
         .WillOnce([&](AllocatorCtxIoCompletion completion)
@@ -225,14 +207,12 @@ TEST(ContextIoManager, FlushContexts_IfSyncFailFirstFile)
     addrInfo.SetUT(true);
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
 
@@ -252,14 +232,12 @@ TEST(ContextIoManager, FlushContexts_IfSyncFailSecondFile)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetUT(true);
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&addrInfo, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&addrInfo, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(-1));
@@ -277,14 +255,12 @@ TEST(ContextIoManager, FlushContexts_IfAsyncAlreadyFlushing)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
@@ -309,14 +285,12 @@ TEST(ContextIoManager, FlushContexts_IfAsyncSuccessAllFile)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
@@ -335,16 +309,13 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailFirstFile)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
-
     ON_CALL(info, IsUT).WillByDefault(Return(true));
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
 
@@ -362,16 +333,14 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailSecondFile)
     // given
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     ON_CALL(info, IsUT).WillByDefault(Return(true));
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(-1));
@@ -389,14 +358,12 @@ TEST(ContextIoManager, FlushRebuildContext_testSyncFlush)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
 
@@ -413,10 +380,9 @@ TEST(ContextIoManager, FlushRebuildContext_testAsyncFlush)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, nullptr, nullptr, nullptr, rebuildCtxIo);
 
     EXPECT_CALL(*rebuildCtxIo, GetNumFilesFlushing).WillOnce(Return(1));
     EXPECT_CALL(*rebuildCtxIo, Flush).WillOnce(Return(0));
@@ -428,10 +394,9 @@ TEST(ContextIoManager, GetStoredContextVersion_TestGetter)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(REBUILD_CTX, rebuildCtxIo);
+    ContextIoManager ioManager(&info, &tp, nullptr, nullptr, nullptr, rebuildCtxIo);
 
     EXPECT_CALL(*rebuildCtxIo, GetStoredVersion).WillOnce(Return(10));
     EXPECT_EQ(ioManager.GetStoredContextVersion(REBUILD_CTX), 10);
@@ -441,10 +406,9 @@ TEST(ContextIoManager, GetContextSectionAddr_TestGetter)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(ALLOCATOR_CTX, allocatorCtxIo);
+    ContextIoManager ioManager(&info, &tp, nullptr, nullptr, allocatorCtxIo, nullptr);
 
     char buffer[100];
     EXPECT_CALL(*allocatorCtxIo, GetSectionAddr(AC_CURRENT_SSD_LSID)).WillOnce(Return(buffer));
@@ -455,10 +419,9 @@ TEST(ContextIoManager, GetContextSectionSize_TestGetter)
 {
     NiceMock<MockAllocatorAddressInfo> info;
     NiceMock<MockTelemetryPublisher> tp;
-    ContextIoManager ioManager(&info, &tp);
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ioManager.SetAllocatorFileIo(SEGMENT_CTX, segmentCtxIo);
+    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, nullptr, nullptr);
 
     EXPECT_CALL(*segmentCtxIo, GetSectionSize(SC_SEGMENT_INFO)).WillOnce(Return(1024*1024));
     EXPECT_EQ(ioManager.GetContextSectionSize(SEGMENT_CTX, SC_SEGMENT_INFO), 1024*1024);

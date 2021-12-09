@@ -41,14 +41,13 @@
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
+RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorAddressInfo* info)
 : addrInfo(info),
   ctxStoredVersion(0),
   ctxDirtyVersion(0),
   needContinue(false),
   targetSegmentCount(0),
   currentTarget(UINT32_MAX),
-  allocatorCtx(allocCtx),
   tp(tp_),
   initialized(false)
 {
@@ -66,8 +65,8 @@ RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, Alloca
         ctxHeader.numTargetSegments = 0;
     }
 }
-RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
-: RebuildCtx(tp, nullptr, allocCtx, info)
+RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info)
+: RebuildCtx(tp, nullptr, info)
 {
 }
 
@@ -86,6 +85,7 @@ RebuildCtx::Init(void)
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
+
     initialized = true;
 }
 
@@ -218,7 +218,7 @@ RebuildCtx::GetSignature(void)
 {
     return SIG_REBUILD_CTX;
 }
-    
+
 int
 RebuildCtx::GetNumSections(void)
 {

@@ -187,7 +187,9 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
             // Update the buffer with the prepared buffer above
             EXPECT_EQ(fileManager.GetNumFilesReading(), 1);
 
-            CtxHeader header = { .sig = 0xAFAFAFAF, .ctxVersion = 0 };
+            CtxHeader header = {
+                .sig = 0xAFAFAFAF,
+                .ctxVersion = 0 };
             memcpy(ctx->buffer, &header, sizeof(header));
 
             char* ptr = ctx->buffer + sizeof(header);
@@ -196,7 +198,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
                 memset(ptr + 100 * (sectionId - 1), 'a' + sectionId, 100);
             }
 
-            ctx->ioDoneCheckCallback = [](void* ctx){ return 0; };
+            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
 
             return 0;
@@ -271,14 +273,14 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
             {
                 EXPECT_EQ(*ptr, 'a' + sectionId);
                 ptr += 100;
-            }            
+            }
 
-            ctx->ioDoneCheckCallback = [](void* ctx){ return 0; };
+            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
             return 0;
         });
 
-    auto testCallback = [](){}; // do nothing
+    auto testCallback = []() {}; // do nothing
     int ret = fileManager.Flush(testCallback);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(fileManager.GetNumFilesFlushing(), 0);
@@ -313,7 +315,7 @@ TEST(AllocatorFileIo, Flush_testFlushFail)
     EXPECT_CALL(client, BeforeFlush);
     EXPECT_CALL(*file, AsyncIO).WillOnce(Return(-1));
 
-    auto testCallback = [](){}; // do nothing
+    auto testCallback = []() {}; // do nothing
     int ret = fileManager.Flush(testCallback);
     EXPECT_TRUE(ret < 0);
 
