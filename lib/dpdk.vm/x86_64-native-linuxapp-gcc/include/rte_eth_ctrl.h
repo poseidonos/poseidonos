@@ -1,1 +1,0 @@
-../../lib/librte_ethdev/rte_eth_ctrl.h
