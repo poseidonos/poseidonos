@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -31,9 +31,51 @@
  */
 
 #include "src/metafs/mim/enum_iterator.h"
+#include "src/metafs/mim/mim_state.h"
 
 #include <gtest/gtest.h>
 
 namespace pos
 {
+TEST(EnumIterator, testIfTheActualCounterIsTheSameAsExpectedCountOfTheStates)
+{
+    int expected = 0;
+    for (auto state : Enum<MpAioState>())
+    {
+        expected++;
+    }
+
+    int actual = (int)MpAioState::Max - (int)MpAioState::First;
+
+    EXPECT_EQ(actual, expected);
+}
+
+TEST(EnumIterator, testIfTheGetterIsWorkingAsExpected)
+{
+    Enum<MpAioState>::Iterator tester(7);
+    MpAioState actual = *tester;
+    MpAioState expected = MpAioState::Ready;
+
+    EXPECT_EQ(actual, expected);
+}
+
+TEST(EnumIterator, testIfTheAdderIsWorkingAsExpected)
+{
+    Enum<MpAioState>::Iterator tester(7);
+
+    ++tester;
+
+    MpAioState actual = *tester;
+    MpAioState expected = MpAioState::Read;
+
+    EXPECT_EQ(actual, expected);
+}
+
+TEST(EnumIterator, testIfTheOperatorOfNotEqualIsWorkingAsExpected)
+{
+    Enum<MpAioState>::Iterator tester1(7);
+    Enum<MpAioState>::Iterator tester2(8);
+
+    EXPECT_NE(tester1, tester2);
+}
 } // namespace pos
