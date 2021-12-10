@@ -41,7 +41,7 @@ namespace pos
 class IGlobalPublisher
 {
 public:
-    virtual int PublishToServer(std::string ownerName, std::vector<POSMetric>* metricList) = 0;
+    virtual int PublishToServer(MetricLabelMap* defaultLabelList, POSMetricVector* metricList) = 0;
 };
 
 } // namespace pos

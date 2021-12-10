@@ -45,11 +45,11 @@
 
 namespace pos
 {
-Metadata::Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state)
+Metadata::Metadata(IArrayInfo* info, IStateControl* state)
 : Metadata(info,
-      new Mapper(tp, info, nullptr),
-      new Allocator(tp, info, state),
-      new JournalManager(tp, info, state),
+      new Mapper(info, nullptr),
+      new Allocator(info, state),
+      new JournalManager(info, state),
       MetaServiceSingleton::Instance())
 {
 }

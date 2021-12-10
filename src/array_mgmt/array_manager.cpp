@@ -158,11 +158,14 @@ ArrayManager::Mount(string name)
 {
     return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
-        telClient->RegisterPublisher(name, array->GetTelemetryPublisher());
+        telClient->RegisterPublisher(array->GetTelemetryPublisher());
         int ret = array->Mount();
         if (ret !=  EID(SUCCESS))
         {
-            telClient->DeregisterPublisher(name);
+            if (array->GetTelemetryPublisher() != nullptr)
+            {
+                telClient->DeregisterPublisher(array->GetTelemetryPublisher()->GetName());
+            }
         }
         return ret;
     }, name);
@@ -176,7 +179,10 @@ ArrayManager::Unmount(string name)
         int ret = array->Unmount();
         if (ret == EID(SUCCESS))
         {
-            telClient->DeregisterPublisher(name);
+            if (array->GetTelemetryPublisher() != nullptr)
+            {
+                telClient->DeregisterPublisher(array->GetTelemetryPublisher()->GetName());
+            }
         }
         return ret;
     }, name);

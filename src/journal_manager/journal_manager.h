@@ -40,6 +40,7 @@
 #include "src/journal_manager/i_journal_manager.h"
 #include "src/journal_manager/i_journal_writer.h"
 #include "src/journal_manager/i_journal_status_provider.h"
+#include <string>
 
 namespace pos
 {
@@ -82,12 +83,13 @@ class IVolumeManager;
 class MetaFsFileControlApi;
 class EventScheduler;
 class TelemetryPublisher;
+class TelemetryClient;
 
 class JournalManager : public IMountSequence, public IJournalManager
 {
 public:
     JournalManager(void);
-    JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState);
+    JournalManager(IArrayInfo* info, IStateControl* iState);
     JournalManager(TelemetryPublisher* tp, JournalConfiguration* config,
         JournalStatusProvider* journalStatusProvider,
         LogWriteContextFactory* logWriteContextFactory,
@@ -118,7 +120,7 @@ public:
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
         IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
-        EventScheduler* eventScheduler);
+        EventScheduler* eventScheduler, TelemetryClient* tc);
 
     JournalManagerStatus
     GetJournalManagerStatus(void)
@@ -174,6 +176,7 @@ protected:
 
     ReplayHandler* replayHandler;
     TelemetryPublisher* tp;
+    TelemetryClient* telClient;
 };
 
 } // namespace pos

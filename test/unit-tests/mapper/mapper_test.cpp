@@ -26,7 +26,7 @@ TEST(Mapper, Init_InitAndDispose)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -55,7 +55,7 @@ TEST(Mapper, TestInitAndShutdown)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
 
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
@@ -104,7 +104,7 @@ TEST(Mapper, TestFlushDirtyMpages)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -134,7 +134,7 @@ TEST(Mapper, TestFlushDirtyMpagesGiven)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -163,7 +163,7 @@ TEST(Mapper, TestStoreAll)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -244,7 +244,6 @@ TEST(Mapper, TestEnableInternalAccess)
 
     delete mapper;
     delete arr;
-    delete tp;
 }
 
 TEST(Mapper, TestVolumeEvent)
@@ -296,7 +295,6 @@ TEST(Mapper, TestVolumeEvent)
 
     delete mapper;
     delete arr;
-    delete tp;
 }
 
 TEST(Mapper, TestGetVSASetVSA)
@@ -369,7 +367,6 @@ TEST(Mapper, TestGetVSASetVSA)
 
     delete mapper;
     delete arr;
-    delete tp;
 }
 
 TEST(Mapper, TestSimpleBypassFunctions)
@@ -380,7 +377,7 @@ TEST(Mapper, TestSimpleBypassFunctions)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -419,7 +416,7 @@ TEST(Mapper, TestGetNumUsedBlks)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
     EXPECT_CALL(*addrInfo, SetupAddressInfo).Times(1);
     EXPECT_CALL(*vsaMan, Init).WillOnce(Return(0));
@@ -452,7 +449,7 @@ TEST(Mapper, TestVolumeCreated_Failed)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
 
     mapper->SetVolumeState(0, VolState::BACKGROUND_MOUNTED, 10);
@@ -482,7 +479,7 @@ TEST(Mapper, TestPrepareVolumeDelete_Failed)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
 
     mapper->SetVolumeState(1, VolState::VOLUME_DELETING, 10);
@@ -512,7 +509,7 @@ TEST(Mapper, TestDeleteVolMap_Failed)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
 
     EXPECT_CALL(*vsaMan, DeleteVSAMap).WillOnce(Return(-1));
@@ -531,7 +528,7 @@ TEST(Mapper, TestVolumeDetacheds_Failed)
     NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
     NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
     NiceMock<MockMetaFs> mfs;
-    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    EXPECT_CALL(*arr, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Mapper* mapper = new Mapper(nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
 
     vector<int> list;

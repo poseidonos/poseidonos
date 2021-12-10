@@ -38,13 +38,12 @@ ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCou
 : MetaFsIoHandlerBase(threadId, coreId)
 {
     telemetryPublisher = tp;
-    nameForTelemetry = "metafs_io_" + to_string(coreId);
     if (nullptr == telemetryPublisher)
     {
-        telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
+        telemetryPublisher = new TelemetryPublisher("metafs_io_" + to_string(coreId));
         needToDeleteTelemetryPublisher = true;
     }
-    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
     tophalfHandler = new MioHandler(threadId, coreId, coreCount, telemetryPublisher);
     bottomhalfHandler = new MpioHandler(threadId, coreId, telemetryPublisher);
@@ -56,7 +55,7 @@ ScalableMetaIoWorker::~ScalableMetaIoWorker(void)
 {
     if (nullptr != telemetryPublisher)
     {
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
 
         if (true == needToDeleteTelemetryPublisher)
         {

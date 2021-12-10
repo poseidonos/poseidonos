@@ -42,6 +42,7 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/sys_event/volume_event.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -64,13 +65,17 @@ Mapper::Mapper(TelemetryPublisher* tp_, MapperWbt* mapperWbt_, VSAMapManager* vs
     {
         addrInfo = new MapperAddressInfo(iarrayInfo);
     }
+    if (tp == nullptr)
+    {
+        tp = new TelemetryPublisher("MAPPERPUB_" + iarrayInfo->GetName());
+    }
     if (vsaMapManager == nullptr)
     {
-        vsaMapManager = new VSAMapManager(tp_, addrInfo);
+        vsaMapManager = new VSAMapManager(tp, addrInfo);
     }
     if (stripeMapManager == nullptr)
     {
-        stripeMapManager = new StripeMapManager(tp_, nullptr, addrInfo);
+        stripeMapManager = new StripeMapManager(tp, nullptr, addrInfo);
     }
     if (reverseMapManager == nullptr)
     {
@@ -82,11 +87,12 @@ Mapper::Mapper(TelemetryPublisher* tp_, MapperWbt* mapperWbt_, VSAMapManager* vs
     }
 }
 
-Mapper::Mapper(TelemetryPublisher* tp, IArrayInfo* iarrayInfo, MetaFs* metaFs_)
-: Mapper(tp, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
+Mapper::Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_)
+: Mapper(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
 {
     _ClearVolumeState();
 }
+
 // LCOV_EXCL_START
 Mapper::~Mapper(void)
 {
@@ -112,6 +118,11 @@ Mapper::~Mapper(void)
         delete vsaMapManager;
         vsaMapManager = nullptr;
     }
+    if (tp != nullptr)
+    {
+        delete tp;
+        tp = nullptr;
+    }
     if (addrInfo != nullptr)
     {
         delete addrInfo;
@@ -119,6 +130,7 @@ Mapper::~Mapper(void)
     }
 }
 // LCOV_EXCL_STOP
+
 void
 Mapper::Dispose(void)
 {
@@ -147,6 +159,10 @@ Mapper::Init(void)
         if (metaFs == nullptr)
         {
             metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(addrInfo->GetArrayId());
+        }
+        if (tp != nullptr)
+        {
+            TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
         }
         int mpageSize = _GetMpageSize();
         addrInfo->SetupAddressInfo(mpageSize);
@@ -615,6 +631,10 @@ Mapper::_Dispose(void)
         reverseMapManager->Dispose();
         _UnregisterFromMapperService();
         _ClearVolumeState();
+        if ((addrInfo->IsUT() == false) && (tp != nullptr))
+        {
+            TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+        }
         isInitialized = false;
     }
 }

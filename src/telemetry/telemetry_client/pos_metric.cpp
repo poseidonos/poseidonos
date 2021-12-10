@@ -44,19 +44,13 @@ POSMetric::POSMetric(std::string name_, POSMetricTypes type_)
 {
     name = name_;
     type = type_;
-    time = std::time(nullptr);
+    // time = std::time(nullptr);
 }
 
 void
 POSMetric::SetName(std::string name_)
 {
     name = name_;
-}
-
-void
-POSMetric::SetTime(time_t time_)
-{
-    time = time_;
 }
 
 void
@@ -101,12 +95,6 @@ POSMetricTypes
 POSMetric::GetType(void)
 {
     return type;
-}
-
-time_t
-POSMetric::GetTime(void)
-{
-    return time;
 }
 
 uint64_t

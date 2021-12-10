@@ -24,7 +24,7 @@ TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServer)
     v->push_back(metric);
 
     // When 1: publish()
-    int ret = grpcClient->PublishToServer("1", v);
+    int ret = grpcClient->PublishToServer(nullptr, v);
 
     // Then 1
     EXPECT_EQ(0, ret); // TODO: Activate after MetricManager applied to TelemetryManager Server
@@ -47,7 +47,7 @@ TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServerWithStringMetric)
     v->push_back(metric);
 
     // When 1: publish()
-    int ret = grpcClient->PublishToServer("1", v);
+    int ret = grpcClient->PublishToServer(nullptr, v);
 
     // Then 1
     EXPECT_EQ(0, ret); // TODO: Activate after MetricManager applied to TelemetryManager Server

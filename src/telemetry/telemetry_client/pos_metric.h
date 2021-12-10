@@ -82,15 +82,15 @@ public:
     POSMetric(std::string name, POSMetricTypes type);
     virtual ~POSMetric(void) = default;
     virtual void SetName(std::string name_);
-    virtual void SetTime(time_t time_);
+    // virtual void SetTime(time_t time_);
     virtual void SetType(POSMetricTypes type_);
     virtual void SetCountValue(uint64_t count_);
     virtual void SetGaugeValue(int64_t gauge_);
-    virtual int AddLabel(std::string label, std::string key);
+    virtual int AddLabel(std::string key, std::string value);
 
     virtual std::string GetName(void);
     virtual POSMetricTypes GetType(void);
-    virtual time_t GetTime(void);
+    // virtual time_t GetTime(void);
     virtual uint64_t GetCountValue(void);
     virtual int64_t GetGaugeValue(void);
     virtual MetricLabelMap* GetLabelList(void);
@@ -98,7 +98,7 @@ public:
 private:
     POSMetricTypes type;       // Mandatory
     std::string name;          // Mandatory
-    time_t time;               // optional (preset)
+    // time_t time;               // optional (preset)
     POSMetricValue value;      // Mandatory
     MetricLabelMap labelList;  // optional (default: publisher's name)
 };

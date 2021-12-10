@@ -59,11 +59,8 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     ctrl = new MetaFsFileControlApi(arrayId, metaStorage);
     io = new MetaFsIoApi(arrayId, ctrl, metaStorage);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
-
-    nameForTelemetry = "metafs_" + to_string(arrayId);
-
-    telemetryPublisher = new TelemetryPublisher(nameForTelemetry);
-    TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+    telemetryPublisher = new TelemetryPublisher("metafs_" + to_string(arrayId));
+    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
@@ -87,7 +84,7 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
     telemetryPublisher = tp;
 
     if (nullptr != telemetryPublisher)
-        TelemetryClientSingleton::Instance()->RegisterPublisher(nameForTelemetry, telemetryPublisher);
+        TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
@@ -98,7 +95,7 @@ MetaFs::~MetaFs(void)
 
     if (nullptr != telemetryPublisher)
     {
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(nameForTelemetry);
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
         delete telemetryPublisher;
         telemetryPublisher = nullptr;
     }

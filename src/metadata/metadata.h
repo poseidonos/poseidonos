@@ -38,7 +38,6 @@
 
 namespace pos
 {
-class TelemetryPublisher;
 class Mapper;
 class Allocator;
 class JournalManager;
@@ -50,7 +49,7 @@ class MetaService;
 class Metadata : public IMountSequence
 {
 public:
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
+    Metadata(IArrayInfo* info, IStateControl* state);
     Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaService* service);
     virtual ~Metadata(void);
 

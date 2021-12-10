@@ -53,8 +53,10 @@ GrpcGlobalPublisher::~GrpcGlobalPublisher(void)
 }
 
 int
-GrpcGlobalPublisher::PublishToServer(std::string ownerName, POSMetricVector* metricList)
+GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetricVector* metricList)
 {
+    int ret = 0;
+    assert(metricList != nullptr);
     MetricPublishRequest* request = new MetricPublishRequest;
     uint32_t cnt = 0;
     for (auto& mit : (*metricList))
@@ -65,6 +67,7 @@ GrpcGlobalPublisher::PublishToServer(std::string ownerName, POSMetricVector* met
             POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add MetricList, numMetric overflowed!!!, name:{}, numMetric:{}", mit.GetName(), metricList->size());
             break;
         }
+        // set values
         Metric* metric = request->add_metrics();
         POSMetricTypes type = mit.GetType();
         metric->set_type((MetricTypes)type);
@@ -77,26 +80,31 @@ GrpcGlobalPublisher::PublishToServer(std::string ownerName, POSMetricVector* met
         {
             metric->set_guagevalue(mit.GetGaugeValue());
         }
-        google::protobuf::Timestamp* tt = new google::protobuf::Timestamp();
-        tt->set_seconds(mit.GetTime());
-        metric->set_allocated_time(tt);
-
-        Label* lab = metric->add_labels();
+        // set time
+        // google::protobuf::Timestamp* tt = new google::protobuf::Timestamp();
+        // tt->set_seconds(mit.GetTime());
+        // metric->set_allocated_time(tt);
+        // set default label
+        if (defaultLabelList != nullptr)
+        {
+            for (auto& dlit : (*defaultLabelList))
+            {
+                Label* lab = metric->add_labels();
+                lab->set_key(dlit.first);
+                lab->set_value(dlit.second);
+            }
+        }
+        // set user label
         MetricLabelMap* labelList = mit.GetLabelList();
         for (auto& lit : (*labelList))
         {
-            lab = metric->add_labels();
+            Label* lab = metric->add_labels();
             lab->set_key(lit.first);
             lab->set_value(lit.second);
         }
-        if (labelList->size() < MAX_NUM_LABEL)
-        {
-            lab->set_key("default_label");
-            lab->set_value(ownerName);
-        }
+        ret = _SendMessage(request, (cnt - 1));
+        delete request;
     }
-    int ret = _SendMessage(request, (cnt - 1));
-    delete request;
     return ret;
 }
 

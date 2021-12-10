@@ -58,10 +58,7 @@ TEST(TelemetryPublisher, PublishData_TestUpdateData)
     m.SetGaugeValue(2);
     m.AddLabel("1", "tt");
     m.AddLabel("2", "cc");
-    time_t t;
-    m.SetTime(t);
     m.SetType(MT_GAUGE);
-    t = m.GetTime();
     POSMetricTypes tt = m.GetType();
     std::string temp = m.GetName();
     uint64_t cnt = m.GetCountValue();
@@ -86,10 +83,11 @@ TEST(TelemetryPublisher, PublishData_TestUpdateData)
 TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
 {
     // given
-    TelemetryPublisher tp;
+    TelemetryPublisher tp("aaa");
     tp.SetMaxEntryLimit(2);
     tp.StartPublishing();
     tp.StartUsingDataPool();
+    std::string nnn = tp.GetName();
 
     NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
     tp.SetGlobalPublisher(igp);
@@ -98,10 +96,7 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     m.SetGaugeValue(2);
     m.AddLabel("1", "tt");
     m.AddLabel("2", "cc");
-    time_t t;
-    m.SetTime(t);
     m.SetType(MT_GAUGE);
-    t = m.GetTime();
     POSMetricTypes tt = m.GetType();
     std::string temp = m.GetName();
     uint64_t cnt = m.GetCountValue();

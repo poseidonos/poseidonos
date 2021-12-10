@@ -54,8 +54,9 @@ TelemetryClient::~TelemetryClient(void)
 }
 
 int
-TelemetryClient::RegisterPublisher(std::string name, TelemetryPublisher* publisher)
+TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
 {
+    std::string name = publisher->GetName();
     auto ret = publisherList.find(name);
     if (ret != publisherList.end())
     {

@@ -36,6 +36,8 @@ namespace pos
 {
 #define MAX_NUM_METRICLIST 1000
 #define MAX_NUM_LABEL 100
+#define TEL_PUBNAME_LABEL_KEY "PUBNAME"
+#define TEL_RUNID_LABEL_KEY "PUBRUNID"
 
     // ID = "modulecode_itemname_collectiontype(count/history)"
     static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";

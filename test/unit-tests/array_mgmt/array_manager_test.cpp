@@ -318,7 +318,6 @@ TEST(ArrayManager, Unmount_testIfTargetArrayCallsUnmount)
     auto mockTelClient = BuildMockTelemetryClient();
 
     EXPECT_CALL(*mockArrayComp, Unmount).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*mockTelClient, DeregisterPublisher).Times(1);
 
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
 

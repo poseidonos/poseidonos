@@ -50,7 +50,7 @@ public:
     explicit TelemetryClient(std::shared_ptr<grpc::Channel> channel_);
     TelemetryClient(void);
     virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
+    virtual int RegisterPublisher(TelemetryPublisher* tp);
     virtual int DeregisterPublisher(std::string name);
     virtual bool StartPublisher(std::string name);
     virtual bool StopPublisher(std::string name);

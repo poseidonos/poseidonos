@@ -44,7 +44,7 @@ class TelemetryPublisher
 {
 public:
     TelemetryPublisher(void) = default;
-    explicit TelemetryPublisher(std::string ownerName);
+    explicit TelemetryPublisher(std::string name);
     virtual ~TelemetryPublisher(void);
     virtual void StartPublishing(void);
     virtual void StopPublishing(void);
@@ -54,21 +54,22 @@ public:
 
     virtual void SetMaxEntryLimit(int limit);
     virtual int GetNumEntries(void);
+    virtual std::string GetName(void);
 
     virtual int PublishData(std::string id_, POSMetricValue value_, POSMetricTypes type_);
     virtual int PublishMetric(POSMetric metric);
     virtual int PublishMetricList(std::vector<POSMetric>* metricList);
     virtual POSMetricVector* AllocatePOSMetricVector(void);
     virtual void SetGlobalPublisher(IGlobalPublisher* gp);
+    virtual int AddDefaultLabel(std::string key, std::string value);
 
 private:
-    std::string _GetTimeString(time_t time);
-
-    std::string ownerName;
+    std::string name;
     IGlobalPublisher* globalPublisher;
     TelemetryDataPool dataPool;
     bool turnOn;
     bool useDataPool;
+    MetricLabelMap defaultlabelList;
 };
 
 } // namespace pos

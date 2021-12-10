@@ -28,7 +28,7 @@ TEST(Allocator, Allocator_TestConstructor)
     // given
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    Allocator alloc(nullptr, iArrayInfo, iState);
+    Allocator alloc(iArrayInfo, iState);
     delete iArrayInfo;
     delete iState;
 }

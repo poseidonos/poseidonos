@@ -61,6 +61,8 @@
 #include "src/mapper_service/mapper_service.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/volume/volume_service.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -82,7 +84,8 @@ JournalManager::JournalManager(void)
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
   replayHandler(nullptr),
-  tp(nullptr)
+  tp(nullptr),
+  telClient(nullptr)
 {
 }
 
@@ -106,6 +109,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* co
     IArrayInfo* info)
 : JournalManager()
 {
+    tp = tp_;
     config = configuration;
     statusProvider = journalStatusProvider;
 
@@ -127,14 +131,13 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* co
     sequenceController = callbackSequenceController;
 
     replayHandler = replay;
-    tp = tp_;
-
     arrayInfo = info;
 }
 
 // Constructor for injecting mock module dependencies in product code
-JournalManager::JournalManager(TelemetryPublisher* tp_, IArrayInfo* info, IStateControl* state)
-: JournalManager(tp_, new JournalConfiguration(),
+JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
+: JournalManager(new TelemetryPublisher("JOURNALPUB_" + info->GetName()), 
+    new JournalConfiguration(),
     new JournalStatusProvider(),
     new LogWriteContextFactory(),
     new JournalEventFactory(),
@@ -156,6 +159,11 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, IArrayInfo* info, IState
 
 JournalManager::~JournalManager(void)
 {
+    if ((telClient != nullptr) && (tp != nullptr))
+    {
+        telClient->DeregisterPublisher(tp->GetName());
+        delete tp;
+    }
     delete replayHandler;
 
     delete sequenceController;
@@ -193,7 +201,8 @@ JournalManager::Init(void)
         AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayId),
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId),
         MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->ctrl,
-        EventSchedulerSingleton::Instance());
+        EventSchedulerSingleton::Instance(),
+        TelemetryClientSingleton::Instance());
 }
 
 int
@@ -202,7 +211,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
     IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
-    EventScheduler* eventScheduler)
+    EventScheduler* eventScheduler, TelemetryClient* tc)
 {
     int result = 0;
 
@@ -215,7 +224,11 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         {
             return result;
         }
-
+        telClient = tc;
+        if (telClient != nullptr)
+        {
+            telClient->RegisterPublisher(tp);
+        }
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
             wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
@@ -304,6 +317,10 @@ JournalManager::Dispose(void)
     if (config->IsEnabled() == true)
     {
         _Reset();
+        if ((telClient != nullptr) && (tp != nullptr))
+        {
+            telClient->DeregisterPublisher(tp->GetName());
+        }
         _DisposeModules();
     }
 }

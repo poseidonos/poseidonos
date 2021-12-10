@@ -58,7 +58,7 @@ public:
     GrpcGlobalPublisher(void) = default;
     explicit GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_);
     virtual ~GrpcGlobalPublisher(void);
-    virtual int PublishToServer(std::string ownerName, POSMetricVector* metricList);
+    virtual int PublishToServer(MetricLabelMap* defaultLabelList, POSMetricVector* metricList);
 
 private:
     int _SendMessage(MetricPublishRequest* request, uint32_t numMetrics);

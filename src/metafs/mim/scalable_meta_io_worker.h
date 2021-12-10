@@ -56,7 +56,6 @@ private:
     MioHandler* tophalfHandler = nullptr;
     MpioHandler* bottomhalfHandler = nullptr;
     TelemetryPublisher* telemetryPublisher = nullptr;
-    std::string nameForTelemetry = "";
     bool needToDeleteTelemetryPublisher = false;
 };
 } // namespace pos

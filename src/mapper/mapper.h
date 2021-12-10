@@ -104,7 +104,7 @@ class Mapper : public IMapFlush, public IMountSequence, public IMapperVolumeEven
 {
 public:
     Mapper(TelemetryPublisher* tp, MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan, StripeMapManager* stripeMan, ReverseMapManager* revMapMan, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
-    Mapper(TelemetryPublisher* tp, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
+    Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_);
     virtual ~Mapper(void);
 
     virtual int Init(void);

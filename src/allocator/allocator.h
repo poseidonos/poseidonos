@@ -62,7 +62,7 @@ public:
     Allocator(void) = default;
     Allocator(TelemetryPublisher* telPublisher, AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
         WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
-    Allocator(TelemetryPublisher* telPublisher, IArrayInfo* info, IStateControl* iState);
+    Allocator(IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
 
     virtual int Init(void) override;
@@ -87,7 +87,7 @@ public:
     virtual IContextReplayer* GetIContextReplayer(void);
 
 private:
-    void _CreateSubmodules(TelemetryPublisher* tp);
+    void _CreateSubmodules(void);
     void _DeleteSubmodules(void);
     void _RegisterToAllocatorService(void);
     void _UnregisterFromAllocatorService(void);

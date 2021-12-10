@@ -74,7 +74,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     // metafs -> volume manager -> mapper/allocator -> journal -> gc.
     // Given that "metafs" object creation depends on runtime information (i.e., array is loaded or not)
     // I'll move those the objection to Create()/Load() instead.
-    this->telPublisher = new TelemetryPublisher(arrayName);
+    this->telPublisher = new TelemetryPublisher(("ARRAYPUB_" + arrayName));
 }
 
 ArrayComponents::ArrayComponents(string arrayName,
@@ -291,7 +291,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
     nvmf = new Nvmf(array->GetName(), array->GetIndex());
-    meta = new Metadata(telPublisher, array, state);
+    meta = new Metadata(array, state);
     rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);

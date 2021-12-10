@@ -91,6 +91,5 @@ private:
     int arrayId = INT32_MAX;
     MetaStorageSubsystem* metaStorage = nullptr;
     TelemetryPublisher* telemetryPublisher = nullptr;
-    std::string nameForTelemetry = "";
 };
 } // namespace pos

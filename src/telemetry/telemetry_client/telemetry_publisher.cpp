@@ -31,15 +31,19 @@
  */
 
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/master_context/instance_id_provider.h"
 
 namespace pos
 {
-TelemetryPublisher::TelemetryPublisher(std::string ownerName_)
-: ownerName(ownerName_),
-  globalPublisher(nullptr),
+TelemetryPublisher::TelemetryPublisher(std::string name_)
+: globalPublisher(nullptr),
   turnOn(false),
   useDataPool(false) // todo: change default true or using config
 {
+    name = name_;
+    defaultlabelList.emplace(TEL_PUBNAME_LABEL_KEY, name);
+    std::string runId = to_string(InstanceIdProviderSingleton::Instance()->GetInstanceId());
+    defaultlabelList.emplace(TEL_RUNID_LABEL_KEY, runId);
 }
 
 TelemetryPublisher::~TelemetryPublisher(void)
@@ -56,6 +60,12 @@ int
 TelemetryPublisher::GetNumEntries(void)
 {
     return dataPool.GetNumEntries();
+}
+
+std::string
+TelemetryPublisher::GetName(void)
+{
+    return name;
 }
 
 void
@@ -109,7 +119,7 @@ TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricT
     }
     POSMetricVector* metricList = AllocatePOSMetricVector();
     metricList->push_back(metric);
-    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
     metricList->clear();
     delete metricList;
     return ret;
@@ -120,14 +130,14 @@ TelemetryPublisher::PublishMetric(POSMetric metric)
 {
     POSMetricVector* metricList = AllocatePOSMetricVector();
     metricList->push_back(metric);
-    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
     metricList->clear();
     delete metricList;
     return ret;
 }
 
 int
-TelemetryPublisher::PublishMetricList(std::vector<POSMetric>* metricList)
+TelemetryPublisher::PublishMetricList(POSMetricVector* metricList)
 {
     if (turnOn == false)
     {
@@ -135,7 +145,7 @@ TelemetryPublisher::PublishMetricList(std::vector<POSMetric>* metricList)
         delete metricList;
         return -1;
     }
-    int ret = globalPublisher->PublishToServer(ownerName, metricList);
+    int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
     metricList->clear();
     delete metricList;
     return ret;
@@ -147,13 +157,16 @@ TelemetryPublisher::SetGlobalPublisher(IGlobalPublisher* gp)
     globalPublisher = gp;
 }
 
-std::string
-TelemetryPublisher::_GetTimeString(time_t time)
+int
+TelemetryPublisher::AddDefaultLabel(std::string key, std::string value)
 {
-    tm curTime = *std::localtime(&time);
-    std::ostringstream oss;
-    oss << std::put_time(&curTime, "%Y-%m-%d %H:%M:%S");
-    return oss.str();
+    if (defaultlabelList.size() == MAX_NUM_LABEL)
+    {
+        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add Default Label, numLabel is overflowed!!!!, key:{}, value:{}", key, value);
+        return -1;
+    }
+    defaultlabelList.emplace(key, value);
+    return 0;
 }
 
 } // namespace pos

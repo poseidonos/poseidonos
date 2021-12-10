@@ -156,7 +156,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
     EXPECT_CALL(*config, IsEnabled()).WillRepeatedly(Return(false));
 
     // When: Journal is initialized
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should be initialized with INVALID state
@@ -194,7 +194,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
     }
 
     // When: Journal is initialized
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
@@ -233,7 +233,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
     }
 
     // When: Journal is initialized
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
@@ -251,7 +251,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfFailedToOpenLogBuffer)
     EXPECT_CALL(*logBuffer, Open).WillOnce(Return(expectReturnCode));
 
     // Then: JournalManager return the error code
-    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr,
+    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(expectReturnCode, actualReturnCode);
 }
@@ -268,7 +268,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfJournalEnabledOptionIsChanged)
         .WillOnce(Return(false));
 
     // Then: Journal manager bypass the process of replay
-    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr,
+    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     int expectReturnCode = 0;
 
@@ -300,7 +300,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfReplayFailed)
     // When: Replay handler return the error code
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(-1));
 
-    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr,
+    int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // Then: Journal manager should be return the error code to indicate that replay is failed
@@ -378,7 +378,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
     EXPECT_CALL(*logBuffer, SyncResetAll).WillOnce(Return(0));
 
     // When: Journal is initialized
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
@@ -398,7 +398,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(0));
 
     // When: Journal is initialized
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready

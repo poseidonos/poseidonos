@@ -5,7 +5,7 @@ using ::testing::StrictMock;
 namespace pos
 {
 AllocatorMock::AllocatorMock(IArrayInfo* info)
-: Allocator(nullptr, info, nullptr)
+: Allocator(info, nullptr)
 {
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
     blockAllocatorMock = new StrictMock<BlockAllocatorMock>();

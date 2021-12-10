@@ -47,6 +47,7 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -64,10 +65,10 @@ Allocator::Allocator(TelemetryPublisher* tp_, AllocatorAddressInfo* addrInfo_, C
 {
 }
 
-Allocator::Allocator(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState)
-: Allocator(tp, nullptr, nullptr, nullptr, nullptr, info, iState)
+Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
+: Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
-    _CreateSubmodules(tp);
+    _CreateSubmodules();
     POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
 }
 
@@ -80,96 +81,67 @@ Allocator::~Allocator(void)
 int
 Allocator::Init(void)
 {
-    if (isInitialized == true)
+    if (isInitialized == false)
     {
-        return 0;
+        if (tp != nullptr)
+        {
+            TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
+        }
+        addrInfo->Init(iArrayInfo);
+        contextManager->Init();
+        blockManager->Init(wbStripeManager);
+        wbStripeManager->Init();
+
+        _RegisterToAllocatorService();
+        isInitialized = true;
     }
-
-    addrInfo->Init(iArrayInfo);
-    contextManager->Init();
-    blockManager->Init(wbStripeManager);
-    wbStripeManager->Init();
-
-    _RegisterToAllocatorService();
-    isInitialized = true;
     return 0;
-}
-
-void
-Allocator::_CreateSubmodules(TelemetryPublisher* tp)
-{
-    addrInfo = new AllocatorAddressInfo();
-    contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
-    blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
-    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
-}
-
-void
-Allocator::_RegisterToAllocatorService(void)
-{
-    AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
-    allocatorService->RegisterAllocator(arrayName, iArrayInfo->GetIndex(), GetIBlockAllocator(),
-        GetIWBStripeAllocator(), GetIAllocatorWbt(), GetIContextManager(), GetIContextReplayer());
-}
-
-void
-Allocator::_UnregisterFromAllocatorService(void)
-{
-    AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
-    allocatorService->UnregisterAllocator(arrayName);
 }
 
 void
 Allocator::Dispose(void)
 {
-    if (isInitialized == false)
+    POS_TRACE_INFO(EID(ARRAY_UNMOUNTING), "[Allocator] Dispose, init:{}", isInitialized);
+    if (isInitialized == true)
     {
-        return;
+        wbStripeManager->FlushAllActiveStripes();
+        wbStripeManager->Dispose();
+
+        contextManager->FlushContexts(nullptr, true);
+        contextManager->Dispose();
+
+        _UnregisterFromAllocatorService();
+        if (tp != nullptr)
+        {
+            TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+        }
+        isInitialized = false;
     }
-
-    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
-
-    POS_TRACE_INFO(eventId, "Start flushing all active stripes");
-    wbStripeManager->FlushAllActiveStripes();
-    wbStripeManager->Dispose();
-
-    POS_TRACE_INFO(eventId, "Start allocator contexts store");
-    contextManager->FlushContexts(nullptr, true);
-    contextManager->Dispose();
-
-    _UnregisterFromAllocatorService();
-    isInitialized = false;
 }
 
 void
 Allocator::Shutdown(void)
 {
-    if (isInitialized == false)
+    POS_TRACE_INFO(EID(ARRAY_UNMOUNTING), "[Allocator] Shutdown, init:{}", isInitialized);
+    if (isInitialized == true)
     {
-        return;
+        wbStripeManager->FlushAllActiveStripes();
+        wbStripeManager->Dispose();
+
+        contextManager->Dispose();
+        _UnregisterFromAllocatorService();
+        if (tp != nullptr)
+        {
+            TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+        }
+        isInitialized = false;
     }
-
-    wbStripeManager->FlushAllActiveStripes();
-    wbStripeManager->Dispose();
-
-    contextManager->Dispose();
-    _UnregisterFromAllocatorService();
-    isInitialized = false;
 }
 
 void
 Allocator::Flush(void)
 {
     // no-op for IMountSequence
-}
-
-void
-Allocator::_DeleteSubmodules(void)
-{
-    delete wbStripeManager;
-    delete blockManager;
-    delete contextManager;
-    delete addrInfo;
 }
 
 IBlockAllocator*
@@ -446,6 +418,61 @@ Allocator::FlushAllUserdataWBT(void)
     wbStripeManager->CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
     blockManager->TurnOnBlkAllocation();
     wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
+}
+
+void
+Allocator::_CreateSubmodules(void)
+{
+    addrInfo = new AllocatorAddressInfo();
+    tp = new TelemetryPublisher("ALLOCATORPUB_" + iArrayInfo->GetName());
+    contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
+    blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
+    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
+}
+
+void
+Allocator::_DeleteSubmodules(void)
+{
+    if (wbStripeManager != nullptr)
+    {
+        delete wbStripeManager;
+        wbStripeManager = nullptr;
+    }
+    if (blockManager != nullptr)
+    {
+        delete blockManager;
+        blockManager = nullptr;
+    }
+    if (contextManager != nullptr)
+    {
+        delete contextManager;
+        contextManager = nullptr;
+    }
+    if (tp != nullptr)
+    {
+        delete tp;
+        tp = nullptr;
+    }
+    if (addrInfo != nullptr)
+    {
+        delete addrInfo;
+        addrInfo = nullptr;
+    }
+}
+
+void
+Allocator::_RegisterToAllocatorService(void)
+{
+    AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
+    allocatorService->RegisterAllocator(arrayName, iArrayInfo->GetIndex(), GetIBlockAllocator(),
+        GetIWBStripeAllocator(), GetIAllocatorWbt(), GetIContextManager(), GetIContextReplayer());
+}
+
+void
+Allocator::_UnregisterFromAllocatorService(void)
+{
+    AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
+    allocatorService->UnregisterAllocator(arrayName);
 }
 
 } // namespace pos
