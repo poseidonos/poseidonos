@@ -220,9 +220,6 @@ TEST(NvmfTarget, TryToAttachNamespace_Fail)
 TEST(NvmfTarget, AttachNamespace_TargetDoesNotExist)
 {
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_nvmf_tgt target;
-    target.max_subsystems = 0;
-    g_spdk_nvmf_tgt = &target;
     string nqn{"test_nqn"};
     string bdevName{"bdev"};
     bool expected{false};
@@ -285,8 +282,6 @@ TEST(NvmfTarget, GetNamespace_Success_Iter)
 
 TEST(NvmfTarget, DetachNamespace_TargetNotExist)
 {
-    struct spdk_nvmf_tgt target;
-    target.max_subsystems = 0;
     string nqn{"subnqn"};
     uint32_t nsid = 0;
     bool expected{false};
@@ -300,8 +295,8 @@ TEST(NvmfTarget, DetachNamespace_TargetNotExist)
 
 TEST(NvmfTarget, DetachNamespace_NqnEmpty)
 {
-    struct spdk_nvmf_tgt target;
-    target.max_subsystems = 0;
+    struct spdk_nvmf_tgt* target;
+    g_spdk_nvmf_tgt = target;
     string nqn{""};
     uint32_t nsid = 0;
     bool expected{false};
