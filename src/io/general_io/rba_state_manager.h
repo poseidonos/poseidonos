@@ -39,6 +39,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/address_type.h"
 #include "src/lib/singleton.h"
 #include "src/sys_event/volume_event.h"
@@ -50,11 +51,16 @@ namespace pos
 class RBAStateService;
 class VolumeEventPublisher;
 
-class RBAStateManager : public VolumeEvent
+class RBAStateManager : public VolumeEvent, public IMountSequence
 {
 public:
     explicit RBAStateManager(std::string arrayName, int arrayID);
     virtual ~RBAStateManager();
+
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
 
     virtual void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
     virtual void DeleteRBAState(uint32_t volumeID);
