@@ -108,8 +108,7 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotificati
     ClientConfig client;
     std::string key = "enabled";
 
-    TelemetryConfigSingleton::ResetInstance();
-    EXPECT_EQ(TelemetryConfigSingleton::Instance()->Register(TelemetryConfigType::Client, key, observer), true);
+    EXPECT_EQ(TelemetryConfigSingleton::Instance(path, fileName)->Register(TelemetryConfigType::Client, key, observer), true);
 
     // config won't call the observer due to last flag
     client.UpdateConfig(TelemetryConfigType::Client, key, true, false);
@@ -120,6 +119,7 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotificati
     client.UpdateConfig(TelemetryConfigType::Client, key, true, true);
 
     delete observer;
+    TelemetryConfigSingleton::ResetInstance();
 }
 
 TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCannotBeRegisteredTwice)

@@ -220,6 +220,9 @@ TEST(NvmfTarget, TryToAttachNamespace_Fail)
 TEST(NvmfTarget, AttachNamespace_TargetDoesNotExist)
 {
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    struct spdk_nvmf_tgt target;
+    target.max_subsystems = 0;
+    g_spdk_nvmf_tgt = &target;
     string nqn{"test_nqn"};
     string bdevName{"bdev"};
     bool expected{false};
@@ -282,6 +285,8 @@ TEST(NvmfTarget, GetNamespace_Success_Iter)
 
 TEST(NvmfTarget, DetachNamespace_TargetNotExist)
 {
+    struct spdk_nvmf_tgt target;
+    target.max_subsystems = 0;
     string nqn{"subnqn"};
     uint32_t nsid = 0;
     bool expected{false};
@@ -295,8 +300,8 @@ TEST(NvmfTarget, DetachNamespace_TargetNotExist)
 
 TEST(NvmfTarget, DetachNamespace_NqnEmpty)
 {
-    struct spdk_nvmf_tgt* target;
-    g_spdk_nvmf_tgt = target;
+    struct spdk_nvmf_tgt target;
+    target.max_subsystems = 0;
     string nqn{""};
     uint32_t nsid = 0;
     bool expected{false};
@@ -947,8 +952,8 @@ TEST(NvmfTarget, GetPosBdevUuid_Success)
     struct spdk_uuid* uuid[1];
     string expected = "abcd";
 
-    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev[0]));
-    ON_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillByDefault(Return(uuid[0]));
+    EXPECT_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillOnce(Return(bdev[0]));
+    EXPECT_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillOnce(Return(uuid[0]));
     EXPECT_CALL(*mockSpdkCaller, SpdkUuidFmtLower(_, _, _)).WillOnce([&](char* uuidStr, size_t uuidStrSize, const spdk_uuid* uuid)
     {
         snprintf(uuidStr, sizeof(uuidStr), "abcd");
