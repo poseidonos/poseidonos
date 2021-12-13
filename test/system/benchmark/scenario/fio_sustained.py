@@ -86,7 +86,7 @@ def play(json_targets, json_inits, json_scenario):
                 test_fio.opt["ioengine"] = f"{init.spdk_dir}/examples/nvme/fio_plugin/fio_plugin"
                 test_fio.opt["runtime"] = "0"
                 test_fio.opt["ramp_time"] = "15"
-                test_fio.opt["io_size"] = "2000g"
+                test_fio.opt["io_size"] = "40g"
                 test_fio.opt["verify"] = "0"
                 test_fio.opt["size"] = "100%"
                 test_fio.opt["serialize_overlap"] = "1"
@@ -95,7 +95,7 @@ def play(json_targets, json_inits, json_scenario):
                 test_fio.opt["thread"] = "1"
                 test_fio.opt["direct"] = "1"
                 if "randrw" == rw:
-                    test_fio.opt["rwmixread"] = "70"
+                    test_fio.opt["rwmixread"] = "0"
                 test_fio.opt["readwrite"] = rw
                 test_fio.opt["bs"] = bs
                 test_fio.opt["iodepth"] = iodepth

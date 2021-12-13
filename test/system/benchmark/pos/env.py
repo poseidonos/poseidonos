@@ -70,3 +70,25 @@ def make_directory(id, pw, ip, dir):
         lib.printer.red(mkdir_cmd)
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
+
+
+def detach_device(id, pw, ip, dev):
+    try:
+        detach_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} 'sudo echo 1 > /sys/bus/pci/devices/{dev}/remove'"
+        lib.subproc.sync_run(detach_cmd)
+        return True
+    except Exception as e:
+        lib.printer.red(detach_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return False
+
+
+def pcie_scan(id, pw, ip):
+    try:
+        scan_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} 'sudo echo 1 > /sys/bus/pci/rescan'"
+        lib.subproc.sync_run(scan_cmd)
+        return True
+    except Exception as e:
+        lib.printer.red(scan_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return False

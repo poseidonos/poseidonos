@@ -155,3 +155,47 @@ def logger_setlevel(id, pw, ip, cli, dir, level):
         lib.printer.red(cli_cmd)
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
+
+
+def check_rebuild_complete(id, pw, ip, cli, dir, arr_name):
+    ret = ''
+    try:
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} array list --array-name {arr_name}"
+        ret = lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+    return ret
+
+
+def device_list(id, pw, ip, cli, dir):
+    ret = ''
+    try:
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} device list"
+        ret = lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+    return ret
+
+
+def add_spare(id, pw, ip, cli, dir, arr_name, dev_name):
+    ret = ''
+    try:
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} array addspare -a {arr_name} -s {dev_name}"
+        ret = lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+    return ret
+
+
+def set_rebuild_impact(id, pw, ip, cli, dir, impact):
+    ret = ''
+    try:
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} system set-property --rebuild-impact {impact}"
+        ret = lib.subproc.sync_run(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+    return ret

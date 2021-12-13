@@ -24,7 +24,6 @@ class Target:
         self.subsystem_list = []
 
     def Prepare(self):
-        # env setting
         result = pos.env.check_pos_running(self.id, self.pw, self.nic_ssh, self.pos_bin)
         if -1 == result:
             return False
@@ -37,7 +36,7 @@ class Target:
             return False
         if -1 == pos.env.execute_pos(self.id, self.pw, self.nic_ssh, self.pos_bin, self.pos_dir, self.pos_log):
             return False
-        time.sleep(1)
+        time.sleep(10)
 
         # spdk setting
         if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
@@ -201,3 +200,21 @@ class Target:
         pos.cli.logger_setlevel(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "warning")
         lib.printer.green(f" '{self.name}' prepared")
         return True
+
+    def DetachDevice(self, dev):
+        return pos.env.detach_device(self.id, self.pw, self.nic_ssh, dev)
+
+    def PcieScan(self):
+        return pos.env.pcie_scan(self.id, self.pw, self.nic_ssh)
+
+    def CheckRebuildComplete(self, arr_name):
+        return pos.cli.check_rebuild_complete(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, arr_name)
+
+    def DeviceList(self):
+        return pos.cli.device_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+
+    def AddSpare(self, arr_name, dev_name):
+        return pos.cli.add_spare(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, arr_name, dev_name)
+
+    def SetRebuildImpact(self, impact):
+        return pos.cli.set_rebuild_impact(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, impact)
