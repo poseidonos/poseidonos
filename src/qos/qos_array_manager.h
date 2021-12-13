@@ -74,6 +74,7 @@ public:
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap);
     bool IsMinimumPolicyInEffect(void);
     void SetArrayName(std::string arrayName);
+    void ResetVolumeThrottling(void);
 
 private:
     QosVolumeManager* qosVolumeManager;

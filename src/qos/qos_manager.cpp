@@ -67,6 +67,7 @@ namespace pos
 QosManager::QosManager(void)
 {
     qosThread = nullptr;
+    qosTimeThrottling = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
     arrayNameMap.clear();
@@ -89,6 +90,7 @@ QosManager::QosManager(void)
     }
 
     SpdkConnection::SetQosInSpdk(feQosEnabled);
+
     initialized = false;
     try
     {
@@ -107,6 +109,10 @@ QosManager::QosManager(void)
     catch (bad_alloc& ex)
     {
         assert(0);
+    }
+    for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
+    {
+        previousDelay[reactor] = 0;
     }
     currentNumberOfArrays = 0;
     systemMinPolicy = false;
@@ -128,6 +134,7 @@ QosManager::~QosManager(void)
         delete qosArrayManager[i];
     }
     delete qosThread;
+    delete qosTimeThrottling;
     delete spdkManager;
     delete qosEventManager;
     delete monitoringManager;
@@ -159,6 +166,7 @@ QosManager::Initialize(void)
     AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
+    qosTimeThrottling = new std::thread(&QosManager::_QosTimeChecker, this);
     initialized = true;
 }
 
@@ -203,6 +211,7 @@ QosManager::_Finalize(void)
     if (nullptr != qosThread)
     {
         qosThread->join();
+        qosTimeThrottling->join();
     }
     POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
 }
@@ -252,6 +261,44 @@ QosManager::HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
+void
+QosManager::_QosTimeChecker(void)
+{
+    cpu_set_t cpuSetLocal;
+    CPU_ZERO(&cpuSetLocal);
+    uint32_t totalCore = AffinityManagerSingleton::Instance()->GetTotalCore();
+    CPU_SET(totalCore - 1, &cpuSetLocal);
+    sched_setaffinity(0, sizeof(cpuSetLocal), &cpuSetLocal);
+    pthread_setname_np(pthread_self(), "QoSWorker");
+    uint64_t next_tick = 0;
+    while (true)
+    {
+        uint64_t now = SpdkConnection::SpdkGetTicks();
+        if (true == IsExitQosSet())
+        {
+            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
+            break;
+        }
+        // We can check overlap case.
+        uint64_t tickDiff = (now - next_tick);
+        if ((int64_t)tickDiff > 0)
+        {
+            for (uint32_t arrayId = 0; arrayId < MAX_ARRAY_COUNT; arrayId++)
+            {
+                qosArrayManager[arrayId]->ResetVolumeThrottling();
+            }
+            if (next_tick == 0)
+            {
+                next_tick = now;
+            }
+
+            next_tick = next_tick + IBOF_QOS_TIMESLICE_IN_USEC * SpdkConnection::SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+        }
+    }
+}
+
+
 void
 QosManager::_QosWorker(void)
 {
@@ -482,14 +529,17 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
         {
             return 0;
         }
-        double offset = (double)(now - next_tick) / param->qosTimeSlice;
+        double offset = (double)(now - next_tick
+            + previousDelay[reactor]) / param->qosTimeSlice;
         offset = offset + 1.0;
         for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
         {
             qosArrayManager[i]->VolumeQosPoller(reactor, aioSubmission, offset);
         }
         qosContext->SetReactorProcessed(reactor, true);
-        param->nextTimeStamp = now + param->qosTimeSlice;
+        uint64_t after = SpdkConnection::SpdkGetTicks();
+        previousDelay[reactor] = after - now;
+        param->nextTimeStamp = after + param->qosTimeSlice / POLLING_FREQ_PER_QOS_SLICE;
     }
     return 0;
 }
@@ -820,6 +870,7 @@ QosManager::GetNumberOfArrays(void)
 {
     return currentNumberOfArrays;
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
