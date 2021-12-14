@@ -103,6 +103,12 @@ MockArrayInfo::GetDataRaidType(void)
     return str;
 }
 
+id_t 
+MockArrayInfo::GetUniqueId(void)
+{
+    return 0;
+}
+
 ArrayStateType
 MockArrayInfo::GetState(void)
 {

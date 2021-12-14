@@ -513,6 +513,7 @@ MbrManager::CreateAbr(ArrayMeta& meta)
                 Time::GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             CopyData(systeminfo.arrayInfo[tempArrayIndex].updateDatetime,
                 Time::GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
+            systeminfo.arrayInfo[tempArrayIndex].uniqueId = meta.unique_id;
             pthread_rwlock_unlock(&mbrLock);
             meta.id = tempArrayIndex;
             return 0;

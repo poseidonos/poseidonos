@@ -104,6 +104,7 @@ AbrManager::LoadAbr(ArrayMeta& meta)
 
     meta.createDatetime = abr->createDatetime;
     meta.updateDatetime = abr->updateDatetime;
+    meta.unique_id = abr->uniqueId;
     return 0;
 }
 

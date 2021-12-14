@@ -51,6 +51,7 @@ public:
     string dataRaidType;
     string createDatetime;
     string updateDatetime;
+    id_t unique_id;
 };
 
 } // namespace pos

@@ -44,6 +44,7 @@
 #include "src/include/i_array_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/master_context/instance_id_provider.h"
 
 namespace pos
 {
@@ -125,6 +126,7 @@ Array::_LoadImpl(void)
     else
     {
         index_ = meta.id;
+        uniqueId = meta.unique_id;
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
@@ -187,12 +189,13 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         ret = (int)POS_EVENT_ID::ARRAY_WRONG_FT_METHOD;
         goto error;
     }
+    uniqueId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
 
     meta.arrayName = name_;
     meta.devs = devMgr_->ExportToMeta();
     meta.metaRaidType = "RAID1";
     meta.dataRaidType = "dataRaidType";
-
+    meta.unique_id = uniqueId;
     ret = abrControl->CreateAbr(meta);
     if (ret != 0)
     {
@@ -493,6 +496,12 @@ string
 Array::GetUpdateDatetime(void)
 {
     return abrControl->GetLastUpdatedDateTime(name_);
+}
+
+id_t
+Array::GetUniqueId(void)
+{
+    return uniqueId;
 }
 
 ArrayStateType

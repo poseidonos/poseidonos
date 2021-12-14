@@ -110,6 +110,17 @@ TEST(MbrManager, MbrManager_testIfConstructorInitializesMBRWithZeros)
     }
 }
 
+TEST(MbrManager, MbrManager_testIfUsingRightSizeOfMbr)
+{
+    // Given: nothing
+
+    // When: nothing
+
+    // Then:
+    ASSERT_EQ(sizeof(ArrayBootRecord), 17920);
+    ASSERT_EQ(sizeof(masterBootRecord), 262144);
+}
+
 // FIXME: What's the maximum length of an array name? It seems to be ARRAY_NAME_SIZE - 2 (=62) at the moment.
 // "ARRAY_NAME_SIZE - 1" and "ARRAY_NAME_SIZE" silently ignore string copy.
 // ArrayNamePolicy does not reflect this; "ARRAY_NAME_SIZE - 1" would be a valid-length from ArrayNamePolicy's perspective.

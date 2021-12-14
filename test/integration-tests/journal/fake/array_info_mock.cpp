@@ -67,6 +67,12 @@ ArrayInfoMock::GetDataRaidType(void)
     return "";
 }
 
+id_t 
+ArrayInfoMock::GetUniqueId(void)
+{
+    return 0;
+}
+
 ArrayStateType
 ArrayInfoMock::GetState(void)
 {

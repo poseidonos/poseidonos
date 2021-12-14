@@ -56,6 +56,7 @@ public:
     virtual string GetDataRaidType(void) = 0;
     virtual string GetCreateDatetime(void) = 0;
     virtual string GetUpdateDatetime(void) = 0;
+    virtual id_t GetUniqueId(void) = 0;
     virtual ArrayStateType GetState(void) = 0;
     virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;

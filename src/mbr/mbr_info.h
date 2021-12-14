@@ -67,7 +67,8 @@ const unsigned int SPARE_DEV_NUM_OFFSET = DATA_DEV_NUM_OFFSET + sizeof(unsigned 
 const unsigned int MFS_INIT_OFFSET = SPARE_DEV_NUM_OFFSET + sizeof(unsigned int);
 const unsigned int CREATE_DATE_OFFSET = MFS_INIT_OFFSET + sizeof(unsigned int);
 const unsigned int MODIFIED_DATE_OFFSET = CREATE_DATE_OFFSET + sizeof(char) * DATE_SIZE;
-const unsigned int ABR_PADDING_1_OFFSET = MODIFIED_DATE_OFFSET + sizeof(char) * DATE_SIZE;
+const unsigned int INSTANCE_ID_OFFSET = MODIFIED_DATE_OFFSET + sizeof(char) * DATE_SIZE;
+const unsigned int ABR_PADDING_1_OFFSET = INSTANCE_ID_OFFSET + sizeof(unsigned int);
 const unsigned int ABR_DEVICE_INFO_OFFSET = 1024;
 const unsigned int ABR_PADDING_1_NUM = (ABR_DEVICE_INFO_OFFSET - ABR_PADDING_1_OFFSET) / sizeof(uint32_t);
 const unsigned int ABR_RESERVED_OFFSET = ABR_DEVICE_INFO_OFFSET + DEVICE_INFO_SIZE * MAX_ARRAY_DEVICE_CNT;
@@ -120,6 +121,7 @@ struct ArrayBootRecord
     unsigned int mfsInit;
     char createDatetime[DATE_SIZE];
     char updateDatetime[DATE_SIZE];
+    unsigned int uniqueId;
     uint32_t pad1[ABR_PADDING_1_NUM];
     struct deviceInfo devInfo[MAX_ARRAY_DEVICE_CNT];
     uint32_t reserved[ABR_RESERVED_NUM];

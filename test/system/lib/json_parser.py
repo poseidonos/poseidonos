@@ -99,3 +99,7 @@ def is_ssd(listdev, devicename):
         if item['name'] == devicename and item['type'] == "SSD":
             return True
     return False
+
+
+def make_result_code(result):
+    return json.dumps({"Response":{"result":{"status":{"code":result}}}})

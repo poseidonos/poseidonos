@@ -83,6 +83,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
     data.SetAttribute(JsonAttribute("createDatetime", "\"" + array->GetCreateDatetime() + "\""));
     data.SetAttribute(JsonAttribute("updateDatetime", "\"" + array->GetUpdateDatetime() + "\""));
+    data.SetAttribute(JsonAttribute("uniqueId", "\"" + to_string(array->GetUniqueId()) + "\""));
     data.SetAttribute(JsonAttribute("rebuildingProgress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
     data.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
     data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));

@@ -53,6 +53,7 @@ public:
     string GetDataRaidType(void) override;
     string GetCreateDatetime(void) override { return ""; }
     string GetUpdateDatetime(void) override { return ""; }
+    id_t GetUniqueId(void);
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;

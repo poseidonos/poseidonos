@@ -95,6 +95,7 @@ public:
     string GetDataRaidType(void) override;
     string GetCreateDatetime(void) override;
     string GetUpdateDatetime(void) override;
+    id_t GetUniqueId(void) override;
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
@@ -133,6 +134,7 @@ private:
     EventScheduler* eventScheduler = nullptr;
     int shutdownFlag = 0;
     ArrayServiceLayer* arrayService = nullptr;
+    id_t uniqueId = 0;
 };
 } // namespace pos
 #endif // ARRAY_H_
