@@ -1,3 +1,4 @@
+- [- _**VSAMapFlushedDirtyPageCount**_](#--vsamapflusheddirtypagecount)
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
   - [_**PendingMioCount**_](#pendingmiocount)
@@ -15,7 +16,25 @@
   - [_**ArrayStatus**_](#arraystatus)
   - [_**RebuildCount**_](#rebuildcount)
   - [_**GarbageCollectorStatus**_](#garbagecollectorstatus)
-
+- [**Meta**](#meta)
+  - [**Allocator**](#Allocator)
+    - [_**FreeSegmentCount**_](#freesegcnt)
+    - [_**ContextManagerPendingIoCount**_](#ctxmngpendingiocnt)
+    - [_**GCVictimSegId**_](#victimsegid)
+    - [_**GCMode**_](#gcmode)
+    - [_**AllocateRebuildSegId**_](#allocrebuildsegid)
+    - [_**ReleaseRebuildSegId**_](#relrebuildsegid)
+    - [_**VictimSegInvPgCnt**_](#victiminvpgcnt)
+    - [_**ProhibitUserblkAllocationOnOff**_](#prohibitalloconoff)
+  - [**Mapper**](#Mapper)
+    - [_**LoadedVolCnt**_](#loadedvolcnt)
+    - [_**UnmountedVolId**_](#unmountedvolid)
+    - [_**DeletedVolId**_](#deletedvolid)
+    - [_**MountedVolCnt**_](#mountedvolcnt)
+    - [_**VSAMapLoadPendingIoCnt**_](#vsamaploadpendingiocnt)
+    - [_**VSAMapFlushPendingIoCnt**_](#vsamapflushpendingiocnt)
+    - [_**StripeMapFlushPendingIoCnt**_](#stripemapflushpendingiocnt)
+    - [_**VSAMapFlushedDirtypgCnt**_](#vsamapflusheddirtypgcnt)
 
 ---
 
@@ -250,7 +269,7 @@ Total number of rebuilds triggered.
 
 **ID**: 60003
 
-**Type**: Gaugage
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -263,3 +282,201 @@ The current status of garbage collector in the array.
 0: None, 1: Normal, 2: Urgent
 
 ---
+### _**FreeSegmentCount**_
+
+**ID**: 30000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The max value is the number of segments in array
+
+---
+### _**ContextManagerPendingIoCount**_
+
+**ID**: 30001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+ContextManager's pendingIo count
+
+---
+### _**GCVictimSegId**_
+
+**ID**: 30002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Current victim segment
+
+---
+### _**GCMode**_
+
+**ID**: 30003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Current victim segment
+
+---
+### _**VictimSegInvPgCnt**_
+
+**ID**: 30010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Current victim segment's invalid page count when it was chosen
+
+---
+### _**ProhibitUserBlkAllocationOnOff**_
+
+**ID**: 30011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Prohibit free block allocation On or Off
+Prohibited: 1, Permitted: 0
+
+---
+### _**LoadedVolumeCount**_
+
+**ID**: 33002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Loaded volume count
+
+---
+### _**UnmountedVolumeCount**_
+
+**ID**: 33004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Unmounted volume count
+
+---
+### _**MountedVolumeCount**_
+
+**ID**: 33006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Mounted volume count
+
+---
+### _**VSAMapLoadPendingIoCount**_
+
+**ID**: 33007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+VSAMap Load pendingIo count
+
+---
+### _**VSAMapFlushPendingIoCount**_
+
+**ID**: 33008
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+VSAMap Flush pendingIo count
+
+---
+### _**StripeMapFlushPendingIoCount**_
+
+**ID**: 33009
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+StripeMap Flush pendingIo count
+
+---
+### _**VSAMapFlushedDirtyPageCount**_
+
+**ID**: 33010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+VSAMap Flushed dirty page count
+
+---
+
+

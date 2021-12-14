@@ -214,9 +214,6 @@ SegmentCtx::_FreeSegment(SegmentId segId)
     segmentInfos[segId].SetOccupiedStripeCount(0);
     segmentStates[segId].SetState(SegmentState::FREE);
     allocSegBitmap->ClearBit(segId);
-    POSMetricValue v;
-    v.gauge = segId;
-    tp->PublishData(TEL30005_ALCT_FREED_SEG, v, MT_GAUGE);
 }
 
 uint32_t
@@ -246,9 +243,6 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
         {
             segmentStates[segId].SetState(SegmentState::SSD);
         }
-        POSMetricValue v;
-        v.gauge = segId;
-        tp->PublishData(TEL30008_ALCT_ALL_OCCUIPIED_SEG, v, MT_GAUGE);
     }
     return segmentFreed;
 }
@@ -572,9 +566,6 @@ SegmentCtx::MakeRebuildTarget(void)
         }
         ++segmentId;
     }
-    POSMetricValue v;
-    v.gauge = cnt;
-    tp->PublishData(TEL30009_ALCT_REBUILD_TARGET_SEG_CNT, v, MT_GAUGE);
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget Done, target cnt:{}", cnt);
     return 1;
 }

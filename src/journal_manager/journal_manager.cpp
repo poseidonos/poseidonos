@@ -136,7 +136,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* co
 
 // Constructor for injecting mock module dependencies in product code
 JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
-: JournalManager(new TelemetryPublisher("JOURNALPUB_" + info->GetName()), 
+: JournalManager(new TelemetryPublisher("Journal"),
     new JournalConfiguration(),
     new JournalStatusProvider(),
     new LogWriteContextFactory(),
@@ -155,6 +155,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
     new ReplayHandler(state),
     info)
 {
+    tp->AddDefaultLabel("array_name", info->GetName());
 }
 
 JournalManager::~JournalManager(void)
