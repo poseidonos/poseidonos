@@ -46,7 +46,6 @@
 #include "proto/generated/cpp/metric.pb.h"
 #include "src/helper/json/json_helper.h"
 #include "src/telemetry/telemetry_client/i_global_publisher.h"
-#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 
 namespace pos
 {

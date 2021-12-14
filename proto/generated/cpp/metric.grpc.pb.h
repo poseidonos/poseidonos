@@ -42,14 +42,6 @@ class MetricManager final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>> PrepareAsyncMetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>>(PrepareAsyncMetricPublishRaw(context, request, cq));
     }
-    // Collector -> Manager
-    virtual ::grpc::Status MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::MetricCollectResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>> AsyncMetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>>(AsyncMetricCollectRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>> PrepareAsyncMetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>>(PrepareAsyncMetricCollectRaw(context, request, cq));
-    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -59,13 +51,6 @@ class MetricManager final {
       virtual void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      // Collector -> Manager
-      virtual void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -78,8 +63,6 @@ class MetricManager final {
   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>* AsyncMetricPublishRaw(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::MetricPublishResponse>* PrepareAsyncMetricPublishRaw(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>* AsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::MetricCollectResponse>* PrepareAsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -91,13 +74,6 @@ class MetricManager final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricPublishResponse>> PrepareAsyncMetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricPublishResponse>>(PrepareAsyncMetricPublishRaw(context, request, cq));
     }
-    ::grpc::Status MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::MetricCollectResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>> AsyncMetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>>(AsyncMetricCollectRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>> PrepareAsyncMetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>>(PrepareAsyncMetricCollectRaw(context, request, cq));
-    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
@@ -106,12 +82,6 @@ class MetricManager final {
       void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
       void MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
      private:
       friend class Stub;
@@ -126,10 +96,7 @@ class MetricManager final {
     class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::MetricPublishResponse>* AsyncMetricPublishRaw(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::MetricPublishResponse>* PrepareAsyncMetricPublishRaw(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>* AsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>* PrepareAsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_MetricPublish_;
-    const ::grpc::internal::RpcMethod rpcmethod_MetricCollect_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -139,8 +106,6 @@ class MetricManager final {
     virtual ~Service();
     // Publisher -> Manager
     virtual ::grpc::Status MetricPublish(::grpc::ServerContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response);
-    // Collector -> Manager
-    virtual ::grpc::Status MetricCollect(::grpc::ServerContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_MetricPublish : public BaseClass {
@@ -162,27 +127,7 @@ class MetricManager final {
       ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  template <class BaseClass>
-  class WithAsyncMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_MetricCollect() {
-      ::grpc::Service::MarkMethodAsync(1);
-    }
-    ~WithAsyncMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMetricCollect(::grpc::ServerContext* context, ::MetricCollectRequest* request, ::grpc::ServerAsyncResponseWriter< ::MetricCollectResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  typedef WithAsyncMethod_MetricPublish<WithAsyncMethod_MetricCollect<Service > > AsyncService;
+  typedef WithAsyncMethod_MetricPublish<Service > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_MetricPublish : public BaseClass {
    private:
@@ -230,58 +175,11 @@ class MetricManager final {
     #endif
       { return nullptr; }
   };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_MetricCollect() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::MetricCollectRequest, ::MetricCollectResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response) { return this->MetricCollect(context, request, response); }));}
-    void SetMessageAllocatorFor_MetricCollect(
-        ::grpc::experimental::MessageAllocator< ::MetricCollectRequest, ::MetricCollectResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::MetricCollectRequest, ::MetricCollectResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* MetricCollect(
-      ::grpc::CallbackServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* MetricCollect(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_MetricPublish<ExperimentalWithCallbackMethod_MetricCollect<Service > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_MetricPublish<Service > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_MetricPublish<ExperimentalWithCallbackMethod_MetricCollect<Service > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_MetricPublish<Service > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_MetricPublish : public BaseClass {
    private:
@@ -295,23 +193,6 @@ class MetricManager final {
     }
     // disable synchronous version of this method
     ::grpc::Status MetricPublish(::grpc::ServerContext* /*context*/, const ::MetricPublishRequest* /*request*/, ::MetricPublishResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_MetricCollect() {
-      ::grpc::Service::MarkMethodGeneric(1);
-    }
-    ~WithGenericMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -334,26 +215,6 @@ class MetricManager final {
     }
     void RequestMetricPublish(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_MetricCollect() {
-      ::grpc::Service::MarkMethodRaw(1);
-    }
-    ~WithRawMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMetricCollect(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -395,44 +256,6 @@ class MetricManager final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_MetricCollect() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->MetricCollect(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* MetricCollect(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* MetricCollect(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
   class WithStreamedUnaryMethod_MetricPublish : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -459,36 +282,9 @@ class MetricManager final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedMetricPublish(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::MetricPublishRequest,::MetricPublishResponse>* server_unary_streamer) = 0;
   };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_MetricCollect : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_MetricCollect() {
-      ::grpc::Service::MarkMethodStreamed(1,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::MetricCollectRequest, ::MetricCollectResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::MetricCollectRequest, ::MetricCollectResponse>* streamer) {
-                       return this->StreamedMetricCollect(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_MetricCollect() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status MetricCollect(::grpc::ServerContext* /*context*/, const ::MetricCollectRequest* /*request*/, ::MetricCollectResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedMetricCollect(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::MetricCollectRequest,::MetricCollectResponse>* server_unary_streamer) = 0;
-  };
-  typedef WithStreamedUnaryMethod_MetricPublish<WithStreamedUnaryMethod_MetricCollect<Service > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_MetricPublish<Service > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_MetricPublish<WithStreamedUnaryMethod_MetricCollect<Service > > StreamedService;
+  typedef WithStreamedUnaryMethod_MetricPublish<Service > StreamedService;
 };
 
 

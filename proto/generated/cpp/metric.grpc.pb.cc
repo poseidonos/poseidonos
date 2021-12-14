@@ -22,7 +22,6 @@
 
 static const char* MetricManager_method_names[] = {
   "/MetricManager/MetricPublish",
-  "/MetricManager/MetricCollect",
 };
 
 std::unique_ptr< MetricManager::Stub> MetricManager::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -33,7 +32,6 @@ std::unique_ptr< MetricManager::Stub> MetricManager::NewStub(const std::shared_p
 
 MetricManager::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
   : channel_(channel), rpcmethod_MetricPublish_(MetricManager_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MetricCollect_(MetricManager_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status MetricManager::Stub::MetricPublish(::grpc::ClientContext* context, const ::MetricPublishRequest& request, ::MetricPublishResponse* response) {
@@ -59,29 +57,6 @@ void MetricManager::Stub::experimental_async::MetricPublish(::grpc::ClientContex
   return result;
 }
 
-::grpc::Status MetricManager::Stub::MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::MetricCollectResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::MetricCollectRequest, ::MetricCollectResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_MetricCollect_, context, request, response);
-}
-
-void MetricManager::Stub::experimental_async::MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::MetricCollectRequest, ::MetricCollectResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_MetricCollect_, context, request, response, std::move(f));
-}
-
-void MetricManager::Stub::experimental_async::MetricCollect(::grpc::ClientContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_MetricCollect_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>* MetricManager::Stub::PrepareAsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::MetricCollectResponse, ::MetricCollectRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_MetricCollect_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::MetricCollectResponse>* MetricManager::Stub::AsyncMetricCollectRaw(::grpc::ClientContext* context, const ::MetricCollectRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncMetricCollectRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
 MetricManager::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       MetricManager_method_names[0],
@@ -93,29 +68,12 @@ MetricManager::Service::Service() {
              ::MetricPublishResponse* resp) {
                return service->MetricPublish(ctx, req, resp);
              }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      MetricManager_method_names[1],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< MetricManager::Service, ::MetricCollectRequest, ::MetricCollectResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](MetricManager::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::MetricCollectRequest* req,
-             ::MetricCollectResponse* resp) {
-               return service->MetricCollect(ctx, req, resp);
-             }, this)));
 }
 
 MetricManager::Service::~Service() {
 }
 
 ::grpc::Status MetricManager::Service::MetricPublish(::grpc::ServerContext* context, const ::MetricPublishRequest* request, ::MetricPublishResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status MetricManager::Service::MetricCollect(::grpc::ServerContext* context, const ::MetricCollectRequest* request, ::MetricCollectResponse* response) {
   (void) context;
   (void) request;
   (void) response;

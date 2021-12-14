@@ -33,7 +33,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/grpc_global_publisher.h"
-#include <google/protobuf/timestamp.pb.h>
 
 namespace pos
 {
@@ -80,11 +79,6 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
         {
             metric->set_guagevalue(mit.GetGaugeValue());
         }
-        // set time
-        // google::protobuf::Timestamp* tt = new google::protobuf::Timestamp();
-        // tt->set_seconds(mit.GetTime());
-        // metric->set_allocated_time(tt);
-        // set default label
         if (defaultLabelList != nullptr)
         {
             for (auto& dlit : (*defaultLabelList))

@@ -32,7 +32,6 @@
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
-#include <google/protobuf/timestamp.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_metric_2eproto
@@ -48,7 +47,7 @@ struct TableStruct_metric_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -62,12 +61,6 @@ extern LabelDefaultTypeInternal _Label_default_instance_;
 class Metric;
 struct MetricDefaultTypeInternal;
 extern MetricDefaultTypeInternal _Metric_default_instance_;
-class MetricCollectRequest;
-struct MetricCollectRequestDefaultTypeInternal;
-extern MetricCollectRequestDefaultTypeInternal _MetricCollectRequest_default_instance_;
-class MetricCollectResponse;
-struct MetricCollectResponseDefaultTypeInternal;
-extern MetricCollectResponseDefaultTypeInternal _MetricCollectResponse_default_instance_;
 class MetricPublishRequest;
 struct MetricPublishRequestDefaultTypeInternal;
 extern MetricPublishRequestDefaultTypeInternal _MetricPublishRequest_default_instance_;
@@ -77,8 +70,6 @@ extern MetricPublishResponseDefaultTypeInternal _MetricPublishResponse_default_i
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Label* Arena::CreateMaybeMessage<::Label>(Arena*);
 template<> ::Metric* Arena::CreateMaybeMessage<::Metric>(Arena*);
-template<> ::MetricCollectRequest* Arena::CreateMaybeMessage<::MetricCollectRequest>(Arena*);
-template<> ::MetricCollectResponse* Arena::CreateMaybeMessage<::MetricCollectResponse>(Arena*);
 template<> ::MetricPublishRequest* Arena::CreateMaybeMessage<::MetricPublishRequest>(Arena*);
 template<> ::MetricPublishResponse* Arena::CreateMaybeMessage<::MetricPublishResponse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -393,296 +384,6 @@ class MetricPublishResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class MetricCollectRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MetricCollectRequest) */ {
- public:
-  inline MetricCollectRequest() : MetricCollectRequest(nullptr) {}
-  virtual ~MetricCollectRequest();
-  explicit constexpr MetricCollectRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  MetricCollectRequest(const MetricCollectRequest& from);
-  MetricCollectRequest(MetricCollectRequest&& from) noexcept
-    : MetricCollectRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline MetricCollectRequest& operator=(const MetricCollectRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline MetricCollectRequest& operator=(MetricCollectRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const MetricCollectRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const MetricCollectRequest* internal_default_instance() {
-    return reinterpret_cast<const MetricCollectRequest*>(
-               &_MetricCollectRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    2;
-
-  friend void swap(MetricCollectRequest& a, MetricCollectRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(MetricCollectRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(MetricCollectRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline MetricCollectRequest* New() const final {
-    return CreateMaybeMessage<MetricCollectRequest>(nullptr);
-  }
-
-  MetricCollectRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<MetricCollectRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const MetricCollectRequest& from);
-  void MergeFrom(const MetricCollectRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(MetricCollectRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "MetricCollectRequest";
-  }
-  protected:
-  explicit MetricCollectRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_metric_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kRequesterFieldNumber = 1,
-  };
-  // string requester = 1;
-  void clear_requester();
-  const std::string& requester() const;
-  void set_requester(const std::string& value);
-  void set_requester(std::string&& value);
-  void set_requester(const char* value);
-  void set_requester(const char* value, size_t size);
-  std::string* mutable_requester();
-  std::string* release_requester();
-  void set_allocated_requester(std::string* requester);
-  private:
-  const std::string& _internal_requester() const;
-  void _internal_set_requester(const std::string& value);
-  std::string* _internal_mutable_requester();
-  public:
-
-  // @@protoc_insertion_point(class_scope:MetricCollectRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requester_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_metric_2eproto;
-};
-// -------------------------------------------------------------------
-
-class MetricCollectResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:MetricCollectResponse) */ {
- public:
-  inline MetricCollectResponse() : MetricCollectResponse(nullptr) {}
-  virtual ~MetricCollectResponse();
-  explicit constexpr MetricCollectResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  MetricCollectResponse(const MetricCollectResponse& from);
-  MetricCollectResponse(MetricCollectResponse&& from) noexcept
-    : MetricCollectResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline MetricCollectResponse& operator=(const MetricCollectResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline MetricCollectResponse& operator=(MetricCollectResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const MetricCollectResponse& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const MetricCollectResponse* internal_default_instance() {
-    return reinterpret_cast<const MetricCollectResponse*>(
-               &_MetricCollectResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    3;
-
-  friend void swap(MetricCollectResponse& a, MetricCollectResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(MetricCollectResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(MetricCollectResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline MetricCollectResponse* New() const final {
-    return CreateMaybeMessage<MetricCollectResponse>(nullptr);
-  }
-
-  MetricCollectResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<MetricCollectResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const MetricCollectResponse& from);
-  void MergeFrom(const MetricCollectResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(MetricCollectResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "MetricCollectResponse";
-  }
-  protected:
-  explicit MetricCollectResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_metric_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kMetricsFieldNumber = 1,
-  };
-  // repeated .Metric metrics = 1;
-  int metrics_size() const;
-  private:
-  int _internal_metrics_size() const;
-  public:
-  void clear_metrics();
-  ::Metric* mutable_metrics(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Metric >*
-      mutable_metrics();
-  private:
-  const ::Metric& _internal_metrics(int index) const;
-  ::Metric* _internal_add_metrics();
-  public:
-  const ::Metric& metrics(int index) const;
-  ::Metric* add_metrics();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Metric >&
-      metrics() const;
-
-  // @@protoc_insertion_point(class_scope:MetricCollectResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Metric > metrics_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_metric_2eproto;
-};
-// -------------------------------------------------------------------
-
 class Metric PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Metric) */ {
  public:
@@ -732,7 +433,7 @@ class Metric PROTOBUF_FINAL :
                &_Metric_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    2;
 
   friend void swap(Metric& a, Metric& b) {
     a.Swap(&b);
@@ -804,7 +505,6 @@ class Metric PROTOBUF_FINAL :
   enum : int {
     kLabelsFieldNumber = 6,
     kNameFieldNumber = 3,
-    kTimeFieldNumber = 2,
     kTypeFieldNumber = 1,
     kCounterValueFieldNumber = 4,
     kGuageValueFieldNumber = 5,
@@ -842,24 +542,6 @@ class Metric PROTOBUF_FINAL :
   void _internal_set_name(const std::string& value);
   std::string* _internal_mutable_name();
   public:
-
-  // .google.protobuf.Timestamp time = 2;
-  bool has_time() const;
-  private:
-  bool _internal_has_time() const;
-  public:
-  void clear_time();
-  const PROTOBUF_NAMESPACE_ID::Timestamp& time() const;
-  PROTOBUF_NAMESPACE_ID::Timestamp* release_time();
-  PROTOBUF_NAMESPACE_ID::Timestamp* mutable_time();
-  void set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time);
-  private:
-  const PROTOBUF_NAMESPACE_ID::Timestamp& _internal_time() const;
-  PROTOBUF_NAMESPACE_ID::Timestamp* _internal_mutable_time();
-  public:
-  void unsafe_arena_set_allocated_time(
-      PROTOBUF_NAMESPACE_ID::Timestamp* time);
-  PROTOBUF_NAMESPACE_ID::Timestamp* unsafe_arena_release_time();
 
   // .MetricTypes type = 1;
   void clear_type();
@@ -912,7 +594,6 @@ class Metric PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Label > labels_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
-  PROTOBUF_NAMESPACE_ID::Timestamp* time_;
   int type_;
   union ValueUnion {
     constexpr ValueUnion() : _constinit_{} {}
@@ -970,7 +651,7 @@ class Label PROTOBUF_FINAL :
                &_Label_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    3;
 
   friend void swap(Label& a, Label& b) {
     a.Swap(&b);
@@ -1163,114 +844,6 @@ inline void MetricPublishResponse::set_totalreceivedmetrics(::PROTOBUF_NAMESPACE
 
 // -------------------------------------------------------------------
 
-// MetricCollectRequest
-
-// string requester = 1;
-inline void MetricCollectRequest::clear_requester() {
-  requester_.ClearToEmpty();
-}
-inline const std::string& MetricCollectRequest::requester() const {
-  // @@protoc_insertion_point(field_get:MetricCollectRequest.requester)
-  return _internal_requester();
-}
-inline void MetricCollectRequest::set_requester(const std::string& value) {
-  _internal_set_requester(value);
-  // @@protoc_insertion_point(field_set:MetricCollectRequest.requester)
-}
-inline std::string* MetricCollectRequest::mutable_requester() {
-  // @@protoc_insertion_point(field_mutable:MetricCollectRequest.requester)
-  return _internal_mutable_requester();
-}
-inline const std::string& MetricCollectRequest::_internal_requester() const {
-  return requester_.Get();
-}
-inline void MetricCollectRequest::_internal_set_requester(const std::string& value) {
-  
-  requester_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void MetricCollectRequest::set_requester(std::string&& value) {
-  
-  requester_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:MetricCollectRequest.requester)
-}
-inline void MetricCollectRequest::set_requester(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  requester_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:MetricCollectRequest.requester)
-}
-inline void MetricCollectRequest::set_requester(const char* value,
-    size_t size) {
-  
-  requester_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:MetricCollectRequest.requester)
-}
-inline std::string* MetricCollectRequest::_internal_mutable_requester() {
-  
-  return requester_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* MetricCollectRequest::release_requester() {
-  // @@protoc_insertion_point(field_release:MetricCollectRequest.requester)
-  return requester_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void MetricCollectRequest::set_allocated_requester(std::string* requester) {
-  if (requester != nullptr) {
-    
-  } else {
-    
-  }
-  requester_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requester,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:MetricCollectRequest.requester)
-}
-
-// -------------------------------------------------------------------
-
-// MetricCollectResponse
-
-// repeated .Metric metrics = 1;
-inline int MetricCollectResponse::_internal_metrics_size() const {
-  return metrics_.size();
-}
-inline int MetricCollectResponse::metrics_size() const {
-  return _internal_metrics_size();
-}
-inline void MetricCollectResponse::clear_metrics() {
-  metrics_.Clear();
-}
-inline ::Metric* MetricCollectResponse::mutable_metrics(int index) {
-  // @@protoc_insertion_point(field_mutable:MetricCollectResponse.metrics)
-  return metrics_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Metric >*
-MetricCollectResponse::mutable_metrics() {
-  // @@protoc_insertion_point(field_mutable_list:MetricCollectResponse.metrics)
-  return &metrics_;
-}
-inline const ::Metric& MetricCollectResponse::_internal_metrics(int index) const {
-  return metrics_.Get(index);
-}
-inline const ::Metric& MetricCollectResponse::metrics(int index) const {
-  // @@protoc_insertion_point(field_get:MetricCollectResponse.metrics)
-  return _internal_metrics(index);
-}
-inline ::Metric* MetricCollectResponse::_internal_add_metrics() {
-  return metrics_.Add();
-}
-inline ::Metric* MetricCollectResponse::add_metrics() {
-  // @@protoc_insertion_point(field_add:MetricCollectResponse.metrics)
-  return _internal_add_metrics();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Metric >&
-MetricCollectResponse::metrics() const {
-  // @@protoc_insertion_point(field_list:MetricCollectResponse.metrics)
-  return metrics_;
-}
-
-// -------------------------------------------------------------------
-
 // Metric
 
 // .MetricTypes type = 1;
@@ -1291,83 +864,6 @@ inline void Metric::_internal_set_type(::MetricTypes value) {
 inline void Metric::set_type(::MetricTypes value) {
   _internal_set_type(value);
   // @@protoc_insertion_point(field_set:Metric.type)
-}
-
-// .google.protobuf.Timestamp time = 2;
-inline bool Metric::_internal_has_time() const {
-  return this != internal_default_instance() && time_ != nullptr;
-}
-inline bool Metric::has_time() const {
-  return _internal_has_time();
-}
-inline const PROTOBUF_NAMESPACE_ID::Timestamp& Metric::_internal_time() const {
-  const PROTOBUF_NAMESPACE_ID::Timestamp* p = time_;
-  return p != nullptr ? *p : reinterpret_cast<const PROTOBUF_NAMESPACE_ID::Timestamp&>(
-      PROTOBUF_NAMESPACE_ID::_Timestamp_default_instance_);
-}
-inline const PROTOBUF_NAMESPACE_ID::Timestamp& Metric::time() const {
-  // @@protoc_insertion_point(field_get:Metric.time)
-  return _internal_time();
-}
-inline void Metric::unsafe_arena_set_allocated_time(
-    PROTOBUF_NAMESPACE_ID::Timestamp* time) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
-  }
-  time_ = time;
-  if (time) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Metric.time)
-}
-inline PROTOBUF_NAMESPACE_ID::Timestamp* Metric::release_time() {
-  
-  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
-  time_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline PROTOBUF_NAMESPACE_ID::Timestamp* Metric::unsafe_arena_release_time() {
-  // @@protoc_insertion_point(field_release:Metric.time)
-  
-  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
-  time_ = nullptr;
-  return temp;
-}
-inline PROTOBUF_NAMESPACE_ID::Timestamp* Metric::_internal_mutable_time() {
-  
-  if (time_ == nullptr) {
-    auto* p = CreateMaybeMessage<PROTOBUF_NAMESPACE_ID::Timestamp>(GetArena());
-    time_ = p;
-  }
-  return time_;
-}
-inline PROTOBUF_NAMESPACE_ID::Timestamp* Metric::mutable_time() {
-  // @@protoc_insertion_point(field_mutable:Metric.time)
-  return _internal_mutable_time();
-}
-inline void Metric::set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
-  }
-  if (time) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time)->GetArena();
-    if (message_arena != submessage_arena) {
-      time = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, time, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  time_ = time;
-  // @@protoc_insertion_point(field_set_allocated:Metric.time)
 }
 
 // string name = 3;
@@ -1684,10 +1180,6 @@ inline void Label::set_allocated_value(std::string* value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

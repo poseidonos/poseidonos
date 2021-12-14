@@ -60,7 +60,6 @@
 #include "src/spdk_wrapper/spdk.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
-#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 #include "src/telemetry/telemetry_config/telemetry_config.h"
 #include "src/volume/volume_service.h"
 #include "src/resource_manager/memory_manager.h"
@@ -137,7 +136,6 @@ DebugInfo::Update(void)
     nvmfTarget = NvmfTargetSingleton::Instance();
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
-    telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
     telemetryClient = TelemetryClientSingleton::Instance();
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
