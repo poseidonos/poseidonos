@@ -946,12 +946,14 @@ TEST(NvmfTarget, GetPosBdevUuid_Success)
     struct spdk_bdev* bdev[1];
     struct spdk_uuid* uuid[1];
     string expected = "abcd";
+    char uuidString[37] = "abcd";
 
     EXPECT_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillOnce(Return(bdev[0]));
     EXPECT_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillOnce(Return(uuid[0]));
     EXPECT_CALL(*mockSpdkCaller, SpdkUuidFmtLower(_, _, _)).WillOnce([&](char* uuidStr, size_t uuidStrSize, const spdk_uuid* uuid)
     {
-        snprintf(uuidStr, sizeof(uuidStr), "abcd");
+        memset(uuidStr, 0, uuidStrSize);
+        memcpy(uuidStr, uuidString, 5);
         return 0;
     });
 
