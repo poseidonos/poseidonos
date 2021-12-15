@@ -1,9 +1,9 @@
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
-#include "src/include/pos_event_id.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_group_buffer_status_mock.h"
@@ -47,7 +47,7 @@ AllocateBuffer(BufferOffsetAllocator* allocator, uint64_t totalSizeToAllocate)
 
                 offset = allocatedOffset + sizeToAllocate;
 
-                MapPageList dirty; // garbage data
+                MapList dirty; // garbage data
                 allocator->LogFilled(allocator->GetLogGroupId(allocatedOffset), dirty);
             }
             else if (allocationResult == (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE)

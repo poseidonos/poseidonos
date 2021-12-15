@@ -60,9 +60,9 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/metafs/include/metafs_service.h"
-#include "src/volume/volume_service.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -84,13 +84,13 @@ JournalManager::JournalManager(void)
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
   replayHandler(nullptr),
-  tp(nullptr),
-  telClient(nullptr)
+  telemetryPublisher(nullptr),
+  telemetryClient(nullptr)
 {
 }
 
 // Constructor for injecting dependencies in unit tests
-JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* configuration,
+JournalManager::JournalManager(JournalConfiguration* configuration,
     JournalStatusProvider* journalStatusProvider,
     LogWriteContextFactory* logWriteContextFactory,
     JournalEventFactory* journalEventFactory,
@@ -106,10 +106,10 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* co
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
     ReplayHandler* replay,
-    IArrayInfo* info)
+    IArrayInfo* info,
+    TelemetryPublisher* tp_)
 : JournalManager()
 {
-    tp = tp_;
     config = configuration;
     statusProvider = journalStatusProvider;
 
@@ -132,38 +132,49 @@ JournalManager::JournalManager(TelemetryPublisher* tp_, JournalConfiguration* co
 
     replayHandler = replay;
     arrayInfo = info;
+
+    telemetryPublisher = tp_;
+}
+
+// Constructor for injecting dependencies in integration tests
+JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state)
+: JournalManager(new JournalConfiguration(),
+      new JournalStatusProvider(),
+      new LogWriteContextFactory(),
+      new JournalEventFactory(),
+      new LogWriteHandler(),
+      new JournalVolumeEventHandler(),
+      new JournalWriter(),
+      new JournalLogBuffer(info->GetIndex()),
+      new BufferOffsetAllocator(),
+      new LogGroupReleaser(),
+      new CheckpointManager(),
+      new BufferedSegmentContextManager(),
+      new DirtyMapManager(),
+      new LogBufferWriteDoneNotifier(),
+      new CallbackSequenceController(),
+      new ReplayHandler(state),
+      info,
+      tp)
+{
+    telemetryPublisher->AddDefaultLabel("array_name", arrayInfo->GetName());
 }
 
 // Constructor for injecting mock module dependencies in product code
 JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
-: JournalManager(new TelemetryPublisher("Journal"),
-    new JournalConfiguration(),
-    new JournalStatusProvider(),
-    new LogWriteContextFactory(),
-    new JournalEventFactory(),
-    new LogWriteHandler(),
-    new JournalVolumeEventHandler(),
-    new JournalWriter(),
-    new JournalLogBuffer(info->GetIndex()),
-    new BufferOffsetAllocator(),
-    new LogGroupReleaser(),
-    new CheckpointManager(),
-    new BufferedSegmentContextManager(),
-    new DirtyMapManager(),
-    new LogBufferWriteDoneNotifier(),
-    new CallbackSequenceController(),
-    new ReplayHandler(state),
-    info)
+: JournalManager(
+      new TelemetryPublisher("Journal"),
+      info,
+      state)
 {
-    tp->AddDefaultLabel("array_name", info->GetName());
 }
 
 JournalManager::~JournalManager(void)
 {
-    if ((telClient != nullptr) && (tp != nullptr))
+    if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
     {
-        telClient->DeregisterPublisher(tp->GetName());
-        delete tp;
+        telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
+        delete telemetryPublisher;
     }
     delete replayHandler;
 
@@ -191,7 +202,6 @@ int
 JournalManager::Init(void)
 {
     int arrayId = arrayInfo->GetIndex();
-
     // TODO (huijeong.kim) Dependency injection should be moved to the constructor
     return Init(MapperServiceSingleton::Instance()->GetIVSAMap(arrayId),
         MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
@@ -225,12 +235,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         {
             return result;
         }
-        telClient = tc;
-        if (telClient != nullptr)
-        {
-            telClient->RegisterPublisher(tp);
-        }
-        _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
+        _InitModules(tc, vsaMap, stripeMap, mapFlush, blockAllocator,
             wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
         if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
@@ -318,9 +323,9 @@ JournalManager::Dispose(void)
     if (config->IsEnabled() == true)
     {
         _Reset();
-        if ((telClient != nullptr) && (tp != nullptr))
+        if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
         {
-            telClient->DeregisterPublisher(tp->GetName());
+            telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
         }
         _DisposeModules();
     }
@@ -395,12 +400,14 @@ JournalManager::_Reset(void)
 }
 
 void
-JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
+JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IVolumeManager* volumeManager,
     EventScheduler* eventScheduler)
 {
+    telemetryClient = tc;
+    telemetryClient->RegisterPublisher(telemetryPublisher);
     logBuffer->Init(config, logFactory);
 
     bufferAllocator->Init(logGroupReleaser, config);

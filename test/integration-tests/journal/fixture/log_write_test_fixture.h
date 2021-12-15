@@ -1,13 +1,12 @@
 #pragma once
 
-#include "test/integration-tests/journal/journal_manager_spy.h"
-#include "test/integration-tests/journal/utils/test_info.h"
-#include "test/integration-tests/journal/utils/rba_generator.h"
-#include "test/integration-tests/journal/utils/written_logs.h"
-#include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
-
 #include "test/integration-tests/journal/fake/array_info_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
+#include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
+#include "test/integration-tests/journal/journal_manager_spy.h"
+#include "test/integration-tests/journal/utils/rba_generator.h"
+#include "test/integration-tests/journal/utils/test_info.h"
+#include "test/integration-tests/journal/utils/written_logs.h"
 
 namespace pos
 {
@@ -40,17 +39,17 @@ public:
     bool AreAllLogWritesDone(void);
 
     void CompareLogs(void);
-    MapPageList GetDirtyMap(void);
+    MapList GetDirtyMap(void);
 
 private:
     BlockMapList _GenerateBlocksInStripe(StripeId vsid, uint32_t startOffset, int numBlks);
-    void _GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates, MapPageList& dirtyMap);
-    void _AddToDirtyPageList(int mapId, MpageList dirty);
+    void _GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates);
+    void _AddToDirtyPageList(int mapId);
 
     std::mutex dirtyListLock;
 
     WrittenLogs testingLogs;
-    MapPageList dirtyPages;
+    MapList dirtyMaps;
     RbaGenerator* rbaGenerator;
     TestInfo* testInfo;
 

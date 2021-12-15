@@ -41,7 +41,7 @@ namespace pos
 class LogBufferWriteDoneEvent
 {
 public:
-    virtual void LogFilled(int logGroupId, MapPageList& dirty) = 0;
+    virtual void LogFilled(int logGroupId, MapList& dirty) = 0;
     virtual void LogBufferReseted(int logGroupId) = 0;
 };
 
@@ -54,7 +54,7 @@ public:
     virtual void Register(LogBufferWriteDoneEvent* notified);
     virtual void Dispose(void);
 
-    virtual void NotifyLogFilled(int logGroupId, MapPageList& dirty);
+    virtual void NotifyLogFilled(int logGroupId, MapList& dirty);
     virtual void NotifyLogBufferReseted(int logGroupId);
 
     // For UT

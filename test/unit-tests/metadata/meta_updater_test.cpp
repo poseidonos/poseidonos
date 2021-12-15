@@ -124,13 +124,11 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessullfyWhenJournalEnabled)
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
-    MpageList dirtyList;
 
     ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
-    ON_CALL(vsaMap, GetDirtyVsaMapPages).WillByDefault(Return(dirtyList));
 
-    EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, dirtyList, _)).WillOnce(Return(0));
+    EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, _)).WillOnce(Return(0));
 
     int expected = 0;
     int actual = metaUpdater.UpdateBlockMap(volumeIo, clientCallback);
@@ -158,13 +156,11 @@ TEST(MetaUpdater, UpdateBlockMap_testIfFailsWhenJournalWriteFails)
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
-    MpageList dirtyList;
 
     ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
-    ON_CALL(vsaMap, GetDirtyVsaMapPages).WillByDefault(Return(dirtyList));
 
-    EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, dirtyList, _)).WillOnce(Return(-1));
+    EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, _)).WillOnce(Return(-1));
 
     int actual = metaUpdater.UpdateBlockMap(volumeIo, clientCallback);
     EXPECT_TRUE(actual < 0);
@@ -260,18 +256,16 @@ TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
 
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
-    MpageList dirty;
 
     ON_CALL(*metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
-    EXPECT_CALL(stripeMap, GetDirtyStripeMapPages).WillOnce(Return(dirty));
 
     StripeAddr oldAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 10};
     EXPECT_CALL(stripeMap, GetLSA).WillOnce(Return(oldAddr));
 
-    EXPECT_CALL(journalWriter, AddStripeMapUpdatedLog(&stripe, oldAddr, dirty, _)).WillOnce(Return(0));
+    EXPECT_CALL(journalWriter, AddStripeMapUpdatedLog(&stripe, oldAddr, _)).WillOnce(Return(0));
 
     int result = metaUpdater.UpdateStripeMap(&stripe, metaCallback);
     EXPECT_EQ(result, 0);
@@ -375,22 +369,6 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.blksPerStripe = 10;
     ON_CALL(arrayInfo, GetSizeInfo).WillByDefault(Return(&partitionLogicalSize));
-
-    MapPageList dirtyMap;
-    for (uint32_t offset = 0; offset < partitionLogicalSize.blksPerStripe; offset++)
-    {
-        std::pair<uint32_t, uint32_t> revMapEntry = {offset, mapUpdateInfoList.volumeId};
-        EXPECT_CALL(stripe, GetReverseMapEntry(offset)).WillRepeatedly(Return(revMapEntry));
-
-        MpageList dirty;
-        dirty.insert(offset);
-        EXPECT_CALL(vsaMap, GetDirtyVsaMapPages(mapUpdateInfoList.volumeId, offset, blockCount)).WillOnce(Return(dirty));
-        dirtyMap[mapUpdateInfoList.volumeId].insert(dirty.begin(), dirty.end());
-    }
-    MpageList dirty;
-    dirty.insert(10);
-    EXPECT_CALL(stripeMap, GetDirtyStripeMapPages(stripeId)).WillOnce(Return(dirty));
-    dirtyMap[STRIPE_MAP_ID] = dirty;
 
     // Then
     int expected = 0;

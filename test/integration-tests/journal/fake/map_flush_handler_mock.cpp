@@ -20,17 +20,16 @@ MapFlushHandlerMock::~MapFlushHandlerMock(void)
 }
 
 int
-MapFlushHandlerMock::FlushMapWithPageList(MpageList dirtyPages,
-    EventSmartPtr callback)
+MapFlushHandlerMock::FlushTouchedPages(EventSmartPtr callback)
 {
     std::chrono::microseconds sleeptime(5);
     std::this_thread::sleep_for(sleeptime);
 
     callbackEvent = callback;
-    numPagesToFlush = dirtyPages.size();
-    for (auto it = dirtyPages.begin(); it != dirtyPages.end(); ++it)
+    numPagesToFlush = NUM_DIRTY_MPAGES;
+    for (int pageId = 0; pageId < NUM_DIRTY_MPAGES; pageId++)
     {
-        std::thread flushDone(&MapFlushHandlerMock::_MpageFlushed, this, *it);
+        std::thread flushDone(&MapFlushHandlerMock::_MpageFlushed, this, pageId);
         flushDone.detach();
     }
     return 0;

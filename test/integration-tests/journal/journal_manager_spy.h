@@ -17,14 +17,16 @@ class MockEventScheduler;
 class IJournalWriter;
 class IVolumeEventHandler;
 class IJournalStatusProvider;
+class TelemetryPublisher;
+class TelemetryClient;
 
 class JournalManagerSpy : public JournalManager
 {
 public:
-    JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub, std::string logFileName);
+    JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, IStateControl* stateSub, std::string logFileName);
     virtual ~JournalManagerSpy(void);
 
-    int InitializeForTest(Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager);
+    int InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager);
     int DoRecoveryForTest(void);
 
     void DeleteLogBuffer(void);

@@ -92,14 +92,13 @@ JournalWriter::_CanBeWritten(void)
 }
 
 int
-JournalWriter::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
-    MpageList dirty, EventSmartPtr callbackEvent)
+JournalWriter::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent)
 {
     int result = _CanBeWritten();
     if (result == 0)
     {
         LogWriteContext* logWriteContext =
-            logFactory->CreateBlockMapLogWriteContext(volumeIo, dirty, callbackEvent);
+            logFactory->CreateBlockMapLogWriteContext(volumeIo, callbackEvent);
         return logWriteHandler->AddLog(logWriteContext);
     }
     else
@@ -109,14 +108,13 @@ JournalWriter::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
 }
 
 int
-JournalWriter::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-    MpageList dirty, EventSmartPtr callbackEvent)
+JournalWriter::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent)
 {
     int result = _CanBeWritten();
     if (result == 0)
     {
         LogWriteContext* logWriteContext =
-            logFactory->CreateStripeMapLogWriteContext(stripe, oldAddr, dirty, callbackEvent);
+            logFactory->CreateStripeMapLogWriteContext(stripe, oldAddr, callbackEvent);
         return logWriteHandler->AddLog(logWriteContext);
     }
     else
@@ -126,12 +124,12 @@ JournalWriter::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
 }
 
 int
-JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent)
 {
     int result = _CanBeWritten();
     if (result == 0)
     {
-        return _AddGcLogs(mapUpdates, dirty, callbackEvent);
+        return _AddGcLogs(mapUpdates, callbackEvent);
     }
     else
     {
@@ -140,12 +138,12 @@ JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, MapPageLi
 }
 
 int
-JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent)
 {
     int result = 0;
 
     LogWriteContext* stripeFlushedLogWriteContext =
-        logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
+        logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, callbackEvent);
 
     // TODO (huijeong.kim) change GcLogWriteCompleted to inherit Callback instead of Event
     EventSmartPtr gcStripeLogWriteRequest = eventFactory->CreateGcStripeLogWriteRequestEvent(stripeFlushedLogWriteContext);
@@ -162,8 +160,7 @@ JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, E
     }
     else
     {
-        MapPageList dummyList;
-        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, gcLogWriteCompleted);
+        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, gcLogWriteCompleted);
         gcLogCallback->SetNumLogs(blockContexts.size());
 
         for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)

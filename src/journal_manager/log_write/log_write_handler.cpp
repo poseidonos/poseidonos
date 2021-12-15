@@ -32,12 +32,11 @@
 
 #include "log_write_handler.h"
 
+#include "buffer_offset_allocator.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_write/log_write_statistics.h"
 #include "src/journal_manager/replay/replay_stripe.h"
-#include "buffer_offset_allocator.h"
-
-#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -192,7 +191,7 @@ LogWriteHandler::_StartWaitingIos(void)
 }
 
 void
-LogWriteHandler::LogFilled(int logGroupId, MapPageList& dirty)
+LogWriteHandler::LogFilled(int logGroupId, MapList& dirty)
 {
     // Nothing to do
 }

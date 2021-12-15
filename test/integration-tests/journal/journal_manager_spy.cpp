@@ -15,13 +15,14 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::NiceMock;
 
 namespace pos
 {
-JournalManagerSpy::JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub, std::string logFileName)
-: JournalManager(array, stateSub)
+JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, IStateControl* stateSub, std::string logFileName)
+: JournalManager(tp, array, stateSub)
 {
     delete logGroupReleaser;
     logGroupReleaser = new LogGroupReleaserSpy();
@@ -45,7 +46,7 @@ JournalManagerSpy::~JournalManagerSpy(void)
 }
 
 int
-JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager)
+JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager)
 {
     int ret = JournalManager::_InitConfigAndPrepareLogBuffer(nullptr);
     if (ret < 0)
@@ -53,7 +54,7 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolu
         return ret;
     }
 
-    _InitModules(mapper->GetIVSAMap(), mapper->GetIStripeMap(),
+    _InitModules(telemetryClient, mapper->GetIVSAMap(), mapper->GetIStripeMap(),
         mapper->GetIMapFlush(),
         allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),

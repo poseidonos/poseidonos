@@ -12,7 +12,8 @@
 #include "test/integration-tests/journal/journal_manager_spy.h"
 #include "test/integration-tests/journal/utils/journal_configuration_builder.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 namespace pos
 {
 class JournalManagerTestFixture
@@ -41,6 +42,8 @@ protected:
     ArrayInfoMock* arrayInfo;
     StateSubscriptionMock* stateSub;
     IVolumeManager* volumeManager;
+    MockTelemetryPublisher* telemetryPublisher;
+    MockTelemetryClient* telemetryClient;
 
     LogWriteTestFixture* writeTester;
     ReplayTestFixture* replayTester;

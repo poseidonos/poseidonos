@@ -19,10 +19,12 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     arrayInfo = new ArrayInfoMock(testInfo);
     stateSub = new StateSubscriptionMock();
 
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
     testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
     volumeManager = new NiceMock<MockIVolumeManager>();
-    journal = new JournalManagerSpy(arrayInfo, stateSub, logFileName);
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
     writeTester = new LogWriteTestFixture(testMapper, arrayInfo, journal, testInfo);
     replayTester = new ReplayTestFixture(testMapper, testAllocator, testInfo);
@@ -68,7 +70,7 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 
     if (journal->IsEnabled() == true)
     {
-        journal->InitializeForTest(testMapper, testAllocator, volumeManager);
+        journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
     }
 
     _GetLogBufferSizeInfo();
@@ -90,11 +92,12 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
 
     delete journal;
 
-    journal = new JournalManagerSpy(arrayInfo, stateSub, GetLogFileName());
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    journal->InitializeForTest(testMapper, testAllocator, volumeManager);
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
 void
@@ -106,7 +109,7 @@ JournalManagerTestFixture::SetTriggerCheckpoint(bool isCheckpointEnabled)
 void
 JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 {
-    EXPECT_CALL(*testMapper, FlushDirtyMpagesGiven).Times(AtLeast(1));
+    EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
         FlushContexts)
         .Times(AtLeast(1));

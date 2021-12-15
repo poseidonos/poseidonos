@@ -39,11 +39,11 @@ namespace pos
 {
 DirtyMapManager::~DirtyMapManager(void)
 {
-    for (auto it : pendingDirtyPages)
+    for (auto it : pendingDirtyMaps)
     {
         delete it;
     }
-    pendingDirtyPages.clear();
+    pendingDirtyMaps.clear();
 }
 
 void
@@ -52,67 +52,67 @@ DirtyMapManager::Init(JournalConfiguration* journalConfiguration)
     int numLogGroups = journalConfiguration->GetNumLogGroups();
     for (int id = 0; id < numLogGroups; id++)
     {
-        pendingDirtyPages.push_back(new DirtyPageList());
+        pendingDirtyMaps.push_back(new DirtyMapList());
     }
 }
 
 // Init function for unit test
 // TODO (huijeong.kim) move initialization to the construcor
 void
-DirtyMapManager::Init(std::vector<DirtyPageList* > dirtyPages)
+DirtyMapManager::Init(std::vector<DirtyMapList*> dirtyPages)
 {
-    pendingDirtyPages = dirtyPages;
+    pendingDirtyMaps = dirtyPages;
 }
 
 void
 DirtyMapManager::Dispose(void)
 {
-    for (auto it : pendingDirtyPages)
+    for (auto it : pendingDirtyMaps)
     {
         delete it;
     }
-    pendingDirtyPages.clear();
+    pendingDirtyMaps.clear();
 }
 
-MapPageList
+MapList
 DirtyMapManager::GetDirtyList(int logGroupId)
 {
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    return pendingDirtyPages[logGroupId]->GetList();
+    assert(logGroupId < static_cast<int>(pendingDirtyMaps.size()));
+    return pendingDirtyMaps[logGroupId]->GetList();
 }
 
-MapPageList
+MapList
 DirtyMapManager::GetTotalDirtyList(void)
 {
-    MapPageList dirtyList;
-    for (auto it : pendingDirtyPages)
+    MapList dirtyMaps;
+    for (auto it : pendingDirtyMaps)
     {
-        MapPageList dirtyPage = it->PopDirtyList();
-        dirtyList.insert(dirtyPage.begin(), dirtyPage.end());
+        MapList dirtyMap = it->PopDirtyList();
+        dirtyMaps.insert(dirtyMap.begin(), dirtyMap.end());
     }
-    return dirtyList;
+    return dirtyMaps;
 }
 
 void
 DirtyMapManager::DeleteDirtyList(int volumeId)
 {
-    for (auto it = pendingDirtyPages.begin(); it != pendingDirtyPages.end(); ++it)
+    for (auto it = pendingDirtyMaps.begin(); it != pendingDirtyMaps.end(); ++it)
     {
         (*it)->Delete(volumeId);
     }
 }
 
 void
-DirtyMapManager::LogFilled(int logGroupId, MapPageList& dirty)
+DirtyMapManager::LogFilled(int logGroupId, MapList& dirty)
 {
-    pendingDirtyPages[logGroupId]->Add(dirty);
+    pendingDirtyMaps[logGroupId]->Add(dirty);
 }
 
 void
 DirtyMapManager::LogBufferReseted(int logGroupId)
 {
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    pendingDirtyPages[logGroupId]->Reset();
+    assert(logGroupId < static_cast<int>(pendingDirtyMaps.size()));
+    pendingDirtyMaps[logGroupId]->Reset();
 }
 
 } // namespace pos

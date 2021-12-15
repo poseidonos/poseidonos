@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mutex>
 #include <atomic>
+#include <mutex>
 
-#include "src/mapper/include/mpage_info.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
@@ -14,11 +14,12 @@ public:
     explicit MapFlushHandlerMock(int mapId);
     virtual ~MapFlushHandlerMock(void);
 
-    int FlushMapWithPageList(MpageList dirtyPages, EventSmartPtr callback);
+    int FlushTouchedPages(EventSmartPtr callback);
 
 private:
     void _MpageFlushed(int pageId);
 
+    static const int NUM_DIRTY_MPAGES = 10;
     int id;
     std::mutex lock;
     std::atomic<int> numPagesToFlush;

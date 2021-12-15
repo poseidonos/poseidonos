@@ -30,33 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "dirty_map_list.h"
 
-#include <mutex>
-
-#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/config/journal_configuration.h"
 
 namespace pos
 {
-class JournalConfiguration;
-
-class DirtyPageList
+DirtyMapList::DirtyMapList(void)
 {
-public:
-    DirtyPageList(void);
-    virtual ~DirtyPageList(void)
+    dirtyMaps.clear();
+}
+
+void
+DirtyMapList::Add(MapList& dirty)
+{
+    // TODO(cheolho.kang): Remove lock using bitmap
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+
+    for (auto mapId : dirty)
     {
+        dirtyMaps.emplace(mapId);
     }
+}
 
-    virtual void Add(MapPageList& dirty);
-    virtual MapPageList GetList(void);
-    virtual MapPageList PopDirtyList(void);
-    virtual void Reset(void);
-    virtual void Delete(int volumeId);
+MapList
+DirtyMapList::GetList(void)
+{
+    return dirtyMaps;
+}
 
-private:
-    std::mutex dirtyListLock;
-    MapPageList dirtyPages;
-};
+MapList
+DirtyMapList::PopDirtyList(void)
+{
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+    MapList dirtyPageToReturn = dirtyMaps;
+    dirtyMaps.clear();
+
+    return dirtyPageToReturn;
+}
+
+void
+DirtyMapList::Reset(void)
+{
+    dirtyMaps.clear();
+}
+
+void
+DirtyMapList::Delete(int volumeId)
+{
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+
+    auto mapIt = dirtyMaps.find(volumeId);
+    if (mapIt != dirtyMaps.end())
+    {
+        dirtyMaps.erase(volumeId);
+    }
+}
 
 } // namespace pos

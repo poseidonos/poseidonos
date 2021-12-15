@@ -57,16 +57,15 @@ public:
     virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
         CallbackSequenceController* sequencer);
 
-    virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent);
+    virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
-        StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
+        StripeAddr oldAddr, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateGcBlockMapLogWriteContext(
-        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
-    virtual std::vector<LogWriteContext*> CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList mapUpdates,
-        MapPageList dirty, EventSmartPtr callbackEvent);
+        GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
+    virtual std::vector<LogWriteContext*> CreateGcBlockMapLogWriteContexts(
+        GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
-        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
+        GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, EventSmartPtr callback);
     virtual LogGroupResetContext* CreateLogGroupResetContext(uint64_t offset, int id,

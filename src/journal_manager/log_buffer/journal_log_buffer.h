@@ -32,13 +32,13 @@
 
 #pragma once
 
+#include <atomic>
+#include <string>
+
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/meta_file_intf/meta_file_intf.h"
-
-#include <atomic>
-#include <string>
 
 namespace pos
 {
@@ -82,8 +82,14 @@ public:
     }
 
     // For UT
-    char* GetInitializedDataBuffer(void) { return initializedDataBuffer; }
-    void SetLogBufferReadDone(bool val) { logBufferReadDone = val; }
+    char* GetInitializedDataBuffer(void)
+    {
+        return initializedDataBuffer;
+    }
+    void SetLogBufferReadDone(bool val)
+    {
+        logBufferReadDone = val;
+    }
 
 private:
     void _LoadBufferSize(void);

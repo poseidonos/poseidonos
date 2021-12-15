@@ -30,46 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+#pragma once
 
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include <mutex>
+
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-MapUpdateLogWriteContext::MapUpdateLogWriteContext(MapList dirtyList, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer)
-: LogWriteContext(callback, logFilledNotifier),
-  sequenceController(sequencer),
-  dirty(dirtyList)
-{
-}
+class JournalConfiguration;
 
-MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
-    MapList dirtyList, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* logFilledNotifier,
-    CallbackSequenceController* sequencer)
-: LogWriteContext(log, callback, logFilledNotifier),
-  sequenceController(sequencer),
-  dirty(dirtyList)
+class DirtyMapList
 {
-}
+public:
+    DirtyMapList(void);
+    virtual ~DirtyMapList(void)
+    {
+    }
 
-MapList&
-MapUpdateLogWriteContext::GetDirtyList(void)
-{
-    return dirty;
-}
+    virtual void Add(MapList& dirty);
+    virtual MapList GetList(void);
+    virtual MapList PopDirtyList(void);
+    virtual void Reset(void);
+    virtual void Delete(int volumeId);
 
-void
-MapUpdateLogWriteContext::IoDone(void)
-{
-    sequenceController->GetCallbackExecutionApproval();
-    LogBufferIoContext::IoDone();
-    sequenceController->NotifyCallbackCompleted();
-
-    // Log filled notify should be after the callback function completed
-    logFilledNotifier->NotifyLogFilled(GetLogGroupId(), dirty);
-}
+private:
+    std::mutex dirtyListLock;
+    MapList dirtyMaps;
+};
 
 } // namespace pos

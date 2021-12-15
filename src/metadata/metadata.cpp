@@ -47,7 +47,7 @@ namespace pos
 {
 Metadata::Metadata(IArrayInfo* info, IStateControl* state)
 : Metadata(info,
-      new Mapper(info, nullptr),
+      new Mapper(nullptr, info, nullptr),
       new Allocator(info, state),
       new JournalManager(info, state),
       MetaServiceSingleton::Instance())

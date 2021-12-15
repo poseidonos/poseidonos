@@ -281,7 +281,7 @@ TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Log is filled
-    MapPageList dummyDirty;
+    MapList dummyDirty;
     logWriteHandler->LogFilled(0, dummyDirty);
 
     // Then: LogFilled should be executed successfully

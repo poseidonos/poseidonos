@@ -88,8 +88,8 @@ Mapper::Mapper(TelemetryPublisher* tp_, MapperWbt* mapperWbt_, VSAMapManager* vs
     }
 }
 
-Mapper::Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_)
-: Mapper(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
+Mapper::Mapper(TelemetryPublisher* tp, IArrayInfo* iarrayInfo, MetaFs* metaFs_)
+: Mapper(tp, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
 {
     _ClearVolumeState();
 }

@@ -30,71 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dirty_page_list.h"
+#include <gmock/gmock.h>
 
-#include "src/journal_manager/config/journal_configuration.h"
+#include <list>
+#include <string>
+#include <vector>
+
+#include "src/journal_manager/checkpoint/dirty_map_list.h"
 
 namespace pos
 {
-DirtyPageList::DirtyPageList(void)
+class MockDirtyPageList : public DirtyMapList
 {
-    dirtyPages.clear();
-}
-
-void
-DirtyPageList::Add(MapPageList& dirty)
-{
-    std::unique_lock<std::mutex> lock(dirtyListLock);
-
-    for (auto it = dirty.begin(); it != dirty.end(); it++)
-    {
-        int mapId = it->first;
-
-        auto mapIt = dirtyPages.find(mapId);
-        if (mapIt != dirtyPages.end())
-        {
-            dirtyPages[mapId].insert((it->second.begin()), it->second.end());
-        }
-        else
-        {
-            dirtyPages.emplace(mapId, it->second);
-        }
-    }
-}
-
-MapPageList
-DirtyPageList::GetList(void)
-{
-    return dirtyPages;
-}
-
-MapPageList
-DirtyPageList::PopDirtyList(void)
-{
-    std::unique_lock<std::mutex> lock(dirtyListLock);
-    MapPageList dirtyPageToReturn = dirtyPages;
-    dirtyPages.clear();
-
-    return dirtyPageToReturn;
-}
-
-void
-DirtyPageList::Reset(void)
-{
-    dirtyPages.clear();
-}
-
-void
-DirtyPageList::Delete(int volumeId)
-{
-    std::unique_lock<std::mutex> lock(dirtyListLock);
-
-    auto mapIt = dirtyPages.find(volumeId);
-    if (mapIt != dirtyPages.end())
-    {
-        (mapIt->second).clear();
-        dirtyPages.erase(volumeId);
-    }
-}
+public:
+    using DirtyMapList::DirtyMapList;
+    MOCK_METHOD(void, Add, (MapList & dirty), (override));
+    MOCK_METHOD(MapList, GetList, (), (override));
+    MOCK_METHOD(MapList, PopDirtyList, (), (override));
+    MOCK_METHOD(void, Reset, (), (override));
+    MOCK_METHOD(void, Delete, (int volumeId), (override));
+};
 
 } // namespace pos

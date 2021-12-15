@@ -231,18 +231,18 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
     clientCallback = request.callback;
     EventSmartPtr completionEvent(new CheckpointCompletion(this));
 
-    MapPageList dirtyPages;
+    MapList dirtyMaps;
     if (request.groupId == -1)
     {
-        dirtyPages = dirtyMapManager->GetTotalDirtyList();
+        dirtyMaps = dirtyMapManager->GetTotalDirtyList();
     }
     else
     {
-        dirtyPages = dirtyMapManager->GetDirtyList(request.groupId);
+        dirtyMaps = dirtyMapManager->GetDirtyList(request.groupId);
     }
 
     sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyPages, completionEvent);
+    int ret = checkpointHandler->Start(dirtyMaps, completionEvent);
     sequenceController->AllowCallbackExecution();
     if (ret != 0)
     {

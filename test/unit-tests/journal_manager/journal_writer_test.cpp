@@ -62,8 +62,7 @@ TEST(JournalWriter, AddBlockMapUpdatedLog_testIfExectedWithoutInitialilzation)
     JournalWriter writer;
 
     // When: Journal is requested to write block write done log without initialization
-    MpageList dummyList;
-    int actualReturnCode = writer.AddBlockMapUpdatedLog(nullptr, dummyList, nullptr);
+    int actualReturnCode = writer.AddBlockMapUpdatedLog(nullptr, nullptr);
 
     // Then: JournalWriter return the error code;
     int expectedReturnCode = -EID(JOURNAL_INVALID);
@@ -88,8 +87,7 @@ TEST(JournalWriter, AddBlockMapUpdatedLog_testIfSuccessWhenStatusIsJournaling)
 
     // When: Journal is requested to write block write done log
     // Then: Log write should be successfully requested
-    MpageList dummyList;
-    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, dummyList, nullptr) == 0);
+    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, nullptr) == 0);
 }
 
 TEST(JournalWriter, AddBlockMapUpdatedLog_testIfFailsWhenStatusIsInvalid)
@@ -107,8 +105,7 @@ TEST(JournalWriter, AddBlockMapUpdatedLog_testIfFailsWhenStatusIsInvalid)
 
     // When: Requested to write block write done log
     // Then: Log write should be failed
-    MpageList dummyList;
-    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, dummyList, nullptr) < 0);
+    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, nullptr) < 0);
 }
 
 TEST(JournalWriter, AddBlockMapUpdatedLog_testIfFailsWhenStatusIsNotJournalingOrInvalid)
@@ -126,8 +123,7 @@ TEST(JournalWriter, AddBlockMapUpdatedLog_testIfFailsWhenStatusIsNotJournalingOr
 
     // When: Requested to write block write done log
     // Then: Should return value above zero to let caller retry it
-    MpageList dummyList;
-    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, dummyList, nullptr) > 0);
+    EXPECT_TRUE(writer.AddBlockMapUpdatedLog(nullptr, nullptr) > 0);
 }
 
 TEST(JournalWriter, AddStripeMapUpdatedLog_testIfSuccessWhenStatusIsJournaling)
@@ -148,9 +144,8 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfSuccessWhenStatusIsJournaling)
 
     // When: Journal is requested to write block write done log
     // Then: Log write should be successfully requested
-    MpageList dummyList;
     StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
-    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) == 0);
+    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, nullptr) == 0);
 }
 
 TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsInvalid)
@@ -168,9 +163,8 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsInvalid)
 
     // When: Requested to write block write done log
     // Then: Log write should be failed
-    MpageList dummyList;
     StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
-    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) < 0);
+    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, nullptr) < 0);
 }
 
 TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsNotJournalingOrInvalid)
@@ -188,9 +182,8 @@ TEST(JournalWriter, AddStripeMapUpdatedLog_testIfFailsWhenStatusIsNotJournalingO
 
     // When: Requested to write block write done log
     // Then: Should return value above zero to let caller retry it
-    MpageList dummyList;
     StripeAddr unmap = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
-    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) > 0);
+    EXPECT_TRUE(writer.AddStripeMapUpdatedLog(nullptr, unmap, nullptr) > 0);
 }
 
 TEST(JournalWriter, AddGcStripeFlushedLog_testIfSuccessWhenStatusIsJournaling)
@@ -223,8 +216,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfSuccessWhenStatusIsJournaling)
         .rba = 0,
         .vsa = UNMAP_VSA};
     mapUpdates.blockMapUpdateList.assign(5, dummyUpdate);
-    MapPageList dummyList;
-    EXPECT_TRUE(writer.AddGcStripeFlushedLog(mapUpdates, dummyList, nullptr) == 0);
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(mapUpdates, nullptr) == 0);
 }
 
 TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailsWhenStatusIsInvalid)
@@ -243,8 +235,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailsWhenStatusIsInvalid)
     // When: Requested to write block write done log
     // Then: Log write should be failed
     GcStripeMapUpdateList dummyMapUpdates;
-    MapPageList dummyList;
-    EXPECT_TRUE(writer.AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) < 0);
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(dummyMapUpdates, nullptr) < 0);
 }
 
 TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailsWhenStatusIsNotJournalingOrInvalid)
@@ -263,8 +254,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailsWhenStatusIsNotJournalingOr
     // When: Requested to write block write done log
     // Then: Should return value above zero to let caller retry it
     GcStripeMapUpdateList dummyMapUpdates;
-    MapPageList dummyList;
-    EXPECT_TRUE(writer.AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) > 0);
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(dummyMapUpdates, nullptr) > 0);
 }
 
 TEST(JournalWriter, AddGcStripeFlushedLog_testIfGcLogWriteCompletionCallbackIsExecutedWhenBlockMapIsEmpty)
@@ -291,8 +281,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfGcLogWriteCompletionCallbackIsEx
     // When: Requested to write block write done log
     // Then: Should return value above zero to let caller retry it
     GcStripeMapUpdateList emptyMapUpdates;
-    MapPageList dummyList;
-    EXPECT_TRUE(writer.AddGcStripeFlushedLog(emptyMapUpdates, dummyList, nullptr) == 0);
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(emptyMapUpdates, nullptr) == 0);
 }
 
 TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailedToAddLog)
@@ -317,7 +306,6 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailedToAddLog)
         .rba = 0,
         .vsa = UNMAP_VSA};
     mapUpdates.blockMapUpdateList.assign(5, dummyUpdate);
-    MapPageList dummyList;
 
     std::vector<LogWriteContext*> blockContexts;
     MapUpdateLogWriteContext logWriteContext;
@@ -331,6 +319,6 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailedToAddLog)
     EXPECT_CALL(factory, CreateGcBlockMapLogWriteContexts).WillOnce(Return(blockContexts));
     EXPECT_CALL(writeHandler, AddLog).WillRepeatedly(Return(-1));
 
-    EXPECT_TRUE(writer.AddGcStripeFlushedLog(mapUpdates, dummyList, nullptr) == -1);
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(mapUpdates, nullptr) == -1);
 }
 } // namespace pos

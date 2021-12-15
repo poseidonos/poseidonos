@@ -1,6 +1,7 @@
 #include "test/integration-tests/journal/fixture/log_write_test_fixture.h"
-#include "test/integration-tests/journal/utils/used_offset_calculator.h"
+
 #include "test/integration-tests/journal/fake/test_journal_write_completion.h"
+#include "test/integration-tests/journal/utils/used_offset_calculator.h"
 
 namespace pos
 {
@@ -26,7 +27,7 @@ void
 LogWriteTestFixture::Reset(void)
 {
     testingLogs.Reset();
-    dirtyPages.clear();
+    dirtyMaps.clear();
 }
 
 void
@@ -83,7 +84,6 @@ LogWriteTestFixture::WriteLogsWithSize(uint64_t sizeToFill)
 bool
 LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
 {
-    MpageList dirty = (mapper->GetVSAMapMock())->GetDirtyVsaMapPages(volId, rba, blks.numBlks);
     uint32_t numBlksInSector = blks.numBlks * SECTORS_PER_BLOCK;
     StripeAddr stripeAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
@@ -97,11 +97,11 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
 
     IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddBlockMapUpdatedLog(volumeIo, dirty, event);
+    int result = writer->AddBlockMapUpdatedLog(volumeIo, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(volumeIo);
-        _AddToDirtyPageList(volId, dirty);
+        dirtyMaps.emplace(volId);
     }
     else
     {
@@ -116,19 +116,17 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
 {
     assert(newAddr.stripeLoc == IN_USER_AREA);
 
-    MpageList dirty = (mapper->GetStripeMapMock())->GetDirtyStripeMapPages(vsid);
-
     Stripe* stripe = new Stripe(nullptr, true, 1);
     stripe->SetVsid(vsid);
     stripe->SetUserLsid(newAddr.stripeId);
 
     IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddStripeMapUpdatedLog(stripe, oldAddr, dirty, event);
+    int result = writer->AddStripeMapUpdatedLog(stripe, oldAddr, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(stripe, oldAddr);
-        _AddToDirtyPageList(STRIPE_MAP_ID, dirty);
+        dirtyMaps.emplace(STRIPE_MAP_ID);
     }
     else
     {
@@ -148,18 +146,16 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLs
     mapUpdates.vsid = vsid;
     mapUpdates.wbLsid = wbLsid;
     mapUpdates.userLsid = userLsid;
-    MapPageList dirtyMap;
-
-    _GenerateGcBlockLogs(mapUpdates, dirtyMap);
+    _GenerateGcBlockLogs(mapUpdates);
 
     IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
+    int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(mapUpdates);
-        _AddToDirtyPageList(volumeId, dirtyMap[volumeId]);
-        _AddToDirtyPageList(STRIPE_MAP_ID, dirtyMap[STRIPE_MAP_ID]);
+        dirtyMaps.emplace(volumeId);
+        dirtyMaps.emplace(STRIPE_MAP_ID);
     }
     else
     {
@@ -177,18 +173,15 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeTestFixture& stripe)
     mapUpdates.vsid = stripe.GetVsid();
     mapUpdates.wbLsid = stripe.GetWbAddr().stripeId;
     mapUpdates.userLsid = stripe.GetUserAddr().stripeId;
-    MapPageList dirtyMap;
-
-    _GenerateGcBlockLogs(mapUpdates, dirtyMap);
 
     IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
+    int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(mapUpdates);
-        _AddToDirtyPageList(volumeId, dirtyMap[volumeId]);
-        _AddToDirtyPageList(STRIPE_MAP_ID, dirtyMap[STRIPE_MAP_ID]);
+        dirtyMaps.emplace(volumeId);
+        dirtyMaps.emplace(STRIPE_MAP_ID);
     }
     else
     {
@@ -207,9 +200,8 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeTestFixture& stripe)
 }
 
 void
-LogWriteTestFixture::_GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates, MapPageList& dirtyMap)
+LogWriteTestFixture::_GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates)
 {
-    MpageList volumeDirtyList;
     for (BlkOffset offset = 0; offset < testInfo->numBlksPerStripe; offset++)
     {
         GcBlockMapUpdate update = {
@@ -218,26 +210,6 @@ LogWriteTestFixture::_GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates, Map
                 .stripeId = mapUpdates.vsid,
                 .offset = offset}};
         mapUpdates.blockMapUpdateList.push_back(update);
-        auto dirty = mapper->GetVSAMapMock()->GetDirtyVsaMapPages(mapUpdates.volumeId, update.rba, 1);
-        volumeDirtyList.insert(dirty.begin(), dirty.end());
-    }
-
-    dirtyMap[mapUpdates.volumeId] = volumeDirtyList;
-    dirtyMap[STRIPE_MAP_ID] = (mapper->GetStripeMapMock())->GetDirtyStripeMapPages(mapUpdates.vsid);
-}
-
-void
-LogWriteTestFixture::_AddToDirtyPageList(int mapId, MpageList dirty)
-{
-    std::lock_guard<std::mutex> lock(dirtyListLock);
-
-    if (dirtyPages.find(mapId) == dirtyPages.end())
-    {
-        dirtyPages.emplace(mapId, dirty);
-    }
-    else
-    {
-        dirtyPages[mapId].insert(dirty.begin(), dirty.end());
     }
 }
 
@@ -359,9 +331,9 @@ LogWriteTestFixture::CompareLogs(void)
     EXPECT_TRUE(readLogs.size() == 0);
 }
 
-MapPageList
+MapList
 LogWriteTestFixture::GetDirtyMap(void)
 {
-    return dirtyPages;
+    return dirtyMaps;
 }
 } // namespace pos
