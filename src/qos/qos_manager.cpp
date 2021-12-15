@@ -298,7 +298,6 @@ QosManager::_QosTimeChecker(void)
     }
 }
 
-
 void
 QosManager::_QosWorker(void)
 {
@@ -529,8 +528,7 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
         {
             return 0;
         }
-        double offset = (double)(now - next_tick
-            + previousDelay[reactor]) / param->qosTimeSlice;
+        double offset = (double)(now - next_tick + previousDelay[reactor]) / param->qosTimeSlice;
         offset = offset + 1.0;
         for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
         {
@@ -725,8 +723,9 @@ QosManager::GetRebuildPolicy(std::string arrayName)
             return qosArrayManager[arrayId]->GetRebuildPolicy();
         }
     }
-    qos_rebuild_policy qosRebuildPolicyDefault;
-    return qosRebuildPolicyDefault;
+    qos_rebuild_policy qosRebuildPolicyInvalid;
+    qosRebuildPolicyInvalid.rebuildImpact = PRIORITY_INVALID;
+    return qosRebuildPolicyInvalid;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -855,7 +854,13 @@ QosManager::GetArrayIdFromMap(std::string arrayName)
 std::string
 QosManager::GetArrayNameFromMap(uint32_t arrayId)
 {
-    return arrayIdMap[arrayId];
+    std::string retName = "";
+    if (arrayIdMap.find(arrayId) != arrayIdMap.end())
+    {
+        retName = arrayIdMap[arrayId];
+    }
+
+    return retName;
 }
 
 /* --------------------------------------------------------------------------*/
