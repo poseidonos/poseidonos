@@ -1,1 +1,0 @@
-const char net_ice_pmd_info[] __attribute__((used)) = "PMD_INFO_STRING= {\"name\" : \"net_ice\", \"params\" : \"safe-mode-support=<0|1>\", \"kmod\" : \"* igb_uio | uio_pci_generic | vfio-pci\", \"pci_ids\" : [[32902, 5521, 65535, 65535],[32902, 5522, 65535, 65535],[32902, 5523, 65535, 65535] ]}";

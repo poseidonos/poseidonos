@@ -1,1 +1,0 @@
-../../lib/librte_eal/include/rte_per_lcore.h

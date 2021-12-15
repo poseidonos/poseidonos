@@ -1,1 +1,0 @@
-../../lib/librte_eventdev/rte_event_ring.h
