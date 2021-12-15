@@ -159,7 +159,7 @@ UDEV_FILE = $(UDEV_DIR)/99-custom-nvme.rules
 
 ################################################
 
-all : $(APP) #collector
+all : $(APP) pos-exporter
 	@:
 
 install: 
@@ -230,12 +230,12 @@ gen_proto:
 	@`[ -d $(PROTO_CPP_GENERATED_DIR) ] || mkdir -p $(PROTO_CPP_GENERATED_DIR)`
 	protoc --cpp_out=$(PROTO_CPP_GENERATED_DIR) --grpc_out=$(PROTO_CPP_GENERATED_DIR) --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --proto_path=$(PROTO_DIR) $(PROTO_DIR)/*.proto
 
-#
-#collector:
-#	@echo Build Telemetry Collector
-#	$(MAKE) -C tool/collector
-#	mv tool/collector/collector $(BINDIR)
-#	@cd $(TOP)
+
+pos-exporter:
+	@echo Build Telemetry Collector
+	$(MAKE) -C tool/pos-exporter
+	mv tool/pos-exporter/pos-exporter $(BINDIR)
+	@cd $(TOP)
 
 sam: makedir
 	@echo SAM Build

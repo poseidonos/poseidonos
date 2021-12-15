@@ -89,4 +89,4 @@ tool/cli/vendor
 tool/cli/docs/manpage
 tool/pkg/
 tool/cli/lib/pnconnector/src/util/resource.go
-collector
+pos-exporter

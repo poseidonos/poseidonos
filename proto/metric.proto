@@ -20,7 +20,7 @@ message MetricPublishRequest
 
 message MetricPublishResponse
 {
-  int64 totalReceivedMetrics = 1;
+  uint64 totalReceivedMetrics = 1;
 }
 
 message Metric
@@ -29,7 +29,7 @@ message Metric
   string name = 3;
   oneof value {
     uint64 counterValue = 4;
-    int64 guageValue = 5;
+    int64 gaugeValue = 5;
   }
   repeated Label labels = 6;
 }

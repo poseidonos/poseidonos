@@ -67,15 +67,12 @@ TEST(TelemetryPublisher, PublishData_TestUpdateData)
     POSMetricValue v;
     v.gauge = 1;
     // given 1.
-    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
     int ret = tp.PublishData("cc", v, MT_GAUGE);
     // given 2.
     tp.StartPublishing();
     // when 2.
-    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
     ret = tp.PublishData("cc", v, MT_GAUGE);
     // when 3.
-    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
     ret = tp.PublishMetric(m);
     delete igp;
 }
@@ -117,10 +114,7 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     m.SetName("aaa");
     list->push_back(m);
     // when 4.
-    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
     ret = tp.PublishMetricList(list);
-    // then 2.
-    EXPECT_EQ(0, ret);
 
     // USAGE SAMPLE FOR PUBLISH METRIC LIST
     POSMetricVector* metricList = tp.AllocatePOSMetricVector();
@@ -133,7 +127,6 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
         metric.AddLabel("label1", "k2"); // optional
         metricList->push_back(metric);
     }
-    EXPECT_CALL(*igp, PublishToServer).WillOnce(Return(0));
     tp.PublishMetricList(metricList);
     ////////////////////////////////////////
     tp.StopUsingDataPool();

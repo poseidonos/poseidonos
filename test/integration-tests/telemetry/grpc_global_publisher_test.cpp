@@ -5,40 +5,22 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
 
-namespace pos
-{
-TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServer)
+using namespace pos;
+
+TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishCounterMetric)
 {
     // Given: a grpc client
-    GrpcGlobalPublisher* grpcClient = new GrpcGlobalPublisher(nullptr);
-    POSMetricVector* v = new POSMetricVector();
-    POSMetric metric("n", MT_COUNT);
-    v->push_back(metric);
+    string publisherName = "test_publisher";
+    TelemetryPublisher publisher(publisherName);
+    TelemetryClientSingleton::Instance()->RegisterPublisher(&publisher);
+    POSMetric metric("test_counter_metric_name", MT_COUNT);
+    metric.SetCountValue(1234);
+    metric.AddLabel("array_unique_id", "11223344");
+    metric.AddLabel("volume_unique_id", "22334455");
 
     // When 1: publish()
-    int ret = grpcClient->PublishToServer(nullptr, v);
+    int ret = publisher.PublishMetric(metric);
 
-    // Then -1: Server is not running
+    // Then -1: Server is not running.
     EXPECT_EQ(-1, ret); // TODO: Activate after MetricManager applied to TelemetryManager Server
-    delete v;
-    delete grpcClient;
 }
-
-TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServerWithStringMetric)
-{
-
-    // Given: a grpc client
-    GrpcGlobalPublisher* grpcClient = new GrpcGlobalPublisher(nullptr);
-    POSMetricVector* v = new POSMetricVector();
-    POSMetric metric("n", MT_COUNT);
-    v->push_back(metric);
-
-    // When 1: publish()
-    int ret = grpcClient->PublishToServer(nullptr, v);
-
-    // Then -1: Server is not running
-    EXPECT_EQ(-1, ret); // TODO: Activate after MetricManager applied to TelemetryManager Server
-    delete grpcClient;
-}
-
-} // namespace pos

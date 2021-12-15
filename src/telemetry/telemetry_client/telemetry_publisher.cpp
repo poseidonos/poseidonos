@@ -108,6 +108,10 @@ TelemetryPublisher::AllocatePOSMetricVector(void)
 int
 TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricTypes type)
 {
+    if (turnOn == false)
+    {
+        return -1;
+    }
     POSMetric metric(id, type);
     if (type == MT_COUNT)
     {
@@ -128,6 +132,10 @@ TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricT
 int
 TelemetryPublisher::PublishMetric(POSMetric metric)
 {
+    if (turnOn == false)
+    {
+        return -1;
+    }
     POSMetricVector* metricList = AllocatePOSMetricVector();
     metricList->push_back(metric);
     int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
