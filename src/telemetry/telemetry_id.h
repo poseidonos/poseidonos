@@ -72,6 +72,13 @@ namespace pos
     static const std::string TEL40100_METAFS_PENDING_MIO_CNT = "pending_mio_cnt";
     static const std::string TEL40101_METAFS_PENDING_MPIO_CNT = "pending_mpio_cnt";
 
-    static const std::string TEL50000_VOLUME_IOPS_READ = "volume_iops_read";
+    static const std::string TEL50000_READ_IOPS = "read_iops";
+    static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";
+    static const std::string TEL50002_READ_LATENCY_MEAN_NS = "read_latency_mean_ns";
+    static const std::string TEL50003_READ_LATENCY_MAX_NS = "read_latency_max_ns";
+    static const std::string TEL50010_WRITE_IOPS = "write_iops";
+    static const std::string TEL50011_WRITE_RATE_BYTES_PER_SECOND = "write_rate_bytes_per_second";
+    static const std::string TEL50012_WRITE_LATENCY_MEAN_NS = "write_latency_mean_ns";
+    static const std::string TEL50013_WRITE_LATENCY_MAX_NS = "write_latency_max_ns";
 
 } // namespace pos

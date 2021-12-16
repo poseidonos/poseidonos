@@ -4,14 +4,14 @@
   - [_**PendingMioCount**_](#pendingmiocount)
   - [_**PendingMpioCount**_](#pendingmpiocount)
 - [**Volume**](#volume)
-  - [_**ReadIops**_](#readiops)
-  - [_**ReadBandwidth**_](#readbandwidth)
-  - [_**ReadLatencyMean**_](#readlatencymean)
-  - [_**ReadLatencyMax**_](#readlatencymax)
-  - [_**WriteIops**_](#writeiops)
-  - [_**WriteBandwidth**_](#writebandwidth)
-  - [_**WriteLatencyMean**_](#writelatencymean)
-  - [_**WriteLatencyMax**_](#writelatencymax)
+  - [_**read_iops**_](#read_iops)
+  - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
+  - [_**read_latency_mean_ns**_](#read_latency_mean_ns)
+  - [_**read_latency_max_ns**_](#read_latency_max_ns)
+  - [_**write_iops**_](#write_iops)
+  - [_**write_rate_bytes_per_second**_](#write_rate_bytes_per_second)
+  - [_**write_latency_mean_ns**_](#write_latency_mean_ns)
+  - [_**write_latency_max_ns**_](#write_latency_max_ns)
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
   - [_**RebuildCount**_](#rebuildcount)
@@ -97,7 +97,7 @@ The Count of requests for follow-up because the event worker has finished proces
 Volume group contains the metrics of volume.
 
 ---
-### _**ReadIops**_
+### _**read_iops**_
 
 **ID**: 50000
 
@@ -105,15 +105,15 @@ Volume group contains the metrics of volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The IOPS of read in the volume.
+The IOPS of read in a volume & an array.
 
 ---
 
-### _**ReadBandwidth**_
+### _**read_rate_bytes_per_second**_
 
 **ID**: 50001
 
@@ -121,15 +121,15 @@ The IOPS of read in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The bandwidth of read I/O in the volume.
+The rate(bytes/second) of read in a volume & an array.
 
 ---
 
-### _**ReadLatencyMean**_
+### _**read_latency_mean_ns**_
 
 **ID**: 50002
 
@@ -137,15 +137,15 @@ The bandwidth of read I/O in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of read latency in the volume.
+The mean value of read latency in a volume & an array.
 
 ---
 
-### _**ReadLatencyMax**_
+### _**read_latency_max_ns**_
 
 **ID**: 50003
 
@@ -153,15 +153,15 @@ The mean value of read latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The max value of read latency in the volume.
+The max value of read latency in a volume & an array.
 
 ---
 
-### _**WriteIops**_
+### _**write_iops**_
 
 **ID**: 50010
 
@@ -169,15 +169,15 @@ The max value of read latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The IOPS of write in the volume.
+The IOPS of write in a volume & an array.
 
 ---
 
-### _**WriteBandwidth**_
+### _**write_rate_bytes_per_second**_
 
 **ID**: 50011
 
@@ -185,15 +185,15 @@ The IOPS of write in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The bandwidth of write I/O in the volume.
+The rate(bytes/second) of write in a volume & an array.
 
 ---
 
-### _**WriteLatencyMean**_
+### _**write_latency_mean_ns**_
 
 **ID**: 50012
 
@@ -201,15 +201,15 @@ The bandwidth of write I/O in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of write latency in the volume.
+The mean value of write latency in a volume & an array.
 
 ---
 
-### _**WriteLatencyMax**_
+### _**write_latency_max_ns**_
 
 **ID**: 50013
 
@@ -217,11 +217,11 @@ The mean value of write latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The max value of write latency in the volume.
+The max value of write latency in a volume & an array.
 
 ---
 
