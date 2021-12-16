@@ -9,13 +9,12 @@ import pytz
 import datetime
 
 def subprocess_validation(p):
-
     if p.returncode == 0:
-      print('Completed')
+        print('Completed')
     else:
-      print('Error')
-      print(p.stderr)
-      exit()
+        print('Error')
+        print(p.stderr)
+        exit()
 
 filebeat_default_config_yaml = '''
 filebeat.inputs:
