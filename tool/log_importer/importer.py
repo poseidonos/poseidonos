@@ -8,7 +8,7 @@ import time
 import pytz
 import datetime
 
-def subprocess_validation(p):
+def validate_process(p):
     if p.returncode == 0:
         print('Completed')
     else:
@@ -89,18 +89,18 @@ print('\n========== Procedure ===========')
 
 print('  Preparing filebeat...', end='\t', flush=True)
 if os.path.isfile(os.path.join(root_dir, 'filebeat')) is not True:
-    prepare_filebeat = subprocess.run(['tar', '-xzvf', os.path.join(root_dir, 'filebeat-executable.tar.gz'), '-C', root_dir], capture_output=True)
-    subprocess_validation(prepare_filebeat)
+    prepare_filebeat_process = subprocess.run(['tar', '-xzvf', os.path.join(root_dir, 'filebeat-executable.tar.gz'), '-C', root_dir], capture_output=True)
+    validate_process(prepare_filebeat_process)
 else:
     print('Completed')
 
 print('  Cleaning registry...', end='\t', flush=True)
-delete_registry = subprocess.run(' '.join(['rm', '-rf', os.path.join(root_dir, 'data', '*')]), capture_output=True, shell=True)
-subprocess_validation(delete_registry)
+delete_registry_process = subprocess.run(' '.join(['rm', '-rf', os.path.join(root_dir, 'data', '*')]), capture_output=True, shell=True)
+validate_process(delete_registry_process)
 
 print('  Starting import...', end='\t', flush=True)
-run_filebeat = subprocess.run([os.path.join(root_dir, 'filebeat'), '--once', '-v', '--path.config', root_dir], capture_output=True)
-subprocess_validation(run_filebeat)
+run_filebeat_process = subprocess.run([os.path.join(root_dir, 'filebeat'), '--once', '-v', '--path.config', root_dir], capture_output=True)
+validate_process(run_filebeat_process)
 
 print('  Completed!!!')
 print('\nExecution time for importing logs: %.2f sec' % (time.time() - start_time))
