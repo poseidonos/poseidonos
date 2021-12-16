@@ -9,12 +9,13 @@ import pytz
 import datetime
 
 def subprocess_validation(p):
-  if p.returncode == 0:
-    print('Completed')
-  else:
-    print('Error')
-    print(p.stderr)
-    exit()
+
+    if p.returncode == 0:
+      print('Completed')
+    else:
+      print('Error')
+      print(p.stderr)
+      exit()
 
 filebeat_default_config_yaml = '''
 filebeat.inputs:
@@ -37,11 +38,10 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Get argument
 parser = argparse.ArgumentParser(description='POS Log Importer', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
 parser.add_argument('--dir', '-d', required=True, help='Specify a directory where input log file(s) exist')
 parser.add_argument('--uuid', required=False, default=uuid.uuid1(), help='Specify an uuid of the set of logs')
-parser.add_argument('--tag', required=False, default=default_tag, help='Specify tag(s) separated with comma.' )
-parser.add_argument('--destination', required=False, default='12.36.192.145:5046', help='Specify a log monitoring system destination') 
+parser.add_argument('--tag', required=False, default=default_tag, help='Specify tag(s) separated with comma.')
+parser.add_argument('--destination', required=False, default='12.36.192.145:5046', help='Specify a log monitoring system destination')
 parser.add_argument('--timezone', required=False, default='UTC', help='Specify a timezone of input log')
 
 args = parser.parse_args()
@@ -55,8 +55,8 @@ for t in default_tag.split(','):
     config_yaml['filebeat.inputs'][0]['tags'].append(t.strip())
 
 if args.tag != default_tag:
-  for t in args.tag.split(','):
-    config_yaml['filebeat.inputs'][0]['tags'].append(t.strip())
+    for t in args.tag.split(','):
+        config_yaml['filebeat.inputs'][0]['tags'].append(t.strip())
 
 date = datetime.datetime.now().strftime('%Y.%m.%d')
 tm = time.localtime()
@@ -66,9 +66,9 @@ config_yaml['filebeat.inputs'][0]['fields']['import_time'] = 't'.join([date, str
 config_yaml['filebeat.inputs'][0]['fields']['import_uuid'] = str(args.uuid)
 
 if args.timezone in pytz.all_timezones:
-  config_yaml['filebeat.inputs'][0]['fields']['timezone'] = args.timezone 
+    config_yaml['filebeat.inputs'][0]['fields']['timezone'] = args.timezone
 else:
-  raise ValueError('Invalid timezone -> ' + args.timezone)
+    raise ValueError('Invalid timezone -> ' + args.timezone)
 
 config_yaml['output.logstash']['hosts'].append(args.destination)
 
@@ -80,8 +80,8 @@ print()
 # Save configuration file
 config_yaml_file = os.path.join(root_dir, 'filebeat.yml')
 with open(config_yaml_file, 'w') as f:
-  os.chmod(config_yaml_file, 0o644)
-  yaml.dump(config_yaml, f, default_flow_style=False, sort_keys=False)
+    os.chmod(config_yaml_file, 0o644)
+    yaml.dump(config_yaml, f, default_flow_style=False, sort_keys=False)
 
 # Start importing procedure
 start_time = time.time()
@@ -89,11 +89,11 @@ start_time = time.time()
 print('\n========== Procedure ===========')
 
 print('  Preparing filebeat...', end='\t', flush=True)
-if os.path.isfile(os.path.join(root_dir, 'filebeat')) != True:
-  prepare_filebeat = subprocess.run(['tar', '-xzvf', os.path.join(root_dir, 'filebeat-executable.tar.gz'), '-C', root_dir], capture_output=True)
-  subprocess_validation(prepare_filebeat)
+if os.path.isfile(os.path.join(root_dir, 'filebeat')) is not True:
+    prepare_filebeat = subprocess.run(['tar', '-xzvf', os.path.join(root_dir, 'filebeat-executable.tar.gz'), '-C', root_dir], capture_output=True)
+    subprocess_validation(prepare_filebeat)
 else:
-  print('Completed')
+    print('Completed')
 
 print('  Cleaning registry...', end='\t', flush=True)
 delete_registry = subprocess.run(' '.join(['rm', '-rf', os.path.join(root_dir, 'data', '*')]), capture_output=True, shell=True)
