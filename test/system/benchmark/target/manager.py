@@ -2,6 +2,7 @@ import json
 import lib
 import pos
 import time
+import os
 
 
 class Target:
@@ -67,6 +68,7 @@ class Target:
                                                         self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
                     return False
 
+        pos.cli.telemetry_stop(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
             buf_dev = array["BUFFER_DEVICE"]
@@ -111,12 +113,17 @@ class Target:
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
+        pos.cli.logger_setlevel(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "info")
+
         # print subsystems
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
         print(subsys)
 
         lib.printer.green(f" '{self.name}' prepared")
         return True
+
+    def CliInLocal(self):
+        pos.set_cli_in_local()
 
     def Wrapup(self):
         for array in self.json["POS"]["ARRAYs"]:
@@ -200,11 +207,12 @@ class Target:
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
+        pos.cli.logger_setlevel(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "info")
+
         # print subsystems
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
         print(subsys)
 
-        pos.cli.logger_setlevel(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "warning")
         lib.printer.green(f" '{self.name}' prepared")
         return True
 

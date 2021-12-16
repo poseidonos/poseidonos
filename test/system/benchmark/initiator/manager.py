@@ -14,7 +14,10 @@ class Initiator:
         self.spdk_tp = json["SPDK"]["TRANSPORT"]
         self.output_dir = json["SPDK"]["DIR"] + "/tmp"
         self.device_list = []
-        self.vdbench_dir = json["VDBENCH"]["DIR"]
+        try:
+            self.vdbench_dir = json["VDBENCH"]["DIR"]
+        except:
+            self.vdbench_dir = ""
 
     def Prepare(self, connect_nvme=False, subsystem_list=[]):
         if -1 == pos.env.remove_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
