@@ -40,8 +40,8 @@ parser = argparse.ArgumentParser(description='POS Log Importer', formatter_class
 parser.add_argument('--dir', '-d', required=True, help='Specify a directory where input log file(s) exist')
 parser.add_argument('--uuid', required=False, default=uuid.uuid1(), help='Specify an uuid of the set of logs')
 parser.add_argument('--tag', required=False, default=default_tag, help='Specify tag(s) separated with comma.')
-parser.add_argument('--destination', required=False, default='12.36.192.145:5046', help='Specify a log monitoring system destination')
-parser.add_argument('--timezone', required=False, default='UTC', help='Specify a timezone of input log')
+parser.add_argument('--dst', required=False, default='12.36.192.145:5046', help='Specify a log monitoring system destination')
+parser.add_argument('--tz', required=False, default='UTC', help='Specify a timezone of input log')
 
 args = parser.parse_args()
 
