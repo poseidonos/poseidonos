@@ -37,6 +37,8 @@
 #include <sstream>
 #include <string>
 
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 #include "src/telemetry/telemetry_id.h"
 #include "src/telemetry/telemetry_client/pos_metric.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -53,7 +55,7 @@ AddLabelArrayVolumeInterval(POSMetric& posMetric,
     uint64_t index {0};
     stream_index >> index;
     uint32_t array_id = (index & 0xFF00) >> 8;
-    posMetric.AddLabel("array_unique_id", std::to_string(array_id));
+    posMetric.AddLabel("array_id", std::to_string(array_id));
 
     uint32_t volume_id = (index & 0x00FF);
     posMetric.AddLabel("volume_id", std::to_string(volume_id));
@@ -227,7 +229,8 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
         }
         catch (std::exception& e)
         {
-            std::cout << e.what() << std::endl;
+            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::TELEMETRY_AIR_DATA_PARSING_FAILED),
+                "TelemetryAirDelegator failed to parsing data : {}", e.what());
             this->returnState = State::ERR_DATA;
 
             posMetricVector->clear();

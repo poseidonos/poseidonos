@@ -105,7 +105,7 @@ Volume group contains the metrics of volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -121,7 +121,7 @@ The IOPS of read in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -137,7 +137,7 @@ The rate(bytes/second) of read in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -153,7 +153,7 @@ The mean value of read latency in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -169,7 +169,7 @@ The max value of read latency in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -185,7 +185,7 @@ The IOPS of write in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -201,7 +201,7 @@ The rate(bytes/second) of write in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
@@ -217,7 +217,7 @@ The mean value of write latency in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_unique_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
