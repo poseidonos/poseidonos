@@ -61,6 +61,7 @@ class MbrManager;
 class UBlockDevice;
 class IAbrControl;
 class IStateControl;
+class TelemetryPublishser;
 
 class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 {

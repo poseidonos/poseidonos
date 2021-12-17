@@ -81,4 +81,6 @@ namespace pos
     static const std::string TEL50012_WRITE_LATENCY_MEAN_NS = "write_latency_mean_ns";
     static const std::string TEL50013_WRITE_LATENCY_MAX_NS = "write_latency_max_ns";
 
+    static const std::string TEL60001_ARRAY_STATUS = "array_status";
+
 } // namespace pos

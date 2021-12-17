@@ -1,4 +1,3 @@
-- [- _**VSAMapFlushedDirtyPageCount**_](#--vsamapflusheddirtypagecount)
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
   - [_**PendingMioCount**_](#pendingmiocount)
@@ -14,27 +13,20 @@
   - [_**write_latency_max_ns**_](#write_latency_max_ns)
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
-  - [_**RebuildCount**_](#rebuildcount)
-  - [_**GarbageCollectorStatus**_](#garbagecollectorstatus)
 - [**Meta**](#meta)
-  - [**Allocator**](#Allocator)
-    - [_**FreeSegmentCount**_](#freesegcnt)
-    - [_**ContextManagerPendingIoCount**_](#ctxmngpendingiocnt)
-    - [_**GCVictimSegId**_](#victimsegid)
-    - [_**GCMode**_](#gcmode)
-    - [_**AllocateRebuildSegId**_](#allocrebuildsegid)
-    - [_**ReleaseRebuildSegId**_](#relrebuildsegid)
-    - [_**VictimSegInvPgCnt**_](#victiminvpgcnt)
-    - [_**ProhibitUserblkAllocationOnOff**_](#prohibitalloconoff)
-  - [**Mapper**](#Mapper)
-    - [_**LoadedVolCnt**_](#loadedvolcnt)
-    - [_**UnmountedVolId**_](#unmountedvolid)
-    - [_**DeletedVolId**_](#deletedvolid)
-    - [_**MountedVolCnt**_](#mountedvolcnt)
-    - [_**VSAMapLoadPendingIoCnt**_](#vsamaploadpendingiocnt)
-    - [_**VSAMapFlushPendingIoCnt**_](#vsamapflushpendingiocnt)
-    - [_**StripeMapFlushPendingIoCnt**_](#stripemapflushpendingiocnt)
-    - [_**VSAMapFlushedDirtypgCnt**_](#vsamapflusheddirtypgcnt)
+  - [_**FreeSegmentCount**_](#freesegmentcount)
+  - [_**ContextManagerPendingIoCount**_](#contextmanagerpendingiocount)
+  - [_**GCVictimSegId**_](#gcvictimsegid)
+  - [_**GCMode**_](#gcmode)
+  - [_**VictimSegInvPgCnt**_](#victimseginvpgcnt)
+  - [_**ProhibitUserBlkAllocationOnOff**_](#prohibituserblkallocationonoff)
+  - [_**LoadedVolumeCount**_](#loadedvolumecount)
+  - [_**UnmountedVolumeCount**_](#unmountedvolumecount)
+  - [_**MountedVolumeCount**_](#mountedvolumecount)
+  - [_**VSAMapLoadPendingIoCount**_](#vsamaploadpendingiocount)
+  - [_**VSAMapFlushPendingIoCount**_](#vsamapflushpendingiocount)
+  - [_**StripeMapFlushPendingIoCount**_](#stripemapflushpendingiocount)
+  - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
 
 ---
 
@@ -245,41 +237,12 @@ Array group contains the metrics of array
 
 The current status of the array
 
-0: Offline, 1: Normal, 2: Degraded, 3: Rebuilding
+0: NOT_EXIST, 1:EXIST_NORMAL, 2:EXIST_DEGRADED, 3:BROKEN, 4: TRY_MOUNT, 5:TRY_UNMOUNT, 6: NORMAL, 7:DEGRADED, 8:REBUILD
+
 
 ---
+## **Meta**
 
-### _**RebuildCount**_
-
-**ID**: 60002
-
-**Type**: Counter
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_unique_id", "array_name", "array_id"}
-
-**Introduced**: v0.10.0
-
-Total number of rebuilds triggered.
-
----
-
-### _**GarbageCollectorStatus**_
-
-**ID**: 60003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_unique_id", "array_name", "array_id"}
-
-**Introduced**: v0.10.0
-
-The current status of garbage collector in the array.
-
-0: None, 1: Normal, 2: Urgent
 
 ---
 ### _**FreeSegmentCount**_
@@ -339,7 +302,9 @@ Current victim segment
 
 **Introduced**: v0.10.0
 
-Current victim segment
+The current status of garbage collector in the array.
+
+0: None, 1: Normal, 2: Urgent
 
 ---
 ### _**VictimSegInvPgCnt**_

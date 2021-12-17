@@ -149,6 +149,7 @@ Array::_LoadImpl(void)
     }
 
     RaidState rs = ptnMgr->GetRaidState();
+    state->EnableStatePublisher(uniqueId);
     state->SetLoad(rs);
     return ret;
 }
@@ -191,6 +192,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         goto error;
     }
     uniqueId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
+    state->EnableStatePublisher(uniqueId);
 
     meta.arrayName = name_;
     meta.devs = devMgr_->ExportToMeta();

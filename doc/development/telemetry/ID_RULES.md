@@ -72,8 +72,4 @@ Array ID Range : 60000 ~ 70000
 
 60001 ArrayStatus
 
-60002 RebuildCounts
-
-60003 GarbageCollectorStatus
-
 ---
