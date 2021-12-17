@@ -50,7 +50,6 @@ public:
     virtual SegmentId AllocateGCVictimSegment(void) = 0;
     virtual SegmentId AllocateRebuildTargetSegment(void) = 0;
     virtual int ReleaseRebuildSegment(SegmentId segmentId) = 0;
-    virtual int MakeRebuildTarget(void) = 0;
     virtual int StopRebuilding(void) = 0;
     virtual bool NeedRebuildAgain(void) = 0;
     virtual uint32_t GetRebuildTargetSegmentCount(void) = 0;

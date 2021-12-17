@@ -58,8 +58,6 @@ public:
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
 
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
     virtual bool NeedRebuildAgain(void);
     virtual int PrepareRebuild(void);
     virtual void StopRebuilding(void);

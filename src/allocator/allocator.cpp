@@ -174,19 +174,37 @@ Allocator::GetIContextReplayer(void)
     return (IContextReplayer*)contextManager->GetContextReplayer();
 }
 
-bool
-Allocator::FinalizeActiveStripes(int volumeId)
+int
+Allocator::PrepareRebuild(void)
 {
-    std::vector<Stripe*> stripesToFlush;
-    std::vector<StripeId> vsidToCheckFlushDone;
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
+    blockManager->TurnOffBlkAllocation();
 
+    std::set<SegmentId> rebuildSegments;
+    int ret = contextManager->MakeRebuildTargetSegmentList(rebuildSegments);
+    if (ret < 0 || rebuildSegments.size() == 0)
     {
-        std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
-        wbStripeManager->PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
+        // Error occured or there's no segments to rebuild
+        blockManager->TurnOnBlkAllocation();
+        return ret;
     }
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "MakeRebuildTarget Done @PrepareRebuild()");
 
-    wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
-    return true;
+    ret = contextManager->SetNextSsdLsid();
+    if (ret < 0)
+    {
+        blockManager->TurnOnBlkAllocation();
+        return ret;
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
+
+    ret = wbStripeManager->FlushOnlineStripesInSegment(rebuildSegments);
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
+
+    blockManager->TurnOnBlkAllocation();
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild() with return {}", ret);
+
+    return ret;
 }
 
 void
@@ -378,7 +396,9 @@ Allocator::GetInstantMetaInfo(std::string fname)
     oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentCount() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
-    for (RTSegmentIter iter = rebuildCtx->GetRebuildTargetSegmentsBegin(); iter != rebuildCtx->GetRebuildTargetSegmentsEnd(); ++iter, ++cnt)
+    std::set<SegmentId> segmentList;
+    rebuildCtx->GetRebuildSegmentList(segmentList);
+    for (RTSegmentIter iter = segmentList.begin(); iter != segmentList.end(); ++iter, ++cnt)
     {
         if (cnt > 0 && (cnt % 16 == 0))
         {

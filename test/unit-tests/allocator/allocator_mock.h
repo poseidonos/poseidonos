@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/allocator/allocator.h"
 
 namespace pos
@@ -16,7 +14,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, Flush, (), (override));
-    MOCK_METHOD(bool, FinalizeActiveStripes, (int volumeId), (override));
+    MOCK_METHOD(int, PrepareRebuild, (), (override));
     MOCK_METHOD(void, SetNormalGcThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(void, SetUrgentThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(int, GetMeta, (WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file), (override));

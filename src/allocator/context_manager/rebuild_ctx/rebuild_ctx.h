@@ -54,6 +54,8 @@ public:
     RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorAddressInfo* info); // for UT
     RebuildCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info);
     virtual ~RebuildCtx(void);
+
+    virtual void SetAllocatorFileIo(AllocatorFileIo* fileIo_);
     virtual void Init(void);
     virtual void Dispose(void);
 
@@ -69,28 +71,27 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
+    virtual int InitializeTargetSegmentList(std::set<SegmentId>& segmentList);
+    virtual bool NeedRebuildAgain(void);
+    virtual void GetRebuildSegmentList(std::set<SegmentId>& segmentList);
+    virtual int StopRebuilding(void);
+
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
-    virtual bool NeedRebuildAgain(void);
     virtual int FreeSegmentInRebuildTarget(SegmentId segId);
-    virtual bool IsRebuidTargetSegmentsEmpty(void);
     virtual bool IsRebuildTargetSegment(SegmentId segId);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
-    virtual RTSegmentIter GetRebuildTargetSegmentsBegin(void);
-    virtual RTSegmentIter GetRebuildTargetSegmentsEnd(void);
-    virtual void ClearRebuildTargetList(void);
-    virtual void AddRebuildTargetSegment(SegmentId segmentId);
-    virtual int StopRebuilding(void);
     virtual void EraseRebuildTargetSegment(SegmentId segmentId);
 
     // For Testing
     virtual std::mutex& GetLock(void) { return rebuildLock; }
-    virtual std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
-    virtual void SetTargetSegmentCnt(uint32_t val) { targetSegmentCount = val; }
 
     static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
 private:
+    int _FlushContext(void);
+    void _ClearRebuildTargetList(void);
+
     AllocatorAddressInfo* addrInfo;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -102,6 +103,7 @@ private:
     std::mutex rebuildLock;
 
     TelemetryPublisher* tp;
+    AllocatorFileIo* fileIo;
     bool initialized;
 };
 

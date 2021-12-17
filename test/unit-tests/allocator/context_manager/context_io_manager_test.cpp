@@ -354,42 +354,6 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailSecondFile)
     EXPECT_LE(-1, ret);
 }
 
-TEST(ContextIoManager, FlushRebuildContext_testSyncFlush)
-{
-    NiceMock<MockAllocatorAddressInfo> info;
-    NiceMock<MockTelemetryPublisher> tp;
-
-    NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
-    NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
-    NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-
-    ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
-
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
-
-    EXPECT_CALL(*rebuildCtxIo, Flush).WillOnce(Return(0));
-    EXPECT_CALL(*segmentCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
-    EXPECT_CALL(*allocatorCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
-    EXPECT_CALL(*rebuildCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
-
-    int ret = ioManager.FlushRebuildContext(nullptr, true);
-    EXPECT_EQ(ret, 0);
-}
-
-TEST(ContextIoManager, FlushRebuildContext_testAsyncFlush)
-{
-    NiceMock<MockAllocatorAddressInfo> info;
-    NiceMock<MockTelemetryPublisher> tp;
-
-    NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ContextIoManager ioManager(&info, &tp, nullptr, nullptr, nullptr, rebuildCtxIo);
-
-    EXPECT_CALL(*rebuildCtxIo, GetNumFilesFlushing).WillOnce(Return(1));
-    EXPECT_CALL(*rebuildCtxIo, Flush).WillOnce(Return(0));
-    int ret = ioManager.FlushRebuildContext(nullptr, false);
-    EXPECT_EQ(ret, 0);
-}
-
 TEST(ContextIoManager, GetStoredContextVersion_TestGetter)
 {
     NiceMock<MockAllocatorAddressInfo> info;

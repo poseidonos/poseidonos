@@ -462,7 +462,7 @@ SegmentCtx::AllocateFreeSegment(void)
 }
 
 SegmentId
-SegmentCtx::GetUsedSegment(SegmentId startSegId)
+SegmentCtx::_GetUsedSegment(SegmentId startSegId)
 {
     SegmentId segId = allocSegBitmap->FindFirstSetBit(startSegId);
     if (allocSegBitmap->IsValidBit(segId) == false)
@@ -565,27 +565,33 @@ int
 SegmentCtx::MakeRebuildTarget(void)
 {
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
-    rebuildCtx->ClearRebuildTargetList();
 
+    std::set<SegmentId> usedSegmentList;
+    _GetUsedSegmentList(usedSegmentList);
+
+    return rebuildCtx->InitializeTargetSegmentList(usedSegmentList);
+}
+
+void
+SegmentCtx::_GetUsedSegmentList(std::set<SegmentId>& segmentList)
+{
     int cnt = 0;
     SegmentId segmentId = 0;
     while (true)
     {
         // Pick non-free segments and make rebuildTargetSegments
-        segmentId = GetUsedSegment(segmentId);
+        segmentId = _GetUsedSegment(segmentId);
         if (segmentId == UNMAP_SEGMENT)
         {
             break;
         }
         else
         {
-            rebuildCtx->AddRebuildTargetSegment(segmentId);
+            segmentList.emplace(segmentId);
             ++cnt;
         }
         ++segmentId;
     }
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget Done, target cnt:{}", cnt);
-    return 1;
 }
 
 void
