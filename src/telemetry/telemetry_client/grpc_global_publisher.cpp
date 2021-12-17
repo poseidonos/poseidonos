@@ -56,7 +56,6 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
 {
     int ret = 0;
     assert(metricList != nullptr);
-    MetricPublishRequest* request = new MetricPublishRequest;
     uint32_t cnt = 0;
     for (auto& mit : (*metricList))
     {
@@ -66,6 +65,7 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
             POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add MetricList, numMetric overflowed!!!, name:{}, numMetric:{}", mit.GetName(), metricList->size());
             break;
         }
+        MetricPublishRequest* request = new MetricPublishRequest;
         // set values
         Metric* metric = request->add_metrics();
         POSMetricTypes type = mit.GetType();
