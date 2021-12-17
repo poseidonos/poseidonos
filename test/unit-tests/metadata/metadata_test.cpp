@@ -245,9 +245,27 @@ TEST(Metadata, NeedRebuildAgain_testIfAllocatorIsCalled)
     NiceMock<MockIContextManager> contextManager;
 
     EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
-    EXPECT_CALL(contextManager, NeedRebuildAgain);
+    EXPECT_CALL(contextManager, NeedRebuildAgain).WillOnce(Return(true));
 
-    meta.NeedRebuildAgain();
+    bool ret = meta.NeedRebuildAgain();
+    EXPECT_EQ(ret, true);
+}
+
+TEST(Metadata, NeedRebuildAgain_testWithInvalidContextManager)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
+
+    EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(nullptr));
+
+    bool ret = meta.NeedRebuildAgain();
+    EXPECT_EQ(ret, false);
 }
 
 TEST(Metadata, PrepareRebuild_testIfAllocatorIsCalled)
@@ -262,10 +280,7 @@ TEST(Metadata, PrepareRebuild_testIfAllocatorIsCalled)
 
     Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
 
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-
-    EXPECT_CALL(*allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeAllocator));
-    EXPECT_CALL(wbStripeAllocator, PrepareRebuild).WillOnce(Return(0));
+    EXPECT_CALL(*allocator, PrepareRebuild).WillOnce(Return(0));
 
     int ret = meta.PrepareRebuild();
     EXPECT_EQ(ret, 0);
@@ -287,6 +302,23 @@ TEST(Metadata, StopRebuilding_testIfAllocatorIsCalled)
 
     EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
     EXPECT_CALL(contextManager, StopRebuilding);
+
+    meta.StopRebuilding();
+}
+
+TEST(Metadata, StopRebuilding_testWithInvalidContextManager)
+{
+    // Given
+    NiceMock<MockIArrayInfo> arrayInfo;
+    NiceMock<MockIStateControl> stateControl;
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
+    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
+    NiceMock<MockMetaService> metaService;
+
+    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaService);
+
+    EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(nullptr));
 
     meta.StopRebuilding();
 }

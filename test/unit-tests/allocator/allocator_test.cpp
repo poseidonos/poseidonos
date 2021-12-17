@@ -113,27 +113,6 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     alloc.Flush();
 }
 
-TEST(Allocator, FinalizeActiveStripes_TestSimpleCall)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    std::mutex ctxLock;
-    EXPECT_CALL(*wbManager, PickActiveStripe);
-    EXPECT_CALL(*wbManager, FinalizeWriteIO);
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
-
-    // when
-    int volumeId = 0;
-    alloc.FinalizeActiveStripes(volumeId);
-}
-
 TEST(Allocator, SetNormalGcThreshold_TestSimpleSetter)
 {
     // given
@@ -493,5 +472,75 @@ TEST(Allocator, GetIAllocatorWbt_TestSimpleGetter)
     IAllocatorWbt* ret = alloc.GetIAllocatorWbt();
 }
 
+TEST(Allocator, PreppareRebuild_testSuccessfulPath)
+{
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList)
+        .WillOnce([&](std::set<SegmentId>& segmentList)
+        {
+            segmentList.emplace(0);
+            segmentList.emplace(1);
+            segmentList.emplace(2);
+            return 0;
+        });
+    EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(0));
+    EXPECT_CALL(*wbManager, FlushOnlineStripesInSegment).WillOnce(Return(0));
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
+
+    int ret = alloc.PrepareRebuild();
+    EXPECT_EQ(ret, 0);
+}
+
+TEST(Allocator, PreppareRebuild_testWhenRebuildSegmentListIsEmpty)
+{
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList);
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
+
+    int ret = alloc.PrepareRebuild();
+    EXPECT_EQ(ret, 0);
+}
+
+TEST(Allocator, PreppareRebuild_testWhenSetNextSsdLsidFails)
+{
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList)
+        .WillOnce([&](std::set<SegmentId>& segmentList)
+        {
+            segmentList.emplace(0);
+            segmentList.emplace(1);
+            segmentList.emplace(2);
+            return 0;
+        });
+    EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(-1));
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
+
+    int ret = alloc.PrepareRebuild();
+    EXPECT_EQ(ret, -1);
+}
 
 } // namespace pos

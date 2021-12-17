@@ -86,6 +86,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     AllocatorFileIo* segmentFileIo = new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo, arrayId);
     AllocatorFileIo* allocatorFileIo = new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo, arrayId);
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
+
+    rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
 }
 
 ContextManager::~ContextManager(void)
@@ -261,24 +263,18 @@ ContextManager::NeedRebuildAgain(void)
 int
 ContextManager::ReleaseRebuildSegment(SegmentId segId)
 {
-    int ret = rebuildCtx->ReleaseRebuildSegment(segId);
-    if (ret == 1) // need to flush
-    {
-        ioManager->FlushRebuildContext(nullptr, false);
-        ret = 0;
-    }
-    return ret;
+    return rebuildCtx->ReleaseRebuildSegment(segId);
 }
 
 int
-ContextManager::MakeRebuildTarget(void)
+ContextManager::MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList)
 {
     int ret = segmentCtx->MakeRebuildTarget();
-    if (ret == 1) // need to flush
+    if (ret == 0)
     {
-        ioManager->FlushRebuildContext(nullptr, false);
-        ret = rebuildCtx->GetRebuildTargetSegmentCount();
+        rebuildCtx->GetRebuildSegmentList(segmentList);
     }
+
     return ret;
 }
 
@@ -287,13 +283,7 @@ ContextManager::StopRebuilding(void)
 {
     std::unique_lock<std::mutex> lock(ctxLock);
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
-    int ret = rebuildCtx->StopRebuilding();
-    if (ret == 1) // need to flush
-    {
-        ioManager->FlushRebuildContext(nullptr, false);
-        ret = 0;
-    }
-    return ret;
+    return rebuildCtx->StopRebuilding();
 }
 
 char*
@@ -321,11 +311,8 @@ ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
     int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
-    int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
-    if (ret == 1)
-    {
-        ioManager->FlushRebuildContext(nullptr, false);
-    }
+    rebuildCtx->FreeSegmentInRebuildTarget(segId);
+
     if (GetCurrentGcMode() != MODE_URGENT_GC)
     {
         blockAllocStatus->PermitUserBlockAllocation();

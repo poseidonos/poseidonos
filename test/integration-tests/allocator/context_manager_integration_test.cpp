@@ -90,8 +90,9 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
 
     // Prepare Test
     contextManager.Init();
-    rebuildCtx->EmplaceRebuildTargetSegment(0);
-    rebuildCtx->SetTargetSegmentCnt(TEST_SEG_CNT);
+
+    std::set<SegmentId> segmentList = {0};
+    rebuildCtx->InitializeTargetSegmentList(segmentList);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
@@ -199,7 +200,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
         });
 
     // When 2. Flushing rebuild contexts started
-    ioManager.FlushRebuildContext(nullptr, false);
+    // ioManager.FlushRebuildContext(nullptr, false);
 
     // Wait for all flush completed
     {

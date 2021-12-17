@@ -33,6 +33,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -76,9 +77,9 @@ public:
         return 0;
     }
     int
-    _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
+    _GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes)
     {
-        WBStripeManager::_FlushOnlineStripes(vsidToCheckFlushDone);
+        WBStripeManager::_GetOnlineStripes(segments, stripes);
         return 0;
     }
     void
@@ -88,7 +89,7 @@ public:
         {
             return;
         }
-        WBStripeManager::PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
+        WBStripeManager::_PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
     VirtualBlks
     _AllocateRemainingBlocks(VirtualBlkAddr tail)

@@ -789,39 +789,6 @@ TEST(SegmentCtx, GetTotalSegmentsCount_TestSimpleGetter)
     delete segmentBitmap;
 }
 
-TEST(SegmentCtx, GetUsedSegment_TestGetAllocatedSegment)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
-    NiceMock<MockSegmentLock>* segStateLock = new NiceMock<MockSegmentLock>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(100);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segStates, segStateLock, segmentBitmap, nullptr, addrInfo);
-
-    // given 1.
-    EXPECT_CALL(*segmentBitmap, FindFirstSetBit).WillOnce(Return(5));
-    EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(true));
-    // when 1.
-    int ret = segCtx.GetUsedSegment(0);
-    // then 1.
-    EXPECT_EQ(5, ret);
-
-    // given 2.
-    EXPECT_CALL(*segmentBitmap, FindFirstSetBit).WillOnce(Return(5));
-    EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(false));
-    // when 2.
-    ret = segCtx.GetUsedSegment(0);
-    // then 2.
-    EXPECT_EQ(UNMAP_SEGMENT, ret);
-
-    delete addrInfo;
-    delete segInfos;
-    delete segStates;
-    delete segStateLock;
-    delete segmentBitmap;
-}
-
 TEST(SegmentCtx, DISABLED_FindMostInvalidSSDSegment_testIfMostInvalidSegmentIsReturned)
 {
 }
@@ -887,13 +854,12 @@ TEST(SegmentCtx, MakeRebuildTarget_TestMakeRebuildTarget)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentCtx segmentCtx(tp, nullptr, nullptr, nullptr, nullptr, segmentBitmap, rebuildCtx, nullptr);
 
-    EXPECT_CALL(*rebuildCtx, ClearRebuildTargetList);
     EXPECT_CALL(*segmentBitmap, FindFirstSetBit).WillOnce(Return(0)).WillOnce(Return(1));
     EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(true)).WillOnce(Return(false));
-    EXPECT_CALL(*rebuildCtx, AddRebuildTargetSegment(0));
+    EXPECT_CALL(*rebuildCtx, InitializeTargetSegmentList);
 
     int ret = segmentCtx.MakeRebuildTarget();
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, 0);
 
     delete rebuildCtx;
     delete segmentBitmap;

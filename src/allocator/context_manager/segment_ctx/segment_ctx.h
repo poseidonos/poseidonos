@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 
 #include "src/allocator/address/allocator_address_info.h"
@@ -92,7 +93,6 @@ public:
     virtual void ReleaseSegment(SegmentId segId);
     virtual SegmentId AllocateFreeSegment(void);
 
-    virtual SegmentId GetUsedSegment(SegmentId startSegId);
     virtual uint64_t GetNumOfFreeSegment(void);
     virtual uint64_t GetNumOfFreeSegmentWoLock(void);
     virtual void SetAllocatedSegmentCount(int count);
@@ -112,6 +112,8 @@ public:
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
     void _FreeSegment(SegmentId segId);
+    void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
+    SegmentId _GetUsedSegment(SegmentId startSegId);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
