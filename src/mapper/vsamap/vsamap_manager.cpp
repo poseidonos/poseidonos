@@ -214,8 +214,8 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
     int cnt = dirtyPages.size();
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, array:{}, numdirtyPages:{}", volId, addrInfo->GetArrayName(), cnt);
     POSMetricValue v;
-    v.count = cnt;
-    tp->PublishData(TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT, v, MT_COUNT);
+    v.gauge = cnt;
+    tp->PublishData(TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT, v, MT_GAUGE);
     assert(vsaMaps[volId] != nullptr);
     assert(vsaMaps[volId]->GetCallback() == nullptr);
     vsaMaps[volId]->SetCallback(cb);
@@ -387,7 +387,7 @@ VSAMapManager::MapFlushDone(int mapId)
     numWriteIssuedCount--;
     POSMetricValue v;
     v.gauge = numWriteIssuedCount;
-    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_COUNT);
+    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
     mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
 }
 

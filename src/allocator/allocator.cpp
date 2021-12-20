@@ -444,8 +444,9 @@ void
 Allocator::_CreateSubmodules(void)
 {
     addrInfo = new AllocatorAddressInfo();
-    tp = new TelemetryPublisher("Allocator");
-    tp->AddDefaultLabel("array_name", iArrayInfo->GetName());
+    std::string arrName = iArrayInfo->GetName();
+    tp = new TelemetryPublisher(("Allocator"));
+    tp->AddDefaultLabel("array_name", arrName);
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());

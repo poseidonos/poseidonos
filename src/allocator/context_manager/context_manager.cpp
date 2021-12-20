@@ -168,7 +168,7 @@ ContextManager::AllocateFreeSegment(void)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
         POSMetricValue v;
-        v.gauge = segId;
+        v.gauge = freeSegCount;
         telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
     }
     return segId;

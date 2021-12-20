@@ -11,12 +11,7 @@ using ::testing::StrictMock;
 namespace pos
 {
 MockMapper::MockMapper(TestInfo* _testInfo, IArrayInfo* info, IStateControl* iState)
-: MockMapper(new NiceMock<MockTelemetryPublisher>(), _testInfo, info, iState)
-{
-}
-
-MockMapper::MockMapper(TelemetryPublisher* tp, TestInfo* _testInfo, IArrayInfo* info, IStateControl* iState)
-: Mapper(tp, info, nullptr)
+: Mapper(info, nullptr)
 {
     testInfo = _testInfo;
     flushHandler.resize(testInfo->numMap);

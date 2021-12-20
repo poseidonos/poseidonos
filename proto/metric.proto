@@ -3,8 +3,9 @@ syntax="proto3";
 option go_package = "pos.metric";
 
 enum MetricTypes {
-  COUNTER = 0;
-  GUAGE = 1;
+  START = 0;
+  COUNTER = 1;
+  GAUGE = 2;
 }
 
 service MetricManager {
