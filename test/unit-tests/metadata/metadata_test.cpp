@@ -29,7 +29,7 @@ TEST(Metadata, Metadata_testContructor)
 
     {
         // Given 2
-        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
         NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaService> metaService;
@@ -40,7 +40,7 @@ TEST(Metadata, Metadata_testContructor)
 
     {
         // Given 3
-        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
         NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaService> metaService;
@@ -52,7 +52,7 @@ TEST(Metadata, Metadata_testContructor)
 
     {
         // Given 4
-        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+        NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
         NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaService> metaService;
@@ -67,7 +67,7 @@ TEST(Metadata, Init_testIfEverySequenceIsInitialized)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -95,7 +95,7 @@ TEST(Metadata, Init_testIfMapperIsRolledBack)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -120,7 +120,7 @@ TEST(Metadata, Init_testIfMapperAndAllocatorAreRolledBack)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -147,7 +147,7 @@ TEST(Metadata, Init_testIfMapperAndAllocatorAndJournalAreRolledBack)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -176,7 +176,7 @@ TEST(Metadata, Dispose_testIfAllSequenceInvokeDispose)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -199,7 +199,7 @@ TEST(Metadata, Shutdown_testIfAllComponentsAreDisposed)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -221,7 +221,7 @@ TEST(Metadata, Flush_testFlush)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -236,7 +236,7 @@ TEST(Metadata, NeedRebuildAgain_testIfAllocatorIsCalled)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -255,7 +255,7 @@ TEST(Metadata, PrepareRebuild_testIfAllocatorIsCalled)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -276,7 +276,7 @@ TEST(Metadata, StopRebuilding_testIfAllocatorIsCalled)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;

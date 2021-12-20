@@ -50,6 +50,7 @@ func runSubscriber() {
 
 func parseRequest(in *pb.MetricPublishRequest) error {
 	for _, metric := range in.GetMetrics() {
+		fmt.Println(metric)
 		name := metric.GetName()
 		labelMap := makeLabelMap(metric.GetLabels())
 		switch metric.GetType() {
@@ -57,7 +58,7 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 			value := metric.GetCounterValue()
 			parsed := CounterMetric{name, labelMap, value}
 			addCounter(&parsed)
-		case pb.MetricTypes_GUAGE:
+		case pb.MetricTypes_GAUGE:
 			value := metric.GetGaugeValue()
 			parsed := GaugeMetric{name, labelMap, value}
 			addGauge(&parsed)

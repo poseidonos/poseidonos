@@ -19,7 +19,6 @@ class MockMapper : public Mapper
 {
 public:
     explicit MockMapper(TestInfo* _testInfo, IArrayInfo* info, IStateControl* iState);
-    explicit MockMapper(TelemetryPublisher* tp, TestInfo* _testInfo, IArrayInfo* info, IStateControl* iState);
     virtual ~MockMapper(void);
 
     MpageList GetVsaMapDirtyPages(int volId, BlkAddr rba, uint32_t numBlks);

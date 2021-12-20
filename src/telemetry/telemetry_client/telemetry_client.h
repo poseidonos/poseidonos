@@ -66,6 +66,7 @@ public:
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;
     GrpcGlobalPublisher* globalPublisher;
+    std::atomic<uint64_t> publisherId;
 };
 
 using TelemetryClientSingleton = Singleton<TelemetryClient>;

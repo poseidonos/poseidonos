@@ -41,6 +41,7 @@ namespace pos
 TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
 {
     globalPublisher = new GrpcGlobalPublisher(channel_);
+    publisherId = 0;
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -56,20 +57,14 @@ TelemetryClient::~TelemetryClient(void)
 int
 TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
 {
+    assert(publisher != nullptr);
     std::string name = publisher->GetName();
-    auto ret = publisherList.find(name);
-    if (ret != publisherList.end())
-    {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! tried to add a publisher already registered:{}", name);
-        return -1;
-    }
-    else
-    {
-        publisherList.emplace(name, publisher);
-        publisher->SetGlobalPublisher(globalPublisher);
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}", name, publisherList.size());
-        return 0;
-    }
+    name = to_string(publisherId.fetch_add(1)) + name;
+    publisher->SetName(name);
+    publisherList.emplace(name, publisher);
+    publisher->SetGlobalPublisher(globalPublisher);
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}", name, publisherList.size());
+    return 0;
 }
 
 int

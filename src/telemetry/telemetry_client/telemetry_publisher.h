@@ -54,6 +54,7 @@ public:
 
     virtual void SetMaxEntryLimit(int limit);
     virtual int GetNumEntries(void);
+    void SetName(std::string name_);
     virtual std::string GetName(void);
 
     virtual int PublishData(std::string id_, POSMetricValue value_, POSMetricTypes type_);

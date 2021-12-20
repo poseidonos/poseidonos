@@ -57,6 +57,7 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
     int ret = 0;
     assert(metricList != nullptr);
     uint32_t cnt = 0;
+    MetricPublishRequest* request = new MetricPublishRequest;
     for (auto& mit : (*metricList))
     {
         cnt++;
@@ -65,20 +66,25 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
             POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add MetricList, numMetric overflowed!!!, name:{}, numMetric:{}", mit.GetName(), metricList->size());
             break;
         }
-        MetricPublishRequest* request = new MetricPublishRequest;
         // set values
         Metric* metric = request->add_metrics();
-        POSMetricTypes type = mit.GetType();
-        metric->set_type((MetricTypes)type);
         metric->set_name(mit.GetName());
+        POSMetricTypes type = mit.GetType();
         if (type == MT_COUNT)
         {
+            metric->set_type(MetricTypes::COUNTER);
             metric->set_countervalue(mit.GetCountValue());
         }
         else if (type == MT_GAUGE)
         {
-            metric->set_guagevalue(mit.GetGaugeValue());
+            metric->set_type(MetricTypes::GAUGE);
+            metric->set_gaugevalue(mit.GetGaugeValue());
         }
+        else
+        {
+            assert(false);
+        }
+
         if (defaultLabelList != nullptr)
         {
             for (auto& dlit : (*defaultLabelList))
@@ -96,9 +102,9 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
             lab->set_key(lit.first);
             lab->set_value(lit.second);
         }
-        ret = _SendMessage(request, (cnt - 1));
-        delete request;
     }
+    ret = _SendMessage(request, cnt);
+    delete request;
     return ret;
 }
 
