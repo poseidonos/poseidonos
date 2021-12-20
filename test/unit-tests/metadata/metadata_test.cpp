@@ -291,7 +291,7 @@ TEST(Metadata, StopRebuilding_testIfAllocatorIsCalled)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;
@@ -311,7 +311,7 @@ TEST(Metadata, StopRebuilding_testWithInvalidContextManager)
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(nullptr, &arrayInfo, nullptr);
+    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
     NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
     NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
     NiceMock<MockMetaService> metaService;

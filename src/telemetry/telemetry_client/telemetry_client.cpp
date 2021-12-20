@@ -42,6 +42,7 @@ TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
 {
     globalPublisher = new GrpcGlobalPublisher(channel_);
     publisherId = 0;
+    defaultEnable = false;
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -63,7 +64,11 @@ TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
     publisher->SetName(name);
     publisherList.emplace(name, publisher);
     publisher->SetGlobalPublisher(globalPublisher);
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}", name, publisherList.size());
+    if (defaultEnable == true)
+    {
+        publisher->StartPublishing();
+    }
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}, turnOn:{}", name, publisherList.size(), defaultEnable);
     return 0;
 }
 
@@ -108,6 +113,7 @@ bool
 TelemetryClient::StartAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start all publishers");
+    defaultEnable = true;
     for (auto &p : publisherList)
     {
         p.second->StartPublishing();
@@ -120,6 +126,7 @@ bool
 TelemetryClient::StopAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop all publishers");
+    defaultEnable = false;
     for (auto &p : publisherList)
     {
         p.second->StopPublishing();
