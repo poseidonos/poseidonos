@@ -174,7 +174,7 @@ TelemetryClient::StopUsingDataPoolForAllPublisher(void)
 }
 
 bool
-TelemetryClient::Notify(std::string key, std::string value)
+TelemetryClient::Notify(const std::string& key, const std::string& value)
 {
     if (0 == key.compare("enabled"))
     {

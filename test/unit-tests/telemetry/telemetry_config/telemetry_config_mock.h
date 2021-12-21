@@ -31,43 +31,22 @@
  */
 
 #pragma once
-#include "src/telemetry/telemetry_client/grpc_global_publisher.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/telemetry/telemetry_config/telemetry_config.h"
-#include <list>
-#include <map>
-#include <memory>
+
+#include <gmock/gmock.h>
 #include <string>
-#include <vector>
+
+#include "src/telemetry/telemetry_config/telemetry_config.h"
 
 namespace pos
 {
-class GrpcGlobalPublisher;
-
-class TelemetryClient : public ConfigObserver
+class MockTelemetryConfig : public TelemetryConfig
 {
 public:
-    explicit TelemetryClient(std::shared_ptr<grpc::Channel> channel_);
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(TelemetryPublisher* tp);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
-    virtual bool StartUsingDataPool(std::string name);
-    virtual bool StopUsingDataPool(std::string name);
-    virtual bool StartUsingDataPoolForAllPublisher(void);
-    virtual bool StopUsingDataPoolForAllPublisher(void);
-    virtual bool Notify(const std::string& key, const std::string& value) override;
-
-private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
-    GrpcGlobalPublisher* globalPublisher;
+    using TelemetryConfig::TelemetryConfig;
+    MOCK_METHOD(bool, Register, (const TelemetryConfigType type, const std::string& key, std::shared_ptr<ConfigObserver> observer), (override));
+    MOCK_METHOD(void, RequestToNotify, (const TelemetryConfigType type, const std::string& key, const std::string& value), (override));
+    MOCK_METHOD(ClientConfig&, GetClient, (), (override));
+    MOCK_METHOD(const std::string, ConfigurationFileName, (), (const, override));
+    MOCK_METHOD(const std::string, GetCompositeKey, (const TelemetryConfigType type, const std::string& key), (override));
 };
-
-using TelemetryClientSingleton = Singleton<TelemetryClient>;
-
 } // namespace pos
