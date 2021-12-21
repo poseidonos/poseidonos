@@ -34,6 +34,7 @@
 
 #include <gmock/gmock.h>
 #include <string>
+#include <memory>
 
 #include "src/telemetry/telemetry_config/telemetry_config.h"
 

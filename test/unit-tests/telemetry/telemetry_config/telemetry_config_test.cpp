@@ -65,7 +65,7 @@ public:
     virtual void
     SetUp(void) override
     {
-        config = make_shared<TelemetryConfig>(path, fileName);
+        config = make_shared<TelemetryConfig>(PATH, FILE_NAME);
     }
 
     virtual void
@@ -75,8 +75,8 @@ public:
 
 protected:
     shared_ptr<TelemetryConfig> config;
-    const string path = "./unit-tests/telemetry/telemetry_config/";
-    const string fileName = "test.yaml";
+    const string PATH = "./unit-tests/telemetry/telemetry_config/";
+    const string FILE_NAME = "test.yaml";
 };
 
 TEST(TelemetryConfig, testIfThereIsNoConfigurationFile)
@@ -113,7 +113,7 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotificati
     ClientConfig client;
     const string key = "enabled";
 
-    EXPECT_EQ(TelemetryConfigSingleton::Instance(path, fileName)->Register(TelemetryConfigType::Client, key, observer), true);
+    EXPECT_EQ(TelemetryConfigSingleton::Instance(PATH, FILE_NAME)->Register(TelemetryConfigType::Client, key, observer), true);
 
     // config won't call the observer due to last flag
     client.UpdateConfig(TelemetryConfigType::Client, key, true, false);
