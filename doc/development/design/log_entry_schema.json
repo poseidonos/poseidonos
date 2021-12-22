@@ -1,0 +1,227 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/poseidonos_log_entry.schema.json",
+    "type": "object",
+    "title": "PoseidonOS Log Entry Schema",
+    "description": "The root schema for PoseidonOS event log entry.",
+    "default": {},
+    "examples": [
+        {
+            "instanceId": 1638929401,
+            "eventId": 10005328,
+            "datetime": "2021-12-09 03:00:93.999873",
+            "level": "info",
+            "eventName": "ARRAY_CREATE_FAILURE",
+            "moduleName": "ArrayManager",
+            "errorCode": 301,
+            "message": "Failed to create an array",
+            "cause": "Array name has a special character",
+            "trace": "",
+            "variables": [
+                {
+                    "arrayName": "array1"
+                },
+                {
+                    "volumeName": "volum@1"
+                }
+            ],
+            "source": "array_name_policy.cpp:80",
+            "posVersion": "pos-v0.10.0"
+        }
+    ],
+    "required": [
+        "instanceId",
+        "eventId",
+        "datetime",
+        "level",
+        "eventName",
+        "moduleName",
+        "errorCode",
+        "message",
+        "cause",
+        "variables",
+        "source",
+        "posVersion"
+    ],
+    "properties": {
+        "instanceId": {
+            "$id": "#/properties/instanceId",
+            "type": "integer",
+            "title": "Instance ID of PoseidonOS.",
+            "description": "The unique identifier for a PoseidonOS process. This is generated when PosedionOS launches.",
+            "default": 0,
+            "examples": [
+                1638929401
+            ]
+        },
+        "eventId": {
+            "$id": "#/properties/eventId",
+            "type": "integer",
+            "title": "Event ID of Event",
+            "description": "The unique identifier for this event.",
+            "default": 0,
+            "examples": [
+                10005328
+            ]
+        },
+        "datetime": {
+            "$id": "#/properties/datetime",
+            "type": "string",
+            "title": "Datetime",
+            "description": "The datetime when this event occurs (YYYY-MM-DDTHH:mm:ss.SSSSSS)",
+            "default": "",
+            "examples": [
+                "2021-12-09 03:00:93.999876"
+            ]
+        },
+        "level": {
+            "$id": "#/properties/level",
+            "type": "string",
+            "title": "Level",
+            "description": "The severity level of this event.",
+            "default": "info",
+            "examples": [
+                "critical",
+                "error",
+                "warning",
+                "info",
+                "debug"
+            ]
+        },
+        "eventName": {
+            "$id": "#/properties/eventName",
+            "type": "string",
+            "title": "Name of event",
+            "description": "The name of this event",
+            "default": "",
+            "examples": [
+                "VOLUME_MOUNT_FAILURE",
+                "ARRAY_CREATE_FAILURE",
+                "ARRAY_DELETE_SUCCESS",
+                "SYSTEM_STOP_FAILURE",
+                "JOURNAL_CALLBACK_FAILURE"
+            ]
+        },
+        "moduleName": {
+            "$id": "#/properties/moduleName",
+            "type": "string",
+            "title": "Module name that this event occurrs",
+            "description": "The module name where this event occurrs.",
+            "default": "",
+            "examples": [
+                "Allocator",
+                "Meta",
+                "CLI",
+                "IOPathBackend",
+                "GC"
+            ]
+        },
+        "errorCode": {
+            "$id": "#/properties/errorCode",
+            "type": "integer",
+            "title": "Error code related to this event",
+            "description": "The error code related to this event. This field has a value only when this event is errorneous.",
+            "default": 0,
+            "examples": [
+                301
+            ]
+        },
+        "message": {
+            "$id": "#/properties/message",
+            "type": "string",
+            "title": "Event log mesage",
+            "description": "The message of the event. This describes what the event is (not why).",
+            "default": "",
+            "examples": [
+                "An unexpected pending error has occurred.",
+                "Failed to mount array.",
+                "Array has been created.",
+                "Volume has been mounted.",
+                "PoseidonOS has restarted."
+            ]
+        },
+        "cause": {
+            "$id": "#/properties/cause",
+            "type": "string",
+            "title": "Event log cause",
+            "description": "The cause of the event. This describes why this event occurred (not what).",
+            "default": "",
+            "examples": [
+                "Array name contains a special character.",
+                "Array is not being mounted.",
+                "An array is being mounted.",
+                "CLI is processing another command."
+            ]
+        },
+        "trace": {
+            "$id": "#/properties/trace",
+            "type": "string",
+            "title": "Stack trace",
+            "description": "The function call stack trace before the event has occurred.",
+            "default": "",
+            "examples": [
+            ]
+        },
+        "variables": {
+            "$id": "#/properties/variables",
+            "type": "array",
+            "title": "Variables related to this event",
+            "description": "The variables related to this event.",
+            "default": [],
+            "examples": [
+                [
+                    {
+                        "volume_id": 5
+                    },
+                    {
+                        "array_name": "array1"
+                    },
+                    {
+                        "gcThreshold": 0
+                    }
+
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/variables/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/variables/items/anyOf/0",
+                        "type": "object",
+                        "title": "Variable item",
+                        "description": "An item in the variabls array.",
+                        "default": {},
+                        "examples": [
+                            {
+                                "volume_id": 5
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "source": {
+            "$id": "#/properties/source",
+            "type": "string",
+            "title": "Source location of this event",
+            "description": "The source code location of this event.",
+            "default": "",
+            "examples": [
+                "array.cpp:86",
+                "flow_control.cpp:25"
+            ]
+        },
+        "posVersion": {
+            "$id": "#/properties/posVersion",
+            "type": "string",
+            "title": "Version of PoseidonOS",
+            "description": "The version of PoseidonOS.",
+            "default": "",
+            "examples": [
+                "pos-0.9.0",
+                "pos-v0.10.0"
+            ]
+        }
+    }
+}
