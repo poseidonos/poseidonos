@@ -44,7 +44,7 @@
 #include "src/include/i_array_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/master_context/instance_id_provider.h"
+#include "src/master_context/unique_id_generator.h"
 #include "src/io_scheduler/io_dispatcher.h"
 
 namespace pos
@@ -166,6 +166,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
     int ret = 0;
     ArrayMeta meta;
     ArrayNamePolicy namePolicy;
+    UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
     ret = state->IsCreatable();
@@ -191,7 +192,8 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         ret = (int)POS_EVENT_ID::ARRAY_WRONG_FT_METHOD;
         goto error;
     }
-    uniqueId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
+
+    uniqueId = uIdGen.GenerateUniqueId();
     state->EnableStatePublisher(uniqueId);
 
     meta.arrayName = name_;

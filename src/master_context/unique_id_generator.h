@@ -30,50 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/master_context/instance_id_provider.h"
+#pragma once
 
 #include <string>
 #include <sys/types.h>
 
 namespace pos
 {
-InstanceIdProvider::InstanceIdProvider(void)
+// UniqueIdGenerator generates a random ID for a module in POS.
+// Using UniqueIDGenerator, each module will have own unique ID,
+// mainly to be identified by telemetry publisher.
+class UniqueIdGenerator
 {
-    time_t timeStamp = time(NULL);
+public:
+    UniqueIdGenerator(void);
+    ~UniqueIdGenerator(void);
+    id_t GenerateUniqueId(void);
 
-    // Bitwisely reverse timeStamp to make
-    // multiple instanceIds distinguishable.
-    timeStamp = _ReverseBits(timeStamp);
-    instanceId = (id_t) timeStamp;
-}
-
-// ReverseBits reverses the bitstring of timeStamp.
-// Example: 1100 -> 0011
-time_t
-InstanceIdProvider::_ReverseBits(time_t timeStamp)
-{
-    time_t rev = 0;
-
-    while (timeStamp > 0)
-    {
-        rev <<= 1;
-
-        if (timeStamp & 1)
-            rev ^= 1;
-
-        timeStamp >>= 1;
-    }
-    return rev;
-}
-
-InstanceIdProvider::~InstanceIdProvider(void)
-{
-}
-
-id_t
-InstanceIdProvider::GetInstanceId(void)
-{
-    return instanceId;
-}
+private:
+    time_t _ReverseBits(time_t timeStamp);
+};
 
 } // namespace pos

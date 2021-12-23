@@ -32,12 +32,13 @@
 
 #pragma once
 
-#include <string>
-
 #include "src/lib/singleton.h"
 
 namespace pos
 {
+// InstanceIdProvider generates and stores the unique ID
+// for a PoseidonOS process. This class is declared as a
+// Singleton because any POS class can use instanceID.
 class InstanceIdProvider
 {
 public:
@@ -48,6 +49,8 @@ public:
 
 private:
     id_t instanceId;
+
+    time_t _ReverseBits(time_t timeStamp);
 };
 
 using InstanceIdProviderSingleton = Singleton<InstanceIdProvider>;

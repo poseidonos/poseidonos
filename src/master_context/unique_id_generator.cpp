@@ -30,27 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/master_context/instance_id_provider.h"
-
-#include <string>
-#include <sys/types.h>
+#include "src/master_context/unique_id_generator.h"
 
 namespace pos
 {
-InstanceIdProvider::InstanceIdProvider(void)
+UniqueIdGenerator::UniqueIdGenerator(void)
+{
+}
+
+UniqueIdGenerator::~UniqueIdGenerator(void)
+{
+}
+
+id_t
+UniqueIdGenerator::GenerateUniqueId(void)
 {
     time_t timeStamp = time(NULL);
 
     // Bitwisely reverse timeStamp to make
-    // multiple instanceIds distinguishable.
+    // multiple uniqueIDs distinguishable.
     timeStamp = _ReverseBits(timeStamp);
-    instanceId = (id_t) timeStamp;
+    return (id_t) timeStamp;
 }
 
 // ReverseBits reverses the bitstring of timeStamp.
 // Example: 1100 -> 0011
 time_t
-InstanceIdProvider::_ReverseBits(time_t timeStamp)
+UniqueIdGenerator::_ReverseBits(time_t timeStamp)
 {
     time_t rev = 0;
 
@@ -64,16 +70,6 @@ InstanceIdProvider::_ReverseBits(time_t timeStamp)
         timeStamp >>= 1;
     }
     return rev;
-}
-
-InstanceIdProvider::~InstanceIdProvider(void)
-{
-}
-
-id_t
-InstanceIdProvider::GetInstanceId(void)
-{
-    return instanceId;
 }
 
 } // namespace pos
