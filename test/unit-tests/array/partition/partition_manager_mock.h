@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(void, DeletePartitions, (), (override));
     MOCK_METHOD(void, FormatPartition, (PartitionType type, uint32_t arrayId, IODispatcher* io), (override));
     MOCK_METHOD(RaidState, GetRaidState, (), (override));
+    MOCK_METHOD(RaidTypeEnum, GetRaidType, (PartitionType), (override));
 };
 
 } // namespace pos

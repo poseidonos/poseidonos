@@ -78,8 +78,6 @@ public:
 private:
     int _CheckDevs(const ArrayDeviceSet& devSet);
     int _CheckConstraints(ArrayDeviceList* devs);
-    int _CheckDevsCount(ArrayDeviceSet devSet);
-    int _CheckFaultTolerance(ArrayDeviceSet devSet);
     int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
     int _CheckNvmCapacity(const ArrayDeviceSet& devSet);
     uint64_t _ComputeMinNvmCapacity(const uint32_t logicalChunkCount);

@@ -78,7 +78,7 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual int Load(void);
-    virtual int Create(DeviceSet<string> nameSet, string dataRaidType);
+    virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
@@ -108,9 +108,10 @@ public:
 
 private:
     int _LoadImpl(void);
-    int _CreatePartitions(void);
+    int _CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid);
     void _DeletePartitions(void);
     int _Flush(void);
+    int _Flush(ArrayMeta& meta);
     int _CheckRebuildNecessity(ArrayDevice* target);
     void _RebuildDone(RebuildResult result);
     void _DetachSpare(ArrayDevice* target);

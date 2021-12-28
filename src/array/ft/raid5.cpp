@@ -42,8 +42,8 @@
 
 namespace pos
 {
-
 Raid5::Raid5(const PartitionPhysicalSize* pSize)
+: Method(RaidTypeEnum::RAID5)
 {
     ftSize_ = {
         .minWriteBlkCnt = 0,
@@ -62,7 +62,7 @@ Raid5::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
         .offset = src.offset};
 
     uint32_t chunkIndex = src.offset / ftSize_.blksPerChunk;
-    uint32_t parityIndex = _GetParityOffset(src.stripeId);
+    uint32_t parityIndex = GetParityOffset(src.stripeId).front();
     if (chunkIndex >= parityIndex)
     {
         dst.offset += ftSize_.blksPerChunk;
@@ -118,7 +118,7 @@ Raid5::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
     ftEntry.buffers = *(src.buffers);
     BufferEntry parity = _AllocBuffer();
     _ComputeParity(parity, *(src.buffers));
-    uint32_t parityOffset = _GetParityOffset(ftEntry.addr.stripeId);
+    uint32_t parityOffset = GetParityOffset(ftEntry.addr.stripeId).front();
     auto it = ftEntry.buffers.begin();
     advance(it, parityOffset);
     ftEntry.buffers.insert(it, parity);
@@ -197,17 +197,17 @@ Raid5::_XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize)
     }
 }
 
-uint32_t
-Raid5::_GetParityOffset(StripeId lsid)
+vector<uint32_t>
+Raid5::GetParityOffset(StripeId lsid)
 {
-    return lsid % ftSize_.chunksPerStripe;
+    return vector<uint32_t>{ lsid % ftSize_.chunksPerStripe };
 }
 
 void
 Raid5::_BindRecoverFunc(void)
 {
     using namespace std::placeholders;
-    recoverFunc_ = bind(&Raid5::_RebuildData, this, _1, _2, _3);
+    recoverFunc = bind(&Raid5::_RebuildData, this, _1, _2, _3);
 }
 
 void

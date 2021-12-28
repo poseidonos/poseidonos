@@ -40,8 +40,6 @@ namespace pos
 class ArrayConfig
 {
 public:
-    static const uint32_t MINIMUM_DATA_DEVICE_COUNT = 3;
-    static const uint32_t MAXIMUM_DEVICE_COUNT = 32;
     static const uint32_t NVM_DEVICE_COUNT = 1;
     static const uint64_t MINIMUM_SSD_SIZE_BYTE = 20UL * SIZE_GB;
     static const uint64_t MAXIMUM_SSD_SIZE_BYTE = 32UL * SIZE_TB;
@@ -61,10 +59,11 @@ public:
     static const uint64_t META_SSD_SIZE_RATIO = 2; // 2% of USER_DATA
 
     static const uint32_t NVM_SEGMENT_SIZE = 1;
-    static const uint32_t JOURNAL_SSD_SEGMENT_SIZE = 1;
+    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 1;
     static const uint32_t PARITY_COUNT = 1;
 
-    static const uint32_t RAID1_MIN_WRITE_BLOCK_COUNT = 1;
+    static const uint32_t RAID10_MIN_WRITE_BLOCK_COUNT = 1;
+    static const uint32_t RAID0_MIN_WRITE_BLOCK_COUNT = 1;
     static const uint32_t OVER_PROVISIONING_RATIO = 10;
 };
 

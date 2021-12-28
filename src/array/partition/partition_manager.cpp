@@ -35,8 +35,6 @@
 
 #include "src/array/partition/partition_services.h"
 #include "src/array/device/array_device.h"
-#include "src/array/ft/raid1.h"
-#include "src/array/ft/raid5.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/logger/logger.h"
@@ -139,4 +137,13 @@ PartitionManager::GetRaidState(void)
     return res;
 }
 
+RaidTypeEnum
+PartitionManager::GetRaidType(PartitionType type)
+{
+    if (partitions[type] != nullptr)
+    {
+        return partitions[type]->GetRaidType();
+    }
+    return RaidTypeEnum::NONE;
+}
 } // namespace pos

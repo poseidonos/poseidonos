@@ -53,10 +53,10 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
         return new Raid5Rebuild(move(ctx), allocatorSvc);
     }
 
-    case RaidTypeEnum::RAID1 :
+    case RaidTypeEnum::RAID10 :
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid1Rebuild Created");
-        return new Raid1Rebuild(move(ctx));
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid10Rebuild Created");
+        return new Raid10Rebuild(move(ctx));
     }
 
     default:

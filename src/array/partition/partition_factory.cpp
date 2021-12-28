@@ -33,7 +33,6 @@
 #include "partition_factory.h"
 #include "nvm_partition.h"
 #include "stripe_partition.h"
-#include "journal_ssd_partition.h"
 #include "ssd_partition_builder.h"
 #include "nvm_partition_builder.h"
 #include "src/include/array_config.h"
@@ -72,7 +71,7 @@ PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nv
     if (nvm == nullptr)
     {
         POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
-        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, RaidTypeEnum::NONE, devs, nullptr);
+        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, RaidTypeEnum::RAID0, devs, nullptr);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {

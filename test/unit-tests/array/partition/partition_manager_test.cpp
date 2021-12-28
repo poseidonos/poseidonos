@@ -96,7 +96,7 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(svc, AddRebuildTarget).Times(2); // one for nvm and the other for userdata
 
     // When 1: PartitionManager creates all partitions
-    int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID1, RaidTypeEnum::RAID5, &svc);
+    int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
     // Then 1: validate against expected number of segments of each partition type.
     ASSERT_EQ(0, actual);
     int expectedNvmTotalSegments = DIV_ROUND_UP(

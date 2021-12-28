@@ -60,11 +60,17 @@ string CreateArrayCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["name"].get<std::string>();
     }
 
-    string raidType = "RAID5";
+    string dataFt = "RAID5";
     if (doc["param"].contains("raidtype") == true)
     {
-        raidType = doc["param"]["raidtype"].get<std::string>();
+        dataFt = doc["param"]["raidtype"].get<std::string>();
     }
+    string metaFt = "RAID10";
+    // TODO(SRM): Set Meta's RAID to RAID0
+    // if (dataFt == "RAID0")
+    // {
+    //     metaFt = dataFt;
+    // }
 
     if (doc["param"].contains("buffer"))
     {
@@ -94,7 +100,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     }
 
     IArrayMgmt* array = ArrayMgr();
-    ret = array->Create(arrayName, nameSet, raidType);
+    ret = array->Create(arrayName, nameSet, metaFt, dataFt);
     if (0 != ret)
     {
         return jFormat.MakeResponse(

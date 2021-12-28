@@ -30,35 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RAID1_H_
-#define RAID1_H_
+#pragma once
 
-#include <list>
-#include <vector>
+#include <string>
+#include <memory>
 
-#include "method.h"
+#include "rebuild_behavior.h"
+#include "src/array/service/io_locker/i_io_locker.h"
 
 namespace pos
 {
-class PartitionPhysicalSize;
-class RebuildBehavior;
-
-class Raid1 : public Method
+class Raid10Rebuild : public RebuildBehavior
 {
 public:
-    explicit Raid1(const PartitionPhysicalSize* pSize);
-    virtual ~Raid1();
-    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
-    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
-    list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
-    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    explicit Raid10Rebuild(unique_ptr<RebuildContext> c);
+    ~Raid10Rebuild(void);
+
+    virtual bool Read(void) override;
+    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
+    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
+    virtual void UpdateProgress(uint32_t val) override;
 
 private:
-    void _RebuildData(void* dst, void* src, uint32_t size);
-    uint32_t _GetMirrorIndex(uint32_t idx);
-    virtual void _BindRecoverFunc(void) override;
-    uint32_t mirrorDevCnt = 0;
+    virtual string _GetClassName(void);
+    virtual int _GetTotalReadChunksForRecovery(void);
+
+    StripeId baseStripe = 0;
+    IIOLocker* locker = nullptr;
 };
 
 } // namespace pos
-#endif // RAID1_H_

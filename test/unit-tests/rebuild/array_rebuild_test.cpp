@@ -5,7 +5,7 @@
 #include "test/unit-tests/array/rebuild/rebuild_context_mock.h"
 #include "test/unit-tests/array_models/dto/partition_physical_size_mock.h"
 #include "test/unit-tests/rebuild/rebuild_behavior_mock.h"
-#include "test/unit-tests/rebuild/raid1_rebuild_mock.h"
+#include "test/unit-tests/rebuild/raid10_rebuild_mock.h"
 #include "test/unit-tests/rebuild/raid5_rebuild_mock.h"
 #include "test/unit-tests/rebuild/partition_rebuild_mock.h"
 #include "test/unit-tests/rebuild/rebuild_behavior_factory_mock.h"

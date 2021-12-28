@@ -32,30 +32,25 @@
 
 #pragma once
 
-#include <string>
+#include <list>
+#include <vector>
 
-#include "rebuild_behavior.h"
-#include "src/array/service/io_locker/i_io_locker.h"
+#include "method.h"
 
 namespace pos
 {
-class Raid1Rebuild : public RebuildBehavior
+class PartitionPhysicalSize;
+
+class Raid0 : public Method
 {
 public:
-    Raid1Rebuild(unique_ptr<RebuildContext> c);
-    ~Raid1Rebuild(void);
-
-    virtual bool Read(void) override;
-    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
-    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
-    virtual void UpdateProgress(uint32_t val) override;
-
-private:
-    virtual string _GetClassName(void);
-    virtual int _GetTotalReadChunksForRecovery(void);
-
-    StripeId baseStripe = 0;
-    IIOLocker* locker = nullptr;
+    explicit Raid0(const PartitionPhysicalSize* pSize);
+    virtual ~Raid0();
+    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
+    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    uint32_t GetMinimumNumberOfDevices(void) override { return 2; }
+    virtual bool IsRecoverable(void) override { return false; }
 };
 
 } // namespace pos

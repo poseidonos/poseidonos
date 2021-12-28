@@ -4,14 +4,14 @@
 
 #include "src/array/device/array_device.h"
 #include "src/array/ft/raid5.h"
-#include "src/array/ft/raid1.h"
+#include "src/array/ft/raid10.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/bio/ubio.h"
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/helper/calc/calc.h"
 #include "test/unit-tests/array/ft/raid5_mock.h"
-#include "test/unit-tests/array/ft/raid1_mock.h"
+#include "test/unit-tests/array/ft/raid10_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
@@ -41,24 +41,24 @@ TEST(StripePartition, StripePartition_testIfCreateUserDataWithRaid5InitializesPh
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
+    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
+    uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
 
     // When
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, ssdTotalSegments - mbrSegments - metaSegments, totalNvmBlks);
 
     // Then
     uint64_t stripesPerSeg = ArrayConfig::STRIPES_PER_SEGMENT;
     uint32_t blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
-    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
-    uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
 
     const PartitionPhysicalSize* pPhysicalSize = sPartition.GetPhysicalSize();
     ASSERT_EQ(startLba, pPhysicalSize->startLba);
     ASSERT_EQ(blksPerChunk, pPhysicalSize->blksPerChunk);
     ASSERT_EQ(devCnt, pPhysicalSize->chunksPerStripe);
     ASSERT_EQ(stripesPerSeg, pPhysicalSize->stripesPerSegment);
-    ASSERT_EQ(ssdTotalSegments - metaSegments - mbrSegments , pPhysicalSize->totalSegments);
+    ASSERT_EQ(ssdTotalSegments - metaSegments - mbrSegments, pPhysicalSize->totalSegments);
 
     const PartitionLogicalSize* pLogicalSize = sPartition.GetLogicalSize();
     ASSERT_EQ(pPhysicalSize->blksPerChunk, pLogicalSize->blksPerChunk);
@@ -92,17 +92,17 @@ TEST(StripePartition, StripePartition_testIfCreateMetaSsdWithRaid1InitializesPhy
     }
     uint64_t startLba = 0; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    RaidTypeEnum raid = RaidTypeEnum::RAID1;
+    RaidTypeEnum raid = RaidTypeEnum::RAID10;
+    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
 
     // When
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, metaSegments, totalNvmBlks);
 
     // Then
     uint64_t stripesPerSeg = ArrayConfig::STRIPES_PER_SEGMENT;
     uint32_t blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
-    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
     uint32_t actualDevCnt = sPartition.GetDevs().size();
     const PartitionPhysicalSize* pPhysicalSize = sPartition.GetPhysicalSize();
     ASSERT_EQ(startLba, pPhysicalSize->startLba);
@@ -143,9 +143,10 @@ TEST(StripePartition, Translate_testIfFtBlkAddrIsMappedToPhysicalBlkAddr)
     }
     uint64_t startLba = 0; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    RaidTypeEnum raid = RaidTypeEnum::RAID1;
+    uint32_t segCnt = 1; // not interesting
+    RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     auto psize = sPartition.GetPhysicalSize();
     auto lsize = sPartition.GetLogicalSize();
     StripeId MAX_BLK_OFFSET = psize->blksPerChunk * psize->chunksPerStripe - 1;
@@ -190,9 +191,10 @@ TEST(StripePartition, Convert_testIfConvertWithRaid1FillsDestIn)
     }
     uint64_t startLba = 0; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    RaidTypeEnum raid = RaidTypeEnum::RAID1;
+    uint32_t segCnt = 1; // not interesting
+    RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     std::list<BufferEntry> buffers;
     LogicalBlkAddr lBlkAddr{
         .stripeId = 5,
@@ -239,9 +241,10 @@ TEST(StripePartition, GetRecoverMethod_testIfValidUbioCanRetrieveRecoverMethodSu
     }
     uint64_t startLba = 0; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    RaidTypeEnum raid = RaidTypeEnum::RAID1;
+    uint32_t segCnt = 1; // not interesting
+    RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
 
     int DATA_BUFFER_UNIT = 13; // just picked up randomly
     UbioSmartPtr ubio = make_shared<Ubio>(nullptr, DATA_BUFFER_UNIT, "mock-array");
@@ -295,10 +298,11 @@ TEST(StripePartition, GetRebuildCtx_testIfRebuildContextIsFilledInWithFaultyDevi
     ArrayDevice* arrayDevice4 = new ArrayDevice(nullptr, ArrayDeviceState::FAULT); // it seems current GetRebuildCtx() doesn't care about the state.
     devs.push_back(arrayDevice4); // it seems current GetRebuildCtx() doesn't care about the state.
     uint64_t startLba = 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
 
     // When
     auto rebuildCtx = sPartition.GetRebuildCtx(arrayDevice4);
@@ -336,9 +340,10 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     }
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     auto physicalSize = sPartition.GetPhysicalSize();
     MockIODispatcher mockIoDispatcher;
     int cntSubmitIo = 0;
@@ -404,9 +409,10 @@ TEST(StripePartition, ByteTranslate_testFunctionCallForCoverage)
 
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     // When
     PhysicalByteAddr dst;
     LogicalByteAddr src;
@@ -442,9 +448,10 @@ TEST(StripePartition, ByteConvert_testFunctionCallForCoverage)
 
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     // When
     list<PhysicalByteWriteEntry> dst;
     LogicalByteWriteEntry src;
@@ -479,9 +486,10 @@ TEST(StripePartition, IsByteAccessSupported_testReturnValue)
 
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     // When
     bool result = sPartition.IsByteAccessSupported();
     // Then
@@ -515,9 +523,10 @@ TEST(StripePartition, GetRaidState_testIfExtractDeviceStateListFromArrayDeviceLi
 
     uint64_t startLba = 1024; // not interesting
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, totalNvmBlks);
+    sPartition.Create(startLba, segCnt, totalNvmBlks);
     // When
     RaidState state = sPartition.GetRaidState();
     // Then

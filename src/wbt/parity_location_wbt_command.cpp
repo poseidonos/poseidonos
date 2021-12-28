@@ -38,9 +38,9 @@
 
 #include "src/array/array.h"
 #include "src/array/ft/raid5.h"
-#include "src/array/partition/stripe_partition.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/device/device_manager.h"
+#include "src/array/partition/stripe_partition.h"
 
 namespace pos
 {
@@ -107,14 +107,23 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
         .arrayDev = arrayDev};
     StripePartition* ptn = static_cast<StripePartition*>(
         sysArray->ptnMgr->partitions[PartitionType::USER_DATA]);
-    Raid5* method = static_cast<Raid5*>(ptn->GetMethod());
-
+    Method* method = static_cast<Method*>(ptn->GetMethod());
+    if (method == nullptr)
+    {
+        out << "no ft method in the userdata partition" << endl;
+        return ret;
+    }
     FtBlkAddr fba = ptn->_P2FTranslate(pba);
-    uint32_t parityIndex = method->_GetParityOffset(fba.stripeId);
-    ArrayDevice* parityDev = ptn->devs.at(parityIndex);
-
-    out << "device name : " << parityDev->GetUblock()->GetName() << endl;
-    out << "lba : " << lba << endl;
+    vector<uint32_t> parityIndexs = method->GetParityOffset(fba.stripeId);
+    for (uint32_t parityIndex : parityIndexs)
+    {
+        ArrayDevice* parityDev = ptn->devs.at(parityIndex);
+        if (parityDev->GetState() != ArrayDeviceState::FAULT)
+        {
+            out << "device name : " << parityDev->GetUblock()->GetName() << endl;
+            out << "lba : " << lba << endl;
+        }
+    }
     out << std::endl;
     out.close();
     ret = 0;

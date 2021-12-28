@@ -42,8 +42,9 @@
 #include "src/include/array_config.h"
 #include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
-#include "src/array/ft/raid1.h"
+#include "src/array/ft/raid10.h"
 #include "src/array/ft/raid5.h"
+#include "src/array/ft/raid0.h"
 #include "src/helper/calc/calc.h"
 
 namespace pos
@@ -66,15 +67,15 @@ StripePartition::~StripePartition(void)
 }
 
 int
-StripePartition::Create(uint64_t startLba, uint64_t totalNvmBlks)
+StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks)
 {
     POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "StripePartition::Create, RaidType:{}", RaidType(raidType).ToString());
 
-    if (raidType == RaidTypeEnum::RAID1 && 0 != devs.size() % 2)
+    if (raidType == RaidTypeEnum::RAID10 && 0 != devs.size() % 2)
     {
         devs.pop_back();
     }
-    int ret = _SetPhysicalAddress(startLba);
+    int ret = _SetPhysicalAddress(startLba, segCnt);
     if (ret != 0)
     {
         return ret;
@@ -93,42 +94,29 @@ void
 StripePartition::RegisterService(IPartitionServices* svc)
 {
     POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
-    svc->AddRebuildTarget(this);
-    svc->AddRecover(type, this);
     svc->AddTranslator(type, this);
+    if (method->IsRecoverable() == true)
+    {
+        svc->AddRebuildTarget(this);
+        svc->AddRecover(type, this);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target", 
+            PARTITION_TYPE_STR[type], RaidType(raidType).ToString());
+    }
 }
 
 int
-StripePartition::_SetPhysicalAddress(uint64_t startLba)
+StripePartition::_SetPhysicalAddress(uint64_t startLba, uint32_t segCnt)
 {
-    ArrayDevice* baseline = Enumerable::First(devs,
-        [](auto p) { return p->GetState() == ArrayDeviceState::NORMAL; });
-    if (baseline == nullptr)
-    {
-        int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
-        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_SSD\"");
-        return eventId;
-    }
     physicalSize.startLba = startLba;
     physicalSize.blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
-
-    uint64_t ssdTotalSegments =
-            baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
-    if (type == PartitionType::META_SSD)
-    {
-        physicalSize.totalSegments = metaSegments;
-    }
-    else if (type == PartitionType::USER_DATA)
-    {
-        uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-        physicalSize.totalSegments = ssdTotalSegments - mbrSegments - metaSegments;
-    }
-
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}, TotalSegCnt{}",
-        startLba, RaidType(raidType).ToString(), physicalSize.totalSegments, ssdTotalSegments);
+    physicalSize.totalSegments = segCnt;
+    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}",
+        startLba, RaidType(raidType).ToString(), physicalSize.totalSegments);
 
     return 0;
 }
@@ -152,10 +140,15 @@ StripePartition::_SetLogicalAddress(void)
 int
 StripePartition::_SetMethod(uint64_t totalNvmBlks)
 {
-    if (raidType == RaidTypeEnum::RAID1)
+    if (raidType == RaidTypeEnum::RAID0)
     {
-        Raid1* raid1 = new Raid1(&physicalSize);
-        method = raid1;
+        Raid0* raid0 = new Raid0(&physicalSize);
+        method = raid0;
+    }
+    else if (raidType == RaidTypeEnum::RAID10)
+    {
+        Raid10* raid10 = new Raid10(&physicalSize);
+        method = raid10;
     }
     else if (raidType == RaidTypeEnum::RAID5)
     {
@@ -178,6 +171,17 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
         return eventId;
     }
+    size_t required = method->GetMinimumNumberOfDevices();
+    size_t actual = devs.size();
+    if (required > actual)
+    {
+        int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
+        POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, need:{}, actual:{}",
+            required, actual);
+        delete method;
+        return eventId;
+    }
+
     return 0;
 }
 
@@ -186,8 +190,9 @@ StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 {
     if (false == _IsValidAddress(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        POS_TRACE_ERROR(error, "Invalid Address Error");
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
+            PARTITION_TYPE_STR[type], raidType, src.stripeId, src.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
 
@@ -251,8 +256,9 @@ StripePartition::Convert(list<PhysicalWriteEntry>& dst,
 {
     if (false == _IsValidEntry(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        POS_TRACE_ERROR(error, "Invalid Address Error");
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during convert. raidtype:{}, stripeId:{}, offset:{}, blkCnt:{}, totalStripes:{}, totalBlksPerStripe:{}, minWriteBlkCnt:{}",
+            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, src.blkCnt, logicalSize.totalStripes, logicalSize.blksPerStripe, logicalSize.minWriteBlkCnt);
         return error;
     }
     dst.clear();

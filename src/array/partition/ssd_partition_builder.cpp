@@ -33,10 +33,11 @@
 #include "ssd_partition_builder.h"
 #include "src/device/base/ublock_device.h"
 #include "src/array/partition/stripe_partition.h"
-#include "src/array/partition/journal_ssd_partition.h"
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/helper/enumerable/query.h"
+#include "src/helper/calc/calc.h"
 
 namespace pos
 {
@@ -44,32 +45,18 @@ namespace pos
 int
 SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {} ",
-        option.devices.size());
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {}", option.devices.size());
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create StripePartition ({})", PARTITION_TYPE_STR[option.partitionType]);
     int ret = EID(ARRAY_PARTITION_CREATION_ERROR);
     Partition* base = nullptr;
-    if (option.partitionType == PartitionType::JOURNAL_SSD)
+    StripePartition* impl = new StripePartition(option.partitionType, option.devices, option.raidType);
+    uint64_t totalNvmBlks = 0;
+    if (option.nvm != nullptr)
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create JournalSsdPartition");
-        JournalSsdPartition* impl = new JournalSsdPartition(option.devices);
-        ret = impl->Create(startLba);
-        base = impl;
+        totalNvmBlks = option.nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
     }
-    else if (option.partitionType == PartitionType::META_SSD ||
-        option.partitionType == PartitionType::USER_DATA)
-    {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create StripePartition ({})",
-            PARTITION_TYPE_STR[option.partitionType]);
-        StripePartition* impl = new StripePartition(
-            option.partitionType, option.devices, option.raidType);
-        uint64_t totalNvmBlks = 0;
-        if (option.nvm != nullptr)
-        {
-            totalNvmBlks = option.nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
-        }
-        ret = impl->Create(startLba, totalNvmBlks);
-        base = impl;
-    }
+    ret = impl->Create(startLba, _GetSegmentCount(), totalNvmBlks);
+    base = impl;
     if (ret != 0)
     {
         return ret;
@@ -84,6 +71,32 @@ SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
         }
     }
 
+    return 0;
+}
+
+uint32_t
+SsdPartitionBuilder::_GetSegmentCount(void)
+{
+    if (option.partitionType == PartitionType::JOURNAL_SSD)
+    {
+        return ArrayConfig::JOURNAL_PART_SEGMENT_SIZE;
+    }
+
+    ArrayDevice* baseline = Enumerable::First(option.devices,
+        [](auto p) { return p->GetState() == ArrayDeviceState::NORMAL; });
+    uint64_t ssdTotalSegments =
+            baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+    uint64_t metaSegCnt = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
+
+    if (option.partitionType == PartitionType::META_SSD)
+    {
+        return metaSegCnt;
+    }
+    else if (option.partitionType == PartitionType::USER_DATA)
+    {
+        uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+        return ssdTotalSegments - mbrSegments - metaSegCnt;
+    }
     return 0;
 }
 

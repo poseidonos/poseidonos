@@ -211,12 +211,6 @@ ArrayDeviceManager::AddSpare(string devName)
 int
 ArrayDeviceManager::_CheckDevs(const ArrayDeviceSet& devSet)
 {
-    int ret = _CheckFaultTolerance(devSet);
-    if (ret != 0)
-    {
-        return ret;
-    }
-
     for (ArrayDevice* dev : devSet.nvm)
     {
         if (nullptr != dev->GetUblock() && false == dev->GetUblock()->IsAlive())
@@ -384,14 +378,7 @@ int
 ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
 {
     ArrayDeviceSet devSet = devs->GetDevs();
-
-    int ret = _CheckDevsCount(devSet);
-    if (0 != ret)
-    {
-        return ret;
-    }
-
-    ret = _CheckDevs(devSet);
+    int ret = _CheckDevs(devSet);
     if (0 != ret)
     {
         return ret;
@@ -406,81 +393,6 @@ ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
     ret = _CheckSsdsCapacity(devSet);
 
     return ret;
-}
-
-int
-ArrayDeviceManager::_CheckDevsCount(ArrayDeviceSet devSet)
-{
-    uint32_t nvmCnt = devSet.nvm.size();
-
-    uint32_t activeDataCnt = 0;
-    uint32_t faultDataCnt = 0;
-    for (ArrayDevice* dev : devSet.data)
-    {
-        if (dev->GetUblock() != nullptr)
-        {
-            activeDataCnt++;
-        }
-        else
-        {
-            faultDataCnt++;
-        }
-    }
-    uint32_t spareCnt = devSet.spares.size();
-    uint32_t totalCnt = activeDataCnt + spareCnt;
-
-    int ret = 0;
-    uint32_t errEventId = (uint32_t)POS_EVENT_ID::ARRAY_DEVICE_COUNT_ERROR;
-
-    uint32_t maxNvmCnt = ArrayConfig::NVM_DEVICE_COUNT;
-    uint32_t minDataCnt = ArrayConfig::MINIMUM_DATA_DEVICE_COUNT;
-    uint32_t maxDataCnt = ArrayConfig::MAXIMUM_DEVICE_COUNT;
-
-    if (nvmCnt != maxNvmCnt)
-    {
-        POS_TRACE_ERROR(errEventId,
-            "The number of nvm device must be {}", maxNvmCnt);
-        ret = errEventId;
-    }
-    else if (activeDataCnt + faultDataCnt < minDataCnt)
-    {
-        POS_TRACE_ERROR(errEventId,
-            "The number of data disks must be {} or more", minDataCnt);
-        ret = errEventId;
-    }
-    else if (totalCnt > maxDataCnt)
-    {
-        POS_TRACE_ERROR(errEventId,
-            "The number of disks must be no more {}", maxDataCnt);
-        ret = errEventId;
-    }
-
-    return ret;
-}
-
-int
-ArrayDeviceManager::_CheckFaultTolerance(DeviceSet<ArrayDevice*> devSet)
-{
-    int faultDevCnt = 0;
-    for (ArrayDevice* dev : devSet.data)
-    {
-        if (dev->GetState() != ArrayDeviceState::NORMAL)
-        {
-            faultDevCnt++;
-        }
-    }
-
-    const int brokenCnt = 2;
-    if (faultDevCnt >= brokenCnt)
-    {
-        uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_BROKEN_ERROR;
-        POS_TRACE_ERROR(eventId,
-            "Array cannot be configured due to faults of {} data devices",
-            faultDevCnt);
-        return eventId;
-    }
-
-    return 0;
 }
 
 int

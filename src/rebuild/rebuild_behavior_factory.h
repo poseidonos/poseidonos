@@ -33,7 +33,7 @@
 #pragma once
 
 #include "rebuild_behavior.h"
-#include "raid1_rebuild.h"
+#include "raid10_rebuild.h"
 #include "raid5_rebuild.h"
 #include "src/allocator_service/allocator_service.h"
 

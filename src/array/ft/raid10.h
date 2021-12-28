@@ -33,32 +33,32 @@
 #pragma once
 
 #include <list>
-#include <memory>
 #include <vector>
 
-#include "partition.h"
-
-using namespace std;
+#include "method.h"
 
 namespace pos
 {
+class PartitionPhysicalSize;
+class RebuildBehavior;
 
-class JournalSsdPartition : public Partition
+class Raid10 : public Method
 {
 public:
-    explicit JournalSsdPartition(vector<ArrayDevice *> devs);
-    virtual ~JournalSsdPartition();
-    int Create(uint64_t startLba);
-    void RegisterService(IPartitionServices* svc) override;
-    int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
-    int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
-    int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
-    int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
-    bool IsByteAccessSupported(void) override;
+    explicit Raid10(const PartitionPhysicalSize* pSize);
+    virtual ~Raid10();
+    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
+    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    vector<uint32_t> GetParityOffset(StripeId lsid) override;
+    uint32_t GetMinimumNumberOfDevices(void) override { return 2; }
 
 private:
-    int _SetPhysicalAddress(uint64_t startLba);
-    void _SetLogicalAddress(void);
+    void _RebuildData(void* dst, void* src, uint32_t size);
+    uint32_t _GetMirrorIndex(uint32_t idx);
+    void _BindRecoverFunc(void);
+    uint32_t mirrorDevCnt = 0;
 };
 
 } // namespace pos

@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/array/ft/raid1.h"
+#include "src/array/ft/raid10.h"
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/array/partition/stripe_partition_mock.h"
 
@@ -51,7 +51,7 @@ TEST(IORecover, GetRecoverMethod_testWhenMethodIsSet)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 30};
-    Raid1* method = new Raid1(&physicalSize);
+    Raid10* method = new Raid10(&physicalSize);
     MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
     recover.emplace(mockPartitionType, mockPart);
     unsigned int arrayIndex = 0;

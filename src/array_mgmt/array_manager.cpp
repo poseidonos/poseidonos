@@ -101,7 +101,7 @@ ArrayManager::~ArrayManager()
 }
 
 int
-ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
+ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
 {
     if (_FindArray(name) != nullptr)
     {
@@ -116,7 +116,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
     }
 
     ArrayComponents* array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
-    int ret = array->Create(devs, raidtype);
+    int ret = array->Create(devs, metaFt, dataFt);
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         arrayList.emplace(name, array);

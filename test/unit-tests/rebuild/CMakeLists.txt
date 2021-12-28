@@ -1,6 +1,6 @@
 POS_ADD_UNIT_TEST(rebuild_completed_ut rebuild_completed_test.cpp)
 POS_ADD_UNIT_TEST(update_data_complete_handler_ut update_data_complete_handler_test.cpp)
-POS_ADD_UNIT_TEST(raid1_rebuild_ut raid1_rebuild_test.cpp)
+POS_ADD_UNIT_TEST(raid10_rebuild_ut raid10_rebuild_test.cpp)
 POS_ADD_UNIT_TEST(partition_rebuild_ut partition_rebuild_test.cpp)
 POS_ADD_UNIT_TEST(rebuild_behavior_factory_ut rebuild_behavior_factory_test.cpp)
 POS_ADD_UNIT_TEST(update_data_handler_ut update_data_handler_test.cpp)

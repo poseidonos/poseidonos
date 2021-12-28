@@ -30,11 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cassert>
-#include <cstring>
-#include <list>
-
-#include "raid1.h"
+#include "raid10.h"
 #include "src/helper/enumerable/query.h"
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
@@ -43,11 +39,12 @@
 
 namespace pos
 {
-Raid1::Raid1(const PartitionPhysicalSize* pSize)
+Raid10::Raid10(const PartitionPhysicalSize* pSize)
+: Method(RaidTypeEnum::RAID10)
 {
     mirrorDevCnt = pSize->chunksPerStripe / 2;
     ftSize_ = {
-        .minWriteBlkCnt = ArrayConfig::RAID1_MIN_WRITE_BLOCK_COUNT,
+        .minWriteBlkCnt = ArrayConfig::RAID10_MIN_WRITE_BLOCK_COUNT,
         .backupBlkCnt = mirrorDevCnt * pSize->blksPerChunk,
         .blksPerChunk = pSize->blksPerChunk,
         .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,
@@ -56,7 +53,7 @@ Raid1::Raid1(const PartitionPhysicalSize* pSize)
 }
 
 int
-Raid1::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
+Raid10::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
 {
     dst = {.stripeId = src.stripeId,
         .offset = src.offset};
@@ -64,7 +61,7 @@ Raid1::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
 }
 
 int
-Raid1::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+Raid10::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
 {
     FtWriteEntry ftEntry;
     Translate(ftEntry.addr, src.addr);
@@ -82,7 +79,7 @@ Raid1::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
 }
 
 list<FtBlkAddr>
-Raid1::GetRebuildGroup(FtBlkAddr fba)
+Raid10::GetRebuildGroup(FtBlkAddr fba)
 {
     uint32_t idx = fba.offset / ftSize_.blksPerChunk;
     uint32_t offset = fba.offset % ftSize_.blksPerChunk;
@@ -95,7 +92,7 @@ Raid1::GetRebuildGroup(FtBlkAddr fba)
 }
 
 RaidState
-Raid1::GetRaidState(vector<ArrayDeviceState> devs)
+Raid10::GetRaidState(vector<ArrayDeviceState> devs)
 {
     RaidState rs = RaidState::NORMAL;
     for (size_t i = 0; i < devs.size(); i++)
@@ -111,25 +108,36 @@ Raid1::GetRaidState(vector<ArrayDeviceState> devs)
             }
         }
     }
-    POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "GetRaidState from raid1:{} ", rs);
+    POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "GetRaidState from raid10:{} ", rs);
     return rs;
 }
 
-void
-Raid1::_BindRecoverFunc(void)
+vector<uint32_t>
+Raid10::GetParityOffset(StripeId lsid)
 {
-    using namespace std::placeholders;
-    recoverFunc_ = bind(&Raid1::_RebuildData, this, _1, _2, _3);
+    vector<uint32_t> parityIdx;
+    for (uint32_t i = mirrorDevCnt; i < mirrorDevCnt * 2 ; i++)
+    {
+        parityIdx.push_back(i);
+    }
+    return parityIdx;
 }
 
 void
-Raid1::_RebuildData(void* dst, void* src, uint32_t size)
+Raid10::_BindRecoverFunc(void)
+{
+    using namespace std::placeholders;
+    recoverFunc = bind(&Raid10::_RebuildData, this, _1, _2, _3);
+}
+
+void
+Raid10::_RebuildData(void* dst, void* src, uint32_t size)
 {
     memcpy(dst, src, size);
 }
 
 uint32_t
-Raid1::_GetMirrorIndex(uint32_t idx)
+Raid10::_GetMirrorIndex(uint32_t idx)
 {
     if (idx >= mirrorDevCnt)
     {
@@ -141,7 +149,7 @@ Raid1::_GetMirrorIndex(uint32_t idx)
     }
 }
 
-Raid1::~Raid1()
+Raid10::~Raid10()
 {
 }
 

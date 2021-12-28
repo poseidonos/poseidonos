@@ -29,7 +29,7 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "raid1_rebuild.h"
+#include "raid10_rebuild.h"
 
 #include <typeinfo>
 
@@ -53,10 +53,10 @@
 
 namespace pos
 {
-Raid1Rebuild::Raid1Rebuild(unique_ptr<RebuildContext> c)
+Raid10Rebuild::Raid10Rebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid1Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid10Rebuild");
     locker = IOLockerSingleton::Instance();
     assert(locker != nullptr);
 
@@ -64,28 +64,28 @@ Raid1Rebuild::Raid1Rebuild(unique_ptr<RebuildContext> c)
     assert(ret);
 }
 
-Raid1Rebuild::~Raid1Rebuild(void)
+Raid10Rebuild::~Raid10Rebuild(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~Raid1Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~Raid10Rebuild");
 }
 
 string
-Raid1Rebuild::_GetClassName(void)
+Raid10Rebuild::_GetClassName(void)
 {
     return typeid(this).name();
 }
 
 int
-Raid1Rebuild::_GetTotalReadChunksForRecovery(void)
+Raid10Rebuild::_GetTotalReadChunksForRecovery(void)
 {
     return 1; // Mirror
 }
 
 
 bool
-Raid1Rebuild::Read(void)
+Raid10Rebuild::Read(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid1Rebuild::Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid10Rebuild::Rebuild");
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
@@ -146,7 +146,7 @@ Raid1Rebuild::Read(void)
 
     ctx->taskCnt = currWorkload;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid1Rebuild - from:{}, to:{}", from, to);
+        "Raid10Rebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -179,9 +179,9 @@ Raid1Rebuild::Read(void)
     return true;
 }
 
-bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
+bool Raid10Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
-    POS_TRACE_DEBUG(2831, "Raid1Rebuild::Write, target stripe:{}", targetId);
+    POS_TRACE_DEBUG(2831, "Raid10Rebuild::Write, target stripe:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_MetadataRebuild);
@@ -204,7 +204,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
+bool Raid10Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     locker->Unlock(ctx->faultDev, targetId);
 
@@ -222,7 +222,7 @@ bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-void Raid1Rebuild::UpdateProgress(uint32_t val)
+void Raid10Rebuild::UpdateProgress(uint32_t val)
 {
     ctx->prog->Update(ctx->part, val, ctx->stripeCnt);
 }

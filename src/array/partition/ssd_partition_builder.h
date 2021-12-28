@@ -80,6 +80,7 @@ public:
     void SetNext(SsdPartitionBuilder* builder) { next = builder; }
 
 private:
+    uint32_t _GetSegmentCount(void);
     SsdPartitionBuilder* next = nullptr;
     SsdPartitionOptions option;
 };

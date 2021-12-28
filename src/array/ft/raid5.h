@@ -48,8 +48,6 @@ class BufferPool;
 
 class Raid5 : public Method
 {
-    friend class ParityLocationWbtCommand;
-
 public:
     explicit Raid5(const PartitionPhysicalSize* pSize);
     virtual ~Raid5();
@@ -61,20 +59,19 @@ public:
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    vector<uint32_t> GetParityOffset(StripeId lsid) override;
+    uint32_t GetMinimumNumberOfDevices(void) override { return 3; }
 
     // This function is for unit testing only
     virtual int GetParityPoolSize();
 private:
-    virtual void _BindRecoverFunc(void) override;
+    void _BindRecoverFunc(void);
     void _RebuildData(void* dst, void* src, uint32_t size);
     BufferEntry _AllocBuffer();
     void _ComputeParity(BufferEntry& dst, const list<BufferEntry>& srcs);
     void _XorBlocks(void* dst, const void* src, uint32_t memSize);
     void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
-    uint32_t _GetParityOffset(StripeId lsid);
-
     vector<BufferPool*> parityPools;
-
     AffinityManager* affinityManager;
     MemoryManager* memoryManager;
 };

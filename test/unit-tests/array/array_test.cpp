@@ -297,7 +297,7 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     Array array(mockArrayName, NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "RAID5" /* is the only option at the moment */);
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5" /* is the only option at the moment */);
 
     // Then
     ASSERT_EQ(0, actual);
@@ -319,7 +319,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayStateIsNotCreatable)
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter");
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");
 
     // Then
     ASSERT_EQ(STATE_ERROR, actual);
@@ -342,7 +342,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenDeviceImportFails)
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter");
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");
 
     // Then
     ASSERT_EQ(IMPORT_ERROR, actual);
@@ -365,33 +365,10 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
     Array array(BAD_ARRAY_NAME, NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "doesn't matter");
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");
 
     // Then
     ASSERT_EQ(EID(ARRAY_NAME_TOO_LONG), actual);
-}
-
-TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)
-{
-    // Given
-    DeviceSet<string> emptyDeviceSet;
-    NiceMock<MockIStateControl> mockIStateControl;
-    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
-    string BAD_RAID_TYPE = "RAID6"; // 'cause we don't support at the moment
-    unsigned int arrayIndex;
-
-    EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
-
-    Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
-
-    // When
-    int actual = array.Create(emptyDeviceSet, BAD_RAID_TYPE);
-
-    // Then
-    ASSERT_EQ(EID(ARRAY_WRONG_FT_METHOD), actual);
 }
 
 TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeCreated)
@@ -412,10 +389,9 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeCreated)
     EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce(Return(ABR_CREATE_FAILURE));
 
     Array array("goodmockname", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
-    string GOOD_RAID_TYPE = "RAID5";
 
     // When
-    int actual = array.Create(emptyDeviceSet, GOOD_RAID_TYPE);
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");
 
     // Then
     ASSERT_EQ(ABR_CREATE_FAILURE, actual);
@@ -445,7 +421,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     Array array("goodmockname", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    int actual = array.Create(emptyDeviceSet, "RAID5");
+    int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");
 
     // Then
     ASSERT_EQ(ABR_SAVE_FAILURE, actual);
@@ -544,6 +520,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     string spareDevName = "spareDev";
     MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
@@ -557,8 +534,9 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return(""));
     EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
@@ -575,6 +553,7 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(0);
@@ -582,8 +561,9 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     EXPECT_CALL(*mockState, SetDelete).Times(0);
     EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(true));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
 
     // When: array is broken but shutdown process is not finished
     int actual = array.Delete();
@@ -693,11 +673,13 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
     MockDeviceManager mockDevMgr;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     string spareDevName = "spareDev";
     MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
     UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
     EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
     int FAILED_TO_FLUSH = -1;
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
@@ -708,7 +690,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     EXPECT_CALL(*rawPtr, GetSN).Times(1);
     EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).Times(1);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare(spareDevName);
@@ -724,14 +706,16 @@ TEST(Array, RemoveSpare_testIfSpareIsRemovedWhenInputsAreValid)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
     string mockSpareName = "mock-spare";
 
     EXPECT_CALL(*mockState, CanRemoveSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, RemoveSpare(mockSpareName)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
 
     // When
     int actual = array.RemoveSpare(mockSpareName);
@@ -795,6 +779,8 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenFailedToFlush)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
+
     string mockSpareName = "mock-spare";
 
     int FAILED_TO_FLUSH = -1;
@@ -802,8 +788,9 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenFailedToFlush)
     EXPECT_CALL(*mockArrDevMgr, RemoveSpare(mockSpareName)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(1);
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(FAILED_TO_FLUSH));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
 
     // When
     int actual = array.RemoveSpare(mockSpareName);
@@ -920,6 +907,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
     Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, mockPtnMgr, mockState, NULL, NULL, NULL);
     // When: DetachDevice() is invoked
@@ -974,6 +962,7 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
     UblockSharedPtr mockUblockSharedPtr = shared_ptr<UBlockDevice>(mockUblockDevice);
     MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
     MockIAbrControl mockAbrControl;
 
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
@@ -983,7 +972,7 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     EXPECT_CALL(*mockArrayDeviceManager, ExportToMeta).Times(1);
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, NULL, NULL, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, mockPtnMgr, NULL, NULL, &mockEventScheduler, NULL);
 
     // When: Mount is done
     array.MountDone();
@@ -1302,6 +1291,8 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     MockIAbrControl mockAbrControl;
     MockPartitionServices* mockSvc = new MockPartitionServices;
     MockArrayRebuilder mockArrayRebuilder(NULL);
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
+
     int REPLACE_SUCCESS = 0;
     std::list<RebuildTarget*> emptyTargets;
 
@@ -1314,8 +1305,9 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockSvc, GetRebuildTargets).WillOnce(Return(emptyTargets));
     EXPECT_CALL(mockArrayRebuilder, Rebuild).Times(AtLeast(0)); // simply, ignore
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockSvc, NULL, NULL);
+    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
 
     // When
     bool actual = array.TriggerRebuild(mockArrDev);
@@ -1338,6 +1330,8 @@ TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
     MockPartitionServices* mockSvc = new MockPartitionServices;
     MockArrayRebuilder mockArrayRebuilder(NULL);
     std::list<RebuildTarget*> emptyTargets;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
+
 
     int REPLACE_SUCCESS = 0;
     int FAILED_TO_FLUSH = -1;
@@ -1348,10 +1342,11 @@ TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
     EXPECT_CALL(*mockArrDev, SetState(ArrayDeviceState::REBUILD)).Times(1);
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(FAILED_TO_FLUSH));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
     EXPECT_CALL(*mockSvc, GetRebuildTargets).Times(0);
     EXPECT_CALL(mockArrayRebuilder, Rebuild).Times(0);
 
-    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockSvc, NULL, NULL);
+    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
 
     // When
     bool actual = array.TriggerRebuild(mockArrDev);

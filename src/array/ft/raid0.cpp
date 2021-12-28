@@ -30,21 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "method.h"
+#include "raid0.h"
 #include "src/helper/enumerable/query.h"
+#include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/array_models/dto/partition_physical_size.h"
 
 namespace pos
 {
-const FtSizeInfo*
-Method::GetSizeInfo()
+Raid0::Raid0(const PartitionPhysicalSize* pSize)
+: Method(RaidTypeEnum::RAID0)
 {
-    return &ftSize_;
+    ftSize_ = {
+        .minWriteBlkCnt = ArrayConfig::RAID0_MIN_WRITE_BLOCK_COUNT,
+        .backupBlkCnt = 0,
+        .blksPerChunk = pSize->blksPerChunk,
+        .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,
+        .chunksPerStripe = pSize->chunksPerStripe};
 }
 
-RecoverFunc&
-Method::GetRecoverFunc(void)
+int
+Raid0::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
 {
-    return recoverFunc_;
+    dst = {.stripeId = src.stripeId,
+        .offset = src.offset};
+    return 0;
+}
+
+int
+Raid0::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+{
+    FtWriteEntry ftEntry;
+    ftEntry.addr = {.stripeId = src.addr.stripeId,
+        .offset = 0};
+    ftEntry.buffers = *(src.buffers);
+    ftEntry.blkCnt = src.blkCnt;
+    dst.clear();
+    dst.push_front(ftEntry);
+
+    return 0;
+}
+
+RaidState
+Raid0::GetRaidState(vector<ArrayDeviceState> devs)
+{
+    auto&& abnormalDevs = Enumerable::Where(devs,
+        [](auto d) { return d != ArrayDeviceState::NORMAL; });
+
+    if (abnormalDevs.size() == 0)
+    {
+        return RaidState::NORMAL;
+    }
+    return RaidState::FAILURE;
+}
+
+Raid0::~Raid0()
+{
 }
 
 } // namespace pos

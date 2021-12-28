@@ -419,7 +419,7 @@ add_spare()
 		if [ $ret = "0" ]; then
 			notice "spare added"
 			break;
-        elif [$retry = 0]; then
+        elif [${retry} -eq 0]; then
 			notice "failed to add spare"
             kill_ibofos
             exit 2

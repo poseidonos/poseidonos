@@ -34,6 +34,7 @@
 
 #include "partition.h"
 #include "partition_formatter.h"
+#include "src/include/raid_type.h"
 
 #include <array>
 #include <vector>
@@ -56,6 +57,7 @@ public:
     virtual void DeletePartitions(void);
     virtual void FormatPartition(PartitionType type, uint32_t arrayId, IODispatcher* io);
     virtual RaidState GetRaidState(void);
+    virtual RaidTypeEnum GetRaidType(PartitionType type);
 
 private:
     Partitions partitions;

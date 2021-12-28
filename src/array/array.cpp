@@ -142,7 +142,8 @@ Array::_LoadImpl(void)
         return ret;
     }
 
-    ret = _CreatePartitions();
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "MetaRaid:{}, DataRaid:{}", meta.metaRaidType, meta.dataRaidType);
+    ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
     if (ret != 0)
     {
         return ret;
@@ -161,7 +162,7 @@ Array::GetArrayManager(void)
 }
 
 int
-Array::Create(DeviceSet<string> nameSet, string dataRaidType)
+Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
     int ret = 0;
     ArrayMeta meta;
@@ -187,19 +188,13 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         goto error;
     }
 
-    if (dataRaidType != "RAID5")
-    {
-        ret = (int)POS_EVENT_ID::ARRAY_WRONG_FT_METHOD;
-        goto error;
-    }
-
     uniqueId = uIdGen.GenerateUniqueId();
     state->EnableStatePublisher(uniqueId);
 
     meta.arrayName = name_;
     meta.devs = devMgr_->ExportToMeta();
-    meta.metaRaidType = "RAID1";
-    meta.dataRaidType = "dataRaidType";
+    meta.metaRaidType = metaFt;
+    meta.dataRaidType = dataFt;
     meta.unique_id = uniqueId;
     ret = abrControl->CreateAbr(meta);
     if (ret != 0)
@@ -217,13 +212,13 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
         }
     }
 
-    ret = _Flush();
+    ret = _Flush(meta);
     if (ret != 0)
     {
         goto error;
     }
 
-    ret = _CreatePartitions();
+    ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
     if (ret != 0)
     {
         goto error;
@@ -233,7 +228,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully created", name_);
+    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} is successfully created", name_);
     return 0;
 
 error:
@@ -482,13 +477,13 @@ Array::GetIndex(void)
 string
 Array::GetMetaRaidType(void)
 {
-    return "RAID1";
+    return RaidType(ptnMgr->GetRaidType(PartitionType::META_SSD)).ToString();
 }
 
 string
 Array::GetDataRaidType(void)
 {
-    return "RAID5";
+    return RaidType(ptnMgr->GetRaidType(PartitionType::USER_DATA)).ToString();
 }
 
 string
@@ -535,12 +530,19 @@ Array::_Flush(void)
     meta.metaRaidType = GetMetaRaidType();
     meta.dataRaidType = GetDataRaidType();
     meta.devs = devMgr_->ExportToMeta();
+    return _Flush(meta);
+}
 
+int
+Array::_Flush(ArrayMeta& meta)
+{
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Trying to save Array to MBR, name:{}, metaRaid:{}, dataRaid:{}",
+        meta.arrayName, meta.metaRaidType, meta.dataRaidType);
     return abrControl->SaveAbr(meta);
 }
 
 int
-Array::_CreatePartitions(void)
+Array::_CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid)
 {
     DeviceSet<ArrayDevice*> devs = devMgr_->Export();
     ArrayDevice* nvm = nullptr;
@@ -548,7 +550,7 @@ Array::_CreatePartitions(void)
     {
         nvm = devs.nvm.front();
     }
-    return ptnMgr->CreatePartitions(nvm, devs.data, RaidTypeEnum::RAID1, RaidTypeEnum::RAID5, svc);
+    return ptnMgr->CreatePartitions(nvm, devs.data, metaRaid, dataRaid, svc);
 }
 
 void

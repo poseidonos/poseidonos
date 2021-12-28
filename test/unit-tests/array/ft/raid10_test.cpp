@@ -1,4 +1,4 @@
-#include "src/array/ft/raid1.h"
+#include "src/array/ft/raid10.h"
 
 #include <gtest/gtest.h>
 
@@ -9,7 +9,7 @@
 
 namespace pos
 {
-TEST(Raid1, Raid1_testWithHeapAllocation)
+TEST(Raid10, Raid10_testWithHeapAllocation)
 {
     // Given a set of constructor params
     const PartitionPhysicalSize physicalSize{
@@ -20,14 +20,14 @@ TEST(Raid1, Raid1_testWithHeapAllocation)
         .totalSegments = 100};
 
     // When
-    Raid1* raid1 = new Raid1(&physicalSize);
+    Raid10* raid10 = new Raid10(&physicalSize);
 
     // Then
-    ASSERT_NE(nullptr, raid1);
-    delete raid1;
+    ASSERT_NE(nullptr, raid10);
+    delete raid10;
 }
 
-TEST(Raid1, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
+TEST(Raid10, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -36,7 +36,7 @@ TEST(Raid1, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
         .chunksPerStripe = 5,
         .stripesPerSegment = 20,
         .totalSegments = 100};
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
 
     StripeId STRIPE_ID = 1234;
     uint32_t OFFSET = 4567;
@@ -47,7 +47,7 @@ TEST(Raid1, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
     FtBlkAddr dest;
 
     // When
-    int actual = raid1.Translate(dest, src);
+    int actual = raid10.Translate(dest, src);
 
     // Then
     ASSERT_EQ(0, actual);
@@ -55,7 +55,7 @@ TEST(Raid1, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
     ASSERT_EQ(OFFSET, dest.offset);
 }
 
-TEST(Raid1, Convert_testIfDestinationIsFilledWithTwoItems)
+TEST(Raid10, Convert_testIfDestinationIsFilledWithTwoItems)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -64,11 +64,11 @@ TEST(Raid1, Convert_testIfDestinationIsFilledWithTwoItems)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 100};
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
 
     StripeId STRIPE_ID = 1234;
     uint32_t OFFSET = 4567;
-    uint32_t BACKUP_BLK_CNT = physicalSize.chunksPerStripe / 2 * physicalSize.blksPerChunk; // the semantics defined in Raid1::Raid1()
+    uint32_t BACKUP_BLK_CNT = physicalSize.chunksPerStripe / 2 * physicalSize.blksPerChunk; // the semantics defined in Raid10::Raid10()
 
     const LogicalBlkAddr src{
         .stripeId = STRIPE_ID,
@@ -81,7 +81,7 @@ TEST(Raid1, Convert_testIfDestinationIsFilledWithTwoItems)
     list<FtWriteEntry> dest;
 
     // When
-    int actual = raid1.Convert(dest, srcLogicalWriteEntry);
+    int actual = raid10.Convert(dest, srcLogicalWriteEntry);
 
     // Then
     ASSERT_EQ(2, dest.size());
@@ -96,7 +96,7 @@ TEST(Raid1, Convert_testIfDestinationIsFilledWithTwoItems)
     ASSERT_EQ(OFFSET + BACKUP_BLK_CNT, mirror.addr.offset);
 }
 
-TEST(Raid1, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerThanMirrorDevCount)
+TEST(Raid10, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerThanMirrorDevCount)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -109,10 +109,10 @@ TEST(Raid1, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerTh
     FtBlkAddr fba;
     int FBA_OFFSET = 1234;
     fba.offset = FBA_OFFSET;
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
 
     // When
-    list<FtBlkAddr> actual = raid1.GetRebuildGroup(fba);
+    list<FtBlkAddr> actual = raid10.GetRebuildGroup(fba);
 
     // Then
     ASSERT_EQ(1, actual.size());
@@ -123,7 +123,7 @@ TEST(Raid1, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerTh
     ASSERT_EQ(expected_offset, front.offset);
 }
 
-TEST(Raid1, GetRaidState_testIfRaid1IsFailure)
+TEST(Raid10, GetRaidState_testIfRaid10IsFailure)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -132,7 +132,7 @@ TEST(Raid1, GetRaidState_testIfRaid1IsFailure)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 100};
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
     vector<ArrayDeviceState> devs;
     devs.push_back(ArrayDeviceState::NORMAL);
     devs.push_back(ArrayDeviceState::FAULT);
@@ -140,13 +140,13 @@ TEST(Raid1, GetRaidState_testIfRaid1IsFailure)
     devs.push_back(ArrayDeviceState::FAULT);
 
     // When
-    RaidState actual = raid1.GetRaidState(devs);
+    RaidState actual = raid10.GetRaidState(devs);
 
     // Then
     ASSERT_EQ(RaidState::FAILURE, actual);
 }
 
-TEST(Raid1, GetRaidState_testIfRaid1IsDegraded)
+TEST(Raid10, GetRaidState_testIfRaid10IsDegraded)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -155,7 +155,7 @@ TEST(Raid1, GetRaidState_testIfRaid1IsDegraded)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 100};
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
     vector<ArrayDeviceState> devs;
     // note that both the original and mirror devices should be fault, and raid is failure
     devs.push_back(ArrayDeviceState::NORMAL);
@@ -164,13 +164,13 @@ TEST(Raid1, GetRaidState_testIfRaid1IsDegraded)
     devs.push_back(ArrayDeviceState::NORMAL);
 
     // When
-    RaidState actual = raid1.GetRaidState(devs);
+    RaidState actual = raid10.GetRaidState(devs);
 
     // Then
     ASSERT_EQ(RaidState::DEGRADED, actual);
 }
 
-TEST(Raid1, GetRaidState_testIfRaid1IsNormal)
+TEST(Raid10, GetRaidState_testIfRaid10IsNormal)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -179,7 +179,7 @@ TEST(Raid1, GetRaidState_testIfRaid1IsNormal)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 100};
-    Raid1 raid1(&physicalSize);
+    Raid10 raid10(&physicalSize);
     vector<ArrayDeviceState> devs;
     devs.push_back(ArrayDeviceState::NORMAL);
     devs.push_back(ArrayDeviceState::NORMAL);
@@ -187,7 +187,7 @@ TEST(Raid1, GetRaidState_testIfRaid1IsNormal)
     devs.push_back(ArrayDeviceState::NORMAL);
 
     // When
-    RaidState actual = raid1.GetRaidState(devs);
+    RaidState actual = raid10.GetRaidState(devs);
 
     // Then
     ASSERT_EQ(RaidState::NORMAL, actual);

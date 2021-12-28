@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PARTITION_H_
-#define PARTITION_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -39,6 +38,7 @@
 
 #include "src/include/partition_type.h"
 #include "src/include/address_type.h"
+#include "src/include/raid_type.h"
 #include "src/array/device/array_device.h"
 #include "src/array/ft/method.h"
 #include "src/array_models/dto/partition_physical_size.h"
@@ -66,6 +66,7 @@ public:
     PartitionType GetType(void) { return type; }
     uint64_t GetLastLba() { return lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
+    virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
 
 protected:
     bool _IsValidAddress(const LogicalBlkAddr& lsa);
@@ -81,4 +82,3 @@ protected:
 using Partitions = array<Partition*, PartitionType::TYPE_COUNT>;
 
 } // namespace pos
-#endif // PARTITION_H_
