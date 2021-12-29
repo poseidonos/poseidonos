@@ -40,6 +40,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <execinfo.h>
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -61,7 +62,6 @@ union semun {
     unsigned short int* arr;
 };
 
-void INThandler(int sig);
 void PreventDualExecution(int nrProc);
 int CheckPrevileges(void);
 #if IBOF_CONFIG_LIBRARY_BUILD == 1
@@ -85,7 +85,7 @@ extern "C"
 
         pos::Poseidonos _pos;
         _pos.Init(argc, &argvPtr);
-        signal(SIGINT, INThandler);
+
         _pos.Run();
         _pos.Terminate();
 
@@ -93,6 +93,7 @@ extern "C"
     }
 }
 #else
+
 int
 main(int argc, char* argv[])
 {
@@ -105,21 +106,12 @@ main(int argc, char* argv[])
 
     pos::Poseidonos _pos;
     _pos.Init(argc, argv);
-    signal(SIGINT, INThandler);
     _pos.Run();
     _pos.Terminate();
 
     return 0;
 }
 #endif
-
-void
-INThandler(int sig)
-{
-    signal(sig, SIG_IGN);
-    std::cout << "You cannot close FA server abruptly. Close it via client. "
-                 "Ex: ./poseidonos-cli system stop\n";
-}
 
 void
 PreventDualExecution(int nrProc)

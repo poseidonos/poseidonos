@@ -58,6 +58,7 @@ class MockDeviceDriver;
 class QosManager;
 class RBAStateService;
 class Reporter;
+class SignalHandler;
 class Spdk;
 class UnvmeDrv;
 class UramDrv;
@@ -101,6 +102,7 @@ private:
     QosManager *qosManager;
     RBAStateService* rbaStateService;
     Reporter* reporter;
+    SignalHandler* signalHandler;
     Spdk* spdk;
     UnvmeDrv* unvmeDrv;
     UramDrv* uramDrv;

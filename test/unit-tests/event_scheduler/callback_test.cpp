@@ -111,6 +111,13 @@ TEST(Callback, Callback_Heap)
     // Then: Do nothing
 }
 
+TEST(Callback, SetTimeout)
+{
+    Callback::SetTimeout(50);
+    Callback::SetTimeout(120);
+    Callback::SetTimeout(5);
+}
+
 TEST(Callback, Execute_WithoutInvokeCallee)
 {
     // Given: StubCallbackC, SetResultSpecificJob

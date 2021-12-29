@@ -32,44 +32,38 @@
 
 #pragma once
 
-#include <cstdint>
-#include "src/debug/debug_info.h"
+#include <signal.h>
+
+#include <atomic>
+#include <list>
+
+#include "src/lib/singleton.h"
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
-
-class Poseidonos
+typedef void (*SignalHandlerType)(int);
+class SignalHandler
 {
 public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    SignalHandler(void);
+    void Register(void);
+    void Deregister(void);
+    static void INTHandler(int sig);
+    static void ExceptionHandler(int sig);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
+    void _ExceptionHandler(int sig);
+    void _GetThreadIdList(void);
+    void _BacktraceAndInvokeNextThread(int sig);
+    void _Backtrace(void);
+    std::list<long> threadList;
+    std::atomic<uint32_t> pendingThreads;
+    static const long ATOI_ERR = 0;
+    static const int MAX_CALL_STACK = 100;
+    std::atomic<bool> listUpdated;
+    std::atomic<int> dominantSignal;
 };
+
+using SignalHandlerSingleton = Singleton<SignalHandler>;
+
 } // namespace pos

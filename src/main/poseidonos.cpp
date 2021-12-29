@@ -57,6 +57,8 @@
 #include "src/network/nvmf_target.h"
 #include "src/network/transport_configuration.h"
 #include "src/qos/qos_manager.h"
+#include "src/signal_handler/user_signal_interface.h"
+#include "src/signal_handler/signal_handler.h"
 #include "src/spdk_wrapper/spdk.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
@@ -67,6 +69,7 @@ namespace pos
 void
 Poseidonos::Init(int argc, char** argv)
 {
+    _InitSignalHandler();
     _LoadConfiguration();
     _LoadVersion();
     _InitSpdk(argc, argv);
@@ -132,6 +135,12 @@ Poseidonos::Terminate(void)
         delete telemtryPublisherForAir;
         telemtryPublisherForAir = nullptr;
     }
+    if (nullptr != signalHandler)
+    {
+        signalHandler->Deregister();
+        UserSignalInterface::Enable(false);
+    }
+    SignalHandlerSingleton::ResetInstance();
 }
 
 void
@@ -198,6 +207,34 @@ Poseidonos::_InitDebugInfo(void)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::DEBUG_CORE_DUMP_SETTING_FAILED, "Core pattern is not set properly");
         return;
+    }
+
+    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    std::string module("debug");
+    uint64_t timeout = false;
+    ret = configManager.GetValue(module, "callback_timeout_sec", &timeout,
+        CONFIG_TYPE_UINT64);
+    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    {
+        Callback::SetTimeout(timeout);
+    }
+}
+
+void
+Poseidonos::_InitSignalHandler(void)
+{
+    signalHandler = SignalHandlerSingleton::Instance();
+    signalHandler->Register();
+    UserSignalInterface::Enable(true);
+
+    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    std::string module("debug");
+    uint64_t timeout = false;
+    int ret = configManager.GetValue(module, "user_signal_ignore_timeout_sec", &timeout,
+        CONFIG_TYPE_UINT64);
+    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    {
+        UserSignalInterface::SetTimeout(timeout);
     }
 }
 

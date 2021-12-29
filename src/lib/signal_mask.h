@@ -32,44 +32,17 @@
 
 #pragma once
 
-#include <cstdint>
-#include "src/debug/debug_info.h"
+#include <signal.h>
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
 
-class Poseidonos
+class SignalMask
 {
 public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
-
-private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
+    static void MaskSignal(sigset_t* oldset);
+    static void MaskSignal(int AllowedSignalNo, sigset_t* oldset);
+    static void RestoreSignal(sigset_t* oldset);
 };
+
 } // namespace pos

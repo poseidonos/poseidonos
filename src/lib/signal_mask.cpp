@@ -30,46 +30,39 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <cstdint>
-#include "src/debug/debug_info.h"
+#include "src/lib/signal_mask.h"
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
 
-class Poseidonos
+void
+SignalMask::MaskSignal(int AllowedSignalNo, sigset_t* oldset)
 {
-public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGUSR1);
+    sigdelset(&set, AllowedSignalNo);
+    pthread_sigmask(SIG_BLOCK, &set, oldset);
+}
 
-private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
+void
+SignalMask::RestoreSignal(sigset_t* oldset)
+{
+    pthread_sigmask(SIG_SETMASK, oldset, nullptr);
+}
 
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
+void
+SignalMask::MaskSignal(sigset_t* oldset)
+{
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGUSR1);
+    pthread_sigmask(SIG_BLOCK, &set, oldset);
+}
 
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-};
 } // namespace pos
+

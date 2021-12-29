@@ -30,46 +30,58 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/signal_handler/user_signal_interface.h"
 
-#include <cstdint>
-#include "src/debug/debug_info.h"
+#include <signal.h>
+
+#include "src/signal_handler/signal_handler.h"
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
+volatile bool UserSignalInterface::signalOnce = false;
+bool UserSignalInterface::enabled = false;
+uint64_t UserSignalInterface::ignTimeoutNs = UserSignalInterface::DEFAULT_TIMEOUT;
+SystemTimeoutChecker UserSignalInterface::systemTimeoutChecker;
 
-class Poseidonos
+void
+UserSignalInterface::Enable(bool inputEnabled)
 {
-public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    enabled = inputEnabled;
+}
 
-private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
+void
+UserSignalInterface::SetTimeout(uint64_t inputIgnTimeoutSec)
+{
+    if (inputIgnTimeoutSec > MAX_TIMEOUT_SEC)
+    {
+        inputIgnTimeoutSec = MAX_TIMEOUT_SEC;
+    }
+    if (inputIgnTimeoutSec != 0)
+    {
+        ignTimeoutNs = inputIgnTimeoutSec * 1000ULL * 1000ULL * 1000ULL;
+    }
+}
 
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
+void
+UserSignalInterface::TriggerBacktrace(void)
+{
+    if (enabled)
+    {
+        if (signalOnce == false)
+        {
+            signalOnce = true;
+            systemTimeoutChecker.SetTimeout(ignTimeoutNs);
+            SignalHandlerSingleton::Instance()->ExceptionHandler(SIGUSR1);
+        }
+        else
+        {
+            if (systemTimeoutChecker.CheckTimeout() == true)
+            {
+                systemTimeoutChecker.SetTimeout(ignTimeoutNs);
+                SignalHandlerSingleton::Instance()->ExceptionHandler(SIGUSR1);
+            }
+        }
+    }
+}
 
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-};
 } // namespace pos

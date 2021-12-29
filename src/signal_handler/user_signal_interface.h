@@ -32,44 +32,23 @@
 
 #pragma once
 
-#include <cstdint>
-#include "src/debug/debug_info.h"
-
+#include "src/lib/system_timeout_checker.h"
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
-
-class Poseidonos
+class UserSignalInterface
 {
 public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    static void Enable(bool inputEnabled);
+    static void SetTimeout(uint64_t timeout);
+    static void TriggerBacktrace(void);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
+    static SystemTimeoutChecker systemTimeoutChecker;
+    static volatile bool signalOnce;
+    static const uint64_t DEFAULT_TIMEOUT = 3ULL * 1000ULL * 1000ULL * 1000ULL;
+    static const uint64_t MAX_TIMEOUT_SEC = 120ULL;
+    static uint64_t ignTimeoutNs;
+    static bool enabled;
 };
+
 } // namespace pos
