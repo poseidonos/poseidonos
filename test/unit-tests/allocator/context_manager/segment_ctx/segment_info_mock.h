@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 
 namespace pos
@@ -19,6 +17,9 @@ public:
     MOCK_METHOD(void, SetOccupiedStripeCount, (uint32_t cnt), (override));
     MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (), (override));
     MOCK_METHOD(uint32_t, IncreaseOccupiedStripeCount, (), (override));
+    MOCK_METHOD(std::mutex&, GetLock, (), (override));
+    MOCK_METHOD(SegmentState, GetState, (), (override));
+    MOCK_METHOD(void, SetState, (SegmentState newState), (override));
 };
 
 } // namespace pos

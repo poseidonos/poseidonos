@@ -21,8 +21,6 @@
 #include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_lock_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_states_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"

@@ -91,4 +91,16 @@ SegmentInfo::IncreaseOccupiedStripeCount(void)
     return ++occupiedStripeCount;
 }
 
+void
+SegmentInfo::SetState(SegmentState newState)
+{
+    state = newState;
+}
+
+SegmentState
+SegmentInfo::GetState(void)
+{
+    return state;
+}
+
 } // namespace pos

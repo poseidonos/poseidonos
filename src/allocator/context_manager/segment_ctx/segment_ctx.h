@@ -39,8 +39,6 @@
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
-#include "src/allocator/context_manager/segment_ctx/segment_lock.h"
-#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
@@ -55,7 +53,6 @@ public:
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
         BitMapMutex* segmentBitmap,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
@@ -120,8 +117,6 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
-    SegmentStates* segmentStates;
-
     BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
 
     uint32_t numSegments;
@@ -130,7 +125,6 @@ private:
     AllocatorAddressInfo* addrInfo;
 
     std::mutex segCtxLock;
-    SegmentLock* segStateLocks;
 
     RebuildCtx* rebuildCtx;
     TelemetryPublisher* tp;

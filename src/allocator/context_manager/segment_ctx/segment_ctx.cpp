@@ -35,8 +35,6 @@
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/segment_ctx/segment_lock.h"
-#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
@@ -46,23 +44,20 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, nullptr, nullptr, rebuildCtx_, addrInfo_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_)
 {
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
     BitMapMutex* segmentBitmap_,
     RebuildCtx* rebuildCtx_,
     AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
-  segmentStates(segmentStates_),
   allocSegBitmap(segmentBitmap_),
   numSegments(0),
   initialized(false),
   addrInfo(addrInfo_),
-  segStateLocks(segmentStateLocks_),
   rebuildCtx(rebuildCtx_),
   tp(tp_)
 {
@@ -107,18 +102,6 @@ SegmentCtx::Init(void)
     numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
 
-    if (segmentStates == nullptr)
-    {
-        segmentStates = new SegmentStates[numSegments];
-    }
-    for (uint32_t segmentId = 0; segmentId < numSegments; ++segmentId)
-    {
-        segmentStates[segmentId].SetSegmentId(segmentId);
-    }
-    if (segStateLocks == nullptr)
-    {
-        segStateLocks = new SegmentLock[numSegments];
-    }
     if (allocSegBitmap == nullptr)
     {
         allocSegBitmap = new BitMapMutex(numSegments);
@@ -139,18 +122,6 @@ SegmentCtx::Dispose(void)
     {
         delete[] segmentInfos;
         segmentInfos = nullptr;
-    }
-
-    if (segmentStates != nullptr)
-    {
-        delete[] segmentStates;
-        segmentStates = nullptr;
-    }
-
-    if (segStateLocks != nullptr)
-    {
-        delete[] segStateLocks;
-        segStateLocks = nullptr;
     }
 
     if (allocSegBitmap != nullptr)
@@ -191,8 +162,8 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 
     if (validCount == 0)
     {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        SegmentState state = segmentStates[segId].GetState();
+        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
+        SegmentState state = segmentInfos[segId].GetState();
         if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
         {
             assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
@@ -212,7 +183,7 @@ SegmentCtx::_FreeSegment(SegmentId segId)
     assert(segmentInfos[segId].GetValidBlockCount() == 0);
 
     segmentInfos[segId].SetOccupiedStripeCount(0);
-    segmentStates[segId].SetState(SegmentState::FREE);
+    segmentInfos[segId].SetState(SegmentState::FREE);
     allocSegBitmap->ClearBit(segId);
 }
 
@@ -230,10 +201,10 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
     uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
     if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
     {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
         if (segmentInfos[segId].GetValidBlockCount() == 0)
         {
-            if (segmentStates[segId].GetState() != SegmentState::FREE)
+            if (segmentInfos[segId].GetState() != SegmentState::FREE)
             {
                 _FreeSegment(segId);
                 segmentFreed = true;
@@ -241,7 +212,7 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
         }
         else
         {
-            segmentStates[segId].SetState(SegmentState::SSD);
+            segmentInfos[segId].SetState(SegmentState::SSD);
         }
     }
     return segmentFreed;
@@ -291,11 +262,6 @@ SegmentCtx::GetSectionAddr(int section)
             ret = (char*)segmentInfos;
             break;
         }
-        case AC_SEGMENT_STATES:
-        {
-            ret = (char*)segmentStates;
-            break;
-        }
         case AC_ALLOCATE_SEGMENT_BITMAP:
         {
             ret = (char*)allocSegBitmap->GetMapAddr();
@@ -319,11 +285,6 @@ SegmentCtx::GetSectionSize(int section)
         case SC_SEGMENT_INFO:
         {
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
-            break;
-        }
-        case AC_SEGMENT_STATES:
-        {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentStates);
             break;
         }
         case AC_ALLOCATE_SEGMENT_BITMAP:
@@ -370,12 +331,12 @@ SegmentCtx::SetSegmentState(SegmentId segId, SegmentState state, bool needlock)
 {
     if (needlock == true)
     {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        segmentStates[segId].SetState(state);
+        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
+        segmentInfos[segId].SetState(state);
     }
     else
     {
-        segmentStates[segId].SetState(state);
+        segmentInfos[segId].SetState(state);
     }
 }
 
@@ -384,25 +345,25 @@ SegmentCtx::GetSegmentState(SegmentId segId, bool needlock)
 {
     if (needlock == true)
     {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        return segmentStates[segId].GetState();
+        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
+        return segmentInfos[segId].GetState();
     }
     else
     {
-        return segmentStates[segId].GetState();
+        return segmentInfos[segId].GetState();
     }
 }
 
 std::mutex&
 SegmentCtx::GetSegStateLock(SegmentId segId)
 {
-    return segStateLocks[segId].GetLock();
+    return segmentInfos[segId].GetLock();
 }
 
 void
 SegmentCtx::AllocateSegment(SegmentId segId)
 {
-    segmentStates[segId].SetState(SegmentState::NVRAM);
+    segmentInfos[segId].SetState(SegmentState::NVRAM);
     allocSegBitmap->SetBit(segId);
 }
 
@@ -410,7 +371,7 @@ void
 SegmentCtx::ReleaseSegment(SegmentId segId)
 {
     allocSegBitmap->ClearBit(segId);
-    segmentStates[segId].SetState(SegmentState::FREE);
+    segmentInfos[segId].SetState(SegmentState::FREE);
 
     segmentInfos[segId].SetOccupiedStripeCount(0);
     segmentInfos[segId].SetValidBlockCount(0);
@@ -451,7 +412,7 @@ SegmentCtx::AllocateFreeSegment(void)
         }
         else
         {
-            segmentStates[segId].SetState(SegmentState::NVRAM);
+            segmentInfos[segId].SetState(SegmentState::NVRAM);
 
             assert(segmentInfos[segId].GetOccupiedStripeCount() == 0);
             assert(segmentInfos[segId].GetValidBlockCount() == 0);
@@ -511,8 +472,8 @@ SegmentCtx::FindMostInvalidSSDSegment(void)
     for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
     {
         uint32_t cnt = segmentInfos[segId].GetValidBlockCount();
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        if ((segmentStates[segId].GetState() != SegmentState::SSD) || (cnt == 0))
+        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
+        if ((segmentInfos[segId].GetState() != SegmentState::SSD) || (cnt == 0))
         {
             continue;
         }

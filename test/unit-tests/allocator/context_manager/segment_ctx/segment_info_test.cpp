@@ -85,4 +85,33 @@ TEST(SegmentInfo, IncreaseOccupiedStripeCount_TestIncreaseValue)
     EXPECT_EQ(8, ret);
 }
 
+TEST(SegmentInfo, GetLock_TestSimpleGetter)
+{
+    // given
+    SegmentInfo segInfos;
+    // when
+    std::mutex& m = segInfos.GetLock();
+}
+
+TEST(SegmentInfo, GetState_TestSimpleGetter)
+{
+    // given
+    SegmentInfo segInfos;
+    segInfos.SetState(SegmentState::FREE);
+    // when
+    SegmentState ret = segInfos.GetState();
+    // then
+    EXPECT_EQ(SegmentState::FREE, ret);
+}
+
+TEST(SegmentInfo, SetState_TestSimpleSetter)
+{
+    // given
+    SegmentInfo segInfos;
+    // when
+    segInfos.SetState(SegmentState::SSD);
+    // then
+    SegmentState ret = segInfos.GetState();
+    EXPECT_EQ(SegmentState::SSD, ret);
+}
 } // namespace pos
