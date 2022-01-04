@@ -6,6 +6,7 @@ Create an array for PoseidonOS.
 
 
 Create an array for PoseidonOS. 
+Please note that if capacity of the data devices is heterogeneous, it is truncated based on the smallest one.
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 

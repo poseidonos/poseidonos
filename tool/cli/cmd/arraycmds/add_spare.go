@@ -18,6 +18,7 @@ var AddSpareCmd = &cobra.Command{
 	Long: `
 Add a device as a spare to an array. Use this command when you want 
 to add a spare device to an array that was created already. 
+Please note that the capacity of the spare device must be equal to or greater than the smallest capacity among existing array devices.
 
 Syntax:
 	poseidonos-cli array addspare (--spare | -s) DeviceName (--array-name | -a) ArrayName
