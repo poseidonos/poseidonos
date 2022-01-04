@@ -81,7 +81,7 @@ private:
     int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
     int _CheckNvmCapacity(const ArrayDeviceSet& devSet);
     uint64_t _ComputeMinNvmCapacity(const uint32_t logicalChunkCount);
-    ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
+    uint64_t _GetBaseCapacity(const vector<ArrayDevice*>& devs);
 
     ArrayDeviceList* devs_ = nullptr;
     DeviceManager* sysDevMgr_;

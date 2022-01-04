@@ -82,10 +82,15 @@ SsdPartitionBuilder::_GetSegmentCount(void)
         return ArrayConfig::JOURNAL_PART_SEGMENT_SIZE;
     }
 
-    ArrayDevice* baseline = Enumerable::First(option.devices,
-        [](auto p) { return p->GetState() == ArrayDeviceState::NORMAL; });
-    uint64_t ssdTotalSegments =
-            baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+    uint64_t baseCapa = _GetMinCapacity(option.devices);
+    uint64_t maxCapa = _GetMaxCapacity(option.devices);
+    if (baseCapa != maxCapa)
+    {
+        POS_TRACE_WARN(EID(ARRAY_DEBUG_MSG), "Partitions are constructed with hetero device sizes, resulting in truncation. max:{}, min:{}",
+            maxCapa, baseCapa);
+    }
+
+    uint64_t ssdTotalSegments = baseCapa / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     uint64_t metaSegCnt = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
 
     if (option.partitionType == PartitionType::META_SSD)
@@ -98,6 +103,30 @@ SsdPartitionBuilder::_GetSegmentCount(void)
         return ssdTotalSegments - mbrSegments - metaSegCnt;
     }
     return 0;
+}
+
+uint64_t
+SsdPartitionBuilder::_GetMinCapacity(const vector<ArrayDevice*>& devs)
+{
+    auto&& devList = Enumerable::Where(devs,
+        [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
+
+    ArrayDevice* min = Enumerable::Minimum(devList,
+        [](auto d) { return d->GetUblock()->GetSize(); });
+
+    return min->GetUblock()->GetSize();
+}
+
+uint64_t
+SsdPartitionBuilder::_GetMaxCapacity(const vector<ArrayDevice*>& devs)
+{
+    auto&& devList = Enumerable::Where(devs,
+        [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
+
+    ArrayDevice* max = Enumerable::Maximum(devList,
+        [](auto d) { return d->GetUblock()->GetSize(); });
+
+    return max->GetUblock()->GetSize();
 }
 
 } // namespace pos

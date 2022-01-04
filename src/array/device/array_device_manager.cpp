@@ -41,6 +41,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_list.h"
+#include "src/helper/enumerable/query.h"
 
 namespace pos
 {
@@ -198,10 +199,10 @@ ArrayDeviceManager::AddSpare(string devName)
         return -2; // TODO
     }
 
-    ArrayDevice* baseline = _GetBaseline(devs_->GetDevs().data);
-    if (baseline->GetUblock()->GetSize() != spare->GetSize())
+    uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
+    if (baseCapa > spare->GetSize())
     {
-        return EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
+        return EID(ARRAY_SSD_CAPACITY_ERROR);
     }
 
     devs_->AddSpare(new ArrayDevice(spare));
@@ -432,10 +433,9 @@ ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
 int
 ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 {
-    ArrayDevice* baseline = _GetBaseline(devSet.data);
-    uint64_t capacityBytes = baseline->GetUblock()->GetSize();
+    uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
 
-    if (capacityBytes < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || capacityBytes > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
+    if (baseCapa < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || baseCapa > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
     {
         uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_SSD_CAPACITY_ERROR;
         POS_TRACE_ERROR(eventId,
@@ -443,24 +443,6 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
             ArrayConfig::MINIMUM_SSD_SIZE_BYTE / SIZE_GB,
             ArrayConfig::MAXIMUM_SSD_SIZE_BYTE / SIZE_TB);
         return eventId;
-    }
-    for (ArrayDevice* dev : devSet.data)
-    {
-        if (ArrayDeviceState::NORMAL == dev->GetState() && capacityBytes != dev->GetUblock()->GetSize())
-        {
-            int eventId = EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
-            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
-            return eventId;
-        }
-    }
-    for (ArrayDevice* dev : devSet.spares)
-    {
-        if (capacityBytes != dev->GetUblock()->GetSize())
-        {
-            int eventId = EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
-            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
-            return eventId;
-        }
     }
 
     return 0;
@@ -506,24 +488,21 @@ ArrayDeviceManager::GetDev(string devSn)
     return GetDev(dev);
 }
 
-ArrayDevice*
-ArrayDeviceManager::_GetBaseline(const vector<ArrayDevice*>& devs)
+uint64_t
+ArrayDeviceManager::_GetBaseCapacity(const vector<ArrayDevice*>& devs)
 {
-    ArrayDevice* baseline = nullptr;
-    for (ArrayDevice* dev : devs)
-    {
-        if (ArrayDeviceState::FAULT != dev->GetState())
-        {
-            baseline = dev;
-            break;
-        }
-    }
-    if (nullptr == baseline)
-    {
-        assert(0);
-    }
+    auto&& devList = Enumerable::Where(devs,
+        [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
 
-    return baseline;
+    ArrayDevice* base = Enumerable::Minimum(devList,
+        [](auto d) { return d->GetUblock()->GetSize(); });
+
+    if (base == nullptr)
+    {
+        POS_TRACE_WARN(EID(ARRAY_DEBUG_MSG), "Failed to acquire base capaicty, device cnt: {}", devList.size());
+        return 0;
+    }
+    return base->GetUblock()->GetSize();
 }
 
 void

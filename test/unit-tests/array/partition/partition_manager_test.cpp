@@ -56,10 +56,16 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     PartitionManager pm;
 
-    MockArrayDevice dataDev1(nullptr), dataDev2(nullptr), dataDev3(nullptr), dataDev4(nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev1 = make_shared<MockUBlockDevice>("mock-dataDev1", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev2 = make_shared<MockUBlockDevice>("mock-dataDev2", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev3 = make_shared<MockUBlockDevice>("mock-dataDev3", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev4 = make_shared<MockUBlockDevice>("mock-dataDev4", 1024, nullptr);
+    MockArrayDevice dataDev1(ptrMockUblockDev1), dataDev2(ptrMockUblockDev2), dataDev3(ptrMockUblockDev3), dataDev4(ptrMockUblockDev4);
     vector<ArrayDevice*> data = {&dataDev1, &dataDev2, &dataDev3, &dataDev4};
-    shared_ptr<MockUBlockDevice> ptrMockUblockDev = make_shared<MockUBlockDevice>("mock-dataDev1", 0, nullptr);
-    EXPECT_CALL(dataDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev)); // 'cause this would become "baseline"
+    EXPECT_CALL(dataDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev1));
+    EXPECT_CALL(dataDev2, GetUblock).WillRepeatedly(Return(ptrMockUblockDev2));
+    EXPECT_CALL(dataDev3, GetUblock).WillRepeatedly(Return(ptrMockUblockDev3));
+    EXPECT_CALL(dataDev4, GetUblock).WillRepeatedly(Return(ptrMockUblockDev4));
 
     MockArrayDevice bufDev(nullptr);
     vector<ArrayDevice*> buf = {&bufDev};
@@ -77,7 +83,10 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(dataDev4, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
 
     // set up mocks for _CreateMetaSsd
-    EXPECT_CALL(*ptrMockUblockDev.get(), GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev1, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev3, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev4, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
     EXPECT_CALL(svc, AddTranslator(PartitionType::META_SSD, _)).Times(1);
     EXPECT_CALL(svc, AddRecover(PartitionType::META_SSD, _)).Times(1);
 
@@ -107,6 +116,94 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     int expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     int expectedDataTotalSegments =
         DATA_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedNvmTotalSegments;
+    ASSERT_EQ(expectedDataTotalSegments, pm.GetSizeInfo(PartitionType::USER_DATA)->totalSegments);
+
+    int expectedMetaNvmTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
+    ASSERT_EQ(expectedMetaNvmTotalSegments, pm.GetSizeInfo(PartitionType::META_NVM)->totalSegments);
+
+    int expectedWriteBufferTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
+    ASSERT_EQ(expectedWriteBufferTotalSegments, pm.GetSizeInfo(PartitionType::WRITE_BUFFER)->totalSegments);
+
+    // When 2: PartitionManager deletes all partitions
+    pm.DeletePartitions();
+
+    // Then 2
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::USER_DATA));
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_NVM));
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_SSD));
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::WRITE_BUFFER));
+}
+
+TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
+{
+    // Given 1
+    using MockUblockSharedPtr = std::shared_ptr<MockUBlockDevice>;
+
+    MockIAbrControl mockIAbrControl;
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    PartitionManager pm;
+
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev1 = make_shared<MockUBlockDevice>("mock-dataDev1", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev2 = make_shared<MockUBlockDevice>("mock-dataDev2", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev3 = make_shared<MockUBlockDevice>("mock-dataDev3", 1024, nullptr);
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev4 = make_shared<MockUBlockDevice>("mock-dataDev4", 1024, nullptr);
+    MockArrayDevice dataDev1(ptrMockUblockDev1), dataDev2(ptrMockUblockDev2), dataDev3(ptrMockUblockDev3), dataDev4(ptrMockUblockDev4);
+    vector<ArrayDevice*> data = {&dataDev1, &dataDev2, &dataDev3, &dataDev4};
+    EXPECT_CALL(dataDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev1));
+    EXPECT_CALL(dataDev2, GetUblock).WillRepeatedly(Return(ptrMockUblockDev2));
+    EXPECT_CALL(dataDev3, GetUblock).WillRepeatedly(Return(ptrMockUblockDev3));
+    EXPECT_CALL(dataDev4, GetUblock).WillRepeatedly(Return(ptrMockUblockDev4));
+
+    MockArrayDevice bufDev(nullptr);
+    vector<ArrayDevice*> buf = {&bufDev};
+    shared_ptr<MockUBlockDevice> ptrMockUblockNvmDev = make_shared<MockUBlockDevice>("mock-nvmDev", 0, nullptr);
+    EXPECT_CALL(bufDev, GetUblock).WillRepeatedly(Return(ptrMockUblockNvmDev)); // 'cause this would become "baseline"
+
+    uint64_t DATA_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 20; // in bytes
+    uint64_t HETERO_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 15; // in bytes
+    uint64_t NVM_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 1;  // in bytes
+
+    MockPartitionServices svc;
+
+    EXPECT_CALL(dataDev1, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(dataDev2, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(dataDev3, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(dataDev4, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+
+    // set up mocks for _CreateMetaSsd
+    EXPECT_CALL(*ptrMockUblockDev1, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(HETERO_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev3, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(*ptrMockUblockDev4, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(svc, AddTranslator(PartitionType::META_SSD, _)).Times(1);
+    EXPECT_CALL(svc, AddRecover(PartitionType::META_SSD, _)).Times(1);
+
+    // set up mocks for _CreateUserData
+    EXPECT_CALL(*ptrMockUblockNvmDev.get(), GetSize).WillRepeatedly(Return(NVM_DEV_SIZE));
+    EXPECT_CALL(svc, AddTranslator(PartitionType::USER_DATA, _)).Times(1);
+    EXPECT_CALL(svc, AddRecover(PartitionType::USER_DATA, _)).Times(1);
+
+    // set up mocks for _CreateMetaNvm
+    EXPECT_CALL(svc, AddTranslator(PartitionType::META_NVM, _)).Times(1);
+
+    // set up mocks for _CreateWriteBuffer
+    EXPECT_CALL(svc, AddTranslator(PartitionType::WRITE_BUFFER, _)).Times(1);
+
+    // verify the number of invocations
+    EXPECT_CALL(svc, AddRebuildTarget).Times(2); // one for nvm and the other for userdata
+
+    // When 1: PartitionManager creates all partitions
+    int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
+    // Then 1: validate against expected number of segments of each partition type.
+    ASSERT_EQ(0, actual);
+    int expectedNvmTotalSegments = DIV_ROUND_UP(
+        HETERO_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE * ArrayConfig::META_SSD_SIZE_RATIO,
+        (uint64_t)(100));
+    ASSERT_EQ(expectedNvmTotalSegments, pm.GetSizeInfo(PartitionType::META_SSD)->totalSegments);
+
+    int expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+    int expectedDataTotalSegments =
+        HETERO_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedNvmTotalSegments;
     ASSERT_EQ(expectedDataTotalSegments, pm.GetSizeInfo(PartitionType::USER_DATA)->totalSegments);
 
     int expectedMetaNvmTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;

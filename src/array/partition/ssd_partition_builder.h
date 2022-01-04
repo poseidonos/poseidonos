@@ -83,5 +83,7 @@ private:
     uint32_t _GetSegmentCount(void);
     SsdPartitionBuilder* next = nullptr;
     SsdPartitionOptions option;
+    uint64_t _GetMinCapacity(const vector<ArrayDevice*>& devs);
+    uint64_t _GetMaxCapacity(const vector<ArrayDevice*>& devs);
 };
 } // namespace pos

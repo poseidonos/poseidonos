@@ -146,4 +146,38 @@ TEST(Query, Query_testSelect)
     ASSERT_EQ("foo", *(peopleNameList.begin()));
     ASSERT_EQ(3, peopleNameList.size());
 }
+
+TEST(Query, Query_testMinimum)
+{
+    // Given
+    std::vector<Person*> v1;
+    int minVal = 10;
+    v1.push_back(new Person("foo", 50));
+    v1.push_back(new Person("bar", minVal));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personNameisbar = Enumerable::Minimum(v1,
+        [](auto p) { return p->GetID(); });
+
+    // Then
+    ASSERT_EQ(minVal, personNameisbar->GetID());
+}
+
+TEST(Query, Query_testMaximum)
+{
+    // Given
+    std::vector<Person*> v1;
+    int maxVal = 100;
+    v1.push_back(new Person("foo", 50));
+    v1.push_back(new Person("bar", maxVal));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personNameisbar = Enumerable::Maximum(v1,
+        [](auto p) { return p->GetID(); });
+
+    // Then
+    ASSERT_EQ(maxVal, personNameisbar->GetID());
+}
 }  // namespace Enumerable
