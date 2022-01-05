@@ -63,7 +63,7 @@ RaidNone::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
 {
     FtWriteEntry ftEntry;
     ftEntry.addr = {.stripeId = src.addr.stripeId,
-        .offset = 0};
+        .offset = src.addr.offset};
     ftEntry.buffers = *(src.buffers);
     ftEntry.blkCnt = src.blkCnt;
     dst.clear();
