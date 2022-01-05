@@ -22,7 +22,7 @@ Please note that if capacity of the data devices is heterogeneous, it is truncat
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
-	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RaidType]
+	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10]
 
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 
@@ -70,7 +70,7 @@ func buildCreateArrayReq(command string) messages.Request {
 
 	param := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
-		RAID:      create_array_raid,
+		RAID:      strings.ToUpper(create_array_raid),
 		BUFFER:    buffer,
 		DATA:      dataDevs,
 		SPARE:     spareDevs,

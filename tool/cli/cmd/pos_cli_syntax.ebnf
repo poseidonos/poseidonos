@@ -53,7 +53,7 @@ BufCacheSize = Number ;
 
 NumSharedBuffers = Number ;
 
-RaidType = [ "RAID5" | "raid5" ] ;
+RaidType = [ "RAID5" | "raid5" | "RAID0" | "raid0" | "RAID10" | "raid10"] ;
 
 SubsystemNQN = Letter , { Letter | Digit | "-" | "_" } ;
 
