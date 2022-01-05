@@ -32,38 +32,25 @@
 
 #pragma once
 
-const uint64_t SIZE_GB = 1UL * 1024 * 1024 * 1024;
-const uint64_t SIZE_TB = SIZE_GB * 1024;
+#include <list>
+#include <vector>
+
+#include "method.h"
 
 namespace pos
 {
-class ArrayConfig
+class PartitionPhysicalSize;
+
+class RaidNone : public Method
 {
 public:
-    static const uint32_t NVM_DEVICE_COUNT = 1;
-    static const uint64_t MINIMUM_SSD_SIZE_BYTE = 20UL * SIZE_GB;
-    static const uint64_t MAXIMUM_SSD_SIZE_BYTE = 32UL * SIZE_TB;
-    static const uint64_t MINIMUM_NVM_SIZE_BYTE = 2UL * SIZE_GB;
-    static const uint32_t SECTOR_SIZE_BYTE = 512;
-    static const uint32_t BLOCK_SIZE_BYTE = 4096;
-    static const uint32_t SECTORS_PER_BLOCK = 8;
-    static const uint32_t BLOCKS_PER_CHUNK = 64;
-    static const uint64_t STRIPES_PER_SEGMENT = 1024;
-    static const uint64_t SSD_SEGMENT_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK * STRIPES_PER_SEGMENT;
-    static const uint64_t NVM_MBR_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK;
-    static const uint64_t META_NVM_SIZE = 512 * 1024 * 1024; // 512MB
-
-    static const uint64_t MBR_SIZE_BYTE = SSD_SEGMENT_SIZE_BYTE;
-    static const uint64_t SSD_PARTITION_START_LBA =
-        MBR_SIZE_BYTE / SECTOR_SIZE_BYTE;
-    static const uint64_t META_SSD_SIZE_RATIO = 2; // 2% of USER_DATA
-
-    static const uint32_t NVM_SEGMENT_SIZE = 1;
-    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 1;
-    static const uint32_t PARITY_COUNT = 1;
-
-    static const uint32_t MIN_WRITE_BLOCK_COUNT = 1;
-    static const uint32_t OVER_PROVISIONING_RATIO = 10;
+    explicit RaidNone(const PartitionPhysicalSize* pSize);
+    virtual ~RaidNone();
+    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
+    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    uint32_t GetMinimumNumberOfDevices(void) override { return 1; }
+    virtual bool IsRecoverable(void) override { return false; }
 };
 
 } // namespace pos

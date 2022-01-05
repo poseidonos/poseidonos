@@ -30,40 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-const uint64_t SIZE_GB = 1UL * 1024 * 1024 * 1024;
-const uint64_t SIZE_TB = SIZE_GB * 1024;
+#include "raid_none.h"
+#include "src/helper/enumerable/query.h"
+#include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/array_models/dto/partition_physical_size.h"
 
 namespace pos
 {
-class ArrayConfig
+RaidNone::RaidNone(const PartitionPhysicalSize* pSize)
+: Method(RaidTypeEnum::NONE)
 {
-public:
-    static const uint32_t NVM_DEVICE_COUNT = 1;
-    static const uint64_t MINIMUM_SSD_SIZE_BYTE = 20UL * SIZE_GB;
-    static const uint64_t MAXIMUM_SSD_SIZE_BYTE = 32UL * SIZE_TB;
-    static const uint64_t MINIMUM_NVM_SIZE_BYTE = 2UL * SIZE_GB;
-    static const uint32_t SECTOR_SIZE_BYTE = 512;
-    static const uint32_t BLOCK_SIZE_BYTE = 4096;
-    static const uint32_t SECTORS_PER_BLOCK = 8;
-    static const uint32_t BLOCKS_PER_CHUNK = 64;
-    static const uint64_t STRIPES_PER_SEGMENT = 1024;
-    static const uint64_t SSD_SEGMENT_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK * STRIPES_PER_SEGMENT;
-    static const uint64_t NVM_MBR_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK;
-    static const uint64_t META_NVM_SIZE = 512 * 1024 * 1024; // 512MB
+    ftSize_ = {
+        .minWriteBlkCnt = ArrayConfig::MIN_WRITE_BLOCK_COUNT,
+        .backupBlkCnt = 0,
+        .blksPerChunk = pSize->blksPerChunk,
+        .blksPerStripe = pSize->blksPerChunk,
+        .chunksPerStripe = 1};
+}
 
-    static const uint64_t MBR_SIZE_BYTE = SSD_SEGMENT_SIZE_BYTE;
-    static const uint64_t SSD_PARTITION_START_LBA =
-        MBR_SIZE_BYTE / SECTOR_SIZE_BYTE;
-    static const uint64_t META_SSD_SIZE_RATIO = 2; // 2% of USER_DATA
+int
+RaidNone::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
+{
+    dst = {.stripeId = src.stripeId,
+        .offset = src.offset};
+    return 0;
+}
 
-    static const uint32_t NVM_SEGMENT_SIZE = 1;
-    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 1;
-    static const uint32_t PARITY_COUNT = 1;
+int
+RaidNone::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+{
+    FtWriteEntry ftEntry;
+    ftEntry.addr = {.stripeId = src.addr.stripeId,
+        .offset = 0};
+    ftEntry.buffers = *(src.buffers);
+    ftEntry.blkCnt = src.blkCnt;
+    dst.clear();
+    dst.push_front(ftEntry);
 
-    static const uint32_t MIN_WRITE_BLOCK_COUNT = 1;
-    static const uint32_t OVER_PROVISIONING_RATIO = 10;
-};
+    return 0;
+}
+
+RaidState
+RaidNone::GetRaidState(vector<ArrayDeviceState> devs)
+{
+    auto&& abnormalDevs = Enumerable::Where(devs,
+        [](auto d) { return d != ArrayDeviceState::NORMAL; });
+
+    if (abnormalDevs.size() == 0)
+    {
+        return RaidState::NORMAL;
+    }
+    return RaidState::FAILURE;
+}
+
+RaidNone::~RaidNone()
+{
+}
 
 } // namespace pos

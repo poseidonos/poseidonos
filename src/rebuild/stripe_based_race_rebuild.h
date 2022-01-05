@@ -40,11 +40,11 @@
 
 namespace pos
 {
-class Raid10Rebuild : public RebuildBehavior
+class StripeBasedRaceRebuild : public RebuildBehavior
 {
 public:
-    explicit Raid10Rebuild(unique_ptr<RebuildContext> c);
-    ~Raid10Rebuild(void);
+    explicit StripeBasedRaceRebuild(unique_ptr<RebuildContext> c);
+    ~StripeBasedRaceRebuild(void);
 
     virtual bool Read(void) override;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;

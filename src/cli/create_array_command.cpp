@@ -66,11 +66,10 @@ string CreateArrayCommand::Execute(json& doc, string rid)
         dataFt = doc["param"]["raidtype"].get<std::string>();
     }
     string metaFt = "RAID10";
-    // TODO(SRM): Set Meta's RAID to RAID0
-    // if (dataFt == "RAID0")
-    // {
-    //     metaFt = dataFt;
-    // }
+    if (dataFt == "RAID0" || dataFt == "NONE")
+    {
+        metaFt = dataFt;
+    }
 
     if (doc["param"].contains("buffer"))
     {

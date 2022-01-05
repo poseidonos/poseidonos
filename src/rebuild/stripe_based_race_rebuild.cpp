@@ -29,7 +29,7 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "raid10_rebuild.h"
+#include "stripe_based_race_rebuild.h"
 
 #include <typeinfo>
 
@@ -53,10 +53,10 @@
 
 namespace pos
 {
-Raid10Rebuild::Raid10Rebuild(unique_ptr<RebuildContext> c)
+StripeBasedRaceRebuild::StripeBasedRaceRebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid10Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "StripeBasedRaceRebuild");
     locker = IOLockerSingleton::Instance();
     assert(locker != nullptr);
 
@@ -64,28 +64,27 @@ Raid10Rebuild::Raid10Rebuild(unique_ptr<RebuildContext> c)
     assert(ret);
 }
 
-Raid10Rebuild::~Raid10Rebuild(void)
+StripeBasedRaceRebuild::~StripeBasedRaceRebuild(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~Raid10Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~StripeBasedRaceRebuild");
 }
 
 string
-Raid10Rebuild::_GetClassName(void)
+StripeBasedRaceRebuild::_GetClassName(void)
 {
     return typeid(this).name();
 }
 
 int
-Raid10Rebuild::_GetTotalReadChunksForRecovery(void)
+StripeBasedRaceRebuild::_GetTotalReadChunksForRecovery(void)
 {
     return 1; // Mirror
 }
 
-
 bool
-Raid10Rebuild::Read(void)
+StripeBasedRaceRebuild::Read(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid10Rebuild::Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "StripeBasedRaceRebuild::Rebuild");
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
@@ -146,7 +145,7 @@ Raid10Rebuild::Read(void)
 
     ctx->taskCnt = currWorkload;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid10Rebuild - from:{}, to:{}", from, to);
+        "StripeBasedRaceRebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -179,9 +178,9 @@ Raid10Rebuild::Read(void)
     return true;
 }
 
-bool Raid10Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
+bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
-    POS_TRACE_DEBUG(2831, "Raid10Rebuild::Write, target stripe:{}", targetId);
+    POS_TRACE_DEBUG(2831, "StripeBasedRaceRebuild::Write, target stripe:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_MetadataRebuild);
@@ -204,7 +203,7 @@ bool Raid10Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-bool Raid10Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
+bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     locker->Unlock(ctx->faultDev, targetId);
 
@@ -222,7 +221,7 @@ bool Raid10Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-void Raid10Rebuild::UpdateProgress(uint32_t val)
+void StripeBasedRaceRebuild::UpdateProgress(uint32_t val)
 {
     ctx->prog->Update(ctx->part, val, ctx->stripeCnt);
 }

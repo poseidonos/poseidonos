@@ -927,7 +927,11 @@ Array::_RegisterService(void)
     {
         if (devMgr_ != nullptr)
         {
-            IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+            RaidTypeEnum metaRaid = ptnMgr->GetRaidType(PartitionType::META_SSD);
+            if (metaRaid == RaidTypeEnum::RAID10)
+            {
+                IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+            }
             return 0;
         }
     }

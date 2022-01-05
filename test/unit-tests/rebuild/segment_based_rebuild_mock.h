@@ -1,17 +1,15 @@
-#pragma once
-
 #include <gmock/gmock.h>
 #include <string>
 #include <list>
 #include <vector>
-#include "src/rebuild/raid10_rebuild.h"
+#include "src/rebuild/segment_based_rebuild.h"
 
 namespace pos
 {
-class MockRaid10Rebuild : public Raid10Rebuild
+class MockSegmentBasedRebuild : public SegmentBasedRebuild
 {
 public:
-    using Raid10Rebuild::Raid10Rebuild;
+    using SegmentBasedRebuild::SegmentBasedRebuild;
     MOCK_METHOD(bool, Read, (), (override));
     MOCK_METHOD(bool, Write, (uint32_t targetId, UbioSmartPtr ubio), (override));
     MOCK_METHOD(bool, Complete, (uint32_t targetId, UbioSmartPtr ubio), (override));

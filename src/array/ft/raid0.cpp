@@ -43,7 +43,7 @@ Raid0::Raid0(const PartitionPhysicalSize* pSize)
 : Method(RaidTypeEnum::RAID0)
 {
     ftSize_ = {
-        .minWriteBlkCnt = ArrayConfig::RAID0_MIN_WRITE_BLOCK_COUNT,
+        .minWriteBlkCnt = ArrayConfig::MIN_WRITE_BLOCK_COUNT,
         .backupBlkCnt = 0,
         .blksPerChunk = pSize->blksPerChunk,
         .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,

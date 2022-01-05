@@ -41,11 +41,11 @@
 
 namespace pos
 {
-class Raid5Rebuild : public RebuildBehavior
+class SegmentBasedRebuild : public RebuildBehavior
 {
 public:
-    Raid5Rebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc);
-    ~Raid5Rebuild(void);
+    SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc);
+    ~SegmentBasedRebuild(void);
 
     virtual bool Read(void) override;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;

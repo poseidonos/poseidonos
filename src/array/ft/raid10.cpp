@@ -44,7 +44,7 @@ Raid10::Raid10(const PartitionPhysicalSize* pSize)
 {
     mirrorDevCnt = pSize->chunksPerStripe / 2;
     ftSize_ = {
-        .minWriteBlkCnt = ArrayConfig::RAID10_MIN_WRITE_BLOCK_COUNT,
+        .minWriteBlkCnt = ArrayConfig::MIN_WRITE_BLOCK_COUNT,
         .backupBlkCnt = mirrorDevCnt * pSize->blksPerChunk,
         .blksPerChunk = pSize->blksPerChunk,
         .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,

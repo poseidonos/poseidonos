@@ -120,7 +120,6 @@ TEST(Array, Init_testIfInitIsDoneSuccessfully)
 
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     vector<ArrayDevice*> mockDevs;
-    EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillOnce(Return(mockDevs));
     EXPECT_CALL(*mockState, SetMount).Times(1);
     EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(true));
     EXPECT_CALL(*mockArrayService, Unregister).Times(0);

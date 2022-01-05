@@ -71,7 +71,12 @@ PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nv
     if (nvm == nullptr)
     {
         POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
-        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, RaidTypeEnum::RAID0, devs, nullptr);
+        RaidTypeEnum journalRaid = RaidTypeEnum::RAID0;
+        if (dataRaid == RaidTypeEnum::NONE)
+        {
+            journalRaid = RaidTypeEnum::NONE;
+        }
+        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nullptr);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {

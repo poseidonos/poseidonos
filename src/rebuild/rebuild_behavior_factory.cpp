@@ -33,6 +33,7 @@
 #include "rebuild_behavior_factory.h"
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
+#include "src/include/partition_type.h"
 
 namespace pos
 {
@@ -45,25 +46,18 @@ RebuildBehaviorFactory::RebuildBehaviorFactory(IContextManager* allocator)
 RebuildBehavior*
 RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
-    switch (ctx->raidType)
+    if (ctx->part == PARTITION_TYPE_STR[PartitionType::META_SSD])
     {
-    case RaidTypeEnum::RAID5 :
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, StripeBasedRaceRebuild Created");
+        return new StripeBasedRaceRebuild(move(ctx));
+    }
+    else if (ctx->part == PARTITION_TYPE_STR[PartitionType::USER_DATA])
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid5Rebuild Created");
-        return new Raid5Rebuild(move(ctx), allocatorSvc);
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, SegmentBasedRebuild Created");
+        return new SegmentBasedRebuild(move(ctx), allocatorSvc);
     }
 
-    case RaidTypeEnum::RAID10 :
-    {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid10Rebuild Created");
-        return new Raid10Rebuild(move(ctx));
-    }
-
-    default:
-    {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, nullptr returned");
-        return nullptr;
-    }
-    }
+    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, nullptr returned");
+    return nullptr;
 }
 } // namespace pos

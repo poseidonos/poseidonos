@@ -45,6 +45,7 @@
 #include "src/array/ft/raid10.h"
 #include "src/array/ft/raid5.h"
 #include "src/array/ft/raid0.h"
+#include "src/array/ft/raid_none.h"
 #include "src/helper/calc/calc.h"
 
 namespace pos
@@ -165,9 +166,14 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         }
         method = raid5;
     }
+    else if (raidType == RaidTypeEnum::NONE)
+    {
+        RaidNone* raidNone = new RaidNone(&physicalSize);
+        method = raidNone;
+    }
     else
     {
-        int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
+        int eventId = EID(ARRAY_WRONG_FT_METHOD);
         POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
         return eventId;
     }
@@ -175,13 +181,12 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     size_t actual = devs.size();
     if (required > actual)
     {
-        int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
+        int eventId = EID(ARRAY_DEVICE_COUNT_ERROR);
         POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, need:{}, actual:{}",
             required, actual);
         delete method;
         return eventId;
     }
-
     return 0;
 }
 

@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "raid5_rebuild.h"
+#include "segment_based_rebuild.h"
 
 #include <typeinfo>
 
@@ -55,39 +55,39 @@
 
 namespace pos
 {
-Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc)
+SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc)
 : RebuildBehavior(move(c)),
   allocatorSvc(allocatorSvc)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "SegmentBasedRebuild");
     bool ret = _InitBuffers();
     assert(ret);
 }
 
-Raid5Rebuild::~Raid5Rebuild(void)
+SegmentBasedRebuild::~SegmentBasedRebuild(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~Raid5Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~SegmentBasedRebuild");
 }
 
 string
-Raid5Rebuild::_GetClassName(void)
+SegmentBasedRebuild::_GetClassName(void)
 {
     return typeid(this).name();
 }
 
 int
-Raid5Rebuild::_GetTotalReadChunksForRecovery(void)
+SegmentBasedRebuild::_GetTotalReadChunksForRecovery(void)
 {
     return ctx->size->chunksPerStripe - 1; // Except faulty device
 }
 
 SegmentId
-Raid5Rebuild::_NextSegment(void)
+SegmentBasedRebuild::_NextSegment(void)
 {
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-                "Raid5Rebuild::_NextSegment is {}",
+                "SegmentBasedRebuild::_NextSegment is {}",
                 segId);
     if (segId == UINT32_MAX)
     {
@@ -98,17 +98,17 @@ Raid5Rebuild::_NextSegment(void)
 }
 
 bool
-Raid5Rebuild::Read(void)
+SegmentBasedRebuild::Read(void)
 {
     uint32_t strCnt = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint64_t key = (((uint64_t)strCnt) << 32) + blkCnt;
-    airlog("LAT_Raid5RebuildRead", "AIR_BEGIN", 0, key);
+    airlog("LAT_SegmentBasedRebuildRead", "AIR_BEGIN", 0, key);
 
     SegmentId segId = _NextSegment();
     if (segId == NEED_TO_RETRY)
     {
-        airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
+        airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
         return false;
     }
     UpdateProgress(0);
@@ -141,20 +141,19 @@ Raid5Rebuild::Read(void)
         complete->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
 
-        airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
+        airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
         return true;
     }
 
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid5Rebuild - segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
+        "SegmentBasedRebuild - segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;
         void* buffer = recoverBuffers->TryGetBuffer();
         assert(buffer != nullptr);
-
 
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->arrayIndex));
         ubio->dir = UbioDir::Write;
@@ -177,14 +176,14 @@ Raid5Rebuild::Read(void)
         }
     }
 
-    airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
+    airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
     return true;
 }
 
-bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
+bool SegmentBasedRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
-    airlog("LAT_Raid5RebuildWrite", "AIR_BEGIN", 0, objAddr);
+    airlog("LAT_SegmentBasedRebuildWrite", "AIR_BEGIN", 0, objAddr);
 
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
@@ -204,12 +203,12 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
         ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
     }
 
-    airlog("LAT_Raid5RebuildWrite", "AIR_END", 0, objAddr);
+    airlog("LAT_SegmentBasedRebuildWrite", "AIR_END", 0, objAddr);
     ubio = nullptr;
     return true;
 }
 
-bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
+bool SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
 
@@ -226,12 +225,12 @@ bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-void Raid5Rebuild::UpdateProgress(uint32_t val)
+void SegmentBasedRebuild::UpdateProgress(uint32_t val)
 {
     uint32_t remainingStripe =
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid5Rebuild::UpdateProgress, reamining:{}", remainingStripe);
+        "SegmentBasedRebuild::UpdateProgress, reamining:{}", remainingStripe);
     ctx->prog->Update(ctx->part, val, remainingStripe);
 }
 
