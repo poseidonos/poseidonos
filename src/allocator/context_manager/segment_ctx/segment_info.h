@@ -51,6 +51,7 @@ class SegmentInfo
 {
 public:
     SegmentInfo(void);
+    SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
     ~SegmentInfo(void);
 
     virtual uint32_t GetValidBlockCount(void);
@@ -62,14 +63,17 @@ public:
     virtual uint32_t GetOccupiedStripeCount(void);
     virtual uint32_t IncreaseOccupiedStripeCount(void);
 
-    virtual std::mutex& GetLock(void)
-    {
-        return seglock;
-    }
     virtual SegmentState GetState(void);
-    virtual void SetState(SegmentState newState);
+
+    virtual void MoveToNvramState(void);
+    virtual bool MoveToSsdStateOrFreeStateIfItBecomesEmpty(void);
+    virtual void MoveToVictimState(void);
+
+    virtual uint32_t GetValidBlockCountIfSsdState(void);
 
 private:
+    void _MoveToFreeState(void);
+
     std::atomic<uint32_t> validBlockCount;
     std::atomic<uint32_t> occupiedStripeCount;
 

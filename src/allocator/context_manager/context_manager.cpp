@@ -160,33 +160,13 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {
-    SegmentId segId = segmentCtx->AllocateFreeSegment();
-
-    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
-    if (segId != UNMAP_SEGMENT)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
-        POSMetricValue v;
-        v.gauge = freeSegCount;
-        telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
-    }
-    return segId;
+    return segmentCtx->AllocateFreeSegment();
 }
 
 SegmentId
 ContextManager::AllocateGCVictimSegment(void)
 {
-    SegmentId victimSegment = segmentCtx->FindMostInvalidSSDSegment();
-    if (victimSegment != UNMAP_SEGMENT)
-    {
-        segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
-
-        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, segmentCtx->GetNumOfFreeSegmentWoLock());
-        POSMetricValue v;
-        v.gauge = victimSegment;
-        telPublisher->PublishData(TEL30002_ALCT_GCVICTIM_SEG, v, MT_GAUGE);
-    }
-    return victimSegment;
+    return segmentCtx->AllocateGCVictimSegment();
 }
 
 GcMode
@@ -308,8 +288,6 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 void
 ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
-    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
-    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
     rebuildCtx->FreeSegmentInRebuildTarget(segId);
 
     if (GetCurrentGcMode() != MODE_URGENT_GC)

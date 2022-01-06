@@ -32,13 +32,24 @@
 
 #include "segment_info.h"
 
+#include <cassert>
 #include <memory.h>
+
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 SegmentInfo::SegmentInfo(void)
-: validBlockCount(0),
-  occupiedStripeCount(0)
+: SegmentInfo(0, 0, SegmentState::FREE)
+{
+}
+
+// Constructor for UT to inject precondition values
+SegmentInfo::SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
+: validBlockCount(blkCount),
+  occupiedStripeCount(stripeCount),
+  state(segmentState)
 {
 }
 
@@ -62,15 +73,23 @@ SegmentInfo::SetValidBlockCount(int cnt)
 uint32_t
 SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 {
-    validBlockCount += inc;
-    return validBlockCount;
+    return validBlockCount.fetch_add(inc) + inc;
 }
 
 int32_t
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
 {
-    validBlockCount -= dec;
-    return validBlockCount;
+    uint32_t decreased = validBlockCount.fetch_sub(dec) - dec;
+    if (decreased == 0)
+    {
+        std::lock_guard<std::mutex> lock(seglock);
+        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
+        {
+            _MoveToFreeState();
+        }
+    }
+
+    return decreased;
 }
 
 void
@@ -91,16 +110,82 @@ SegmentInfo::IncreaseOccupiedStripeCount(void)
     return ++occupiedStripeCount;
 }
 
-void
-SegmentInfo::SetState(SegmentState newState)
-{
-    state = newState;
-}
-
 SegmentState
 SegmentInfo::GetState(void)
 {
+    std::lock_guard<std::mutex> lock(seglock);
     return state;
+}
+
+void
+SegmentInfo::_MoveToFreeState(void)
+{
+    assert(state != SegmentState::NVRAM);
+
+    occupiedStripeCount = 0;
+    validBlockCount = 0;
+
+    state = SegmentState::FREE;
+}
+
+void
+SegmentInfo::MoveToNvramState(void)
+{
+    if (state != SegmentState::FREE)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+            "Failed to move to NVRAM state. Segment state {} valid count {} occupied stripe count {}",
+            state, validBlockCount, occupiedStripeCount);
+        assert(false);
+    }
+
+    state = SegmentState::NVRAM;
+}
+
+bool
+SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
+{
+    std::lock_guard<std::mutex> lock(seglock);
+    state = SegmentState::SSD;
+
+    if (validBlockCount == 0)
+    {
+        _MoveToFreeState();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void
+SegmentInfo::MoveToVictimState(void)
+{
+    if (state != SegmentState::SSD)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+            "Cannot move to victim state as it's not SSD state");
+        assert(false);
+    }
+
+    std::lock_guard<std::mutex> lock(seglock);
+    state = SegmentState::VICTIM;
+}
+
+uint32_t
+SegmentInfo::GetValidBlockCountIfSsdState(void)
+{
+    std::lock_guard<std::mutex> lock(seglock);
+    if (state != SegmentState::SSD)
+    {
+        return UINT32_MAX;
+    }
+    else
+    {
+        return validBlockCount;
+    }
 }
 
 } // namespace pos

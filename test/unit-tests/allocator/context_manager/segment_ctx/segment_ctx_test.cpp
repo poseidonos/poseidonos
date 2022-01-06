@@ -92,7 +92,7 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountSmallerThanMax
     delete segInfos;
 }
 
-TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidCountIsNotZero)
+TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMax)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -103,74 +103,12 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidC
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, &addrInfo);
 
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
-
     // when
     EXPECT_CALL(*segInfos, IncreaseOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*segInfos, GetValidBlockCount).WillOnce(Return(1));
+    EXPECT_CALL(*segInfos, MoveToSsdStateOrFreeStateIfItBecomesEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*segmentBitmap, ClearBit).Times(1);
     bool segmentFreed = segCtx.IncreaseOccupiedStripeCount(0);
     // then
-    EXPECT_EQ(segmentFreed, false);
-
-    delete segInfos;
-    delete segmentBitmap;
-    delete tp;
-}
-
-TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidCountIsZeroAndSegStateFree)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(100);
-    addrInfo.SetnumUserAreaSegments(1);
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
-    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, &addrInfo);
-
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
-
-    // when
-    EXPECT_CALL(*segInfos, IncreaseOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*segInfos, GetValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::FREE));
-    bool segmentFreed = segCtx.IncreaseOccupiedStripeCount(0);
-    // then
-    EXPECT_EQ(segmentFreed, false);
-
-    delete segInfos;
-    delete segmentBitmap;
-    delete tp;
-}
-
-TEST(SegmentCtx, IncreaseOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidCountIsZeroAndSegStateSSD)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(100);
-    addrInfo.SetnumUserAreaSegments(1);
-
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
-    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, &addrInfo);
-
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
-
-    // when
-    EXPECT_CALL(*segInfos, IncreaseOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillOnce(Return(100));
-    EXPECT_CALL(*segInfos, GetValidBlockCount).WillRepeatedly(Return(0));
-    EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::SSD));
-
-    // then
-    EXPECT_CALL(*segInfos, SetOccupiedStripeCount(0)).Times(1);
-    EXPECT_CALL(*segInfos, SetState(SegmentState::FREE)).Times(1);
-
-    bool segmentFreed = segCtx.IncreaseOccupiedStripeCount(0);
     EXPECT_EQ(segmentFreed, true);
 
     delete segInfos;
@@ -189,9 +127,7 @@ TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
     EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(3));
     EXPECT_CALL(addrInfo, GetblksPerSegment).WillOnce(Return(5));
     // when 1.
-    int ret = segCtx.IncreaseValidBlockCount(0, 1);
-    // then 1.
-    EXPECT_EQ(3, ret);
+    segCtx.IncreaseValidBlockCount(0, 1);
 
     delete segInfos;
 }
@@ -214,7 +150,7 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)
     delete segInfos;
 }
 
-TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValueWhenValidCountZeroAndNVRAMState)
+TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValueWhenSegmentIsNotZero)
 {
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
@@ -222,12 +158,8 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValueWhenValidCountZeroAndN
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
     SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, addrInfo);
 
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
-
     // given 1.
-    EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::NVRAM));
+    EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(10));
 
     // when 1.
     bool ret = segCtx.DecreaseValidBlockCount(0, 1);
@@ -247,16 +179,9 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValueWhenValidCountZeroAndS
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, addrInfo);
 
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
-
     // given 1.
     EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::SSD));
-    EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillRepeatedly(Return(100));
-    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillRepeatedly(Return(100));
-    EXPECT_CALL(*segInfos, SetOccupiedStripeCount(0)).Times(1);
-    EXPECT_CALL(*segInfos, SetState(SegmentState::FREE)).Times(1);
+    EXPECT_CALL(*segmentBitmap, ClearBit(0)).Times(1);
 
     // when 1.
     bool ret = segCtx.DecreaseValidBlockCount(0, 1);
@@ -328,63 +253,11 @@ TEST(SegmentCtx, GetSegmentState_TestSimpleGetter)
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
     SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, &addrInfo);
 
-    // given 1.
     EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::FREE));
-    // when 1.
-    SegmentState ret = segCtx.GetSegmentState(0, false);
-    // then 1.
-    EXPECT_EQ(SegmentState::FREE, ret);
-
-    // given 2.
-    std::mutex segStateLock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::SSD));
-    // when 2.
-    ret = segCtx.GetSegmentState(0, true);
-    // then 2.
-    EXPECT_EQ(SegmentState::SSD, ret);
-
-    delete segInfos;
-    delete segmentBitmap;
-}
-
-TEST(SegmentCtx, SetSegmentState_TestSimpleSetter)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumUserAreaSegments(1000);
-    addrInfo.SetnumUserAreaSegments(1);
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, &addrInfo);
-
-    // given 1.
-    EXPECT_CALL(*segInfos, SetState);
-    // when 1.
-    segCtx.SetSegmentState(0, SegmentState::FREE, false);
-
-    // given 2.
-    std::mutex segStateLock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*segInfos, SetState);
-    // when 2.
-    segCtx.SetSegmentState(0, SegmentState::SSD, true);
-
-    delete segInfos;
-    delete segmentBitmap;
-}
-
-TEST(SegmentCtx, GetSegStateLock_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, nullptr);
-
-    std::mutex m;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(m));
     // when
-    segCtx.GetSegStateLock(0);
+    SegmentState ret = segCtx.GetSegmentState(0);
+    // then
+    EXPECT_EQ(SegmentState::FREE, ret);
 
     delete segInfos;
     delete segmentBitmap;
@@ -416,15 +289,6 @@ TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
     EXPECT_EQ(12, result);
 
     delete segInfos;
-}
-
-TEST(SegmentCtx, GetSegmentCtxLock_TestSimpleGetter)
-{
-    // given
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr);
-
-    // when
-    std::mutex& m = segCtx.GetSegmentCtxLock();
 }
 
 TEST(SegmentCtx, Init_testInitAndClose)
@@ -525,15 +389,6 @@ TEST(SegmentCtx, CopySegmentInfoFromBufferforWBT_TestSimpleSetter)
     delete segInfos;
 }
 
-TEST(SegmentCtx, GetSegmentInfo_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, nullptr, nullptr);
-    // when
-    segCtx.GetSegmentInfo();
-}
-
 TEST(SegmentCtx, ResetDirtyVersion_TestSimpleSetter)
 {
     // given
@@ -548,32 +403,17 @@ TEST(SegmentCtx, AllocateSegment_TestSimpleInterfaceFunc)
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, nullptr);
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, nullptr);
 
-    EXPECT_CALL(*segInfos, SetState(SegmentState::NVRAM));
+    EXPECT_CALL(*segInfos, MoveToNvramState);
     EXPECT_CALL(*segmentBitmap, SetBit(0));
     // when
     segCtx.AllocateSegment(0);
 
     delete segInfos;
     delete segmentBitmap;
-}
-
-TEST(SegmentCtx, ReleaseSegment_TestSimpleInterfaceFunc)
-{
-    // given
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, nullptr);
-
-    EXPECT_CALL(*segInfos, SetState(SegmentState::FREE));
-    EXPECT_CALL(*segmentBitmap, ClearBit);
-
-    // when
-    segCtx.ReleaseSegment(0);
-
-    delete segInfos;
-    delete segmentBitmap;
+    delete tp;
 }
 
 TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
@@ -583,26 +423,23 @@ TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
     SegmentInfo* segInfos = new SegmentInfo[100]();
     NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(100);
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, rebuildCtx, addrInfo);
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, rebuildCtx, addrInfo);
 
     // given 1.
     EXPECT_CALL(*segmentBitmap, SetNextZeroBit).WillOnce(Return(22));
     EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(true));
     EXPECT_CALL(*rebuildCtx, IsRebuildTargetSegment(22)).WillOnce(Return(false));
-
+    EXPECT_EQ(segInfos[22].GetState(), SegmentState::FREE);
     // when 1.
     int ret = segCtx.AllocateFreeSegment();
+    EXPECT_EQ(segInfos[22].GetState(), SegmentState::NVRAM);
     // then 1.
     EXPECT_EQ(22, ret);
-    EXPECT_EQ(segInfos[22].GetState(), SegmentState::NVRAM);
 
     // given 2.
     EXPECT_CALL(*segmentBitmap, SetNextZeroBit).WillOnce(Return(33));
     EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(false));
-
-    segInfos[22].SetOccupiedStripeCount(0);
-    segInfos[22].SetValidBlockCount(0);
-
     // when 2.
     ret = segCtx.AllocateFreeSegment();
     // then 2.
@@ -613,6 +450,7 @@ TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
     EXPECT_CALL(*segmentBitmap, SetFirstZeroBit).Times(0);
     EXPECT_CALL(*segmentBitmap, IsValidBit).WillOnce(Return(true));
     EXPECT_CALL(*rebuildCtx, IsRebuildTargetSegment(10)).WillOnce(Return(false));
+    EXPECT_EQ(segInfos[10].GetState(), SegmentState::FREE);
     // when 3.
     ret = segCtx.AllocateFreeSegment();
     // then 3.
@@ -633,6 +471,91 @@ TEST(SegmentCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
     delete[] segInfos;
     delete segmentBitmap;
     delete rebuildCtx;
+    delete tp;
+}
+
+TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsFound)
+{
+    // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
+    SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
+    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(4);
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, addrInfo);
+
+    EXPECT_CALL(*addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(4));
+    EXPECT_CALL(*addrInfo, GetblksPerSegment).WillRepeatedly(Return(10));
+
+    segInfos[0].SetValidBlockCount(10);
+    segInfos[1].SetValidBlockCount(6);
+    segInfos[2].SetValidBlockCount(4);
+    segInfos[3].SetValidBlockCount(9);
+
+    SegmentId victimSegment = segCtx.AllocateGCVictimSegment();
+    EXPECT_EQ(victimSegment, 2);
+
+    delete addrInfo;
+    delete[] segInfos;
+    delete segmentBitmap;
+    delete tp;
+}
+
+TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsNotFound)
+{
+    // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
+    SegmentInfo* segInfos = new SegmentInfo[4](10, 0, SegmentState::NVRAM);
+    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(1);
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentCtx segCtx(tp, nullptr, segInfos, segmentBitmap, nullptr, addrInfo);
+
+    EXPECT_CALL(*addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(4));
+    EXPECT_CALL(*addrInfo, GetblksPerSegment).WillRepeatedly(Return(10));
+
+    SegmentId victimSegment = segCtx.AllocateGCVictimSegment();
+    EXPECT_EQ(victimSegment, UNMAP_SEGMENT);
+
+    delete addrInfo;
+    delete[] segInfos;
+    delete segmentBitmap;
+    delete tp;
+}
+
+TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
+{
+    // given
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    NiceMock<MockBitMapMutex> segmentBitmap(1);
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(1));
+
+    {
+        SegmentInfo segInfos(100, 10, SegmentState::VICTIM);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, &segmentBitmap, nullptr, &addrInfo);
+
+        segCtx.ResetSegmentsStates();
+        EXPECT_EQ(segInfos.GetState(), SegmentState::SSD);
+    }
+    {
+        SegmentInfo segInfos(100, 10, SegmentState::SSD);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, &segmentBitmap, nullptr, &addrInfo);
+
+        segCtx.ResetSegmentsStates();
+        EXPECT_EQ(segInfos.GetState(), SegmentState::SSD);
+    }
+    {
+        SegmentInfo segInfos(0, 10, SegmentState::SSD);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, &segmentBitmap, nullptr, &addrInfo);
+
+        segCtx.ResetSegmentsStates();
+        EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
+    }
+    {
+        SegmentInfo segInfos(0, 0, SegmentState::FREE);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, &segmentBitmap, nullptr, &addrInfo);
+
+        segCtx.ResetSegmentsStates();
+        EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
+    }
 }
 
 TEST(SegmentCtx, GetNumOfFreeSegment_TestSimpleGetter)
@@ -693,28 +616,6 @@ TEST(SegmentCtx, GetAllocatedSegmentCount_TestSimpleGetter)
     delete segmentBitmap;
 }
 
-TEST(SegmentCtx, GetTotalSegmentsCount_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
-    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    NiceMock<MockBitMapMutex>* segmentBitmap = new NiceMock<MockBitMapMutex>(100);
-    SegmentCtx segCtx(nullptr, nullptr, segInfos, segmentBitmap, nullptr, addrInfo);
-
-    EXPECT_CALL(*segmentBitmap, GetNumBits).WillOnce(Return(100));
-    // when
-    int ret = segCtx.GetTotalSegmentsCount();
-    EXPECT_EQ(100, ret);
-
-    delete addrInfo;
-    delete segInfos;
-    delete segmentBitmap;
-}
-
-TEST(SegmentCtx, DISABLED_FindMostInvalidSSDSegment_testIfMostInvalidSegmentIsReturned)
-{
-}
-
 TEST(SegmentCtx, GetRebuildTargetSegment_TestRebuildTargetFindFail)
 {
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
@@ -735,8 +636,6 @@ TEST(SegmentCtx, GetRebuildTargetSegment_TestRebuildTargetIsAlreadyFree)
     SegmentCtx segmentCtx(nullptr, nullptr, segInfos, nullptr, rebuildCtx, nullptr);
 
     EXPECT_CALL(*rebuildCtx, GetRebuildTargetSegment).WillOnce(Return(0)).WillOnce(Return(UNMAP_SEGMENT));
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
     EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::FREE));
     EXPECT_CALL(*rebuildCtx, EraseRebuildTargetSegment(0));
 
@@ -754,8 +653,6 @@ TEST(SegmentCtx, GetRebuildTargetSegment_TestRebuildTargetFindSuccess)
     SegmentCtx segmentCtx(nullptr, nullptr, segInfos, nullptr, rebuildCtx, nullptr);
 
     EXPECT_CALL(*rebuildCtx, GetRebuildTargetSegment).WillOnce(Return(0));
-    std::mutex lock;
-    EXPECT_CALL(*segInfos, GetLock).WillOnce(ReturnRef(lock));
     EXPECT_CALL(*segInfos, GetState).WillOnce(Return(SegmentState::SSD));
 
     SegmentId ret = segmentCtx.GetRebuildTargetSegment();

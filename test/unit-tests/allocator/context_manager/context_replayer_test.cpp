@@ -139,14 +139,8 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, &addrInfo);
 
-    // given 1.
+    // given
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount(1)).WillOnce(Return(false));
-    // when
-    ctxReplayer.ReplayStripeFlushed(10);
-
-    // given 2.
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount(1)).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, ReleaseSegment).Times(1);
     // when
     ctxReplayer.ReplayStripeFlushed(10);
 
@@ -201,8 +195,7 @@ TEST(ContextReplayer, ResetSegmentsStates_TestSimpleSetter)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, &addrInfo);
-    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::VICTIM)).WillOnce(Return(SegmentState::VICTIM)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::NVRAM));
-    EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0)).WillOnce(Return(5)).WillOnce(Return(0)).WillOnce(Return(5)).WillOnce(Return(0)).WillOnce(Return(5));
+    EXPECT_CALL(*segCtx, ResetSegmentsStates).Times(1);
 
     // when
     ctxReplayer.ResetSegmentsStates();

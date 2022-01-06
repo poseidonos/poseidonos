@@ -35,7 +35,6 @@
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -55,7 +54,6 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   allocSegBitmap(segmentBitmap_),
-  numSegments(0),
   initialized(false),
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
@@ -99,7 +97,7 @@ SegmentCtx::Init(void)
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
-    numSegments = addrInfo->GetnumUserAreaSegments();
+    uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
 
     if (allocSegBitmap == nullptr)
@@ -133,58 +131,36 @@ SegmentCtx::Dispose(void)
     initialized = false;
 }
 
-uint32_t
+void
 SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    uint32_t validCount = segmentInfos[segId].IncreaseValidBlockCount(cnt);
-    uint32_t blksPerSegment = addrInfo->GetblksPerSegment();
-    if (validCount > blksPerSegment)
+    uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
+    if (increasedValue > addrInfo->GetblksPerSegment())
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_OVERFLOWED),
-            "segmentId:{} increasedCount:{} total validCount:{} : OVERFLOWED", segId, cnt, validCount);
+            "segmentId:{} increasedCount:{} total validCount:{} : OVERFLOWED", segId, cnt, increasedValue);
         assert(false);
     }
-    return validCount;
 }
 
 bool
 SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    bool segmentFreed = false;
+    uint32_t decreasedValue = segmentInfos[segId].DecreaseValidBlockCount(cnt);
 
-    int32_t validCount = segmentInfos[segId].DecreaseValidBlockCount(cnt);
-    if (validCount < 0)
+    if (decreasedValue < 0)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
-            "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, validCount);
+            "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, decreasedValue);
         assert(false);
     }
 
-    if (validCount == 0)
+    if (decreasedValue == 0)
     {
-        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
-        SegmentState state = segmentInfos[segId].GetState();
-        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
-        {
-            assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
-
-            _FreeSegment(segId);
-            segmentFreed = true;
-        }
+        _SegmentFreed(segId);
+        return true;
     }
-
-    return segmentFreed;
-}
-
-void
-SegmentCtx::_FreeSegment(SegmentId segId)
-{
-    assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
-    assert(segmentInfos[segId].GetValidBlockCount() == 0);
-
-    segmentInfos[segId].SetOccupiedStripeCount(0);
-    segmentInfos[segId].SetState(SegmentState::FREE);
-    allocSegBitmap->ClearBit(segId);
+    return false;
 }
 
 uint32_t
@@ -196,26 +172,17 @@ SegmentCtx::GetValidBlockCount(SegmentId segId)
 bool
 SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 {
-    bool segmentFreed = false;
-
     uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
     if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
     {
-        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
-        if (segmentInfos[segId].GetValidBlockCount() == 0)
+        bool segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+        if (segmentFreed == true)
         {
-            if (segmentInfos[segId].GetState() != SegmentState::FREE)
-            {
-                _FreeSegment(segId);
-                segmentFreed = true;
-            }
-        }
-        else
-        {
-            segmentInfos[segId].SetState(SegmentState::SSD);
+            _SegmentFreed(segId);
+            return true;
         }
     }
-    return segmentFreed;
+    return false;
 }
 
 int
@@ -274,7 +241,7 @@ SegmentCtx::GetSectionAddr(int section)
 int
 SegmentCtx::GetSectionSize(int section)
 {
-    int ret = 0;
+    uint64_t ret = 0;
     switch (section)
     {
         case SC_HEADER:
@@ -326,55 +293,17 @@ SegmentCtx::GetNumSections(void)
     return NUM_SEGMENT_CTX_SECTION;
 }
 
-void
-SegmentCtx::SetSegmentState(SegmentId segId, SegmentState state, bool needlock)
-{
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
-        segmentInfos[segId].SetState(state);
-    }
-    else
-    {
-        segmentInfos[segId].SetState(state);
-    }
-}
-
 SegmentState
-SegmentCtx::GetSegmentState(SegmentId segId, bool needlock)
+SegmentCtx::GetSegmentState(SegmentId segId)
 {
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
-        return segmentInfos[segId].GetState();
-    }
-    else
-    {
-        return segmentInfos[segId].GetState();
-    }
-}
-
-std::mutex&
-SegmentCtx::GetSegStateLock(SegmentId segId)
-{
-    return segmentInfos[segId].GetLock();
+    return segmentInfos[segId].GetState();
 }
 
 void
 SegmentCtx::AllocateSegment(SegmentId segId)
 {
-    segmentInfos[segId].SetState(SegmentState::NVRAM);
+    segmentInfos[segId].MoveToNvramState();
     allocSegBitmap->SetBit(segId);
-}
-
-void
-SegmentCtx::ReleaseSegment(SegmentId segId)
-{
-    allocSegBitmap->ClearBit(segId);
-    segmentInfos[segId].SetState(SegmentState::FREE);
-
-    segmentInfos[segId].SetOccupiedStripeCount(0);
-    segmentInfos[segId].SetValidBlockCount(0);
 }
 
 SegmentId
@@ -412,10 +341,14 @@ SegmentCtx::AllocateFreeSegment(void)
         }
         else
         {
-            segmentInfos[segId].SetState(SegmentState::NVRAM);
+            segmentInfos[segId].MoveToNvramState();
 
-            assert(segmentInfos[segId].GetOccupiedStripeCount() == 0);
-            assert(segmentInfos[segId].GetValidBlockCount() == 0);
+            uint64_t freeSegCount = GetNumOfFreeSegmentWoLock();
+            POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
+            POSMetricValue v;
+            v.gauge = freeSegCount;
+            tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
+
             break;
         }
     }
@@ -457,40 +390,76 @@ SegmentCtx::GetAllocatedSegmentCount(void)
     return allocSegBitmap->GetNumBitsSet();
 }
 
-int
-SegmentCtx::GetTotalSegmentsCount(void)
+SegmentId
+SegmentCtx::AllocateGCVictimSegment(void)
 {
-    return allocSegBitmap->GetNumBits();
+    SegmentId victimSegment = _FindMostInvalidSSDSegment();
+    if (victimSegment != UNMAP_SEGMENT)
+    {
+        segmentInfos[victimSegment].MoveToVictimState();
+
+        POSMetricValue validCount;
+        validCount.gauge = segmentInfos[victimSegment].GetValidBlockCount();
+        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, validCount, MT_GAUGE);
+
+        POSMetricValue victimSegmentId;
+        victimSegmentId.gauge = victimSegment;
+        tp->PublishData(TEL30002_ALCT_GCVICTIM_SEG, victimSegmentId, MT_GAUGE);
+
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}",
+            victimSegment, GetNumOfFreeSegmentWoLock());
+    }
+
+    return victimSegment;
 }
 
 SegmentId
-SegmentCtx::FindMostInvalidSSDSegment(void)
+SegmentCtx::_FindMostInvalidSSDSegment(void)
 {
     uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
     SegmentId victimSegment = UNMAP_SEGMENT;
     uint32_t minValidCount = addrInfo->GetblksPerSegment();
     for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
     {
-        uint32_t cnt = segmentInfos[segId].GetValidBlockCount();
-        std::lock_guard<std::mutex> lock(segmentInfos[segId].GetLock());
-        if ((segmentInfos[segId].GetState() != SegmentState::SSD) || (cnt == 0))
-        {
-            continue;
-        }
-
+        uint32_t cnt = segmentInfos[segId].GetValidBlockCountIfSsdState();
         if (cnt < minValidCount)
         {
             victimSegment = segId;
             minValidCount = cnt;
         }
     }
-    if (victimSegment != UNMAP_SEGMENT)
-    {
-        POSMetricValue v;
-        v.gauge = minValidCount;
-        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, v, MT_GAUGE);
-    }
     return victimSegment;
+}
+
+void
+SegmentCtx::_SegmentFreed(SegmentId segmentId)
+{
+    allocSegBitmap->ClearBit(segmentId);
+
+    uint32_t freeSegCount = GetNumOfFreeSegmentWoLock();
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
+        "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segmentId, freeSegCount);
+}
+
+void
+SegmentCtx::ResetSegmentsStates(void)
+{
+    for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
+    {
+        if (segmentInfos[segId].GetState() == SegmentState::VICTIM)
+        {
+            segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+            POS_TRACE_INFO(EID(SEGMENT_WAS_VICTIM), "segmentId:{} was VICTIM, so changed to SSD", segId);
+        }
+        else if (segmentInfos[segId].GetState() == SegmentState::SSD)
+        {
+            bool freed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+            if (freed == true)
+            {
+                POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was All Invalidated, so changed to FREE", segId);
+            }
+        }
+    }
 }
 
 SegmentId
@@ -508,7 +477,7 @@ SegmentCtx::GetRebuildTargetSegment(void)
             segmentId = UINT32_MAX;
             break;
         }
-        else if (GetSegmentState(segmentId, true) == SegmentState::FREE)
+        else if (segmentInfos[segmentId].GetState() == SegmentState::FREE)
         {
             POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "Skip Rebuilding segmentId:{}, Already Freed", segmentId);
             rebuildCtx->EraseRebuildTargetSegment(segmentId);

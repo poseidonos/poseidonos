@@ -73,30 +73,23 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
-    virtual uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
-
-    virtual void SetSegmentState(SegmentId segId, SegmentState state, bool needlock);
-    virtual SegmentState GetSegmentState(SegmentId segId, bool needlock);
-    virtual std::mutex& GetSegStateLock(SegmentId segId);
-
-    virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
-    virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
+    virtual SegmentState GetSegmentState(SegmentId segId);
+    virtual void ResetSegmentsStates(void);
 
     virtual void AllocateSegment(SegmentId segId);
-    virtual void ReleaseSegment(SegmentId segId);
     virtual SegmentId AllocateFreeSegment(void);
 
     virtual uint64_t GetNumOfFreeSegment(void);
     virtual uint64_t GetNumOfFreeSegmentWoLock(void);
     virtual void SetAllocatedSegmentCount(int count);
     virtual int GetAllocatedSegmentCount(void);
-    virtual int GetTotalSegmentsCount(void);
 
-    virtual SegmentId FindMostInvalidSSDSegment(void);
+    virtual SegmentId AllocateGCVictimSegment(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int MakeRebuildTarget(void);
@@ -108,9 +101,10 @@ public:
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
-    void _FreeSegment(SegmentId segId);
     void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
     SegmentId _GetUsedSegment(SegmentId startSegId);
+    SegmentId _FindMostInvalidSSDSegment(void);
+    void _SegmentFreed(SegmentId segId);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -119,7 +113,6 @@ private:
     SegmentInfo* segmentInfos;
     BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
 
-    uint32_t numSegments;
     bool initialized;
 
     AllocatorAddressInfo* addrInfo;

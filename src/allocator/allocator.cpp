@@ -377,11 +377,11 @@ Allocator::GetInstantMetaInfo(std::string fname)
     oss << std::endl;
 
     oss << "<< Segments >>" << std::endl;
-    oss << "Set:" << std::dec << segCtx->GetAllocatedSegmentCount() << " / ToTal:" << segCtx->GetTotalSegmentsCount() << std::endl;
+    oss << "Set:" << std::dec << segCtx->GetAllocatedSegmentCount() << " / ToTal:" << addrInfo->GetnumUserAreaSegments() << std::endl;
     oss << "currentSsdLsid: " << allocCtx->GetCurrentSsdLsid() << std::endl;
     for (uint32_t segmentId = 0; segmentId < addrInfo->GetnumUserAreaSegments(); ++segmentId)
     {
-        SegmentState state = segCtx->GetSegmentState(segmentId, false);
+        SegmentState state = segCtx->GetSegmentState(segmentId);
         if ((segmentId > 0) && (segmentId % 4 == 0))
         {
             oss << std::endl;

@@ -20,7 +20,6 @@
 #include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"
@@ -51,10 +50,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
 
     // SegmentCtx (Mock)
     NiceMock<MockSegmentCtx>* segmentCtx = new NiceMock<MockSegmentCtx>();
-    std::mutex segCtxLock;
-    std::mutex segStateLock;
     EXPECT_CALL(*segmentCtx, GetOccupiedStripeCount).WillRepeatedly(Return(STRIPE_PER_SEGMENT));
-    EXPECT_CALL(*segmentCtx, GetSegmentCtxLock).WillRepeatedly(ReturnRef(segStateLock));
 
     // WbStripeCtx (Mock)
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>();
@@ -255,7 +251,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     SegmentState expectedState = SegmentState::SSD;
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        SegmentState actualState = segmentCtx->GetSegmentState(segId, false);
+        SegmentState actualState = segmentCtx->GetSegmentState(segId);
         EXPECT_EQ(expectedState, actualState);
     }
 
@@ -270,7 +266,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     int expectedOccupiedCount = 0;
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        SegmentState actualState = segmentCtx->GetSegmentState(segId, false);
+        SegmentState actualState = segmentCtx->GetSegmentState(segId);
         EXPECT_EQ(expectedState, actualState);
 
         int actualOccupiedCount = segmentCtx->GetOccupiedStripeCount(segId);
