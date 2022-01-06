@@ -33,6 +33,8 @@
 #ifndef META_FILE_NAME_MOCK_H
 #define META_FILE_NAME_MOCK_H
 
+#include <string>
+
 #include <gmock/gmock.h>
 
 #include "src/metafs/common/meta_file_name.h"

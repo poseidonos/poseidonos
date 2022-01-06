@@ -35,6 +35,7 @@
 #include "metafs_common.h"
 #include <string>
 #include <array>
+#include <algorithm>
 
 class MetaFileName
 {
