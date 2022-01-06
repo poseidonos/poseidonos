@@ -72,16 +72,22 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w,
 			"Index\t"+
 				globals.FieldSeparator+"Name\t"+
+				globals.FieldSeparator+"Status\t"+
 				globals.FieldSeparator+"DatetimeCreated\t"+
 				globals.FieldSeparator+"DatetimeUpdated\t"+
-				globals.FieldSeparator+"Status")
+				globals.FieldSeparator+"TotalCapacity\t"+
+				globals.FieldSeparator+"UsedCapacity\t"+
+				globals.FieldSeparator+"RAID")
 
 		// Horizontal line
 		fmt.Fprintln(w,
 			"-----\t"+
 				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"----------\t"+
 				globals.FieldSeparator+"---------------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"-------------\t"+
+				globals.FieldSeparator+"-------------\t"+
 				globals.FieldSeparator+"----------")
 
 		// Data
@@ -89,9 +95,13 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 			fmt.Fprint(w,
 				strconv.Itoa(array.ARRAYINDEX)+"\t"+
 					globals.FieldSeparator+array.ARRAYNAME+"\t"+
+					globals.FieldSeparator+array.STATUS+"\t"+
 					globals.FieldSeparator+array.CREATEDATETIME+"\t"+
 					globals.FieldSeparator+array.UPDATEDATETIME+"\t"+
-					globals.FieldSeparator+array.STATUS)
+					globals.FieldSeparator+toByte(displayUnit, array.CAPACITY)+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, array.USED)+"\t"+
+					globals.FieldSeparator+array.DATARAID)
+					
 			fmt.Fprintln(w, "")
 		}
 		w.Flush()
@@ -104,23 +114,47 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "Array\t: "+array.ARRAYNAME)
-		fmt.Fprintln(w, "------------------------------------")
+		fmt.Fprintln(w, "Name\t: "+array.ARRAYNAME)
 		fmt.Fprintln(w, "Index\t: "+strconv.Itoa(array.ARRAYINDEX))
+		fmt.Fprintln(w, "UniqueID\t: "+strconv.Itoa(array.UNIQUEID))
 		fmt.Fprintln(w, "State\t: "+array.STATE)
 		fmt.Fprintln(w, "Situation\t: "+array.SITUATION)
-		fmt.Fprintln(w, "Rebuilding Progress\t:", array.REBUILDINGPROGRESS)
+		fmt.Fprintln(w, "CreateDatetime\t: "+array.CREATEDATETIME)
+		fmt.Fprintln(w, "UpdateDatetime\t: "+array.UPDATEDATETIME)
+		fmt.Fprintln(w, "RebuildingProgress\t:", array.REBUILDINGPROGRESS)
 		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, array.CAPACITY))
 		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, array.USED))
 		fmt.Fprintln(w, "GCMode\t: "+array.GCMODE)
-		fmt.Fprintln(w, "")
-		fmt.Fprintln(w, "Devices")
-		fmt.Fprintln(w, "Name\tType")
-		fmt.Fprintln(w, "----\t------")
+		fmt.Fprintln(w, "MetaRAID\t: "+array.METARAID)
+		fmt.Fprintln(w, "DataRAID\t: "+array.DATARAID)
+		fmt.Fprint(w, "BufferDevs\t: ")
 
 		for _, device := range array.DEVICELIST {
-			fmt.Fprintln(w, device.DEVICENAME+"\t"+device.DEVICETYPE)
+			if device.DEVICETYPE == "BUFFER" {
+				fmt.Fprint(w, device.DEVICENAME+"\t")
+			}			
 		}
+		fmt.Fprintln(w, "")
+
+		fmt.Fprint(w, "DataDevs\t: ")
+		
+		for _, device := range array.DEVICELIST {
+			if device.DEVICETYPE == "DATA" {
+				fmt.Fprint(w, device.DEVICENAME+"\t")
+			}			
+		}
+
+		fmt.Fprintln(w, "")
+
+		fmt.Fprint(w, "SpareDevs\t: ")
+		
+		for _, device := range array.DEVICELIST {
+			if device.DEVICETYPE == "SPARE" {
+				fmt.Fprint(w, device.DEVICENAME+"\t")
+			}			
+		}
+
+		fmt.Fprintln(w, "")
 
 		w.Flush()
 

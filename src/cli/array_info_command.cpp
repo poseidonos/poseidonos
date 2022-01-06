@@ -78,15 +78,17 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     string state = array->GetStateCtx()->ToStateType().ToString();
     string situ = array->GetStateCtx()->GetSituation().ToString();
     data.SetAttribute(JsonAttribute("index", to_string(array->GetIndex())));
+    data.SetAttribute(JsonAttribute("unique_id", to_string(array->GetUniqueId())));
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
     data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
-    data.SetAttribute(JsonAttribute("createDatetime", "\"" + array->GetCreateDatetime() + "\""));
-    data.SetAttribute(JsonAttribute("updateDatetime", "\"" + array->GetUpdateDatetime() + "\""));
-    data.SetAttribute(JsonAttribute("uniqueId", "\"" + to_string(array->GetUniqueId()) + "\""));
-    data.SetAttribute(JsonAttribute("rebuildingProgress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
+    data.SetAttribute(JsonAttribute("create_datetime", "\"" + array->GetCreateDatetime() + "\""));
+    data.SetAttribute(JsonAttribute("update_datetime", "\"" + array->GetUpdateDatetime() + "\""));
+    data.SetAttribute(JsonAttribute("rebuilding_progress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
     data.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
     data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
+    data.SetAttribute(JsonAttribute("meta_raid", "\"" + array->GetMetaRaidType() + "\""));
+    data.SetAttribute(JsonAttribute("data_raid", "\"" + array->GetDataRaidType() + "\""));
 
     if (array->GetState() >= ArrayStateEnum::NORMAL)
     {

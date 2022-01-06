@@ -73,17 +73,20 @@ type ArrayInfoResult struct {
 // The commands will be merged and this should be revised.
 type Array struct {
 	ARRAYINDEX         int      `json:"index"`
+	UNIQUEID       	   int      `json:"unique_id"`
 	ARRAYNAME          string   `json:"name"`
-	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
 	STATUS             string   `json:"status,omitempty"`
-	UPDATEDATETIME     string   `json:"updateDatetime,omitempty"`
-	SITUATION          string   `json:situation,omitempty"`
-	STATE              string   `json:state,omitempty"`
-	REBUILDINGPROGRESS int      `json:rebuilding_progress,omitempty"`
-	CAPACITY           uint64   `json:capacity,omitempty"`
-	USED               uint64   `json:used,omitempty"`
+	STATE              string   `json:"state,omitempty"`
+	SITUATION          string   `json:"situation,omitempty"`
+	CREATEDATETIME     string   `json:"create_datetime,omitempty"`
+	UPDATEDATETIME     string   `json:"update_datetime,omitempty"`	
+	REBUILDINGPROGRESS int      `json:"rebuilding_progress,omitempty"`
+	CAPACITY           uint64   `json:"capacity,omitempty"`
+	USED               uint64   `json:"used,omitempty"`
+	GCMODE             string   `json:"gc_mode,omitempty"`
+	METARAID           string   `json:"meta_raid,omitempty"`
+	DATARAID           string   `json:"data_raid,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
-	GCMODE             string   `json:gcMode,omitempty"`
 }
 
 type Device struct {
