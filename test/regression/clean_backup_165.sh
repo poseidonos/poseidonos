@@ -1,8 +1,8 @@
 #!/bin/bash
 pos_root_dir="/home/psd/"
 pos_working_dir="${pos_root_dir}/ibofos"
-pos_core="/psdData/core"
-pos_log="/psdData/log"
+pos_core="/mnt/rsa_nfs/core"
+pos_log="/mnt/rsa_nfs/log"
 target_ip=0
 trtype="tcp"
 port=1158
