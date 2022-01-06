@@ -494,8 +494,7 @@ InodeManager::_UpdateFdAllocator(void)
 
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "fileName={}, hashKey={}, fd={}",
-                inode.data.basic.field.fileName.ToString(),
-                hashKey, inode.data.basic.field.fd);
+                fileName, hashKey, inode.data.basic.field.fd);
         }
     }
 }

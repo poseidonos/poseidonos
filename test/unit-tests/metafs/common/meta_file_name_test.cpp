@@ -36,40 +36,39 @@
 
 namespace pos
 {
+TEST(MetaFileName, ConstructObjectWithInvalidParameter)
+{
+    EXPECT_DEATH(MetaFileName(nullptr), "");
+}
+
 TEST(MetaFileName, Equal)
 {
     const std::string fileName = "ThisIsTestFileName";
-    bool result = true;
 
-    MetaFileName obj;
-    obj = &fileName;
+    // construct by reference and ptr
+    EXPECT_EQ(MetaFileName(fileName).ToString(), fileName);
+    EXPECT_EQ(MetaFileName(&fileName).ToString(), fileName);
 
-    for (int i = 0; i < fileName.size(); ++i)
-    {
-        if (fileName.c_str()[i] != obj.str[i])
-        {
-            result = false;
-            break;
-        }
-    }
+    // copy constructor
+    MetaFileName name(fileName);
+    MetaFileName name2 = name;
 
-    EXPECT_TRUE(result);
+    EXPECT_EQ(name.ToString(), name2.ToString());
+    EXPECT_EQ(name.GetLength(), name2.GetLength());
+    EXPECT_EQ(0, name.ToString().compare(name2.ToString()));
+    // check all chars include null
+    for (size_t i = 0; i <= name.GetLength(); ++i)
+        EXPECT_EQ(name.ToChar()[i], name2.ToChar()[i]);
+
+    // changed the first object only
+    name = "TestFile";
+    EXPECT_NE(0, name.ToString().compare(name2.ToString()));
 }
 
 TEST(MetaFileName, ToString)
 {
     const std::string fileName = "ThisIsTestFileName";
-    bool result = true;
-
-    MetaFileName obj;
-    obj = &fileName;
-
-    string test = obj.ToString();
-
-    if (test != fileName)
-        result = false;
-
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(MetaFileName(fileName).ToString() == fileName);
 }
 
 TEST(MetaFileName, ToChar)
@@ -77,8 +76,7 @@ TEST(MetaFileName, ToChar)
     const std::string fileName = "ThisIsTestFileName";
     bool result = true;
 
-    MetaFileName obj;
-    obj = &fileName;
+    MetaFileName obj(fileName);
 
     for (int i = 0; i < fileName.size(); ++i)
     {
@@ -89,8 +87,52 @@ TEST(MetaFileName, ToChar)
         }
     }
 
-
     EXPECT_TRUE(result);
 }
 
+TEST(MetaFileName, CheckAssignment)
+{
+    const std::string fileName = "ThisIsTestFileName";
+
+    MetaFileName name;
+    EXPECT_EQ(0, name.GetLength());
+
+    name = fileName;
+    EXPECT_EQ(fileName.length(), name.GetLength());
+
+    name = "";
+    EXPECT_EQ(0, name.GetLength());
+
+    name = &fileName;
+    EXPECT_EQ(fileName.length(), name.GetLength());
+}
+
+TEST(MetaFileName, CompareWithString)
+{
+    const std::string fileName = "ThisIsTestFileName";
+    MetaFileName name;
+
+    EXPECT_FALSE(name == fileName);
+    EXPECT_TRUE(name != fileName);
+
+    name = fileName;
+
+    EXPECT_TRUE(name == fileName);
+    EXPECT_FALSE(name != fileName);
+}
+
+TEST(MetaFileName, CompareWithFileNameObject)
+{
+    const std::string fileName = "ThisIsTestFileName";
+    MetaFileName name;
+    MetaFileName name2 = fileName;
+
+    EXPECT_FALSE(name == name2);
+    EXPECT_TRUE(name != name2);
+
+    name = fileName;
+
+    EXPECT_TRUE(name == name2);
+    EXPECT_FALSE(name != name2);
+}
 } // namespace pos
