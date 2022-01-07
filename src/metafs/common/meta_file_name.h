@@ -33,6 +33,7 @@
 #pragma once
 
 #include "metafs_common.h"
+#include "pos_event_id.h"
 #include <string>
 #include <array>
 #include <algorithm>
@@ -42,7 +43,7 @@ class MetaFileName
 public:
     MetaFileName(void)
     {
-        memset(str.data(), 0, MAX_FILE_NAME_LENGTH);
+        memset(str.data(), 0, MAX_FILE_NAME_LENGTH + 1);
     }
 
     MetaFileName(const MetaFileName& original)
@@ -52,26 +53,33 @@ public:
 
     MetaFileName(const string& fileName)
     {
-        assert(fileName.length() < MAX_FILE_NAME_LENGTH);
-        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH);
+        if (!_IsValidFileName(fileName))
+            assert(false);
+
+        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH + 1);
     }
 
     MetaFileName(const string* fileName) : MetaFileName(*fileName)
     {
-        assert(fileName != nullptr);
+        if (!_IsValidPtr(fileName) || !_IsValidFileName(*fileName))
+            assert(false);
     }
 
     MetaFileName&
     operator=(const std::string& fileName)
     {
-        assert(fileName.length() < MAX_FILE_NAME_LENGTH);
-        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH);
+        if (!_IsValidFileName(fileName))
+            assert(false);
+
+        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH + 1);
         return *this;
     }
 
     MetaFileName& operator=(const std::string* fileName)
     {
-        assert(fileName != nullptr);
+        if (!_IsValidPtr(fileName) || !_IsValidFileName(*fileName))
+            assert(false);
+
         return *this = *fileName;
     }
 
@@ -110,8 +118,32 @@ public:
         return ToString().length();
     }
 
-    static const uint32_t MAX_FILE_NAME_LENGTH = 128;
+    static const size_t MAX_FILE_NAME_LENGTH = 127;
 
 private:
-    std::array<char, MAX_FILE_NAME_LENGTH> str;
+    bool _IsValidPtr(const std::string* fileName)
+    {
+        if (nullptr == fileName)
+        {
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "The file name is nullptr");
+            return false;
+        }
+        return true;
+    }
+
+    bool _IsValidFileName(const std::string& fileName)
+    {
+        if (fileName.length() > MAX_FILE_NAME_LENGTH)
+        {
+            const size_t MAX_SIZE = MAX_FILE_NAME_LENGTH;
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "The file name({}) is too long (len: {}, max_allowed: {})",
+                fileName, fileName.length(), MAX_SIZE);
+            return false;
+        }
+        return true;
+    }
+
+    std::array<char, MAX_FILE_NAME_LENGTH + 1> str;
 };

@@ -33,12 +33,30 @@
 #include "src/metafs/common/meta_file_name.h"
 
 #include <gtest/gtest.h>
+#include <string>
 
 namespace pos
 {
-TEST(MetaFileName, ConstructObjectWithInvalidParameter)
+TEST(MetaFileName, ConstructObjectWithNullptr)
 {
     EXPECT_DEATH(MetaFileName(nullptr), "");
+}
+
+TEST(MetaFileName, ConstructObjectWithTooLongString)
+{
+    const size_t MAX_SIZE = MetaFileName::MAX_FILE_NAME_LENGTH;
+    char fileName[MetaFileName::MAX_FILE_NAME_LENGTH + 5] = { 0, };
+
+    // length == 127
+    for (size_t i = 0; i < MetaFileName::MAX_FILE_NAME_LENGTH; i++)
+        fileName[i] = 'A';
+
+    MetaFileName name = std::string(fileName);
+    ASSERT_EQ(name.GetLength(), MAX_SIZE);
+
+    // length == 128
+    fileName[127] = 'A';
+    EXPECT_DEATH(MetaFileName(std::string(fileName)), "") << "fileName.length(): " << std::string(fileName).length();
 }
 
 TEST(MetaFileName, Equal)
