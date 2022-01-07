@@ -133,8 +133,10 @@ public:
 private:
     virtual void _Finalize(void);
     void _QosWorker(void);
+    void _QosTimeChecker(void);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
     std::thread* qosThread;
+    std::thread* qosTimeThrottling;
     cpu_set_t cpuSet;
     volatile uint64_t eventWeight[BackendEvent_Count];
     uint32_t oldLog[BackendEvent_Count];
@@ -163,6 +165,8 @@ private:
     ConfigManager* configManager;
     EventFrameworkApi* eventFrameworkApi;
     AffinityManager* affinityManager;
+
+    uint64_t previousDelay[M_MAX_REACTORS];
 };
 
 using QosManagerSingleton = Singleton<QosManager>;
