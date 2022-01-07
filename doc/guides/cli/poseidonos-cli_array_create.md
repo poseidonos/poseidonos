@@ -6,7 +6,6 @@ Create an array for PoseidonOS.
 
 
 Create an array for PoseidonOS. 
-Please note that if capacity of the data devices is heterogeneous, it is truncated based on the smallest one.
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
@@ -27,7 +26,11 @@ poseidonos-cli array create [flags]
   -a, --array-name string   The name of the array to create.
   -b, --buffer string       The name of device to be used as the buffer.
   -d, --data-devs string    A comma-separated list of devices to be used as the data devices.
+                            When the capacities of the data devices are different, the total capacity
+                            of this array will be truncated based on the smallest one.
   -h, --help                help for create
+  -n, --no-raid             When specified, no RAID will be applied to this array (--raid flag will be ignored).
+                            Array with no RAID can have maximum 1 data device(s).
   -r, --raid string         The RAID type of the array to create. RAID5 is used when not specified. (default "RAID5")
   -s, --spare string        The name of device to be used as the spare.
 ```

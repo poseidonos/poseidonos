@@ -2,6 +2,8 @@ package arraycmds
 
 import (
 	"encoding/json"
+	"errors"
+	"strconv"
 	"strings"
 
 	"cli/cmd/displaymgr"
@@ -13,12 +15,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var maxNumDataDevsNoRaid = 1
+
 var CreateArrayCmd = &cobra.Command{
 	Use:   "create [flags]",
 	Short: "Create an array for PoseidonOS.",
 	Long: `
 Create an array for PoseidonOS. 
-Please note that if capacity of the data devices is heterogeneous, it is truncated based on the smallest one.
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
@@ -33,10 +36,16 @@ Example:
 
 		var command = "CREATEARRAY"
 
-		req := buildCreateArrayReq(command)
+		req, err := buildCreateArrayReq(command)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Error(err)
+			return
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -46,7 +55,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Error("error:", err)
+				log.Error(err)
 				return
 			}
 
@@ -58,7 +67,9 @@ Example:
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildCreateArrayReq(command string) messages.Request {
+func buildCreateArrayReq(command string) (messages.Request, error) {
+
+	req := messages.Request{}
 
 	// Split a string (comma separate) that contains comma-separated device names into strings
 	// and add them to a string array.
@@ -67,6 +78,15 @@ func buildCreateArrayReq(command string) messages.Request {
 
 	var buffer [1]messages.DeviceNameList
 	buffer[0].DEVICENAME = create_array_buffer
+
+	if create_array_isNoRaid == true {
+		if len(dataDevs) > maxNumDataDevsNoRaid {
+			err := errors.New(`array with no RAID can have maximum ` +
+				strconv.Itoa(maxNumDataDevsNoRaid) + ` data device(s).`)
+			return req, err
+		}
+		create_array_raid = "NONE"
+	}
 
 	param := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
@@ -78,9 +98,9 @@ func buildCreateArrayReq(command string) messages.Request {
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.BuildReqWithParam(command, uuid, param)
+	req = messages.BuildReqWithParam(command, uuid, param)
 
-	return req
+	return req, nil
 }
 
 // Parse comma-separated device list string and return the device list
@@ -105,11 +125,14 @@ func parseDeviceList(devsList string) []messages.DeviceNameList {
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var create_array_arrayName = ""
-var create_array_raid = ""
-var create_array_buffer = ""
-var create_array_spareDevsList = ""
-var create_array_dataDevsList = ""
+var (
+	create_array_arrayName     = ""
+	create_array_raid          = ""
+	create_array_buffer        = ""
+	create_array_spareDevsList = ""
+	create_array_dataDevsList  = ""
+	create_array_isNoRaid      = false
+)
 
 func init() {
 	CreateArrayCmd.Flags().StringVarP(&create_array_arrayName,
@@ -118,7 +141,9 @@ func init() {
 
 	CreateArrayCmd.Flags().StringVarP(&create_array_dataDevsList,
 		"data-devs", "d", "",
-		"A comma-separated list of devices to be used as the data devices.")
+		`A comma-separated list of devices to be used as the data devices.
+When the capacities of the data devices are different, the total capacity
+of this array will be truncated based on the smallest one.`)
 	CreateArrayCmd.MarkFlagRequired("data-devs")
 
 	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList,
@@ -127,6 +152,11 @@ func init() {
 	CreateArrayCmd.Flags().StringVarP(&create_array_buffer,
 		"buffer", "b", "", "The name of device to be used as the buffer.")
 	CreateArrayCmd.MarkFlagRequired("buffer")
+
+	CreateArrayCmd.Flags().BoolVarP(&create_array_isNoRaid,
+		"no-raid", "n", false,
+		`When specified, no RAID will be applied to this array (--raid flag will be ignored).
+Array with no RAID can have maximum `+strconv.Itoa(maxNumDataDevsNoRaid)+` data device(s).`)
 
 	CreateArrayCmd.Flags().StringVarP(&create_array_raid,
 		"raid", "r", "RAID5",
