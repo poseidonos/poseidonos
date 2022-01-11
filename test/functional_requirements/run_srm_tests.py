@@ -12,7 +12,7 @@ import pos
 
 default_fabric_ip = "10.1.11.200"
 working_dir = os.path.dirname(os.path.realpath(__file__))
-
+POS_ROOT = '../../'
 test_suites = ["array", "devel", "device_management", "fault_tolerance", "logger", "qos", "subsystem", "system_overall", "telemetry", "volume"]
 
 
@@ -39,6 +39,11 @@ def print_results(dirname):
             print(result.readline())
 
 
+def mbr_reset():
+    pos_mbr_reset = POS_ROOT + "test/script/mbr_reset.sh"
+    subprocess.call([pos_mbr_reset])
+
+
 def run_all_tests():
     for test_suite in test_suites:
         run_tests(test_suite)
@@ -56,7 +61,9 @@ def parse_argument():
     global args
     args = parser.parse_args()
 
+
 if __name__ == "__main__":
+    mbr_reset()
     parse_argument()
     try:
         run_all_tests()

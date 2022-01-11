@@ -21,8 +21,8 @@ ARRAYNAME = EXIT_POS_AFTER_UNMOUNT_VOL.ARRAYNAME
 
 def execute():
     EXIT_POS_AFTER_UNMOUNT_VOL.execute()
-    ibofos_mbr_reset = POS_ROOT + "/test/script/mbr_reset.sh"
-    subprocess.call([ibofos_mbr_reset])
+    pos_mbr_reset = POS_ROOT + "test/script/mbr_reset.sh"
+    subprocess.call([pos_mbr_reset])
     pos.start_pos()
     cli.scan_device()
     out = cli.array_info(ARRAYNAME)
