@@ -287,47 +287,24 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     // then 4.
     EXPECT_EQ(0, ret);
 
-    // given 5. failed to append Io
+    // given 5. failed to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb");
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetAllocatorCtx).Times(0);
-    EXPECT_CALL(*segCtx, SetAllocatedSegmentCount).Times(0);
     // when 5.
-    ret = alloc.SetMeta(WBT_SEGMENT_BITMAP, "", file);
+    ret = alloc.SetMeta(WBT_ACTIVE_STRIPE_TAIL, "", file);
     // then 5.
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
-    // given 6. success to append Io
+    // given 6. success to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb");
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*segCtx, SetAllocatedSegmentCount);
     // when 6.
-    ret = alloc.SetMeta(WBT_SEGMENT_BITMAP, "", file);
+    ret = alloc.SetMeta(WBT_ACTIVE_STRIPE_TAIL, "", file);
     // then 6.
-    EXPECT_EQ(0, ret);
-
-    // given 7. failed to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
-    EXPECT_CALL(*file, Open);
-    EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
-    EXPECT_CALL(*file, Close);
-    // when 7.
-    ret = alloc.SetMeta(WBT_ACTIVE_STRIPE_TAIL, "", file);
-    // then 7.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
-
-    // given 8. success to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
-    EXPECT_CALL(*file, Open);
-    EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
-    EXPECT_CALL(*file, Close);
-    // when 8.
-    ret = alloc.SetMeta(WBT_ACTIVE_STRIPE_TAIL, "", file);
-    // then 8.
     EXPECT_EQ(0, ret);
 }
 

@@ -277,6 +277,7 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
 
             ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
+
             return 0;
         });
 

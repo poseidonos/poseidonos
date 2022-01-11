@@ -39,9 +39,9 @@
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
+#include "src/allocator/context_manager/segment_ctx/segment_list.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
-#include "src/lib/bitmap.h"
 
 namespace pos
 {
@@ -53,7 +53,7 @@ public:
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        BitMapMutex* segmentBitmap,
+        SegmentList* freeSegmentList,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
@@ -86,7 +86,6 @@ public:
 
     virtual uint64_t GetNumOfFreeSegment(void);
     virtual uint64_t GetNumOfFreeSegmentWoLock(void);
-    virtual void SetAllocatedSegmentCount(int count);
     virtual int GetAllocatedSegmentCount(void);
 
     virtual SegmentId AllocateGCVictimSegment(void);
@@ -102,16 +101,17 @@ public:
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
     void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
-    SegmentId _GetUsedSegment(SegmentId startSegId);
     SegmentId _FindMostInvalidSSDSegment(void);
     void _SegmentFreed(SegmentId segId);
+
+    void _RebuildFreeSegmentList(void);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
-    BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
+    SegmentList* freeList;
 
     bool initialized;
 

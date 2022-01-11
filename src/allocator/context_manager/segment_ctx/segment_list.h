@@ -30,44 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/i_allocator_wbt.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/array_mgmt/array_manager.h"
-#include "src/wbt/set_user_segment_bitmap_wbt_command.h"
+#pragma once
 
-#include <string>
+#include <mutex>
+#include <queue>
+
+#include "src/include/address_type.h"
 
 namespace pos
 {
-SetUserSegmentBitmapWbtCommand::SetUserSegmentBitmapWbtCommand(void)
-:   WbtCommand(SET_USER_SEGMENT_BITMAP, "set_user_segment_bitmap")
+class SegmentList
 {
-}
-// LCOV_EXCL_START
-SetUserSegmentBitmapWbtCommand::~SetUserSegmentBitmapWbtCommand(void)
-{
-}
-// LCOV_EXCL_STOP
-int
-SetUserSegmentBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
-{
-    int res = -1;
-    std::string arrayName = _GetParameter(argv, "array");
-    if (0 == arrayName.length())
-    {
-        return res;
-    }
+public:
+    SegmentList(void);
+    virtual ~SegmentList(void) = default;
 
-    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
-    if (info == nullptr)
-    {
-        return res;
-    }
+    virtual void Reset(void);
+    virtual SegmentId PopSegment(void);
+    virtual void AddToList(SegmentId segId);
+    virtual uint32_t GetNumSegments(void);
+    virtual uint32_t GetNumSegmentsWoLock(void);
 
-    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
-    res = iAllocatorWbt->SetMeta(WBT_SEGMENT_BITMAP, argv["input"].get<std::string>());
-
-    return res;
-}
+private:
+    uint32_t numSegments;
+    std::mutex m;
+    std::queue<SegmentId> segments;
+};
 
 } // namespace pos

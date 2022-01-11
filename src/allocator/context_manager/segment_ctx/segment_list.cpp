@@ -30,21 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/wbt/wbt_command.h"
+#include "src/allocator/context_manager/segment_ctx/segment_list.h"
 
 namespace pos
 {
-class SetUserSegmentBitmapWbtCommand : public WbtCommand
+SegmentList::SegmentList(void)
+: numSegments(0)
 {
-public:
-    SetUserSegmentBitmapWbtCommand(void);
-    virtual ~SetUserSegmentBitmapWbtCommand(void);
+}
 
-    int Execute(Args &argv, JsonElement &elem) override;
+void
+SegmentList::Reset(void)
+{
+    std::lock_guard<std::mutex> lock(m);
+    while (segments.empty() == false)
+    {
+        segments.pop();
+        numSegments--;
+    }
+}
 
-private:
-};
+SegmentId
+SegmentList::PopSegment(void)
+{
+    std::lock_guard<std::mutex> lock(m);
+    if (segments.empty() == true)
+    {
+        return UNMAP_SEGMENT;
+    }
+    else
+    {
+        SegmentId ret = segments.front();
+        segments.pop();
+        numSegments--;
+
+        return ret;
+    }
+}
+
+void
+SegmentList::AddToList(SegmentId segId)
+{
+    std::lock_guard<std::mutex> lock(m);
+    segments.push(segId);
+    numSegments++;
+}
+
+uint32_t
+SegmentList::GetNumSegments(void)
+{
+    std::lock_guard<std::mutex> lock(m);
+    return numSegments;
+}
+
+uint32_t
+SegmentList::GetNumSegmentsWoLock(void)
+{
+    return numSegments;
+}
 
 } // namespace pos

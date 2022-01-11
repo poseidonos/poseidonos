@@ -34,7 +34,6 @@ public:
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegment, (), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegmentWoLock, (), (override));
-    MOCK_METHOD(void, SetAllocatedSegmentCount, (int count), (override));
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));

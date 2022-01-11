@@ -322,21 +322,6 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
                 allocCtx->SetAllocatedWbStripeCount(numBitsSet);
             }
         }
-        else if (WBT_SEGMENT_BITMAP == type)
-        {
-            uint32_t numBitsSet = 0;
-            ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, sizeof(numBitsSet), (char*)&numBitsSet);
-            if (ret < 0)
-            {
-                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(segment bitmap) from {} Failed, ret:{}", fname, ret);
-                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
-            }
-            else
-            {
-                SegmentCtx* segCtx = contextManager->GetSegmentCtx();
-                segCtx->SetAllocatedSegmentCount(numBitsSet);
-            }
-        }
         // ACTIVE_STRIPE_TAIL, CURRENT_SSD_LSID, SEGMENT_STATE
         else
         {

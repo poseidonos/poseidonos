@@ -48,12 +48,12 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    BitMapMutex* segmentBitmap_,
+    SegmentList* freeSegmentList,
     RebuildCtx* rebuildCtx_,
     AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
-  allocSegBitmap(segmentBitmap_),
+  freeList(freeSegmentList),
   initialized(false),
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
@@ -100,10 +100,12 @@ SegmentCtx::Init(void)
     uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
 
-    if (allocSegBitmap == nullptr)
+    if (freeList == nullptr)
     {
-        allocSegBitmap = new BitMapMutex(numSegments);
+        freeList = new SegmentList();
     }
+
+    _RebuildFreeSegmentList();
 
     initialized = true;
 }
@@ -122,10 +124,10 @@ SegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    if (allocSegBitmap != nullptr)
+    if (freeList != nullptr)
     {
-        delete allocSegBitmap;
-        allocSegBitmap = nullptr;
+        delete freeList;
+        freeList = nullptr;
     }
 
     initialized = false;
@@ -195,16 +197,30 @@ void
 SegmentCtx::AfterLoad(char* buf)
 {
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
-    allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+
+    _RebuildFreeSegmentList();
+}
+
+void
+SegmentCtx::_RebuildFreeSegmentList(void)
+{
+    freeList->Reset();
+
+    for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
+    {
+        if (segmentInfos[segId].GetState() == SegmentState::FREE)
+        {
+            freeList->AddToList(segId);
+        }
+    }
 }
 
 void
 SegmentCtx::BeforeFlush(char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
-    ctxHeader.numValidSegment = allocSegBitmap->GetNumBitsSet();
 }
 
 void
@@ -229,11 +245,6 @@ SegmentCtx::GetSectionAddr(int section)
             ret = (char*)segmentInfos;
             break;
         }
-        case AC_ALLOCATE_SEGMENT_BITMAP:
-        {
-            ret = (char*)allocSegBitmap->GetMapAddr();
-            break;
-        }
     }
     return ret;
 }
@@ -252,11 +263,6 @@ SegmentCtx::GetSectionSize(int section)
         case SC_SEGMENT_INFO:
         {
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
-            break;
-        }
-        case AC_ALLOCATE_SEGMENT_BITMAP:
-        {
-            ret = allocSegBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
             break;
         }
     }
@@ -302,41 +308,29 @@ SegmentCtx::GetSegmentState(SegmentId segId)
 void
 SegmentCtx::AllocateSegment(SegmentId segId)
 {
+    // Only used by context replayer. Free segment list will be rebuilt after replay is completed
     segmentInfos[segId].MoveToNvramState();
-    allocSegBitmap->SetBit(segId);
 }
 
 SegmentId
 SegmentCtx::AllocateFreeSegment(void)
 {
-    SegmentId segId = UNMAP_SEGMENT;
-
     while (true)
     {
+        SegmentId segId = freeList->PopSegment();
         if (segId == UNMAP_SEGMENT)
-        {
-            segId = allocSegBitmap->SetNextZeroBit();
-        }
-        else
-        {
-            segId = allocSegBitmap->SetFirstZeroBit(segId);
-        }
-
-        if (allocSegBitmap->IsValidBit(segId) == false)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT),
                 "[AllocateSegment] failed to allocate segment, free segment count:{}, rebuild target count: {}",
                 GetNumOfFreeSegmentWoLock(),
                 rebuildCtx->GetRebuildTargetSegmentCount());
 
-            segId = UNMAP_SEGMENT;
             POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
             break;
         }
         else if (rebuildCtx->IsRebuildTargetSegment(segId) == true)
         {
-            allocSegBitmap->ClearBit(segId);
-            segId++;
+            freeList->AddToList(segId);
             continue;
         }
         else
@@ -349,45 +343,29 @@ SegmentCtx::AllocateFreeSegment(void)
             v.gauge = freeSegCount;
             tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
 
-            break;
+            return segId;
         }
     }
-    return segId;
-}
 
-SegmentId
-SegmentCtx::_GetUsedSegment(SegmentId startSegId)
-{
-    SegmentId segId = allocSegBitmap->FindFirstSetBit(startSegId);
-    if (allocSegBitmap->IsValidBit(segId) == false)
-    {
-        segId = UNMAP_SEGMENT;
-    }
-    return segId;
+    return UNMAP_SEGMENT;
 }
 
 uint64_t
 SegmentCtx::GetNumOfFreeSegment(void)
 {
-    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSet();
+    return freeList->GetNumSegments();
 }
 
 uint64_t
 SegmentCtx::GetNumOfFreeSegmentWoLock(void)
 {
-    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSetWoLock();
-}
-
-void
-SegmentCtx::SetAllocatedSegmentCount(int count)
-{
-    allocSegBitmap->SetNumBitsSet(count);
+    return freeList->GetNumSegmentsWoLock();
 }
 
 int
 SegmentCtx::GetAllocatedSegmentCount(void)
 {
-    return allocSegBitmap->GetNumBitsSet();
+    return addrInfo->GetnumUserAreaSegments() - freeList->GetNumSegments();
 }
 
 SegmentId
@@ -434,7 +412,7 @@ SegmentCtx::_FindMostInvalidSSDSegment(void)
 void
 SegmentCtx::_SegmentFreed(SegmentId segmentId)
 {
-    allocSegBitmap->ClearBit(segmentId);
+    freeList->AddToList(segmentId);
 
     uint32_t freeSegCount = GetNumOfFreeSegmentWoLock();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
@@ -460,6 +438,8 @@ SegmentCtx::ResetSegmentsStates(void)
             }
         }
     }
+
+    _RebuildFreeSegmentList();
 }
 
 SegmentId
@@ -505,22 +485,13 @@ SegmentCtx::MakeRebuildTarget(void)
 void
 SegmentCtx::_GetUsedSegmentList(std::set<SegmentId>& segmentList)
 {
-    int cnt = 0;
-    SegmentId segmentId = 0;
-    while (true)
+    uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+    for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        // Pick non-free segments and make rebuildTargetSegments
-        segmentId = _GetUsedSegment(segmentId);
-        if (segmentId == UNMAP_SEGMENT)
+        if (segmentInfos[segId].GetState() != SegmentState::FREE)
         {
-            break;
+            segmentList.emplace(segId);
         }
-        else
-        {
-            segmentList.emplace(segmentId);
-            ++cnt;
-        }
-        ++segmentId;
     }
 }
 
