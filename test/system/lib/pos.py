@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-
 import subprocess
 import sys
 import cli
-import api
 import json_parser
 import time
+sys.path.append("../../functional_requirements/")
+import api
 
 POS_ROOT = '../../../'
 LOG_PATH = 'pos.log'
