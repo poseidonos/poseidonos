@@ -100,8 +100,12 @@ def write_log(_log):
 
 def start_pos():
     write_log ("starting pos...")
-    pos.start_pos()
+    ret = pos.start_pos()
+    if ret is False:
+        write_log ("faild to start pos")
+        return False
     write_log ("pos is running")
+    return True
 
 def exit_pos():
     write_log ("exiting pos...")
@@ -126,7 +130,10 @@ def restart_pos():
     if ret == False:
         write_log("pos restarting failed while exiting")
         return False
-    start_pos()
+    ret = start_pos()
+    if ret == False:
+        write_log("pos restarting failed while starting")
+        return False
     write_log("pos has been restarted")
     return True
 
@@ -197,7 +204,9 @@ def mbr_reset():
     cli.mbr_reset()
 
 def init_test():
-    start_pos()
+    ret = start_pos()
+    if ret is False:
+        return False
     scan_dev()
     mbr_reset()
     create_array()
