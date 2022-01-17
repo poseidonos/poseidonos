@@ -27,10 +27,10 @@ def execute():
     api.detach_ssd_and_attach(DETACH_TARGET_DEV)
     code = -1
     retry = 0
-    timeout = 20
+    maxRetry = 20
     while code != 0:
         retry = retry + 1
-        if retry is timeout:
+        if retry is maxRetry:
             return "fail"
         out = cli.add_device(FIRST_SPARE, ARRAYNAME)
         code = json_parser.get_response_code(out)

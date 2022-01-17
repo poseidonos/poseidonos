@@ -174,9 +174,9 @@ def start_pos():
     write_log ("starting pos...")
     ret = pos.start_pos()
     if ret is False:
-        write_log ("faild to start pos")
+        write_log("faild to start pos")
         return False
-    write_log ("pos is running")
+    write_log("pos is running")
     return True
 
 def kill_pos():
