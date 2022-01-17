@@ -376,7 +376,7 @@ def execute(ip_addr, perf_impact):
     pos_util.kill_process("poseidonos")
     ret = start_pos()
     if ret is False:
-        write_log ("TEST FAILED WHILE INITIALIZATION")
+        write_log("TEST FAILED WHILE INITIALIZATION")
         kill_pos()
     ret = do_event(0)
     if ret == True:

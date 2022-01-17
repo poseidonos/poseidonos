@@ -131,7 +131,7 @@ def restart_pos():
         write_log("pos restarting failed while exiting")
         return False
     ret = start_pos()
-    if ret == False:
+    if ret is False:
         write_log("pos restarting failed while starting")
         return False
     write_log("pos has been restarted")

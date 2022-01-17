@@ -179,7 +179,7 @@ def start_pos():
     write_log ("starting pos...")
     ret = pos.start_pos()
     if ret is False:
-        write_log ("faild to start pos")
+        write_log("faild to start pos")
         return False
     write_log ("pos is running")
     return True
@@ -209,7 +209,7 @@ def restart_pos():
         write_log("pos restarting failed while exiting")
         return False
     ret = start_pos()
-    if ret == False:
+    if ret is False:
         write_log("pos restarting failed while starting")
         return False
     write_log("pos has been restarted")

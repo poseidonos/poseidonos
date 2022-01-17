@@ -29,12 +29,12 @@ def execute():
     retry = 0
     timeout = 20
     while code != 0:
-            retry = retry + 1
-            if retry is timeout:
-                return "fail"
-            out = cli.add_device(FIRST_SPARE, ARRAYNAME)
-            code = json_parser.get_response_code(out)
-            print ("add spare, try: " + str(retry) + "response: " + str(code))
+        retry = retry + 1
+        if retry is timeout:
+            return "fail"
+        out = cli.add_device(FIRST_SPARE, ARRAYNAME)
+        code = json_parser.get_response_code(out)
+        print("add spare, try: " + str(retry) + "response: " + str(code))
     print(FIRST_SPARE + " is added as a spare")
     out = cli.add_device(SECOND_SPARE, ARRAYNAME)
     code = json_parser.get_response_code(out)

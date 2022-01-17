@@ -36,7 +36,7 @@ def start_pos_without_bringup():
     tryCnt = 0
     maxRetry = 20
     ret = api.check_pos_alive()
-    while ret == False:
+    while ret is False:
         tryCnt += 1
         if tryCnt == maxRetry:
             print("failed to initialize pos server")
