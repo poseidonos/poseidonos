@@ -35,7 +35,9 @@
 #include <signal.h>
 
 #include <atomic>
+#include <cstdio>
 #include <list>
+#include <string>
 
 #include "src/lib/singleton.h"
 
@@ -46,6 +48,7 @@ class SignalHandler
 {
 public:
     SignalHandler(void);
+    ~SignalHandler(void);
     void Register(void);
     void Deregister(void);
     static void INTHandler(int sig);
@@ -56,12 +59,14 @@ private:
     void _GetThreadIdList(void);
     void _BacktraceAndInvokeNextThread(int sig);
     void _Backtrace(void);
+    void _Log(std::string logMsg, bool printTimeStamp = true);
     std::list<long> threadList;
     std::atomic<uint32_t> pendingThreads;
     static const long ATOI_ERR = 0;
     static const int MAX_CALL_STACK = 100;
     std::atomic<bool> listUpdated;
     std::atomic<int> dominantSignal;
+    FILE* btLogFilePtr;
 };
 
 using SignalHandlerSingleton = Singleton<SignalHandler>;

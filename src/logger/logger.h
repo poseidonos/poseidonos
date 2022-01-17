@@ -74,8 +74,6 @@ public:
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        sigset_t oldsig;
-        SignalMask::MaskSignal(&oldsig);
         if (ShouldLog(lvl, id))
         {
             uint32_t moduleId = static_cast<uint32_t>(module);
@@ -85,7 +83,6 @@ public:
             DumpBuffer dumpBuffer(buf.data(), buf.size(), dumpModulePtr);
             dumpModulePtr->AddDump(dumpBuffer, 0);
         }
-        SignalMask::RestoreSignal(&oldsig);
 #endif
     }
 
@@ -95,13 +92,10 @@ public:
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        sigset_t oldsig;
-        SignalMask::MaskSignal(&oldsig);
         if (ShouldLog(lvl, id))
         {
             logger->iboflog_sink(loc, lvl, id, fmt, args...);
         }
-        SignalMask::RestoreSignal(&oldsig);
 #endif
     }
     int SetLevel(string lvl);

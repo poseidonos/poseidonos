@@ -54,7 +54,19 @@ namespace pos
 SignalHandler::SignalHandler(void)
 {
     listUpdated = false;
+    char btLogPath[] = "/var/log/pos/pos_backtrace.log";
     pendingThreads = 0;
+    btLogFilePtr = fopen(btLogPath, "w");
+}
+
+SignalHandler::~SignalHandler(void)
+{
+    listUpdated = false;
+    pendingThreads = 0;
+    if (btLogFilePtr != nullptr)
+    {
+        fclose(btLogFilePtr);
+    }
 }
 
 void
@@ -87,6 +99,39 @@ void
 SignalHandler::ExceptionHandler(int sig)
 {
     SignalHandlerSingleton::Instance()->_ExceptionHandler(sig);
+}
+
+void
+SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
+{
+    if (btLogFilePtr != nullptr)
+    {
+        if (printTimeStamp)
+        {
+            // Get the current time
+            time_t curTime = time(NULL);
+
+            // Convert the current time
+            struct tm local;
+
+            localtime_r(&curTime, &local);
+            if (btLogFilePtr)
+            {
+                fprintf(btLogFilePtr, "[%04d-%02d-%02d]%02d:%02d:%02d  ",
+                    local.tm_year + 1900, local.tm_mon + 1, local.tm_mday,
+                    local.tm_hour, local.tm_min, local.tm_sec);
+            }
+
+            printf("[%04d-%02d-%02d]%02d:%02d:%02d  ",
+                local.tm_year + 1900, local.tm_mon + 1, local.tm_mday,
+                local.tm_hour, local.tm_min, local.tm_sec);
+        }
+        if (btLogFilePtr)
+        {
+            fprintf(btLogFilePtr, "%s\n", logMsg.c_str());
+        }
+        printf("%s\n", logMsg.c_str());
+    }
 }
 
 void
@@ -186,7 +231,7 @@ SignalHandler::_GetThreadIdList(void)
     else
     {
         /* could not open directory */
-        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "Cannot found directory!");
+        _Log("Cannot found directory!");
         return;
     }
 }
@@ -203,7 +248,7 @@ SignalHandler::_BacktraceAndInvokeNextThread(int sig)
         int ret = tgkill(getpid(), tid, sig);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "signal is failed\n");
+            _Log("signal is failed\n");
         }
         pendingThreads--;
     }
@@ -218,12 +263,17 @@ SignalHandler::_Backtrace(void)
     nptrs = backtrace(buffer, MAX_CALL_STACK);
 
     strings = backtrace_symbols(buffer, nptrs);
-    POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "coreId : {}, tid : {}", sched_getcpu(), gettid());
+    std::string coreInfoString = "";
+    coreInfoString += "CoreId : ";
+    coreInfoString += std::to_string(sched_getcpu());
+    coreInfoString += " tid : ";
+    coreInfoString += std::to_string(gettid());
+    _Log(coreInfoString);
     for (int index = 0; index < nptrs; index++)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "{}", strings[index]);
+        _Log(strings[index]);
     }
-    POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "================================================");
-    POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_SIGNAL_HANDLING, "                                                ");
+    _Log("", false);
+    fflush(btLogFilePtr);
 }
 } // namespace pos
