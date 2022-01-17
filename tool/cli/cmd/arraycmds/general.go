@@ -1,8 +1,13 @@
 package arraycmds
 
 import (
+	"cli/cmd/messages"
+	"strings"
+
 	"github.com/spf13/cobra"
 )
+
+var maxNumDataDevsNoRaid = 1
 
 // This is a pseudo command to contain array subcommands.
 // ArryCmd itself does nothing when called.
@@ -33,4 +38,23 @@ func init() {
 	ArrayCmd.AddCommand(AddSpareCmd)
 	ArrayCmd.AddCommand(RemoveSpareCmd)
 	ArrayCmd.AddCommand(AutocreateArrayCmd)
+}
+
+// Parse comma-separated device list string and return the device list
+func parseDevList(devsList string) []messages.DeviceNameList {
+
+	if devsList == "" {
+		return nil
+	}
+
+	devsListSlice := strings.Split(devsList, ",")
+
+	var devs []messages.DeviceNameList
+	for _, str := range devsListSlice {
+		var devNameList messages.DeviceNameList // Single device name that is splitted
+		devNameList.DEVICENAME = str
+		devs = append(devs, devNameList)
+	}
+
+	return devs
 }

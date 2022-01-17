@@ -105,12 +105,12 @@ CreateArrayCmd = "create" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--data-devs" | "-d" ) , DeviceNameList ,
   [ ( "--spare" | "-s" ) , DeviceName ] , [ "--raid" ,
-  RaidType ] ;
+  RaidType ] , [ "--no-buffer" ];
 
 AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
-  [ "--raid" , RaidType ] ;
+  [ "--raid" , RaidType ] [ "--no-buffer" ] ;
 
 VolumeCmd = "volume" ,
   ( VolumeCreateCmd  | VolumeDeleteCmd

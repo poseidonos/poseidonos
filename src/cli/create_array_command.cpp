@@ -65,6 +65,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     {
         dataFt = doc["param"]["raidtype"].get<std::string>();
     }
+
     string metaFt = "RAID10";
     if (dataFt == "RAID0" || dataFt == "NONE")
     {

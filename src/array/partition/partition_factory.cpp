@@ -70,14 +70,15 @@ PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nv
     vector<SsdPartitionBuilder*> builders;
     if (nvm == nullptr)
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
-        RaidTypeEnum journalRaid = RaidTypeEnum::RAID0;
-        if (dataRaid == RaidTypeEnum::NONE)
-        {
-            journalRaid = RaidTypeEnum::NONE;
-        }
-        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nullptr);
-        builders.push_back(new SsdPartitionBuilder(option));
+        // TODO (SRM): It is tentatively agreed to use meta partition instead of separate journal partition.
+        // POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
+        // RaidTypeEnum journalRaid = RaidTypeEnum::RAID0;
+        // if (dataRaid == RaidTypeEnum::NONE)
+        // {
+        //     journalRaid = RaidTypeEnum::NONE;
+        // }
+        // SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nullptr);
+        // builders.push_back(new SsdPartitionBuilder(option));
     }
     {
         POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for META_SSD");

@@ -253,9 +253,12 @@ ArrayDeviceManager::ExportToMeta(void)
 {
     DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
     DeviceSet<DeviceMeta> metaSet;
-    string sn = _d.nvm.at(0)->GetUblock()->GetSN();
-    DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
-    metaSet.nvm.push_back(nvmMeta);
+    if (_d.nvm.size() > 0)
+    {
+        string sn = _d.nvm.at(0)->GetUblock()->GetSN();
+        DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
+        metaSet.nvm.push_back(nvmMeta);
+    }
 
     for (ArrayDevice* dev : _d.data)
     {
@@ -385,10 +388,13 @@ ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
         return ret;
     }
 
-    ret = _CheckNvmCapacity(devSet);
-    if (0 != ret)
+    if (devSet.nvm.size() > 0)
     {
-        return ret;
+        ret = _CheckNvmCapacity(devSet);
+        if (0 != ret)
+        {
+            return ret;
+        }
     }
 
     ret = _CheckSsdsCapacity(devSet);

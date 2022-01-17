@@ -15,8 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var maxNumDataDevsNoRaid = 1
-
 var CreateArrayCmd = &cobra.Command{
 	Use:   "create [flags]",
 	Short: "Create an array for PoseidonOS.",
@@ -25,7 +23,8 @@ Create an array for PoseidonOS.
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
-	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10]
+	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10] 
+	[--no-raid] [--no-buffer]
 
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 
@@ -73,11 +72,15 @@ func buildCreateArrayReq(command string) (messages.Request, error) {
 
 	// Split a string (comma separate) that contains comma-separated device names into strings
 	// and add them to a string array.
-	dataDevs := parseDeviceList(create_array_dataDevsList)
-	spareDevs := parseDeviceList(create_array_spareDevsList)
+	dataDevs := parseDevList(create_array_dataDevsList)
+	spareDevs := parseDevList(create_array_spareDevsList)
 
-	var buffer [1]messages.DeviceNameList
-	buffer[0].DEVICENAME = create_array_buffer
+	if (create_array_isNoBuffer == false) && (create_array_bufferList == "") {
+		err := errors.New("no buffer is specified.")
+		return req, err
+	}
+
+	bufferDevs := parseDevList(create_array_bufferList)
 
 	if create_array_isNoRaid == true {
 		if len(dataDevs) > maxNumDataDevsNoRaid {
@@ -91,7 +94,7 @@ func buildCreateArrayReq(command string) (messages.Request, error) {
 	param := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
 		RAID:      strings.ToUpper(create_array_raid),
-		BUFFER:    buffer,
+		BUFFER:    bufferDevs,
 		DATA:      dataDevs,
 		SPARE:     spareDevs,
 	}
@@ -103,35 +106,17 @@ func buildCreateArrayReq(command string) (messages.Request, error) {
 	return req, nil
 }
 
-// Parse comma-separated device list string and return the device list
-func parseDeviceList(devsList string) []messages.DeviceNameList {
-
-	if devsList == "" {
-		return nil
-	}
-
-	devsListSlice := strings.Split(devsList, ",")
-
-	var devs []messages.DeviceNameList
-	for _, str := range devsListSlice {
-		var devNameList messages.DeviceNameList // Single device name that is splitted
-		devNameList.DEVICENAME = str
-		devs = append(devs, devNameList)
-	}
-
-	return devs
-}
-
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var (
 	create_array_arrayName     = ""
 	create_array_raid          = ""
-	create_array_buffer        = ""
+	create_array_bufferList    = ""
 	create_array_spareDevsList = ""
 	create_array_dataDevsList  = ""
 	create_array_isNoRaid      = false
+	create_array_isNoBuffer    = false
 )
 
 func init() {
@@ -149,16 +134,20 @@ of this array will be truncated based on the smallest one.`)
 	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList,
 		"spare", "s", "", "The name of device to be used as the spare.")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_buffer,
+	CreateArrayCmd.Flags().BoolVarP(&create_array_isNoBuffer,
+		"no-buffer", "", false,
+		`When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).`)
+
+	CreateArrayCmd.Flags().StringVarP(&create_array_bufferList,
 		"buffer", "b", "", "The name of device to be used as the buffer.")
-	CreateArrayCmd.MarkFlagRequired("buffer")
 
 	CreateArrayCmd.Flags().BoolVarP(&create_array_isNoRaid,
 		"no-raid", "n", false,
-		`When specified, no RAID will be applied to this array (--raid flag will be ignored).
-Array with no RAID can have maximum `+strconv.Itoa(maxNumDataDevsNoRaid)+` data device(s).`)
+		`When specified, no RAID will be applied to this array (--raid flag will be ignored).`+
+			`Array with no RAID can have maximum `+strconv.Itoa(maxNumDataDevsNoRaid)+` data device(s).`)
 
 	CreateArrayCmd.Flags().StringVarP(&create_array_raid,
 		"raid", "r", "RAID5",
 		"The RAID type of the array to create. RAID5 is used when not specified.")
+
 }

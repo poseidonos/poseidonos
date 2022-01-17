@@ -107,6 +107,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     IArrayMgmt* array = ArrayMgr();
     // TODO(SRM): interactive cli to select from multiple-options.
     int ret = array->Create(arrayName, res.options.front().devs, metaFt, dataFt);
+
     if (0 != ret)
     {
         return jFormat.MakeResponse(

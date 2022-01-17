@@ -78,15 +78,18 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                         sCnt--;
                     }
                 }
-                DevName bufferName(buffers.front());
-                UblockSharedPtr buf = devMgr->GetDev(bufferName);
-                if (buf != nullptr && buf->GetNuma() == numaId)
+                if (buffers.size() > 0)
                 {
-                    option.devs.nvm.push_back(buffers.front());
-                }
-                else
-                {
-                    continue;
+                    DevName bufferName(buffers.front());
+                    UblockSharedPtr buf = devMgr->GetDev(bufferName);
+                    if (buf != nullptr && buf->GetNuma() == numaId)
+                    {
+                        option.devs.nvm.push_back(buffers.front());
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
                 option.capacity = devSize * dataCnt;
                 result.options.push_back(option);

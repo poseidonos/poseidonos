@@ -38,19 +38,19 @@ type SpareDeviceName struct {
 }
 
 type CreateArrayParam struct {
-	ARRAYNAME string            `json:"name"`
-	BUFFER    [1]DeviceNameList `json:"buffer"`
-	DATA      []DeviceNameList  `json:"data"`
-	SPARE     []DeviceNameList  `json:"spare,omitempty"`
-	RAID      string            `json:"raidtype,omitempty"`
+	ARRAYNAME string           `json:"name"`
+	BUFFER    []DeviceNameList `json:"buffer,omitempty"`
+	DATA      []DeviceNameList `json:"data"`
+	SPARE     []DeviceNameList `json:"spare,omitempty"`
+	RAID      string           `json:"raidtype,omitempty"`
 }
 
 type AutocreateArrayParam struct {
-	ARRAYNAME    string            `json:"name"`
-	BUFFER       [1]DeviceNameList `json:"buffer"`
-	NUMDATADEVS  int               `json:"num_data"`
-	NUMSPAREDEVS int               `json:"num_spare,omitempty"`
-	RAID         string            `json:"raidtype,omitempty"`
+	ARRAYNAME    string           `json:"name"`
+	BUFFER       []DeviceNameList `json:"buffer,omitempty"`
+	NUMDATADEVS  int              `json:"num_data"`
+	NUMSPAREDEVS int              `json:"num_spare,omitempty"`
+	RAID         string           `json:"raidtype,omitempty"`
 }
 
 type DeviceNameList struct {
