@@ -161,9 +161,9 @@ DeviceCmd = "device" ,
   ) ;
 
 CreateDeviceCmd = "create" , ( "--device-name" | "-d" ) ,
-  DeviceName , "--num-blocks" , { Digit } ,
-  "--block-size" , { Digit } , "--device-type" ,
-  DeviceType ;
+  DeviceName , ["--num-blocks" , { Digit }] ,
+  ["--block-size" , { Digit }] , ["--device-type" ,
+  DeviceType] ;
 
 ScanDeviceCmd = "scan" ;
 
