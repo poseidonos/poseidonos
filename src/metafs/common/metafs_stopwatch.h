@@ -35,6 +35,7 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 namespace pos
 {
