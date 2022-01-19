@@ -63,6 +63,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   error(0)
 {
     ioDone = false;
+    StoreTimestamp(IoRequestStage::Create);
 }
 
 void
@@ -178,6 +179,7 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
         if (0 == requestCount)
         {
             ioDone = true;
+            StoreTimestamp(IoRequestStage::Complete);
         }
     }
 
