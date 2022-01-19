@@ -1,3 +1,35 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "src/metafs/mim/mpio_pool.h"
 
 #include <gtest/gtest.h>
@@ -7,12 +39,11 @@ namespace pos
 TEST(MpioPool, AllocAndReleaseForSsd)
 {
     const uint32_t COUNT = 10;
-    int arrayId = 0;
+    const int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
 
-    size_t size = pool->GetPoolSize();
-    EXPECT_EQ(size, COUNT);
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
 
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
@@ -22,8 +53,7 @@ TEST(MpioPool, AllocAndReleaseForSsd)
         }
 
         // check read mpio list
-        bool isEmpty = pool->IsEmpty(static_cast<MpioType>(i));
-        EXPECT_EQ(isEmpty, true);
+        EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
         Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
@@ -41,12 +71,11 @@ TEST(MpioPool, AllocAndReleaseForSsd)
 TEST(MpioPool, AllocAndReleaseForNvRam)
 {
     const uint32_t COUNT = 10;
-    int arrayId = 0;
+    const int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
 
-    size_t size = pool->GetPoolSize();
-    EXPECT_EQ(size, COUNT);
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
 
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
@@ -56,8 +85,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
         }
 
         // check read mpio list
-        bool isEmpty = pool->IsEmpty(static_cast<MpioType>(i));
-        EXPECT_EQ(isEmpty, true);
+        EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
         Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
@@ -72,17 +100,61 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
     delete pool;
 }
 
+TEST(MpioPool, CheckCounter)
+{
+    const uint32_t COUNT = 10;
+    const int arrayId = 0;
+    Mpio* mpioList_r[10] = { 0, };
+    Mpio* mpioList_w[10] = { 0, };
+    MpioPool* pool = new MpioPool(COUNT);
+
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), 0);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
+
+    uint32_t popCount = 4;
+
+    for (uint32_t index = 0; index < popCount; index++)
+    {
+        mpioList_r[index] = pool->Alloc(MpioType::Read, MetaStorageType::SSD, index, true, arrayId);
+        mpioList_w[index] = pool->Alloc(MpioType::Write, MetaStorageType::SSD, index, true, arrayId);
+    }
+
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT - popCount);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT - popCount);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), popCount);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), popCount);
+
+    for (uint32_t index = 0; index < popCount; index++)
+    {
+        ASSERT_NE(mpioList_r[index], nullptr);
+        ASSERT_NE(mpioList_w[index], nullptr);
+        pool->Release(mpioList_r[index]);
+        pool->Release(mpioList_w[index]);
+    }
+
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), 0);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
+
+    delete pool;
+}
+
 TEST(MpioPool, AllocAndReleaseForNvRamCache)
 {
 #if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
-    int arrayId = 0;
+    const int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
     uint32_t index = 0;
 
-    size_t size = pool->GetPoolSize();
-    EXPECT_EQ(size, COUNT);
+    EXPECT_EQ(pool->GetCapacity(), COUNT);
 
     for (uint32_t idx = 0; idx < COUNT; idx++)
     {
@@ -96,8 +168,7 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(index, COUNT - 1);
 
     // check write mpio list, not hit all the mpios
-    bool isEmpty = pool->IsEmpty(MpioType::Write);
-    EXPECT_TRUE(isEmpty);
+    EXPECT_TRUE(pool->IsEmpty(MpioType::Write));
 
     // check free read mpio
     Mpio* temp = pool->Alloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayId);

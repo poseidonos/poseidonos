@@ -43,11 +43,10 @@
 #include "mpio_list_context.h"
 #include "mpio_pool.h"
 #include "metafs_aiocb_cxt.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 namespace pos
 {
-#define AsMioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
-
 using MpioDonePollerCb = std::function<void(void)>;
 using MioAsyncDoneCb = AsyncCallback;
 
@@ -88,7 +87,7 @@ private:
     MioState expNextState;
 };
 
-class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>
+class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>, public MetaFsStopwatch<MioTimestampStage>
 {
 public:
     Mio(void) = delete;
@@ -98,7 +97,6 @@ public:
 
     virtual ~Mio(void);
 
-    virtual void InitStateHandler(void) override;
     virtual void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
     virtual void Reset(void);
 
@@ -129,6 +127,7 @@ public:
 #endif
 
 protected:
+    virtual void _InitStateHandler(void) override;
     void _BindMpioPool(MpioPool* mpioPool);
     void _BuildMpioMap(void);
     void _PrepareMpioInfo(MpioIoInfo& mpioIoInfo,

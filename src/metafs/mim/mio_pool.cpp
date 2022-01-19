@@ -39,15 +39,17 @@
 namespace pos
 {
 MioPool::MioPool(MpioPool* mpioPool, uint32_t poolSize)
+: capacity_(poolSize)
 {
-    assert(mpioPool != nullptr && poolSize != 0);
+    assert(mpioPool != nullptr && capacity_ != 0);
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MioPool poolsize={}", poolSize);
+        "MioPool poolsize={}", capacity_);
+
+    mioList.reserve(capacity_);
 
     while (poolSize-- != 0)
     {
         Mio* mio = new Mio(mpioPool);
-        mio->InitStateHandler();
         mioList.push_back(mio);
     }
 }
@@ -67,6 +69,7 @@ MioPool::Alloc(void)
 
     Mio* mio = mioList.back();
     mioList.pop_back();
+    mio->StoreTimestamp(MioTimestampStage::Allocate);
 
     return mio;
 }
@@ -77,9 +80,19 @@ MioPool::IsEmpty(void)
     return mioList.empty();
 }
 
+size_t
+MioPool::GetFreeCount(void)
+{
+    return mioList.size();
+}
+
 void
 MioPool::Release(Mio* mio)
 {
+    if (nullptr == mio)
+        return;
+
+    mio->StoreTimestamp(MioTimestampStage::Release);
     mio->Reset();
     mioList.push_back(mio);
 }
@@ -87,10 +100,10 @@ MioPool::Release(Mio* mio)
 void
 MioPool::_FreeAllMioinPool(void)
 {
-    for (std::vector<Mio*>::iterator itr = mioList.begin(); itr != mioList.end(); ++itr)
+    for (auto ptr : mioList)
     {
-        delete *itr;
-        *itr = nullptr;
+        delete ptr;
     }
+    mioList.clear();
 }
 } // namespace pos

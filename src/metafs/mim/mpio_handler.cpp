@@ -73,7 +73,7 @@ MpioHandler::BindMpioPool(MpioPool* mpioPool)
     assert(this->mpioPool == nullptr && mpioPool != nullptr);
     this->mpioPool = mpioPool;
 
-    _InitPartialMpioDoneQ(mpioPool->GetPoolSize());
+    _InitPartialMpioDoneQ(mpioPool->GetCapacity());
 }
 
 void

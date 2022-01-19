@@ -44,7 +44,6 @@ class MetaAsyncRunnable
 public:
     MetaAsyncRunnable(void);
     virtual ~MetaAsyncRunnable(void);
-    virtual void InitStateHandler(void) = 0;
 
     virtual void Init(void);
     virtual void RegisterStateHandler(AsyncStateT state, AsyncStateExecutionEntry* entry);
@@ -61,6 +60,8 @@ public:
     bool IsCompleted(void);
 
 private:
+    virtual void _InitStateHandler(void) = 0;
+
     AsyncStateExecutionEntry* stateHandler[(int)AsyncStateT::Max];
     CallbackCxtT* cxt;
     AsyncStateT prevState;

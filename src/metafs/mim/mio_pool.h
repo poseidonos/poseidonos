@@ -48,9 +48,16 @@ public:
     virtual Mio* Alloc(void);
     virtual void Release(Mio* mio);
     virtual bool IsEmpty(void);
+    virtual size_t GetCapacity(void)
+    {
+        return capacity_;
+    }
+    virtual size_t GetFreeCount(void);
 
 private:
     void _FreeAllMioinPool(void);
+
     std::vector<Mio*> mioList;
+    size_t capacity_;
 };
 } // namespace pos

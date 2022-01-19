@@ -59,7 +59,7 @@ public:
         return MpioType::Read;
     }
 
-    void InitStateHandler(void)
+    void _InitStateHandler(void) override
     {
     }
 
@@ -88,6 +88,8 @@ TEST(MpioTester, Mpio_testConstructor)
     MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
 
     EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
+
+    delete buf;
 }
 
 TEST(MpioTester, Mpio_testCallbackForMemcpy)
@@ -106,5 +108,7 @@ TEST(MpioTester, Mpio_testCallbackForMemcpy)
     mpio.HandleAsyncMemOpDone();
 
     EXPECT_EQ(mpio.cbTestResult, true);
+
+    delete buf;
 }
 } // namespace pos

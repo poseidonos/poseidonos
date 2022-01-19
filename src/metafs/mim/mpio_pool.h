@@ -32,40 +32,58 @@
 
 #pragma once
 
+#include <array>
+#include <list>
+#include <string>
 #include <vector>
 
 #include "mdpage_buf_pool.h"
 #include "mpio.h"
 #include "os_header.h"
-#include <list>
-#include <map>
-#include <string>
 
 namespace pos
 {
 class MpioPool
 {
 public:
-    explicit MpioPool(uint32_t poolSize);
+    explicit MpioPool(const size_t poolSize);
     virtual ~MpioPool(void);
 
-    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
-                bool partialIO, int arrayId);
-    virtual void Release(Mpio* mpio);
-    virtual size_t GetPoolSize(void);
+    Mpio* Alloc(const MpioType mpioType, const MetaStorageType storageType,
+        const MetaLpnType lpn, const bool partialIO, const int arrayId);
+    virtual void Release(Mpio* item);
+    virtual size_t GetCapacity(void)
+    {
+        return capacity_;
+    }
+    virtual size_t GetFreeCount(void)
+    {
+        size_t total = 0;
+        for (uint32_t mpioType = 0; mpioType < (uint32_t)MpioType::Max; ++mpioType)
+            total += free_[(uint32_t)mpioType].size();
+        return total;
+    }
+    virtual size_t GetFreeCount(const MpioType mpioType)
+    {
+        return free_[(uint32_t)mpioType].size();
+    }
+    virtual size_t GetUsedCount(const MpioType mpioType)
+    {
+        return capacity_ - GetFreeCount(mpioType);
+    }
 
-    bool IsEmpty(MpioType type);
+    bool IsEmpty(const MpioType type);
 
 #if MPIO_CACHE_EN
     virtual void ReleaseCache(void);
 #endif
 
 private:
-    void _FreeAllMpioinPool(MpioType type);
-    Mpio* _AllocMpio(MpioType mpioType);
+    void _FreeAllMpioinPool(const MpioType type);
+    Mpio* _AllocMpio(const MpioType mpioType);
 
 #if MPIO_CACHE_EN
-    void _InitCache(uint32_t poolSize);
+    void _InitCache(const uint32_t poolSize);
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
     Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId);
@@ -73,9 +91,10 @@ private:
     void _CacheRemove(MpioType mpioType);
 #endif
 
-    MDPageBufPool* mdPageBufPool;
-    std::vector<Mpio*> mpioList[(uint32_t)MpioType::Max];
-    size_t poolSize;
+    std::shared_ptr<MDPageBufPool> mdPageBufPool;
+    std::array<std::list<Mpio*>, (uint32_t)MpioType::Max> free_;
+    std::vector<Mpio*> all_;
+    size_t capacity_;
 
 #if MPIO_CACHE_EN
     size_t maxCacheCount;

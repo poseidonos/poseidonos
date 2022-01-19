@@ -41,6 +41,7 @@
 #include "mpio_io_info.h"
 #include "mpio_state_execute_entry.h"
 #include "src/metafs/storage/mss.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 #define AsMpioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
 
@@ -68,7 +69,7 @@ using PartialMpioDoneCb = std::function<void(Mpio*)>;
 using MpioAsyncDoneCb = AsyncCallback;
 
 // meta page io class
-class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>
+class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>, public MetaFsStopwatch<MpioTimestampStage>
 {
 public:
     explicit Mpio(void* mdPageBuf);
@@ -81,7 +82,6 @@ public:
     void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
     void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
     virtual MpioType GetType(void) = 0;
-    virtual void InitStateHandler(void) = 0;
 
     void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
     bool IsPartialIO(void);
@@ -118,6 +118,7 @@ protected:
 
     MpioCacheState cacheState;
 
+    virtual void _InitStateHandler(void) = 0;
     bool _DoMemCpy(void* dst, void* src, size_t nbytes);
     bool _DoMemSetZero(void* addr, size_t nbytes);
 

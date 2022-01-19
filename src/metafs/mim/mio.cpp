@@ -51,13 +51,14 @@ InstanceTagIdAllocator mioTagIdAllocator;
 
 Mio::Mio(MpioPool* mpioPool)
 : originReq(nullptr),
+  opCode(MetaIoOpcode::Max),
   fileDataChunkSize(0),
+  startLpn(0),
   error(0, false),
   ioCQ(nullptr),
   mpioPool(nullptr)
 {
-    opCode = MetaIoOpcode::Max;
-    startLpn = 0;
+    _InitStateHandler();
 
     mpioAsyncDoneCallback = AsEntryPointParam1(&Mio::_HandleMpioDone, this);
     _BindMpioPool(mpioPool);
@@ -126,17 +127,18 @@ Mio::Reset(void)
         originReq = nullptr;
     }
     mpioListCxt.Reset();
+    ResetTimestamp();
 }
 
 void
-Mio::InitStateHandler(void)
+Mio::_InitStateHandler(void)
 {
     RegisterStateHandler(MioState::Init,
-        new MioStateExecuteEntry(MioState::Init, AsMioStateEntryPoint(&Mio::Init, this), MioState::Issued));
+        new MioStateExecuteEntry(MioState::Init, AsEntryPointParam1(&Mio::Init, this), MioState::Issued));
     RegisterStateHandler(MioState::Issued,
-        new MioStateExecuteEntry(MioState::Issued, AsMioStateEntryPoint(&Mio::Issue, this), MioState::Complete));
+        new MioStateExecuteEntry(MioState::Issued, AsEntryPointParam1(&Mio::Issue, this), MioState::Complete));
     RegisterStateHandler(MioState::Complete,
-        new MioStateExecuteEntry(MioState::Complete, AsMioStateEntryPoint(&Mio::Complete, this), MioState::Complete));
+        new MioStateExecuteEntry(MioState::Complete, AsEntryPointParam1(&Mio::Complete, this), MioState::Complete));
 }
 
 void
@@ -413,6 +415,7 @@ Mio::_MarkMpioComplete(Mpio& mpio)
 bool
 Mio::Init(MioState expNextState)
 {
+    StoreTimestamp(MioTimestampStage::Initialize);
     SetNextState(expNextState);
     return true;
 }
@@ -420,6 +423,7 @@ Mio::Init(MioState expNextState)
 bool
 Mio::Issue(MioState expNextState)
 {
+    StoreTimestamp(MioTimestampStage::Issue);
     _BuildMpioMap();
     SetNextState(expNextState);
 
@@ -450,8 +454,10 @@ Mio::_FinalizeMpio(Mpio& mpio)
 bool
 Mio::Complete(MioState expNextState)
 {
+    StoreTimestamp(MioTimestampStage::Complete);
     SetNextState(expNextState);
 
+    StoreTimestamp(MioTimestampStage::Enqueue);
     ioCQ->Enqueue(this);
 
     metaStorage = nullptr;
@@ -469,6 +475,8 @@ Mio::NotifyCompletionToClient(void)
         originReq->originalMsg->SetError(true);
     }
 
+    originReq->StoreTimestamp(IoRequestStage::Complete);
+    // std::cout << "req: " << originReq->GetElapsedInMilli().count() << std::endl;
     originReq->originalMsg->NotifyIoCompletionToClient();
 }
 } // namespace pos

@@ -49,7 +49,7 @@ TEST(MpioHandler, Normal)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>;
 
     MockMpioPool* pool = new MockMpioPool(100);
-    EXPECT_CALL(*pool, GetPoolSize);
+    EXPECT_CALL(*pool, GetCapacity);
 #if MPIO_CACHE_EN
     EXPECT_CALL(*pool, ReleaseCache).WillRepeatedly(Return());
 #endif

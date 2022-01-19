@@ -80,6 +80,8 @@ Mpio::Reset(void)
     // clear error info
     error = 0;
     errorStopState = false;
+
+    ResetTimestamp();
 }
 
 // LCOV_EXCL_START
