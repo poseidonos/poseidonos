@@ -40,7 +40,7 @@ poseidonos-cli volume [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli volume create](poseidonos-cli_volume_create.md)	 - Create a volume from an array in PoseidonOS.
 * [poseidonos-cli volume delete](poseidonos-cli_volume_delete.md)	 - Delete a volume from PoseidonOS.
 * [poseidonos-cli volume list](poseidonos-cli_volume_list.md)	 - List all volumes of an array.

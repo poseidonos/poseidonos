@@ -39,7 +39,7 @@ poseidonos-cli logger [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli logger apply-filter](poseidonos-cli_logger_apply-filter.md)	 - Apply a filtering policy to the logger.
 * [poseidonos-cli logger get-level](poseidonos-cli_logger_get-level.md)	 - Get the filtering level of logger.
 * [poseidonos-cli logger info](poseidonos-cli_logger_info.md)	 - Get the current settings of the logger.

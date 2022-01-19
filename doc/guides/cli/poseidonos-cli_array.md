@@ -37,7 +37,7 @@ poseidonos-cli array [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli array addspare](poseidonos-cli_array_addspare.md)	 - Add a device as a spare to an array.
 * [poseidonos-cli array autocreate](poseidonos-cli_array_autocreate.md)	 - Automatically create an array for PoseidonOS.
 * [poseidonos-cli array create](poseidonos-cli_array_create.md)	 - Create an array for PoseidonOS.
