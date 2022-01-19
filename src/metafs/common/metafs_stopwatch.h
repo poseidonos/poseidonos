@@ -38,30 +38,38 @@
 
 namespace pos
 {
+/***
+Not thread-safe.
+It's caller's responsibility to use this class in a thread-safe context.
+***/
 template<class StageEnum>
 class MetaFsStopwatch
 {
 public:
     MetaFsStopwatch(void);
     virtual ~MetaFsStopwatch(void);
-    virtual void StoreTimestamp(void);
+    /* need to check the return value */
+    virtual bool StoreTimestamp(void);
     virtual void StoreTimestamp(StageEnum stage);
     virtual void ResetTimestamp(void);
     virtual std::vector<std::chrono::system_clock::time_point> GetDataInRaw(void) const;
     virtual std::vector<std::chrono::milliseconds> GetDataInMilli(void) const;
-    virtual std::vector<std::chrono::nanoseconds> GetDataInNano(void) const;
+    virtual std::vector<std::chrono::microseconds> GetDataInMicro(void) const;
     virtual std::vector<std::chrono::seconds> GetDataInSec(void) const;
     virtual std::chrono::milliseconds GetElapsedInMilli(void) const;
+    /* If the return value is 0, please check your code again. */
     virtual std::chrono::milliseconds GetElapsedInMilli(StageEnum from, StageEnum to) const;
 
 private:
     std::vector<std::chrono::system_clock::time_point> stamp_;
+    size_t count_;
 };
 
 template<class StageEnum>
 MetaFsStopwatch<StageEnum>::MetaFsStopwatch(void)
+: count_(0)
 {
-    stamp_.reserve((size_t)StageEnum::Count);
+    stamp_.resize((size_t)StageEnum::Count);
 }
 
 template<class StageEnum>
@@ -70,13 +78,14 @@ MetaFsStopwatch<StageEnum>::~MetaFsStopwatch(void)
 }
 
 template<class StageEnum>
-void
+bool
 MetaFsStopwatch<StageEnum>::StoreTimestamp(void)
 {
-    if ((size_t)StageEnum::Count <= stamp_.size())
-        return;
+    if ((size_t)StageEnum::Count <= count_)
+        return false;
 
-    stamp_.emplace_back(std::chrono::system_clock::now());
+    stamp_[count_++] = std::chrono::system_clock::now();
+    return true;
 }
 
 template<class StageEnum>
@@ -84,10 +93,7 @@ void
 MetaFsStopwatch<StageEnum>::StoreTimestamp(StageEnum stage)
 {
     const size_t index = (size_t)stage;
-    while (stamp_.size() <= index)
-    {
-        stamp_.emplace_back(std::chrono::system_clock::time_point{});
-    }
+    count_ = std::max(count_, index + 1);
     stamp_[index] = std::chrono::system_clock::now();
 }
 
@@ -95,7 +101,9 @@ template<class StageEnum>
 void
 MetaFsStopwatch<StageEnum>::ResetTimestamp(void)
 {
+    count_ = 0;
     stamp_.clear();
+    stamp_.resize((size_t)StageEnum::Count);
 }
 
 template<class StageEnum>
@@ -103,8 +111,7 @@ std::vector<std::chrono::system_clock::time_point>
 MetaFsStopwatch<StageEnum>::GetDataInRaw(void) const
 {
     std::vector<std::chrono::system_clock::time_point> result;
-    for (auto& i : stamp_)
-        result.emplace_back(i);
+    result.assign(stamp_.begin(), stamp_.begin() + count_);
     return result;
 }
 
@@ -113,18 +120,18 @@ std::vector<std::chrono::milliseconds>
 MetaFsStopwatch<StageEnum>::GetDataInMilli(void) const
 {
     std::vector<std::chrono::milliseconds> result;
-    for (auto& i : stamp_)
-        result.emplace_back(std::chrono::duration_cast<std::chrono::milliseconds>(i.time_since_epoch()));
+    for (size_t i = 0; i < count_; ++i)
+        result.emplace_back(std::chrono::duration_cast<std::chrono::milliseconds>(stamp_.at(i).time_since_epoch()));
     return result;
 }
 
 template<class StageEnum>
-std::vector<std::chrono::nanoseconds>
-MetaFsStopwatch<StageEnum>::GetDataInNano(void) const
+std::vector<std::chrono::microseconds>
+MetaFsStopwatch<StageEnum>::GetDataInMicro(void) const
 {
-    std::vector<std::chrono::nanoseconds> result;
-    for (auto& i : stamp_)
-        result.emplace_back(std::chrono::duration_cast<std::chrono::nanoseconds>(i.time_since_epoch()));
+    std::vector<std::chrono::microseconds> result;
+    for (size_t i = 0; i < count_; ++i)
+        result.emplace_back(std::chrono::duration_cast<std::chrono::microseconds>(stamp_.at(i).time_since_epoch()));
     return result;
 }
 
@@ -133,8 +140,8 @@ std::vector<std::chrono::seconds>
 MetaFsStopwatch<StageEnum>::GetDataInSec(void) const
 {
     std::vector<std::chrono::seconds> result;
-    for (auto& i : stamp_)
-        result.emplace_back(std::chrono::duration_cast<std::chrono::seconds>(i.time_since_epoch()));
+    for (size_t i = 0; i < count_; ++i)
+        result.emplace_back(std::chrono::duration_cast<std::chrono::seconds>(stamp_.at(i).time_since_epoch()));
     return result;
 }
 
@@ -142,9 +149,9 @@ template<class StageEnum>
 std::chrono::milliseconds
 MetaFsStopwatch<StageEnum>::GetElapsedInMilli(void) const
 {
-    if (stamp_.size() <= 1)
+    if (count_ <= 1)
         return {};
-    return std::chrono::duration_cast<std::chrono::milliseconds>(stamp_.back() - stamp_.front());
+    return std::chrono::duration_cast<std::chrono::milliseconds>(stamp_.at(count_ - 1) - stamp_.front());
 }
 
 template<class StageEnum>

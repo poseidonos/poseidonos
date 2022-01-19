@@ -62,21 +62,21 @@ TEST(MetaFsStopwatch, CheckStartAndStop)
 
     // get raw data (nanoseconds on linux)
     auto v1 = stopwatch.GetDataInRaw();
-    EXPECT_EQ(v1.size(), 2);
+    EXPECT_GE(v1.size(), 2);
 
     for (auto i : v1)
         std::cout << "raw: " << i.time_since_epoch().count() << std::endl;
 
-    // get data in nano sec
-    auto v2 = stopwatch.GetDataInNano();
-    EXPECT_EQ(v2.size(), 2);
+    // get data in micro sec
+    auto v2 = stopwatch.GetDataInMicro();
+    EXPECT_GE(v2.size(), 2);
 
     for (auto i : v2)
-        std::cout << "nano: " << i.count() << std::endl;
+        std::cout << "micro: " << i.count() << std::endl;
 
     // get data in milli sec
     auto v3 = stopwatch.GetDataInMilli();
-    EXPECT_EQ(v3.size(), 2);
+    EXPECT_GE(v3.size(), 2);
 
     for (auto i : v3)
         std::cout << "milli: " << i.count() << std::endl;
@@ -164,7 +164,7 @@ TEST(MetaFsStopwatch, CheckInverseTimestamp)
     EXPECT_NE(result[(size_t)TestTimestampStage::Stage_4].time_since_epoch().count(), 0);
 }
 
-TEST(MetaFsStopwatch, CheckValidationOfElapsedTime)
+TEST(MetaFsStopwatch, StoreTimestampWithStageName_CheckValidationOfElapsedTime)
 {
     MetaFsStopwatch<TestTimestampStage> stopwatch;
 
@@ -185,7 +185,7 @@ TEST(MetaFsStopwatch, CheckValidationOfElapsedTime)
     EXPECT_EQ(result.count(), 0);
 }
 
-TEST(MetaFsStopwatch, CheckValidationOfElapsedTime2)
+TEST(MetaFsStopwatch, StoreTimestamp_checkValidationOfElapsedTime)
 {
     MetaFsStopwatch<TestTimestampStage> stopwatch;
 
@@ -212,7 +212,7 @@ TEST(MetaFsStopwatch, CheckValidationOfElapsedTime2)
     }
 }
 
-TEST(MetaFsStopwatch, CheckElapsedTimeFromStageToStageWithoutStage)
+TEST(MetaFsStopwatch, StoreTimestamp_checkValidationOfElapsedTime2)
 {
     MetaFsStopwatch<TestTimestampStage> stopwatch;
 
