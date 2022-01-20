@@ -36,6 +36,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "mdpage_buf_pool.h"
 #include "mpio.h"

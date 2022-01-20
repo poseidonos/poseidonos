@@ -59,10 +59,6 @@ public:
         return MpioType::Read;
     }
 
-    void _InitStateHandler(void) override
-    {
-    }
-
     void HandleAsyncMemOpDone(void)
     {
         Mpio::_HandleAsyncMemOpDone(this);
@@ -74,6 +70,11 @@ public:
     }
 
     bool cbTestResult = false;
+
+private:
+    void _InitStateHandler(void) override
+    {
+    }
 };
 
 TEST(MpioTester, Mpio_testConstructor)
