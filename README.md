@@ -65,9 +65,9 @@ Hardware: Poseidon server
  - Storage: E1.S SSD * 32 ea
 ```
 
-| Config | Value |
-| ------ | ----- |
-| OS  | Ubuntu 18.04 |
+| Config |  Value  |
+| ------ | ------- |
+| OS  | **Ubuntu 18.04 <br/> (Note: PoseidonOS is not officially supported in the later versions of Ubuntu.)** |
 | Kernel     | 5.3.0-24-generic      |
 | Hostname | R2U14-PSD-3 |
 | $POS_HOME | /poseidonos |
