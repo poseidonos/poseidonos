@@ -1,7 +1,10 @@
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
+  - [_**UserRequest**_](#userrequest)
   - [_**PendingMioCount**_](#pendingmiocount)
   - [_**PendingMpioCount**_](#pendingmpiocount)
+  - [_**FreeMioCount**_](#freemiocount)
+  - [_**FreeMpioCount**_](#freempiocount)
 - [**Volume**](#volume)
   - [_**read_iops**_](#read_iops)
   - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
@@ -52,11 +55,27 @@ Whether the previous shutdown was normal.
 
 ---
 
+### _**UserRequest**_
+
+**ID**: 40010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name" : Integer, "io_type" : String, "array_id": Integer, "fd" : Integer}
+
+**Introduced**: v0.10.0
+
+Whether the previous shutdown was normal.
+
+---
+
 ### _**PendingMioCount**_
 
 **ID**: 40100
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -72,7 +91,7 @@ The number of requests requested by user modules per a MetaLpn.
 
 **ID**: 40101
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -81,6 +100,38 @@ The number of requests requested by user modules per a MetaLpn.
 **Introduced**: v0.10.0
 
 The Count of requests for follow-up because the event worker has finished processing.
+
+---
+
+### _**FreeMioCount**_
+
+**ID**: 40102
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The number of mio to allocate
+
+---
+
+### _**FreeMpioCount**_
+
+**ID**: 40103
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The number of mpio to allocate
 
 ---
 

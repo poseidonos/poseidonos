@@ -56,7 +56,7 @@ public:
 
 private:
     void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
-    void _SendMetric(uint32_t size);
+    void _SendPeriodicMetrics(void);
 
     MetaFsIoQ<Mpio*>* partialMpioDoneQ;
     MpioPool* mpioPool;

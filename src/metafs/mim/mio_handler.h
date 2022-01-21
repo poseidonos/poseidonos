@@ -85,7 +85,7 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
-    void _SendMetric(uint32_t size);
+    void _SendPeriodicMetrics(void);
 #if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif

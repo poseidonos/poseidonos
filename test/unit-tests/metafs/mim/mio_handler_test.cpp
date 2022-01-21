@@ -102,7 +102,7 @@ public:
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex(), mss);
         ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss);
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
-        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss);
+        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp);
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 

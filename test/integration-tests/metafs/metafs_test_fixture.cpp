@@ -58,7 +58,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
 
     mgmt = new MetaFsManagementApi(arrayId, storage);
     ctrl = new MetaFsFileControlApi(arrayId, storage);
-    io = new MetaFsIoApi(arrayId, ctrl, storage);
+    io = new MetaFsIoApi(arrayId, ctrl, storage, tpForMetafs);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
 
     metaFs = new MetaFs(arrayInfo, isLoaded, mgmt, ctrl, io, wbt, storage, tpForMetafs);

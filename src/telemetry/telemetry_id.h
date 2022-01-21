@@ -69,8 +69,11 @@ namespace pos
     static const std::string TEL39999_JRN_ = "j_test_end";
 
     static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
+    static const std::string TEL40010_METAFS_USER_REQUEST = "user_request";
     static const std::string TEL40100_METAFS_PENDING_MIO_CNT = "pending_mio_cnt";
     static const std::string TEL40101_METAFS_PENDING_MPIO_CNT = "pending_mpio_cnt";
+    static const std::string TEL40102_METAFS_FREE_MIO_CNT = "free_mio_cnt";
+    static const std::string TEL40103_METAFS_FREE_MPIO_CNT = "free_mpio_cnt";
 
     static const std::string TEL50000_READ_IOPS = "read_iops";
     static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";

@@ -44,10 +44,11 @@ MetaFsIoApi::MetaFsIoApi(void)
 }
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
-            MetaStorageSubsystem* storage, MetaIoManager* io)
+            MetaStorageSubsystem* storage, TelemetryPublisher* tp, MetaIoManager* io)
 {
     this->arrayId = arrayId;
     ctrlMgr = ctrl;
+    telemetryPublisher = tp;
     ioMgr = (nullptr == io) ? new MetaIoManager(storage) : io;
 }
 
@@ -86,6 +87,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
     }
 
     return rc;
@@ -124,6 +126,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, byteSize);
     }
 
     return rc;
@@ -159,6 +162,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
     }
 
     return rc;
@@ -197,6 +201,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, byteSize);
     }
 
     return rc;
@@ -240,6 +245,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
             "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
 
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, reqMsg.fd, reqMsg.byteSize);
     }
 
     return rc;
@@ -361,5 +367,17 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
         }
     }
     return rc;
+}
+
+void
+MetaFsIoApi::_SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize)
+{
+    POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_GAUGE);
+    metric.AddLabel("thread_name", std::to_string(sched_getcpu()));
+    metric.AddLabel("io_type", (ioType == MetaIoRequestType::Read) ? "read" : "write");
+    metric.AddLabel("array_id", std::to_string(arrayId));
+    metric.AddLabel("fd", std::to_string(fd));
+    metric.SetCountValue(byteSize);
+    telemetryPublisher->PublishMetric(metric);
 }
 } // namespace pos

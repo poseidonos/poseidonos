@@ -152,6 +152,7 @@ MioHandler::_HandleIoSQ(void)
         }
         return;
     }
+    reqMsg->StoreTimestamp(IoRequestStage::Dequeue);
     cpuStallCnt = 0;
 
 #if RANGE_OVERLAP_CHECK_EN // range overlap enable
@@ -174,21 +175,27 @@ MioHandler::_HandleIoSQ(void)
 #endif
     ExecuteMio(*mio);
 
-    _SendMetric(ioSQ->GetItemCnt());
+    _SendPeriodicMetrics();
 }
 
 void
-MioHandler::_SendMetric(uint32_t size)
+MioHandler::_SendPeriodicMetrics(void)
 {
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
 
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
-        POSMetric metric(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_COUNT);
-        metric.AddLabel("thread_name", to_string(coreId));
-        metric.SetCountValue(size);
-        telemetryPublisher->PublishMetric(metric);
+        POSMetric metricPendedMioCnt(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_GAUGE);
+        metricPendedMioCnt.AddLabel("thread_name", to_string(coreId));
+        metricPendedMioCnt.SetGaugeValue(ioSQ->GetItemCnt());
+        telemetryPublisher->PublishMetric(metricPendedMioCnt);
+
+        POSMetric metricFreeMioCnt(TEL40102_METAFS_FREE_MIO_CNT, POSMetricTypes::MT_GAUGE);
+        metricFreeMioCnt.AddLabel("thread_name", to_string(coreId));
+        metricFreeMioCnt.SetGaugeValue(mioPool->GetFreeCount());
+        telemetryPublisher->PublishMetric(metricFreeMioCnt);
+
         lastTime = currentTime;
     }
 }
@@ -199,6 +206,8 @@ MioHandler::_HandleIoCQ(void)
     Mio* mio = ioCQ->Dequeue();
     if (mio)
     {
+        mio->StoreTimestamp(MioTimestampStage::Dequeue);
+
         while (mio->IsCompleted() != true)
         {
         }
@@ -327,6 +336,7 @@ MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
     {
         return false;
     }
+    reqMsg->StoreTimestamp(IoRequestStage::Enqueue);
     return true;
 }
 
