@@ -229,3 +229,28 @@ func hookResponse(command string, resJSON string, isDebug bool, isJSONRes bool) 
 
 	return string(out)
 }
+
+func TestVolumeInfoResHumanReadable(t *testing.T) {
+	var command = "VOLUMEINFO"
+	var resJSON = `{"command":"VOLUMEINFO","rid":"3e44809a-7a90-11ec-b913-005056adcaa2","result":{"status":{"code":0,"description":"information of volume: vol1 of array: POSArray"},"data":{"name":"vol1","uuid":"3da91570-86b5-44f5-b6c6-b28e17883723","total":107374182400,"status":"Unmounted","maxiops":0,"maxbw":0,"minbw":0,"miniops":0,"subnqn":"","array_name":"POSArray"}},"info":{"version":"v0.10.6"}}`
+
+	expected := `Name              : vol1
+TotalCapacity     : 107374182400
+RemainingCapacity : 0
+Used%             : 0
+Status            : Unmounted
+MaximumIOPS       : 0
+MaximumBandwidth  : 0
+MinimumIOPS       : 0
+MinimumBandwidth  : 0
+SubNQN            : 
+UUID              : 3da91570-86b5-44f5-b6c6-b28e17883723
+Array             : POSArray
+
+`
+	output := hookResponse(command, resJSON, false, false)
+
+	if output != expected {
+		t.Errorf("Expected: %q Output: %q", expected, output)
+	}
+}

@@ -42,7 +42,7 @@ poseidonos-cli array [flags]
 * [poseidonos-cli array autocreate](poseidonos-cli_array_autocreate.md)	 - Automatically create an array for PoseidonOS.
 * [poseidonos-cli array create](poseidonos-cli_array_create.md)	 - Create an array for PoseidonOS.
 * [poseidonos-cli array delete](poseidonos-cli_array_delete.md)	 - Delete an array from PoseidonOS.
-* [poseidonos-cli array list](poseidonos-cli_array_list.md)	 - List arrays of PoseidonOS.
+* [poseidonos-cli array list](poseidonos-cli_array_list.md)	 - List arrays of PoseidonOS or display information of an array.
 * [poseidonos-cli array mount](poseidonos-cli_array_mount.md)	 - Mount an array to PoseidonOS.
 * [poseidonos-cli array rmspare](poseidonos-cli_array_rmspare.md)	 - Remove a spare device from an array of PoseidonOS.
 * [poseidonos-cli array unmount](poseidonos-cli_array_unmount.md)	 - Unmount an array from PoseidonOS.

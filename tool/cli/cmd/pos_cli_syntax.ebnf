@@ -146,8 +146,8 @@ VolumeUnmountCmd = "unmount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--force" ] ;
 
-VolumeListCmd = "list" , [ ( "--array-name" | "-a" ) ,
-  ArrayName ] ;
+VolumeListCmd = "list" , ( "--array-name" | "-a" ) ,
+  ArrayName , [ "( --volume-name" | "-v" ) VolumeName ] ;
 
 VolumeRenameCmd = "rename" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--new-volume-name" | "-n" ) ,

@@ -101,7 +101,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+toByte(displayUnit, array.CAPACITY)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, array.USED)+"\t"+
 					globals.FieldSeparator+array.DATARAID)
-					
+
 			fmt.Fprintln(w, "")
 		}
 		w.Flush()
@@ -132,26 +132,26 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		for _, device := range array.DEVICELIST {
 			if device.DEVICETYPE == "BUFFER" {
 				fmt.Fprint(w, device.DEVICENAME+"\t")
-			}			
+			}
 		}
 		fmt.Fprintln(w, "")
 
 		fmt.Fprint(w, "DataDevs\t: ")
-		
+
 		for _, device := range array.DEVICELIST {
 			if device.DEVICETYPE == "DATA" {
 				fmt.Fprint(w, device.DEVICENAME+"\t")
-			}			
+			}
 		}
 
 		fmt.Fprintln(w, "")
 
 		fmt.Fprint(w, "SpareDevs\t: ")
-		
+
 		for _, device := range array.DEVICELIST {
 			if device.DEVICETYPE == "SPARE" {
 				fmt.Fprint(w, device.DEVICENAME+"\t")
-			}			
+			}
 		}
 
 		fmt.Fprintln(w, "")
@@ -169,27 +169,27 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w,
 			"Name\t"+
 				globals.FieldSeparator+"ID\t"+
-				globals.FieldSeparator+"TotalCapacity\t"+
-				globals.FieldSeparator+"RemainingCapacity\t"+
-				globals.FieldSeparator+"Remaining%\t"+
+				globals.FieldSeparator+"Total\t"+
+				globals.FieldSeparator+"Remaining\t"+
+				globals.FieldSeparator+"Used%\t"+
 				globals.FieldSeparator+"Status\t"+
-				globals.FieldSeparator+"MaximumIOPS\t"+
-				globals.FieldSeparator+"MaximumBandwith\t"+
-				globals.FieldSeparator+"MinimumIOPS\t"+
-				globals.FieldSeparator+"MinimumBandwith")
+				globals.FieldSeparator+"MaxIOPS\t"+
+				globals.FieldSeparator+"MaxBW\t"+
+				globals.FieldSeparator+"MinIOPS\t"+
+				globals.FieldSeparator+"MinBW")
 
 		// Horizontal line
 		fmt.Fprintln(w,
 			"---------\t"+
-				globals.FieldSeparator+"-----\t"+
-				globals.FieldSeparator+"----------------------------\t"+
-				globals.FieldSeparator+"----------------------------\t"+
+				globals.FieldSeparator+"--------\t"+
+				globals.FieldSeparator+"-----------------\t"+
+				globals.FieldSeparator+"-----------------\t"+
 				globals.FieldSeparator+"---------\t"+
 				globals.FieldSeparator+"----------\t"+
-				globals.FieldSeparator+"----------------\t"+
-				globals.FieldSeparator+"----------------\t"+
-				globals.FieldSeparator+"----------------\t"+
-				globals.FieldSeparator+"----------------")
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"---------")
 
 		// Data
 		for _, volume := range res.RESULT.DATA.VOLUMELIST {
@@ -205,6 +205,31 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(volume.MINIOPS)+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MINBW))
 		}
+		w.Flush()
+
+	case "VOLUMEINFO":
+		res := messages.VolumeInfoResponse{}
+		json.Unmarshal([]byte(resJSON), &res)
+		printStatus(res.RESULT.STATUS.CODE)
+		volume := res.RESULT.DATA
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "Name\t: "+volume.VOLUMENAME)
+		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.TOTAL))
+		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.REMAIN))
+		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10))
+		fmt.Fprintln(w, "Status\t: "+volume.STATUS)
+		fmt.Fprintln(w, "MaximumIOPS\t: "+strconv.Itoa(volume.MAXIOPS))
+		fmt.Fprintln(w, "MaximumBandwidth\t: "+strconv.Itoa(volume.MAXBW))
+		fmt.Fprintln(w, "MinimumIOPS\t: "+strconv.Itoa(volume.MINIOPS))
+		fmt.Fprintln(w, "MinimumBandwidth\t: "+strconv.Itoa(volume.MINBW))
+		fmt.Fprintln(w, "SubNQN\t: "+volume.SUBNQN)
+		fmt.Fprintln(w, "UUID\t: "+volume.UUID)
+		fmt.Fprintln(w, "Array\t: "+volume.ARRAYNAME)
+
+		fmt.Fprintln(w, "")
+
 		w.Flush()
 
 	case "LISTDEVICE":

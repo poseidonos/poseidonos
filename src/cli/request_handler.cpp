@@ -58,6 +58,7 @@
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
 #include "src/cli/list_volume_command.h"
+#include "src/cli/volume_info_command.h"
 #include "src/cli/list_wbt_command.h"
 #include "src/cli/logger_info_command.h"
 #include "src/cli/mount_array_command.h"
@@ -110,6 +111,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();
     cmdDictionary["UNMOUNTVOLUME"] = new UnmountVolumeCommand();
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
+    cmdDictionary["VOLUMEINFO"] = new VolumeInfoCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
     cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["STOPPOS"] = new StopPosCommand();

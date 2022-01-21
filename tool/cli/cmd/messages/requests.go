@@ -114,6 +114,11 @@ type ListVolumeParam struct {
 	ARRAYNAME string `json:"array"`
 }
 
+type VolumeInfoParam struct {
+	ARRAYNAME  string `json:"array"`
+	VOLUMENAME string `json:"name"`
+}
+
 type MountVolumeParam struct {
 	VOLUMENAME string `json:"name"`
 	SUBNQN     string `json:"subnqn,omitempty"`
