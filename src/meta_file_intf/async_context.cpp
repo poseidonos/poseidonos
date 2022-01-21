@@ -35,6 +35,16 @@
 namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
+: opcode(MetaFsIoOpcode::Write),
+  fd(-1),
+  fileOffset(0),
+  length(0),
+  buffer(nullptr),
+  callback(nullptr),
+  error(0),
+  ioDoneCheckCallback(nullptr),
+  vsid(0),
+  topPriority(false)
 {
 }
 
@@ -46,15 +56,33 @@ AsyncMetaFileIoCtx::HandleIoComplete(void* data)
 }
 
 int
-AsyncMetaFileIoCtx::GetError(void)
+AsyncMetaFileIoCtx::GetError(void) const
 {
     return error;
 }
 
 uint64_t
-AsyncMetaFileIoCtx::GetLength(void)
+AsyncMetaFileIoCtx::GetLength(void) const
 {
     return length;
+}
+
+void
+AsyncMetaFileIoCtx::SetTopPriority(void)
+{
+    topPriority = true;
+}
+
+void
+AsyncMetaFileIoCtx::ClearTopPriority(void)
+{
+    topPriority = false;
+}
+
+bool
+AsyncMetaFileIoCtx::IsTopPriority(void) const
+{
+    return topPriority;
 }
 
 } // namespace pos

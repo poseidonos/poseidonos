@@ -161,7 +161,7 @@ Mio::SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller)
 }
 
 void
-Mio::SetIoCQ(MetaFsIoQ<Mio*>* ioCQ)
+Mio::SetIoCQ(MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ)
 {
     this->ioCQ = ioCQ;
 }
@@ -331,6 +331,7 @@ Mio::_BuildMpioMap(void)
         // _AllocMpio() always returns valid mpio, because of mpioDonePoller() above.
         Mpio* mpio = _AllocMpio(mpioIoInfo, byteSize != fileDataChunkSize /* partialIO */);
         mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
+        mpio->SetPriority(originReq->priority);
         mpioListCxt.PushMpio(*mpio);
 
 #if MPIO_CACHE_EN
@@ -458,7 +459,7 @@ Mio::Complete(MioState expNextState)
     SetNextState(expNextState);
 
     StoreTimestamp(MioTimestampStage::Enqueue);
-    ioCQ->Enqueue(this);
+    ioCQ->Enqueue(this, originReq->priority);
 
     metaStorage = nullptr;
 

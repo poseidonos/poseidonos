@@ -62,11 +62,8 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
   metricSumOfSpendTime(0),
   metricSumOfMioCount(0)
 {
-    ioCQ = new MetaFsIoQ<Mio*>();
-    ioSQ = new MetaFsIoQ<MetaFsIoRequest*>();
-
-    std::string cqName("IoCQ-" + std::to_string(coreId));
-    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    ioCQ = new MetaFsIoMultilevelQ<Mio*, IoRequestPriority>();
+    ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>();
 
     mpioPool = new MpioPool(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
     mioPool = new MioPool(mpioPool, MAX_CONCURRENT_MIO_PROC_THRESHOLD);
@@ -81,8 +78,8 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
         threadId, coreId);
 }
 
-MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
-        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
@@ -94,9 +91,6 @@ MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* io
   metricSumOfSpendTime(0),
   metricSumOfMioCount(0)
 {
-    std::string cqName("IoCQ-" + std::to_string(coreId));
-    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
-
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     lastTime = std::chrono::steady_clock::now();
@@ -190,25 +184,21 @@ MioHandler::_SendPeriodicMetrics(void)
 
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
-        POSMetric metricPendedMioCnt(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_GAUGE);
-        metricPendedMioCnt.AddLabel("thread_name", to_string(coreId));
-        metricPendedMioCnt.SetGaugeValue(ioSQ->GetItemCnt());
-        telemetryPublisher->PublishMetric(metricPendedMioCnt);
-
+        std::string thread_name = to_string(coreId);
         POSMetric metricFreeMioCnt(TEL40102_METAFS_FREE_MIO_CNT, POSMetricTypes::MT_GAUGE);
-        metricFreeMioCnt.AddLabel("thread_name", to_string(coreId));
+        metricFreeMioCnt.AddLabel("thread_name", thread_name);
         metricFreeMioCnt.SetGaugeValue(mioPool->GetFreeCount());
         telemetryPublisher->PublishMetric(metricFreeMioCnt);
 
         if (metricSumOfMioCount != 0)
         {
             POSMetric metricTime(TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO, POSMetricTypes::MT_COUNT);
-            metricTime.AddLabel("thread_name", to_string(coreId));
+            metricTime.AddLabel("thread_name", thread_name);
             metricTime.SetCountValue(metricSumOfSpendTime);
             telemetryPublisher->PublishMetric(metricTime);
 
             POSMetric metricCount(TEL40107_METAFS_SUM_OF_MIO_COUNT, POSMetricTypes::MT_COUNT);
-            metricCount.AddLabel("thread_name", to_string(coreId));
+            metricCount.AddLabel("thread_name", thread_name);
             metricCount.SetCountValue(metricSumOfMioCount);
             telemetryPublisher->PublishMetric(metricCount);
 
@@ -349,15 +339,11 @@ MioHandler::TophalfMioProcessing(void)
     _HandleIoCQ();
 }
 
-bool
+void
 MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    if (false == ioSQ->Enqueue(reqMsg))
-    {
-        return false;
-    }
+    ioSQ->Enqueue(reqMsg, reqMsg->priority);
     reqMsg->StoreTimestamp(IoRequestStage::Enqueue);
-    return true;
 }
 
 void

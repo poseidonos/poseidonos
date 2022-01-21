@@ -31,26 +31,40 @@
  */
 
 #pragma once
-#include <list>
+
+#include <array>
 
 #include "metafs_io_q.h"
-#include "metafs_io_request.h"
 
 namespace pos
 {
-class MetaFsIoMultiQ
+/* 'ItemT' should be a pointer type of certain object */
+template<typename ItemT, class PriorityE>
+class MetaFsIoMultilevelQ
 {
 public:
-    MetaFsIoMultiQ(void);
-    ~MetaFsIoMultiQ(void);
-
-    void Clear(void);
-    bool IsEmpty(int coreId);
-
-    bool EnqueueReqMsg(uint32_t coreId, MetaFsIoRequest* reqMsg);
-    MetaFsIoRequest* DequeueReqMsg(uint32_t coreId);
+    MetaFsIoMultilevelQ(void)
+    {
+    }
+    virtual ~MetaFsIoMultilevelQ(void)
+    {
+    }
+    virtual void Enqueue(const ItemT entry, const PriorityE priority)
+    {
+        queue_[(size_t)priority].Enqueue(entry);
+    }
+    virtual ItemT Dequeue(void)
+    {
+        for (auto& q : queue_)
+        {
+            ItemT t = q.Dequeue();
+            if (nullptr != t)
+                return t;
+        }
+        return nullptr;
+    }
 
 private:
-    std::array<MetaFsIoQ<MetaFsIoRequest*>*, MetaFsConfig::DEFAULT_MAX_CORE_COUNT> msgQ;
+    std::array<MetaFsIoQ<ItemT>, (size_t)PriorityE::MAX> queue_;
 };
 } // namespace pos

@@ -74,6 +74,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = IoRequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -113,6 +114,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = IoRequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -149,6 +151,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = IoRequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -188,6 +191,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = IoRequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -229,6 +233,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
     reqMsg.aiocb = cxt;
     reqMsg.tagId = cxt->tagId;
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = cxt->IsTopPriority() ? IoRequestPriority::Highest : IoRequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {

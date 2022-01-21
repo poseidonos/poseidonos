@@ -13,7 +13,7 @@ public:
     MOCK_METHOD(int, GetLogGroupId, (), (override));
     MOCK_METHOD(void, SetBufferAllocated, (uint64_t offset, int groupId, uint32_t seqNum), (override));
     MOCK_METHOD(void, IoDone, (), (override));
-    MOCK_METHOD(int, GetError, (), (override));
+    MOCK_METHOD(int, GetError, (), (const, override));
     MOCK_METHOD(void, SetFile, (int fileDescriptor), (override));
 };
 

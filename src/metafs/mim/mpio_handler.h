@@ -33,7 +33,7 @@
 #pragma once
 
 #include "mfs_io_handler_base.h"
-#include "metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "mpio_pool.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -47,7 +47,7 @@ class MpioHandler
 public:
     explicit MpioHandler(int threadId, int coreId,
                     TelemetryPublisher* tp = nullptr,
-                    MetaFsIoQ<Mpio*>* doneQ = nullptr);
+                    MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
@@ -55,10 +55,9 @@ public:
     virtual void BottomhalfMioProcessing(void);
 
 private:
-    void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
     void _SendPeriodicMetrics(void);
 
-    MetaFsIoQ<Mpio*>* partialMpioDoneQ;
+    MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
     TelemetryPublisher* telemetryPublisher;

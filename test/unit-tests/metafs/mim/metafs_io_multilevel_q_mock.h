@@ -30,78 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "metafs_io_multi_q.h"
-#include "metafs_mutex.h"
-#include "src/include/branch_prediction.h"
+#include <gmock/gmock.h>
 
-#include <string>
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
 
 namespace pos
 {
-MetaFsIoMultiQ::MetaFsIoMultiQ(void)
+template<typename T, class E>
+class MockMetaFsIoMultilevelQ : public MetaFsIoMultilevelQ<T, E>
 {
-    msgQ.fill(nullptr);
-}
+public:
+    using MetaFsIoMultilevelQ<T, E>::MetaFsIoMultilevelQ;
 
-MetaFsIoMultiQ::~MetaFsIoMultiQ(void)
-{
-    Clear();
-}
+    MOCK_METHOD(void, Enqueue, (const T entry, const E priority), (override));
+    MOCK_METHOD(T, Dequeue, (), (override));
+};
 
-void
-MetaFsIoMultiQ::Clear(void)
-{
-    for (uint32_t index = 0; index < MetaFsConfig::DEFAULT_MAX_CORE_COUNT; index++)
-    {
-        if (nullptr != msgQ[index])
-        {
-            delete msgQ[index];
-            msgQ[index] = nullptr;
-        }
-    }
-}
-
-bool
-MetaFsIoMultiQ::EnqueueReqMsg(uint32_t coreId, MetaFsIoRequest* reqMsg)
-{
-    MetaFsIoQ<MetaFsIoRequest*>* reqMsgQ = msgQ[coreId];
-
-    if (unlikely(nullptr == reqMsgQ))
-    {
-        MetaFsIoQ<MetaFsIoRequest*>* newReqMsgQ = new MetaFsIoQ<MetaFsIoRequest*>();
-        std::string qName("RequestQ=" + std::to_string(coreId));
-        newReqMsgQ->Init(qName.c_str(), MetaFsConfig::MAX_CONCURRENT_IO_CNT);
-        msgQ[coreId] = newReqMsgQ;
-        reqMsgQ = newReqMsgQ;
-    }
-
-    bool mioQueued = reqMsgQ->Enqueue(reqMsg);
-
-    return mioQueued;
-}
-
-bool
-MetaFsIoMultiQ::IsEmpty(int coreId)
-{
-    MetaFsIoQ<MetaFsIoRequest*>* reqMsgQ = msgQ[coreId];
-
-    if (nullptr == reqMsgQ)
-        return true;
-
-    return msgQ[coreId]->IsEmpty();
-}
-
-MetaFsIoRequest*
-MetaFsIoMultiQ::DequeueReqMsg(uint32_t coreId)
-{
-    MetaFsIoQ<MetaFsIoRequest*>* reqMsgQ = msgQ[coreId];
-    if (nullptr == reqMsgQ)
-    {
-        return nullptr;
-    }
-
-    MetaFsIoRequest* reqMsg = reqMsgQ->Dequeue();
-
-    return reqMsg;
-}
 } // namespace pos

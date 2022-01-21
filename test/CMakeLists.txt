@@ -466,6 +466,7 @@ SET(DEP_LIBRARIES
     jsonrpccpp-client
     fff_mock
     yaml-cpp
+    tbb
     pmem
 )
 

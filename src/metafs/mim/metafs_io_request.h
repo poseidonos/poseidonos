@@ -88,6 +88,13 @@ enum class IoRequestStage
     Count
 };
 
+enum class IoRequestPriority
+{
+    Highest,
+    Normal,
+    MAX
+};
+
 // basic io req. info. given by caller
 class MetaFsIoRequest : public MetaFsRequestBase, public MetaFsStopwatch<IoRequestStage>
 {
@@ -128,6 +135,7 @@ public:
     MetaFsIoRequest* originalMsg;
     int requestCount;
     MetaFileContext* fileCtx;
+    IoRequestPriority priority;
 
 private:
     bool retryFlag;

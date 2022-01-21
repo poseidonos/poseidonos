@@ -161,6 +161,7 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
         revMapPageAsyncIoReq->mpageNum = pageNum++;
         revMapPageAsyncIoReq->stripeToFlush = stripe;
         revMapPageAsyncIoReq->vsid = vsid;
+        revMapPageAsyncIoReq->SetTopPriority();
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {

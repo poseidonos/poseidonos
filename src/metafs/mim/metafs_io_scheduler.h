@@ -35,7 +35,7 @@
 #include <thread>
 #include <vector>
 #include <string>
-#include "metafs_io_multi_q.h"
+#include "metafs_io_multilevel_q.h"
 #include "scalable_meta_io_worker.h"
 
 namespace pos
@@ -46,11 +46,10 @@ public:
     explicit MetaFsIoScheduler(int threadId, int coreId, int coreCount);
     virtual ~MetaFsIoScheduler(void);
     void ClearHandlerThread(void);
-    void ClearQ(void);
 
     void RegisterMioHandler(ScalableMetaIoWorker* mioHandler);
-    bool IssueRequest(MetaFsIoRequest* reqMsg);
-    virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    void IssueRequest(MetaFsIoRequest* reqMsg);
+    virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
     virtual bool AddArrayInfo(int arrayId);
     virtual bool RemoveArrayInfo(int arrayId);
@@ -59,18 +58,11 @@ public:
     void Execute(void);
 
 private:
-    uint32_t _GetCoreId(void);
     MetaFsIoRequest* _FetchPendingNewReq(void);
-
-    uint32_t currentCoreId;
-    uint32_t maxCoreCount;
 
     std::vector<ScalableMetaIoWorker*> metaIoWorkerList;
     uint32_t totalMioHandlerCnt;
 
-    static thread_local uint32_t currentThreadQId;
-    static thread_local bool initializedQid;
-
-    MetaFsIoMultiQ ioMultiQ;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority> ioMultiQ;
 };
 } // namespace pos

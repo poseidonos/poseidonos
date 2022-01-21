@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <chrono>
 
-#include "metafs_io_multi_q.h"
+#include "metafs_io_multilevel_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
 #include "mio_pool.h"
@@ -53,15 +53,15 @@ class MioHandler
 public:
     MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
-    MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
-        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+    MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
     virtual void TophalfMioProcessing(void);
     virtual void BindPartialMpioHandler(MpioHandler* ptMpioHandler);
 
-    virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
     virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     virtual void ExecuteMio(Mio& mio);
 
@@ -90,8 +90,8 @@ private:
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif
 
-    MetaFsIoQ<MetaFsIoRequest*>* ioSQ;
-    MetaFsIoQ<Mio*>* ioCQ;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ;
+    MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
     MioPool* mioPool;

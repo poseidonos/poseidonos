@@ -30,46 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
 
-#include <functional>
+#include <gtest/gtest.h>
 
-#include "meta_file_include.h"
+#include <unordered_set>
+#include <array>
+
+#include "src/metafs/mim/metafs_io_request.h"
 
 namespace pos
 {
-class AsyncMetaFileIoCtx;
-
-using MetaIoCbPtr = std::function<void(AsyncMetaFileIoCtx*)>;
-using MetaFileIoCbPtr = std::function<int(void*)>;
-
-class AsyncMetaFileIoCtx
+TEST(MetaFsIoMultilevelQ, Normal)
 {
-public:
-    AsyncMetaFileIoCtx(void);
-// LCOV_EXCL_START
-    virtual ~AsyncMetaFileIoCtx(void) = default;
-// LCOV_EXCL_STOP
+    const uint32_t REQ_COUNT = 10;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* multiQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>();
+    std::array<std::unordered_set<MetaFsIoRequest*>, (size_t)IoRequestPriority::MAX> requests;
 
-    virtual void HandleIoComplete(void* data);
-    virtual int GetError(void) const;
-    virtual uint64_t GetLength(void) const;
+    // push
+    for (uint32_t req = 0; req < REQ_COUNT; req++)
+    {
+        MetaFsIoRequest* reqH = new MetaFsIoRequest();
+        MetaFsIoRequest* reqL = new MetaFsIoRequest();
 
-    virtual void SetTopPriority(void);
-    virtual void ClearTopPriority(void);
-    virtual bool IsTopPriority(void) const;
+        reqH->priority = IoRequestPriority::Highest;
+        reqL->priority = IoRequestPriority::Normal;
 
-    MetaFsIoOpcode opcode;
-    int fd;
-    uint64_t fileOffset;
-    uint64_t length;
-    char* buffer;
-    MetaIoCbPtr callback;
+        multiQ->Enqueue(reqH, IoRequestPriority::Highest);
+        multiQ->Enqueue(reqL, IoRequestPriority::Normal);
 
-    int error;
-    MetaFileIoCbPtr ioDoneCheckCallback;
-    uint32_t vsid;
-    bool topPriority;
-};
+        requests[(size_t)IoRequestPriority::Highest].insert(reqH);
+        requests[(size_t)IoRequestPriority::Normal].insert(reqL);
+    }
 
+    // pop
+    uint32_t total_count = 0;
+    while (total_count < (REQ_COUNT * 2))
+    {
+        MetaFsIoRequest* reqMsg = multiQ->Dequeue();
+        if (nullptr == reqMsg)
+            continue;
+
+        EXPECT_EQ(requests[(size_t)(reqMsg->priority)].count(reqMsg), 1);
+        requests[(size_t)(reqMsg->priority)].erase(reqMsg);
+        total_count++;
+
+        delete reqMsg;
+    }
+
+    EXPECT_EQ(multiQ->Dequeue(), nullptr);
+    EXPECT_EQ(total_count, REQ_COUNT * 2);
+
+    delete multiQ;
+}
 } // namespace pos

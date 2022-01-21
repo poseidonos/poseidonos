@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "src/logger/logger.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/backend_event.h"
 #include "src/allocator/allocator.h"
 #include "src/allocator/stripe/stripe.h"

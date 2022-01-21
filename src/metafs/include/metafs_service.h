@@ -53,7 +53,6 @@ namespace pos
 {
 class ScalableMetaIoWorker;
 class MetaFsIoScheduler;
-class MetaFsIoMultiQ;
 
 class MetaFsService
 {
@@ -63,10 +62,9 @@ public:
     void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
     void Register(std::string& arrayName, int arrayId, MetaFs* fileSystem);
     void Deregister(std::string& arrayName);
-    MetaFs* GetMetaFs(std::string& arrayName);
-    MetaFs* GetMetaFs(int arrayId);
-    int GetArrayId(std::string& arrayName);
-    MetaFsIoScheduler* GetScheduler(void)
+    MetaFs* GetMetaFs(std::string& arrayName) const;
+    MetaFs* GetMetaFs(int arrayId) const;
+    MetaFsIoScheduler* GetScheduler(void) const
     {
         return ioScheduler;
     }

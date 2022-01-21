@@ -2,8 +2,6 @@
   - [_**NormalShutdown**_](#normalshutdown)
   - [_**UserRequest**_](#userrequest)
   - [_**UserRequestCount**_](#userrequestcount)
-  - [_**PendingMioCount**_](#pendingmiocount)
-  - [_**PendingMpioCount**_](#pendingmpiocount)
   - [_**FreeMioCount**_](#freemiocount)
   - [_**FreeMpioCount**_](#freempiocount)
   - [_**SumOfAllTheTimeSpentByMpio**_](#sumofallthetimespentbympio)
@@ -89,38 +87,6 @@ The byte-sized value of reuqests from user modules.
 **Introduced**: v0.10.0
 
 The count of reuqests from user modules.
-
----
-
-### _**PendingMioCount**_
-
-**ID**: 40100
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_name": String}
-
-**Introduced**: v0.10.0
-
-The number of requests requested by user modules per a MetaLpn.
-
----
-
-### _**PendingMpioCount**_
-
-**ID**: 40101
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_name": String}
-
-**Introduced**: v0.10.0
-
-The Count of requests for follow-up because the event worker has finished processing.
 
 ---
 

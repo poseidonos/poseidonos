@@ -37,7 +37,7 @@
 
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoQ<Mpio*>* doneQ)
+MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioPool(nullptr),
   coreId(coreId),
@@ -49,7 +49,7 @@ MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaF
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
-        partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
+        partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>();
 
     lastTime = std::chrono::steady_clock::now();
 }
@@ -66,7 +66,7 @@ MpioHandler::~MpioHandler(void)
 void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
-    partialMpioDoneQ->Enqueue(mpio);
+    partialMpioDoneQ->Enqueue(mpio, mpio->GetPriority());
     mpio->StoreTimestamp(MpioTimestampStage::Enqueue);
 }
 
@@ -75,15 +75,6 @@ MpioHandler::BindMpioPool(MpioPool* mpioPool)
 {
     assert(this->mpioPool == nullptr && mpioPool != nullptr);
     this->mpioPool = mpioPool;
-
-    _InitPartialMpioDoneQ(mpioPool->GetCapacity());
-}
-
-void
-MpioHandler::_InitPartialMpioDoneQ(size_t mpioDoneQSize)
-{
-    std::string partialqName("PartialMpioDQ = " + std::to_string(coreId));
-    partialMpioDoneQ->Init(partialqName.c_str(), mpioDoneQSize);
 }
 
 void
@@ -120,25 +111,21 @@ MpioHandler::_SendPeriodicMetrics()
 
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
-        POSMetric metricPendedMpioCnt(TEL40101_METAFS_PENDING_MPIO_CNT, POSMetricTypes::MT_GAUGE);
-        metricPendedMpioCnt.AddLabel("thread_name", to_string(coreId));
-        metricPendedMpioCnt.SetGaugeValue(partialMpioDoneQ->GetItemCnt());
-        telemetryPublisher->PublishMetric(metricPendedMpioCnt);
-
+        std::string thread_name = to_string(coreId);
         POSMetric metricFreeMpioCnt(TEL40103_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
-        metricFreeMpioCnt.AddLabel("thread_name", to_string(coreId));
+        metricFreeMpioCnt.AddLabel("thread_name", thread_name);
         metricFreeMpioCnt.SetGaugeValue(mpioPool->GetFreeCount());
         telemetryPublisher->PublishMetric(metricFreeMpioCnt);
 
         if (metricSumOfMpioCount != 0)
         {
             POSMetric metricTime(TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO, POSMetricTypes::MT_COUNT);
-            metricTime.AddLabel("thread_name", to_string(coreId));
+            metricTime.AddLabel("thread_name", thread_name);
             metricTime.SetCountValue(metricSumOfSpendTime);
             telemetryPublisher->PublishMetric(metricTime);
 
             POSMetric metricCount(TEL40105_METAFS_SUM_OF_MPIO_COUNT, POSMetricTypes::MT_COUNT);
-            metricCount.AddLabel("thread_name", to_string(coreId));
+            metricCount.AddLabel("thread_name", thread_name);
             metricCount.SetCountValue(metricSumOfMpioCount);
             telemetryPublisher->PublishMetric(metricCount);
 

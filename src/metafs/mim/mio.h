@@ -35,7 +35,7 @@
 #include <condition_variable>
 #include <string>
 #include <vector>
-#include "metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "metafs_return_code.h"
 #include "metafs_io_request.h"
 #include "mim_state.h"
@@ -103,7 +103,7 @@ public:
     virtual void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
     virtual void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    virtual void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
+    virtual void SetIoCQ(MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
@@ -147,7 +147,7 @@ protected:
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
     MfsError error;
-    MetaFsIoQ<Mio*>* ioCQ;
+    MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ;
     MpioPool* mpioPool;
     MetaAsyncCbCxt aioCbCxt;
 #if MPIO_CACHE_EN

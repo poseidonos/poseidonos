@@ -59,6 +59,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   originalMsg(nullptr),
   requestCount(0),
   fileCtx(nullptr),
+  priority(IoRequestPriority::Normal),
   retryFlag(false),
   error(0)
 {
@@ -86,6 +87,7 @@ MetaFsIoRequest::CopyUserReqMsg(const MetaFsIoRequest& req)
     this->ioDone = false;
     this->error = false;
     this->fileCtx = req.fileCtx;
+    this->priority = req.priority;
 
     if (MetaIoMode::Sync == req.ioMode)
     {
