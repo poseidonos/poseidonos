@@ -61,7 +61,9 @@ private:
     MetaFsIoQ<Mpio*>* partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
-    TelemetryPublisher* telemetryPublisher = nullptr;
+    TelemetryPublisher* telemetryPublisher;
     std::chrono::steady_clock::time_point lastTime;
+    int64_t metricSumOfSpendTime;
+    int64_t metricSumOfMpioCount;
 };
 } // namespace pos

@@ -377,7 +377,7 @@ MetaFsIoApi::_SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t
     metric.AddLabel("io_type", (ioType == MetaIoRequestType::Read) ? "read" : "write");
     metric.AddLabel("array_id", std::to_string(arrayId));
     metric.AddLabel("fd", std::to_string(fd));
-    metric.SetCountValue(byteSize);
+    metric.SetGaugeValue(byteSize);
     telemetryPublisher->PublishMetric(metric);
 }
 } // namespace pos

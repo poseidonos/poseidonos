@@ -41,7 +41,9 @@ MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaF
 : partialMpioDoneQ(doneQ),
   mpioPool(nullptr),
   coreId(coreId),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  metricSumOfSpendTime(0),
+  metricSumOfMpioCount(0)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
@@ -96,15 +98,18 @@ MpioHandler::BottomhalfMioProcessing(void)
 
         if (mpio->IsCompleted())
         {
+            mpio->StoreTimestamp(MpioTimestampStage::Release);
+            metricSumOfSpendTime += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
+            metricSumOfMpioCount++;
             mpioPool->Release(mpio);
         }
-
-        _SendPeriodicMetrics();
     }
 
 #if MPIO_CACHE_EN
     mpioPool->ReleaseCache();
 #endif
+
+    _SendPeriodicMetrics();
 }
 
 void
@@ -124,6 +129,22 @@ MpioHandler::_SendPeriodicMetrics()
         metricFreeMpioCnt.AddLabel("thread_name", to_string(coreId));
         metricFreeMpioCnt.SetGaugeValue(mpioPool->GetFreeCount());
         telemetryPublisher->PublishMetric(metricFreeMpioCnt);
+
+        if (metricSumOfMpioCount != 0)
+        {
+            POSMetric metricTime(TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO, POSMetricTypes::MT_COUNT);
+            metricTime.AddLabel("thread_name", to_string(coreId));
+            metricTime.SetCountValue(metricSumOfSpendTime);
+            telemetryPublisher->PublishMetric(metricTime);
+
+            POSMetric metricCount(TEL40105_METAFS_SUM_OF_MPIO_COUNT, POSMetricTypes::MT_COUNT);
+            metricCount.AddLabel("thread_name", to_string(coreId));
+            metricCount.SetCountValue(metricSumOfMpioCount);
+            telemetryPublisher->PublishMetric(metricCount);
+
+            metricSumOfSpendTime = 0;
+            metricSumOfMpioCount = 0;
+        }
 
         lastTime = currentTime;
     }

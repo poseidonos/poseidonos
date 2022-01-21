@@ -139,8 +139,6 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
 void
 MpioPool::Release(Mpio* mpio)
 {
-    mpio->StoreTimestamp(MpioTimestampStage::Release);
-
 #if MPIO_CACHE_EN
     if (MpioCacheState::Init != mpio->GetCacheState())
     {

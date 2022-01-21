@@ -111,5 +111,7 @@ private:
 
     TelemetryPublisher* telemetryPublisher = nullptr;
     std::chrono::steady_clock::time_point lastTime;
+    int64_t metricSumOfSpendTime;
+    int64_t metricSumOfMioCount;
 };
 } // namespace pos

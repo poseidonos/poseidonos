@@ -95,7 +95,6 @@ MioPool::Release(Mio* mio)
         return;
     }
 
-    mio->StoreTimestamp(MioTimestampStage::Release);
     mio->Reset();
     mioList.push_back(mio);
 }
