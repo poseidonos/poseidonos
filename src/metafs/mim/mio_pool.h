@@ -45,7 +45,7 @@ public:
     explicit MioPool(MpioPool* mpioPool, uint32_t poolSize);
     virtual ~MioPool(void);
 
-    virtual Mio* Alloc(void);
+    virtual Mio* TryAlloc(void);
     virtual void Release(Mio* mio);
     virtual bool IsEmpty(void);
     virtual size_t GetCapacity(void)

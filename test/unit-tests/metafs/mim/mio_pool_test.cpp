@@ -52,11 +52,12 @@ TEST(MioPool, CheckMioPoolCanAllocAndRelease)
 
     for (uint32_t index = 0; index < COUNT; index++)
     {
-        mioList[index] = pool->Alloc();
+        mioList[index] = pool->TryAlloc();
+        ASSERT_NE(mioList[index], nullptr);
     }
 
     EXPECT_TRUE(pool->IsEmpty());
-    EXPECT_EQ(pool->Alloc(), nullptr);
+    EXPECT_EQ(pool->TryAlloc(), nullptr);
 
     for (uint32_t index = 0; index < COUNT; index++)
     {

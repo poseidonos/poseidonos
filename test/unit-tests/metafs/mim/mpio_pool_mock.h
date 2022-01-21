@@ -44,6 +44,8 @@ class MockMpioPool : public MpioPool
 {
 public:
     using MpioPool::MpioPool;
+    MOCK_METHOD(Mpio*, TryAlloc, (const MpioType mpioType, const MetaStorageType storageType,
+        const MetaLpnType lpn, const bool partialIO, const int arrayId), (override));
     MOCK_METHOD(size_t, GetCapacity, (), (override));
     MOCK_METHOD(void, Release, (Mpio* mpio), (override));
 #if MPIO_CACHE_EN

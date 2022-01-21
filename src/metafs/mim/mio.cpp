@@ -218,7 +218,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
 {
     MpioType mpioType = _LookupMpioType(originReq->reqType);
     MetaStorageType storageType = originReq->targetMediaType;
-    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayId);
+    Mpio* mpio = mpioPool->TryAlloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayId);
 
     if (mpio == nullptr)
         return nullptr;
@@ -476,7 +476,6 @@ Mio::NotifyCompletionToClient(void)
     }
 
     originReq->StoreTimestamp(IoRequestStage::Complete);
-    // std::cout << "req: " << originReq->GetElapsedInMilli().count() << std::endl;
     originReq->originalMsg->NotifyIoCompletionToClient();
 }
 } // namespace pos

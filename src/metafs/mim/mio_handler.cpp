@@ -339,7 +339,7 @@ MioHandler::_FinalizeMio(Mio* mio)
 Mio*
 MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 {
-    Mio* mio = mioPool->Alloc();
+    Mio* mio = mioPool->TryAlloc();
 
     if (nullptr == mio)
         return nullptr;

@@ -12,7 +12,7 @@ class MockMioPool : public MioPool
 {
 public:
     using MioPool::MioPool;
-    MOCK_METHOD(Mio*, Alloc, (), (override));
+    MOCK_METHOD(Mio*, TryAlloc, (), (override));
     MOCK_METHOD(void, Release, (Mio* mio), (override));
     MOCK_METHOD(bool, IsEmpty, (), (override));
 };

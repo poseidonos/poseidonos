@@ -90,7 +90,7 @@ TEST(MpioTester, Mpio_testConstructor)
 
     EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
 
-    delete buf;
+    free(buf);
 }
 
 TEST(MpioTester, Mpio_testCallbackForMemcpy)
@@ -110,6 +110,6 @@ TEST(MpioTester, Mpio_testCallbackForMemcpy)
 
     EXPECT_EQ(mpio.cbTestResult, true);
 
-    delete buf;
+    free(buf);
 }
 } // namespace pos

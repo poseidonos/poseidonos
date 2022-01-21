@@ -49,14 +49,14 @@ TEST(MpioPool, AllocAndReleaseForSsd)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayId);
+            mpioList[index] = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayId);
         }
 
         // check read mpio list
         EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
-        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
+        Mpio* temp = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
@@ -81,14 +81,14 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayId);
+            mpioList[index] = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayId);
         }
 
         // check read mpio list
         EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
-        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
+        Mpio* temp = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
@@ -118,8 +118,10 @@ TEST(MpioPool, CheckCounter)
 
     for (uint32_t index = 0; index < popCount; index++)
     {
-        mpioList_r[index] = pool->Alloc(MpioType::Read, MetaStorageType::SSD, index, true, arrayId);
-        mpioList_w[index] = pool->Alloc(MpioType::Write, MetaStorageType::SSD, index, true, arrayId);
+        mpioList_r[index] = pool->TryAlloc(MpioType::Read, MetaStorageType::SSD, index, true, arrayId);
+        ASSERT_NE(mpioList_r[index], nullptr);
+        mpioList_w[index] = pool->TryAlloc(MpioType::Write, MetaStorageType::SSD, index, true, arrayId);
+        ASSERT_NE(mpioList_w[index], nullptr);
     }
 
     EXPECT_EQ(pool->GetCapacity(), COUNT);
@@ -130,8 +132,6 @@ TEST(MpioPool, CheckCounter)
 
     for (uint32_t index = 0; index < popCount; index++)
     {
-        ASSERT_NE(mpioList_r[index], nullptr);
-        ASSERT_NE(mpioList_w[index], nullptr);
         pool->Release(mpioList_r[index]);
         pool->Release(mpioList_w[index]);
     }

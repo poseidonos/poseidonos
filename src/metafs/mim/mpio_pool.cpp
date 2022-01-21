@@ -43,10 +43,12 @@ namespace pos
 MpioPool::MpioPool(const size_t poolSize)
 : capacity_(poolSize)
 {
-    assert(capacity_ != 0);
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MpioPool Construct : poolsize={}", capacity_);
+    if (capacity_ == 0)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "Pool size requested is {}", capacity_);
+        assert(false);
+    }
 
     all_.reserve(capacity_ * (int)MpioType::Last);
 
@@ -60,6 +62,7 @@ MpioPool::MpioPool(const size_t poolSize)
         {
             Mpio* mpio = nullptr;
             auto mdPageBuf = mdPageBufPool->PopNewBuf();
+            assert(nullptr != mdPageBuf);
 
             if (MpioType::Read == (MpioType)idx)
                 mpio = new ReadMpio(mdPageBuf);
@@ -91,7 +94,7 @@ MpioPool::~MpioPool(void)
 }
 
 Mpio*
-MpioPool::Alloc(const MpioType mpioType, const MetaStorageType storageType,
+MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         const MetaLpnType lpn, const bool partialIO, const int arrayId)
 {
 #if RANGE_OVERLAP_CHECK_EN

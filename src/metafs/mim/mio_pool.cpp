@@ -62,7 +62,7 @@ MioPool::~MioPool(void)
 }
 
 Mio*
-MioPool::Alloc(void)
+MioPool::TryAlloc(void)
 {
     if (0 == mioList.size())
         return nullptr;
@@ -90,7 +90,10 @@ void
 MioPool::Release(Mio* mio)
 {
     if (nullptr == mio)
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER, "mio is nullptr");
         return;
+    }
 
     mio->StoreTimestamp(MioTimestampStage::Release);
     mio->Reset();
@@ -104,6 +107,5 @@ MioPool::_FreeAllMioinPool(void)
     {
         delete ptr;
     }
-    mioList.clear();
 }
 } // namespace pos

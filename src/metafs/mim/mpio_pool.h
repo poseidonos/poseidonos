@@ -50,7 +50,7 @@ public:
     explicit MpioPool(const size_t poolSize);
     virtual ~MpioPool(void);
 
-    Mpio* Alloc(const MpioType mpioType, const MetaStorageType storageType,
+    virtual Mpio* TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         const MetaLpnType lpn, const bool partialIO, const int arrayId);
     virtual void Release(Mpio* item);
     virtual size_t GetCapacity(void)
