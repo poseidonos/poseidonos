@@ -124,7 +124,7 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
             _CacheRemove(mpioType);
 
         // add new
-        return _CacheAlloc(mpioType, lpn);
+        return _TryCacheAlloc(mpioType, lpn);
     }
 #else
     mpio = _AllocMpio(mpioType);
@@ -239,7 +239,7 @@ MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId)
 }
 
 Mpio*
-MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn)
+MpioPool::_TryCacheAlloc(MpioType mpioType, MetaLpnType lpn)
 {
     const uint32_t type = (uint32_t)mpioType;
     if (0 == free_[type].size())

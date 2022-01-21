@@ -88,7 +88,7 @@ private:
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
     Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId);
-    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn);
+    Mpio* _TryCacheAlloc(MpioType mpioType, MetaLpnType lpn);
     void _CacheRemove(MpioType mpioType);
 #endif
 

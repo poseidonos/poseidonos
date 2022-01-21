@@ -158,7 +158,7 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
 
     for (uint32_t idx = 0; idx < COUNT; idx++)
     {
-        Mpio* m = pool->Alloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
+        Mpio* m = pool->TryAlloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
 
         if (nullptr == mpioList[index])
             mpioList[index] = m;
@@ -171,7 +171,7 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
     EXPECT_TRUE(pool->IsEmpty(MpioType::Write));
 
     // check free read mpio
-    Mpio* temp = pool->Alloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayId);
+    Mpio* temp = pool->TryAlloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayId);
     EXPECT_NE(temp, nullptr);
 
     pool->Release(temp);
