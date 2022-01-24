@@ -156,8 +156,9 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         Raid5* raid5 = new Raid5(&physicalSize);
         uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes);
-        if (raid5->AllocParityPools(totalNvmStripes) == false)
+        uint64_t maxGcStripes = 2048;
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
+        if (raid5->AllocParityPools(totalNvmStripes + maxGcStripes) == false)
         {
             delete raid5;
             int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
