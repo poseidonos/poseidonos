@@ -108,6 +108,7 @@ Poseidonos::Terminate(void)
     DeviceManagerSingleton::ResetInstance();
     IODispatcherSingleton::ResetInstance();
     EventSchedulerSingleton::ResetInstance();
+    QosManagerSingleton::Instance()->FinalizeSpdkManager();
     QosManagerSingleton::ResetInstance();
     FlushCmdManagerSingleton::ResetInstance();
     delete debugInfo;
@@ -250,6 +251,7 @@ Poseidonos::_SetupThreadModel(void)
         affinityManager->GetCpuSet(CoreType::EVENT_SCHEDULER);
     cpu_set_t workerCPUSet = affinityManager->GetCpuSet(CoreType::EVENT_WORKER);
 
+    QosManagerSingleton::Instance()->InitializeSpdkManager();
     QosManagerSingleton::Instance()->Initialize();
     EventSchedulerSingleton::Instance()->Initialize(workerCount,
         schedulerCPUSet, workerCPUSet);

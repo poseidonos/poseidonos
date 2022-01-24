@@ -104,7 +104,6 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
         qosArrayManager[i] = new QosArrayManager(i, qosContext, feQosEnabled, eventFrameworkApi, this);
     }
 
-    spdkManager = new QosSpdkManager(qosContext, feQosEnabled, eventFrameworkApi);
     monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext, this);
     policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext, this);
     processingManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Processing, qosContext, this);
@@ -137,7 +136,6 @@ QosManager::~QosManager(void)
     }
     delete qosThread;
     delete qosTimeThrottling;
-    delete spdkManager;
     delete qosEventManager;
     delete monitoringManager;
     delete policyManager;
@@ -153,7 +151,22 @@ QosManager::~QosManager(void)
         delete spdkPosNvmfCaller;
     }
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::InitializeSpdkManager(void)
+{
+    spdkManager = new QosSpdkManager(qosContext, feQosEnabled, eventFrameworkApi);
+    if (true == feQosEnabled)
+    {
+        spdkManager->Initialize();
+    }
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -167,10 +180,6 @@ QosManager::Initialize(void)
     if (true == initialized)
     {
         return;
-    }
-    if (true == feQosEnabled)
-    {
-        spdkManager->Initialize();
     }
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
@@ -190,7 +199,23 @@ QosManager::IsFeQosEnabled(void)
 {
     return feQosEnabled;
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::FinalizeSpdkManager(void)
+{
+    if (true == feQosEnabled)
+    {
+        spdkManager->Finalize();
+    }
+    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
+    delete spdkManager;
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -201,13 +226,6 @@ QosManager::IsFeQosEnabled(void)
 void
 QosManager::_Finalize(void)
 {
-    if (true == feQosEnabled)
-    {
-#ifndef POS_QOS_UT
-        spdkManager->Finalize();
-#endif
-    }
-    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
     SetExitQos();
     for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {

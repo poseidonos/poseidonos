@@ -87,6 +87,7 @@ public:
         AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
     virtual ~QosManager(void);
     void Initialize(void);
+    void InitializeSpdkManager(void);
     virtual int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
     virtual void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
@@ -129,6 +130,7 @@ public:
     uint32_t GetNoContentionCycles(void);
     virtual bool IsMinimumPolicyInEffectInSystem(void);
     void ResetCorrection(void);
+    void FinalizeSpdkManager(void);
 
 private:
     virtual void _Finalize(void);
