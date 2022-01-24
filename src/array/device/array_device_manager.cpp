@@ -165,6 +165,12 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
         devs_->AddData(dev);
     }
 
+    ret = _CheckActiveSsdsCount(devs_->GetDevs().data);
+    if (0 != ret)
+    {
+        return ret;
+    }
+
     for (DeviceMeta meta : metaSet.spares)
     {
         DevUid uid(meta.uid);
@@ -388,6 +394,12 @@ ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
         return ret;
     }
 
+    ret = _CheckActiveSsdsCount(devSet.data);
+    if (0 != ret)
+    {
+        return ret;
+    }
+
     if (devSet.nvm.size() > 0)
     {
         ret = _CheckNvmCapacity(devSet);
@@ -398,7 +410,6 @@ ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
     }
 
     ret = _CheckSsdsCapacity(devSet);
-
     return ret;
 }
 
@@ -418,6 +429,24 @@ ArrayDeviceManager::_CheckNvmCapacity(const DeviceSet<ArrayDevice*>& devSet)
 
     return 0;
 }
+
+int
+ArrayDeviceManager::_CheckActiveSsdsCount(const vector<ArrayDevice*>& devs)
+{
+    const int errorId = EID(ARRAY_DEVICE_COUNT_ERROR);
+    if (devs.size() > 0)
+    {
+        auto&& devList = Enumerable::Where(devs,
+            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
+        if (devList.size() > 0)
+        {
+            return 0;
+        }
+    }
+    POS_TRACE_WARN(errorId, "At least one normal state device is required to configure Array");
+    return errorId;
+}
+
 
 uint64_t
 ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
@@ -439,7 +468,7 @@ ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
 int
 ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 {
-    uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
+    uint64_t baseCapa = _GetBaseCapacity(devSet.data);
 
     if (baseCapa < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || baseCapa > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
     {

@@ -80,6 +80,7 @@ private:
     int _CheckConstraints(ArrayDeviceList* devs);
     int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
     int _CheckNvmCapacity(const ArrayDeviceSet& devSet);
+    int _CheckActiveSsdsCount(const vector<ArrayDevice*>& devs);
     uint64_t _ComputeMinNvmCapacity(const uint32_t logicalChunkCount);
     uint64_t _GetBaseCapacity(const vector<ArrayDevice*>& devs);
 
