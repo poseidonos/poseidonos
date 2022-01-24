@@ -53,7 +53,7 @@ public:
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        SegmentList* freeSegmentList,
+        SegmentList* freeSegmentList, SegmentList* rebuildSegmentList,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
@@ -91,7 +91,12 @@ public:
     virtual SegmentId AllocateGCVictimSegment(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
-    virtual int MakeRebuildTarget(void);
+    virtual int SetRebuildCompleted(SegmentId segId);
+    virtual int MakeRebuildTarget(std::set<SegmentId>& segmentList);
+    virtual int StopRebuilding(void);
+    virtual uint32_t GetRebuildTargetSegmentCount(void);
+    virtual std::set<SegmentId> GetRebuildSegmentList(void);
+    virtual bool LoadRebuildList(void);
 
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
@@ -105,13 +110,18 @@ private:
     void _SegmentFreed(SegmentId segId);
 
     void _RebuildFreeSegmentList(void);
+    void _BuildRebuildSegmentList(void);
+    void _ResetSegmentIdInRebuilding(void);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
+
     SegmentList* freeList;
+    SegmentList* rebuildList;
+    SegmentId rebuildingSegment;
 
     bool initialized;
 

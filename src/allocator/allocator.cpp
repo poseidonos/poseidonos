@@ -345,7 +345,6 @@ Allocator::GetInstantMetaInfo(std::string fname)
     std::ostringstream oss;
     std::ofstream ofs(fname, std::ofstream::app);
     AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
-    RebuildCtx* rebuildCtx = contextManager->GetRebuildCtx();
     SegmentCtx* segCtx = contextManager->GetSegmentCtx();
     oss << "<< WriteBuffers >>" << std::endl;
     oss << "Set:" << std::dec << allocCtx->GetAllocatedWbStripeCount() << " / ToTal:" << allocCtx->GetNumTotalWbStripe() << std::endl;
@@ -378,11 +377,10 @@ Allocator::GetInstantMetaInfo(std::string fname)
 
     oss << "<< Rebuild >>" << std::endl;
     oss << "NeedRebuildCont:" << std::boolalpha << contextManager->NeedRebuildAgain() << std::endl;
-    oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentCount() << std::endl;
+    oss << "TargetSegmentCount:" << segCtx->GetRebuildTargetSegmentCount() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
-    std::set<SegmentId> segmentList;
-    rebuildCtx->GetRebuildSegmentList(segmentList);
+    std::set<SegmentId> segmentList = segCtx->GetRebuildSegmentList();
     for (RTSegmentIter iter = segmentList.begin(); iter != segmentList.end(); ++iter, ++cnt)
     {
         if (cnt > 0 && (cnt % 16 == 0))

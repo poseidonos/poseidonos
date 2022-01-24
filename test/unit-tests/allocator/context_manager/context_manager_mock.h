@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 #include <string>
 #include <list>
-#include <set>
 #include <vector>
 #include "src/allocator/context_manager/context_manager.h"
 

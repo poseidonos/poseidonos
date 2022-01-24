@@ -229,40 +229,32 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
-    SegmentId segId = segmentCtx->GetRebuildTargetSegment();
-    return segId;
+    return segmentCtx->GetRebuildTargetSegment();
 }
 
 bool
 ContextManager::NeedRebuildAgain(void)
 {
-    return rebuildCtx->NeedRebuildAgain();
+    bool needToContinue = segmentCtx->LoadRebuildList();
+    return needToContinue;
 }
 
 int
 ContextManager::ReleaseRebuildSegment(SegmentId segId)
 {
-    return rebuildCtx->ReleaseRebuildSegment(segId);
+    return segmentCtx->SetRebuildCompleted(segId);
 }
 
 int
 ContextManager::MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList)
 {
-    int ret = segmentCtx->MakeRebuildTarget();
-    if (ret == 0)
-    {
-        rebuildCtx->GetRebuildSegmentList(segmentList);
-    }
-
-    return ret;
+    return segmentCtx->MakeRebuildTarget(segmentList);
 }
 
 int
 ContextManager::StopRebuilding(void)
 {
-    std::unique_lock<std::mutex> lock(ctxLock);
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
-    return rebuildCtx->StopRebuilding();
+    return segmentCtx->StopRebuilding();
 }
 
 char*
@@ -282,14 +274,12 @@ ContextManager::GetContextSectionSize(int owner, int section)
 uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
-    return rebuildCtx->GetRebuildTargetSegmentCount();
+    return segmentCtx->GetRebuildTargetSegmentCount();
 }
 
 void
 ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
-    rebuildCtx->FreeSegmentInRebuildTarget(segId);
-
     if (GetCurrentGcMode() != MODE_URGENT_GC)
     {
         blockAllocStatus->PermitUserBlockAllocation();

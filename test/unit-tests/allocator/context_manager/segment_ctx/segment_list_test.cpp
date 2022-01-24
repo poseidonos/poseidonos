@@ -35,6 +35,10 @@ TEST(SegmentList, Reset_testWhenListIsNotEmpty)
     list.AddToList(5);
     
     EXPECT_EQ(list.GetNumSegments(), 4);
+    EXPECT_EQ(list.Contains(0), true);
+    EXPECT_EQ(list.Contains(1), true);
+    EXPECT_EQ(list.Contains(2), true);
+    EXPECT_EQ(list.Contains(5), true);
 
     list.Reset();
 

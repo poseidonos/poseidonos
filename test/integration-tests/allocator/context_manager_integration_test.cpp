@@ -48,10 +48,6 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     EXPECT_CALL(*allocatorAddressInfo, GetnumUserAreaSegments).WillRepeatedly(Return(TEST_SEG_CNT));
     EXPECT_CALL(*allocatorAddressInfo, IsUT).WillRepeatedly(Return(true));
 
-    // SegmentCtx (Mock)
-    NiceMock<MockSegmentCtx>* segmentCtx = new NiceMock<MockSegmentCtx>();
-    EXPECT_CALL(*segmentCtx, GetOccupiedStripeCount).WillRepeatedly(Return(STRIPE_PER_SEGMENT));
-
     // WbStripeCtx (Mock)
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>();
 
@@ -67,40 +63,25 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     // TelemetryPublisher (Mock)
     NiceMock<MockTelemetryPublisher>* telemetryPublisher = new NiceMock<MockTelemetryPublisher>();
 
-    // RebuildCtx (Real)
-    RebuildCtx* rebuildCtx = new RebuildCtx(nullptr, allocatorAddressInfo);
+    // RebuildCtx (Mock)
+    NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
 
-    // Context IO Manager (Real)
-    // Allocator File Io (Real)
-    AllocatorFileIo* rebuildFileIo = new NiceMock<AllocatorFileIo>;
-    AllocatorFileIo* segmentFileIo = new NiceMock<AllocatorFileIo>;
-    AllocatorFileIo* allocatorFileIo = new NiceMock<AllocatorFileIo>;
-    ContextIoManager* contextIoManager = new ContextIoManager(allocatorAddressInfo, telemetryPublisher, rebuildFileIo, segmentFileIo, allocatorFileIo);
-
-    // ContextManager (Real)
-    ContextManager contextManager(telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
-        gcCtx, blockAllocStatus, contextIoManager,
-        contextReplayer, allocatorAddressInfo, ARRAY_ID);
-
-    // Prepare Test
-    contextManager.Init();
-
-    std::set<SegmentId> segmentList = {0};
-    rebuildCtx->InitializeTargetSegmentList(segmentList);
+    // SegmentCtx (Real)
+    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
     {
         int nanoSec = std::rand() % 100;
-        std::thread th1(&RebuildCtx::GetRebuildTargetSegment, rebuildCtx);
+        std::thread th1(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th2(&RebuildCtx::FreeSegmentInRebuildTarget, rebuildCtx, 0);
+        std::thread th2(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
         th1.join();
         th2.join();
 
-        std::thread th3(&RebuildCtx::FreeSegmentInRebuildTarget, rebuildCtx, 0);
+        std::thread th3(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th4(&RebuildCtx::GetRebuildTargetSegment, rebuildCtx);
+        std::thread th4(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         th3.join();
         th4.join();
     }

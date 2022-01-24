@@ -338,7 +338,6 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
-    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(rebuildCtx));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
     addrInfo->SetnumUserAreaSegments(6);
     EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE));

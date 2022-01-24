@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -37,7 +38,12 @@ public:
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
-    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
+    MOCK_METHOD(int, SetRebuildCompleted, (SegmentId segId), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (std::set<SegmentId>& segmentList), (override));
+    MOCK_METHOD(int, StopRebuilding, (), (override));
+    MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetRebuildSegmentList, (), (override));
+    MOCK_METHOD(bool, LoadRebuildList, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
 };

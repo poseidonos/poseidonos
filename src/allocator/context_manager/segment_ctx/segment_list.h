@@ -33,7 +33,7 @@
 #pragma once
 
 #include <mutex>
-#include <queue>
+#include <set>
 
 #include "src/include/address_type.h"
 
@@ -47,14 +47,21 @@ public:
 
     virtual void Reset(void);
     virtual SegmentId PopSegment(void);
+    virtual SegmentId GetFrontSegment(void);
     virtual void AddToList(SegmentId segId);
+    virtual bool RemoveFromList(SegmentId segId);
+
     virtual uint32_t GetNumSegments(void);
     virtual uint32_t GetNumSegmentsWoLock(void);
+    virtual bool Contains(SegmentId segId);
+
+    virtual void SetList(std::set<SegmentId> list);
+    virtual std::set<SegmentId> GetList(void);
 
 private:
     uint32_t numSegments;
     std::mutex m;
-    std::queue<SegmentId> segments;
+    std::set<SegmentId> segments;
 };
 
 } // namespace pos

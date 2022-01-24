@@ -71,36 +71,25 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
-    virtual int InitializeTargetSegmentList(std::set<SegmentId>& segmentList);
-    virtual bool NeedRebuildAgain(void);
-    virtual void GetRebuildSegmentList(std::set<SegmentId>& segmentList);
-    virtual int StopRebuilding(void);
-
-    virtual SegmentId GetRebuildTargetSegment(void);
-    virtual int ReleaseRebuildSegment(SegmentId segmentId);
-    virtual int FreeSegmentInRebuildTarget(SegmentId segId);
-    virtual bool IsRebuildTargetSegment(SegmentId segId);
-    virtual uint32_t GetRebuildTargetSegmentCount(void);
-    virtual void EraseRebuildTargetSegment(SegmentId segmentId);
-
-    // For Testing
-    virtual std::mutex& GetLock(void) { return rebuildLock; }
+    virtual int FlushRebuildSegmentList(std::set<SegmentId> segIdSet);
+    virtual std::set<SegmentId> GetList(void);
 
     static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
 private:
     int _FlushContext(void);
-    void _ClearRebuildTargetList(void);
+    void _UpdateRebuildList(std::set<SegmentId> list); // for test
 
     AllocatorAddressInfo* addrInfo;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
     RebuildCtxHeader ctxHeader;
-    bool needContinue;
-    std::atomic<uint32_t> targetSegmentCount;   // for monitor
-    std::set<SegmentId> targetSegmentList;
-    SegmentId currentTarget;
-    std::mutex rebuildLock;
+
+    std::mutex rebuildLock; // not needed. keep it for allocatorFileIo interface
+
+    // Data to be flushed
+    uint32_t listSize;
+    SegmentId* segmentList;
 
     TelemetryPublisher* tp;
     AllocatorFileIo* fileIo;

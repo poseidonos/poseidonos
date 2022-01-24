@@ -129,7 +129,6 @@ TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentFreed)
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
 
     // when
@@ -351,21 +350,21 @@ TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(0));
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(0));
     // when 1.
     int ret = ctxManager.ReleaseRebuildSegment(5);
     // then 1.
     EXPECT_EQ(0, ret);
 
     // given 2.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(-1));
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(-1));
     // when 2.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 2.
     EXPECT_EQ(-1, ret);
 
     // given 3.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(0));
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(0));
     // when 3.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 3.
@@ -384,7 +383,7 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleByPassFunc)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
-    EXPECT_CALL(*reCtx, NeedRebuildAgain).WillOnce(Return(true));
+    EXPECT_CALL(*segCtx, LoadRebuildList).WillOnce(Return(true));
 
     // when
     bool ret = ctxManager.NeedRebuildAgain();
@@ -622,12 +621,12 @@ TEST(ContextManager, MakeRebuildTargetSegmentList_TestwithFlushOrwithoutFlush)
 
     // given 2.
     segmentList.clear();
-    EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(0));
-    EXPECT_CALL(*reCtx, GetRebuildSegmentList)
+    EXPECT_CALL(*segCtx, MakeRebuildTarget)
         .WillOnce([&](std::set<SegmentId>& segmentList)
         {
             segmentList.emplace(0);
             segmentList.emplace(1);
+            return 0;
         });
     // when 1.
     ret = ctxManager.MakeRebuildTargetSegmentList(segmentList);
@@ -649,7 +648,7 @@ TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)
     NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
-    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
+    EXPECT_CALL(*segCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
     // when
     int ret = ctxManager.GetRebuildTargetSegmentCount();
     // then
@@ -669,14 +668,14 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(-1));
+    EXPECT_CALL(*segCtx, StopRebuilding).WillOnce(Return(-1));
     // when 1.
     int ret = ctxManager.StopRebuilding();
     // then 1.
     EXPECT_EQ(-1, ret);
 
     // given 2.
-    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(0));
+    EXPECT_CALL(*segCtx, StopRebuilding).WillOnce(Return(0));
 
     // when 1.
     ret = ctxManager.StopRebuilding();

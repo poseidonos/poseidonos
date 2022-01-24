@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
+#include <set>
 #include <string>
 #include <list>
-#include <set>
 #include <vector>
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 
@@ -25,17 +25,8 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(int, InitializeTargetSegmentList, (std::set<SegmentId>& segmentList), (override));
-    MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
-    MOCK_METHOD(void, GetRebuildSegmentList, (std::set<SegmentId>& segmentList), (override));
-    MOCK_METHOD(int, StopRebuilding, (), (override));
-    MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
-    MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
-    MOCK_METHOD(int, FreeSegmentInRebuildTarget, (SegmentId segId), (override));
-    MOCK_METHOD(bool, IsRebuildTargetSegment, (SegmentId segId), (override));
-    MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
-    MOCK_METHOD(void, EraseRebuildTargetSegment, (SegmentId segmentId), (override));
-    MOCK_METHOD(std::mutex&, GetLock, (), (override));
+    MOCK_METHOD(int, FlushRebuildSegmentList, (std::set<SegmentId> list), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetList, (), (override));
 };
 
 } // namespace pos
