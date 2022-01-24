@@ -372,12 +372,25 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
 void
 MetaFsIoApi::_SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize)
 {
-    POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_GAUGE);
-    metric.AddLabel("thread_name", std::to_string(sched_getcpu()));
-    metric.AddLabel("io_type", (ioType == MetaIoRequestType::Read) ? "read" : "write");
-    metric.AddLabel("array_id", std::to_string(arrayId));
-    metric.AddLabel("fd", std::to_string(fd));
-    metric.SetGaugeValue(byteSize);
+    std::string thread_name = std::to_string(sched_getcpu());
+    std::string io_type = (ioType == MetaIoRequestType::Read) ? "read" : "write";
+    std::string array_id = std::to_string(arrayId);
+    std::string file_descriptor = std::to_string(fd);
+
+    POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_COUNT);
+    metric.AddLabel("thread_name", thread_name);
+    metric.AddLabel("io_type", io_type);
+    metric.AddLabel("array_id", array_id);
+    metric.AddLabel("fd", file_descriptor);
+    metric.SetCountValue(byteSize);
+    telemetryPublisher->PublishMetric(metric);
+
+    POSMetric metricCnt(TEL40011_METAFS_USER_REQUEST_CNT, POSMetricTypes::MT_COUNT);
+    metricCnt.AddLabel("thread_name", thread_name);
+    metricCnt.AddLabel("io_type", io_type);
+    metricCnt.AddLabel("array_id", array_id);
+    metricCnt.AddLabel("fd", file_descriptor);
+    metricCnt.SetCountValue(1);
     telemetryPublisher->PublishMetric(metric);
 }
 } // namespace pos

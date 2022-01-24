@@ -70,6 +70,7 @@ namespace pos
 
     static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
     static const std::string TEL40010_METAFS_USER_REQUEST = "user_request";
+    static const std::string TEL40011_METAFS_USER_REQUEST_CNT = "user_request_cnt";
     static const std::string TEL40100_METAFS_PENDING_MIO_CNT = "pending_mio_cnt";
     static const std::string TEL40101_METAFS_PENDING_MPIO_CNT = "pending_mpio_cnt";
     static const std::string TEL40102_METAFS_FREE_MIO_CNT = "free_mio_cnt";

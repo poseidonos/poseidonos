@@ -1,10 +1,15 @@
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
   - [_**UserRequest**_](#userrequest)
+  - [_**UserRequestCount**_](#userrequestcount)
   - [_**PendingMioCount**_](#pendingmiocount)
   - [_**PendingMpioCount**_](#pendingmpiocount)
   - [_**FreeMioCount**_](#freemiocount)
   - [_**FreeMpioCount**_](#freempiocount)
+  - [_**SumOfAllTheTimeSpentByMpio**_](#sumofallthetimespentbympio)
+  - [_**SumOfProcessedMpioCount**_](#sumofprocessedmpiocount)
+  - [_**SumOfAllTheTimeSpentByMio**_](#sumofallthetimespentbymio)
+  - [_**SumOfProcessedMioCount**_](#sumofprocessedmiocount)
 - [**Volume**](#volume)
   - [_**read_iops**_](#read_iops)
   - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
@@ -59,7 +64,7 @@ Whether the previous shutdown was normal.
 
 **ID**: 40010
 
-**Type**: Gauge
+**Type**: Count
 
 **Monitoring**: Mandatory
 
@@ -67,7 +72,23 @@ Whether the previous shutdown was normal.
 
 **Introduced**: v0.10.0
 
-Whether the previous shutdown was normal.
+The byte-sized value of reuqests from user modules.
+
+---
+
+### _**UserRequestCount**_
+
+**ID**: 40011
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name" : Integer, "io_type" : String, "array_id": Integer, "fd" : Integer}
+
+**Introduced**: v0.10.0
+
+The count of reuqests from user modules.
 
 ---
 
@@ -132,6 +153,70 @@ The number of mio to allocate
 **Introduced**: v0.10.0
 
 The number of mpio to allocate
+
+---
+
+### _**SumOfAllTheTimeSpentByMpio**_
+
+**ID**: 40104
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of all the time spent by mpio in specific period
+
+---
+
+### _**SumOfProcessedMpioCount**_
+
+**ID**: 40105
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of processed mpio count in specific period
+
+---
+
+### _**SumOfAllTheTimeSpentByMio**_
+
+**ID**: 40106
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of all the time spent by mio in specific period
+
+---
+
+### _**SumOfProcessedMioCount**_
+
+**ID**: 40107
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of processed mio count in specific period
 
 ---
 
