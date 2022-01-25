@@ -65,6 +65,7 @@
 const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
 
+const uint8_t PRIORITY_INVALID = 0;
 const uint8_t PRIORITY_HIGHEST = 1;
 const uint8_t PRIORITY_HIGHER = 2;
 const uint8_t PRIORITY_HIGH = 3;
