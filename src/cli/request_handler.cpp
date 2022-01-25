@@ -71,6 +71,7 @@
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_log_command.h"
+#include "src/cli/set_log_preference_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
 #include "src/cli/start_telemetry_command.h"
@@ -119,6 +120,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();
     cmdDictionary["SETLOGLEVEL"] = new SetLogLevelCommand();
     cmdDictionary["GETLOGLEVEL"] = new GetLogLevelCommand();
+    cmdDictionary["SETLOGPREFERENCE"] = new SetLogPreferenceCommand();
     cmdDictionary["LISTWBT"] = new ListWbtCommand();
     cmdDictionary["WBT"] = new HandleWbtCommand();
     cmdDictionary["LISTQOSPOLICIES"] = new QosListPoliciesCommand();

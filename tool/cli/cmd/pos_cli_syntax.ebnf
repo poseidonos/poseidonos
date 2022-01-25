@@ -23,6 +23,8 @@ Symbol
 
 Identifier = Letter , { Letter | Digit | "-" | "_" } ;
 
+BooleanValue = "true" | "false" ;
+
 ArrayName = Identifier ;
 
 DeviceName = Identifier ;
@@ -193,6 +195,7 @@ LoggerCmd = "logger" ,
   | GetLogLevelCmd
   | ApplyLogFilterCmd
   | LoggerInfoCmd
+  | SetPreferenceCmd
   ) ;
 
 SetLogLevelCmd = "set-level" , "--level" , LogLevel ;
@@ -210,6 +213,8 @@ GetLogLevelCmd = "get-level" ;
 ApplyLogFilterCmd = "apply-filter" ;
 
 LoggerInfoCmd = "info" ;
+
+SetPreferenceCmd = "set-preference" , [ "--log-json" , BooleanValue ] ;
 
 QosCmd = "qos" ,
   ( QosVolumePolicyCmd

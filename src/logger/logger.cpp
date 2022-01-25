@@ -51,22 +51,24 @@ Logger::Logger(void)
         MakeDir(preferences.LogDir());
     }
 
-    id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
-
-    // Format: [POSInstanceId][2021-12-01 07:00:01.234134][EventID]][LogLevel] Message at SourceFile and LineNumber
-    const string pattern = '[' + std::to_string(instanceId) + ']' + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
     std::vector<spdlog::sink_ptr> sinks;
     auto console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::trace);
-    console_sink->set_pattern(pattern);
     auto minor_sink = make_shared<spdlog::sinks::rotating_file_sink_mt>(
         preferences.MinorLogFilePath(), preferences.LogFileSize() * SZ_1MB, preferences.LogRotation());
-    minor_sink->set_level(spdlog::level::debug);
-    minor_sink->set_pattern(pattern);
     auto major_sink = make_shared<spdlog::sinks::rotating_file_sink_mt>(
         preferences.MajorLogFilePath(), preferences.LogFileSize() * SZ_1MB, preferences.LogRotation());
+
+    console_sink->set_level(spdlog::level::trace);
+    minor_sink->set_level(spdlog::level::debug);
     major_sink->set_level(spdlog::level::warn);
-    major_sink->set_pattern(pattern);
+
+    // Console log is always displayed in plain text form
+    console_sink->set_pattern(_BuildPattern(false));
+    // Minor and major logs will be displayed
+    // according to preference (plain text or json)
+    minor_sink->set_pattern(_BuildPattern(preferences.IsJson()));
+    major_sink->set_pattern(_BuildPattern(preferences.IsJson()));
+
     sinks.push_back(console_sink);
     sinks.push_back(minor_sink);
     sinks.push_back(major_sink);
@@ -93,6 +95,19 @@ Logger::~Logger(void)
     }
 }
 
+void
+Logger::ApplyPreference(void)
+{
+    if (DirExists(preferences.LogDir()) == false)
+    {
+        MakeDir(preferences.LogDir());
+    }
+
+    string pattern = _BuildPattern(preferences.IsJson());
+    logger->sinks()[1]->set_pattern(pattern); // Index 1: minor sink
+    logger->sinks()[2]->set_pattern(pattern); // Index 2: major sink
+}
+
 int
 Logger::SetLevel(string level)
 {
@@ -103,6 +118,37 @@ string
 Logger::GetLevel()
 {
     return preferences.LogLevel();
+}
+
+int
+Logger::SetJson(bool logJson)
+{
+    return preferences.SetJson(logJson);
+}
+
+string
+Logger::_BuildPattern(bool logJson)
+{
+    id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
+
+    std::string pattern = "";
+
+    // Conventional Log Format
+    // [POSInstanceId][Datetime][EventID]][LogLevel] -
+    // Message at SourceFile and LineNumber
+    pattern = '[' + std::to_string(instanceId) + ']'
+            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
+
+    if (preferences.IsJson() == true)
+    {
+        // TODO (mj): eventName, moduleName, errorCode
+        // cause, trace, and variables fields will be added
+        pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
+            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"name\":\"%n\"," +
+            "\"level\":\"%^%l%$\",\"message\":\"%v\"},"};
+    }
+
+    return pattern;
 }
 
 Reporter::Reporter(void)

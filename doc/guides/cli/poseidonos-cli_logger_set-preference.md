@@ -1,24 +1,26 @@
-## poseidonos-cli logger apply-filter
+## poseidonos-cli logger set-preference
 
-Apply a filtering policy to logger.
+Set the preferences (e.g., format) of logger.
 
 ### Synopsis
 
 
-Apply a filtering policy to logger.
+Set the preferences (e.g., format) of logger.
 
 Syntax:
-	poseidonos-cli logger apply-filter
+	poseidonos-cli logger set-preference [--json BooleanValue]
           
 
 ```
-poseidonos-cli logger apply-filter [flags]
+poseidonos-cli logger set-preference [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for apply-filter
+  -h, --help              help for set-preference
+  -j, --log-json string   When specified as true, PoseidonOS will log the events in JSON form.
+                          Otherwise, the events will be logged in plain text form. (default "false")
 ```
 
 ### Options inherited from parent commands

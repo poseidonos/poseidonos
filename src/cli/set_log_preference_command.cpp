@@ -30,79 +30,52 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <string>
+#include "src/cli/set_log_preference_command.h"
 
-#include "filter.h"
-#include "spdlog/spdlog.h"
-#include "src/helper/json/json_helper.h"
+#include <cstring>
 
-using namespace std;
-namespace pos_logger
+#include "src/cli/cli_event_code.h"
+#include "src/logger/logger.h"
+
+namespace pos_cli
 {
-class Preferences
+SetLogPreferenceCommand::SetLogPreferenceCommand(void)
 {
-public:
-    Preferences();
-    string
-    LogDir()
+}
+
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
+SetLogPreferenceCommand::~SetLogPreferenceCommand(void)
+{
+}
+// LCOV_EXCL_STOP
+
+string
+SetLogPreferenceCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
+    if (doc["param"].contains("log_json"))
     {
-        return LOG_PATH;
-    }
-    string
-    MinorLogFilePath()
-    {
-        return LOG_PATH + MINOR_LOG_NAME;
-    }
-    string
-    MajorLogFilePath()
-    {
-        return LOG_PATH + MAJOR_LOG_NAME;
-    }
-    string
-    FilterFilePath()
-    {
-        return LOG_PATH + FILTER_NAME;
-    }
-    uint32_t
-    LogFileSize()
-    {
-        return logfileSize;
-    }
-    uint32_t
-    LogRotation()
-    {
-        return logRotation;
-    }
-    string
-    LogLevel()
-    {
-        return LogLevelToString(logLevel);
+        string logJSON = doc["param"]["log_json"].get<std::string>();
+
+        bool _logJson = (strcasecmp("true", logJSON.c_str()) == 0);
+        int ret = logger()->SetJson(_logJson);
+        logger()->ApplyPreference();
+
+        if (ret == SUCCESS)
+        {
+            return jFormat.MakeResponse("SETPREFERENCE", rid, ret,
+                "Succeeded to set preference", GetPosInfo());
+        }
+        else
+        {
+            return jFormat.MakeResponse("SETPREFERENCE", rid, ret,
+                "Failed to set preference", GetPosInfo());
+        }
     }
 
-    int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
-    int SetJson(bool logJson);
-    bool IsJson() { return logJson; }
-    JsonElement ToJson();
-    int ApplyFilter();
-    int ApplyFilter(string filePath);
-    bool ShouldLog(spdlog::level::level_enum lvl, int id);
-    string LogLevelToString(spdlog::level::level_enum lvl);
-    spdlog::level::level_enum StringToLogLevel(string lvl);
-
-private:
-    const string LOG_PATH = "/var/log/pos/";
-    const string MINOR_LOG_NAME = "pos.log";
-    const string MAJOR_LOG_NAME = "pos_major.log";
-    const string FILTER_NAME = "filter";
-    static const int LOG_LEVEL_SIZE = 7;
-    const string LOG_LEVEL_NAME[LOG_LEVEL_SIZE] = {
-        "debug", "info", "trace", "warning", "error", "critical", "off"};
-
-    uint32_t logfileSize;
-    uint32_t logRotation;
-    spdlog::level::level_enum logLevel;
-    Filter filter;
-    bool logJson;
-};
-} // namespace pos_logger
+    return jFormat.MakeResponse(
+        "SETPREFERENCE", rid, BADREQUEST,
+        "No preference is input", GetPosInfo());
+}
+}; // namespace pos_cli

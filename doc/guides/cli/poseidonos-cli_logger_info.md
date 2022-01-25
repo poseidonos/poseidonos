@@ -1,11 +1,11 @@
 ## poseidonos-cli logger info
 
-Get the current settings of the logger.
+Display the current preference of logger.
 
 ### Synopsis
 
 
-Get the current settings of the logger.
+Display the current preference of logger.
 
 Syntax:
 	poseidonos-cli logger info

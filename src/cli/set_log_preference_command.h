@@ -31,78 +31,17 @@
  */
 
 #pragma once
+
+#include "src/cli/command.h"
 #include <string>
 
-#include "filter.h"
-#include "spdlog/spdlog.h"
-#include "src/helper/json/json_helper.h"
-
-using namespace std;
-namespace pos_logger
+namespace pos_cli
 {
-class Preferences
+class SetLogPreferenceCommand : public Command
 {
 public:
-    Preferences();
-    string
-    LogDir()
-    {
-        return LOG_PATH;
-    }
-    string
-    MinorLogFilePath()
-    {
-        return LOG_PATH + MINOR_LOG_NAME;
-    }
-    string
-    MajorLogFilePath()
-    {
-        return LOG_PATH + MAJOR_LOG_NAME;
-    }
-    string
-    FilterFilePath()
-    {
-        return LOG_PATH + FILTER_NAME;
-    }
-    uint32_t
-    LogFileSize()
-    {
-        return logfileSize;
-    }
-    uint32_t
-    LogRotation()
-    {
-        return logRotation;
-    }
-    string
-    LogLevel()
-    {
-        return LogLevelToString(logLevel);
-    }
-
-    int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
-    int SetJson(bool logJson);
-    bool IsJson() { return logJson; }
-    JsonElement ToJson();
-    int ApplyFilter();
-    int ApplyFilter(string filePath);
-    bool ShouldLog(spdlog::level::level_enum lvl, int id);
-    string LogLevelToString(spdlog::level::level_enum lvl);
-    spdlog::level::level_enum StringToLogLevel(string lvl);
-
-private:
-    const string LOG_PATH = "/var/log/pos/";
-    const string MINOR_LOG_NAME = "pos.log";
-    const string MAJOR_LOG_NAME = "pos_major.log";
-    const string FILTER_NAME = "filter";
-    static const int LOG_LEVEL_SIZE = 7;
-    const string LOG_LEVEL_NAME[LOG_LEVEL_SIZE] = {
-        "debug", "info", "trace", "warning", "error", "critical", "off"};
-
-    uint32_t logfileSize;
-    uint32_t logRotation;
-    spdlog::level::level_enum logLevel;
-    Filter filter;
-    bool logJson;
+    SetLogPreferenceCommand(void);
+    ~SetLogPreferenceCommand(void) override;
+    string Execute(json& doc, string rid) override;
 };
-} // namespace pos_logger
+}; // namespace pos_cli

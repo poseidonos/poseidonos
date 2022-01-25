@@ -334,6 +334,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "filter_enabled\t:", loggerInfo.FILTERENABLED == 1)
 		fmt.Fprintln(w, "filter_included\t: "+loggerInfo.FILTERINCLUDED)
 		fmt.Fprintln(w, "filter_excluded\t: "+loggerInfo.FILTEREXCLUDED)
+		fmt.Fprintln(w, "log_json\t: "+strconv.FormatBool(loggerInfo.LOGJSON))
 
 		w.Flush()
 

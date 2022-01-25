@@ -122,6 +122,7 @@ type LoggerInfoResData struct {
 	FILTERENABLED        int    `json:"filter_enabled"`
 	FILTERINCLUDED       string `json:"filter_included"`
 	FILTEREXCLUDED       string `json:"filter_excluded"`
+	LOGJSON              bool   `json:"log_json"`
 }
 
 // Response for GETLOGLEVEL command

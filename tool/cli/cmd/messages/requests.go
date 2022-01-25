@@ -86,9 +86,13 @@ type CreateDeviceReqParam struct {
 	NUMA       int    `json:"numa"`
 }
 
-// Loger request params
+// Logger request params
 type SetLevelReqParam struct {
 	LEVEL string `json:"level"`
+}
+
+type SetPrefReqParam struct {
+	LOGJSON string `json:"log_json,omitempty"`
 }
 
 // System request params

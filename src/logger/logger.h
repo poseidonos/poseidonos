@@ -98,8 +98,17 @@ public:
         }
 #endif
     }
+
+    void ApplyPreference(void);
+
     int SetLevel(string lvl);
-    string GetLevel();
+    string GetLevel(void);
+
+    int SetJson(bool logJson);
+    bool IsJson(void)
+    {
+        return preferences.IsJson();
+    }
 
     int
     ApplyFilter()
@@ -125,6 +134,8 @@ public:
     }
 
 private:
+    string _BuildPattern(bool logJson);
+
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];

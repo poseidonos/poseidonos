@@ -41,6 +41,11 @@ namespace pos_logger
 {
 Preferences::Preferences()
 {
+    // TODO (mj): Set isJSON to false in default.
+    // Later, the default value will be set to true,
+    // which means that the default log format will be JSON.
+    logJson = false;
+
     Configuration conf;
     logfileSize = conf.LogSizePerFileInMB();
     logRotation = conf.NumOfLogFilesForRotation();
@@ -98,6 +103,7 @@ Preferences::ToJson()
         data.SetAttribute(JsonAttribute("filter_included", "\"" + filter.IncludeRule() + "\""));
         data.SetAttribute(JsonAttribute("filter_excluded", "\"" + filter.ExcludeRule() + "\""));
     }
+    data.SetAttribute(JsonAttribute("log_json", logJson ? "true" : "false"));
 
     return data;
 }
@@ -132,4 +138,13 @@ Preferences::StringToLogLevel(string lvl)
     }
     return spdlog::level::off;
 }
+
+int
+Preferences::SetJson(bool logJson)
+{
+    this->logJson = logJson;
+
+    return (int)POS_EVENT_ID::SUCCESS;
+}
+
 } // namespace pos_logger
