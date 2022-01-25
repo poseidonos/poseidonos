@@ -53,8 +53,8 @@ class MioHandler
 public:
     MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
-    MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+    MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
@@ -90,8 +90,8 @@ private:
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ;
-    MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ;
+    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
     MioPool* mioPool;

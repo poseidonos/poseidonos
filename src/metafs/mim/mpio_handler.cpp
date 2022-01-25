@@ -37,7 +37,7 @@
 
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ)
+MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioPool(nullptr),
   coreId(coreId),
@@ -49,7 +49,7 @@ MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaF
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
-        partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>();
+        partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, RequestPriority>();
 
     lastTime = std::chrono::steady_clock::now();
 }

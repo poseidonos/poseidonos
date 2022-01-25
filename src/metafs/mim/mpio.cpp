@@ -50,7 +50,7 @@ Mpio::Mpio(void* mdPageBuf)
   errorStopState(false),
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
-  priority(IoRequestPriority::Normal)
+  priority(RequestPriority::Normal)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -65,7 +65,7 @@ Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoI
   errorStopState(false),
   forceSyncIO(forceSyncIO),
   cacheState(MpioCacheState::Init),
-  priority(IoRequestPriority::Normal)
+  priority(RequestPriority::Normal)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -117,12 +117,12 @@ Mpio::GetErrorStatus(void)
 }
 
 void
-Mpio::SetPriority(IoRequestPriority p)
+Mpio::SetPriority(RequestPriority p)
 {
     priority = p;
 }
 
-IoRequestPriority
+RequestPriority
 Mpio::GetPriority(void)
 {
     return priority;

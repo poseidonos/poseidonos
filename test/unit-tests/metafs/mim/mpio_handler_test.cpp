@@ -58,7 +58,7 @@ TEST(MpioHandler, Normal)
     MockWriteMpio* mpio = new MockWriteMpio(this);
     EXPECT_CALL(*mpio, ExecuteAsyncState).WillRepeatedly(Return());
 
-    MockMetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, IoRequestPriority>();
+    MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
     EXPECT_CALL(*doneQ, Enqueue).WillRepeatedly(Return());
     EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
 

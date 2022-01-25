@@ -47,7 +47,7 @@ class MpioHandler
 public:
     explicit MpioHandler(int threadId, int coreId,
                     TelemetryPublisher* tp = nullptr,
-                    MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ = nullptr);
+                    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
@@ -57,7 +57,7 @@ public:
 private:
     void _SendPeriodicMetrics(void);
 
-    MetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* partialMpioDoneQ;
+    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
     TelemetryPublisher* telemetryPublisher;

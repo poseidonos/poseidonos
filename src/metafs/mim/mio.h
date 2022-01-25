@@ -103,7 +103,7 @@ public:
     virtual void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
     virtual void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    virtual void SetIoCQ(MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ);
+    virtual void SetIoCQ(MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
@@ -147,7 +147,7 @@ protected:
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
     MfsError error;
-    MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ;
+    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
     MpioPool* mpioPool;
     MetaAsyncCbCxt aioCbCxt;
 #if MPIO_CACHE_EN

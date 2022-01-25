@@ -54,6 +54,7 @@ using ::testing::DoAll;
 using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -87,9 +88,9 @@ public:
 
         tp = new NiceMock<MockTelemetryPublisher>;
 
-        ioSQ = new NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>>;
-        ioCQ = new NiceMock<MockMetaFsIoMultilevelQ<Mio*, IoRequestPriority>>;
-        doneQ = new MockMetaFsIoMultilevelQ<Mpio*, IoRequestPriority>();
+        ioSQ = new NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>>;
+        ioCQ = new NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>;
+        doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
         bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, nullptr, doneQ);
         mpioPool = new NiceMock<MockMpioPool>(POOL_SIZE);
         mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
@@ -122,9 +123,9 @@ public:
 protected:
     MioHandler* handler;
 
-    NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>>* ioSQ;
-    NiceMock<MockMetaFsIoMultilevelQ<Mio*, IoRequestPriority>>* ioCQ;
-    MockMetaFsIoMultilevelQ<Mpio*, IoRequestPriority>* doneQ;
+    NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>>* ioSQ;
+    NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>* ioCQ;
+    MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ;
     NiceMock<MockMpioHandler>* bottomhalfHandler;
     NiceMock<MockMioPool>* mioPool;
     NiceMock<MockMpioPool>* mpioPool;
@@ -149,8 +150,7 @@ TEST_F(MioHandlerTestFixture, Normal)
     MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
     msg->reqType = MetaIoRequestType::Read;
 
-    EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
-    EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return());
+    EXPECT_CALL(*ioSQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*ioSQ, Dequeue).WillRepeatedly(Return(msg));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
@@ -186,8 +186,8 @@ TEST_F(MioHandlerTestFixture, Normal_PushToRetryQueue)
     msg->arrayId = 0;
     msg->targetMediaType = MetaStorageType::SSD;
 
-    EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
-    EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return());
+    EXPECT_CALL(*msg, SetRetryFlag).Times(AtLeast(1));
+    EXPECT_CALL(*ioSQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*ioSQ, Dequeue).Times(MAX_COUNT).WillRepeatedly(Return(msg));
     EXPECT_CALL(*checker, IsRangeOverlapConflicted).WillRepeatedly(Return(true));
 

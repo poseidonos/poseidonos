@@ -62,8 +62,8 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
   metricSumOfSpendTime(0),
   metricSumOfMioCount(0)
 {
-    ioCQ = new MetaFsIoMultilevelQ<Mio*, IoRequestPriority>();
-    ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>();
+    ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
+    ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
 
     mpioPool = new MpioPool(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
     mioPool = new MioPool(mpioPool, MAX_CONCURRENT_MIO_PROC_THRESHOLD);
@@ -78,8 +78,8 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
         threadId, coreId);
 }
 
-MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),

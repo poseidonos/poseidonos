@@ -48,6 +48,11 @@ public:
     }
     virtual ~MetaFsIoMultilevelQ(void)
     {
+        ItemT t;
+        while (nullptr != (t = Dequeue()))
+        {
+            delete t;
+        }
     }
     virtual void Enqueue(const ItemT entry, const PriorityE priority)
     {

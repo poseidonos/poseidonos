@@ -42,6 +42,7 @@
 #include "src/bio/volume_io.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/common/metafs_stopwatch.h"
+#include "src/meta_file_intf/meta_file_include.h"
 
 namespace pos
 {
@@ -88,13 +89,6 @@ enum class IoRequestStage
     Count
 };
 
-enum class IoRequestPriority
-{
-    Highest,
-    Normal,
-    MAX
-};
-
 // basic io req. info. given by caller
 class MetaFsIoRequest : public MetaFsRequestBase, public MetaFsStopwatch<IoRequestStage>
 {
@@ -135,7 +129,7 @@ public:
     MetaFsIoRequest* originalMsg;
     int requestCount;
     MetaFileContext* fileCtx;
-    IoRequestPriority priority;
+    RequestPriority priority;
 
 private:
     bool retryFlag;

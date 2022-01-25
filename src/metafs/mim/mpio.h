@@ -102,8 +102,8 @@ public:
     bool CheckReadStatus(MpAioState expNextState);
     bool CheckWriteStatus(MpAioState expNextState);
     MfsError GetErrorStatus(void);
-    void SetPriority(IoRequestPriority p);
-    IoRequestPriority GetPriority(void);
+    void SetPriority(RequestPriority p);
+    RequestPriority GetPriority(void);
 
     MpioIoInfo io;
 
@@ -119,7 +119,7 @@ protected:
     MetaAsyncCbCxt aioCbCxt;
 
     MpioCacheState cacheState;
-    IoRequestPriority priority;
+    RequestPriority priority;
 
     virtual void _InitStateHandler(void) = 0;
     bool _DoMemCpy(void* dst, void* src, size_t nbytes);

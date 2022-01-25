@@ -161,7 +161,7 @@ Mio::SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller)
 }
 
 void
-Mio::SetIoCQ(MetaFsIoMultilevelQ<Mio*, IoRequestPriority>* ioCQ)
+Mio::SetIoCQ(MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ)
 {
     this->ioCQ = ioCQ;
 }

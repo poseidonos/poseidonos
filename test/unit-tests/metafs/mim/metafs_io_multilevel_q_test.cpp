@@ -41,11 +41,13 @@
 
 namespace pos
 {
-TEST(MetaFsIoMultilevelQ, Normal)
+TEST(MetaFsIoMultilevelQ, testIfDequeueCountMatchesWithEnqueueCountWithTwoDifferentPriorities)
 {
     const uint32_t REQ_COUNT = 10;
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>* multiQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority>();
-    std::array<std::unordered_set<MetaFsIoRequest*>, (size_t)IoRequestPriority::MAX> requests;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* multiQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
+    std::array<std::unordered_set<MetaFsIoRequest*>, (size_t)RequestPriority::MAX> requests;
+
+    ASSERT_EQ(multiQ->Dequeue(), nullptr);
 
     // push
     for (uint32_t req = 0; req < REQ_COUNT; req++)
@@ -53,14 +55,14 @@ TEST(MetaFsIoMultilevelQ, Normal)
         MetaFsIoRequest* reqH = new MetaFsIoRequest();
         MetaFsIoRequest* reqL = new MetaFsIoRequest();
 
-        reqH->priority = IoRequestPriority::Highest;
-        reqL->priority = IoRequestPriority::Normal;
+        reqH->priority = RequestPriority::Highest;
+        reqL->priority = RequestPriority::Normal;
 
-        multiQ->Enqueue(reqH, IoRequestPriority::Highest);
-        multiQ->Enqueue(reqL, IoRequestPriority::Normal);
+        multiQ->Enqueue(reqH, RequestPriority::Highest);
+        multiQ->Enqueue(reqL, RequestPriority::Normal);
 
-        requests[(size_t)IoRequestPriority::Highest].insert(reqH);
-        requests[(size_t)IoRequestPriority::Normal].insert(reqL);
+        requests[(size_t)RequestPriority::Highest].insert(reqH);
+        requests[(size_t)RequestPriority::Normal].insert(reqL);
     }
 
     // pop
@@ -71,16 +73,67 @@ TEST(MetaFsIoMultilevelQ, Normal)
         if (nullptr == reqMsg)
             continue;
 
-        EXPECT_EQ(requests[(size_t)(reqMsg->priority)].count(reqMsg), 1);
+        EXPECT_NE(requests[(size_t)(reqMsg->priority)].find(reqMsg), requests[(size_t)(reqMsg->priority)].end());
         requests[(size_t)(reqMsg->priority)].erase(reqMsg);
         total_count++;
 
         delete reqMsg;
     }
 
-    EXPECT_EQ(multiQ->Dequeue(), nullptr);
     EXPECT_EQ(total_count, REQ_COUNT * 2);
+    EXPECT_EQ(0, requests[(size_t)RequestPriority::Highest].size());
+    EXPECT_EQ(0, requests[(size_t)RequestPriority::Normal].size());
 
     delete multiQ;
+}
+
+class TestMetaFsRequest : public MetaFsIoRequest
+{
+public:
+    TestMetaFsRequest(std::unordered_set<TestMetaFsRequest*>* v) : v(v)
+    {
+    }
+    ~TestMetaFsRequest(void)
+    {
+        v->erase(this);
+    }
+
+private:
+    std::unordered_set<TestMetaFsRequest*>* v;
+};
+
+TEST(MetaFsIoMultilevelQ, destructor_testIfTheDesctructorWillDeleteAllTheItemsInTheQueues)
+{
+    const uint32_t REQ_COUNT = 10;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* multiQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
+    std::array<std::unordered_set<TestMetaFsRequest*>, (size_t)RequestPriority::MAX> requests;
+
+    ASSERT_EQ(multiQ->Dequeue(), nullptr);
+
+    // push
+    for (uint32_t req = 0; req < REQ_COUNT; req++)
+    {
+        TestMetaFsRequest* reqH = new TestMetaFsRequest(&requests[(size_t)RequestPriority::Highest]);
+        TestMetaFsRequest* reqL = new TestMetaFsRequest(&requests[(size_t)RequestPriority::Normal]);
+
+        reqH->priority = RequestPriority::Highest;
+        reqL->priority = RequestPriority::Normal;
+
+        multiQ->Enqueue(reqH, RequestPriority::Highest);
+        multiQ->Enqueue(reqL, RequestPriority::Normal);
+
+        requests[(size_t)RequestPriority::Highest].insert(reqH);
+        requests[(size_t)RequestPriority::Normal].insert(reqL);
+    }
+
+    EXPECT_EQ(REQ_COUNT, requests[(size_t)RequestPriority::Highest].size());
+    EXPECT_EQ(REQ_COUNT, requests[(size_t)RequestPriority::Normal].size());
+
+    // desctuct
+    delete multiQ;
+
+    // check
+    EXPECT_EQ(0, requests[(size_t)RequestPriority::Highest].size());
+    EXPECT_EQ(0, requests[(size_t)RequestPriority::Normal].size());
 }
 } // namespace pos

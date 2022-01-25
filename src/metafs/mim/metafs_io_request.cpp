@@ -59,7 +59,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   originalMsg(nullptr),
   requestCount(0),
   fileCtx(nullptr),
-  priority(IoRequestPriority::Normal),
+  priority(RequestPriority::Normal),
   retryFlag(false),
   error(0)
 {

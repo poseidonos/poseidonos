@@ -58,6 +58,8 @@ public:
     virtual void SetTopPriority(void);
     virtual void ClearTopPriority(void);
     virtual bool IsTopPriority(void) const;
+    virtual void SetPriority(const RequestPriority p);
+    virtual RequestPriority GetPriority(void) const;
 
     MetaFsIoOpcode opcode;
     int fd;
@@ -69,7 +71,7 @@ public:
     int error;
     MetaFileIoCbPtr ioDoneCheckCallback;
     uint32_t vsid;
-    bool topPriority;
+    RequestPriority priority;
 };
 
 } // namespace pos

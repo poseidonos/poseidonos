@@ -58,7 +58,7 @@ public:
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
       tagId(0),
-      topPriority(false)
+      priority(RequestPriority::Normal)
     {
         callbackCount = 0;
     }
@@ -73,7 +73,7 @@ public:
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
       tagId(0),
-      topPriority(false)
+      priority(RequestPriority::Normal)
     {
     }
 
@@ -87,7 +87,7 @@ public:
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
       rc(POS_EVENT_ID::MFS_END),
       tagId(0),
-      topPriority(ctx->IsTopPriority())
+      priority(ctx->GetPriority())
     {
         callbackCount = 0;
     }
@@ -177,19 +177,29 @@ public:
         callbackCount = cnt;
     }
 
-    void SetTopPriority(void)
+    virtual void SetTopPriority(void)
     {
-        topPriority = true;
+        priority = RequestPriority::Highest;
     }
 
-    void ClearTopPriority(void)
+    virtual void ClearTopPriority(void)
     {
-        topPriority = false;
+        priority = RequestPriority::Normal;
     }
 
-    bool IsTopPriority(void) const
+    virtual bool IsTopPriority(void) const
     {
-        return topPriority;
+        return (RequestPriority::Highest == priority);
+    }
+
+    virtual void SetPriority(const RequestPriority p)
+    {
+        priority = p;
+    }
+
+    virtual RequestPriority GetPriority(void) const
+    {
+        return priority;
     }
 
 private:
@@ -206,6 +216,6 @@ private:
     POS_EVENT_ID rc;
     uint32_t tagId;
     std::atomic<int> callbackCount;
-    bool topPriority;
+    RequestPriority priority;
 };
 } // namespace pos

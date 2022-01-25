@@ -63,6 +63,6 @@ private:
     std::vector<ScalableMetaIoWorker*> metaIoWorkerList;
     uint32_t totalMioHandlerCnt;
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, IoRequestPriority> ioMultiQ;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ;
 };
 } // namespace pos

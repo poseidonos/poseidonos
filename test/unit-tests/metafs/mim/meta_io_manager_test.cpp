@@ -39,6 +39,7 @@
 
 using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -72,7 +73,7 @@ TEST(MetaIoManager, CheckProcess_AsyncRequest)
 {
     const int arrayId = 0;
     MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
-    EXPECT_CALL(*scheduler, EnqueueNewReq).WillRepeatedly(Return());
+    EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
     req->ioMode = MetaIoMode::Async;
@@ -100,7 +101,7 @@ TEST(MetaIoManager, CheckProcess_SyncRequest)
 {
     const int arrayId = 0;
     MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
-    EXPECT_CALL(*scheduler, EnqueueNewReq).WillRepeatedly(Return());
+    EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
     req->ioMode = MetaIoMode::Sync;

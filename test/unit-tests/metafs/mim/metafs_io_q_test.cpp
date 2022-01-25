@@ -67,7 +67,7 @@ TEST(MetaFsIoQ_Msg, CheckEnqueueAndDequeue)
     MetaFsIoRequest* msg = nullptr;
     while (nullptr != (msg = q.Dequeue()))
     {
-        EXPECT_EQ(requests.count(msg), 1);
+        EXPECT_NE(requests.find(msg), requests.end());
         requests.erase(msg);
         delete msg;
     }
@@ -101,7 +101,7 @@ TEST(MetaFsIoQ_Mio, CheckEnqueueAndDequeue)
     MockMio* msg = nullptr;
     while (nullptr != (msg = dynamic_cast<MockMio*>(q.Dequeue())))
     {
-        EXPECT_EQ(requests.count(msg), 1);
+        EXPECT_NE(requests.find(msg), requests.end());
         requests.erase(msg);
         delete msg;
     }
@@ -134,7 +134,7 @@ TEST(MetaFsIoQ_Mpio, CheckEnqueueAndDequeue)
     MockMpio* msg = nullptr;
     while (nullptr != (msg = dynamic_cast<MockMpio*>(q.Dequeue())))
     {
-        EXPECT_EQ(requests.count(msg), 1);
+        EXPECT_NE(requests.find(msg), requests.end());
         requests.erase(msg);
         delete msg;
     }
