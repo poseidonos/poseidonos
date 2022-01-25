@@ -443,7 +443,7 @@ ArrayDeviceManager::_CheckActiveSsdsCount(const vector<ArrayDevice*>& devs)
             return 0;
         }
     }
-    POS_TRACE_WARN(errorId, "At least one normal state device is required to configure Array");
+    POS_TRACE_WARN(errorId, "Failed to load array: all devices in this array is in the fault state. At least one normal state device is required to configure Array");
     return errorId;
 }
 

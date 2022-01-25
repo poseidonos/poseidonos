@@ -542,10 +542,10 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr))
         .WillOnce(Return(nvm1UblockDevPtr))
-        .WillOnce(Return(nullptr))
-        .WillOnce(Return(nullptr))
-        .WillOnce(Return(nullptr))
-        .WillOnce(Return(nullptr));
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
     SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
