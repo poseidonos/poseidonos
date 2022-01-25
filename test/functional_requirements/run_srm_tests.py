@@ -26,7 +26,7 @@ def run_tests(dirname):
             time.sleep(30)
             os.system("rm -rf /dev/shm/ibof*")
             os.system("rm -rf /tmp/*.uram.*")
-            os.system("rm -rf /var/tmp/spdk.sock")
+            os.system("rm -rf /var/tmp/spdk*")
 
 
 def print_results(dirname):
