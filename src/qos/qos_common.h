@@ -110,7 +110,7 @@ const uint32_t UPPER_GC_TH = 30;
 const uint32_t MID_GC_TH = 20;
 const uint32_t LOW_GC_TH = 5;
 
-const uint32_t NO_CONTENTION_CYCLES = 20;
+const uint32_t NO_CONTENTION_CYCLES = 100;
 namespace pos
 {
 /* --------------------------------------------------------------------------*/

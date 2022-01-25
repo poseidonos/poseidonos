@@ -287,7 +287,6 @@ EventScheduler::DequeueEvents(void)
             }
         }
     }
-    _IncrementCycles();
     return eventList;
 }
 
@@ -359,27 +358,18 @@ EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
         cpuIndex = cpuIndex + 1;
     }
 }
-
 bool
-EventScheduler::_CheckContention(void)
+EventScheduler::_CheckContention(BackendEvent eventId)
 {
     bool frontendQueueOccupied = false;
-    bool backendQueueOccupied = false;
+    bool backendFlushQueueOccupied = false;
     bool contention = false;
-
-    for (uint32_t eventType = BackendEvent_Start; (BackendEvent)eventType < BackendEvent_Count; eventType++)
+    if (eventId == (BackendEvent)BackendEvent_UserdataRebuild)
     {
-        if (eventType == BackendEvent_FrontendIO)
-        {
-            frontendQueueOccupied = _GetQueueOccupancy(BackendEvent_FrontendIO);
-        }
-        else
-        {
-            // if any of the backendQueus is occupied
-            backendQueueOccupied = backendQueueOccupied || _GetQueueOccupancy((BackendEvent)eventType);
-        }
+        frontendQueueOccupied = _GetQueueOccupancy(BackendEvent_FrontendIO);
+        backendFlushQueueOccupied = _GetQueueOccupancy((BackendEvent)BackendEvent_Flush);
+        contention = frontendQueueOccupied || backendFlushQueueOccupied;
     }
-    contention = frontendQueueOccupied && backendQueueOccupied;
     return contention;
 }
 
@@ -427,8 +417,8 @@ int32_t
 EventScheduler::_GetEventWeight(BackendEvent eventId)
 {
     int32_t eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
-
-    if (_CheckContention() == true)
+    bool contention = _CheckContention(eventId);
+    if (contention == true)
     {
         eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventId);
         cyclesElapsed = 0;
@@ -440,7 +430,9 @@ EventScheduler::_GetEventWeight(BackendEvent eventId)
         {
             eventWeight = qosManager->GetDefaultEventWeightWRR((BackendEvent)eventId);
         }
+        _IncrementCycles();
     }
     return eventWeight;
 }
+
 } // namespace pos
