@@ -2,6 +2,7 @@ import lib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
+import time
 
 
 def FormatLatency(y, idx=0):
@@ -57,6 +58,11 @@ def FormatSimpleFloat(y, pos=1):
         return f"{round(y/1e3, pos)}"
     else:
         return f"{round(y, pos)}"
+
+
+def FormatEpochTime(y, idx=0):
+    time_format = time.strftime("%H:%M:%S", time.localtime(y / 1000))
+    return time_format
 
 
 def DrawEta(data, pic_name, graph_list):
@@ -151,3 +157,44 @@ def DrawResult(data, pic_name):
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
         plt.close(fig)
+
+
+def DrawLogGraphWithType(data, pic_name, type):
+    try:
+        plt.clf()  # plot 초기화
+        num_graph = len(data)
+        fig = plt.figure(figsize=(8, 3 * num_graph))  # plot size setting(unit: inch)
+
+        for job in data:
+            ax = plt.subplot(num_graph, 1, int(job))  # subplot position(행, 렬, 순서)
+            ax.set_title(job, fontsize=12)
+            ax.grid(True, axis="y", color="lightgrey", zorder=0)
+            if ("iops" == type):
+                ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatIOPS))
+            elif ("bw" == type):
+                ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatKBW))
+            elif ("lat" == type):
+                ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatLatency))
+            else:
+                ax.yaxis.set_major_formatter(ticker.EngFormatter())
+            ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatEpochTime))
+            ax.tick_params(axis='y', labelrotation=30, labelsize=8)
+            ax.tick_params(axis='x', labelrotation=0, labelsize=8)
+            plt.scatter(data[job]["read"]["x"], data[job]["read"]["y"], s=10, label="read")  # 점 그래프
+            plt.plot(data[job]["read"]["x"], data[job]["read"]["y"])  # 선 그래프
+            plt.scatter(data[job]["write"]["x"], data[job]["write"]["y"], s=10, label="write")
+            plt.plot(data[job]["write"]["x"], data[job]["write"]["y"])
+            plt.legend(fontsize=8, loc="upper left", ncol=2)  # 범례 그리기
+
+        plt.tight_layout()
+        plt.savefig(pic_name, dpi=200)
+        plt.close(fig)
+    except Exception as e:
+        lib.printer.red(f"{__name__} [Error] {e}")
+        plt.close(fig)
+
+
+def DrawLog(data, pic_name):
+    DrawLogGraphWithType(data["iops"], f"{pic_name}_per_job_iops.png", "iops")
+    DrawLogGraphWithType(data["bw"], f"{pic_name}_per_job_bw.png", "bw")
+    DrawLogGraphWithType(data["clat"], f"{pic_name}_per_job_clat.png", "lat")
