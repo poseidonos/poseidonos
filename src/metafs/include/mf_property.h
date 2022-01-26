@@ -69,6 +69,12 @@ public:
       integrity(MetaFileIntegrityType::Default)
     {
     }
+    MetaFilePropertySet(MetaFileAccessPattern pattern, MetaFileDominant dominant, MetaFileIntegrityType integrity)
+    : ioAccPattern(pattern),
+      ioOpType(dominant),
+      integrity(integrity)
+    {
+    }
     MetaFileAccessPattern ioAccPattern;
     MetaFileDominant ioOpType;
     MetaFileIntegrityType integrity;
