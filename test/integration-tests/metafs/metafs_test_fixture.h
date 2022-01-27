@@ -41,6 +41,7 @@
 #include <cstdint>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
@@ -158,7 +159,7 @@ public:
         printf("DoPageIO, %s, mediaType: %d, startLpn: %ld, size: %ld, mpio_id: %d, tagid: %d, thread: %d\n",
             ((int)opcode == 0) ? "write" : "read ", (int)mediaType, metaLpn, numPages, mpio_id, tagid, sched_getcpu());
 
-        assert(false);
+        throw logic_error("not implemented");
 
         return POS_EVENT_ID::SUCCESS;
     }
@@ -168,13 +169,13 @@ public:
         if (opcode == MssOpcode::Read)
             result = files[cb->GetIoContext()->media]->Read(
                 cb->GetIoContext()->buf,
-                cb->GetIoContext()->metaLpn * 4096,
-                cb->GetIoContext()->lpnCnt * 4096);
+                cb->GetIoContext()->metaLpn * BYTE_4K,
+                cb->GetIoContext()->lpnCnt * BYTE_4K);
         else
             result = files[cb->GetIoContext()->media]->Write(
                 cb->GetIoContext()->buf,
-                cb->GetIoContext()->metaLpn * 4096,
-                cb->GetIoContext()->lpnCnt * 4096);
+                cb->GetIoContext()->metaLpn * BYTE_4K,
+                cb->GetIoContext()->lpnCnt * BYTE_4K);
 
         printf("DoPageIOAsync, %s, result: %s, mediaType: %d, startLpn: %ld, size: %ld, mpio_id: %d, tagid: %d, thread: %d\n",
             ((int)opcode == 0) ? "write" : "read ", (result == true) ? "good" : "fail",
@@ -192,6 +193,7 @@ public:
 private:
     std::unordered_map<MetaStorageType, std::string> fileNames;
     std::unordered_map<MetaStorageType, std::shared_ptr<FileIo>> files;
+    const size_t BYTE_4K = 4096;
 };
 
 class MetaFsTestFixture

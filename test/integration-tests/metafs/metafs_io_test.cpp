@@ -56,8 +56,8 @@ public:
     MetaFsIoTest(void)
     : MetaFsTestFixture()
     {
-        files.insert({StorageOpt::SSD, {"TestFileSsd", BYTE_4K * 1000, 0, {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
-        files.insert({StorageOpt::NVRAM, {"TestFileNvm", BYTE_4K * 100, 0, {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+        files.insert({StorageOpt::SSD, {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0, {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+        files.insert({StorageOpt::NVRAM, {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0, {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
 
         writeBuf = new char[BYTE_4K];
         readBuf = new char[BYTE_4K];
@@ -98,15 +98,16 @@ protected:
     char* readBuf;
 
     const size_t BYTE_4K = 4032;
+    const size_t COUNT_OF_META_LPN_FOR_SSD = 1000;
+    const size_t COUNT_OF_META_LPN_FOR_NVM = 100;
 };
 
 TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_InRotation)
 {
-    const int requestLpnCount = 1000;
     memset(writeBuf, 0, BYTE_4K);
 
     // write -> read -> write -> read -> ..
-    for (int i = 0; i < requestLpnCount; ++i)
+    for (int i = 0; i < COUNT_OF_META_LPN_FOR_SSD; ++i)
     {
         *(int*)writeBuf = i + 1;
 
@@ -121,10 +122,8 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_InRot
 
 TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_FirstWriteLastRead)
 {
-    const int requestLpnCount = 1000;
-
     // write
-    for (int i = 0; i < requestLpnCount; ++i)
+    for (int i = 0; i < COUNT_OF_META_LPN_FOR_SSD; ++i)
     {
         *(int*)writeBuf = i + 1;
 
@@ -133,7 +132,7 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
     }
 
     // read and verify
-    for (int i = 0; i < requestLpnCount; ++i)
+    for (int i = 0; i < COUNT_OF_META_LPN_FOR_SSD; ++i)
     {
         *(int*)writeBuf = i + 1;
 
@@ -145,16 +144,10 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
 
 TEST_F(MetaFsIoTest, testIfMetaFsCanRejectTheRequestsDueToOutOfRange)
 {
-    POS_EVENT_ID result = metaFs->io->Write(files[StorageOpt::SSD].fd, 1001 * BYTE_4K, BYTE_4K, writeBuf);
+    POS_EVENT_ID result = metaFs->io->Write(files[StorageOpt::SSD].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
     ASSERT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
 
-    result = metaFs->io->Read(files[StorageOpt::SSD].fd, 1001 * BYTE_4K, BYTE_4K, readBuf);
+    result = metaFs->io->Read(files[StorageOpt::SSD].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
     EXPECT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
-}
-
-TEST_F(MetaFsIoTest, testIfMpioCacheWorks)
-{
-    // POS_EVENT_ID result = metaFs->io->Write(files[StorageOpt::NVRAM].fd, 1001 * BYTE_4K, BYTE_4K, writeBuf);
-    // ASSERT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
 }
 } // namespace pos
