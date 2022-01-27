@@ -127,7 +127,6 @@ Callback::~Callback(void)
                     eventId,
                     "Callback Timeout. Caller : {}",
                     returnAddress);
-                UserSignalInterface::TriggerBacktrace();
             }
             catch(...)
             {

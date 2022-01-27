@@ -73,9 +73,9 @@ void
 SignalHandler::Register(void)
 {
     signal(SIGINT, SignalHandler::INTHandler);
-    signal(SIGSEGV, SignalHandler::ExceptionHandler);
-    signal(SIGABRT, SignalHandler::ExceptionHandler);
-    signal(SIGUSR1, SignalHandler::ExceptionHandler);
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGABRT, SIG_DFL);
+    signal(SIGUSR1, SIG_DFL);
 }
 
 void
