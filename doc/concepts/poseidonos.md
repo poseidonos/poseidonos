@@ -15,7 +15,10 @@ POS is capable of exposing block devices over network. This helps cloud vendors 
 
 One of the key design decisions is to run POS as user-level application. The rationale behind it is to fully control the I/O path and avoid wasting CPU cycles required by general-purpose OS activities. The following figure illustrates what types of software overheads exist in Kernel Device Driver (KDD) and how they could be eliminated in User Device Driver (UDD).
 
+![user_vs_kernel](../images/user_vs_kernel.png)
+
 **Virtualizing storage resources**
 
 POS offers virtualized block devices that provide valuable features as well as block read/write functionality: capacity elasticity, performance throttling, data protection (RAID), and more. Customers could benefit from the features for free transparently. The following figure illustrates how POS (represented as "Reference Software") plays a role in storage virtualization. POS sits between initiator(s) and NVMe device(s) and remaps, duplicates, and/or buffers I/O requests to implement the features.
 
+![virtualizing_storage](../images/virtualizing_storage.png)

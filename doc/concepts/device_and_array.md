@@ -8,6 +8,8 @@ POS array can contain 1 or more POS volumes, each of which can be exposed to ini
 
 In the following figure, POS manages two POS arrays, "A" and "B", each exposing two POS volumes. Initiator gets connected to all those 4 POS volumes over NVMe-oF, converts block requests from applications into NVMe-oF packets, and sends/receives them to/from POS volumes "A", "B", "C", and "D". POS is responsible for translating the destination address of initiator's request into a list of (SSD id, Logical Block Addresses).
 
+![pos_array](../images/pos_array.png)
+
 ### Creating POS Array
 Storage administrator may want to manage multiple POS arrays to meet various Service-Level Agreement (SLA) requirements.  
 
@@ -46,8 +48,9 @@ The types of POS partition are as follows:
 - Meta-data partition manages logical-to-physical mappings and write operations in the partition to support virtualization and consistency. 
 - User-data partition stores actual user content transferred from initiator(s).
 
-
 The following figure illustrates the layout of the partitions within POS array.
+
+![layout_partition_pos_array](../images/layout_partition_pos_array.png)
 
 The layout of three areas within a data device looks exactly the same. We name them as MBR, metadata, and userdata "partition area" respectively. Here is how POS calculates the size of each partition area and the capacity of POS array:
 
@@ -58,11 +61,18 @@ The layout of three areas within a data device looks exactly the same. We name t
 - Effective userdata partition area = userdata partition area * 0.9
 - The capacity of POS array = effective userdata partition area * (# of data devices - # of parity devices)
 
+    ![data_device_capacity](../images/data_device_capacity.png)
+
 ### RAID
 POS implements data redundancy at POS partition level. Parity device in POS is defined as a device that contains device recovery information. 
 
-- Metadata partition is protected by RAID 1. The metadata partition area is divided into multiple chunks, each of which being fully mirrored. Hence, the number of parity devices equals to 50% of the total number of data devices in POS array.
-- Userdata partition is protected by RAID 5. The userdata partition area is divided into multiple chunks, each of which containing either data or parity bits. POS stores parity chunk in a round-robin fashion, so keeps one parity device effectively.
+- Metadata partition is protected by RAID 10. The metadata partition area is divided into multiple chunks, each of which being fully mirrored. Hence, the number of parity devices equals to 50% of the total number of data devices in POS array.
+
+    ![RAID10](../images/RAID10.png)
+
+- Userdata partition is protected by RAID 5 as the default. The userdata partition area is divided into multiple chunks, each of which containing either data or parity bits. POS stores parity chunk in a round-robin fashion, so keeps one parity device effectively.
+
+    ![RAID5](../images/RAID5.png)
 
 When POS detects a data device failure, it automatically enters "degraded" mode, which is a fallback mode that continues general array operations but with potential performance degradation caused by 1) decreased read parallelism and 2) resource contention due to RAID rebuild operation. 
 
@@ -98,3 +108,5 @@ Situation indicates the detailed explanation of POS array state. Situation is al
 
 #### State Transition Diagram
 The following diagram illustrates what conditions trigger a state transition of POS array.
+
+![state_transition_diagram](../images/state_transition_diagram.png)
