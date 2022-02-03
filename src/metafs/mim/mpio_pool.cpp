@@ -108,16 +108,15 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
     }
     else
     {
-        // find mpio
+        // At this point, all IOs must be "partial writes to NVRAM".
+        // We check the corresponding cache entry first in the hope of reusing it.
         mpio = writeCache_->Find({arrayId, lpn});
         if (nullptr != mpio)
             return mpio;
 
-        // add new
         mpio = _TryAllocMpio(mpioType);
         if (mpio)
         {
-            // delete the oldest
             if (writeCache_->IsFull())
                 _ReleaseCache();
 

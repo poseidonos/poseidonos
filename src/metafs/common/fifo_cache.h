@@ -52,7 +52,7 @@ struct MakeHash
     };
 };
 
-/* 'Value' should be a pointer type of certain object */
+/* thread unsafe, 'Value' should be a pointer type of certain object */
 template<typename Key_1, typename Key_2, typename Value>
 class FifoCache
 {
@@ -74,6 +74,7 @@ public:
             return nullptr;
         return iter->second;
     }
+    /* If the key already exists in the cache, this will return nullptr */
     virtual Value Push(const std::pair<Key_1, Key_2>& key, const Value& value)
     {
         if (map_.find(key) != map_.end())
@@ -147,6 +148,8 @@ private:
     }
 
     std::unordered_map<std::pair<Key_1, Key_2>, Value, MakeHash> map_;
+    /* "cache_" will perform a delete with O(N) time complexity, which should be okay given that the list size will be small enough.
+    The size should not exceed 32 (or so). */
     std::list<std::tuple<Key_1, Key_2, Value>> cache_;
     const size_t CAPACITY;
 };

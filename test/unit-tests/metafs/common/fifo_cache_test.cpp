@@ -127,7 +127,7 @@ TEST(FifoCache, Insert_testIfTheMethodCanRemoveOlestItemsCorrectly)
     EXPECT_EQ(3, test.GetSize());
 }
 
-TEST(FifoCache, Insert_testIfTheCacheCanContainItemsAsSet)
+TEST(FifoCache, IsFull_testIfTheCacheCanShowWhetherItIsFull)
 {
     const size_t CACHE_COUNT = 5;
     std::pair<int, MetaLpnType> pairInput;
