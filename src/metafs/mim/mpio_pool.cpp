@@ -127,10 +127,10 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         return mpio;
     }
 #else
-    mpio = _AllocMpio(mpioType);
+    mpio = _TryAllocMpio(mpioType);
 #endif
 #else
-    Mpio* mpio = _AllocMpio(mpioType);
+    Mpio* mpio = _TryAllocMpio(mpioType);
 #endif
 
     return mpio;
