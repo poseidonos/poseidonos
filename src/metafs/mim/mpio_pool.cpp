@@ -41,7 +41,8 @@
 namespace pos
 {
 MpioPool::MpioPool(const size_t poolSize)
-: capacity_(poolSize)
+: capacity_(poolSize),
+  writeCacheCapacity_(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
 {
     if (capacity_ == 0)
     {
@@ -51,6 +52,9 @@ MpioPool::MpioPool(const size_t poolSize)
     }
 
     all_.reserve(capacity_ * (int)MpioType::Last);
+
+    // tuple of array id, meta lpn, and mpio
+    writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(writeCacheCapacity_);
 
     mdPageBufPool = std::make_shared<MDPageBufPool>(capacity_ * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();
@@ -73,18 +77,10 @@ MpioPool::MpioPool(const size_t poolSize)
             free_[idx].emplace_back(mpio);
         }
     }
-
-#if MPIO_CACHE_EN
-    _InitCache(capacity_);
-#endif
 }
 
 MpioPool::~MpioPool(void)
 {
-#if MPIO_CACHE_EN
-    _InitCache(capacity_);
-#endif
-
     all_.clear();
     for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
@@ -105,26 +101,30 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
             (true == partialIO) &&
             (MpioType::Write == mpioType)))
     {
-        mpio = _AllocMpio(mpioType);
+        mpio = _TryAllocMpio(mpioType);
 
         if (nullptr == mpio)
-        {
-            _CacheRemove(mpioType);
-        }
+            _ReleaseCache();
     }
     else
     {
         // find mpio
-        mpio = _CacheHit(mpioType, lpn, arrayId);
+        mpio = writeCache_->Find({arrayId, lpn});
         if (nullptr != mpio)
             return mpio;
 
-        // delete the oldest
-        if (true == _IsFullyCached())
-            _CacheRemove(mpioType);
-
         // add new
-        return _TryCacheAlloc(mpioType, lpn);
+        mpio = _TryAllocMpio(mpioType);
+        if (mpio)
+        {
+            // delete the oldest
+            if (writeCache_->IsFull())
+                _ReleaseCache();
+
+            mpio->SetCacheState(MpioCacheState::FirstRead);
+            assert(writeCache_->Push({arrayId, lpn}, mpio) == nullptr);
+        }
+        return mpio;
     }
 #else
     mpio = _AllocMpio(mpioType);
@@ -182,7 +182,7 @@ MpioPool::IsEmpty(MpioType type)
 }
 
 Mpio*
-MpioPool::_AllocMpio(const MpioType mpioType)
+MpioPool::_TryAllocMpio(const MpioType mpioType)
 {
     const uint32_t type = (uint32_t)mpioType;
     if (0 == free_[type].size())
@@ -197,95 +197,24 @@ MpioPool::_AllocMpio(const MpioType mpioType)
 
 #if MPIO_CACHE_EN
 void
-MpioPool::_InitCache(uint32_t poolSize)
-{
-    maxCacheCount = MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT;
-    currentCacheCount = 0;
-
-    for (auto& it : cachedMpio)
-        free_[(int)MpioType::Write].push_back(it.second);
-
-    cachedMpio.clear();
-    cachedList.clear();
-}
-
-bool
-MpioPool::_IsFullyCached(void)
-{
-    return (maxCacheCount == currentCacheCount);
-}
-
-bool
-MpioPool::_IsEmptyCached(void)
-{
-    return (0 == currentCacheCount);
-}
-
-Mpio*
-MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId)
-{
-    auto range = cachedMpio.equal_range(lpn);
-    for (multimap<MetaLpnType, Mpio*>::iterator iter = range.first; iter != range.second; ++iter)
-    {
-        if (arrayId == iter->second->io.arrayId)
-        {
-            return iter->second;
-        }
-    }
-
-    return nullptr;
-}
-
-Mpio*
-MpioPool::_TryCacheAlloc(MpioType mpioType, MetaLpnType lpn)
-{
-    const uint32_t type = (uint32_t)mpioType;
-    if (0 == free_[type].size())
-        return nullptr;
-
-    Mpio* mpio = free_[type].back();
-    free_[type].pop_back();
-    mpio->SetCacheState(MpioCacheState::FirstRead);
-    cachedMpio.insert(make_pair(lpn, mpio));
-    cachedList.push_back(mpio);
-    currentCacheCount++;
-
-    return mpio;
-}
-
-void
-MpioPool::_CacheRemove(MpioType mpioType)
-{
-    if (0 == cachedList.size())
-        return;
-
-    Mpio* mpio = cachedList.front();
-    cachedList.pop_front();
-
-    auto range = cachedMpio.equal_range(mpio->io.metaLpn);
-    for (multimap<MetaLpnType, Mpio*>::iterator iter = range.first; iter != range.second; ++iter)
-    {
-        if (mpio == iter->second)
-        {
-            cachedMpio.erase(iter);
-            break;
-        }
-    }
-
-    mpio->SetCacheState(MpioCacheState::Init);
-    if (mpio->GetCurrState() == MpAioState::First)
-    {
-        Release(mpio);
-    }
-
-    currentCacheCount--;
-}
-
-void
 MpioPool::ReleaseCache(void)
 {
     if (0 == free_[(uint32_t)MpioType::Write].size())
-        _CacheRemove(MpioType::Write);
+        _ReleaseCache();
+}
+
+void
+MpioPool::_ReleaseCache(void)
+{
+    auto victim = writeCache_->PopTheOldest();
+    if (!victim)
+        return;
+
+    victim->SetCacheState(MpioCacheState::Init);
+    if (victim->GetCurrState() == MpAioState::First)
+    {
+        Release(victim);
+    }
 }
 #endif
 } // namespace pos

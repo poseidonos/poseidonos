@@ -177,13 +177,14 @@ public:
                 cb->GetIoContext()->metaLpn * BYTE_4K,
                 cb->GetIoContext()->lpnCnt * BYTE_4K);
 
-        printf("DoPageIOAsync, %s, result: %s, mediaType: %d, startLpn: %ld, size: %ld, mpio_id: %d, tagid: %d, thread: %d\n",
-            ((int)opcode == 0) ? "write" : "read ", (result == true) ? "good" : "fail",
-            (int)cb->GetIoContext()->media, cb->GetIoContext()->metaLpn, cb->GetIoContext()->lpnCnt,
-            cb->GetIoContext()->mpioId, cb->GetIoContext()->tagId, sched_getcpu());
-
         if (!result)
+        {
             std::cout << "the request was failed" << std::endl;
+            printf("DoPageIOAsync, %s, result: %s, mediaType: %d, startLpn: %ld, size: %ld, mpio_id: %d, tagid: %d, thread: %d\n",
+                ((int)opcode == 0) ? "write" : "read ", (result == true) ? "good" : "fail",
+                (int)cb->GetIoContext()->media, cb->GetIoContext()->metaLpn, cb->GetIoContext()->lpnCnt,
+                cb->GetIoContext()->mpioId, cb->GetIoContext()->tagId, sched_getcpu());
+        }
 
         cb->InvokeCallback();
 

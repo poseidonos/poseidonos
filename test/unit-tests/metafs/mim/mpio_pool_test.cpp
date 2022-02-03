@@ -34,13 +34,17 @@
 
 #include <gtest/gtest.h>
 
+#include <unordered_set>
+
 namespace pos
 {
 TEST(MpioPool, AllocAndReleaseForSsd)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
-    Mpio* mpioList[10] = { 0, };
+    Mpio* mpioList[10] = {
+        0,
+    };
     MpioPool* pool = new MpioPool(COUNT);
 
     EXPECT_EQ(pool->GetCapacity(), COUNT);
@@ -72,7 +76,9 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
-    Mpio* mpioList[10] = { 0, };
+    Mpio* mpioList[10] = {
+        0,
+    };
     MpioPool* pool = new MpioPool(COUNT);
 
     EXPECT_EQ(pool->GetCapacity(), COUNT);
@@ -104,8 +110,12 @@ TEST(MpioPool, CheckCounter)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
-    Mpio* mpioList_r[10] = { 0, };
-    Mpio* mpioList_w[10] = { 0, };
+    Mpio* mpioList_r[10] = {
+        0,
+    };
+    Mpio* mpioList_w[10] = {
+        0,
+    };
     MpioPool* pool = new MpioPool(COUNT);
 
     EXPECT_EQ(pool->GetCapacity(), COUNT);
@@ -145,44 +155,46 @@ TEST(MpioPool, CheckCounter)
     delete pool;
 }
 
+void
+BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
+    const int arrayId, const MetaLpnType lpn)
+{
+    io.opcode = opcode;
+    io.arrayId = arrayId;
+    io.metaLpn = lpn;
+}
+
 TEST(MpioPool, AllocAndReleaseForNvRamCache)
 {
 #if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
     const int arrayId = 0;
-    Mpio* mpioList[10] = { 0, };
+    std::unordered_set<Mpio*> mpioSet;
     MpioPool* pool = new MpioPool(COUNT);
-    uint32_t index = 0;
 
     EXPECT_EQ(pool->GetCapacity(), COUNT);
 
     for (uint32_t idx = 0; idx < COUNT; idx++)
     {
         Mpio* m = pool->TryAlloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
+        BuildIoInfo(m->io, MetaIoOpcode::Write, arrayId, 0);
+        EXPECT_NE(m, nullptr);
 
-        if (nullptr == mpioList[index])
-            mpioList[index] = m;
-        else if (m != mpioList[index])
-            mpioList[++index] = m;
+        if (mpioSet.find(m) == mpioSet.end())
+            mpioSet.insert(m);
     }
-    EXPECT_EQ(index, COUNT - 1);
 
-    // check write mpio list, not hit all the mpios
-    EXPECT_TRUE(pool->IsEmpty(MpioType::Write));
+    EXPECT_EQ(mpioSet.size(), 1);
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 1);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT - 1);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
 
-    // check free read mpio
-    Mpio* temp = pool->TryAlloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayId);
-    EXPECT_NE(temp, nullptr);
+    for (auto& i : mpioSet)
+        pool->Release(i);
+    mpioSet.clear();
 
-    pool->Release(temp);
-
-    for (index = 0; index < COUNT; index++)
-    {
-        if (nullptr == mpioList[index])
-            continue;
-
-        pool->Release(mpioList[index]);
-    }
+    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
+    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
 
     delete pool;
 #endif

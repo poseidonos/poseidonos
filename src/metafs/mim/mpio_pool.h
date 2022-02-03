@@ -41,6 +41,7 @@
 #include "mdpage_buf_pool.h"
 #include "mpio.h"
 #include "os_header.h"
+#include "src/metafs/common/fifo_cache.h"
 
 namespace pos
 {
@@ -81,27 +82,14 @@ public:
 
 private:
     void _FreeAllMpioinPool(const MpioType type);
-    Mpio* _AllocMpio(const MpioType mpioType);
-
-#if MPIO_CACHE_EN
-    void _InitCache(const uint32_t poolSize);
-    bool _IsFullyCached(void);
-    bool _IsEmptyCached(void);
-    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId);
-    Mpio* _TryCacheAlloc(MpioType mpioType, MetaLpnType lpn);
-    void _CacheRemove(MpioType mpioType);
-#endif
+    Mpio* _TryAllocMpio(const MpioType mpioType);
+    void _ReleaseCache(void);
 
     std::shared_ptr<MDPageBufPool> mdPageBufPool;
     std::array<std::list<Mpio*>, (uint32_t)MpioType::Max> free_;
     std::vector<Mpio*> all_;
     size_t capacity_;
-
-#if MPIO_CACHE_EN
-    size_t maxCacheCount;
-    size_t currentCacheCount;
-    std::list<Mpio*> cachedList;
-    std::multimap<MetaLpnType, Mpio*> cachedMpio;
-#endif
+    const size_t writeCacheCapacity_;
+    std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache_;
 };
 } // namespace pos
