@@ -42,7 +42,7 @@ namespace pos
 {
 MpioPool::MpioPool(const size_t poolSize)
 : capacity_(poolSize),
-  writeCacheCapacity_(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
+  WRITE_CACHE_CAPACITY(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
 {
     if (capacity_ == 0)
     {
@@ -54,7 +54,7 @@ MpioPool::MpioPool(const size_t poolSize)
     all_.reserve(capacity_ * (int)MpioType::Last);
 
     // tuple of array id, meta lpn, and mpio
-    writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(writeCacheCapacity_);
+    writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(WRITE_CACHE_CAPACITY);
 
     mdPageBufPool = std::make_shared<MDPageBufPool>(capacity_ * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();

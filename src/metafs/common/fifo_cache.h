@@ -59,7 +59,7 @@ class FifoCache
 public:
     FifoCache(void) = delete;
     explicit FifoCache(const size_t cacheSize)
-    : capacity_(cacheSize)
+    : CAPACITY(cacheSize)
     {
     }
     virtual ~FifoCache(void)
@@ -102,7 +102,7 @@ public:
     }
     virtual size_t GetCapacity(void) const
     {
-        return capacity_;
+        return CAPACITY;
     }
     virtual bool IsEmpty(void) const
     {
@@ -110,7 +110,7 @@ public:
     }
     virtual bool IsFull(void) const
     {
-        return (capacity_ == cache_.size());
+        return (CAPACITY == cache_.size());
     }
     virtual size_t GetSize(void) const
     {
@@ -148,6 +148,6 @@ private:
 
     std::unordered_map<std::pair<Key_1, Key_2>, Value, MakeHash> map_;
     std::list<std::tuple<Key_1, Key_2, Value>> cache_;
-    const size_t capacity_;
+    const size_t CAPACITY;
 };
 } // namespace pos

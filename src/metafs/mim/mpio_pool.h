@@ -89,7 +89,7 @@ private:
     std::array<std::list<Mpio*>, (uint32_t)MpioType::Max> free_;
     std::vector<Mpio*> all_;
     size_t capacity_;
-    const size_t writeCacheCapacity_;
+    const size_t WRITE_CACHE_CAPACITY;
     std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache_;
 };
 } // namespace pos
