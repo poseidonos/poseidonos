@@ -197,16 +197,17 @@ func TestLoggerInfoResHumanReadable(t *testing.T) {
 		` "major_log_path":"/etc/ibofos/log/ibof_majorlog.log",` +
 		` "logfile_size_in_mb":50, "logfile_rotation_count":20,` +
 		` "min_allowable_log_level":"info", "filter_enabled":0,` +
-		` "filter_included":"1000-2000", "filter_excluded":""}}}`
+		` "filter_included":"1000-2000", "filter_excluded":"","structured_logging":"true"}}}`
 
-	expected := `minor_log_path                    : /etc/ibofos/log/ibofos_log.log
-major_log_path                    : /etc/ibofos/log/ibof_majorlog.log
-logfile_size_in_mb                : 
-logfile_rotation_count            : 20
-min_allowable_log_level           : info
-filter_enabled                    : false
-filter_included                   : 1000-2000
-filter_excluded                   : 
+	expected := `minor_log_path          : /etc/ibofos/log/ibofos_log.log
+major_log_path          : /etc/ibofos/log/ibof_majorlog.log
+logfile_size_in_mb      : 
+logfile_rotation_count  : 20
+min_allowable_log_level : info
+filter_enabled          : false
+filter_included         : 1000-2000
+filter_excluded         : 
+structured_logging      : false
 `
 	output := hookResponse(command, resJSON, false, false)
 

@@ -25,7 +25,7 @@ Syntax:
 		var command = "SETLOGPREFERENCE"
 
 		param := messages.SetPrefReqParam{
-			LOGJSON: set_pref_req_logJson,
+			STRUCTUREDLOGGING: set_pref_req_strLogging,
 		}
 
 		uuid := globals.GenerateUUID()
@@ -57,13 +57,13 @@ Syntax:
 }
 
 var (
-	set_pref_req_logJson = ""
+	set_pref_req_strLogging = ""
 )
 
 func init() {
-	SetPrefCmd.Flags().StringVarP(&set_pref_req_logJson,
-		"log-json", "j", "false",
-		`When specified as true, PoseidonOS will log the events in JSON form.
+	SetPrefCmd.Flags().StringVarP(&set_pref_req_strLogging,
+		"structured-logging", "s", "false",
+		`When specified as true, PoseidonOS will log the events in JSON form for structured logging.
 Otherwise, the events will be logged in plain text form.`)
 	SetPrefCmd.MarkFlagRequired("level")
 }

@@ -66,8 +66,8 @@ Logger::Logger(void)
     console_sink->set_pattern(_BuildPattern(false));
     // Minor and major logs will be displayed
     // according to preference (plain text or json)
-    minor_sink->set_pattern(_BuildPattern(preferences.IsJson()));
-    major_sink->set_pattern(_BuildPattern(preferences.IsJson()));
+    minor_sink->set_pattern(_BuildPattern(preferences.IsStrLoggingEnabled()));
+    major_sink->set_pattern(_BuildPattern(preferences.IsStrLoggingEnabled()));
 
     sinks.push_back(console_sink);
     sinks.push_back(minor_sink);
@@ -103,7 +103,7 @@ Logger::ApplyPreference(void)
         MakeDir(preferences.LogDir());
     }
 
-    string pattern = _BuildPattern(preferences.IsJson());
+    string pattern = _BuildPattern(preferences.IsStrLoggingEnabled());
     logger->sinks()[1]->set_pattern(pattern); // Index 1: minor sink
     logger->sinks()[2]->set_pattern(pattern); // Index 2: major sink
 }
@@ -121,31 +121,32 @@ Logger::GetLevel()
 }
 
 int
-Logger::SetJson(bool logJson)
+Logger::SetStrLogging(bool input)
 {
-    return preferences.SetJson(logJson);
+    return preferences.SetStrLogging(input);
 }
 
 string
-Logger::_BuildPattern(bool logJson)
+Logger::_BuildPattern(bool isStrLoggingEnabled)
 {
     id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
-
     std::string pattern = "";
 
-    // Conventional Log Format
-    // [POSInstanceId][Datetime][EventID]][LogLevel] -
-    // Message at SourceFile and LineNumber
-    pattern = '[' + std::to_string(instanceId) + ']'
-            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
-
-    if (preferences.IsJson() == true)
+    if (isStrLoggingEnabled)
     {
         // TODO (mj): eventName, moduleName, errorCode
         // cause, trace, and variables fields will be added
         pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
-            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"name\":\"%n\"," +
-            "\"level\":\"%^%l%$\",\"message\":\"%v\"},"};
+            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
+            "\"level\":\"%^%l%$\",\"description\":{ %v }},"};
+    }
+    else
+    {
+        // Conventional Log Format
+        // [POSInstanceId][Datetime][EventID]][LogLevel] -
+        // Log Message at SourceFile and LineNumber
+        pattern = '[' + std::to_string(instanceId) + ']'
+            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
     }
 
     return pattern;

@@ -44,7 +44,7 @@ Preferences::Preferences()
     // TODO (mj): Set isJSON to false in default.
     // Later, the default value will be set to true,
     // which means that the default log format will be JSON.
-    logJson = false;
+    StructuredLogging = false;
 
     Configuration conf;
     logfileSize = conf.LogSizePerFileInMB();
@@ -103,7 +103,7 @@ Preferences::ToJson()
         data.SetAttribute(JsonAttribute("filter_included", "\"" + filter.IncludeRule() + "\""));
         data.SetAttribute(JsonAttribute("filter_excluded", "\"" + filter.ExcludeRule() + "\""));
     }
-    data.SetAttribute(JsonAttribute("log_json", logJson ? "true" : "false"));
+    data.SetAttribute(JsonAttribute("structured_logging", StructuredLogging ? "true" : "false"));
 
     return data;
 }
@@ -140,9 +140,9 @@ Preferences::StringToLogLevel(string lvl)
 }
 
 int
-Preferences::SetJson(bool logJson)
+Preferences::SetStrLogging(bool input)
 {
-    this->logJson = logJson;
+    StructuredLogging = input;
 
     return (int)POS_EVENT_ID::SUCCESS;
 }

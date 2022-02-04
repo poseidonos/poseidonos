@@ -81,8 +81,8 @@ public:
     }
 
     int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
-    int SetJson(bool logJson);
-    bool IsJson() { return logJson; }
+    int SetStrLogging(bool input);
+    bool IsStrLoggingEnabled() { return StructuredLogging; }
     JsonElement ToJson();
     int ApplyFilter();
     int ApplyFilter(string filePath);
@@ -103,6 +103,6 @@ private:
     uint32_t logRotation;
     spdlog::level::level_enum logLevel;
     Filter filter;
-    bool logJson;
+    bool StructuredLogging;
 };
 } // namespace pos_logger

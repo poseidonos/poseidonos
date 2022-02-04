@@ -52,6 +52,7 @@ class PosEventId
 {
 public:
     static const char*& GetString(POS_EVENT_ID eventId);
+    static std::string GetJsonLogMsg(int eventId);
     static void Print(POS_EVENT_ID id, EventLevel level);
     static void Print(POS_EVENT_ID id, EventLevel level,
         std::string& additionalMessage);
@@ -60,10 +61,13 @@ private:
     struct PosEventIdEntry
     {
         POS_EVENT_ID eventId;
-        const char* message;
+        const char* message = "";
+        const char* cause = "";
     };
 
     static PosEventIdEntry RESERVED_EVENT_ENTRY;
+    static PosEventIdEntry SYSTEM_EVENT_ENTRY[(int)POS_EVENT_ID::SYSTEM_COUNT];
+    static PosEventIdEntry ARRAY_EVENT_ENTRY[(int)POS_EVENT_ID::ARRAY_COUNT];
     static PosEventIdEntry QOS_EVENT_ENTRY[(int)POS_EVENT_ID::QOS_COUNT];
     static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[(int)POS_EVENT_ID::IONVMF_COUNT];
     static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOFRONTEND_COUNT];

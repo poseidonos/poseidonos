@@ -18,9 +18,9 @@ poseidonos-cli logger set-preference [flags]
 ### Options
 
 ```
-  -h, --help              help for set-preference
-  -j, --log-json string   When specified as true, PoseidonOS will log the events in JSON form.
-                          Otherwise, the events will be logged in plain text form. (default "false")
+  -h, --help                        help for set-preference
+  -s, --structured-logging string   When specified as true, PoseidonOS will log the events in JSON form for structured logging.
+                                    Otherwise, the events will be logged in plain text form. (default "false")
 ```
 
 ### Options inherited from parent commands

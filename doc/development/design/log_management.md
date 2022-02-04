@@ -59,7 +59,7 @@ A formal description of PoseidonOS event log entry format is defined in [Poseido
 
 **Example**
 ```json
-{"instanceId": 1638929401,"eventId": 10005328,"datetime": "2021-12-09 03:00:93.999","level": "info","eventName":"ARRAY_CREATE_FAILURE","moduleName": "ArrayManager","errorCode": 301,"message": "Failed to create an array","cause": "Array name has a special character","trace": "","variables": [ {"arrayName": "array1"},{"volumeName": "volum@1"}],"source": "array_name_policy.cpp:80","posVersion":"pos-v0.10.0"}
+{"instanceId": 1638929401,"eventId": 10005328,"datetime": "2021-12-09 03:00:93.999","level": "info","description":{"eventName":"ARRAY_CREATE_FAILURE","message":"Failed to create an array","cause": "Array name has a special character","trace":"","variables":[{"arrayName": "array1"},{"volumeName": "volum@1"}]},"source": "array_name_policy.cpp:80","posVersion":"pos-v0.10.0"}
 ```
 
 # Log Message

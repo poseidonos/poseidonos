@@ -92,7 +92,7 @@ type SetLevelReqParam struct {
 }
 
 type SetPrefReqParam struct {
-	LOGJSON string `json:"log_json,omitempty"`
+	STRUCTUREDLOGGING string `json:"structured_logging,omitempty"`
 }
 
 // System request params

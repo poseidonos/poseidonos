@@ -306,7 +306,7 @@ Poseidonos::_LoadVersion(void)
 {
     std::string version =
         pos::VersionProviderSingleton::Instance()->GetVersion();
-    POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::SYSTEM_VERSION),
+    POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::SYSTEM_VERSION_LOAD_SUCCESS),
         "POS Version {}", version.c_str());
 }
 

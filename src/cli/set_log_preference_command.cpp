@@ -54,12 +54,12 @@ string
 SetLogPreferenceCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-    if (doc["param"].contains("log_json"))
+    if (doc["param"].contains("structured_logging"))
     {
-        string logJSON = doc["param"]["log_json"].get<std::string>();
+        string structured_logging = doc["param"]["structured_logging"].get<std::string>();
 
-        bool _logJson = (strcasecmp("true", logJSON.c_str()) == 0);
-        int ret = logger()->SetJson(_logJson);
+        bool _structured_logging = (strcasecmp("true", structured_logging.c_str()) == 0);
+        int ret = logger()->SetStrLogging(_structured_logging);
         logger()->ApplyPreference();
 
         if (ret == SUCCESS)

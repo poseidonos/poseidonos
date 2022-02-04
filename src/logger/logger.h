@@ -44,6 +44,7 @@
 #include "src/dump/dump_module.hpp"
 #include "src/lib/singleton.h"
 #include "src/lib/signal_mask.h"
+#include "src/include/pos_event_id.hpp"
 
 using namespace std;
 
@@ -89,12 +90,20 @@ public:
     template<typename... Args>
     void
     Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
-        int id, spdlog::string_view_t fmt, const Args&... args)
+        int eventId, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        if (ShouldLog(lvl, id))
+        if (ShouldLog(lvl, eventId))
         {
-            logger->iboflog_sink(loc, lvl, id, fmt, args...);
+            if (preferences.IsStrLoggingEnabled())
+            {
+                std::string desc = PosEventId::GetJsonLogMsg(eventId);
+                logger->iboflog_sink(loc, lvl, eventId, desc.c_str(), args...);
+            }
+            else
+            {
+                logger->iboflog_sink(loc, lvl, eventId, fmt, args...);
+            }
         }
 #endif
     }
@@ -104,10 +113,10 @@ public:
     int SetLevel(string lvl);
     string GetLevel(void);
 
-    int SetJson(bool logJson);
-    bool IsJson(void)
+    int SetStrLogging(bool input); // Note (mj): need ApplyPreference to apply the JSON setting.
+    bool IsStrLogginGEnabled(void)
     {
-        return preferences.IsJson();
+        return preferences.IsStrLoggingEnabled();
     }
 
     int
