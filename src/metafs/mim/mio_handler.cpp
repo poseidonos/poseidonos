@@ -192,14 +192,14 @@ MioHandler::_SendPeriodicMetrics(void)
 
         if (metricSumOfMioCount != 0)
         {
-            POSMetric metricTime(TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO, POSMetricTypes::MT_COUNT);
+            POSMetric metricTime(TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO, POSMetricTypes::MT_GAUGE);
             metricTime.AddLabel("thread_name", thread_name);
-            metricTime.SetCountValue(metricSumOfSpendTime);
+            metricTime.SetGaugeValue(metricSumOfSpendTime);
             telemetryPublisher->PublishMetric(metricTime);
 
-            POSMetric metricCount(TEL40107_METAFS_SUM_OF_MIO_COUNT, POSMetricTypes::MT_COUNT);
+            POSMetric metricCount(TEL40107_METAFS_SUM_OF_MIO_COUNT, POSMetricTypes::MT_GAUGE);
             metricCount.AddLabel("thread_name", thread_name);
-            metricCount.SetCountValue(metricSumOfMioCount);
+            metricCount.SetGaugeValue(metricSumOfMioCount);
             telemetryPublisher->PublishMetric(metricCount);
 
             metricSumOfSpendTime = 0;

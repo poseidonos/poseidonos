@@ -119,14 +119,14 @@ MpioHandler::_SendPeriodicMetrics()
 
         if (metricSumOfMpioCount != 0)
         {
-            POSMetric metricTime(TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO, POSMetricTypes::MT_COUNT);
+            POSMetric metricTime(TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO, POSMetricTypes::MT_GAUGE);
             metricTime.AddLabel("thread_name", thread_name);
-            metricTime.SetCountValue(metricSumOfSpendTime);
+            metricTime.SetGaugeValue(metricSumOfSpendTime);
             telemetryPublisher->PublishMetric(metricTime);
 
-            POSMetric metricCount(TEL40105_METAFS_SUM_OF_MPIO_COUNT, POSMetricTypes::MT_COUNT);
+            POSMetric metricCount(TEL40105_METAFS_SUM_OF_MPIO_COUNT, POSMetricTypes::MT_GAUGE);
             metricCount.AddLabel("thread_name", thread_name);
-            metricCount.SetCountValue(metricSumOfMpioCount);
+            metricCount.SetGaugeValue(metricSumOfMpioCount);
             telemetryPublisher->PublishMetric(metricCount);
 
             metricSumOfSpendTime = 0;

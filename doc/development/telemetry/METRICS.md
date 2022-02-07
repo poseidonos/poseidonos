@@ -126,7 +126,7 @@ The number of mpio to allocate
 
 **ID**: 40104
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -142,7 +142,7 @@ The Sum of all the time spent by mpio in specific period
 
 **ID**: 40105
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -158,7 +158,7 @@ The Sum of processed mpio count in specific period
 
 **ID**: 40106
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -174,7 +174,7 @@ The Sum of all the time spent by mio in specific period
 
 **ID**: 40107
 
-**Type**: Count
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
