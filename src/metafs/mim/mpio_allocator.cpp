@@ -178,7 +178,6 @@ MpioAllocator::ReleaseAllCache(void)
 {
     while (writeCache_->GetSize())
         _ReleaseCache();
-
 }
 
 void

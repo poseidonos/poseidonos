@@ -47,7 +47,7 @@ class MetafsPool
 {
 public:
     MetafsPool(void) = delete;
-    MetafsPool(const size_t poolSize)
+    explicit MetafsPool(const size_t poolSize)
     : CAPACITY(poolSize)
     {
         all_.reserve(CAPACITY);
