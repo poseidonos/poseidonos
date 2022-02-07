@@ -30,22 +30,74 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
+#include <functional>
+#include <iostream>
 #include <list>
-#include <string>
+#include <memory>
+#include <stdexcept>
 #include <vector>
-
-#include "src/metafs/mim/read_mpio.h"
 
 namespace pos
 {
-class MockReadMpio : public ReadMpio
+/* thread unsafe, 'Value' should be a pointer type of certain object */
+template<class T>
+class MetafsPool
 {
 public:
-    using ReadMpio::ReadMpio;
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-};
+    MetafsPool(void) = delete;
+    MetafsPool(const size_t poolSize)
+    : CAPACITY(poolSize)
+    {
+        all_.reserve(CAPACITY);
+    }
+    virtual ~MetafsPool(void)
+    {
+        all_.clear();
+        free_.clear();
+    }
+    virtual bool AddToPool(T item)
+    {
+        if (GetCapacity() <= (GetFreeCount() + GetUsedCount()))
+            return false;
+        free_.emplace_back(item);
+        all_.emplace_back(item);
+        return true;
+    }
+    virtual T TryAlloc(void)
+    {
+        if (free_.empty())
+            return nullptr;
+        auto item = free_.front();
+        free_.pop_front();
+        return item;
+    }
+    virtual void Release(T item)
+    {
+        free_.emplace_back(item);
+    }
+    virtual void DeleteAll(void)
+    {
+        for (auto i : all_)
+            delete i;
+    }
+    virtual size_t GetCapacity(void) const
+    {
+        return CAPACITY;
+    }
+    virtual size_t GetFreeCount(void) const
+    {
+        return free_.size();
+    }
+    virtual size_t GetUsedCount(void) const
+    {
+        return all_.size() - GetFreeCount();
+    }
 
+private:
+    const size_t CAPACITY;
+    std::list<T> free_;
+    std::vector<T> all_;
+};
 } // namespace pos

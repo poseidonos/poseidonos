@@ -34,7 +34,7 @@
 
 #include "mfs_io_handler_base.h"
 #include "src/metafs/mim/metafs_io_multilevel_q.h"
-#include "mpio_pool.h"
+#include "mpio_allocator.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 #include <string>
@@ -51,14 +51,14 @@ public:
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
-    virtual void BindMpioPool(MpioPool* mpioPool);
+    virtual void BindMpioAllocator(MpioAllocator* mpioAllocator);
     virtual void BottomhalfMioProcessing(void);
 
 private:
     void _SendPeriodicMetrics(void);
 
     MetaFsIoMultilevelQ<Mpio*, RequestPriority>* partialMpioDoneQ;
-    MpioPool* mpioPool;
+    MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;
     std::chrono::steady_clock::time_point lastTime;

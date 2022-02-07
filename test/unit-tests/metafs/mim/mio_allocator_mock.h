@@ -30,44 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mim/mio_pool.h"
+#include <gmock/gmock.h>
 
-#include <gtest/gtest.h>
+#include <list>
+#include <string>
+#include <vector>
 
-#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
-
-using ::testing::NiceMock;
+#include "src/metafs/mim/mio_allocator.h"
 
 namespace pos
 {
-TEST(MioPool, CheckMioPoolCanAllocAndRelease)
+class MockMioAllocator : public MioAllocator
 {
-    const uint32_t COUNT = 10;
-    const int arrayId = 0;
-    NiceMock<MockMpioPool>* mpioPool = new NiceMock<MockMpioPool>(COUNT);
-    Mio* mioList[10] = { 0, };
-    MioPool* pool = new MioPool(mpioPool, COUNT);
+public:
+    using MioAllocator::MioAllocator;
+    MOCK_METHOD(Mio*, TryAlloc, (), (override));
+    MOCK_METHOD(void, Release, (Mio* mio), (override));
+    MOCK_METHOD(bool, IsEmpty, (), (const, override));
+    MOCK_METHOD(size_t, GetCapacity, (), (const, override));
+    MOCK_METHOD(size_t, GetFreeCount, (), (const, override));
+};
 
-    EXPECT_EQ(pool->GetFreeCount(), COUNT);
-
-    for (uint32_t index = 0; index < COUNT; index++)
-    {
-        mioList[index] = pool->TryAlloc();
-        ASSERT_NE(mioList[index], nullptr);
-    }
-
-    EXPECT_TRUE(pool->IsEmpty());
-    EXPECT_EQ(pool->TryAlloc(), nullptr);
-
-    for (uint32_t index = 0; index < COUNT; index++)
-    {
-        pool->Release(mioList[index]);
-    }
-
-    EXPECT_EQ(pool->GetFreeCount(), COUNT);
-    EXPECT_NO_FATAL_FAILURE(pool->Release(nullptr));
-
-    delete pool;
-    delete mpioPool;
-}
 } // namespace pos

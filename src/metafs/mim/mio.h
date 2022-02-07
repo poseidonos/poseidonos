@@ -41,7 +41,7 @@
 #include "mim_state.h"
 #include "mpio.h"
 #include "mpio_list_context.h"
-#include "mpio_pool.h"
+#include "mpio_allocator.h"
 #include "metafs_aiocb_cxt.h"
 #include "src/metafs/common/metafs_stopwatch.h"
 
@@ -91,7 +91,7 @@ class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEn
 {
 public:
     Mio(void) = delete;
-    explicit Mio(MpioPool* mpioPool);
+    explicit Mio(MpioAllocator* mpioAllocator);
     Mio(const Mio& mio) = delete;
     Mio& operator=(const Mio& mio) = delete;
 
@@ -128,7 +128,7 @@ public:
 
 protected:
     virtual void _InitStateHandler(void) override;
-    void _BindMpioPool(MpioPool* mpioPool);
+    void _BindMpioAllocator(MpioAllocator* mpioAllocator);
     void _BuildMpioMap(void);
     void _PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
         MetaLpnType lpn, FileSizeType byteOffset, FileSizeType byteSize, FileBufType buf,
@@ -148,7 +148,7 @@ protected:
     MetaLpnType startLpn;
     MfsError error;
     MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
-    MpioPool* mpioPool;
+    MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
 #if MPIO_CACHE_EN
     std::vector<MetaFsIoRequest*>* mergedRequestList = nullptr;

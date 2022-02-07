@@ -30,27 +30,58 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "mio_allocator.h"
 
-#include <list>
-#include <string>
 #include <vector>
 
-#include "src/metafs/mim/mpio_pool.h"
+#include "metafs_common.h"
 
 namespace pos
 {
-class MockMpioPool : public MpioPool
+MioAllocator::MioAllocator(MpioAllocator* mpioAllocator, const uint32_t poolSize)
 {
-public:
-    using MpioPool::MpioPool;
-    MOCK_METHOD(Mpio*, TryAlloc, (const MpioType mpioType, const MetaStorageType storageType,
-        const MetaLpnType lpn, const bool partialIO, const int arrayId), (override));
-    MOCK_METHOD(size_t, GetCapacity, (), (override));
-    MOCK_METHOD(void, Release, (Mpio* mpio), (override));
-#if MPIO_CACHE_EN
-    MOCK_METHOD(void, ReleaseCache, (), (override));
-#endif
-};
+    assert(mpioAllocator != nullptr && poolSize != 0);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "MioAllocator poolsize={}", poolSize);
 
+    pool_ = std::make_shared<MetafsPool<Mio*>>(poolSize);
+
+    uint32_t count = poolSize;
+    while (count-- != 0)
+    {
+        pool_->AddToPool(new Mio(mpioAllocator));
+    }
+}
+
+MioAllocator::~MioAllocator(void)
+{
+    pool_->DeleteAll();
+    mioTagIdAllocator.Reset();
+}
+
+Mio*
+MioAllocator::TryAlloc(void)
+{
+    if (0 == pool_->GetFreeCount())
+        return nullptr;
+
+    Mio* mio = pool_->TryAlloc();
+    if (mio)
+        mio->StoreTimestamp(MioTimestampStage::Allocate);
+
+    return mio;
+}
+
+void
+MioAllocator::Release(Mio* mio)
+{
+    if (nullptr == mio)
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER, "mio is nullptr");
+        return;
+    }
+
+    mio->Reset();
+    pool_->Release(mio);
+}
 } // namespace pos

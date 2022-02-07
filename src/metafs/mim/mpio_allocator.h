@@ -30,81 +30,69 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mio_pool.h"
+#pragma once
 
+#include <array>
+#include <list>
+#include <string>
 #include <vector>
+#include <memory>
 
-#include "metafs_common.h"
+#include "mdpage_buf_pool.h"
+#include "mpio.h"
+#include "os_header.h"
+#include "src/metafs/lib/metafs_pool.h"
+#include "src/metafs/common/fifo_cache.h"
 
 namespace pos
 {
-MioPool::MioPool(MpioPool* mpioPool, uint32_t poolSize)
-: capacity_(poolSize)
+class MpioAllocator
 {
-    assert(mpioPool != nullptr && capacity_ != 0);
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MioPool poolsize={}", capacity_);
+public:
+    explicit MpioAllocator(const size_t eachPoolSize);
+    virtual ~MpioAllocator(void);
 
-    mioList.reserve(capacity_);
-
-    while (poolSize-- != 0)
+    virtual Mpio* TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
+        const MetaLpnType lpn, const bool partialIO, const int arrayId);
+    virtual void Release(Mpio* item);
+    virtual size_t GetFreeCount(void) const
     {
-        Mio* mio = new Mio(mpioPool);
-        mioList.push_back(mio);
+        size_t total = 0;
+        for (uint32_t type = 0; type < (uint32_t)MpioType::Last; ++type)
+            pool_[(uint32_t)type]->GetFreeCount();
+        return total;
     }
-}
-
-MioPool::~MioPool(void)
-{
-    _FreeAllMioinPool();
-    mioList.clear();
-    mioTagIdAllocator.Reset();
-}
-
-Mio*
-MioPool::TryAlloc(void)
-{
-    if (0 == mioList.size())
-        return nullptr;
-
-    Mio* mio = mioList.back();
-    mioList.pop_back();
-    mio->StoreTimestamp(MioTimestampStage::Allocate);
-
-    return mio;
-}
-
-bool
-MioPool::IsEmpty(void)
-{
-    return mioList.empty();
-}
-
-size_t
-MioPool::GetFreeCount(void)
-{
-    return mioList.size();
-}
-
-void
-MioPool::Release(Mio* mio)
-{
-    if (nullptr == mio)
+    virtual size_t GetFreeCount(const MpioType type) const
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER, "mio is nullptr");
-        return;
+        return pool_[(uint32_t)type]->GetFreeCount();
     }
-
-    mio->Reset();
-    mioList.push_back(mio);
-}
-
-void
-MioPool::_FreeAllMioinPool(void)
-{
-    for (auto ptr : mioList)
+    virtual size_t GetUsedCount(const MpioType type) const
     {
-        delete ptr;
+        return pool_[(uint32_t)type]->GetUsedCount();
     }
-}
+    virtual size_t GetCapacity(const MpioType type) const
+    {
+        return pool_[(uint32_t)type]->GetCapacity();
+    }
+    virtual bool IsEmpty(const MpioType type) const
+    {
+        return (0 == pool_[(uint32_t)type]->GetFreeCount());
+    }
+#if MPIO_CACHE_EN
+    virtual void TryReleaseTheOldestCache(void);
+    virtual void ReleaseAllCache(void);
+#endif
+
+private:
+    Mpio* _CreateMpio(MpioType type);
+    Mpio* _TryAlloc(const MpioType mpioType);
+#if MPIO_CACHE_EN
+    void _ReleaseCache(void);
+#endif
+
+    const size_t WRITE_CACHE_CAPACITY;
+    std::shared_ptr<MDPageBufPool> mdPageBufPool;
+    std::array<std::shared_ptr<MetafsPool<Mpio*>>, (uint32_t)MpioType::Max> pool_;
+    std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache_;
+};
 } // namespace pos

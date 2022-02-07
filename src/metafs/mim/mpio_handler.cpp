@@ -39,7 +39,7 @@ namespace pos
 {
 MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
 : partialMpioDoneQ(doneQ),
-  mpioPool(nullptr),
+  mpioAllocator(nullptr),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
@@ -71,10 +71,10 @@ MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 }
 
 void
-MpioHandler::BindMpioPool(MpioPool* mpioPool)
+MpioHandler::BindMpioAllocator(MpioAllocator* mpioAllocator)
 {
-    assert(this->mpioPool == nullptr && mpioPool != nullptr);
-    this->mpioPool = mpioPool;
+    assert(this->mpioAllocator == nullptr && mpioAllocator != nullptr);
+    this->mpioAllocator = mpioAllocator;
 }
 
 void
@@ -92,12 +92,12 @@ MpioHandler::BottomhalfMioProcessing(void)
             mpio->StoreTimestamp(MpioTimestampStage::Release);
             metricSumOfSpendTime += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
             metricSumOfMpioCount++;
-            mpioPool->Release(mpio);
+            mpioAllocator->Release(mpio);
         }
     }
 
 #if MPIO_CACHE_EN
-    mpioPool->ReleaseCache();
+    mpioAllocator->TryReleaseTheOldestCache();
 #endif
 
     _SendPeriodicMetrics();
@@ -114,7 +114,7 @@ MpioHandler::_SendPeriodicMetrics()
         std::string thread_name = to_string(coreId);
         POSMetric metricFreeMpioCnt(TEL40103_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
         metricFreeMpioCnt.AddLabel("thread_name", thread_name);
-        metricFreeMpioCnt.SetGaugeValue(mpioPool->GetFreeCount());
+        metricFreeMpioCnt.SetGaugeValue(mpioAllocator->GetFreeCount());
         telemetryPublisher->PublishMetric(metricFreeMpioCnt);
 
         if (metricSumOfMpioCount != 0)

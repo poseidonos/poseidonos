@@ -35,12 +35,13 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/write_mpio_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -50,20 +51,20 @@ TEST(MpioHandler, Normal)
 
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>;
 
-    MockMpioPool* pool = new MockMpioPool(100);
+    MockMpioAllocator* allocator = new MockMpioAllocator(100);
 
 #if MPIO_CACHE_EN
-    EXPECT_CALL(*pool, ReleaseCache).WillRepeatedly(Return());
+    EXPECT_CALL(*allocator, TryReleaseTheOldestCache).Times(AtLeast(1));
 #endif
     MockWriteMpio* mpio = new MockWriteMpio(this);
-    EXPECT_CALL(*mpio, ExecuteAsyncState).WillRepeatedly(Return());
+    EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
 
     MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
-    EXPECT_CALL(*doneQ, Enqueue).WillRepeatedly(Return());
+    EXPECT_CALL(*doneQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
 
     MpioHandler* handler = new MpioHandler(0, 0, tp, doneQ);
-    handler->BindMpioPool(pool);
+    handler->BindMpioAllocator(allocator);
 
     for (int i = 0; i < MAX_COUNT; i++)
     {
@@ -76,7 +77,7 @@ TEST(MpioHandler, Normal)
     }
 
     delete handler;
-    delete pool;
+    delete allocator;
     delete mpio;
     delete tp;
 }

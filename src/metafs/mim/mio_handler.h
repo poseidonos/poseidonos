@@ -41,7 +41,7 @@
 #include "metafs_io_multilevel_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
-#include "mio_pool.h"
+#include "mio_allocator.h"
 #include "mpio.h"
 #include "mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -54,7 +54,7 @@ public:
     MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
     MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MioAllocator* mioAllocator,
         TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
@@ -94,8 +94,8 @@ private:
     MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
-    MioPool* mioPool;
-    MpioPool* mpioPool;
+    MioAllocator* mioAllocator;
+    MpioAllocator* mpioAllocator;
     int cpuStallCnt;
     MioAsyncDoneCb mioCompletionCallback;
     PartialMpioDoneCb partialMpioDoneNotifier;

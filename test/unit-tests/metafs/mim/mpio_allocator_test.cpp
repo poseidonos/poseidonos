@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mim/mpio_pool.h"
+#include "src/metafs/mim/mpio_allocator.h"
 
 #include <gtest/gtest.h>
 
@@ -38,75 +38,74 @@
 
 namespace pos
 {
-TEST(MpioPool, AllocAndReleaseForSsd)
+TEST(MpioAllocator, AllocAndReleaseForSsd)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
     Mpio* mpioList[10] = {
         0,
     };
-    MpioPool* pool = new MpioPool(COUNT);
+    MpioAllocator* allocator = new MpioAllocator(COUNT);
 
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
 
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayId);
+            mpioList[index] = allocator->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayId);
         }
 
         // check read mpio list
-        EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
+        EXPECT_TRUE(allocator->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
-        Mpio* temp = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
+        Mpio* temp = allocator->TryAlloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            pool->Release(mpioList[index]);
+            allocator->Release(mpioList[index]);
         }
     }
 
-    delete pool;
+    delete allocator;
 }
 
-TEST(MpioPool, AllocAndReleaseForNvRam)
+TEST(MpioAllocator, AllocAndReleaseForNvRam)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
     Mpio* mpioList[10] = {
         0,
     };
-    MpioPool* pool = new MpioPool(COUNT);
-
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    MpioAllocator* allocator = new MpioAllocator(COUNT);
 
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayId);
+            mpioList[index] = allocator->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayId);
         }
 
         // check read mpio list
-        EXPECT_TRUE(pool->IsEmpty(static_cast<MpioType>(i)));
+        EXPECT_TRUE(allocator->IsEmpty(static_cast<MpioType>(i)));
 
         // check free read mpio
-        Mpio* temp = pool->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
+        Mpio* temp = allocator->TryAlloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            pool->Release(mpioList[index]);
+            allocator->Release(mpioList[index]);
         }
     }
 
-    delete pool;
+    delete allocator;
 }
 
-TEST(MpioPool, CheckCounter)
+TEST(MpioAllocator, CheckCounter)
 {
     const uint32_t COUNT = 10;
     const int arrayId = 0;
@@ -116,43 +115,46 @@ TEST(MpioPool, CheckCounter)
     Mpio* mpioList_w[10] = {
         0,
     };
-    MpioPool* pool = new MpioPool(COUNT);
+    MpioAllocator* allocator = new MpioAllocator(COUNT);
 
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), 0);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), 0);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
 
     uint32_t popCount = 4;
 
     for (uint32_t index = 0; index < popCount; index++)
     {
-        mpioList_r[index] = pool->TryAlloc(MpioType::Read, MetaStorageType::SSD, index, true, arrayId);
+        mpioList_r[index] = allocator->TryAlloc(MpioType::Read, MetaStorageType::SSD, index, true, arrayId);
         ASSERT_NE(mpioList_r[index], nullptr);
-        mpioList_w[index] = pool->TryAlloc(MpioType::Write, MetaStorageType::SSD, index, true, arrayId);
+        mpioList_w[index] = allocator->TryAlloc(MpioType::Write, MetaStorageType::SSD, index, true, arrayId);
         ASSERT_NE(mpioList_w[index], nullptr);
     }
 
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT - popCount);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT - popCount);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), popCount);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), popCount);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT - popCount);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - popCount);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), popCount);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), popCount);
 
     for (uint32_t index = 0; index < popCount; index++)
     {
-        pool->Release(mpioList_r[index]);
-        pool->Release(mpioList_w[index]);
+        allocator->Release(mpioList_r[index]);
+        allocator->Release(mpioList_w[index]);
     }
 
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Read), 0);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), 0);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
 
-    delete pool;
+    delete allocator;
 }
 
 void
@@ -164,19 +166,20 @@ BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
     io.metaLpn = lpn;
 }
 
-TEST(MpioPool, AllocAndReleaseForNvRamCache)
+TEST(MpioAllocator, AllocAndReleaseForNvRamCache)
 {
 #if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
     const int arrayId = 0;
     std::unordered_set<Mpio*> mpioSet;
-    MpioPool* pool = new MpioPool(COUNT);
+    MpioAllocator* allocator = new MpioAllocator(COUNT);
 
-    EXPECT_EQ(pool->GetCapacity(), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
 
     for (uint32_t idx = 0; idx < COUNT; idx++)
     {
-        Mpio* m = pool->TryAlloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
+        Mpio* m = allocator->TryAlloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
         BuildIoInfo(m->io, MetaIoOpcode::Write, arrayId, 0);
         EXPECT_NE(m, nullptr);
 
@@ -185,18 +188,23 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
     }
 
     EXPECT_EQ(mpioSet.size(), 1);
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 1);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT - 1);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 1);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - 1);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
 
     for (auto& i : mpioSet)
-        pool->Release(i);
+        allocator->Release(i);
     mpioSet.clear();
 
-    EXPECT_EQ(pool->GetUsedCount(MpioType::Write), 0);
-    EXPECT_EQ(pool->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 1);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - 1);
 
-    delete pool;
+    allocator->ReleaseAllCache();
+    EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
+
+    delete allocator;
 #endif
 }
 

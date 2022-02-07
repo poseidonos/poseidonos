@@ -38,7 +38,7 @@
 #include "src/metafs/mim/metafs_io_request.h"
 #include "test/unit-tests/metafs/mim/mio_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 
 namespace pos
 {
@@ -87,11 +87,11 @@ TEST(MetaFsIoQ_Mio, CheckEnqueueAndDequeue)
     const int SIZE = 200;
     MetaFsIoQ<Mio*> q;
     std::unordered_set<Mio*> requests;
-    MockMpioPool* pool = new MockMpioPool(SIZE);
+    MockMpioAllocator* allocator = new MockMpioAllocator(SIZE);
 
     for (int i = 0; i < SIZE; i++)
     {
-        MockMio* msg = new MockMio(pool);
+        MockMio* msg = new MockMio(allocator);
         q.Enqueue(msg);
         requests.insert(msg);
     }

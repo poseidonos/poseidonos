@@ -30,22 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/metafs/mim/mio_allocator.h"
 
-#include <list>
-#include <string>
-#include <vector>
+#include <gtest/gtest.h>
 
-#include "src/metafs/mim/read_mpio.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
-class MockReadMpio : public ReadMpio
+TEST(MioAllocator, CheckMioAllocatorCanAllocAndRelease)
 {
-public:
-    using ReadMpio::ReadMpio;
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-};
+    const uint32_t COUNT = 10;
+    const int arrayId = 0;
+    NiceMock<MockMpioAllocator>* mpioAllocator = new NiceMock<MockMpioAllocator>(COUNT);
+    Mio* mioList[10] = {
+        0,
+    };
+    MioAllocator* mioAllocator = new MioAllocator(mpioAllocator, COUNT);
 
+    EXPECT_EQ(mioAllocator->GetFreeCount(), COUNT);
+    EXPECT_EQ(mioAllocator->GetCapacity(), COUNT);
+
+    for (uint32_t index = 0; index < COUNT; index++)
+    {
+        mioList[index] = mioAllocator->TryAlloc();
+        ASSERT_NE(mioList[index], nullptr);
+    }
+
+    EXPECT_TRUE(mioAllocator->IsEmpty());
+    EXPECT_EQ(mioAllocator->TryAlloc(), nullptr);
+
+    for (uint32_t index = 0; index < COUNT; index++)
+    {
+        mioAllocator->Release(mioList[index]);
+    }
+
+    EXPECT_EQ(mioAllocator->GetFreeCount(), COUNT);
+    EXPECT_NO_FATAL_FAILURE(mioAllocator->Release(nullptr));
+
+    delete mioAllocator;
+    delete mpioAllocator;
+}
 } // namespace pos

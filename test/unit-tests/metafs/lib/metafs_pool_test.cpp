@@ -30,22 +30,83 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/metafs/lib/metafs_pool.h"
 
-#include <list>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include <string>
 #include <vector>
 
 #include "src/metafs/mim/read_mpio.h"
+#include "src/metafs/mim/write_mpio.h"
+#include "test/unit-tests/metafs/mim/read_mpio_mock.h"
+#include "test/unit-tests/metafs/mim/write_mpio_mock.h"
+
+using ::testing::_;
+using ::testing::Matcher;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class MockReadMpio : public ReadMpio
+template<typename T>
+T*
+GetMpio(void* buf)
 {
-public:
-    using ReadMpio::ReadMpio;
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-};
+    return new T(buf);
+}
 
+TEST(MetaFsPool, Construct_testIfThePoolHasCorrectNumbers)
+{
+    const size_t POOL_SIZE = 5;
+    MetafsPool<WriteMpio*> pool(POOL_SIZE);
+
+    EXPECT_EQ(pool.GetCapacity(), POOL_SIZE);
+    EXPECT_EQ(pool.GetFreeCount(), 0);
+    EXPECT_EQ(pool.GetUsedCount(), 0);
+}
+
+TEST(MetaFsPool, AddToPool_testIfThePoolHasCorrectNumbers)
+{
+    const size_t POOL_SIZE = 5;
+    MetafsPool<WriteMpio*> pool(POOL_SIZE);
+    size_t testBuf = 0;
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        EXPECT_TRUE(pool.AddToPool(mpio));
+    }
+
+    EXPECT_EQ(pool.GetCapacity(), POOL_SIZE);
+    EXPECT_EQ(pool.GetFreeCount(), POOL_SIZE);
+    EXPECT_EQ(pool.GetUsedCount(), 0);
+}
+
+TEST(MetaFsPool, Desctructor_testIfThePoolWillBeDesctuctedWell)
+{
+    const size_t POOL_SIZE = 5;
+    MetafsPool<WriteMpio*>* pool = new MetafsPool<WriteMpio*>(POOL_SIZE);
+    size_t testBuf = 0;
+    std::vector<WriteMpio*> mpioList;
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        mpioList.push_back(mpio);
+        EXPECT_TRUE(pool->AddToPool(mpio));
+    }
+
+    MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+    EXPECT_FALSE(pool->AddToPool(mpio));
+    delete mpio;
+
+    EXPECT_NO_FATAL_FAILURE(delete pool);
+
+    for (auto mpio : mpioList)
+    {
+        EXPECT_NO_FATAL_FAILURE(delete mpio);
+    }
+}
 } // namespace pos

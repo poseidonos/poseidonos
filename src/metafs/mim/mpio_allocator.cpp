@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mpio_pool.h"
+#include "mpio_allocator.h"
 
 #include <vector>
 
@@ -40,57 +40,39 @@
 
 namespace pos
 {
-MpioPool::MpioPool(const size_t poolSize)
-: capacity_(poolSize),
-  WRITE_CACHE_CAPACITY(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
+MpioAllocator::MpioAllocator(const size_t eachPoolSize)
+: WRITE_CACHE_CAPACITY(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
 {
-    if (capacity_ == 0)
+    if (eachPoolSize == 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Pool size requested is {}", capacity_);
+            "Pool size requested is {}", eachPoolSize);
         assert(false);
     }
-
-    all_.reserve(capacity_ * (int)MpioType::Last);
 
     // tuple of array id, meta lpn, and mpio
     writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(WRITE_CACHE_CAPACITY);
 
-    mdPageBufPool = std::make_shared<MDPageBufPool>(capacity_ * (uint32_t)MpioType::Max);
+    mdPageBufPool = std::make_shared<MDPageBufPool>(eachPoolSize * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();
 
     for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
-        int numMpio = capacity_;
+        int numMpio = eachPoolSize;
+        pool_[idx] = std::make_shared<MetafsPool<Mpio*>>(eachPoolSize);
         while (numMpio-- != 0)
-        {
-            Mpio* mpio = nullptr;
-            auto mdPageBuf = mdPageBufPool->PopNewBuf();
-            assert(nullptr != mdPageBuf);
-
-            if (MpioType::Read == (MpioType)idx)
-                mpio = new ReadMpio(mdPageBuf);
-            else
-                mpio = new WriteMpio(mdPageBuf);
-
-            all_.emplace_back(mpio);
-            free_[idx].emplace_back(mpio);
-        }
+            pool_[idx]->AddToPool(_CreateMpio((MpioType)idx));
     }
 }
 
-MpioPool::~MpioPool(void)
+MpioAllocator::~MpioAllocator(void)
 {
-    all_.clear();
     for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
-    {
-        _FreeAllMpioinPool((MpioType)idx);
-        free_[idx].clear();
-    }
+        pool_[idx]->DeleteAll();
 }
 
 Mpio*
-MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
+MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         const MetaLpnType lpn, const bool partialIO, const int arrayId)
 {
 #if RANGE_OVERLAP_CHECK_EN
@@ -101,7 +83,7 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
             (true == partialIO) &&
             (MpioType::Write == mpioType)))
     {
-        mpio = _TryAllocMpio(mpioType);
+        mpio = _TryAlloc(mpioType);
 
         if (nullptr == mpio)
             _ReleaseCache();
@@ -114,7 +96,7 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         if (nullptr != mpio)
             return mpio;
 
-        mpio = _TryAllocMpio(mpioType);
+        mpio = _TryAlloc(mpioType);
         if (mpio)
         {
             if (writeCache_->IsFull())
@@ -126,17 +108,17 @@ MpioPool::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         return mpio;
     }
 #else
-    mpio = _TryAllocMpio(mpioType);
+    mpio = _TryAlloc(mpioType);
 #endif
 #else
-    Mpio* mpio = _TryAllocMpio(mpioType);
+    Mpio* mpio = _TryAlloc(mpioType);
 #endif
 
     return mpio;
 }
 
 void
-MpioPool::Release(Mpio* mpio)
+MpioAllocator::Release(Mpio* mpio)
 {
 #if MPIO_CACHE_EN
     if (MpioCacheState::Init != mpio->GetCacheState())
@@ -158,52 +140,49 @@ MpioPool::Release(Mpio* mpio)
         mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
 
     mpio->Reset();
-    free_[(uint32_t)mpio->GetType()].emplace_back(mpio);
-}
-
-void
-MpioPool::_FreeAllMpioinPool(const MpioType type)
-{
-    for (auto itr : free_[(uint32_t)type])
-    {
-        delete itr;
-    }
-}
-
-bool
-MpioPool::IsEmpty(MpioType type)
-{
-    if (free_[(uint32_t)type].size() == 0)
-    {
-        return true;
-    }
-    return false;
+    pool_[(uint32_t)mpio->GetType()]->Release(mpio);
 }
 
 Mpio*
-MpioPool::_TryAllocMpio(const MpioType mpioType)
+MpioAllocator::_CreateMpio(MpioType type)
+{
+    auto mdPageBuf = mdPageBufPool->PopNewBuf();
+    assert(nullptr != mdPageBuf);
+    if (MpioType::Read == type)
+        return new ReadMpio(mdPageBuf);
+    return new WriteMpio(mdPageBuf);
+}
+
+Mpio*
+MpioAllocator::_TryAlloc(const MpioType mpioType)
 {
     const uint32_t type = (uint32_t)mpioType;
-    if (0 == free_[type].size())
+    if (0 == pool_[type]->GetFreeCount())
         return nullptr;
 
-    auto mpio = free_[type].front();
-    free_[type].pop_front();
+    auto mpio = pool_[type]->TryAlloc();
     mpio->StoreTimestamp(MpioTimestampStage::Allocate);
-
     return mpio;
 }
 
 #if MPIO_CACHE_EN
 void
-MpioPool::ReleaseCache(void)
+MpioAllocator::TryReleaseTheOldestCache(void)
 {
-    if (0 == free_[(uint32_t)MpioType::Write].size())
+    if (0 == pool_[(uint32_t)MpioType::Write]->GetFreeCount())
         _ReleaseCache();
 }
 
 void
-MpioPool::_ReleaseCache(void)
+MpioAllocator::ReleaseAllCache(void)
+{
+    while (writeCache_->GetSize())
+        _ReleaseCache();
+
+}
+
+void
+MpioAllocator::_ReleaseCache(void)
 {
     auto victim = writeCache_->PopTheOldest();
     if (!victim)

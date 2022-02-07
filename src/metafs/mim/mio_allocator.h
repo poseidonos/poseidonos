@@ -32,64 +32,37 @@
 
 #pragma once
 
-#include <array>
-#include <list>
-#include <string>
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "mdpage_buf_pool.h"
-#include "mpio.h"
+#include "mio.h"
 #include "os_header.h"
-#include "src/metafs/common/fifo_cache.h"
+#include "src/metafs/lib/metafs_pool.h"
 
 namespace pos
 {
-class MpioPool
+class MioAllocator
 {
 public:
-    explicit MpioPool(const size_t poolSize);
-    virtual ~MpioPool(void);
+    explicit MioAllocator(MpioAllocator* mpioAllocator, const uint32_t poolSize);
+    virtual ~MioAllocator(void);
 
-    virtual Mpio* TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
-        const MetaLpnType lpn, const bool partialIO, const int arrayId);
-    virtual void Release(Mpio* item);
-    virtual size_t GetCapacity(void)
+    virtual Mio* TryAlloc(void);
+    virtual void Release(Mio* mio);
+    virtual bool IsEmpty(void) const
     {
-        return capacity_;
+        return (0 == GetFreeCount());
     }
-    virtual size_t GetFreeCount(void)
+    virtual size_t GetCapacity(void) const
     {
-        size_t total = 0;
-        for (uint32_t mpioType = 0; mpioType < (uint32_t)MpioType::Max; ++mpioType)
-            total += free_[(uint32_t)mpioType].size();
-        return total;
+        return pool_->GetCapacity();
     }
-    virtual size_t GetFreeCount(const MpioType mpioType)
+    virtual size_t GetFreeCount(void) const
     {
-        return free_[(uint32_t)mpioType].size();
+        return pool_->GetFreeCount();
     }
-    virtual size_t GetUsedCount(const MpioType mpioType)
-    {
-        return capacity_ - GetFreeCount(mpioType);
-    }
-
-    bool IsEmpty(const MpioType type);
-
-#if MPIO_CACHE_EN
-    virtual void ReleaseCache(void);
-#endif
 
 private:
-    void _FreeAllMpioinPool(const MpioType type);
-    Mpio* _TryAllocMpio(const MpioType mpioType);
-    void _ReleaseCache(void);
-
-    std::shared_ptr<MDPageBufPool> mdPageBufPool;
-    std::array<std::list<Mpio*>, (uint32_t)MpioType::Max> free_;
-    std::vector<Mpio*> all_;
-    size_t capacity_;
-    const size_t WRITE_CACHE_CAPACITY;
-    std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache_;
+    std::shared_ptr<MetafsPool<Mio*>> pool_;
 };
 } // namespace pos

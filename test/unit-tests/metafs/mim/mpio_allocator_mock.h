@@ -30,34 +30,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
+#include <list>
+#include <string>
 #include <vector>
 
-#include "mio.h"
-#include "os_header.h"
+#include "src/metafs/mim/mpio_allocator.h"
 
 namespace pos
 {
-class MioPool
+class MockMpioAllocator : public MpioAllocator
 {
 public:
-    explicit MioPool(MpioPool* mpioPool, uint32_t poolSize);
-    virtual ~MioPool(void);
-
-    virtual Mio* TryAlloc(void);
-    virtual void Release(Mio* mio);
-    virtual bool IsEmpty(void);
-    virtual size_t GetCapacity(void)
-    {
-        return capacity_;
-    }
-    virtual size_t GetFreeCount(void);
-
-private:
-    void _FreeAllMioinPool(void);
-
-    std::vector<Mio*> mioList;
-    size_t capacity_;
+    using MpioAllocator::MpioAllocator;
+    MOCK_METHOD(Mpio*, TryAlloc, (const MpioType mpioType, const MetaStorageType storageType,
+        const MetaLpnType lpn, const bool partialIO, const int arrayId), (override));
+    MOCK_METHOD(size_t, GetCapacity, (const MpioType type), (const, override));
+    MOCK_METHOD(void, Release, (Mpio* mpio), (override));
+#if MPIO_CACHE_EN
+    MOCK_METHOD(void, TryReleaseTheOldestCache, (), (override));
+    MOCK_METHOD(void, ReleaseAllCache, (), (override));
+#endif
 };
+
 } // namespace pos

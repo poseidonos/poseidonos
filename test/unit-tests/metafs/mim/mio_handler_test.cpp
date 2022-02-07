@@ -35,8 +35,8 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
-#include "test/unit-tests/metafs/mim/mio_pool_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
+#include "test/unit-tests/metafs/mim/mio_allocator_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
@@ -66,8 +66,8 @@ public:
       ioCQ(nullptr),
       doneQ(nullptr),
       bottomhalfHandler(nullptr),
-      mioPool(nullptr),
-      mpioPool(nullptr),
+      mioAllocator(nullptr),
+      mpioAllocator(nullptr),
       arrayInfo(nullptr),
       mgmt(nullptr),
       ctrl(nullptr),
@@ -92,8 +92,8 @@ public:
         ioCQ = new NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>;
         doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
         bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, nullptr, doneQ);
-        mpioPool = new NiceMock<MockMpioPool>(POOL_SIZE);
-        mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
+        mpioAllocator = new NiceMock<MockMpioAllocator>(POOL_SIZE);
+        mioAllocator = new NiceMock<MockMioAllocator>(mpioAllocator, POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
         EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
@@ -107,7 +107,7 @@ public:
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
-        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool, tp);
+        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioAllocator, mioAllocator, tp);
     }
 
     virtual void
@@ -127,8 +127,8 @@ protected:
     NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>* ioCQ;
     MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ;
     NiceMock<MockMpioHandler>* bottomhalfHandler;
-    NiceMock<MockMioPool>* mioPool;
-    NiceMock<MockMpioPool>* mpioPool;
+    NiceMock<MockMioAllocator>* mioAllocator;
+    NiceMock<MockMpioAllocator>* mpioAllocator;
     NiceMock<MockMetaStorageSubsystem>* mss;
     NiceMock<MockTelemetryPublisher>* tp;
 
