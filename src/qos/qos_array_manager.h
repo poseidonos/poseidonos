@@ -69,6 +69,7 @@ public:
     qos_rebuild_policy GetRebuildPolicy(void);
     int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
+    void GetMountedVolumes(std::list<uint32_t>& volumeList);
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
     bool IsVolumePolicyUpdated(void);
     void SetGcFreeSegment(uint32_t count);

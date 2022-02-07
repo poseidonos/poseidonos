@@ -59,8 +59,8 @@
 #define M_STRIPES_CONSUMED_HIGH_THRESHOLD (1000)
 #define MAX_IO_WORKER 8 // Currently this is hardcoded, will be taken from affinity manager in next revision
 
-#define GLOBAL_THROTTLING (0.99)
-#define POLLING_FREQ_PER_QOS_SLICE (10)
+#define MAX_THROTTLING_RATE (0.99)
+#define POLLING_FREQ_PER_QOS_SLICE (20)
 
 const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;

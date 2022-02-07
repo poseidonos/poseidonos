@@ -63,6 +63,7 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
 QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
         SpdkPosNvmfCaller* spdkPosNvmfCaller,
         ConfigManager* configManager,
@@ -183,7 +184,7 @@ QosManager::Initialize(void)
     }
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
-    qosTimeThrottling = new std::thread(&QosManager::_QosTimeChecker, this);
+    qosTimeThrottling = nullptr;
     initialized = true;
 }
 
@@ -284,39 +285,36 @@ QosManager::HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
 /* --------------------------------------------------------------------------*/
 
 void
-QosManager::_QosTimeChecker(void)
+QosManager::_PeriodicalJob(uint64_t* nextTick)
 {
-    cpu_set_t cpuSetLocal;
-    CPU_ZERO(&cpuSetLocal);
-    uint32_t totalCore = AffinityManagerSingleton::Instance()->GetTotalCore();
-    CPU_SET(totalCore - 1, &cpuSetLocal);
-    sched_setaffinity(0, sizeof(cpuSetLocal), &cpuSetLocal);
-    pthread_setname_np(pthread_self(), "QoSWorker");
-    uint64_t next_tick = 0;
-    while (true)
+    uint64_t now = spdkEnvCaller->SpdkGetTicks();
+    //static uint64_t cnt = 0;
+    // We can check overlap case.
+    uint64_t tickDiff = (now - *nextTick);
+    if ((int64_t)tickDiff > 0)
     {
-        uint64_t now = spdkEnvCaller->SpdkGetTicks();
-        if (true == IsExitQosSet())
+        for (uint32_t arrayId = 0; arrayId < MAX_ARRAY_COUNT; arrayId++)
         {
-            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
-            break;
+            qosArrayManager[arrayId]->ResetVolumeThrottling();
         }
-        // We can check overlap case.
-        uint64_t tickDiff = (now - next_tick);
-        if ((int64_t)tickDiff > 0)
+        if (*nextTick == 0)
         {
-            for (uint32_t arrayId = 0; arrayId < MAX_ARRAY_COUNT; arrayId++)
-            {
-                qosArrayManager[arrayId]->ResetVolumeThrottling();
-            }
-            if (next_tick == 0)
-            {
-                next_tick = now;
-            }
-
-            next_tick = next_tick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+            *nextTick = now;
         }
+        *nextTick = *nextTick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+       // if (cnt >= 2)
+      //  {
+            ResetGlobalThrottling();
+        //    cnt = 0;
+       // }
+       // cnt++;
     }
+}
+
+void
+QosManager::InitGlobalThrottling()
+{
+    QosVolumeManager::InitGlobalThrottling();
 }
 
 void
@@ -327,6 +325,7 @@ QosManager::_QosWorker(void)
     QosInternalManager* currentManager = monitoringManager;
     QosInternalManagerType nextManagerType = QosInternalManager_Unknown;
     QosInternalManager* nextManager = nullptr;
+    uint64_t nextTick = 0;
     while (nullptr != currentManager)
     {
         if (true == IsExitQosSet())
@@ -338,6 +337,7 @@ QosManager::_QosWorker(void)
         nextManagerType = currentManager->GetNextManagerType();
         nextManager = _GetNextInternalManager(nextManagerType);
         currentManager = nextManager;
+        _PeriodicalJob(&nextTick);
     }
 }
 
@@ -485,6 +485,26 @@ QosManager::GetUsedStripeCnt(uint32_t arrayId)
     return qosArrayManager[arrayId]->GetUsedStripeCnt();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::ResetGlobalThrottling(void)
+{
+    QosVolumeManager::ResetGlobalThrottling();
+}
+
+std::tuple<uint64_t, uint64_t>
+QosManager::GetTotalPerformance(void)
+{
+    uint64_t bw = QosVolumeManager::GetTotalVolumeBandwidth();
+    uint64_t iops = QosVolumeManager::GetTotalVolumeIops();
+    return std::make_tuple(bw, iops);
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -832,6 +852,27 @@ QosManager::GetGcFreeSegment(uint32_t arrayId)
     return qosArrayManager[arrayId]->GetGcFreeSegment();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::GetMountedVolumes(std::list<std::pair<uint32_t, uint32_t>>& volumeList)
+{
+    for (uint32_t arrayId = 0; arrayId < MAX_ARRAY_COUNT; arrayId++)
+    {
+        std::list<uint32_t> tempVolumeList;
+        tempVolumeList.clear();       
+        qosArrayManager[arrayId]->GetMountedVolumes(tempVolumeList);
+        for (auto iter : tempVolumeList)
+        {
+           volumeList.push_back(std::make_pair(arrayId, iter));
+        }
+    }
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

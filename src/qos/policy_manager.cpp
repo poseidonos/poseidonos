@@ -105,15 +105,15 @@ QosPolicyManager::Execute(void)
 void
 QosPolicyManager::_SetNextManagerType(void)
 {
-    qosContext->IncrementCorrectionCycle();
-    if (true == qosContext->GetApplyCorrection())
-    {
+  //  qosContext->IncrementCorrectionCycle();
+  //  if (true == qosContext->GetApplyCorrection())
+  //  {
         nextManagerType = QosInternalManager_Correction;
-    }
-    else
-    {
-        nextManagerType = QosInternalManager_Monitor;
-    }
+  //  }
+  //  else
+   // {
+   //     nextManagerType = QosInternalManager_Monitor;
+ //   }
 }
 
 /* --------------------------------------------------------------------------*/

@@ -314,10 +314,7 @@ AIO::CompleteIOs(void)
     uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     int cnt = ioContext.cnt;
     airlog("CNT_AIO_CompleteIOs", "AIR_BASE", reactor_id, cnt);
-    if (ioContext.needPollingCount > 0)
-    {
-        DeviceManagerSingleton::Instance()->HandleCompletedCommand();
-    }
+    DeviceManagerSingleton::Instance()->HandleCompletedCommand();
 }
 void
 AIO::SubmitAsyncAdmin(pos_io& io, IArrayMgmt* arrayManager)

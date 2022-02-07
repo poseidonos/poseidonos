@@ -129,9 +129,12 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
     bool currentMinBwPolicy = allVolumeUserPolicy.IsMinBwPolicyInEffect();
     bool maxThrottlingChanged = false;
 
+    if (volumePolicyUpdated == false)
+    {
+        return;
+    }
+
     qosManager->GetVolumePolicyMap(arrayId, volumePolicyMap);
-
-
     for (auto vol = volumePolicyMap.begin(); vol != volumePolicyMap.end(); vol++)
     {
         qos_vol_policy volumePolicy = vol->second;

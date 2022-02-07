@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Air.h"
 #include "src/qos/qos_volume_manager.h"
 
 #include "src/event_scheduler/event_scheduler.h"
@@ -45,9 +46,30 @@
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
 #include "src/qos/qos_context.h"
+#include "src/logger/logger.h"
+
+#include <iostream>
+#include <unordered_set>
 
 namespace pos
 {
+
+
+std::atomic<int64_t> QosVolumeManager::globalBwThrottling(0x0);
+std::atomic<int64_t> QosVolumeManager::globalIopsThrottling(0x0);
+std::atomic<int64_t> QosVolumeManager::globalRemainingVolumeBw(0x0);
+std::atomic<int64_t> QosVolumeManager::globalRemainingVolumeIops(0x0);
+std::atomic<int64_t> QosVolumeManager::globalCurrentBw(0x0);
+std::atomic<int64_t> QosVolumeManager::globalCurrentIops(0x0);
+
+std::atomic<int64_t> QosVolumeManager::notThrottledVolumesThrottling;
+std::atomic<int64_t> QosVolumeManager::remainingNotThrottledVolumesBw;
+std::atomic<bool>  QosVolumeManager::isMinVolume[MAX_VOLUME_COUNT];
+
+thread_local uint32_t myClock = 0, myClock2 = 0;
+std::atomic<uint32_t> globalClock(0);
+thread_local uint32_t gvolId = 0;
+QosContext* qosContextGlobal = nullptr;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -69,6 +91,7 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
   spdkPosVolumeCaller(spdkPosVolumeCaller),
   volumeEventPublisher(volumeEventPublisher)
 {
+    qosContextGlobal = qosContext;
     uint32_t arrayId = arrayIndex;
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
@@ -183,19 +206,6 @@ QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
-QosVolumeManager::_RateLimit(uint32_t reactor, int volId)
-{
-    return bwIopsRateLimit->IsLimitExceeded(reactor, volId);
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
 void
 QosVolumeManager::_UpdateRateLimit(uint32_t reactor, int volId, uint64_t size)
 {
@@ -218,52 +228,37 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     }
     uint32_t reactorId = eventFrameworkApi->GetCurrentReactor();
     uint32_t volId = volIo->GetVolumeId();
-    uint64_t currentBw = 0;
-    uint64_t currentIO = 0;
-    uint32_t blockSize = 0;
+   // uint32_t blockSize = 0;
 
-    currentBw = volumeQosParam[reactorId][volId].currentBW;
-    currentIO = volumeQosParam[reactorId][volId].currentIOs;
-    blockSize = volIo->GetSize();
+ //   blockSize = volIo->GetSize();
 
-    if ((pendingIO[volId] == 0) &&
-        (_GlobalRateLimit(reactorId, volId) == false))
+   /* if ((pendingIO[volId] == 0) &&
+        (_RateLimit(reactorId, volId) == false) && (_GlobalRateLimit() == false))
     {
-        currentBw = currentBw + volIo->GetSize();
-        currentIO++;
         aioSubmission->Do(volIo);
-        _UpdateRateLimit(reactorId, volId, volIo->GetSize());
-        remainingVolumeBw[volId] -= volIo->GetSize();
+        remainingVolumeBw[volId] -= blockSize;
+        globalRemainingVolumeBw -= blockSize;
+        globalCurrentBw += blockSize;
+        currentVolumeBw[volId] += blockSize;
         remainingVolumeIops[volId] -= 1;
+        globalRemainingVolumeIops -= 1;
+        globalCurrentIops += 1;
+        currentVolumeIops[volId] += 1;
     }
     else
-    {
+    {*/
         pendingIO[volId]++;
         _EnqueueVolumeUbio(reactorId, volId, volIo);
-        while (!IsExitQosSet())
+  /*      while (!IsExitQosSet())
         {
-             if (_GlobalRateLimit(reactorId, volId) == true)
+             if (_RateLimit(reactorId, volId) == true || _GlobalRateLimit() == true)
             {
                 break;
             }
-            VolumeIoSmartPtr queuedVolumeIo = nullptr;
-            queuedVolumeIo = _DequeueVolumeUbio(reactorId, volId);
-            if (queuedVolumeIo == nullptr)
-            {
-                break;
-            }
-            currentBw = currentBw + queuedVolumeIo->GetSize();
-            currentIO++;
-            pendingIO[volId]--;
-            aioSubmission->Do(queuedVolumeIo);
-            _UpdateRateLimit(reactorId, volId, queuedVolumeIo->GetSize());
-            remainingVolumeBw[volId] -= queuedVolumeIo->GetSize();
-            remainingVolumeIops[volId] -= 1;
-        }
-    }
-    volumeQosParam[reactorId][volId].currentBW = currentBw;
-    volumeQosParam[reactorId][volId].currentIOs = currentIO;
-    volumeQosParam[reactorId][volId].blockSize = blockSize;
+            _PollingAndSubmit(aioSubmission, volId);
+            break;
+        }*/
+  //  }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -408,7 +403,7 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
     // enqueue in same reactor as NvmfVolumePos::VolumeMounted so that pos_disk structure is populated with correct values before qos tries to access it.
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeMountHandler, vInfo, this);
-
+    volumeMap[vInfo->id] = true;
     while (qosContext->GetVolumeOperationDone() == false)
     {
         if (qosContext->GetVolumeOperationDone() == true)
@@ -455,7 +450,40 @@ QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info* volMountIn
 }
 
 bool
-QosVolumeManager::_GlobalRateLimit(uint32_t reactor, int volId)
+QosVolumeManager::_GlobalRateLimit(void)
+{
+    bool results = false;
+   /* if ((globalRemainingVolumeBw < 0) || (globalRemainingVolumeIops < 0))
+    {
+        results = true;
+    }*/
+    return results;
+}
+bool
+QosVolumeManager::_SpecialRateLimit(void)
+{
+    bool results = false;
+    if (remainingNotThrottledVolumesBw < 0)
+    {
+        results = true;
+    }
+    return results;
+}
+
+void
+QosVolumeManager::GetMountedVolumes(std::list<uint32_t>& volumeList)
+{
+    for (uint32_t index = 0; index < MAX_VOLUME_COUNT; index++)
+    {
+        if (volumeMap[index] == true)
+        {
+            volumeList.push_back(index);
+        }
+    }
+}
+
+bool
+QosVolumeManager::_RateLimit(uint32_t reactor, int volId)
 {
     bool results = false;
     if ((remainingVolumeBw[volId] < 0) || (remainingVolumeIops[volId] < 0))
@@ -465,34 +493,210 @@ QosVolumeManager::_GlobalRateLimit(uint32_t reactor, int volId)
     return results;
 }
 
+int _UpdateTotalVolumePerformance(const air::JSONdoc& data)
+{
+    auto& objs = data["PERF_ARR_VOL"]["objs"];
+    uint64_t totalBw = 0, totalIops = 0;
+    for (auto& obj_it : objs)
+    {
+        auto& obj = objs[obj_it.first];
+   //     std::stringstream stream_it;
+   //     stream_it << obj["index"];
+    //    uint32_t index {0};
+   //     stream_it >> index;
+
+        std::stringstream stream_bw;
+        stream_bw << obj["bw"];
+        uint64_t bw {0};
+        stream_bw >> bw;
+
+        std::stringstream stream_iops;
+        stream_iops << obj["iops"];
+        uint32_t iops {0};
+        stream_iops >> iops;
+
+        std::stringstream stream_thread_name;
+        stream_thread_name << obj["target_name"];
+        std::string thread_name = "";
+        stream_thread_name >> thread_name;
+
+      //  uint32_t arrayId = (index & 0xFF00) >> 8;
+      //  uint32_t volumeId = (index & 0x00FF);
+        totalBw += bw;
+        totalIops += iops;
+    }
+    totalBw /= PARAMETER_COLLECTION_INTERVAL;
+    totalIops /= PARAMETER_COLLECTION_INTERVAL;
+    float currentBw = QosVolumeManager::globalBwThrottling + 1;
+    QosVolumeManager::globalBwThrottling = currentBw * 1.02;
+    if (QosVolumeManager::globalBwThrottling > totalBw * 1.05)
+    {
+        QosVolumeManager::globalBwThrottling = currentBw * 0.9;
+    }
+    float currentIops = QosVolumeManager::globalIopsThrottling + 1;
+    QosVolumeManager::globalIopsThrottling += currentIops * 1.02;
+    if (QosVolumeManager::globalIopsThrottling > totalIops * 1.05)
+    {
+        QosVolumeManager::globalIopsThrottling = currentIops * 0.9;
+    }
+    if (QosVolumeManager::globalBwThrottling < 10)
+    {
+        QosVolumeManager::globalBwThrottling = 10;
+    }
+    if (QosVolumeManager::globalIopsThrottling < 10)
+    {
+         QosVolumeManager::globalIopsThrottling = 10;
+    }
+    POS_TRACE_INFO(9999, "previous Bw : {} Iops : {}, Throttling Bw : {}, Iops : {}, totalBw : {}, totalIops : {}",
+        currentBw, currentIops, QosVolumeManager::globalBwThrottling, QosVolumeManager::globalIopsThrottling, totalBw, totalIops);
+    return 0;
+}
+
+
+std::atomic<bool> updated;
+void
+QosVolumeManager::InitGlobalThrottling(void)
+{
+    updated = true;
+}
+
+void
+QosVolumeManager::ResetGlobalThrottling(void)
+{
+
+  //  POS_TRACE_INFO(9999, " remaining Bw : {}, Iops : {}",
+    //    globalRemainingVolumeBw, globalRemainingVolumeIops);
+
+    int64_t bwUnit = 1024ULL * 1024ULL / PARAMETER_COLLECTION_INTERVAL; //1mb
+    if (bwUnit < (float)globalBwThrottling * 0.02)
+    {
+        bwUnit = globalBwThrottling * 0.02;
+    }
+    int64_t iopsUnit = 1024ULL / 4 / PARAMETER_COLLECTION_INTERVAL; // 256 iops
+    if (iopsUnit < (float)globalIopsThrottling * 0.02)
+    {
+        iopsUnit = globalIopsThrottling * 0.02;
+    }
+    if (globalRemainingVolumeBw > 0)
+    {
+        globalBwThrottling = globalBwThrottling - bwUnit;
+    }
+    else
+    {
+        globalBwThrottling = globalBwThrottling + bwUnit * 2;
+    }
+    
+    if (globalRemainingVolumeIops > 0)
+    {
+       globalIopsThrottling = globalIopsThrottling - iopsUnit;
+    }
+    else
+    {
+        globalIopsThrottling = globalIopsThrottling + iopsUnit * 2;
+    }
+    if (globalBwThrottling < bwUnit)
+    {
+        globalBwThrottling = bwUnit;
+    }
+    if (globalIopsThrottling < iopsUnit)
+    {
+         globalIopsThrottling = iopsUnit;
+    }
+    if (globalRemainingVolumeBw < 0)
+    {
+        globalRemainingVolumeBw += globalBwThrottling;
+    }
+    else
+    {
+        globalRemainingVolumeBw = globalBwThrottling * 1;
+    }
+
+    if (globalRemainingVolumeIops < 0)
+    {
+        globalRemainingVolumeIops += globalIopsThrottling;
+    }
+    else
+    {
+        globalRemainingVolumeIops = globalIopsThrottling * 1;
+    }
+    if (updated == true)
+    {
+     //   globalBwThrottling = 1024ULL * 1024ULL / PARAMETER_COLLECTION_INTERVAL;
+     //   globalIopsThrottling = 1024ULL / 4 / PARAMETER_COLLECTION_INTERVAL;
+        POS_TRACE_INFO(9999, "Reset!!!!");
+        updated = false;
+    }
+    uint64_t totalMinVolumeBw = 0;
+    QosUserPolicy& qosUserPolicy = qosContextGlobal->GetQosUserPolicy();
+    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
+    std::vector<std::pair<uint32_t, uint32_t>> minVols = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    for (auto iter : minVols)
+    {
+        uint32_t arrayId = iter.first;
+        uint32_t minVolId = iter.second;
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, minVolId);
+        if (volumeUserPolicy->IsMinimumVolume() == false)
+        {
+            isMinVolume[minVolId] = false;
+            continue;
+        }
+        totalMinVolumeBw += volumeUserPolicy->GetMinBandwidth();
+        isMinVolume[minVolId] = true;
+    }
+    notThrottledVolumesThrottling = globalBwThrottling - totalMinVolumeBw;
+    if (notThrottledVolumesThrottling < bwUnit)
+    {
+        notThrottledVolumesThrottling = bwUnit;
+    }
+    if (remainingNotThrottledVolumesBw < 0)
+    {
+        remainingNotThrottledVolumesBw += notThrottledVolumesThrottling;
+    }
+    else
+    {
+        remainingNotThrottledVolumesBw = notThrottledVolumesThrottling * 1;
+    }
+    globalCurrentBw = 0;
+    globalCurrentIops = 0;
+    globalClock = (globalClock + 1) % 100;
+}
+
+uint64_t
+QosVolumeManager::GetTotalVolumeBandwidth(void)
+{
+    return globalRemainingVolumeBw;
+}
+
+uint64_t
+QosVolumeManager::GetTotalVolumeIops(void)
+{
+    return globalRemainingVolumeIops;
+}
+
 void
 QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
 {
-    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
-    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, volId);
-    if (volumeUserPolicy != nullptr)
+    uint64_t userSetBwWeight = bwThrottling[volId];
+    uint64_t userSetIops = iopsThrottling[volId];
+    int64_t remainingBw = remainingVolumeBw[volId];
+    int64_t remainingIops = remainingVolumeIops[volId];
+    currentVolumeBw[volId] = 0;
+    currentVolumeIops[volId] = 0;
+    if (remainingBw > 0)
     {
-        uint64_t userSetBwWeight = volumeUserPolicy->GetMaxBandwidth();
-        uint64_t userSetIops = volumeUserPolicy->GetMaxIops();
-        int64_t remainingBw = remainingVolumeBw[volId];
-        int64_t remainingIops = remainingVolumeIops[volId];
-        if (remainingBw > 0)
-        {
-            remainingVolumeBw[volId] = userSetBwWeight * GLOBAL_THROTTLING;
-        }
-        else
-        {
-            remainingVolumeBw[volId] += userSetBwWeight * GLOBAL_THROTTLING;
-        }
-        if (remainingIops > 0)
-        {
-            remainingVolumeIops[volId] = userSetIops * GLOBAL_THROTTLING;
-        }
-        else
-        {
-            remainingVolumeIops[volId] += userSetIops * GLOBAL_THROTTLING;
-        }
+        remainingVolumeBw[volId] = userSetBwWeight * MAX_THROTTLING_RATE;
+    }
+    else
+    {
+        remainingVolumeBw[volId] += userSetBwWeight * MAX_THROTTLING_RATE;
+    }
+    if (remainingIops > 0)
+    {
+        remainingVolumeIops[volId] = userSetIops * MAX_THROTTLING_RATE;
+    }
+    else
+    {
+        remainingVolumeIops[volId] += userSetIops * MAX_THROTTLING_RATE;
     }
 }
 
@@ -516,7 +720,7 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
     vInfo->iops_limit = 0;
     vInfo->bw_limit = 0;
     qosContext->SetVolumeOperationDone(false);
-
+    volumeMap[vInfo->id] = false;
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeUnmountHandler, vInfo, this);
 
@@ -686,9 +890,6 @@ QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetach
 void
 QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
 {
-/*    int64_t setBwLimit = GetVolumeLimit(reactor, volId, false);
-    int64_t setIopsLimit = GetVolumeLimit(reactor, volId, true);
-    bwIopsRateLimit->ResetRateLimit(reactor, volId, offset, setBwLimit, setIopsLimit);*/
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -697,55 +898,98 @@ QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
+
+bool QosVolumeManager::_PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId)
+{
+    uint64_t blockSize = 0;
+    VolumeIoSmartPtr queuedVolumeIo = nullptr;
+    queuedVolumeIo = _DequeueVolumeUbio(0, volId);
+    if (queuedVolumeIo.get() == nullptr)
+    {
+        return false;
+    }
+    blockSize = queuedVolumeIo->GetSize();
+    pendingIO[volId]--;
+    aioSubmission->Do(queuedVolumeIo);
+    remainingVolumeBw[volId] -= blockSize;
+    globalRemainingVolumeBw -= blockSize;
+    currentVolumeBw[volId] += blockSize;
+    globalCurrentBw += blockSize;
+    remainingVolumeIops[volId] -= 1;
+    globalRemainingVolumeIops -= 1;
+    globalCurrentIops += 1;
+    currentVolumeIops[volId] += 1;
+    if (isMinVolume[volId] == false)
+    {
+        remainingNotThrottledVolumesBw -= blockSize;
+    }
+    return true;
+}
+
 int
 QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset)
 {
     uint32_t retVal = 0;
-    VolumeIoSmartPtr queuedVolumeIo = nullptr;
-    uint64_t currentBW = 0;
-    uint64_t currentIO = 0;
-    volList[reactor].clear();
-    pthread_rwlock_rdlock(&nqnLock);
-    for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
-    {
-        uint32_t subsys = it->first;
-        if (spdkPosNvmfCaller->SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != INVALID_SUBSYSTEM)
-        {
-            volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys, false);
-        }
-    }
-    pthread_rwlock_unlock(&nqnLock);
-  
-    for (uint32_t i = 0; i < MAX_VOLUME_COUNT; i++)
-    {
-        int volId = i;
-        currentBW = 0;
-        currentIO = 0;
-        ResetRateLimit(reactor, volId, offset);
-        //_EnqueueVolumeParameter(reactor, volId, offset);
-        while (!IsExitQosSet())
-        {
-            if (_GlobalRateLimit(reactor, volId) == true)
-            {
-                break;
-            }
-            queuedVolumeIo = _DequeueVolumeUbio(reactor, volId);
-            if (queuedVolumeIo.get() == nullptr)
-            {
-                break;
-            }
-            currentBW = currentBW + queuedVolumeIo->GetSize();
-            currentIO++;
-            pendingIO[volId]--;
-            aioSubmission->Do(queuedVolumeIo);
-            _UpdateRateLimit(reactor, volId, queuedVolumeIo->GetSize());
-            remainingVolumeBw[volId] -= queuedVolumeIo->GetSize();
-            remainingVolumeIops[volId] -= 1;
-        }
-        volumeQosParam[reactor][volId].currentBW = currentBW;
-        volumeQosParam[reactor][volId].currentIOs = currentIO;
-    }
 
+    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
+    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
+    std::vector<std::pair<uint32_t, uint32_t>> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    uint32_t notSubmittedCount = 0;
+    while (!IsExitQosSet())
+    {  
+        bool submitted = false;
+        if (_GlobalRateLimit() == true)
+        {
+            //goto next;
+            break;
+            //break;
+        }
+
+        if (_RateLimit(reactor, gvolId) == true)
+        {
+        //      notSubmittedCount++;
+            // volId = (volId + 1) % MAX_VOLUME_COUNT;
+            goto next;
+            //break;
+            //continue;
+        }
+        if (isMinVolume[gvolId] == false && _SpecialRateLimit() == true)
+        {
+            goto next;
+        }
+        submitted = _PollingAndSubmit(aioSubmission, gvolId);
+        if (submitted == false)
+        {
+            goto next;
+        }
+        else
+        {
+            notSubmittedCount = 0;
+            continue;
+        }
+next:
+        notSubmittedCount++;
+        gvolId = (gvolId + 1) % MAX_VOLUME_COUNT;
+        if (notSubmittedCount >= MAX_VOLUME_COUNT)
+        {
+            break;
+        }
+        /*  if (submitted == false)
+        {
+            // volId = (volId + 1) % MAX_VOLUME_COUNT;
+            notSubmittedCount++;
+        }
+        else
+        {
+            notSubmittedCount = 0;
+        }
+        if (notSubmittedCount >= MAX_VOLUME_COUNT)
+        {
+            // volId = (volId + 1) % MAX_VOLUME_COUNT;
+            break;
+        }   */
+    }
     return retVal;
 }
 
@@ -759,24 +1003,6 @@ QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aio
 void
 QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset)
 {
-    uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
-    uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
-    bool enqueueParameters = false;
-
-    enqueueParameters = !((currentBW == 0) && (pendingIO[volId] == 0));
-    // Condition "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
-    // For any inactive volume the BW and well as pending IO count will be 0. Any other cases would be active volume.
-    // BW (0), Pending (0) ==> Non Active Volume
-    // BW (0), Pending (!0) ==> Active, as 0 throttling would have been applied, so IO's in pending queue
-    // BW (!0), Pending (0) ==> Active, as IO's have been submitted but throttling value not reached
-    // BW (!0), Pending (!0) ==> Active, IO's have been submitted and throttling also active
-    if (enqueueParameters)
-    {
-        volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
-        volumeQosParam[reactor][volId].currentBW = currentBW;
-        volumeQosParam[reactor][volId].currentIOs = currentIops;
-        _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
-    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -789,13 +1015,13 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
 void
 QosVolumeManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t value, bool iops)
 {
-    if (true == iops)
+    if (iops == true)
     {
-        volReactorIopsWeight[reactor][volId] = value;
+        iopsThrottling[volId] = value;
     }
     else
     {
-        volReactorWeight[reactor][volId] = value;
+        bwThrottling[volId] = value;
     }
 }
 
@@ -809,14 +1035,7 @@ QosVolumeManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t value
 int64_t
 QosVolumeManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
 {
-    if (true == iops)
-    {
-        return volReactorIopsWeight[reactor][volId];
-    }
-    else
-    {
-        return volReactorWeight[reactor][volId];
-    }
+    return 0;
 }
 
 /* --------------------------------------------------------------------------*/

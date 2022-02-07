@@ -40,6 +40,7 @@
 #include <unordered_map>
 #include <vector>
 #include <mutex>
+#include <list>
 #include "src/bio/volume_io.h"
 
 #include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
@@ -50,7 +51,6 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event.h"
 #include "src/sys_event/volume_event_publisher.h"
-
 namespace pos
 {
 class QosManager;
@@ -93,7 +93,19 @@ public:
     void ResetVolumeThrottling(int volId, uint32_t arrayId);
     static void _VolumeMountHandler(void* arg1, void* arg2);
     static void _VolumeUnmountHandler(void* arg1, void* arg2);
-    static void _VolumeDetachHandler(void* arg1, void* arg2);    
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
+    static void ResetGlobalThrottling(void);
+    static uint64_t GetTotalVolumeBandwidth(void);
+    static uint64_t GetTotalVolumeIops(void);
+    void GetMountedVolumes(std::list<uint32_t>& volumeList);
+    static void InitGlobalThrottling(void);
+
+    static std::atomic<int64_t> globalBwThrottling;
+    static std::atomic<int64_t> globalCurrentBw;
+    static std::atomic<int64_t> globalIopsThrottling;
+    static std::atomic<int64_t> globalCurrentIops;
+    static std::atomic<int64_t> globalRemainingVolumeBw;
+    static std::atomic<int64_t> globalRemainingVolumeIops;
 
 protected:
     EventFrameworkApi* eventFrameworkApi;
@@ -101,8 +113,10 @@ protected:
 private:
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
     bool _RateLimit(uint32_t reactor, int volId);
-    bool _GlobalRateLimit(uint32_t reactor, int volId);
+    bool _GlobalRateLimit(void);
     void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
+    bool _SpecialRateLimit(void);
+
     void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, VolumeIoSmartPtr io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
     VolumeIoSmartPtr _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
@@ -113,17 +127,24 @@ private:
     void _InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmountInfo);
     void _InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo);
     void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
+    bool _PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId);
 
     std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
-    std::atomic<uint64_t> volReactorWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
-    std::atomic<int64_t> volReactorIopsWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
-    uint64_t pendingIO[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> bwThrottling[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> iopsThrottling[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> pendingIO[MAX_VOLUME_COUNT];
+    std::atomic<bool> volumeMap[MAX_VOLUME_COUNT];
     std::mutex volumePendingIOLock[MAX_VOLUME_COUNT];
     std::atomic<int64_t> remainingVolumeBw[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> currentVolumeBw[MAX_VOLUME_COUNT];
     std::atomic<int64_t> remainingVolumeIops[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> currentVolumeIops[MAX_VOLUME_COUNT];
+    static std::atomic<int64_t> notThrottledVolumesThrottling;
+    static std::atomic<bool> isMinVolume[MAX_VOLUME_COUNT];
+    static std::atomic<int64_t> remainingNotThrottledVolumesBw;
 
     bool feQosEnabled;
     BwIopsRateLimit* bwIopsRateLimit;

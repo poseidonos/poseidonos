@@ -39,6 +39,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -97,6 +98,7 @@ public:
     virtual bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
     virtual bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
+    void SetQoSThrottling(BackendEvent event, int64_t weight);
     virtual int64_t GetEventWeightWRR(BackendEvent event);
     virtual int64_t GetDefaultEventWeightWRR(BackendEvent event);
     uint32_t GetUsedStripeCnt(uint32_t arrayId);
@@ -132,11 +134,15 @@ public:
     virtual bool IsMinimumPolicyInEffectInSystem(void);
     void ResetCorrection(void);
     void FinalizeSpdkManager(void);
+    std::tuple<uint64_t, uint64_t> GetTotalPerformance(void);
+    void GetMountedVolumes(std::list<std::pair<uint32_t, uint32_t>>& volumeList);
+    void ResetGlobalThrottling(void);
+    void InitGlobalThrottling(void);
 
 private:
     virtual void _Finalize(void);
     void _QosWorker(void);
-    void _QosTimeChecker(void);
+    void _PeriodicalJob(uint64_t* nextTick);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
     std::thread* qosThread;
     std::thread* qosTimeThrottling;
