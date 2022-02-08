@@ -167,4 +167,21 @@ TEST(MetaFsPool, Destructor_testIfThePoolWillBeDestructedWell)
         EXPECT_DEATH(delete mpio, "");
     }
 }
+
+TEST(MetaFsPool, Destructor_testIfDestructionWillBeDoneSuccessfully)
+{
+    const size_t POOL_SIZE = 5;
+    MetaFsPool<WriteMpio*>* pool = new MetaFsPool<WriteMpio*>(POOL_SIZE);
+    size_t testBuf = 0;
+    std::vector<WriteMpio*> mpioList;
+
+    for (size_t i = 0; i < POOL_SIZE - 1; i++)
+    {
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        mpioList.push_back(mpio);
+        EXPECT_TRUE(pool->AddToPool(mpio));
+    }
+
+    EXPECT_NO_FATAL_FAILURE(delete pool);
+}
 } // namespace pos
