@@ -44,22 +44,33 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToNonZero)
     // given
     SegmentInfo segInfos(10, 0, SegmentState::FREE);
     // when
-    int ret = segInfos.DecreaseValidBlockCount(3);
+    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
     // then
-    EXPECT_EQ(7, ret);
+    EXPECT_EQ(segmentFreed, false);
 }
 
-TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZero)
+TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenSsdState)
 {
     // given
     SegmentInfo segInfos(3, 10, SegmentState::SSD);
     // when
-    int ret = segInfos.DecreaseValidBlockCount(3);
+    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
     // then
-    EXPECT_EQ(0, ret);
+    EXPECT_EQ(segmentFreed, true);
     EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
     EXPECT_EQ(segInfos.GetValidBlockCount(), 0);
     EXPECT_EQ(segInfos.GetOccupiedStripeCount(), 0);
+}
+
+TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenNvramState)
+{
+    // given
+    SegmentInfo segInfos(3, 10, SegmentState::NVRAM);
+    // when
+    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
+    // then
+    EXPECT_EQ(segmentFreed, false);
+    EXPECT_NE(segInfos.GetState(), SegmentState::FREE);
 }
 
 TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)

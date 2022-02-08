@@ -160,15 +160,7 @@ TEST_F(SegmentCtxTestFixture, IncreaseValidBlockCount_TestIncreaseValue)
 
 TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValue)
 {
-    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(4));
-
-    bool ret = segCtx->DecreaseValidBlockCount(0, 1);
-    EXPECT_EQ(false, ret);
-}
-
-TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValueWhenSegmentIsNotZero)
-{
-    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(10));
+    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(false));
 
     bool ret = segCtx->DecreaseValidBlockCount(0, 1);
     EXPECT_EQ(false, ret);
@@ -176,7 +168,7 @@ TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValueWhenSegme
 
 TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValueWhenValidCountZeroAndSSDState)
 {
-    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(0));
+    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(true));
     EXPECT_CALL(freeSegmentList, AddToList).Times(1);
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(false));
 
@@ -186,7 +178,7 @@ TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValueWhenValid
 
 TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_testIfSegmentFreedAndRemovedFromTheRebuildList)
 {
-    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(0));
+    EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(true));
     EXPECT_CALL(freeSegmentList, AddToList).Times(1);
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(true));
     EXPECT_CALL(rebuildCtx, FlushRebuildSegmentList).Times(1);

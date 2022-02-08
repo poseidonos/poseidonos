@@ -57,7 +57,7 @@ public:
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(int cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
-    virtual int32_t DecreaseValidBlockCount(uint32_t dec);
+    virtual bool DecreaseValidBlockCount(uint32_t dec);
 
     virtual void SetOccupiedStripeCount(uint32_t cnt);
     virtual uint32_t GetOccupiedStripeCount(void);

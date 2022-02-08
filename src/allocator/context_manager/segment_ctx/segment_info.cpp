@@ -76,7 +76,7 @@ SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
     return validBlockCount.fetch_add(inc) + inc;
 }
 
-int32_t
+bool
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
 {
     uint32_t decreased = validBlockCount.fetch_sub(dec) - dec;
@@ -86,10 +86,18 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
         if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
         {
             _MoveToFreeState();
+
+            return true;
         }
     }
+    else if (decreased < 0)
+    {
+        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
+            "Valid block count decreasedCount:{} total validCount:{} : UNDERFLOWED", dec, decreased);
+        assert(false);
+    }
 
-    return decreased;
+    return false;
 }
 
 void

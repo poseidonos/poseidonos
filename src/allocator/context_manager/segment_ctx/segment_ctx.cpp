@@ -161,16 +161,8 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 bool
 SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    uint32_t decreasedValue = segmentInfos[segId].DecreaseValidBlockCount(cnt);
-
-    if (decreasedValue < 0)
-    {
-        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
-            "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, decreasedValue);
-        assert(false);
-    }
-
-    if (decreasedValue == 0)
+    bool segmentFreed = segmentInfos[segId].DecreaseValidBlockCount(cnt);
+    if (segmentFreed == true)
     {
         _SegmentFreed(segId);
         return true;
