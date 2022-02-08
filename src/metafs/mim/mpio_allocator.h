@@ -92,7 +92,7 @@ private:
 
     const size_t WRITE_CACHE_CAPACITY;
     std::shared_ptr<MDPageBufPool> mdPageBufPool;
-    std::array<std::shared_ptr<MetafsPool<Mpio*>>, (uint32_t)MpioType::Max> pool_;
+    std::array<std::shared_ptr<MetaFsPool<Mpio*>>, (uint32_t)MpioType::Max> pool_;
     std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache_;
 };
 } // namespace pos

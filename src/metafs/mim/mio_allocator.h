@@ -63,6 +63,6 @@ public:
     }
 
 private:
-    std::shared_ptr<MetafsPool<Mio*>> pool_;
+    std::shared_ptr<MetaFsPool<Mio*>> pool_;
 };
 } // namespace pos

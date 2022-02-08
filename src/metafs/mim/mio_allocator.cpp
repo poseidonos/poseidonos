@@ -44,7 +44,7 @@ MioAllocator::MioAllocator(MpioAllocator* mpioAllocator, const uint32_t poolSize
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MioAllocator poolsize={}", poolSize);
 
-    pool_ = std::make_shared<MetafsPool<Mio*>>(poolSize);
+    pool_ = std::make_shared<MetaFsPool<Mio*>>(poolSize);
 
     uint32_t count = poolSize;
     while (count-- != 0)
@@ -55,7 +55,6 @@ MioAllocator::MioAllocator(MpioAllocator* mpioAllocator, const uint32_t poolSize
 
 MioAllocator::~MioAllocator(void)
 {
-    pool_->DeleteAll();
     mioTagIdAllocator.Reset();
 }
 

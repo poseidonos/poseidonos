@@ -60,7 +60,7 @@ GetMpio(void* buf)
 TEST(MetaFsPool, Construct_testIfThePoolHasCorrectNumbers)
 {
     const size_t POOL_SIZE = 5;
-    MetafsPool<WriteMpio*> pool(POOL_SIZE);
+    MetaFsPool<WriteMpio*> pool(POOL_SIZE);
 
     EXPECT_EQ(pool.GetCapacity(), POOL_SIZE);
     EXPECT_EQ(pool.GetFreeCount(), 0);
@@ -70,7 +70,7 @@ TEST(MetaFsPool, Construct_testIfThePoolHasCorrectNumbers)
 TEST(MetaFsPool, AddToPool_testIfThePoolHasCorrectNumbers)
 {
     const size_t POOL_SIZE = 5;
-    MetafsPool<WriteMpio*> pool(POOL_SIZE);
+    MetaFsPool<WriteMpio*> pool(POOL_SIZE);
     size_t testBuf = 0;
 
     for (size_t i = 0; i < POOL_SIZE; i++)
@@ -84,10 +84,68 @@ TEST(MetaFsPool, AddToPool_testIfThePoolHasCorrectNumbers)
     EXPECT_EQ(pool.GetUsedCount(), 0);
 }
 
-TEST(MetaFsPool, Desctructor_testIfThePoolWillBeDesctuctedWell)
+TEST(MetaFsPool, TryAlloc_testIfThePoolCanGiveFreeItem)
 {
     const size_t POOL_SIZE = 5;
-    MetafsPool<WriteMpio*>* pool = new MetafsPool<WriteMpio*>(POOL_SIZE);
+    MetaFsPool<WriteMpio*> pool(POOL_SIZE);
+    size_t testBuf = 0;
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        EXPECT_TRUE(pool.AddToPool(mpio));
+    }
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        EXPECT_NE(pool.TryAlloc(), nullptr);
+        EXPECT_EQ(pool.GetFreeCount(), POOL_SIZE - i - 1);
+        EXPECT_EQ(pool.GetUsedCount(), i + 1);
+    }
+
+    EXPECT_EQ(pool.GetCapacity(), POOL_SIZE);
+    EXPECT_EQ(pool.GetFreeCount(), 0);
+    EXPECT_EQ(pool.GetUsedCount(), POOL_SIZE);
+}
+
+TEST(MetaFsPool, Release_testIfThePoolCanRecieveFreeItem)
+{
+    const size_t POOL_SIZE = 5;
+    MetaFsPool<WriteMpio*> pool(POOL_SIZE);
+    size_t testBuf = 0;
+    std::vector<WriteMpio*> items;
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        EXPECT_TRUE(pool.AddToPool(mpio));
+    }
+
+    for (size_t i = 0; i < POOL_SIZE; i++)
+    {
+        auto result = pool.TryAlloc();
+        items.push_back(result);
+        EXPECT_NE(result, nullptr);
+        EXPECT_EQ(pool.GetFreeCount(), POOL_SIZE - i - 1);
+        EXPECT_EQ(pool.GetUsedCount(), i + 1);
+    }
+
+    EXPECT_EQ(items.size(), POOL_SIZE);
+
+    for (auto item : items)
+    {
+        pool.Release(item);
+    }
+
+    EXPECT_EQ(pool.GetCapacity(), POOL_SIZE);
+    EXPECT_EQ(pool.GetFreeCount(), POOL_SIZE);
+    EXPECT_EQ(pool.GetUsedCount(), 0);
+}
+
+TEST(MetaFsPool, Destructor_testIfThePoolWillBeDestructedWell)
+{
+    const size_t POOL_SIZE = 5;
+    MetaFsPool<WriteMpio*>* pool = new MetaFsPool<WriteMpio*>(POOL_SIZE);
     size_t testBuf = 0;
     std::vector<WriteMpio*> mpioList;
 
@@ -106,7 +164,7 @@ TEST(MetaFsPool, Desctructor_testIfThePoolWillBeDesctuctedWell)
 
     for (auto mpio : mpioList)
     {
-        EXPECT_NO_FATAL_FAILURE(delete mpio);
+        EXPECT_DEATH(delete mpio, "");
     }
 }
 } // namespace pos

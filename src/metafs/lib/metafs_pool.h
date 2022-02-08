@@ -43,17 +43,19 @@ namespace pos
 {
 /* thread unsafe, 'Value' should be a pointer type of certain object */
 template<class T>
-class MetafsPool
+class MetaFsPool
 {
 public:
-    MetafsPool(void) = delete;
-    explicit MetafsPool(const size_t poolSize)
+    MetaFsPool(void) = delete;
+    explicit MetaFsPool(const size_t poolSize)
     : CAPACITY(poolSize)
     {
         all_.reserve(CAPACITY);
     }
-    virtual ~MetafsPool(void)
+    virtual ~MetaFsPool(void)
     {
+        for (auto i : all_)
+            delete i;
         all_.clear();
         free_.clear();
     }
@@ -76,11 +78,6 @@ public:
     virtual void Release(T item)
     {
         free_.emplace_back(item);
-    }
-    virtual void DeleteAll(void)
-    {
-        for (auto i : all_)
-            delete i;
     }
     virtual size_t GetCapacity(void) const
     {

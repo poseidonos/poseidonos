@@ -59,7 +59,7 @@ MpioAllocator::MpioAllocator(const size_t eachPoolSize)
     for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
         int numMpio = eachPoolSize;
-        pool_[idx] = std::make_shared<MetafsPool<Mpio*>>(eachPoolSize);
+        pool_[idx] = std::make_shared<MetaFsPool<Mpio*>>(eachPoolSize);
         while (numMpio-- != 0)
             pool_[idx]->AddToPool(_CreateMpio((MpioType)idx));
     }
@@ -67,8 +67,6 @@ MpioAllocator::MpioAllocator(const size_t eachPoolSize)
 
 MpioAllocator::~MpioAllocator(void)
 {
-    for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
-        pool_[idx]->DeleteAll();
 }
 
 Mpio*
