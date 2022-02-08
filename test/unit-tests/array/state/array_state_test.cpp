@@ -386,7 +386,7 @@ TEST(ArrayState, IsCreatable_testIfErrorEventIsReturnedWhenArrayIsMountedAlready
         int actual = arrayState.IsCreatable();
 
         // Then
-        ASSERT_EQ(EID(ARRAY_STATE_ONLINE), actual);
+        ASSERT_EQ(EID(ARRAY_STATE_EXIST), actual);
     }
 }
 

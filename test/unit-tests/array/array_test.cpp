@@ -481,35 +481,6 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenStateIsNotDeletable)
     ASSERT_EQ(NON_ZERO, actual);
 }
 
-TEST(Array, Delete_testIfArrayNotDeletedWhenArrayBootRecordFailsToBeUpdated)
-{
-    // Given: a deletable state, but ABR I/O fails
-    int ABR_FAILURE = 1;
-    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
-    NiceMock<MockIStateControl> mockIStateControl;
-    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
-    MockIAbrControl mockAbrControl;
-    MockPartitionServices* mockSvc = new MockPartitionServices;
-    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
-
-    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
-    EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
-    EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(ABR_FAILURE));
-    EXPECT_CALL(*mockState, SetDelete).Times(0); // this should never be called
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
-    EXPECT_CALL(*mockPtnMgr, DeletePartitions).Times(1);
-
-    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
-    int actual = array.Delete();
-    // Then: state should never be set to Delete
-    ASSERT_EQ(ABR_FAILURE, actual);
-
-    // CleanUp
-    delete mockRebuilder;
-}
-
 TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
 {
     // Given: a happy path scenario

@@ -480,6 +480,20 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
         return eventId;
     }
 
+    if (devSet.spares.size() > 0)
+    {
+        uint64_t minSpareCapa = _GetBaseCapacity(devSet.spares);
+        if (minSpareCapa < baseCapa)
+        {
+            uint32_t eventId = EID(ARRAY_SSD_CAPACITY_ERROR);
+            POS_TRACE_ERROR(eventId,
+                "The capacity of all spare devices must be equal to or greater than the smallest of the data devices, minData:{}, minSpare:{}",
+                baseCapa,
+                minSpareCapa);
+            return eventId;
+        }
+    }
+
     return 0;
 }
 
