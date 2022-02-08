@@ -136,12 +136,14 @@ GcFlushCompletion::_DoSpecificJob(void)
         event = inputEvent;
     }
 
+    StripeId userLsid = stripe->GetUserLsid();
     stripe->Flush(event);
 
+    
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_ACQUIRE_OWNERSHIP_RBA_LIST,
             "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
-            arrayName, stripe->GetUserLsid());
-
+            arrayName, userLsid);
+    
     return true;
 }
 
