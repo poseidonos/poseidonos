@@ -88,6 +88,11 @@ public:
 
     virtual void TearDown(void)
     {
+        for (auto& info : files)
+        {
+            EXPECT_EQ(metaFs->ctrl->Close(info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
+        }
+
         // unmount array
         metaFs->Dispose();
     }
