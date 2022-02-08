@@ -40,7 +40,6 @@
 #include "src/include/address_type.h"
 #include "src/include/raid_type.h"
 #include "src/array/device/array_device.h"
-#include "src/array/ft/method.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/array/service/io_translator/i_translator.h"

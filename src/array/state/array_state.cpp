@@ -194,12 +194,7 @@ int
 ArrayState::IsCreatable(void)
 {
     int eventId = 0;
-    if (IsMounted())
-    {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_ONLINE;
-        POS_TRACE_ERROR(eventId, "Failed to load array, already mounted");
-    }
-    else if (Exists())
+    if (Exists())
     {
         eventId = (int)POS_EVENT_ID::ARRAY_STATE_EXIST;
         POS_TRACE_ERROR(eventId, "Failed to create array, already existed");

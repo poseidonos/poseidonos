@@ -165,6 +165,7 @@ int
 Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
     int ret = 0;
+    bool needSpare = true;
     ArrayMeta meta;
     ArrayNamePolicy namePolicy;
     UniqueIdGenerator uIdGen;
@@ -173,6 +174,14 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     ret = state->IsCreatable();
     if (ret != 0)
     {
+        goto error;
+    }
+
+    needSpare = RaidType(dataFt) != RaidTypeEnum::NONE && RaidType(dataFt) != RaidTypeEnum::RAID0;
+    if (needSpare == false && nameSet.spares.size() > 0)
+    {
+        ret = EID(ARRAY_NO_NEED_SPARE);
+        POS_TRACE_INFO(ret, "Unnecessary spare device requested. RaidType {} does not require spare device", dataFt);
         goto error;
     }
 
@@ -338,12 +347,7 @@ Array::Delete(void)
 
     _DeletePartitions();
     devMgr_->Clear();
-    ret = abrControl->DeleteAbr(name_);
-    if (ret != 0)
-    {
-        goto error;
-    }
-
+    abrControl->DeleteAbr(name_);
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
