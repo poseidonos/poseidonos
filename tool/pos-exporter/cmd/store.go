@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
-	counters = make(map[string]*prometheus.CounterVec)
-	gauges   = make(map[string]*prometheus.GaugeVec)
+	counters     = make(map[string]*prometheus.CounterVec)
+	gauges       = make(map[string]*prometheus.GaugeVec)
+	histogramMap = make(map[string]*POSHistogramCollector)
 )
 
 func getLabelKeys(labels *map[string]string) *[]string {
@@ -45,4 +48,30 @@ func addGauge(in *GaugeMetric) {
 	}
 	vec.With(*in.labels).Set(float64(in.value))
 
+}
+
+func addHistogram(in *HistogramMetric) {
+	var mapIndex = strings.Join(getSortedKeyFromLabelMap(in.labels), ",")
+	histVector, exists := histogramMap[mapIndex]
+	if !exists {
+		histVector = NewPOSHistogramCollector(in.name, getSortedKeyFromLabelMap(in.labels))
+		histogramMap[mapIndex] = histVector
+		prometheus.MustRegister(histVector)
+	}
+
+	hist := histVector.FindHistogram(in.labels)
+	if hist == nil {
+		hist = NewPOSHistogram(len(in.bucketCount))
+		histVector.AddHistogram(in.labels, hist)
+	}
+
+	// Update Label Key, Value
+	var labelKeys = getSortedKeyFromLabelMap(in.labels)
+	var labelValues = make([]string, len(labelKeys))
+	for idx := range labelKeys {
+		labelValues[idx] = (*in.labels)[labelKeys[idx]]
+	}
+	hist.UpdateLabelKey(labelKeys)
+	hist.UpdateLabelValues(labelValues)
+	hist.UpdateHistogram(in)
 }

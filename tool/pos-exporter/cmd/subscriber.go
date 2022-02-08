@@ -48,6 +48,10 @@ func runSubscriber() {
 	grpcServer.Serve(lis)
 }
 
+/**
+internal data structure : internal-metric.go
+handling function ( addXXXX(*MetricType) ) : store.go
+*/
 func parseRequest(in *pb.MetricPublishRequest) error {
 	for _, metric := range in.GetMetrics() {
 		fmt.Println(metric)
@@ -62,9 +66,31 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 			value := metric.GetGaugeValue()
 			parsed := GaugeMetric{name, labelMap, value}
 			addGauge(&parsed)
+		case pb.MetricTypes_HISTOGRAM:
+			//value := metric.GetHistogramValue()
+			parsed := parseToHistogramMetric(metric.GetHistogramValue())
+			parsed.name = name
+			parsed.labels = labelMap
+			addHistogram(parsed)
 		}
 	}
 	return nil
+}
+
+func parseToHistogramMetric(value *pb.HistogramValue) *HistogramMetric {
+	var hMetric = HistogramMetric{}
+
+	hMetric.underflowCount = value.GetUnderflowCount()
+	hMetric.overflowCount = value.GetOverflowCount()
+	hMetric.lowerBound = value.GetLowerBound()
+	hMetric.upperBound = value.GetUpperBound()
+	hMetric.zeroIndex = value.GetZeroIndex()
+	hMetric.bucketScale = value.GetBucketScale()
+	hMetric.scaleType = value.GetScaleType()
+	hMetric.bucketRange = value.GetBucketRange()
+	hMetric.bucketCount = value.GetBucketCount()
+
+	return &hMetric
 }
 
 func makeLabelMap(labels []*pb.Label) *map[string]string {
