@@ -41,8 +41,8 @@
 #include "metafs_io_multilevel_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
-#include "mio_allocator.h"
-#include "mpio.h"
+#include "src/metafs/lib/metafs_pool.h"
+#include "src/metafs/mim/mio.h"
 #include "mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -54,7 +54,7 @@ public:
     MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
     MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MioAllocator* mioAllocator,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
         TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
@@ -86,6 +86,7 @@ private:
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
     void _SendPeriodicMetrics(void);
+    void _CreateMioPool(void);
 #if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif
@@ -94,7 +95,7 @@ private:
     MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
-    MioAllocator* mioAllocator;
+    MetaFsPool<Mio*>* mioPool;
     MpioAllocator* mpioAllocator;
     int cpuStallCnt;
     MioAsyncDoneCb mioCompletionCallback;

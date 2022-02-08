@@ -35,7 +35,6 @@ MIM_SRCS += \
 	meta_io_manager.cpp \
 	metafs_io_scheduler.cpp \
 	mio.cpp \
-	mio_allocator.cpp \
 	mpio.cpp \
 	mpio_allocator.cpp \
 	read_mpio.cpp \

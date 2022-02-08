@@ -30,39 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <memory>
-#include <vector>
-
-#include "mio.h"
-#include "os_header.h"
 #include "src/metafs/lib/metafs_pool.h"
+
+#include <gmock/gmock.h>
 
 namespace pos
 {
-class MioAllocator
+template<typename T>
+class MockMetaFsPool : public MetaFsPool<T>
 {
 public:
-    explicit MioAllocator(MpioAllocator* mpioAllocator, const uint32_t poolSize);
-    virtual ~MioAllocator(void);
+    using MetaFsPool<T>::MetaFsPool;
 
-    virtual Mio* TryAlloc(void);
-    virtual void Release(Mio* mio);
-    virtual bool IsEmpty(void) const
-    {
-        return (0 == GetFreeCount());
-    }
-    virtual size_t GetCapacity(void) const
-    {
-        return pool_->GetCapacity();
-    }
-    virtual size_t GetFreeCount(void) const
-    {
-        return pool_->GetFreeCount();
-    }
-
-private:
-    std::shared_ptr<MetaFsPool<Mio*>> pool_;
+    MOCK_METHOD(bool, AddToPool, (T item), (override));
+    MOCK_METHOD(T, TryAlloc, (), (override));
+    MOCK_METHOD(void, Release, (T item), (override));
+    MOCK_METHOD(size_t, GetCapacity, (), (const, override));
+    MOCK_METHOD(size_t, GetFreeCount, (), (const, override));
+    MOCK_METHOD(size_t, GetUsedCount, (), (const, override));
 };
 } // namespace pos

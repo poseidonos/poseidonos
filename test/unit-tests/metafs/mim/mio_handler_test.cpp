@@ -34,8 +34,8 @@
 #include "src/metafs/mim/mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
+#include "test/unit-tests/metafs/lib/metafs_pool_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
-#include "test/unit-tests/metafs/mim/mio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
@@ -66,7 +66,7 @@ public:
       ioCQ(nullptr),
       doneQ(nullptr),
       bottomhalfHandler(nullptr),
-      mioAllocator(nullptr),
+      mioPool(nullptr),
       mpioAllocator(nullptr),
       arrayInfo(nullptr),
       mgmt(nullptr),
@@ -93,7 +93,7 @@ public:
         doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
         bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, nullptr, doneQ);
         mpioAllocator = new NiceMock<MockMpioAllocator>(POOL_SIZE);
-        mioAllocator = new NiceMock<MockMioAllocator>(mpioAllocator, POOL_SIZE);
+        mioPool = new NiceMock<MockMetaFsPool<Mio*>>(POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
         EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
@@ -107,7 +107,7 @@ public:
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
-        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioAllocator, mioAllocator, tp);
+        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioAllocator, mioPool, tp);
     }
 
     virtual void
@@ -127,7 +127,7 @@ protected:
     NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>* ioCQ;
     MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ;
     NiceMock<MockMpioHandler>* bottomhalfHandler;
-    NiceMock<MockMioAllocator>* mioAllocator;
+    NiceMock<MockMetaFsPool<Mio*>>* mioPool;
     NiceMock<MockMpioAllocator>* mpioAllocator;
     NiceMock<MockMetaStorageSubsystem>* mss;
     NiceMock<MockTelemetryPublisher>* tp;
@@ -186,9 +186,7 @@ TEST_F(MioHandlerTestFixture, Normal_PushToRetryQueue)
     msg->arrayId = 0;
     msg->targetMediaType = MetaStorageType::SSD;
 
-    EXPECT_CALL(*msg, SetRetryFlag).Times(AtLeast(1));
     EXPECT_CALL(*ioSQ, Enqueue).Times(AtLeast(1));
-    EXPECT_CALL(*ioSQ, Dequeue).Times(MAX_COUNT).WillRepeatedly(Return(msg));
     EXPECT_CALL(*checker, IsRangeOverlapConflicted).WillRepeatedly(Return(true));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);
