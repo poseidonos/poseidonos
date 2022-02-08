@@ -32,49 +32,24 @@
 
 #pragma once
 
-#include <atomic>
-
-#include "../log/waiting_log_list.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
+#include "src/event_scheduler/event.h"
 
 namespace pos
 {
-class BufferOffsetAllocator;
-class LogWriteContext;
-class JournalLogBuffer;
-class JournalConfiguration;
-class LogWriteStatistics;
+class JournalVolumeEventHandler;
 
-class LogWriteHandler : public LogBufferWriteDoneEvent
+class VolumeDeletedLogWriteRequestCallback : public Event
 {
 public:
-    LogWriteHandler(void);
-    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
-    virtual ~LogWriteHandler(void);
+    VolumeDeletedLogWriteRequestCallback(JournalVolumeEventHandler* volumeEventHandler, int volId, uint64_t segCtxVersion);
+    virtual ~VolumeDeletedLogWriteRequestCallback(void) = default;
 
-    virtual void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
-        JournalConfiguration* config);
-    virtual void Dispose(void);
-
-    virtual int AddLog(LogWriteContext* context);
-    virtual void AddLogToWaitingList(LogWriteContext* context);
-    void LogWriteDone(AsyncMetaFileIoCtx* ctx);
-
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
+    virtual bool Execute(void);
 
 private:
-    void _StartWaitingIos(void);
-
-    JournalLogBuffer* logBuffer;
-    BufferOffsetAllocator* bufferAllocator;
-
-    LogWriteStatistics* logWriteStats;
-    WaitingLogList* waitingList;
-
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
+    JournalVolumeEventHandler* volumeEventHandler;
+    int volumeId;
+    uint64_t segCtxVersion;
 };
 
 } // namespace pos

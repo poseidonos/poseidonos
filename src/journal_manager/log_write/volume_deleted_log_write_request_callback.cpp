@@ -30,51 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/journal_manager/log_write/volume_deleted_log_write_request_callback.h"
 
-#include <atomic>
-
-#include "../log/waiting_log_list.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
+#include "src/journal_manager/log_write/journal_volume_event_handler.h"
 
 namespace pos
 {
-class BufferOffsetAllocator;
-class LogWriteContext;
-class JournalLogBuffer;
-class JournalConfiguration;
-class LogWriteStatistics;
-
-class LogWriteHandler : public LogBufferWriteDoneEvent
+VolumeDeletedLogWriteRequestCallback::VolumeDeletedLogWriteRequestCallback(JournalVolumeEventHandler* volumeEventHandler,
+    int volumeId, uint64_t segCtxVersion)
+: volumeEventHandler(volumeEventHandler),
+  volumeId(volumeId),
+  segCtxVersion(segCtxVersion)
 {
-public:
-    LogWriteHandler(void);
-    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
-    virtual ~LogWriteHandler(void);
+}
 
-    virtual void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
-        JournalConfiguration* config);
-    virtual void Dispose(void);
-
-    virtual int AddLog(LogWriteContext* context);
-    virtual void AddLogToWaitingList(LogWriteContext* context);
-    void LogWriteDone(AsyncMetaFileIoCtx* ctx);
-
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
-
-private:
-    void _StartWaitingIos(void);
-
-    JournalLogBuffer* logBuffer;
-    BufferOffsetAllocator* bufferAllocator;
-
-    LogWriteStatistics* logWriteStats;
-    WaitingLogList* waitingList;
-
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
-};
+bool VolumeDeletedLogWriteRequestCallback::Execute(void)
+{
+    volumeEventHandler->RetryVolumeDeletedLogWrite(volumeId, segCtxVersion);
+    return true;
+}
 
 } // namespace pos

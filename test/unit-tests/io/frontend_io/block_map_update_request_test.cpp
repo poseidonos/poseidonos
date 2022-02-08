@@ -153,7 +153,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEx
     actual = blockMapUpdateRequest.Execute();
 
     // Then: BlockMapUpdateRequest return false
-    expected = true;
+    expected = false;
     ASSERT_EQ(actual, expected);
 }
 

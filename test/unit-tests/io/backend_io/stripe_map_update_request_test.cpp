@@ -153,7 +153,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
         &mockMetaUpdater, &mockEventScheduler, event, 0);
-    bool actual, expected{true};
+    bool actual, expected{false};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
     StripeAddr stripeAddr;
@@ -161,6 +161,37 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
     ON_CALL(mockIStripeMap, IsInWriteBufferArea(_)).WillByDefault(Return(true));
     ON_CALL(mockMetaUpdater, UpdateStripeMap).WillByDefault(Return(-1));
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+
+    // When: Try to Execute() when userArea false
+    actual = stripeMapUpdateRequest.Execute();
+
+    // Then: Receive result as true
+    ASSERT_EQ(expected, actual);
+}
+
+TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdatePostponed)
+{
+    // Given
+    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
+    CallbackSmartPtr event(mockFlushCompletion);
+
+    StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
+        &mockMetaUpdater, &mockEventScheduler, event, 0);
+    bool actual, expected{false};
+
+    stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
+    StripeAddr stripeAddr;
+    ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
+    ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
+    ON_CALL(mockIStripeMap, IsInWriteBufferArea(_)).WillByDefault(Return(true));
+
+    // return JOURNAL_LOG_GROUP_FULL error code.
+    ON_CALL(mockMetaUpdater, UpdateStripeMap).WillByDefault(Return(3030));
     ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
 
     // When: Try to Execute() when userArea false

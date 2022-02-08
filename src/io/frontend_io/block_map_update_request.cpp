@@ -113,7 +113,7 @@ BlockMapUpdateRequest::_UpdateMeta(void)
     if (likely(blockMapUpdateCompletionEvent != nullptr))
     {
         int result = metaUpdater->UpdateBlockMap(volumeIo, blockMapUpdateCompletionEvent);
-        if (unlikely(result > 0))
+        if (unlikely(result != 0))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
             POS_TRACE_ERROR(static_cast<int>(eventId),
