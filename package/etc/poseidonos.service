@@ -1,0 +1,9 @@
+[Unit]
+Description=poseidonos
+
+[Service]
+ExecStart=/usr/local/bin/poseidonos
+
+[Install]
+WantedBy=multi-user.target
+Alias=poseidonos

@@ -257,12 +257,21 @@ poseidonos: makedir
 makedir:
 	@`[ -d $(BINDIR) ] || mkdir -p $(BINDIR)`
 
+package: poseidonos
+	cp -rf lib/spdk package/usr/local/lib/
+	cp -f bin/poseidonos package/usr/local/bin/
+	@`[ -d debian ] || mkdir -p debian`
+	dpkg-deb --build package debian/poseidonos.deb
+
 clean :
 	@$(MAKE) -C src clean
 	@$(MAKE) -C proto clean
 	@rm -rf $(BINDIR)
+	@rm -rf package/usr/local/bin/poseidonos
+	@rm -rf package/usr/local/lib/spdk
+	@rm -rf debian/
 
-.PHONY: all install clean udev_install udev_uninstall makedir
+.PHONY: all install clean udev_install udev_uninstall makedir package
 
 include $(SPDK_ROOT_DIR)/mk/spdk.deps.mk
 export INCLUDE SRCS CPPFLAGS DEFINE

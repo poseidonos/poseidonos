@@ -1,0 +1,4 @@
+#!/bin/bash
+mv /etc/poseidonos.service /lib/systemd/system/poseidonos.service
+systemctl daemon-reload 
+systemctl start poseidonos.service

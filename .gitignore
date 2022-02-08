@@ -90,3 +90,5 @@ tool/cli/docs/manpage
 tool/pkg/
 tool/cli/lib/pnconnector/src/util/resource.go
 pos-exporter
+package/usr/
+!package/usr/local/*/.gitkeep
