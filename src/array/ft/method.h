@@ -72,7 +72,7 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
-    virtual uint32_t GetMinimumNumberOfDevices(void) = 0;
+    virtual bool CheckNumofDevsToConfigure(uint32_t numofDevs) = 0;
     RaidTypeEnum GetRaidType(void) { return raidType; }
     RecoverFunc& GetRecoverFunc(void) { return recoverFunc; }
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) { return list<FtBlkAddr>(); }

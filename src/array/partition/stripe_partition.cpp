@@ -178,13 +178,13 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
         return eventId;
     }
-    size_t required = method->GetMinimumNumberOfDevices();
-    size_t actual = devs.size();
-    if (required > actual)
+
+    size_t numofDevs = devs.size();
+    if (method->CheckNumofDevsToConfigure(numofDevs) == false)
     {
         int eventId = EID(ARRAY_DEVICE_COUNT_ERROR);
-        POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, need:{}, actual:{}",
-            required, actual);
+        POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, actual:{}",
+            numofDevs);
         delete method;
         return eventId;
     }

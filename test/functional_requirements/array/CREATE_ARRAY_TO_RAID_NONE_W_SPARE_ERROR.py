@@ -2,28 +2,25 @@
 import subprocess
 import os
 import sys
-import time
 sys.path.append("../")
 sys.path.append("../../system/lib/")
+sys.path.append("../device_management/")
 
 import json_parser
 import pos
 import cli
 import api
-import json
-import MOUNT_ARRAY_TO_RAID_NONE
+import SCAN_DEV_BASIC
 
-ARRAYNAME = MOUNT_ARRAY_TO_RAID_NONE.ARRAYNAME
+DATA = "unvme-ns-0"
+SPARE = "unvme-ns-1"
+ARRAYNAME = "POSArray"
 
 def execute():
-    MOUNT_ARRAY_TO_RAID_NONE.execute()
-    cli.unmount_array(ARRAYNAME)
-    pos.exit_pos()
-    time.sleep(5)
-    pos.start_pos()
-    cli.scan_device()
-    out = cli.mount_array(ARRAYNAME)
-    print (out)
+    SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
+    out = cli.create_array("uram0", DATA, SPARE, ARRAYNAME, "NONE")
+    print(out)
     return out
 
 if __name__ == "__main__":
@@ -31,6 +28,6 @@ if __name__ == "__main__":
         pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
-    ret = api.set_result_by_code_eq(out, 0, __file__)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
     exit(ret)
