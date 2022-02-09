@@ -54,7 +54,6 @@ handling function ( addXXXX(*MetricType) ) : store.go
 */
 func parseRequest(in *pb.MetricPublishRequest) error {
 	for _, metric := range in.GetMetrics() {
-		fmt.Println(metric)
 		name := metric.GetName()
 		labelMap := makeLabelMap(metric.GetLabels())
 		switch metric.GetType() {
@@ -72,7 +71,10 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 			parsed.labels = labelMap
 			addHistogram(parsed)
 		}
+
+		touchExpiryVec(&name, labelMap)
 	}
+
 	return nil
 }
 
