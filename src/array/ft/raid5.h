@@ -60,7 +60,7 @@ public:
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
-    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override { return numofDevs >= 3; }
+    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
 
     // This function is for unit testing only
     virtual int GetParityPoolSize();

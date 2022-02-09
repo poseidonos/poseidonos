@@ -85,6 +85,13 @@ RaidNone::GetRaidState(vector<ArrayDeviceState> devs)
     return RaidState::FAILURE;
 }
 
+bool
+RaidNone::CheckNumofDevsToConfigure(uint32_t numofDevs)
+{
+    uint32_t requiredNumofDevsforRAIDNone = 1;
+    return numofDevs == requiredNumofDevsforRAIDNone;
+}
+
 RaidNone::~RaidNone()
 {
 }

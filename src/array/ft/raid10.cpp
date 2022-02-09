@@ -123,6 +123,13 @@ Raid10::GetParityOffset(StripeId lsid)
     return parityIdx;
 }
 
+bool
+Raid10::CheckNumofDevsToConfigure(uint32_t numofDevs)
+{
+    uint32_t minRequiredNumofDevsforRAID10 = 2;
+    return numofDevs >= minRequiredNumofDevsforRAID10;
+}
+
 void
 Raid10::_BindRecoverFunc(void)
 {

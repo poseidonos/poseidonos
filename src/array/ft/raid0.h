@@ -49,7 +49,7 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
-    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override { return numofDevs >= 2; }
+    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
     virtual bool IsRecoverable(void) override { return false; }
 };
 

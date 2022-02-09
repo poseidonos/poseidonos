@@ -130,6 +130,13 @@ Raid5::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
     return 0;
 }
 
+bool
+Raid5::CheckNumofDevsToConfigure(uint32_t numofDevs)
+{
+    uint32_t minRequiredNumofDevsforRAID5 = 3;
+    return numofDevs >= minRequiredNumofDevsforRAID5;
+}
+
 BufferEntry
 Raid5::_AllocBuffer()
 {

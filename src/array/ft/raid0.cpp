@@ -85,6 +85,13 @@ Raid0::GetRaidState(vector<ArrayDeviceState> devs)
     return RaidState::FAILURE;
 }
 
+bool
+Raid0::CheckNumofDevsToConfigure(uint32_t numofDevs)
+{
+    uint32_t minRequiredNumofDevsforRAID0 = 2;
+    return numofDevs >= minRequiredNumofDevsforRAID0;
+}
+
 Raid0::~Raid0()
 {
 }
