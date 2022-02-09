@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	//"fmt"
-
 	"fmt"
 	"io"
 	"net/http"

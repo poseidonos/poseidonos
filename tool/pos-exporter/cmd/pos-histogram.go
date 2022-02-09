@@ -90,11 +90,6 @@ func CalculateUpperBound(in *HistogramMetric) []float64 {
 	var upperBoundArray = make([]float64, bucketSize)
 	if in.scaleType == 0 {
 		for bucketIndex := range upperBoundArray {
-			/*
-			  LowerBound -10, UpperBound +10, Scale 5 (linear type)
-			  Bucket Range [-10,-6] [-5,-1] [0,4] [5-9]
-			  Bucket Index    0        1      2     3
-			*/
 			var upperEq = (int32(bucketIndex) * int32(in.bucketScale)) + (int32(in.lowerBound) + int32(in.bucketScale))
 			upperBoundArray[bucketIndex] = float64(upperEq)
 		}
@@ -109,13 +104,6 @@ func CalculateUpperBound(in *HistogramMetric) []float64 {
 		// (zeroindex+1 ~ bucektSize)
 		curMulti = pow
 		for bucketIndex := zeroIndex + 1; bucketIndex < bucketSize; bucketIndex++ {
-			/*
-			  LowerBound -100, UpperBound +100, Scale 10 (linear type)
-			  Bucket Range   [-10^2,-10^1) [-10^1,-10^0) [-10^0,0) [0,10^0) [10^0,10^1) [10^1,10^2]
-			  Bucket Index    0                 1            2        3         4           5
-			  Note                                                  ZeroIdx
-			  UpperBound      -10^1         -10^0         0         1        10^1        10^2
-			*/
 			upperBoundArray[bucketIndex] = float64(curMulti)
 			curMulti = curMulti * pow
 		}
