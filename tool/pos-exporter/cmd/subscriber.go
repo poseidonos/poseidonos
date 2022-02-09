@@ -67,7 +67,6 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 			parsed := GaugeMetric{name, labelMap, value}
 			addGauge(&parsed)
 		case pb.MetricTypes_HISTOGRAM:
-			//value := metric.GetHistogramValue()
 			parsed := parseToHistogramMetric(metric.GetHistogramValue())
 			parsed.name = name
 			parsed.labels = labelMap
