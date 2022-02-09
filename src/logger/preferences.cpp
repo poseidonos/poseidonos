@@ -41,15 +41,12 @@ namespace pos_logger
 {
 Preferences::Preferences()
 {
-    // TODO (mj): Set isJSON to false in default.
-    // Later, the default value will be set to true,
-    // which means that the default log format will be JSON.
-    StructuredLogging = false;
-
     Configuration conf;
     logfileSize = conf.LogSizePerFileInMB();
     logRotation = conf.NumOfLogFilesForRotation();
     logLevel = StringToLogLevel(conf.LogLevel());
+    EnableStructuredLogging = conf.IsStrLoggingEnabled();
+
     ApplyFilter();
 }
 
@@ -103,7 +100,7 @@ Preferences::ToJson()
         data.SetAttribute(JsonAttribute("filter_included", "\"" + filter.IncludeRule() + "\""));
         data.SetAttribute(JsonAttribute("filter_excluded", "\"" + filter.ExcludeRule() + "\""));
     }
-    data.SetAttribute(JsonAttribute("structured_logging", StructuredLogging ? "true" : "false"));
+    data.SetAttribute(JsonAttribute("structured_logging", EnableStructuredLogging ? "true" : "false"));
 
     return data;
 }
@@ -142,7 +139,7 @@ Preferences::StringToLogLevel(string lvl)
 int
 Preferences::SetStrLogging(bool input)
 {
-    StructuredLogging = input;
+    EnableStructuredLogging = input;
 
     return (int)POS_EVENT_ID::SUCCESS;
 }

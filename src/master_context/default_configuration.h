@@ -94,6 +94,9 @@ private:
         {"logfile_size_in_mb", "50"},
         {"logfile_rotation_count", "20"},
         {"min_allowable_log_level", "\"debug\""},
+        // TODO (mj): The default value of structured_logging will be
+        // TRUE after implementing the strcutured logging functionality.
+        {"enable_structured_logging", "false"},
     };
     vector<ConfigKeyValue> eventSchedulerData = {
         {"numa_dedicated", "false"}
