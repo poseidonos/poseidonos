@@ -61,7 +61,7 @@ func _runExpiryManager() {
 					if exists {
 						vec.Delete(*label_kv)
 					} else {
-						fmt.Println("In the metric expiration process, unknown metric(%s) was accessed", name)
+						fmt.Printf("In the metric expiration process, unknown metric(%s) was accessed", name)
 					}
 				}
 				delete(expiryVec[name], key)

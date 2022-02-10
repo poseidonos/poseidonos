@@ -463,3 +463,123 @@ func Test_POSHistogramCollector_BucketChangeTest(t *testing.T) {
 	prometheus.Unregister(histVector)
 
 }
+
+func Test_POSHistogramAddRemove(t *testing.T) {
+
+	var hMetric = HistogramMetric{}
+	hMetric.name = "histogram5"
+	hMetric.labels = &map[string]string{"s_key_1": "s_value_1"}
+	hMetric.underflowCount = 0
+	hMetric.overflowCount = 0
+	hMetric.lowerBound = -100
+	hMetric.upperBound = 100
+	hMetric.zeroIndex = 3
+	hMetric.bucketScale = 10
+	hMetric.scaleType = 1 /* exp */
+	hMetric.bucketCount = []uint64{1, 2, 3, 4, 5}
+
+	var mapIndex = strings.Join(getSortedKeyFromLabelMap(hMetric.labels), ",")
+	histVector := NewPOSHistogramCollector(hMetric.name, getSortedKeyFromLabelMap(hMetric.labels))
+	histogramMap[mapIndex] = histVector
+	prometheus.MustRegister(histVector)
+
+	// add histogram
+	hist := histVector.FindHistogram(hMetric.labels)
+	if hist != nil {
+		t.Fail()
+	}
+	hist = NewPOSHistogram(len(hMetric.bucketCount))
+	histVector.AddHistogram(hMetric.labels, hist)
+
+	// re find
+	hist = histVector.FindHistogram(hMetric.labels)
+	if hist == nil {
+		t.Fail()
+	}
+
+	// Update Label Key, Value
+	var labelKeys = getSortedKeyFromLabelMap(hMetric.labels)
+	var labelValues = make([]string, len(labelKeys))
+	for idx := range labelKeys {
+		labelValues[idx] = (*hMetric.labels)[labelKeys[idx]]
+	}
+	hist.UpdateLabelKey(labelKeys)
+	hist.UpdateLabelValues(labelValues)
+	hist.UpdateHistogram(&hMetric)
+
+	// prometheus http test
+	ts := httptest.NewServer(promhttp.Handler())
+	fmt.Println("URL : ", ts.URL, ts)
+	defer ts.Close()
+
+	res, _ := http.Get(ts.URL)
+	mBody, _ := io.ReadAll(res.Body)
+
+	var original = string(mBody)
+	if !strings.Contains(original, "histogram5") {
+		fmt.Println("histogram5 doesn't exists ")
+		t.Fail()
+	} else {
+		if !strings.Contains(original, "s_key_1") || !strings.Contains(original, "s_value_1") {
+			fmt.Println("histogram5 doesn't exists ")
+			t.Fail()
+		}
+	}
+
+	// remove Test
+	var rMetric = HistogramMetric{}
+	rMetric.name = "histogram5"
+	rMetric.labels = &map[string]string{"s_key_1": "s_value_NONONONO"}
+	rMetric.underflowCount = 0
+	rMetric.overflowCount = 0
+	rMetric.lowerBound = -100
+	rMetric.upperBound = 100
+	rMetric.zeroIndex = 3
+	rMetric.bucketScale = 10
+	rMetric.scaleType = 1 /* exp */
+	rMetric.bucketCount = []uint64{1, 2, 3, 4, 5}
+
+	if histVector.FindHistogram(rMetric.labels) != nil {
+		fmt.Println("Expect nil but not")
+		t.Fail()
+	}
+
+	var removedCount = histVector.RemoveHistogram(rMetric.labels)
+	if removedCount != 0 {
+		fmt.Println("Expect removed count = 0, but not ", removedCount)
+		t.Fail()
+	}
+
+	// remove actual metric
+	rMetric.labels = &map[string]string{"s_key_1": "s_value_1"}
+	if histVector.FindHistogram(rMetric.labels) == nil {
+		fmt.Println("Expect not nil, but return nil")
+		t.Fail()
+	}
+
+	removedCount = histVector.RemoveHistogram(rMetric.labels)
+	if removedCount == 0 {
+		fmt.Println("Expect removed count = 1, but not ", removedCount)
+		t.Fail()
+	}
+
+	if histVector.FindHistogram(rMetric.labels) != nil {
+		fmt.Println("Expect nil after removing actual metric")
+		t.Fail()
+	}
+
+	res, _ = http.Get(ts.URL)
+	mBody, _ = io.ReadAll(res.Body)
+	original = string(mBody)
+	if strings.Contains(original, "histogram5") {
+		fmt.Println("histogram5 exists after removing")
+		t.Fail()
+	} else {
+		if strings.Contains(original, "s_key_1") || strings.Contains(original, "s_value_1") {
+			fmt.Println("histogram5's property exists after removing")
+			t.Fail()
+		}
+	}
+
+	prometheus.Unregister(histVector)
+}
