@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -51,11 +49,10 @@ func addGauge(in *GaugeMetric) {
 }
 
 func addHistogram(in *HistogramMetric) {
-	var mapIndex = strings.Join(getSortedKeyFromLabelMap(in.labels), ",")
-	histVector, exists := histogramMap[mapIndex]
+	histVector, exists := histogramMap[in.name]
 	if !exists {
 		histVector = NewPOSHistogramCollector(in.name, getSortedKeyFromLabelMap(in.labels))
-		histogramMap[mapIndex] = histVector
+		histogramMap[in.name] = histVector
 		prometheus.MustRegister(histVector)
 	}
 
