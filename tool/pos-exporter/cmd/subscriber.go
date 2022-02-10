@@ -56,23 +56,38 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 	for _, metric := range in.GetMetrics() {
 		name := metric.GetName()
 		labelMap := makeLabelMap(metric.GetLabels())
+
+		mutex.Lock()
+
 		switch metric.GetType() {
 		case pb.MetricTypes_COUNTER:
 			value := metric.GetCounterValue()
 			parsed := CounterMetric{name, labelMap, value}
+
 			addCounter(&parsed)
+
 		case pb.MetricTypes_GAUGE:
 			value := metric.GetGaugeValue()
 			parsed := GaugeMetric{name, labelMap, value}
+
 			addGauge(&parsed)
+
 		case pb.MetricTypes_HISTOGRAM:
 			parsed := parseToHistogramMetric(metric.GetHistogramValue())
 			parsed.name = name
 			parsed.labels = labelMap
+
 			addHistogram(parsed)
+
+		default:
+			mutex.Unlock()
+			fmt.Printf("Unknown metric type (name: %s)\n", name)
+			continue
 		}
 
 		touchExpiryVec(&name, labelMap)
+
+		mutex.Unlock()
 	}
 
 	return nil

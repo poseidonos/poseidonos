@@ -40,7 +40,9 @@ func touchExpiryVec(name *string, labels *map[string]string) {
 
 func runExpiryManager() {
 	for {
+		mutex.Lock()
 		_runExpiryManager()
+		mutex.Unlock()
 		time.Sleep((time.Duration(valid_duration_second + 1)) * time.Second)
 	}
 }
