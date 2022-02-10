@@ -545,7 +545,7 @@ func Test_POSHistogramAddRemove(t *testing.T) {
 	}
 
 	var removedCount = histVector.RemoveHistogram(rMetric.labels)
-	if removedCount != 0 {
+	if removedCount != false {
 		fmt.Println("Expect removed count = 0, but not ", removedCount)
 		t.Fail()
 	}
@@ -558,7 +558,7 @@ func Test_POSHistogramAddRemove(t *testing.T) {
 	}
 
 	removedCount = histVector.RemoveHistogram(rMetric.labels)
-	if removedCount == 0 {
+	if removedCount == false {
 		fmt.Println("Expect removed count = 1, but not ", removedCount)
 		t.Fail()
 	}

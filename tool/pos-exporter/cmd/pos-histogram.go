@@ -62,16 +62,16 @@ func (collector *POSHistogramCollector) AddHistogram(labels *map[string]string, 
 	collector.metrics[mapIndex] = histogram
 }
 
-func (collector *POSHistogramCollector) RemoveHistogram(labels *map[string]string) int {
-	var removedCount = 0
+func (collector *POSHistogramCollector) RemoveHistogram(labels *map[string]string) bool {
+	var isRemoved = false
 	var mapIndex = getMapIndexString(labels)
 
 	if _, ok := collector.metrics[mapIndex]; ok {
 		delete(collector.metrics, mapIndex)
-		removedCount = 1
+		isRemoved = true
 	}
 
-	return removedCount
+	return isRemoved
 }
 
 func getSortedKeyFromLabelMap(labels *map[string]string) []string {
