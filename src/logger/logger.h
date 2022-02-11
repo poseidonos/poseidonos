@@ -61,6 +61,8 @@ enum class ModuleInDebugLogDump
     MAX_SIZE,
 };
 
+string BuildPattern(bool logJson);
+
 class Logger
 {
 public:
@@ -143,8 +145,6 @@ public:
     }
 
 private:
-    string _BuildPattern(bool logJson);
-
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
@@ -171,6 +171,7 @@ public:
 
 private:
     shared_ptr<spdlog::logger> reporter;
+    pos_logger::Preferences preferences;
     const uint32_t SIZE_MB = 50;
     const uint32_t ROTATION = 20;
     const string REPORT_PATH = "/var/log/pos/";

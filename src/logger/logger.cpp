@@ -44,6 +44,32 @@
 
 namespace pos
 {
+string
+BuildPattern(bool isStrLoggingEnabled)
+{
+    id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
+    std::string pattern = "";
+
+    if (isStrLoggingEnabled)
+    {
+        // TODO (mj): eventName, moduleName, errorCode
+        // cause, trace, and variables fields will be added
+        pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
+            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
+            "\"level\":\"%^%l%$\",\"description\":{ %v }},"};
+    }
+    else
+    {
+        // Conventional Log Format
+        // [POSInstanceId][Datetime][EventID]][LogLevel] -
+        // Log Message at SourceFile and LineNumber
+        pattern = '[' + std::to_string(instanceId) + ']'
+            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
+    }
+
+    return pattern;
+}
+
 Logger::Logger(void)
 {
     if (DirExists(preferences.LogDir()) == false)
@@ -63,11 +89,11 @@ Logger::Logger(void)
     major_sink->set_level(spdlog::level::warn);
 
     // Console log is always displayed in plain text form
-    console_sink->set_pattern(_BuildPattern(false));
+    console_sink->set_pattern(BuildPattern(false));
     // Minor and major logs will be displayed
     // according to preference (plain text or json)
-    minor_sink->set_pattern(_BuildPattern(preferences.IsStrLoggingEnabled()));
-    major_sink->set_pattern(_BuildPattern(preferences.IsStrLoggingEnabled()));
+    minor_sink->set_pattern(BuildPattern(preferences.IsStrLoggingEnabled()));
+    major_sink->set_pattern(BuildPattern(preferences.IsStrLoggingEnabled()));
 
     sinks.push_back(console_sink);
     sinks.push_back(minor_sink);
@@ -103,7 +129,7 @@ Logger::ApplyPreference(void)
         MakeDir(preferences.LogDir());
     }
 
-    string pattern = _BuildPattern(preferences.IsStrLoggingEnabled());
+    string pattern = BuildPattern(preferences.IsStrLoggingEnabled());
     logger->sinks()[1]->set_pattern(pattern); // Index 1: minor sink
     logger->sinks()[2]->set_pattern(pattern); // Index 2: major sink
 }
@@ -126,32 +152,6 @@ Logger::SetStrLogging(bool input)
     return preferences.SetStrLogging(input);
 }
 
-string
-Logger::_BuildPattern(bool isStrLoggingEnabled)
-{
-    id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
-    std::string pattern = "";
-
-    if (isStrLoggingEnabled)
-    {
-        // TODO (mj): eventName, moduleName, errorCode
-        // cause, trace, and variables fields will be added
-        pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
-            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
-            "\"level\":\"%^%l%$\",\"description\":{ %v }},"};
-    }
-    else
-    {
-        // Conventional Log Format
-        // [POSInstanceId][Datetime][EventID]][LogLevel] -
-        // Log Message at SourceFile and LineNumber
-        pattern = '[' + std::to_string(instanceId) + ']'
-            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
-    }
-
-    return pattern;
-}
-
 Reporter::Reporter(void)
 {
     if (DirExists(REPORT_PATH) == false)
@@ -159,7 +159,7 @@ Reporter::Reporter(void)
         MakeDir(REPORT_PATH);
     }
 
-    const string pattern = "[%E][%q][%l] %v"; // [Seconds since the epoch][1001][info] blah blah ~
+    const string pattern = BuildPattern(preferences.IsStrLoggingEnabled());
     auto reporter_sink = make_shared<spdlog::sinks::rotating_file_sink_mt>(
         REPORT_PATH + REPORT_NAME, SIZE_MB * SZ_1MB, ROTATION);
     reporter_sink->set_level(spdlog::level::info);
