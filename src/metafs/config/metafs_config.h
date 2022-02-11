@@ -74,6 +74,5 @@ public:
 };
 
 #define RANGE_OVERLAP_CHECK_EN 1
-#define MPIO_CACHE_EN 0
 #define NVRAM_BYTE_ACCESS_DIRECT_EN 1
 } // namespace pos
