@@ -56,7 +56,7 @@ public:
         return components.at(arrayId)->metaFs;
     }
 
-    const static size_t ARRAY_COUNT = 2;
+    static const size_t ARRAY_COUNT = 2;
 
 protected:
     NiceMock<MockTelemetryPublisher>* tpForMetaIo;

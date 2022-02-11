@@ -33,6 +33,7 @@
 #pragma once
 
 #include <atomic>
+#include <string>
 
 #include "src/metafs/log/metafs_log.h"
 #include "src/include/pos_event_id.h"
@@ -108,7 +109,7 @@ public:
     RequestPriority GetPriority(void);
     virtual uint64_t GetId(void) const
     {
-        return id_;
+        return UNIQUE_ID;
     }
     void PrintLog(std::string str, const int array, const int lpn) const
     {
@@ -150,7 +151,7 @@ private:
     PartialMpioDoneCb partialMpioDoneNotifier;
     MssCallbackPointer mpioDoneCallback;
 
-    const uint64_t id_;
+    const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;
 };
 } // namespace pos

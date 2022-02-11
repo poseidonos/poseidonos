@@ -121,7 +121,7 @@ public:
     virtual int GetArrayId(void);
     virtual uint64_t GetId(void) const
     {
-        return id_;
+        return UNIQUE_ID;
     }
 
     virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
@@ -163,7 +163,7 @@ protected:
     MpioAsyncDoneCb mpioAsyncDoneCallback;
 
     MetaStorageSubsystem* metaStorage;
-    const uint64_t id_;
+    const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;
 };
 } // namespace pos

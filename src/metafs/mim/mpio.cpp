@@ -52,7 +52,7 @@ Mpio::Mpio(void* mdPageBuf)
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
   priority(RequestPriority::Normal),
-  id_(idAllocate_++)
+  UNIQUE_ID(idAllocate_++)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }

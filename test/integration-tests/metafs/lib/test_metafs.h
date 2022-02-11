@@ -32,10 +32,12 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -59,11 +61,11 @@ class BufferContext
 {
 public:
     BufferContext(const size_t size)
-    : size_(size)
+    : SIZE(size)
     {
-        assert(size_ != 0);
-        buffer_ = new char[size_];
-        memset(buffer_, 0, size_);
+        assert(SIZE != 0);
+        buffer_ = new char[SIZE];
+        memset(buffer_, 0, SIZE);
     }
     ~BufferContext(void)
     {
@@ -76,7 +78,7 @@ public:
     }
 
 private:
-    const size_t size_;
+    const size_t SIZE;
     char* buffer_;
 };
 
@@ -88,8 +90,12 @@ public:
     {
         for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
         {
-            files[arrayId].insert({StorageOpt::SSD, {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0, {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
-            files[arrayId].insert({StorageOpt::NVRAM, {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0, {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+            files[arrayId].insert({StorageOpt::SSD,
+                {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0,
+                    {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+            files[arrayId].insert({StorageOpt::NVRAM,
+                {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0,
+                    {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
         }
 
         writeBuf = new char[BYTE_4K];

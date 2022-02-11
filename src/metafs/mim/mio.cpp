@@ -57,7 +57,7 @@ Mio::Mio(MpioAllocator* mpioAllocator)
   mpioAllocator(nullptr),
   mergedRequestList(nullptr),
   metaStorage(nullptr),
-  id_(idAllocate_++)
+  UNIQUE_ID(idAllocate_++)
 {
     _InitStateHandler();
 
