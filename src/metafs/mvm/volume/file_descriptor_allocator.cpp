@@ -95,11 +95,12 @@ FileDescriptorType
 FileDescriptorAllocator::Alloc(std::string& fileName)
 {
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    FileDescriptorType fd = Alloc(fileKey);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "alloc new fd={} by fileName={}", fd, fileName);
 
-    return Alloc(fileKey);
+    return fd;
 }
 
 void
@@ -121,7 +122,7 @@ FileDescriptorAllocator::Free(StringHashType fileKey, FileDescriptorType fd)
         fileKey2FdLookupMap->erase(fileKey);
         freeFdMap->insert(fd);
 
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::mfs_file,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "free fd={} by fileKey={}", fd, fileKey);
     }
     else

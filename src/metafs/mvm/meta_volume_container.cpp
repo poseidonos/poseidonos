@@ -72,7 +72,7 @@ MetaVolumeContainer::InitContext(MetaVolumeType volumeType, int arrayId,
     _RegisterVolumeInstance(volumeType, volume);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "volType={}", (uint32_t)(volType));
+        "volType={}", (uint32_t)(volumeType));
 }
 
 MetaVolume*
