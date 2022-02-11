@@ -168,7 +168,6 @@ BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
 
 TEST(MpioAllocator, AllocAndReleaseForNvRamCache)
 {
-#if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
     const int arrayId = 0;
     std::unordered_set<Mpio*> mpioSet;
@@ -205,7 +204,6 @@ TEST(MpioAllocator, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
 
     delete allocator;
-#endif
 }
 
 } // namespace pos

@@ -32,7 +32,12 @@
 
 #include "src/metafs/mim/read_mpio.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/metafs/storage/mss_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -42,34 +47,34 @@ public:
     explicit ReadMpioTester(void* mdPageBuf)
     : ReadMpio(mdPageBuf)
     {
+        mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }
-
-    ReadMpioTester(void* mdPageBuf, MetaStorageType targetMediaType,
-        MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
-    : ReadMpio(mdPageBuf, targetMediaType, mpioIoInfo, partialIO, forceSyncIO)
-    {
-    }
-
     ~ReadMpioTester(void)
     {
+        delete mss;
     }
-
     bool HandleError(MpAioState expNextState)
     {
         return ReadMpio::_HandleError(expNextState);
     }
+    void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+    {
+        EXPECT_CALL(*mss, IsAIOSupport);
+        ReadMpio::Setup(mpioIoInfo, partialIO, forceSyncIO, mss);
+    }
+
+private:
+    NiceMock<MockMetaStorageSubsystem>* mss;
 };
 
 TEST(ReadMpioTester, ReadMpio_testConstructor)
 {
-    MetaStorageType type = MetaStorageType::SSD;
     MpioIoInfo ioInfo;
-    bool partialIO = true;
-    bool forceSyncIO = true;
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-    ReadMpioTester* mpio = new ReadMpioTester(buf, type, ioInfo, partialIO, forceSyncIO);
+    ReadMpioTester* mpio = new ReadMpioTester(buf);
+    mpio->Setup(ioInfo, true, false);
 
     EXPECT_EQ(mpio->GetCurrState(), MpAioState::Init);
 
@@ -80,10 +85,12 @@ TEST(ReadMpioTester, ReadMpio_testConstructor)
 
 TEST(ReadMpioTester, _HandleError_testIfTheMethodChangesNextStateWhenThereIsAnError)
 {
+    MpioIoInfo ioInfo;
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
     ReadMpioTester* mpio = new ReadMpioTester(buf);
+    mpio->Setup(ioInfo, true, false);
 
     bool result = mpio->HandleError(MpAioState::Complete);
 

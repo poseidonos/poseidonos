@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "test/integration-tests/metafs/metafs_test_fixture.h"
+#include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -50,11 +50,13 @@ class MetaFsWbtIntegrationTest : public MetaFsTestFixture, public ::testing::Tes
 {
 public:
     MetaFsWbtIntegrationTest(void)
-    : MetaFsTestFixture()
+    : MetaFsTestFixture(),
+      arrayId(0),
+      isNpor(true),
+      fileName("TestFile"),
+      fileSize(2048),
+      opt(StorageOpt::SSD)
     {
-        fileName = "TestFile";
-        fileSize = 2048;
-        opt = StorageOpt::SSD;
     }
 
     virtual ~MetaFsWbtIntegrationTest(void)
@@ -65,14 +67,14 @@ public:
     SetUp(void)
     {
         // mount array
-        EXPECT_EQ(0, metaFs->Init());
+        EXPECT_EQ(0, GetMetaFs(arrayId)->Init());
 
         // create meta file
         MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
         MetaFilePropertySet prop;
         prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
         prop.ioOpType = MetaFileDominant::NoSpecific;
-        rc_mgmt = metaFs->ctrl->Create(fileName, fileSize, prop, opt);
+        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, opt);
         EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     }
 
@@ -80,14 +82,15 @@ public:
     TearDown(void)
     {
         // unmount array
-        metaFs->Dispose();
+        GetMetaFs(arrayId)->Dispose();
     }
 
 protected:
-    bool isNpor = true;
-    std::string fileName = "";
-    uint64_t fileSize = 0;
-    StorageOpt opt = StorageOpt::MAX;
+    int arrayId;
+    bool isNpor;
+    std::string fileName;
+    uint64_t fileSize;
+    StorageOpt opt;
 };
 
 TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
@@ -95,7 +98,7 @@ TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
     std::vector<pos::MetaFileInfoDumpCxt> fileList;
 
     // positive
-    EXPECT_EQ(true, metaFs->wbt->GetMetaFileList(fileList, MetaVolumeType::SsdVolume));
+    EXPECT_EQ(true, GetMetaFs(arrayId)->wbt->GetMetaFileList(fileList, MetaVolumeType::SsdVolume));
 
     EXPECT_EQ(1, fileList.size());
 
@@ -106,7 +109,7 @@ TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
     }
 
     // negative
-    EXPECT_EQ(false, metaFs->wbt->GetMetaFileList(fileList, MetaVolumeType::NvRamVolume));
+    EXPECT_EQ(false, GetMetaFs(arrayId)->wbt->GetMetaFileList(fileList, MetaVolumeType::NvRamVolume));
 }
 
 TEST_F(MetaFsWbtIntegrationTest, GetMetaFileInfo)
@@ -114,12 +117,12 @@ TEST_F(MetaFsWbtIntegrationTest, GetMetaFileInfo)
     pos::MetaFileInodeDumpCxt fileInfo;
 
     // positive
-    EXPECT_EQ(true, metaFs->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::SsdVolume));
+    EXPECT_EQ(true, GetMetaFs(arrayId)->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::SsdVolume));
 
     EXPECT_EQ(fileInfo.inodeInfo.data.field.fileName, fileName);
     EXPECT_EQ(fileInfo.inodeInfo.data.field.fileByteSize, fileSize);
 
     // negative
-    EXPECT_EQ(false, metaFs->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::NvRamVolume));
+    EXPECT_EQ(false, GetMetaFs(arrayId)->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::NvRamVolume));
 }
 } // namespace pos

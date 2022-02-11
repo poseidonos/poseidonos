@@ -76,7 +76,6 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
 #if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
 
-#if MPIO_CACHE_EN
     if (!((MetaStorageType::NVRAM == storageType) &&
             (true == partialIO) &&
             (MpioType::Write == mpioType)))
@@ -92,7 +91,10 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
         // We check the corresponding cache entry first in the hope of reusing it.
         mpio = writeCache_->Find({arrayId, lpn});
         if (nullptr != mpio)
+        {
+            mpio->PrintLog("[alloc-   hit]", arrayId, lpn);
             return mpio;
+        }
 
         mpio = _TryAlloc(mpioType);
         if (mpio)
@@ -102,12 +104,10 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
 
             mpio->SetCacheState(MpioCacheState::FirstRead);
             assert(writeCache_->Push({arrayId, lpn}, mpio) == nullptr);
+            mpio->PrintLog("[alloc-   new]", arrayId, lpn);
         }
         return mpio;
     }
-#else
-    mpio = _TryAlloc(mpioType);
-#endif
 #else
     Mpio* mpio = _TryAlloc(mpioType);
 #endif
@@ -118,7 +118,6 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
 void
 MpioAllocator::Release(Mpio* mpio)
 {
-#if MPIO_CACHE_EN
     if (MpioCacheState::Init != mpio->GetCacheState())
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -126,17 +125,18 @@ MpioAllocator::Release(Mpio* mpio)
             (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
             mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
 
+        mpio->PrintLog("[release- cac]", mpio->io.arrayId, mpio->io.metaLpn);
         mpio->Reset();
 
         return;
     }
-#endif
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mpio][Release    ] type={}, req.tagId={}, mpio_id={}, fileOffset={}, buffer={}",
         (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
         mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
 
+    mpio->PrintLog("[release- del]", mpio->io.arrayId, mpio->io.metaLpn);
     mpio->Reset();
     pool_[(uint32_t)mpio->GetType()]->Release(mpio);
 }
@@ -163,7 +163,6 @@ MpioAllocator::_TryAlloc(const MpioType mpioType)
     return mpio;
 }
 
-#if MPIO_CACHE_EN
 void
 MpioAllocator::TryReleaseTheOldestCache(void)
 {
@@ -191,5 +190,4 @@ MpioAllocator::_ReleaseCache(void)
         Release(victim);
     }
 }
-#endif
 } // namespace pos

@@ -158,7 +158,7 @@ TEST(NvRamMetaVolume, IsOkayToStore_Negative)
     uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaFilePropertySet prop;
 
-    EXPECT_CALL(*inodeMgr, GetAvailableSpace).WillOnce(Return(99));
+    EXPECT_CALL(*inodeMgr, GetAvailableSpace).WillRepeatedly(Return(99));
     EXPECT_CALL(*inodeMgr, GetAvailableLpnCount).WillOnce(Return(8192));
 
     // not enough space

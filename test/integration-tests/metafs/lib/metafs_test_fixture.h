@@ -30,24 +30,60 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
+#include <cstdint>
+#include <fstream>
 #include <string>
 #include <vector>
 
-#include "src/metafs/mim/mpio.h"
+#include "src/metafs/metafs.h"
+#include "test/integration-tests/metafs/lib/test_meta_storage_subsystem.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
-class MockMpio : public Mpio
+class MetaFsTestFixture
 {
 public:
-    using Mpio::Mpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
+    MetaFsTestFixture(void);
+    virtual ~MetaFsTestFixture(void);
+    virtual MetaFs* GetMetaFs(const int arrayId) const
+    {
+        return components.at(arrayId)->metaFs;
+    }
+
+    const static size_t ARRAY_COUNT = 2;
+
+protected:
+    NiceMock<MockTelemetryPublisher>* tpForMetaIo;
+
+    struct ArrayComponents
+    {
+        NiceMock<MockIArrayInfo>* arrayInfo;
+        MetaFs* metaFs;
+        MetaFsManagementApi* mgmt;
+        MetaFsFileControlApi* ctrl;
+        MetaFsIoApi* io;
+        MetaFsWBTApi* wbt;
+        TestMetaStorageSubsystem* storage;
+        NiceMock<MockTelemetryPublisher>* tpForMetafs;
+
+        bool isLoaded;
+        int arrayId;
+        std::string arrayName;
+        PartitionLogicalSize ptnSize[PartitionType::TYPE_COUNT];
+    };
+
+    std::vector<ArrayComponents*> components;
+
+private:
+    void _SetArrayInfo(ArrayComponents* component, const int index);
+    void _SetThreadModel(void);
+    cpu_set_t _GetCpuSet(const int from, const int to);
 };
 
 } // namespace pos

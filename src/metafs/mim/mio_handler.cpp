@@ -79,8 +79,8 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
 }
 
 MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
-        TelemetryPublisher* tp)
+    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
+    TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
   mioPool(mioPool),
@@ -129,7 +129,6 @@ MioHandler::_CreateMioPool(void)
     {
         mioPool->AddToPool(new Mio(mpioAllocator));
     }
-    mioTagIdAllocator.Reset();
 }
 
 void
@@ -254,14 +253,12 @@ MioHandler::_DiscoverIORangeOverlap(void)
 
         if (!_IsRangeOverlapConflicted(pendingIoReq))
         {
-#if MPIO_CACHE_EN
             if (MetaStorageType::NVRAM == pendingIoReq->targetMediaType)
             {
                 if (!_ExecutePendedIo(pendingIoReq))
                     break;
             }
             else
-#endif
             {
                 Mio* mio = DispatchMio(*pendingIoReq);
                 if (nullptr == mio)
@@ -284,7 +281,6 @@ MioHandler::_DiscoverIORangeOverlap(void)
     }
 }
 
-#if MPIO_CACHE_EN
 bool
 MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
 {
@@ -293,7 +289,6 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
         return false;
 
     _RegisterRangeLockInfo(reqMsg);
-
 
     std::vector<MetaFsIoRequest*>* reqList = new std::vector<MetaFsIoRequest*>();
     auto range = pendingIoRetryQ.equal_range(reqMsg->baseMetaLpn);
@@ -318,7 +313,6 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
 
     return true;
 }
-#endif
 
 bool
 MioHandler::_IsPendedRange(MetaFsIoRequest* reqMsg)
@@ -363,6 +357,12 @@ MioHandler::_FinalizeMio(Mio* mio)
     mio->StoreTimestamp(MioTimestampStage::Release);
     metricSumOfSpendTime += mio->GetElapsedInMilli(MioTimestampStage::Allocate, MioTimestampStage::Release).count();
     metricSumOfMioCount++;
+    if (mio->GetMergedRequestList())
+    {
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "merged request count: {}",
+            mio->GetMergedRequestList()->size());
+    }
     mio->Reset();
     mioPool->Release(mio);
 }
@@ -514,7 +514,6 @@ MioHandler::_HandleMioCompletion(void* data)
     Mio* mio = reinterpret_cast<Mio*>(data);
     assert(mio->IsSyncIO() == false);
 
-#if MPIO_CACHE_EN
     std::vector<MetaFsIoRequest*>* reqList = mio->GetMergedRequestList();
     if (nullptr != reqList)
     {
@@ -530,7 +529,6 @@ MioHandler::_HandleMioCompletion(void* data)
         }
     }
     else
-#endif
     {
         MetaFsAioCbCxt* aiocb = reinterpret_cast<MetaFsAioCbCxt*>(mio->GetClientAioCbCxt());
 

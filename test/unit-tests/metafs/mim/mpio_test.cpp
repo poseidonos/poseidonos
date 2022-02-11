@@ -31,8 +31,15 @@
  */
 
 #include "src/metafs/mim/mpio.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include <list>
+#include <memory>
+
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -42,31 +49,28 @@ public:
     explicit MpioTester(void* mdPageBuf)
     : Mpio(mdPageBuf)
     {
+        mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }
-
-    MpioTester(void* mdPageBuf, MetaStorageType targetMediaType,
-        MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
-    : Mpio(mdPageBuf, targetMediaType, mpioIoInfo, partialIO, forceSyncIO)
-    {
-    }
-
     ~MpioTester(void)
     {
+        delete mss;
     }
-
     MpioType GetType(void)
     {
         return MpioType::Read;
     }
-
     void HandleAsyncMemOpDone(void)
     {
         Mpio::_HandleAsyncMemOpDone(this);
     }
-
     void CallbackTest(Mpio* mpio)
     {
         ((MpioTester*)mpio)->cbTestResult = true;
+    }
+    void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+    {
+        EXPECT_CALL(*mss, IsAIOSupport);
+        Mpio::Setup(mpioIoInfo, partialIO, forceSyncIO, mss);
     }
 
     bool cbTestResult = false;
@@ -75,18 +79,18 @@ private:
     void _InitStateHandler(void) override
     {
     }
+
+    NiceMock<MockMetaStorageSubsystem>* mss;
 };
 
 TEST(MpioTester, Mpio_testConstructor)
 {
-    MetaStorageType type = MetaStorageType::SSD;
     MpioIoInfo ioInfo;
-    bool partialIO = true;
-    bool forceSyncIO = true;
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-    MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
+    MpioTester mpio(buf);
+    mpio.Setup(ioInfo, true, true);
 
     EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
 
@@ -95,14 +99,12 @@ TEST(MpioTester, Mpio_testConstructor)
 
 TEST(MpioTester, Mpio_testCallbackForMemcpy)
 {
-    MetaStorageType type = MetaStorageType::SSD;
     MpioIoInfo ioInfo;
-    bool partialIO = true;
-    bool forceSyncIO = true;
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-    MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
+    MpioTester mpio(buf);
+    mpio.Setup(ioInfo, true, true);
 
     PartialMpioDoneCb notifier = AsEntryPointParam1(&MpioTester::CallbackTest, &mpio);
     mpio.SetPartialDoneNotifier(notifier);
@@ -110,6 +112,36 @@ TEST(MpioTester, Mpio_testCallbackForMemcpy)
 
     EXPECT_EQ(mpio.cbTestResult, true);
 
+    free(buf);
+}
+
+TEST(MpioTester, Id_testIfMpiosCanHaveThereUniqueId)
+{
+    const uint64_t COUNT = 100;
+    MpioIoInfo ioInfo;
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    std::list<std::shared_ptr<Mpio>> mpioList;
+
+    std::shared_ptr<Mpio> ptr = std::make_shared<MpioTester>(buf);
+    uint64_t firstId = ptr->GetId();
+
+    for (uint64_t i = 1; i <= COUNT; ++i)
+    {
+        mpioList.emplace_back(std::make_shared<MpioTester>(buf));
+        EXPECT_EQ(mpioList.back()->GetId(), firstId + i);
+    }
+
+    EXPECT_EQ(mpioList.size(), COUNT);
+
+    uint64_t index = 1;
+    for (auto mpio : mpioList)
+    {
+        EXPECT_EQ(mpio->GetId(), firstId + index);
+        index++;
+    }
+
+    mpioList.clear();
     free(buf);
 }
 } // namespace pos

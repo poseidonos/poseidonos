@@ -44,7 +44,9 @@ class MockReadMpio : public ReadMpio
 {
 public:
     using ReadMpio::ReadMpio;
+    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
     MOCK_METHOD(MpioType, GetType, (), (override));
+    MOCK_METHOD(uint64_t, GetId, (), (const, override));
     MOCK_METHOD(void, _InitStateHandler, (), (override));
 };
 

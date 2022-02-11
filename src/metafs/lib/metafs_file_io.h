@@ -30,24 +30,62 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
 #include <string>
-#include <vector>
-
-#include "src/metafs/mim/mpio.h"
 
 namespace pos
 {
-class MockMpio : public Mpio
+class MetaFsFileIo
 {
 public:
-    using Mpio::Mpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-};
+    MetaFsFileIo(void) = delete;
+    explicit MetaFsFileIo(const std::string& fileName)
+    : fileName(fileName)
+    {
+        file.open(fileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::ate);
+    }
+    virtual ~MetaFsFileIo(void)
+    {
+        file.close();
+    }
+    virtual bool Write(void* const buf, const size_t byteOffset, const size_t byteSize)
+    {
+        file.clear();
+        file.seekp(byteOffset, file.beg);
+        if (!file.good())
+        {
+            return false;
+        }
+        file.write(static_cast<char*>(buf), byteSize);
+        if (!file.good())
+        {
+            return false;
+        }
+        return true;
+    }
+    virtual bool Read(void* buf, const size_t byteOffset, const size_t byteSize)
+    {
+        file.clear();
+        file.seekg(byteOffset);
+        if (!file.good())
+        {
+            std::memset(buf, 0, byteSize);
+            return true;
+        }
+        file.read((char*)buf, byteSize);
+        if (!file.good())
+        {
+            std::memset(buf, 0, byteSize);
+        }
+        return true;
+    }
 
+private:
+    std::string fileName;
+    std::fstream file;
+};
 } // namespace pos

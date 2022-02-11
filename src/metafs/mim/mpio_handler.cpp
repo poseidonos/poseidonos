@@ -96,9 +96,7 @@ MpioHandler::BottomhalfMioProcessing(void)
         }
     }
 
-#if MPIO_CACHE_EN
     mpioAllocator->TryReleaseTheOldestCache();
-#endif
 
     _SendPeriodicMetrics();
 }

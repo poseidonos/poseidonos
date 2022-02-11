@@ -78,17 +78,13 @@ public:
     {
         return (0 == pool_[(uint32_t)type]->GetFreeCount());
     }
-#if MPIO_CACHE_EN
     virtual void TryReleaseTheOldestCache(void);
     virtual void ReleaseAllCache(void);
-#endif
 
 private:
     Mpio* _CreateMpio(MpioType type);
     Mpio* _TryAlloc(const MpioType mpioType);
-#if MPIO_CACHE_EN
     void _ReleaseCache(void);
-#endif
 
     const size_t WRITE_CACHE_CAPACITY;
     std::shared_ptr<MDPageBufPool> mdPageBufPool;

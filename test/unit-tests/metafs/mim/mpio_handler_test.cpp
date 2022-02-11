@@ -53,9 +53,8 @@ TEST(MpioHandler, Normal)
 
     MockMpioAllocator* allocator = new MockMpioAllocator(100);
 
-#if MPIO_CACHE_EN
     EXPECT_CALL(*allocator, TryReleaseTheOldestCache).Times(AtLeast(1));
-#endif
+
     MockWriteMpio* mpio = new MockWriteMpio(this);
     EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
 

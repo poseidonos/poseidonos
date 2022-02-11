@@ -40,7 +40,6 @@ class ReadMpio : public Mpio
 {
 public:
     explicit ReadMpio(void* mdPageBuf);
-    ReadMpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO);
     virtual ~ReadMpio(void);
 
     virtual MpioType

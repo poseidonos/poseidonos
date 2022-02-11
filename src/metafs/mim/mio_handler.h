@@ -87,9 +87,7 @@ private:
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
     void _SendPeriodicMetrics(void);
     void _CreateMioPool(void);
-#if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
-#endif
 
     MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ;
     MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;

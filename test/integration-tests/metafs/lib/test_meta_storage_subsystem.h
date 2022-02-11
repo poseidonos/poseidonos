@@ -30,24 +30,42 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
+#include <cstdint>
+#include <cstdio>
+#include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
-#include "src/metafs/mim/mpio.h"
+#include "src/metafs/lib/metafs_file_io.h"
+#include "src/metafs/storage/mss.h"
 
 namespace pos
 {
-class MockMpio : public Mpio
+class TestMetaStorageSubsystem : public MetaStorageSubsystem
 {
 public:
-    using Mpio::Mpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-};
+    explicit TestMetaStorageSubsystem(int arrayId);
+    virtual ~TestMetaStorageSubsystem(void);
+    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID Open(void) override;
+    virtual POS_EVENT_ID Close(void) override;
+    virtual uint64_t GetCapacity(MetaStorageType mediaType) override;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual bool IsAIOSupport(void) override;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) override;
+    virtual POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
+        MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid) override;
+    virtual POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb) override;
 
+private:
+    std::unordered_map<MetaStorageType, std::string> fileNames;
+    std::unordered_map<MetaStorageType, std::shared_ptr<MetaFsFileIo>> files;
+    const size_t BYTE_4K = 4096;
+};
 } // namespace pos

@@ -32,6 +32,10 @@
 
 #pragma once
 
+#include <atomic>
+
+#include "src/metafs/log/metafs_log.h"
+#include "src/include/pos_event_id.h"
 #include "mdpage.h"
 #include "mfs_async_runnable_template.h"
 #include "mfs_asynccb_cxt_template.h"
@@ -72,24 +76,22 @@ using MpioAsyncDoneCb = AsyncCallback;
 class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>, public MetaFsStopwatch<MpioTimestampStage>
 {
 public:
+    Mpio(void) = delete;
     explicit Mpio(void* mdPageBuf);
-    Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO);
     virtual ~Mpio(void);
     Mpio(const Mpio& mpio) = delete;
     Mpio& operator=(const Mpio& mio) = delete;
     void Reset(void);
 
-    void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
+    virtual void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
     void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
     virtual MpioType GetType(void) = 0;
 
     void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
     bool IsPartialIO(void);
 
-#if MPIO_CACHE_EN
     MpioCacheState GetCacheState(void);
     void SetCacheState(MpioCacheState state);
-#endif
 
     void BuildCompositeMDPage(void);
     bool IsValidPage(void);
@@ -104,6 +106,15 @@ public:
     MfsError GetErrorStatus(void);
     void SetPriority(RequestPriority p);
     RequestPriority GetPriority(void);
+    virtual uint64_t GetId(void) const
+    {
+        return id_;
+    }
+    void PrintLog(std::string str, const int array, const int lpn) const
+    {
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            str + " id: {}, array: {}, lpn: {}", GetId(), array, lpn);
+    }
 
     MpioIoInfo io;
 
@@ -138,7 +149,8 @@ private:
 
     PartialMpioDoneCb partialMpioDoneNotifier;
     MssCallbackPointer mpioDoneCallback;
-};
 
-extern InstanceTagIdAllocator mpioTagIdAllocator;
+    const uint64_t id_;
+    static std::atomic<uint64_t> idAllocate_;
+};
 } // namespace pos

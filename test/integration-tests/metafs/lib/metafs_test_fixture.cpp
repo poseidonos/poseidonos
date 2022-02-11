@@ -30,63 +30,77 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test/integration-tests/metafs/metafs_test_fixture.h"
-
 #include <string>
 
 #include "src/metafs/include/metafs_service.h"
+#include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
 
 using ::testing::_;
 using ::testing::Matcher;
 using ::testing::NiceMock;
 using ::testing::Return;
 
+using namespace std;
+
 namespace pos
 {
 MetaFsTestFixture::MetaFsTestFixture(void)
+: tpForMetaIo(new NiceMock<MockTelemetryPublisher>)
 {
-    arrayId = 0;
-    arrayName = "TestArray";
-
-    tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
-    tpForMetafs = new NiceMock<MockTelemetryPublisher>;
-
-    _SetArrayInfo();
     _SetThreadModel();
 
-    storage = new TestMetaStorageSubsystem(arrayId);
+    tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
 
-    mgmt = new MetaFsManagementApi(arrayId, storage);
-    ctrl = new MetaFsFileControlApi(arrayId, storage);
-    io = new MetaFsIoApi(arrayId, ctrl, storage, tpForMetafs);
-    wbt = new MetaFsWBTApi(arrayId, ctrl);
+    for (size_t arrayId = 0; arrayId < ARRAY_COUNT; ++arrayId)
+    {
+        ArrayComponents* comp = new ArrayComponents;
 
-    metaFs = new MetaFs(arrayInfo, isLoaded, mgmt, ctrl, io, wbt, storage, tpForMetafs);
+        _SetArrayInfo(comp, arrayId);
+        comp->tpForMetafs = new NiceMock<MockTelemetryPublisher>;
+        comp->storage = new TestMetaStorageSubsystem(arrayId);
+        comp->mgmt = new MetaFsManagementApi(arrayId, comp->storage);
+        comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage);
+        comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs);
+        comp->wbt = new MetaFsWBTApi(arrayId, comp->ctrl);
+        comp->metaFs = new MetaFs(comp->arrayInfo, comp->isLoaded, comp->mgmt,
+            comp->ctrl, comp->io, comp->wbt, comp->storage, comp->tpForMetafs);
+
+        components.emplace_back(comp);
+    }
 }
 
 MetaFsTestFixture::~MetaFsTestFixture(void)
 {
-    delete arrayInfo;
-    delete metaFs;
+    for (auto& comp : components)
+    {
+        delete comp->arrayInfo;
+        delete comp->metaFs;
+        delete comp;
+    }
+    components.clear();
     MetaFsServiceSingleton::ResetInstance();
 }
 
 void
-MetaFsTestFixture::_SetArrayInfo(void)
+MetaFsTestFixture::_SetArrayInfo(ArrayComponents* component, const int index)
 {
-    memset(ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::TYPE_COUNT);
+    component->isLoaded = false;
+    component->arrayId = index;
+    component->arrayName = "TestArray" + std::to_string(index);
 
-    ptnSize[PartitionType::META_NVM].totalStripes = 1024;
-    ptnSize[PartitionType::META_NVM].blksPerStripe = 32;
-    ptnSize[PartitionType::META_SSD].totalStripes = 2048;
-    ptnSize[PartitionType::META_SSD].blksPerStripe = 32;
+    memset(component->ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::TYPE_COUNT);
 
-    arrayInfo = new NiceMock<MockIArrayInfo>();
+    component->ptnSize[PartitionType::META_NVM].totalStripes = 1024;
+    component->ptnSize[PartitionType::META_NVM].blksPerStripe = 32;
+    component->ptnSize[PartitionType::META_SSD].totalStripes = 2048;
+    component->ptnSize[PartitionType::META_SSD].blksPerStripe = 32;
 
-    EXPECT_CALL(*arrayInfo, GetSizeInfo(PartitionType::META_NVM)).WillRepeatedly(Return(&ptnSize[PartitionType::META_NVM]));
-    EXPECT_CALL(*arrayInfo, GetSizeInfo(PartitionType::META_SSD)).WillRepeatedly(Return(&ptnSize[PartitionType::META_SSD]));
-    EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(arrayId));
-    EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return(arrayName));
+    component->arrayInfo = new NiceMock<MockIArrayInfo>();
+
+    EXPECT_CALL(*component->arrayInfo, GetSizeInfo(PartitionType::META_NVM)).WillRepeatedly(Return(&component->ptnSize[PartitionType::META_NVM]));
+    EXPECT_CALL(*component->arrayInfo, GetSizeInfo(PartitionType::META_SSD)).WillRepeatedly(Return(&component->ptnSize[PartitionType::META_SSD]));
+    EXPECT_CALL(*component->arrayInfo, GetIndex).WillRepeatedly(Return(component->arrayId));
+    EXPECT_CALL(*component->arrayInfo, GetName).WillRepeatedly(Return(component->arrayName));
 }
 
 void
@@ -94,13 +108,13 @@ MetaFsTestFixture::_SetThreadModel(void)
 {
     uint32_t coreCount = 4;
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
-    cpu_set_t workerCPUSet = _GetCpuSet(1, 2);
+    cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
     MetaFsServiceSingleton::Instance()->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 
 cpu_set_t
-MetaFsTestFixture::_GetCpuSet(int from, int to)
+MetaFsTestFixture::_GetCpuSet(const int from, const int to)
 {
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);

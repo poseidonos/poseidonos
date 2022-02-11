@@ -43,11 +43,6 @@ ReadMpio::ReadMpio(void* mdPageBuf)
     _InitStateHandler();
 }
 
-ReadMpio::ReadMpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
-: Mpio(mdPageBuf, targetMediaType, mpioIoInfo, partialIO, forceSyncIO)
-{
-}
-
 void
 ReadMpio::_InitStateHandler(void)
 {

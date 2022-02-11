@@ -47,7 +47,10 @@ GetMpio(std::pair<int, MetaLpnType> input)
     MpioIoInfo ioInfo;
     ioInfo.arrayId = input.first;
     ioInfo.metaLpn = input.second;
-    return std::make_shared<MockMpio>(nullptr, MetaStorageType::NVRAM, ioInfo, true, false);
+    std::shared_ptr<MockMpio> mpio = std::make_shared<MockMpio>(nullptr);
+    EXPECT_CALL(*mpio, Setup);
+    mpio->Setup(ioInfo, true, false, nullptr);
+    return mpio;
 }
 
 TEST(FifoCache, Find_testIfTheMethodCanRetriveCachedItem)

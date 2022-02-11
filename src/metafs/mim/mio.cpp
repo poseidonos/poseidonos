@@ -32,7 +32,6 @@
 
 #include "mio.h"
 #include "metafs_config.h"
-#include "instance_tagid_allocator.h"
 #include "metafs_common.h"
 #include "meta_volume_manager.h"
 #include "mpio.h"
@@ -46,8 +45,7 @@
 namespace pos
 {
 const MetaIoOpcode Mio::ioOpcodeMap[] = {MetaIoOpcode::Write, MetaIoOpcode::Read};
-
-InstanceTagIdAllocator mioTagIdAllocator;
+std::atomic<uint64_t> Mio::idAllocate_{0};
 
 Mio::Mio(MpioAllocator* mpioAllocator)
 : originReq(nullptr),
@@ -56,7 +54,10 @@ Mio::Mio(MpioAllocator* mpioAllocator)
   startLpn(0),
   error(0, false),
   ioCQ(nullptr),
-  mpioAllocator(nullptr)
+  mpioAllocator(nullptr),
+  mergedRequestList(nullptr),
+  metaStorage(nullptr),
+  id_(idAllocate_++)
 {
     _InitStateHandler();
 
@@ -114,12 +115,10 @@ Mio::Reset(void)
     fileDataChunkSize = 0;
     error = std::make_pair(0, false);
 
-#if MPIO_CACHE_EN
     if (nullptr != mergedRequestList)
     {
         ClearMergedRequestList();
     }
-#endif
 
     if (originReq)
     {
@@ -223,7 +222,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     if (mpio == nullptr)
         return nullptr;
 
-    mpio->Setup(storageType, mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
+    mpio->Setup(mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
     mpio->SetLocalAioCbCxt(mpioAsyncDoneCallback);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -234,7 +233,6 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     return mpio;
 }
 
-#if MPIO_CACHE_EN
 void
 Mio::SetMergedRequestList(std::vector<MetaFsIoRequest*>* list)
 {
@@ -258,7 +256,6 @@ Mio::GetMergedRequestList(void)
 {
     return mergedRequestList;
 }
-#endif
 
 void
 Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
@@ -334,7 +331,6 @@ Mio::_BuildMpioMap(void)
         mpio->SetPriority(originReq->priority);
         mpioListCxt.PushMpio(*mpio);
 
-#if MPIO_CACHE_EN
         if (MpioCacheState::FirstRead == mpio->GetCacheState())
         {
             // pass, new mpio
@@ -362,7 +358,6 @@ Mio::_BuildMpioMap(void)
         {
             assert(0);
         }
-#endif
 
         mpio->ExecuteAsyncState();
 

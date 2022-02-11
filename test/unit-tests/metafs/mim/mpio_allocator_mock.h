@@ -48,10 +48,8 @@ public:
         const MetaLpnType lpn, const bool partialIO, const int arrayId), (override));
     MOCK_METHOD(size_t, GetCapacity, (const MpioType type), (const, override));
     MOCK_METHOD(void, Release, (Mpio* mpio), (override));
-#if MPIO_CACHE_EN
     MOCK_METHOD(void, TryReleaseTheOldestCache, (), (override));
     MOCK_METHOD(void, ReleaseAllCache, (), (override));
-#endif
 };
 
 } // namespace pos

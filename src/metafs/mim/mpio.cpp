@@ -33,7 +33,6 @@
 #include "mpio.h"
 
 #include "Air.h"
-#include "instance_tagid_allocator.h"
 #include "meta_storage_specific.h"
 #include "metafs_common.h"
 #include "metafs_mem_lib.h"
@@ -41,6 +40,8 @@
 
 namespace pos
 {
+std::atomic<uint64_t> Mpio::idAllocate_{0};
+
 Mpio::Mpio(void* mdPageBuf)
 : mdpage(mdPageBuf),
   partialIO(false),
@@ -50,22 +51,8 @@ Mpio::Mpio(void* mdPageBuf)
   errorStopState(false),
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
-  priority(RequestPriority::Normal)
-{
-    mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
-}
-
-Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
-: io(mpioIoInfo),
-  mdpage(mdPageBuf),
-  partialIO(partialIO),
-  mssIntf(nullptr),
-  aioModeEnabled(false),
-  error(0),
-  errorStopState(false),
-  forceSyncIO(forceSyncIO),
-  cacheState(MpioCacheState::Init),
-  priority(RequestPriority::Normal)
+  priority(RequestPriority::Normal),
+  id_(idAllocate_++)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -93,7 +80,7 @@ Mpio::~Mpio(void)
 // LCOV_EXCL_STOP
 
 void
-Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)
+Mpio::Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)
 {
     this->io = mpioIoInfo;
     this->partialIO = partialIO;
@@ -140,7 +127,6 @@ Mpio::IsPartialIO(void)
     return partialIO;
 }
 
-#if MPIO_CACHE_EN
 MpioCacheState
 Mpio::GetCacheState(void)
 {
@@ -152,7 +138,6 @@ Mpio::SetCacheState(MpioCacheState state)
 {
     cacheState = state;
 }
-#endif
 
 bool
 Mpio::CheckReadStatus(MpAioState expNextState)
@@ -296,6 +281,14 @@ Mpio::DoIO(MpAioState expNextState)
     POS_EVENT_ID ret;
     void* buf = GetMDPageDataBuf();
     MssOpcode opcode = _ConvertToMssOpcode(GetStateInExecution());
+
+    if (io.targetMediaType == MetaStorageType::NVRAM)
+    {
+        if (opcode == MssOpcode::Read)
+            PrintLog("[io  -   read]", io.arrayId, io.metaLpn);
+        else
+            PrintLog("[io  -  write]", io.arrayId, io.metaLpn);
+    }
 
     if (aioModeEnabled && (!forceSyncIO))
     {

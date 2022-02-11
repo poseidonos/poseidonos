@@ -30,24 +30,90 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
-
-#include <list>
 #include <string>
-#include <vector>
 
-#include "src/metafs/mim/mpio.h"
+#include "test/integration-tests/metafs/lib/test_metafs.h"
+
+using namespace std;
 
 namespace pos
 {
-class MockMpio : public Mpio
+class MetaFsMpioCacheTest : public TestMetaFs
 {
 public:
-    using Mpio::Mpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
+    MetaFsMpioCacheTest(void)
+    : TestMetaFs()
+    {
+    }
+    virtual ~MetaFsMpioCacheTest(void)
+    {
+    }
+
+protected:
 };
 
+TEST_F(MetaFsMpioCacheTest, VerifyData_testIfTheDataWillBeCorrect_SyncIo)
+{
+    const size_t GRANULARITY_BYTE_SIZE = 52;
+    const size_t COUNT = 1000;
+
+    SetGranularity(GRANULARITY_BYTE_SIZE);
+
+    // write
+    EXPECT_TRUE(WritePatternSync(0, COUNT));
+
+    // read and verify
+    EXPECT_TRUE(VerifyPattern(0, COUNT));
+}
+
+TEST_F(MetaFsMpioCacheTest, VerifyData_testIfTheDataWillBeCorrect_AsyncIo)
+{
+    const size_t GRANULARITY_BYTE_SIZE = 52;
+    const size_t LPN_COUNT = 1000;
+    // 2s
+    const size_t WAIT_TIMEOUT = 2000;
+
+    SetGranularity(GRANULARITY_BYTE_SIZE);
+
+    CreateBuffers(LPN_COUNT);
+
+    // write
+    EXPECT_TRUE(WritePattern(0, LPN_COUNT));
+
+    // wait
+    EXPECT_TRUE(WaitForDone(WAIT_TIMEOUT));
+
+    // read and verify
+    EXPECT_TRUE(VerifyPattern(0, LPN_COUNT));
+
+    DeleteBuffers();
+}
+
+TEST_F(MetaFsMpioCacheTest, VerifyDataInMultiArray_testIfTheDataWillBeCorrect_AsyncIo)
+{
+    const size_t GRANULARITY_BYTE_SIZE = 52;
+    const size_t LPN_COUNT = 1000;
+    // 2s
+    const size_t WAIT_TIMEOUT = 2000;
+
+    SetGranularity(GRANULARITY_BYTE_SIZE);
+
+    CreateBuffers(LPN_COUNT);
+
+    // write
+    for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
+    {
+        EXPECT_TRUE(WritePattern(arrayId, LPN_COUNT));
+    }
+
+    EXPECT_TRUE(WaitForDone(WAIT_TIMEOUT));
+
+    // read and verify
+    for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
+    {
+        EXPECT_TRUE(VerifyPattern(arrayId, LPN_COUNT));
+    }
+
+    DeleteBuffers();
+}
 } // namespace pos

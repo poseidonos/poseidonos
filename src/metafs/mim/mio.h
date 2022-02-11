@@ -119,12 +119,14 @@ public:
     void NotifyCompletionToClient(void);
     virtual void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
     virtual int GetArrayId(void);
+    virtual uint64_t GetId(void) const
+    {
+        return id_;
+    }
 
-#if MPIO_CACHE_EN
     virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
     virtual void ClearMergedRequestList(void);
     virtual std::vector<MetaFsIoRequest*>* GetMergedRequestList(void);
-#endif
 
 protected:
     virtual void _InitStateHandler(void) override;
@@ -150,9 +152,7 @@ protected:
     MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
     MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
-#if MPIO_CACHE_EN
-    std::vector<MetaFsIoRequest*>* mergedRequestList = nullptr;
-#endif
+    std::vector<MetaFsIoRequest*>* mergedRequestList;
 
     static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoRequestType::Max)];
     MetaFsSpinLock mpioListCxtLock;
@@ -162,8 +162,8 @@ protected:
     MpioDonePollerCb mpioDonePoller;
     MpioAsyncDoneCb mpioAsyncDoneCallback;
 
-    MetaStorageSubsystem* metaStorage = nullptr;
+    MetaStorageSubsystem* metaStorage;
+    const uint64_t id_;
+    static std::atomic<uint64_t> idAllocate_;
 };
-
-extern InstanceTagIdAllocator mioTagIdAllocator;
 } // namespace pos
