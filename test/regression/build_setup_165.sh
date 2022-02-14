@@ -82,7 +82,7 @@ buildPos()
 
 getPos()
 {
-    echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${pos_working_dir}/bin ##"
+    echo "## START TO COPY BIN FILES INTO VM|PSD : from ${master_bin_path} to ${pos_working_dir}/bin ##"
     if [ ! -d ${pos_working_dir}/bin ]
     then
         echo "## mkdir ${pos_working_dir}/bin"
@@ -157,7 +157,7 @@ buildTest()
         exit 1
     fi
 
-    if [ $target_type == "VM" ] && [ $build_optimization == "ON" ]
+    if [ $target_type == "VM" ] || [ $target_type == "PSD" ] && [ $build_optimization == "ON" ]
     then
         backupPos
     fi
