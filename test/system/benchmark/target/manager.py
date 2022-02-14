@@ -1,6 +1,7 @@
 import json
 import lib
 import pos
+import prerequisite
 import time
 import os
 
@@ -13,6 +14,10 @@ class Target:
         self.pw = json["PW"]
         self.nic_ssh = json["NIC"]["SSH"]
         self.nic_ip1 = json["NIC"]["IP1"]
+        try:
+            self.prereq = json["PREREQUISITE"]
+        except Exception as e:
+            self.prereq = None
         self.spdk_dir = json["DIR"] + "/lib/spdk"
         self.spdk_tp = json["SPDK"]["TRANSPORT"]["TYPE"]
         self.spdk_no_shd_buf = json["SPDK"]["TRANSPORT"]["NUM_SHARED_BUFFER"]
@@ -26,6 +31,26 @@ class Target:
         self.array_volume_list = {}
 
     def Prepare(self):
+        lib.printer.green(f" {__name__}.Prepare : {self.name}")
+        if (self.prereq and self.prereq["CPU"]["RUN"]):
+            prerequisite.cpu.Scaling(self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
+        if (self.prereq and self.prereq["SSD"]["RUN"]):
+            prerequisite.ssd.Format(self.id, self.pw, self.nic_ssh, self.prereq["SSD"]["FORMAT"], self.spdk_dir)
+        if (self.prereq and self.prereq["MEMORY"]["RUN"]):
+            prerequisite.memory.MaxMapCount(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["MAX_MAP_COUNT"])
+            prerequisite.memory.DropCaches(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["DROP_CACHES"])
+        if (self.prereq and self.prereq["NETWORK"]["RUN"]):
+            prerequisite.network.IrqBalance(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
+            prerequisite.network.TcpTune(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
+            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"], self.pos_dir)
+            prerequisite.network.Nic(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
+        if (self.prereq and self.prereq["SPDK"]["RUN"]):
+            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.pos_dir)
+        if (self.prereq and self.prereq["DEBUG"]["RUN"]):
+            prerequisite.debug.Ulimit(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["ULIMIT"])
+            prerequisite.debug.Apport(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["APPORT"])
+            prerequisite.debug.CorePattern(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["DUMP_DIR"], self.prereq["DEBUG"]["CORE_PATTERN"])
+
         result = pos.env.check_pos_running(self.id, self.pw, self.nic_ssh, self.pos_bin)
         if -1 == result:
             return False
