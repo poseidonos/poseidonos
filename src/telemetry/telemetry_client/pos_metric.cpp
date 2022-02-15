@@ -73,7 +73,7 @@ POSMetric::SetGaugeValue(int64_t gauge_)
     value.gauge = gauge_;
 }
 
-void 
+void
 POSMetric::SetHistogramValue(POSHistogramValue* histogram_)
 {
     type = MT_HISTOGRAM;
@@ -117,7 +117,7 @@ POSMetric::GetGaugeValue(void)
 }
 
 POSHistogramValue*
-POSMetric::GetHistogramValue(void) 
+POSMetric::GetHistogramValue(void)
 {
     return value.histogram;
 }
@@ -132,7 +132,7 @@ POSMetric::GetLabelList(void)
 POSHistogramValue::POSHistogramValue(std::vector<int64_t> upperBound_)
 {
     size_t bucketSize = upperBound_.size();
-    if(bucketSize == 0)
+    if (bucketSize == 0)
     {
         assert(false);
     }
@@ -141,19 +141,19 @@ POSHistogramValue::POSHistogramValue(std::vector<int64_t> upperBound_)
     sum = 0;
     totalCount = 0;
 
-    for(size_t i = 0; i < bucketSize; i++)
+    for (size_t i = 0; i < bucketSize; i++)
     {
         upperBound[i] = upperBound_[i];
         bucketCount[i] = 0;
     }
 }
 
-void 
+void
 POSHistogramValue::Observe(int64_t value)
 {
     for(size_t i = 0; i < upperBound.size(); i++)
     {
-        if(value <= upperBound[i])
+        if (value <= upperBound[i])
         {
             bucketCount[i] += 1;
         }
@@ -162,25 +162,25 @@ POSHistogramValue::Observe(int64_t value)
     totalCount += 1;
 }
 
-const std::vector<int64_t>& 
+const std::vector<int64_t>&
 POSHistogramValue::GetUpperBound(void) const
 {
     return upperBound;
 }
 
-const std::vector<uint64_t>& 
+const std::vector<uint64_t>&
 POSHistogramValue::GetBucketCount(void) const
 {
     return bucketCount;
 }
 
-int64_t 
+int64_t
 POSHistogramValue::GetSum(void)
 {
     return sum;
 }
 
-uint64_t 
+uint64_t
 POSHistogramValue::GetTotalCount(void)
 {
     return totalCount;
