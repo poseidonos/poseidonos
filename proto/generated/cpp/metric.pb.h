@@ -47,7 +47,7 @@ struct TableStruct_metric_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -55,6 +55,9 @@ struct TableStruct_metric_2eproto {
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_metric_2eproto_metadata_getter(int index);
+class HistogramValue;
+struct HistogramValueDefaultTypeInternal;
+extern HistogramValueDefaultTypeInternal _HistogramValue_default_instance_;
 class Label;
 struct LabelDefaultTypeInternal;
 extern LabelDefaultTypeInternal _Label_default_instance_;
@@ -68,6 +71,7 @@ class MetricPublishResponse;
 struct MetricPublishResponseDefaultTypeInternal;
 extern MetricPublishResponseDefaultTypeInternal _MetricPublishResponse_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
+template<> ::HistogramValue* Arena::CreateMaybeMessage<::HistogramValue>(Arena*);
 template<> ::Label* Arena::CreateMaybeMessage<::Label>(Arena*);
 template<> ::Metric* Arena::CreateMaybeMessage<::Metric>(Arena*);
 template<> ::MetricPublishRequest* Arena::CreateMaybeMessage<::MetricPublishRequest>(Arena*);
@@ -78,12 +82,13 @@ enum MetricTypes : int {
   START = 0,
   COUNTER = 1,
   GAUGE = 2,
+  HISTOGRAM = 3,
   MetricTypes_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   MetricTypes_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool MetricTypes_IsValid(int value);
 constexpr MetricTypes MetricTypes_MIN = START;
-constexpr MetricTypes MetricTypes_MAX = GAUGE;
+constexpr MetricTypes MetricTypes_MAX = HISTOGRAM;
 constexpr int MetricTypes_ARRAYSIZE = MetricTypes_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MetricTypes_descriptor();
@@ -426,6 +431,7 @@ class Metric PROTOBUF_FINAL :
   enum ValueCase {
     kCounterValue = 4,
     kGaugeValue = 5,
+    kHistogramValue = 6,
     VALUE_NOT_SET = 0,
   };
 
@@ -504,13 +510,14 @@ class Metric PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kLabelsFieldNumber = 6,
+    kLabelsFieldNumber = 7,
     kNameFieldNumber = 3,
     kTypeFieldNumber = 1,
     kCounterValueFieldNumber = 4,
     kGaugeValueFieldNumber = 5,
+    kHistogramValueFieldNumber = 6,
   };
-  // repeated .Label labels = 6;
+  // repeated .Label labels = 7;
   int labels_size() const;
   private:
   int _internal_labels_size() const;
@@ -579,6 +586,24 @@ class Metric PROTOBUF_FINAL :
   void _internal_set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // .HistogramValue histogramValue = 6;
+  bool has_histogramvalue() const;
+  private:
+  bool _internal_has_histogramvalue() const;
+  public:
+  void clear_histogramvalue();
+  const ::HistogramValue& histogramvalue() const;
+  ::HistogramValue* release_histogramvalue();
+  ::HistogramValue* mutable_histogramvalue();
+  void set_allocated_histogramvalue(::HistogramValue* histogramvalue);
+  private:
+  const ::HistogramValue& _internal_histogramvalue() const;
+  ::HistogramValue* _internal_mutable_histogramvalue();
+  public:
+  void unsafe_arena_set_allocated_histogramvalue(
+      ::HistogramValue* histogramvalue);
+  ::HistogramValue* unsafe_arena_release_histogramvalue();
+
   void clear_value();
   ValueCase value_case() const;
   // @@protoc_insertion_point(class_scope:Metric)
@@ -586,6 +611,7 @@ class Metric PROTOBUF_FINAL :
   class _Internal;
   void set_has_countervalue();
   void set_has_gaugevalue();
+  void set_has_histogramvalue();
 
   inline bool has_value() const;
   inline void clear_has_value();
@@ -601,10 +627,264 @@ class Metric PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     ::PROTOBUF_NAMESPACE_ID::uint64 countervalue_;
     ::PROTOBUF_NAMESPACE_ID::int64 gaugevalue_;
+    ::HistogramValue* histogramvalue_;
   } value_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
 
+  friend struct ::TableStruct_metric_2eproto;
+};
+// -------------------------------------------------------------------
+
+class HistogramValue PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:HistogramValue) */ {
+ public:
+  inline HistogramValue() : HistogramValue(nullptr) {}
+  virtual ~HistogramValue();
+  explicit constexpr HistogramValue(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  HistogramValue(const HistogramValue& from);
+  HistogramValue(HistogramValue&& from) noexcept
+    : HistogramValue() {
+    *this = ::std::move(from);
+  }
+
+  inline HistogramValue& operator=(const HistogramValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline HistogramValue& operator=(HistogramValue&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const HistogramValue& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const HistogramValue* internal_default_instance() {
+    return reinterpret_cast<const HistogramValue*>(
+               &_HistogramValue_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(HistogramValue& a, HistogramValue& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(HistogramValue* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(HistogramValue* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline HistogramValue* New() const final {
+    return CreateMaybeMessage<HistogramValue>(nullptr);
+  }
+
+  HistogramValue* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<HistogramValue>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const HistogramValue& from);
+  void MergeFrom(const HistogramValue& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(HistogramValue* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "HistogramValue";
+  }
+  protected:
+  explicit HistogramValue(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_metric_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBucketRangeFieldNumber = 8,
+    kBucketCountFieldNumber = 9,
+    kUnderflowCountFieldNumber = 1,
+    kOverflowCountFieldNumber = 2,
+    kLowerBoundFieldNumber = 3,
+    kUpperBoundFieldNumber = 4,
+    kZeroIndexFieldNumber = 5,
+    kBucketScaleFieldNumber = 6,
+    kScaleTypeFieldNumber = 7,
+  };
+  // repeated int64 bucketRange = 8;
+  int bucketrange_size() const;
+  private:
+  int _internal_bucketrange_size() const;
+  public:
+  void clear_bucketrange();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_bucketrange(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
+      _internal_bucketrange() const;
+  void _internal_add_bucketrange(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
+      _internal_mutable_bucketrange();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::int64 bucketrange(int index) const;
+  void set_bucketrange(int index, ::PROTOBUF_NAMESPACE_ID::int64 value);
+  void add_bucketrange(::PROTOBUF_NAMESPACE_ID::int64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
+      bucketrange() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
+      mutable_bucketrange();
+
+  // repeated uint64 bucketCount = 9;
+  int bucketcount_size() const;
+  private:
+  int _internal_bucketcount_size() const;
+  public:
+  void clear_bucketcount();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_bucketcount(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_bucketcount() const;
+  void _internal_add_bucketcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_bucketcount();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint64 bucketcount(int index) const;
+  void set_bucketcount(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void add_bucketcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      bucketcount() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_bucketcount();
+
+  // uint64 underflowCount = 1;
+  void clear_underflowcount();
+  ::PROTOBUF_NAMESPACE_ID::uint64 underflowcount() const;
+  void set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_underflowcount() const;
+  void _internal_set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 overflowCount = 2;
+  void clear_overflowcount();
+  ::PROTOBUF_NAMESPACE_ID::uint64 overflowcount() const;
+  void set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_overflowcount() const;
+  void _internal_set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // int64 lowerBound = 3;
+  void clear_lowerbound();
+  ::PROTOBUF_NAMESPACE_ID::int64 lowerbound() const;
+  void set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lowerbound() const;
+  void _internal_set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // int64 upperBound = 4;
+  void clear_upperbound();
+  ::PROTOBUF_NAMESPACE_ID::int64 upperbound() const;
+  void set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_upperbound() const;
+  void _internal_set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // int32 zeroIndex = 5;
+  void clear_zeroindex();
+  ::PROTOBUF_NAMESPACE_ID::int32 zeroindex() const;
+  void set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_zeroindex() const;
+  void _internal_set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 bucketScale = 6;
+  void clear_bucketscale();
+  ::PROTOBUF_NAMESPACE_ID::int32 bucketscale() const;
+  void set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_bucketscale() const;
+  void _internal_set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 scaleType = 7;
+  void clear_scaletype();
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype() const;
+  void set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_scaletype() const;
+  void _internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:HistogramValue)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 > bucketrange_;
+  mutable std::atomic<int> _bucketrange_cached_byte_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > bucketcount_;
+  mutable std::atomic<int> _bucketcount_cached_byte_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 underflowcount_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 overflowcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lowerbound_;
+  ::PROTOBUF_NAMESPACE_ID::int64 upperbound_;
+  ::PROTOBUF_NAMESPACE_ID::int32 zeroindex_;
+  ::PROTOBUF_NAMESPACE_ID::int32 bucketscale_;
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_metric_2eproto;
 };
 // -------------------------------------------------------------------
@@ -652,7 +932,7 @@ class Label PROTOBUF_FINAL :
                &_Label_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(Label& a, Label& b) {
     a.Swap(&b);
@@ -1004,7 +1284,80 @@ inline void Metric::set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
   // @@protoc_insertion_point(field_set:Metric.gaugeValue)
 }
 
-// repeated .Label labels = 6;
+// .HistogramValue histogramValue = 6;
+inline bool Metric::_internal_has_histogramvalue() const {
+  return value_case() == kHistogramValue;
+}
+inline bool Metric::has_histogramvalue() const {
+  return _internal_has_histogramvalue();
+}
+inline void Metric::set_has_histogramvalue() {
+  _oneof_case_[0] = kHistogramValue;
+}
+inline void Metric::clear_histogramvalue() {
+  if (_internal_has_histogramvalue()) {
+    if (GetArena() == nullptr) {
+      delete value_.histogramvalue_;
+    }
+    clear_has_value();
+  }
+}
+inline ::HistogramValue* Metric::release_histogramvalue() {
+  // @@protoc_insertion_point(field_release:Metric.histogramValue)
+  if (_internal_has_histogramvalue()) {
+    clear_has_value();
+      ::HistogramValue* temp = value_.histogramvalue_;
+    if (GetArena() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    value_.histogramvalue_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::HistogramValue& Metric::_internal_histogramvalue() const {
+  return _internal_has_histogramvalue()
+      ? *value_.histogramvalue_
+      : reinterpret_cast< ::HistogramValue&>(::_HistogramValue_default_instance_);
+}
+inline const ::HistogramValue& Metric::histogramvalue() const {
+  // @@protoc_insertion_point(field_get:Metric.histogramValue)
+  return _internal_histogramvalue();
+}
+inline ::HistogramValue* Metric::unsafe_arena_release_histogramvalue() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:Metric.histogramValue)
+  if (_internal_has_histogramvalue()) {
+    clear_has_value();
+    ::HistogramValue* temp = value_.histogramvalue_;
+    value_.histogramvalue_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Metric::unsafe_arena_set_allocated_histogramvalue(::HistogramValue* histogramvalue) {
+  clear_value();
+  if (histogramvalue) {
+    set_has_histogramvalue();
+    value_.histogramvalue_ = histogramvalue;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Metric.histogramValue)
+}
+inline ::HistogramValue* Metric::_internal_mutable_histogramvalue() {
+  if (!_internal_has_histogramvalue()) {
+    clear_value();
+    set_has_histogramvalue();
+    value_.histogramvalue_ = CreateMaybeMessage< ::HistogramValue >(GetArena());
+  }
+  return value_.histogramvalue_;
+}
+inline ::HistogramValue* Metric::mutable_histogramvalue() {
+  // @@protoc_insertion_point(field_mutable:Metric.histogramValue)
+  return _internal_mutable_histogramvalue();
+}
+
+// repeated .Label labels = 7;
 inline int Metric::_internal_labels_size() const {
   return labels_.size();
 }
@@ -1052,6 +1405,244 @@ inline void Metric::clear_has_value() {
 inline Metric::ValueCase Metric::value_case() const {
   return Metric::ValueCase(_oneof_case_[0]);
 }
+// -------------------------------------------------------------------
+
+// HistogramValue
+
+// uint64 underflowCount = 1;
+inline void HistogramValue::clear_underflowcount() {
+  underflowcount_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_underflowcount() const {
+  return underflowcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::underflowcount() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.underflowCount)
+  return _internal_underflowcount();
+}
+inline void HistogramValue::_internal_set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  underflowcount_ = value;
+}
+inline void HistogramValue::set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_underflowcount(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.underflowCount)
+}
+
+// uint64 overflowCount = 2;
+inline void HistogramValue::clear_overflowcount() {
+  overflowcount_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_overflowcount() const {
+  return overflowcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::overflowcount() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.overflowCount)
+  return _internal_overflowcount();
+}
+inline void HistogramValue::_internal_set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  overflowcount_ = value;
+}
+inline void HistogramValue::set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_overflowcount(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.overflowCount)
+}
+
+// int64 lowerBound = 3;
+inline void HistogramValue::clear_lowerbound() {
+  lowerbound_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_lowerbound() const {
+  return lowerbound_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::lowerbound() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.lowerBound)
+  return _internal_lowerbound();
+}
+inline void HistogramValue::_internal_set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  lowerbound_ = value;
+}
+inline void HistogramValue::set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lowerbound(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.lowerBound)
+}
+
+// int64 upperBound = 4;
+inline void HistogramValue::clear_upperbound() {
+  upperbound_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_upperbound() const {
+  return upperbound_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::upperbound() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.upperBound)
+  return _internal_upperbound();
+}
+inline void HistogramValue::_internal_set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  upperbound_ = value;
+}
+inline void HistogramValue::set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_upperbound(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.upperBound)
+}
+
+// int32 zeroIndex = 5;
+inline void HistogramValue::clear_zeroindex() {
+  zeroindex_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_zeroindex() const {
+  return zeroindex_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::zeroindex() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.zeroIndex)
+  return _internal_zeroindex();
+}
+inline void HistogramValue::_internal_set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  zeroindex_ = value;
+}
+inline void HistogramValue::set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_zeroindex(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.zeroIndex)
+}
+
+// int32 bucketScale = 6;
+inline void HistogramValue::clear_bucketscale() {
+  bucketscale_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_bucketscale() const {
+  return bucketscale_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::bucketscale() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.bucketScale)
+  return _internal_bucketscale();
+}
+inline void HistogramValue::_internal_set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  bucketscale_ = value;
+}
+inline void HistogramValue::set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_bucketscale(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.bucketScale)
+}
+
+// int32 scaleType = 7;
+inline void HistogramValue::clear_scaletype() {
+  scaletype_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_scaletype() const {
+  return scaletype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::scaletype() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.scaleType)
+  return _internal_scaletype();
+}
+inline void HistogramValue::_internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  scaletype_ = value;
+}
+inline void HistogramValue::set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_scaletype(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.scaleType)
+}
+
+// repeated int64 bucketRange = 8;
+inline int HistogramValue::_internal_bucketrange_size() const {
+  return bucketrange_.size();
+}
+inline int HistogramValue::bucketrange_size() const {
+  return _internal_bucketrange_size();
+}
+inline void HistogramValue::clear_bucketrange() {
+  bucketrange_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_bucketrange(int index) const {
+  return bucketrange_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::bucketrange(int index) const {
+  // @@protoc_insertion_point(field_get:HistogramValue.bucketRange)
+  return _internal_bucketrange(index);
+}
+inline void HistogramValue::set_bucketrange(int index, ::PROTOBUF_NAMESPACE_ID::int64 value) {
+  bucketrange_.Set(index, value);
+  // @@protoc_insertion_point(field_set:HistogramValue.bucketRange)
+}
+inline void HistogramValue::_internal_add_bucketrange(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  bucketrange_.Add(value);
+}
+inline void HistogramValue::add_bucketrange(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_add_bucketrange(value);
+  // @@protoc_insertion_point(field_add:HistogramValue.bucketRange)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
+HistogramValue::_internal_bucketrange() const {
+  return bucketrange_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
+HistogramValue::bucketrange() const {
+  // @@protoc_insertion_point(field_list:HistogramValue.bucketRange)
+  return _internal_bucketrange();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
+HistogramValue::_internal_mutable_bucketrange() {
+  return &bucketrange_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
+HistogramValue::mutable_bucketrange() {
+  // @@protoc_insertion_point(field_mutable_list:HistogramValue.bucketRange)
+  return _internal_mutable_bucketrange();
+}
+
+// repeated uint64 bucketCount = 9;
+inline int HistogramValue::_internal_bucketcount_size() const {
+  return bucketcount_.size();
+}
+inline int HistogramValue::bucketcount_size() const {
+  return _internal_bucketcount_size();
+}
+inline void HistogramValue::clear_bucketcount() {
+  bucketcount_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_bucketcount(int index) const {
+  return bucketcount_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::bucketcount(int index) const {
+  // @@protoc_insertion_point(field_get:HistogramValue.bucketCount)
+  return _internal_bucketcount(index);
+}
+inline void HistogramValue::set_bucketcount(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  bucketcount_.Set(index, value);
+  // @@protoc_insertion_point(field_set:HistogramValue.bucketCount)
+}
+inline void HistogramValue::_internal_add_bucketcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  bucketcount_.Add(value);
+}
+inline void HistogramValue::add_bucketcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_add_bucketcount(value);
+  // @@protoc_insertion_point(field_add:HistogramValue.bucketCount)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+HistogramValue::_internal_bucketcount() const {
+  return bucketcount_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+HistogramValue::bucketcount() const {
+  // @@protoc_insertion_point(field_list:HistogramValue.bucketCount)
+  return _internal_bucketcount();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+HistogramValue::_internal_mutable_bucketcount() {
+  return &bucketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+HistogramValue::mutable_bucketcount() {
+  // @@protoc_insertion_point(field_mutable_list:HistogramValue.bucketCount)
+  return _internal_mutable_bucketcount();
+}
+
 // -------------------------------------------------------------------
 
 // Label
@@ -1181,6 +1772,8 @@ inline void Label::set_allocated_value(std::string* value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

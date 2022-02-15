@@ -133,4 +133,46 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     delete igp;
 }
 
+TEST(TelemetryPublisher, PublishData_TestHistogramValue)
+{
+    // given
+    TelemetryPublisher tp;
+    NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
+    tp.SetGlobalPublisher(igp);
+    tp.StartUsingDataPool();
+    tp.StopPublishing();
+
+    POSHistogramValue histValue{std::vector<int64_t>{0, 4096, 8192, 16384, 32768, 1048576}};
+
+    POSMetric m("transfer_size", MT_HISTOGRAM);
+    m.SetHistogramValue(&histValue);
+    m.AddLabel("label1", "label1_1");
+    m.AddLabel("label2", "label2_2");
+    m.SetType(MT_HISTOGRAM);
+
+    m.GetHistogramValue()->Observe(512);
+    ASSERT_EQ(m.GetHistogramValue()->GetSum(), 512);
+    ASSERT_EQ(m.GetHistogramValue()->GetTotalCount(), 1);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[0], 0);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[1], 1);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[2], 1);
+
+    m.GetHistogramValue()->Observe(4096);
+    ASSERT_EQ(m.GetHistogramValue()->GetSum(), 4608);
+    ASSERT_EQ(m.GetHistogramValue()->GetTotalCount(), 2);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[0], 0);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[1], 2);
+
+    m.GetHistogramValue()->Observe(6144);
+    ASSERT_EQ(m.GetHistogramValue()->GetSum(), 10752);
+    ASSERT_EQ(m.GetHistogramValue()->GetTotalCount(), 3);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[0], 0);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[1], 2);
+    ASSERT_EQ(m.GetHistogramValue()->GetBucketCount()[2], 3);
+
+    tp.StartPublishing();
+    int ret = tp.PublishMetric(m);
+    delete igp;
+}
+
 } // namespace pos

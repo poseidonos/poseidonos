@@ -56,6 +56,28 @@ struct MetricDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricDefaultTypeInternal _Metric_default_instance_;
+constexpr HistogramValue::HistogramValue(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : bucketrange_()
+  , _bucketrange_cached_byte_size_()
+  , bucketcount_()
+  , _bucketcount_cached_byte_size_()
+  , underflowcount_(PROTOBUF_ULONGLONG(0))
+  , overflowcount_(PROTOBUF_ULONGLONG(0))
+  , lowerbound_(PROTOBUF_LONGLONG(0))
+  , upperbound_(PROTOBUF_LONGLONG(0))
+  , zeroindex_(0)
+  , bucketscale_(0)
+  , scaletype_(0){}
+struct HistogramValueDefaultTypeInternal {
+  constexpr HistogramValueDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~HistogramValueDefaultTypeInternal() {}
+  union {
+    HistogramValue _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT HistogramValueDefaultTypeInternal _HistogramValue_default_instance_;
 constexpr Label::Label(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : key_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -69,7 +91,7 @@ struct LabelDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT LabelDefaultTypeInternal _Label_default_instance_;
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_metric_2eproto[4];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_metric_2eproto[5];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_metric_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_metric_2eproto = nullptr;
 
@@ -95,8 +117,23 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::Metric, name_),
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::Metric, labels_),
   PROTOBUF_FIELD_OFFSET(::Metric, value_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, underflowcount_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, overflowcount_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, lowerbound_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, upperbound_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, zeroindex_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketscale_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, scaletype_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketrange_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketcount_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Label, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -109,13 +146,15 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 0, -1, sizeof(::MetricPublishRequest)},
   { 6, -1, sizeof(::MetricPublishResponse)},
   { 12, -1, sizeof(::Metric)},
-  { 23, -1, sizeof(::Label)},
+  { 24, -1, sizeof(::HistogramValue)},
+  { 38, -1, sizeof(::Label)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricPublishRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_MetricPublishResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_Metric_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_HistogramValue_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::_Label_default_instance_),
 };
 
@@ -123,20 +162,26 @@ const char descriptor_table_protodef_metric_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "\n\014metric.proto\"0\n\024MetricPublishRequest\022\030"
   "\n\007metrics\030\001 \003(\0132\007.Metric\"5\n\025MetricPublis"
   "hResponse\022\034\n\024totalReceivedMetrics\030\001 \001(\004\""
-  "\201\001\n\006Metric\022\032\n\004type\030\001 \001(\0162\014.MetricTypes\022\014"
+  "\254\001\n\006Metric\022\032\n\004type\030\001 \001(\0162\014.MetricTypes\022\014"
   "\n\004name\030\003 \001(\t\022\026\n\014counterValue\030\004 \001(\004H\000\022\024\n\n"
-  "gaugeValue\030\005 \001(\003H\000\022\026\n\006labels\030\006 \003(\0132\006.Lab"
-  "elB\007\n\005value\"#\n\005Label\022\013\n\003key\030\001 \001(\t\022\r\n\005val"
-  "ue\030\002 \001(\t*0\n\013MetricTypes\022\t\n\005START\020\000\022\013\n\007CO"
-  "UNTER\020\001\022\t\n\005GAUGE\020\0022Q\n\rMetricManager\022@\n\rM"
-  "etricPublish\022\025.MetricPublishRequest\032\026.Me"
-  "tricPublishResponse\"\000B\014Z\npos.metricb\006pro"
-  "to3"
+  "gaugeValue\030\005 \001(\003H\000\022)\n\016histogramValue\030\006 \001"
+  "(\0132\017.HistogramValueH\000\022\026\n\006labels\030\007 \003(\0132\006."
+  "LabelB\007\n\005value\"\314\001\n\016HistogramValue\022\026\n\016und"
+  "erflowCount\030\001 \001(\004\022\025\n\roverflowCount\030\002 \001(\004"
+  "\022\022\n\nlowerBound\030\003 \001(\003\022\022\n\nupperBound\030\004 \001(\003"
+  "\022\021\n\tzeroIndex\030\005 \001(\005\022\023\n\013bucketScale\030\006 \001(\005"
+  "\022\021\n\tscaleType\030\007 \001(\005\022\023\n\013bucketRange\030\010 \003(\003"
+  "\022\023\n\013bucketCount\030\t \003(\004\"#\n\005Label\022\013\n\003key\030\001 "
+  "\001(\t\022\r\n\005value\030\002 \001(\t*\?\n\013MetricTypes\022\t\n\005STA"
+  "RT\020\000\022\013\n\007COUNTER\020\001\022\t\n\005GAUGE\020\002\022\r\n\tHISTOGRA"
+  "M\020\0032Q\n\rMetricManager\022@\n\rMetricPublish\022\025."
+  "MetricPublishRequest\032\026.MetricPublishResp"
+  "onse\"\000B\014Z\npos.metricb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_metric_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto = {
-  false, false, 443, descriptor_table_protodef_metric_2eproto, "metric.proto", 
-  &descriptor_table_metric_2eproto_once, nullptr, 0, 4,
+  false, false, 708, descriptor_table_protodef_metric_2eproto, "metric.proto", 
+  &descriptor_table_metric_2eproto_once, nullptr, 0, 5,
   schemas, file_default_instances, TableStruct_metric_2eproto::offsets,
   file_level_metadata_metric_2eproto, file_level_enum_descriptors_metric_2eproto, file_level_service_descriptors_metric_2eproto,
 };
@@ -157,6 +202,7 @@ bool MetricTypes_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -551,8 +597,28 @@ void MetricPublishResponse::InternalSwap(MetricPublishResponse* other) {
 
 class Metric::_Internal {
  public:
+  static const ::HistogramValue& histogramvalue(const Metric* msg);
 };
 
+const ::HistogramValue&
+Metric::_Internal::histogramvalue(const Metric* msg) {
+  return *msg->value_.histogramvalue_;
+}
+void Metric::set_allocated_histogramvalue(::HistogramValue* histogramvalue) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  clear_value();
+  if (histogramvalue) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(histogramvalue);
+    if (message_arena != submessage_arena) {
+      histogramvalue = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, histogramvalue, submessage_arena);
+    }
+    set_has_histogramvalue();
+    value_.histogramvalue_ = histogramvalue;
+  }
+  // @@protoc_insertion_point(field_set_allocated:Metric.histogramValue)
+}
 Metric::Metric(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   labels_(arena) {
@@ -578,6 +644,10 @@ Metric::Metric(const Metric& from)
     }
     case kGaugeValue: {
       _internal_set_gaugevalue(from._internal_gaugevalue());
+      break;
+    }
+    case kHistogramValue: {
+      _internal_mutable_histogramvalue()->::HistogramValue::MergeFrom(from._internal_histogramvalue());
       break;
     }
     case VALUE_NOT_SET: {
@@ -626,6 +696,12 @@ void Metric::clear_value() {
     }
     case kGaugeValue: {
       // No need to clear
+      break;
+    }
+    case kHistogramValue: {
+      if (GetArena() == nullptr) {
+        delete value_.histogramvalue_;
+      }
       break;
     }
     case VALUE_NOT_SET: {
@@ -687,16 +763,23 @@ const char* Metric::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated .Label labels = 6;
+      // .HistogramValue histogramValue = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          ptr = ctx->ParseMessage(_internal_mutable_histogramvalue(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .Label labels = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_labels(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -756,12 +839,20 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(5, this->_internal_gaugevalue(), target);
   }
 
-  // repeated .Label labels = 6;
+  // .HistogramValue histogramValue = 6;
+  if (_internal_has_histogramvalue()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        6, _Internal::histogramvalue(this), target, stream);
+  }
+
+  // repeated .Label labels = 7;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_labels_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, this->_internal_labels(i), target, stream);
+      InternalWriteMessage(7, this->_internal_labels(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -780,7 +871,7 @@ size_t Metric::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .Label labels = 6;
+  // repeated .Label labels = 7;
   total_size += 1UL * this->_internal_labels_size();
   for (const auto& msg : this->labels_) {
     total_size +=
@@ -813,6 +904,13 @@ size_t Metric::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_gaugevalue());
+      break;
+    }
+    // .HistogramValue histogramValue = 6;
+    case kHistogramValue: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *value_.histogramvalue_);
       break;
     }
     case VALUE_NOT_SET: {
@@ -866,6 +964,10 @@ void Metric::MergeFrom(const Metric& from) {
       _internal_set_gaugevalue(from._internal_gaugevalue());
       break;
     }
+    case kHistogramValue: {
+      _internal_mutable_histogramvalue()->::HistogramValue::MergeFrom(from._internal_histogramvalue());
+      break;
+    }
     case VALUE_NOT_SET: {
       break;
     }
@@ -901,6 +1003,423 @@ void Metric::InternalSwap(Metric* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Metric::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class HistogramValue::_Internal {
+ public:
+};
+
+HistogramValue::HistogramValue(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  bucketrange_(arena),
+  bucketcount_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:HistogramValue)
+}
+HistogramValue::HistogramValue(const HistogramValue& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      bucketrange_(from.bucketrange_),
+      bucketcount_(from.bucketcount_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&underflowcount_, &from.underflowcount_,
+    static_cast<size_t>(reinterpret_cast<char*>(&scaletype_) -
+    reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+  // @@protoc_insertion_point(copy_constructor:HistogramValue)
+}
+
+void HistogramValue::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&underflowcount_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&scaletype_) -
+    reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+}
+
+HistogramValue::~HistogramValue() {
+  // @@protoc_insertion_point(destructor:HistogramValue)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void HistogramValue::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void HistogramValue::ArenaDtor(void* object) {
+  HistogramValue* _this = reinterpret_cast< HistogramValue* >(object);
+  (void)_this;
+}
+void HistogramValue::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void HistogramValue::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void HistogramValue::Clear() {
+// @@protoc_insertion_point(message_clear_start:HistogramValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  bucketrange_.Clear();
+  bucketcount_.Clear();
+  ::memset(&underflowcount_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&scaletype_) -
+      reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* HistogramValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // uint64 underflowCount = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          underflowcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 overflowCount = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          overflowcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int64 lowerBound = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          lowerbound_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int64 upperBound = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          upperbound_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 zeroIndex = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          zeroindex_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 bucketScale = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          bucketscale_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 scaleType = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          scaletype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated int64 bucketRange = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedInt64Parser(_internal_mutable_bucketrange(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64) {
+          _internal_add_bucketrange(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated uint64 bucketCount = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_bucketcount(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72) {
+          _internal_add_bucketcount(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* HistogramValue::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:HistogramValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint64 underflowCount = 1;
+  if (this->underflowcount() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_underflowcount(), target);
+  }
+
+  // uint64 overflowCount = 2;
+  if (this->overflowcount() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_overflowcount(), target);
+  }
+
+  // int64 lowerBound = 3;
+  if (this->lowerbound() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(3, this->_internal_lowerbound(), target);
+  }
+
+  // int64 upperBound = 4;
+  if (this->upperbound() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(4, this->_internal_upperbound(), target);
+  }
+
+  // int32 zeroIndex = 5;
+  if (this->zeroindex() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_zeroindex(), target);
+  }
+
+  // int32 bucketScale = 6;
+  if (this->bucketscale() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_bucketscale(), target);
+  }
+
+  // int32 scaleType = 7;
+  if (this->scaletype() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_scaletype(), target);
+  }
+
+  // repeated int64 bucketRange = 8;
+  {
+    int byte_size = _bucketrange_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteInt64Packed(
+          8, _internal_bucketrange(), byte_size, target);
+    }
+  }
+
+  // repeated uint64 bucketCount = 9;
+  {
+    int byte_size = _bucketcount_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteUInt64Packed(
+          9, _internal_bucketcount(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:HistogramValue)
+  return target;
+}
+
+size_t HistogramValue::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:HistogramValue)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated int64 bucketRange = 8;
+  {
+    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      Int64Size(this->bucketrange_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+    }
+    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
+    _bucketrange_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // repeated uint64 bucketCount = 9;
+  {
+    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      UInt64Size(this->bucketcount_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+    }
+    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
+    _bucketcount_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // uint64 underflowCount = 1;
+  if (this->underflowcount() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_underflowcount());
+  }
+
+  // uint64 overflowCount = 2;
+  if (this->overflowcount() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_overflowcount());
+  }
+
+  // int64 lowerBound = 3;
+  if (this->lowerbound() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+        this->_internal_lowerbound());
+  }
+
+  // int64 upperBound = 4;
+  if (this->upperbound() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+        this->_internal_upperbound());
+  }
+
+  // int32 zeroIndex = 5;
+  if (this->zeroindex() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_zeroindex());
+  }
+
+  // int32 bucketScale = 6;
+  if (this->bucketscale() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_bucketscale());
+  }
+
+  // int32 scaleType = 7;
+  if (this->scaletype() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_scaletype());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void HistogramValue::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:HistogramValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  const HistogramValue* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<HistogramValue>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:HistogramValue)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:HistogramValue)
+    MergeFrom(*source);
+  }
+}
+
+void HistogramValue::MergeFrom(const HistogramValue& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:HistogramValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  bucketrange_.MergeFrom(from.bucketrange_);
+  bucketcount_.MergeFrom(from.bucketcount_);
+  if (from.underflowcount() != 0) {
+    _internal_set_underflowcount(from._internal_underflowcount());
+  }
+  if (from.overflowcount() != 0) {
+    _internal_set_overflowcount(from._internal_overflowcount());
+  }
+  if (from.lowerbound() != 0) {
+    _internal_set_lowerbound(from._internal_lowerbound());
+  }
+  if (from.upperbound() != 0) {
+    _internal_set_upperbound(from._internal_upperbound());
+  }
+  if (from.zeroindex() != 0) {
+    _internal_set_zeroindex(from._internal_zeroindex());
+  }
+  if (from.bucketscale() != 0) {
+    _internal_set_bucketscale(from._internal_bucketscale());
+  }
+  if (from.scaletype() != 0) {
+    _internal_set_scaletype(from._internal_scaletype());
+  }
+}
+
+void HistogramValue::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:HistogramValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void HistogramValue::CopyFrom(const HistogramValue& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:HistogramValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool HistogramValue::IsInitialized() const {
+  return true;
+}
+
+void HistogramValue::InternalSwap(HistogramValue* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  bucketrange_.InternalSwap(&other->bucketrange_);
+  bucketcount_.InternalSwap(&other->bucketcount_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(HistogramValue, scaletype_)
+      + sizeof(HistogramValue::scaletype_)
+      - PROTOBUF_FIELD_OFFSET(HistogramValue, underflowcount_)>(
+          reinterpret_cast<char*>(&underflowcount_),
+          reinterpret_cast<char*>(&other->underflowcount_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata HistogramValue::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -1153,6 +1672,9 @@ template<> PROTOBUF_NOINLINE ::MetricPublishResponse* Arena::CreateMaybeMessage<
 }
 template<> PROTOBUF_NOINLINE ::Metric* Arena::CreateMaybeMessage< ::Metric >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Metric >(arena);
+}
+template<> PROTOBUF_NOINLINE ::HistogramValue* Arena::CreateMaybeMessage< ::HistogramValue >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::HistogramValue >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Label* Arena::CreateMaybeMessage< ::Label >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Label >(arena);
