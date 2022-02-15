@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # remove poseidonos.servie
 systemctl stop poseidonos.service
 systemctl disable poseidonos.service

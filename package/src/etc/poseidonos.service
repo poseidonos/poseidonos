@@ -6,7 +6,6 @@ Type=simple
 ExecStartPre=/usr/local/etc/setup_env.sh
 ExecStart=/usr/local/bin/poseidonos
 ExecStop=/usr/local/bin/poseibonos-cli system stop --force
-ExecStopPost=/usr/local/lib/spdk/script/setup.sh reset
 KillMode=none
 
 [Install]
