@@ -33,6 +33,7 @@
 #include "src/cli/request_handler.h"
 
 #include <iostream>
+#include "spdlog/spdlog.h"
 
 #include "src/cli/add_device_command.h"
 #include "src/cli/add_listener_command.h"
@@ -190,8 +191,12 @@ RequestHandler::TimedOut(const char* msg)
 
     JsonFormat jFormat;
 
-    return jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::TIMED_OUT, "TIMED OUT",
-        GetPosInfo());
+    int event = (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT;
+    CliEventInfoEntry* entry = CliEventInfo.at(event);
+    return jFormat.MakeResponse(command, rid, event,
+        fmt::format("event_name:{}, message:{}, cause:{}",
+            entry->GetMessage(), entry->GetMessage(), entry->GetCause()),
+            GetPosInfo());
 }
 
 string
@@ -203,8 +208,12 @@ RequestHandler::PosBusy(const char* msg)
 
     JsonFormat jFormat;
 
-    return jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::POS_BUSY, "CLI SERVER IS NOW PROCESSING A COMMAND",
-        GetPosInfo());
+    int event = (int)POS_EVENT_ID::CLI_SERVER_BUSY;
+    CliEventInfoEntry* entry = CliEventInfo.at(event);
+    return jFormat.MakeResponse(command, rid, event,
+        fmt::format("event_name:{}, message:{}, cause:{}",
+            entry->GetMessage(), entry->GetMessage(), entry->GetCause()),
+            GetPosInfo());
 }
 
 bool

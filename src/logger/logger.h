@@ -107,13 +107,13 @@ public:
             {
                 // mj: CLI events are logged by this routine, because the namespaces
                 // between pos and pos_cli are separated.
-                if (IsCliEvent(eventId)) 
+                if (IsCliEvent(eventId))
                 {
                     try
                     {
-                        pos_cli::cliEventInfoEntry* entry = pos_cli::cliEventInfo.at(eventId);
+                        pos_cli::CliEventInfoEntry* entry = pos_cli::CliEventInfo.at(eventId);
                         logger->iboflog_sink(loc, lvl, eventId,
-                            fmt::format("Event:{}, Message:{}, Cause:{}, Variables:{}",
+                            fmt::format("{} - \"{}\" because \"{}\", variables:[ {} ]",
                                 entry->GetEventName(), entry->GetMessage(),
                                 entry->GetCause(), fmt), args...);
                         return;
@@ -121,7 +121,7 @@ public:
                     catch(const std::exception& e)
                     {
                         // TODO (mj): Handling method to be added
-                    }             
+                    }
                 }
                 // TODO (mj): The log entry format for other events will be modified.
                 logger->iboflog_sink(loc, lvl, eventId, fmt, args...);

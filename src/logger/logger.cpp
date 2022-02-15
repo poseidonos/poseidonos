@@ -64,7 +64,7 @@ BuildPattern(bool isStrLoggingEnabled)
         // [POSInstanceId][Datetime][EventID]][LogLevel] -
         // Log Message at SourceFile and LineNumber
         pattern = '[' + std::to_string(instanceId) + ']'
-            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v at %@";
+            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v @ %@";
     }
 
     return pattern;

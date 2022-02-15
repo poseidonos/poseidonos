@@ -65,14 +65,6 @@ private:
         const char* cause = "";
     };
 
-    struct PosEventInfoEntry
-    {
-        POS_EVENT_ID eventId;
-        const char* eventName = "";
-        const char* message = "";
-        const char* cause = "";
-    };
-
     static PosEventIdEntry RESERVED_EVENT_ENTRY;
     static PosEventIdEntry SYSTEM_EVENT_ENTRY[(int)POS_EVENT_ID::SYSTEM_COUNT];
     static PosEventIdEntry ARRAY_EVENT_ENTRY[(int)POS_EVENT_ID::ARRAY_COUNT];
