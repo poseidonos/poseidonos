@@ -151,7 +151,7 @@ POSHistogramValue::POSHistogramValue(std::vector<int64_t> upperBound_)
 void
 POSHistogramValue::Observe(int64_t value)
 {
-    for(size_t i = 0; i < upperBound.size(); i++)
+    for (size_t i = 0; i < upperBound.size(); i++)
     {
         if (value <= upperBound[i])
         {
