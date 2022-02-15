@@ -43,10 +43,37 @@ static const int FAIL = -1;
 static const int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
 static const int BADREQUEST = 400000;
 static const int INTERNAL_ERROR = 500000;
+static const int MAX_CLI_EVENT_COUNT = 2000;
+
+class cliEventInfoEntry
+{   
+    private:
+        std::string eventName = "";
+        std::string message = "";
+        std::string cause = ""; // mj: Fill in this field for erroneous events only.
+    public:
+        cliEventInfoEntry(const char* eventName, const char* message,
+            const char* cause)
+        {
+            this->eventName = eventName; this->message = message;
+            this->cause = cause;
+        }
+    std::string GetEventName() { return eventName; }
+    std::string GetMessage() { return message; }
+    std::string GetCause() { return cause; }
+};
+
+static const std::map<int, cliEventInfoEntry*> cliEventInfo =
+    {
+        // cliEventInfoEntry(eventName, message, cause)
+        {(int)POS_EVENT_ID::CLI_SERVER_READY_SUCCESS,
+            new cliEventInfoEntry("CLI_SERVER_READY_SUCCESS",
+                "The CLI server has been initialized successfully.", "")}
+    };
 
 static const std::map<int, std::string> cliEventDic =
     {
-        {(int)POS_EVENT_ID::SERVER_READY, "CLI server initialized successfully."},
+        {(int)POS_EVENT_ID::CLI_SERVER_READY_SUCCESS, "The CLI server has been initialized successfully."},
         {(int)POS_EVENT_ID::CLIENT_CONNECTED, "new client {} is connected"},
         {(int)POS_EVENT_ID::CLIENT_DISCONNECTED, "client {} is disconnected"},
         {(int)POS_EVENT_ID::MSG_RECEIVED, "msg received:{}"},

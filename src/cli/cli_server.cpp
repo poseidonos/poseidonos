@@ -423,8 +423,7 @@ CLIServer()
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::SERVER_READY,
-        cliEventDic.at((int)POS_EVENT_ID::SERVER_READY));
+    POS_TRACE_INFO((int)POS_EVENT_ID::CLI_SERVER_READY_SUCCESS, "max_cli_count: {}", MAX_CLI_CNT);
     while (1)
     {
         int s_cnt = epoll_wait(efd, event, MAX_CLI_CNT, 1000);

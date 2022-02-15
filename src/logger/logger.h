@@ -45,6 +45,7 @@
 #include "src/lib/singleton.h"
 #include "src/lib/signal_mask.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/cli/cli_event_code.h"
 
 using namespace std;
 
@@ -104,6 +105,25 @@ public:
             }
             else
             {
+                // mj: CLI events are logged by this routine, because the namespaces
+                // between pos and pos_cli are separated.
+                if (IsCliEvent(eventId)) 
+                {
+                    try
+                    {
+                        pos_cli::cliEventInfoEntry* entry = pos_cli::cliEventInfo.at(eventId);
+                        logger->iboflog_sink(loc, lvl, eventId,
+                            fmt::format("Event:{}, Message:{}, Cause:{}, Variables:{}",
+                                entry->GetEventName(), entry->GetMessage(),
+                                entry->GetCause(), fmt), args...);
+                        return;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        // TODO (mj): Handling method to be added
+                    }             
+                }
+                // TODO (mj): The log entry format for other events will be modified.
                 logger->iboflog_sink(loc, lvl, eventId, fmt, args...);
             }
         }
