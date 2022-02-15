@@ -127,6 +127,10 @@ TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricT
     {
         metric.SetGaugeValue(value.gauge);
     }
+    else if (type == MT_HISTOGRAM)
+    {
+        metric.SetHistogramValue(value.histogram);
+    }
     POSMetricVector* metricList = AllocatePOSMetricVector();
     metricList->push_back(metric);
     int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);

@@ -80,6 +80,25 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
             metric->set_type(MetricTypes::GAUGE);
             metric->set_gaugevalue(mit.GetGaugeValue());
         }
+        else if (type == MT_HISTOGRAM)
+        {
+            // build gRPC histogram data structure
+            HistogramValue *histValue = new HistogramValue{};
+            auto& mitHistUpperBound = mit.GetHistogramValue()->GetUpperBound();
+            auto& mitHistBucketCount = mit.GetHistogramValue()->GetBucketCount();
+            for(size_t i = 0; i < mitHistUpperBound.size(); i++)
+            {
+                histValue->add_bucketrange(mitHistUpperBound[i]);
+                histValue->add_bucketcount(mitHistBucketCount[i]);
+            }
+            
+            /**
+             newly created HistogramValue will be removed by gRPC
+             ref : https://developers.google.com/protocol-buffers/docs/reference/cpp-generated  , void set_allocated_foo(string* value
+            */
+            metric->set_type(MetricTypes::HISTOGRAM);
+            metric->set_allocated_histogramvalue(histValue);
+        }
         else
         {
             assert(false);

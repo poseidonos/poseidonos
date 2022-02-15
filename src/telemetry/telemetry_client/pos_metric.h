@@ -45,19 +45,28 @@
 
 namespace pos
 {
-struct POSHistogramValue
+class POSHistogramValue
 {
-    // TODO: RESERVED
-    std::map<std::string, uint64_t> buckets; // insert duplicated key?
+public:
+    POSHistogramValue(std::vector<int64_t> upperBound_);
+    void Observe(int64_t value);
+    const std::vector<int64_t>& GetUpperBound(void) const;
+    const std::vector<uint64_t>& GetBucketCount(void) const;
+    int64_t GetSum(void);
+    uint64_t GetTotalCount(void);
+
+private:
+    std::vector<int64_t> upperBound;
+    std::vector<uint64_t> bucketCount;
     int64_t sum;
-    uint64_t count;
+    uint64_t totalCount;
 };
 
 enum POSMetricTypes {
     MT_COUNT,
     MT_GAUGE,
-    MT_HISTOGRAM, // TODO: RESERVED
-    MT_NUM_TYPE = MT_HISTOGRAM
+    MT_HISTOGRAM,
+    MT_NUM_TYPE,
 };
 
 class POSMetricValue
@@ -67,9 +76,9 @@ public:
     {
         count = 0;
         gauge = 0;
-        // histogram = nullptr
+        histogram = nullptr;
     }
-    // POSHistogramValue* histogram;
+    POSHistogramValue* histogram;
     uint64_t count;
     int64_t gauge;
 };
@@ -86,6 +95,7 @@ public:
     virtual void SetType(POSMetricTypes type_);
     virtual void SetCountValue(uint64_t count_);
     virtual void SetGaugeValue(int64_t gauge_);
+    virtual void SetHistogramValue(POSHistogramValue* histogram_);
     virtual int AddLabel(std::string key, std::string value);
 
     virtual std::string GetName(void);
@@ -93,6 +103,7 @@ public:
     // virtual time_t GetTime(void);
     virtual uint64_t GetCountValue(void);
     virtual int64_t GetGaugeValue(void);
+    virtual POSHistogramValue* GetHistogramValue(void);
     virtual MetricLabelMap* GetLabelList(void);
 
 private:
