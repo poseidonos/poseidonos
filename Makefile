@@ -258,18 +258,12 @@ makedir:
 	@`[ -d $(BINDIR) ] || mkdir -p $(BINDIR)`
 
 package: poseidonos
-	cp -rf lib/spdk package/usr/local/lib/
-	cp -f bin/poseidonos package/usr/local/bin/
-	@`[ -d debian ] || mkdir -p debian`
-	dpkg-deb --build package debian/poseidonos.deb
-
+	@$(MAKE) -C package
 clean :
 	@$(MAKE) -C src clean
 	@$(MAKE) -C proto clean
+	@$(MAKE) -C package clean
 	@rm -rf $(BINDIR)
-	@rm -rf package/usr/local/bin/poseidonos
-	@rm -rf package/usr/local/lib/spdk
-	@rm -rf debian/
 
 .PHONY: all install clean udev_install udev_uninstall makedir package
 

@@ -1,0 +1,23 @@
+all:
+	@cp -f ../bin/poseidonos src/usr/local/bin/
+	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
+	@cp -f ../script/setup_env.sh src/usr/local/etc/
+	@cp -f ../lib/gperf/.libs/libtcmalloc.so* src/usr/local/lib/
+	@cp -rf ../lib/spdk src/usr/local/lib
+	@cp -f ../config/pos.conf src/etc/pos
+	@cp -f ../config/telemetry_default.yaml src/etc/pos
+	@`[ -d debian ] || mkdir -p debian`
+	@dpkg-deb --build src debian/poseidonos.deb
+
+clean :
+	@rm -rf src/usr/local/bin/*
+	@rm -rf src/usr/local/lib/*
+	@rm -rf src/usr/local/etc/*
+	@rm -rf src/etc/pos/*
+	@rm -rf debian/
+	@touch src/usr/local/bin/.gitkeep
+	@touch src/usr/local/lib/.gitkeep
+	@touch src/usr/local/etc/.gitkeep
+	@touch src/etc/pos/.gitkeep
+
+.PHONY: all clean

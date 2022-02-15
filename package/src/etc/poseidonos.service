@@ -2,7 +2,11 @@
 Description=poseidonos
 
 [Service]
+Type=simple
+ExecStartPre=/usr/local/etc/setup_env.sh
 ExecStart=/usr/local/bin/poseidonos
+ExecStop=/usr/local/bin/poseibonos-cli system stop --force
+KillMode=none
 
 [Install]
 WantedBy=multi-user.target
