@@ -44,6 +44,8 @@ class Target:
             prerequisite.network.TcpTune(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
             prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"], self.pos_dir)
             prerequisite.network.Nic(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
+        if (self.prereq and self.prereq["MODPROBE"]["RUN"]):
+            prerequisite.modprobe.Modprobe(self.id, self.pw, self.nic_ssh, self.prereq["MODPROBE"]["MODs"])
         if (self.prereq and self.prereq["SPDK"]["RUN"]):
             prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.pos_dir)
         if (self.prereq and self.prereq["DEBUG"]["RUN"]):

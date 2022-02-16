@@ -42,6 +42,16 @@
                         }
                     ]
                 },
+                "MODPROBE": {
+                    "RUN": false,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                },
                 "SPDK": {
                     "RUN": false,
                     "HUGE_EVEN_ALLOC": "yes",
