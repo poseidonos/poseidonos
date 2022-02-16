@@ -67,21 +67,6 @@ SegmentList::PopSegment(void)
     }
 }
 
-SegmentId
-SegmentList::GetFrontSegment(void)
-{
-    std::lock_guard<std::mutex> lock(m);
-    if (segments.empty() == true)
-    {
-        return UNMAP_SEGMENT;
-    }
-    else
-    {
-        SegmentId ret = *(segments.begin());
-        return ret;
-    }
-}
-
 void
 SegmentList::AddToList(SegmentId segId)
 {
@@ -99,6 +84,7 @@ SegmentList::RemoveFromList(SegmentId segId)
     if (it != segments.end())
     {
         segments.erase(it);
+        numSegments--;
         return true;
     }
     return false;
@@ -122,14 +108,6 @@ SegmentList::Contains(SegmentId segId)
 {
     std::lock_guard<std::mutex> lock(m);
     return (segments.find(segId) != segments.end());
-}
-
-void
-SegmentList::SetList(std::set<SegmentId> list)
-{
-    std::lock_guard<std::mutex> lock(m);
-    segments = list;
-    numSegments = segments.size();
 }
 
 std::set<SegmentId>

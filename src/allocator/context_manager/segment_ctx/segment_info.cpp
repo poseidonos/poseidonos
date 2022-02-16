@@ -76,18 +76,20 @@ SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
     return validBlockCount.fetch_add(inc) + inc;
 }
 
-bool
+std::pair<bool, SegmentState>
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
 {
     uint32_t decreased = validBlockCount.fetch_sub(dec) - dec;
+
     if (decreased == 0)
     {
         std::lock_guard<std::mutex> lock(seglock);
         if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
         {
+            std::pair<bool, SegmentState> result = {true, state};
             _MoveToFreeState();
 
-            return true;
+            return result;
         }
     }
     else if (decreased < 0)
@@ -97,7 +99,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
         assert(false);
     }
 
-    return false;
+    return {false, state};
 }
 
 void
@@ -115,6 +117,7 @@ SegmentInfo::GetOccupiedStripeCount(void)
 uint32_t
 SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
+    // ++ is equivalent to fetch_add(1) + 1
     return ++occupiedStripeCount;
 }
 
@@ -128,8 +131,6 @@ SegmentInfo::GetState(void)
 void
 SegmentInfo::_MoveToFreeState(void)
 {
-    assert(state != SegmentState::NVRAM);
-
     occupiedStripeCount = 0;
     validBlockCount = 0;
 
@@ -154,7 +155,6 @@ bool
 SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    state = SegmentState::SSD;
 
     if (validBlockCount == 0)
     {
@@ -164,22 +164,27 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
     }
     else
     {
+        state = SegmentState::SSD;
         return false;
     }
 }
 
-void
+bool
 SegmentInfo::MoveToVictimState(void)
 {
     if (state != SegmentState::SSD)
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
-            "Cannot move to victim state as it's not SSD state");
-        assert(false);
+            "Cannot move to victim state as it's not SSD state, state: {}", state);
+        return false;
     }
+    else
+    {
+        std::lock_guard<std::mutex> lock(seglock);
+        state = SegmentState::VICTIM;
 
-    std::lock_guard<std::mutex> lock(seglock);
-    state = SegmentState::VICTIM;
+        return true;
+    }
 }
 
 uint32_t

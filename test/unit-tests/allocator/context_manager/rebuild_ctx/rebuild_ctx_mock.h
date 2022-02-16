@@ -25,7 +25,7 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(int, FlushRebuildSegmentList, (std::set<SegmentId> list), (override));
+    MOCK_METHOD(int, FlushRebuildSegmentList, (std::set<SegmentId> segIdSet), (override));
     MOCK_METHOD(std::set<SegmentId>, GetList, (), (override));
 };
 

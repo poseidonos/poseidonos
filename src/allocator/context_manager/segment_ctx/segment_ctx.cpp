@@ -43,17 +43,16 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, nullptr, rebuildCtx_, addrInfo_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_)
 {
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentList* freeSegmentList, SegmentList* rebuildSegmentList,
+    SegmentList* rebuildSegmentList,
     RebuildCtx* rebuildCtx_,
     AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
-  freeList(freeSegmentList),
   rebuildList(rebuildSegmentList),
   rebuildingSegment(UNMAP_SEGMENT),
   initialized(false),
@@ -61,6 +60,11 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   rebuildCtx(rebuildCtx_),
   tp(tp_)
 {
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
+    {
+        segmentList[state] = nullptr;
+    }
+
     segmentInfos = segmentInfo_;
     if (header != nullptr)
     {
@@ -87,6 +91,13 @@ SegmentCtx::~SegmentCtx(void)
     Dispose();
 }
 
+// Only for UT
+void
+SegmentCtx::SetSegmentList(SegmentState state, SegmentList* list)
+{
+    segmentList[state] = list;
+}
+
 void
 SegmentCtx::Init(void)
 {
@@ -102,9 +113,12 @@ SegmentCtx::Init(void)
     uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
 
-    if (freeList == nullptr)
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
-        freeList = new SegmentList();
+        if (segmentList[state] == nullptr)
+        {
+            segmentList[state] = new SegmentList();
+        }
     }
 
     if (rebuildList == nullptr)
@@ -112,7 +126,7 @@ SegmentCtx::Init(void)
         rebuildList = new SegmentList();
     }
 
-    _RebuildFreeSegmentList();
+    _RebuildSegmentList();
 
     initialized = true;
 }
@@ -131,10 +145,13 @@ SegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    if (freeList != nullptr)
+    for (int state = SegmentState::FREE; state < SegmentState::NUM_STATES; state++)
     {
-        delete freeList;
-        freeList = nullptr;
+        if (segmentList[state] != nullptr)
+        {
+            delete segmentList[state];
+            segmentList[state] = nullptr;
+        }
     }
 
     if (rebuildList != nullptr)
@@ -161,13 +178,21 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 bool
 SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    bool segmentFreed = segmentInfos[segId].DecreaseValidBlockCount(cnt);
+    auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt);
+
+    bool segmentFreed = result.first;
     if (segmentFreed == true)
     {
+        SegmentState prevState = result.second;
+        bool removed = segmentList[prevState]->RemoveFromList(segId);
+
+        POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+            "Segment is freed, segmentId: {}, prevState: {}, removed from the list: {}",
+            segId, prevState, removed);
         _SegmentFreed(segId);
-        return true;
     }
-    return false;
+
+    return segmentFreed;
 }
 
 uint32_t
@@ -180,16 +205,26 @@ bool
 SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 {
     uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
+    bool segmentFreed = false;
+
     if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
     {
-        bool segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+        // Only 1 thread reaches here
+        SegmentState prevState = segmentInfos[segId].GetState();
+        segmentList[prevState]->RemoveFromList(segId);
+
+        segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
         if (segmentFreed == true)
         {
             _SegmentFreed(segId);
-            return true;
+        }
+        else
+        {
+            segmentList[SegmentState::SSD]->AddToList(segId);
         }
     }
-    return false;
+
+    return segmentFreed;
 }
 
 int
@@ -205,20 +240,23 @@ SegmentCtx::AfterLoad(char* buf)
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 
-    _RebuildFreeSegmentList();
+    _RebuildSegmentList();
 }
 
 void
-SegmentCtx::_RebuildFreeSegmentList(void)
+SegmentCtx::_RebuildSegmentList(void)
 {
-    freeList->Reset();
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; ++state)
+    {
+        segmentList[state]->Reset();
+    }
 
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
-        if (segmentInfos[segId].GetState() == SegmentState::FREE)
-        {
-            freeList->AddToList(segId);
-        }
+        SegmentState state = segmentInfos[segId].GetState();
+        segmentList[state]->AddToList(segId);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+            "Segment is added to the list, segmentId {}, state {}", segId, state);
     }
 }
 
@@ -322,25 +360,17 @@ SegmentCtx::AllocateFreeSegment(void)
 {
     while (true)
     {
-        SegmentId segId = freeList->PopSegment();
+        SegmentId segId = segmentList[SegmentState::FREE]->PopSegment();
         if (segId == UNMAP_SEGMENT)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT),
-                "[AllocateSegment] failed to allocate segment, free segment count:{}, rebuild target count: {}",
-                GetNumOfFreeSegmentWoLock(),
-                rebuildList->GetNumSegmentsWoLock());
-
-            POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
+                "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
             break;
-        }
-        else if (rebuildList->Contains(segId) == true)
-        {
-            freeList->AddToList(segId);
-            continue;
         }
         else
         {
             segmentInfos[segId].MoveToNvramState();
+            segmentList[SegmentState::NVRAM]->AddToList(segId);
 
             uint64_t freeSegCount = GetNumOfFreeSegmentWoLock();
             POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
@@ -358,42 +388,32 @@ SegmentCtx::AllocateFreeSegment(void)
 uint64_t
 SegmentCtx::GetNumOfFreeSegment(void)
 {
-    return freeList->GetNumSegments();
+    return segmentList[SegmentState::FREE]->GetNumSegments();
 }
 
 uint64_t
 SegmentCtx::GetNumOfFreeSegmentWoLock(void)
 {
-    return freeList->GetNumSegmentsWoLock();
+    return segmentList[SegmentState::FREE]->GetNumSegmentsWoLock();
 }
 
 int
 SegmentCtx::GetAllocatedSegmentCount(void)
 {
-    return addrInfo->GetnumUserAreaSegments() - freeList->GetNumSegments();
+    return addrInfo->GetnumUserAreaSegments() - segmentList[SegmentState::FREE]->GetNumSegments();
 }
 
 SegmentId
 SegmentCtx::AllocateGCVictimSegment(void)
 {
-    SegmentId victimSegment = _FindMostInvalidSSDSegment();
-    if (victimSegment != UNMAP_SEGMENT)
+    SegmentId victimSegmentId = UNMAP_SEGMENT;
+    while ((victimSegmentId = _FindMostInvalidSSDSegment()) != UNMAP_SEGMENT)
     {
-        segmentInfos[victimSegment].MoveToVictimState();
-
-        POSMetricValue validCount;
-        validCount.gauge = segmentInfos[victimSegment].GetValidBlockCount();
-        tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, validCount, MT_GAUGE);
-
-        POSMetricValue victimSegmentId;
-        victimSegmentId.gauge = victimSegment;
-        tp->PublishData(TEL30002_ALCT_GCVICTIM_SEG, victimSegmentId, MT_GAUGE);
-
-        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}",
-            victimSegment, GetNumOfFreeSegmentWoLock());
+        bool successToSetVictim = _SetVictimSegment(victimSegmentId);
+        if (successToSetVictim == true) break;
     }
 
-    return victimSegment;
+    return victimSegmentId;
 }
 
 SegmentId
@@ -414,6 +434,45 @@ SegmentCtx::_FindMostInvalidSSDSegment(void)
     return victimSegment;
 }
 
+bool
+SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
+{
+    assert(victimSegment != UNMAP_SEGMENT);
+
+    bool stateChanged = segmentInfos[victimSegment].MoveToVictimState();
+    if (stateChanged == true)
+    {
+        // This segment is in SSD LIST or REBUILD LIST
+        if (rebuildList->Contains(victimSegment) == true)
+        {
+            // do nothing. this segment will be return to the victim list when rebuidl is completed
+        }
+        else
+        {
+            segmentList[SegmentState::VICTIM]->AddToList(victimSegment);
+        }
+
+        _UpdateTelemetryOnVictimSegmentAllocation(victimSegment);
+
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}",
+            victimSegment, GetNumOfFreeSegmentWoLock());
+    }
+
+    return stateChanged;
+}
+
+void
+SegmentCtx::_UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment)
+{
+    POSMetricValue validCount;
+    validCount.gauge = segmentInfos[victimSegment].GetValidBlockCount();
+    tp->PublishData(TEL30010_ALCT_VICTIM_SEG_INVALID_PAGE_CNT, validCount, MT_GAUGE);
+
+    POSMetricValue victimSegmentId;
+    victimSegmentId.gauge = victimSegment;
+    tp->PublishData(TEL30002_ALCT_GCVICTIM_SEG, victimSegmentId, MT_GAUGE);
+}
+
 void
 SegmentCtx::_SegmentFreed(SegmentId segmentId)
 {
@@ -423,17 +482,15 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
             "segmentId:{} is reclaimed by GC, but still under rebuilding", segmentId);
         return;
     }
-
-    bool rebuildListChanged = rebuildList->RemoveFromList(segmentId);
-    if (rebuildListChanged == true)
+    else if (rebuildList->RemoveFromList(segmentId) == true)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED),
             "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
 
-        rebuildCtx->FlushRebuildSegmentList(rebuildList->GetList());
+        _FlushRebuildSegmentList();
     }
 
-    freeList->AddToList(segmentId);
+    segmentList[SegmentState::FREE]->AddToList(segmentId);
 
     uint32_t freeSegCount = GetNumOfFreeSegmentWoLock();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
@@ -446,15 +503,8 @@ SegmentCtx::ResetSegmentsStates(void)
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
         bool segmentFreed = false;
-        if (segmentInfos[segId].GetState() == SegmentState::VICTIM)
-        {
-            segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
-            if (segmentFreed == false)
-            {
-                POS_TRACE_INFO(EID(SEGMENT_WAS_VICTIM), "segmentId:{} was VICTIM, so changed to SSD", segId);
-            }
-        }
-        else if (segmentInfos[segId].GetState() == SegmentState::SSD)
+        SegmentState state = segmentInfos[segId].GetState();
+        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
         {
             segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
         }
@@ -465,7 +515,7 @@ SegmentCtx::ResetSegmentsStates(void)
         }
     }
 
-    _RebuildFreeSegmentList();
+    _RebuildSegmentList();
 }
 
 SegmentId
@@ -475,7 +525,7 @@ SegmentCtx::GetRebuildTargetSegment(void)
 
     while (true)
     {
-        segmentId = rebuildList->GetFrontSegment();
+        segmentId = rebuildList->PopSegment();
         if (segmentId == UNMAP_SEGMENT)
         {
             segmentId = UINT32_MAX;
@@ -483,9 +533,10 @@ SegmentCtx::GetRebuildTargetSegment(void)
         }
         else if (segmentInfos[segmentId].GetState() == SegmentState::FREE)
         {
+            segmentList[SegmentState::FREE]->AddToList(segmentId);
+
             POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "Skip Rebuilding segmentId:{}, Already Freed", segmentId);
-            rebuildList->RemoveFromList(segmentId);
-            rebuildCtx->FlushRebuildSegmentList(rebuildList->GetList());
+            _FlushRebuildSegmentList();
         }
         else
         {
@@ -500,29 +551,36 @@ SegmentCtx::GetRebuildTargetSegment(void)
 }
 
 int
+SegmentCtx::_FlushRebuildSegmentList(void)
+{
+    auto list = rebuildList->GetList();
+    if (rebuildingSegment != UNMAP_SEGMENT)
+    {
+        list.insert(rebuildingSegment);
+    }
+
+    return rebuildCtx->FlushRebuildSegmentList(list);
+}
+
+int
 SegmentCtx::SetRebuildCompleted(SegmentId segId)
 {
-    _ResetSegmentIdInRebuilding();
-
-    if (rebuildList->RemoveFromList(segId) == true)
+    if (rebuildingSegment == segId)
     {
-        int ret = rebuildCtx->FlushRebuildSegmentList(rebuildList->GetList());
+        SegmentState state = segmentInfos[segId].GetState();
+        segmentList[state]->AddToList(segId);
+
+        _ResetSegmentIdInRebuilding();
 
         POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_SEGMENT_COMPLETED),
-            "Segment {} is removed from the rebuild list", segId);
-
-        if (segmentInfos[segId].GetState() == SegmentState::FREE)
-        {
-            freeList->AddToList(segId);
-        }
-        return ret;
+            "Rebuild segment released, segmentId: {}", segId);
+        return _FlushRebuildSegmentList();
     }
     else
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE),
-            "There is no segmentId:{} in rebuild target list, seemed to be freed by GC",
-            segId);
-
+        POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
+            "Rebuild is completed, but it's not rebuilding target. Completed segment {}, rebuilding segment {}",
+            segId, rebuildingSegment);
         return 0;
     }
 }
@@ -531,27 +589,39 @@ int
 SegmentCtx::MakeRebuildTarget(std::set<SegmentId>& segmentList)
 {
     _BuildRebuildSegmentList();
-
     segmentList = rebuildList->GetList();
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET),
         "MakeRebuildTarget: rebuild target segment is built, num:{}", segmentList.size());
 
-    return rebuildCtx->FlushRebuildSegmentList(segmentList);
+    return _FlushRebuildSegmentList();
 }
 
 void
 SegmentCtx::_BuildRebuildSegmentList(void)
 {
-    uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
-    for (uint32_t segId = 0; segId < numSegments; segId++)
+    // New segment is not allocated while make rebuild segment target by design
+    _BuildRebuildSegmentListFromTheList(SegmentState::SSD);
+    _BuildRebuildSegmentListFromTheList(SegmentState::VICTIM);
+    _BuildRebuildSegmentListFromTheList(SegmentState::NVRAM); // TODO(huijeong.kim) remove this
+
+    _ResetSegmentIdInRebuilding();
+}
+
+void
+SegmentCtx::_BuildRebuildSegmentListFromTheList(SegmentState state)
+{
+    while (segmentList[state]->GetNumSegments() != 0)
     {
-        if (segmentInfos[segId].GetState() != SegmentState::FREE)
+        SegmentId targetSegment = segmentList[state]->PopSegment();
+        if (targetSegment != UNMAP_SEGMENT)
         {
-            rebuildList->AddToList(segId);
+            POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+                "Segment is added to the rebuild target, segmentId {}, state {}",
+                targetSegment, segmentInfos[targetSegment].GetState());
+            rebuildList->AddToList(targetSegment);
         }
     }
-    _ResetSegmentIdInRebuilding();
 }
 
 void
@@ -572,9 +642,19 @@ SegmentCtx::StopRebuilding(void)
         return -EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
     }
 
+    while (rebuildList->GetNumSegments() != 0)
+    {
+        SegmentId segmentId = rebuildList->PopSegment();
+        if (segmentId != UNMAP_SEGMENT)
+        {
+            SegmentState state = segmentInfos[segmentId].GetState();
+            segmentList[state]->AddToList(segmentId);
+        }
+    }
+
     _ResetSegmentIdInRebuilding();
 
-    return rebuildCtx->FlushRebuildSegmentList(rebuildList->GetList());
+    return _FlushRebuildSegmentList();
 }
 
 uint32_t
@@ -586,7 +666,18 @@ SegmentCtx::GetRebuildTargetSegmentCount(void)
 bool
 SegmentCtx::LoadRebuildList(void)
 {
-    rebuildList->SetList(rebuildCtx->GetList());
+    auto list = rebuildCtx->GetList();
+
+    for (auto it = list.begin(); it != list.end(); it++)
+    {
+        SegmentId segmentId = *it;
+        SegmentState state = segmentInfos[segmentId].GetState();
+        bool removed = segmentList[state]->RemoveFromList(segmentId);
+        assert(removed == true);
+
+        rebuildList->AddToList(segmentId);
+    }
+
     POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_CTX_LOADED),
         "Rebuild list is loaded. size {}", rebuildList->GetNumSegments());
     return (rebuildList->GetNumSegments() != 0);

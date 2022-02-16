@@ -53,11 +53,15 @@ public:
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        SegmentList* freeSegmentList, SegmentList* rebuildSegmentList,
+        SegmentList* rebuildSegmentList,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
+
+    // Only for UT
+    void SetSegmentList(SegmentState state, SegmentList* list);
+
     virtual void Init(void);
     virtual void Dispose(void);
 
@@ -109,9 +113,13 @@ private:
     SegmentId _FindMostInvalidSSDSegment(void);
     void _SegmentFreed(SegmentId segId);
 
-    void _RebuildFreeSegmentList(void);
+    void _RebuildSegmentList(void);
     void _BuildRebuildSegmentList(void);
     void _ResetSegmentIdInRebuilding(void);
+    int _FlushRebuildSegmentList(void);
+    bool _SetVictimSegment(SegmentId victimSegment);
+    void _BuildRebuildSegmentListFromTheList(SegmentState state);
+    void _UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -119,7 +127,7 @@ private:
 
     SegmentInfo* segmentInfos;
 
-    SegmentList* freeList;
+    SegmentList* segmentList[SegmentState::NUM_STATES];
     SegmentList* rebuildList;
     SegmentId rebuildingSegment;
 

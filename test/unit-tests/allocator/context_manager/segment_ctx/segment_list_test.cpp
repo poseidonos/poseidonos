@@ -80,4 +80,20 @@ TEST(SegmentList, AddToList_testAddAndPop)
     EXPECT_EQ(list.GetNumSegments(), 0);
     EXPECT_EQ(list.GetNumSegmentsWoLock(), 0);
 }
+
+TEST(SegmentList, RemoveFromList_testRemove)
+{
+    SegmentList list;
+    list.AddToList(0);
+    list.AddToList(10);
+    list.AddToList(20);
+
+    EXPECT_EQ(list.GetNumSegments(), 3);
+
+    list.RemoveFromList(2);
+    EXPECT_EQ(list.GetNumSegments(), 3);
+
+    list.RemoveFromList(10);
+    EXPECT_EQ(list.GetNumSegments(), 2);
+}
 } // namespace pos

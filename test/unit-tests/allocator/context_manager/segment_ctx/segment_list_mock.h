@@ -13,13 +13,11 @@ public:
     using SegmentList::SegmentList;
     MOCK_METHOD(void, Reset, (), (override));
     MOCK_METHOD(SegmentId, PopSegment, (), (override));
-    MOCK_METHOD(SegmentId, GetFrontSegment, (), (override));
     MOCK_METHOD(void, AddToList, (SegmentId segId), (override));
     MOCK_METHOD(bool, RemoveFromList, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetNumSegments, (), (override));
     MOCK_METHOD(uint32_t, GetNumSegmentsWoLock, (), (override));
     MOCK_METHOD(bool, Contains, (SegmentId segId), (override));
-    MOCK_METHOD(void, SetList, (std::set<SegmentId> list), (override));
     MOCK_METHOD(std::set<SegmentId>, GetList, (), (override));
 };
 

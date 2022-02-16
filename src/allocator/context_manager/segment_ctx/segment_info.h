@@ -34,17 +34,20 @@
 
 #include <atomic>
 #include <mutex>
+#include <utility>
 
 #include "src/include/address_type.h"
 
 namespace pos
 {
-enum class SegmentState
+enum SegmentState : int
 {
-    FREE,
+    START,
+    FREE = START,
     NVRAM,
     SSD,
     VICTIM,
+    NUM_STATES,
 };
 
 class SegmentInfo
@@ -57,7 +60,7 @@ public:
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(int cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
-    virtual bool DecreaseValidBlockCount(uint32_t dec);
+    virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(uint32_t dec);
 
     virtual void SetOccupiedStripeCount(uint32_t cnt);
     virtual uint32_t GetOccupiedStripeCount(void);
@@ -67,7 +70,7 @@ public:
 
     virtual void MoveToNvramState(void);
     virtual bool MoveToSsdStateOrFreeStateIfItBecomesEmpty(void);
-    virtual void MoveToVictimState(void);
+    virtual bool MoveToVictimState(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
 
