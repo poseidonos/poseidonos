@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# remove pos user library and config files
+rm -rf /usr/local/lib/spdk/
+rm -rf /usr/local/lib/libtcmalloc*
+rm -rf /usr/local/etc/
+rm -rf /etc/pos/
+rm -rf /var/log/pos/

@@ -3,4 +3,4 @@ Version: 0.10.6
 Maintainer: PoseidonOS Packaging <packaging@poseidonos.com>
 Description: PoseidonOS
 Architecture: amd64
-Depends: libibverbs-dev (= 17.1-1ubuntu0.2), librdmacm-dev (= 17.1-1ubuntu0.2), libjsonrpccpp-dev (= 0.7.0-1build2), libjsoncpp-dev (= 1.7.4-3), libyaml-cpp-dev (= 0.5.2-4ubuntu1), libtbb-dev (= 2017~U7-8), libc-ares-dev (= 1.14.0-1ubuntu0.1), libaio1 (= 0.3.110-5ubuntu0.1)
+Depends: libibverbs-dev (>= 17.1-1ubuntu0.2), librdmacm-dev (>= 17.1-1ubuntu0.2), libjsonrpccpp-dev (>= 0.7.0-1build2), libjsoncpp-dev (>= 1.7.4-3), libyaml-cpp-dev (>= 0.5.2-4ubuntu1), libtbb-dev (>= 2017~U7-8), libc-ares-dev (>= 1.14.0-1ubuntu0.1), libaio1 (>= 0.3.110-5ubuntu0.1)

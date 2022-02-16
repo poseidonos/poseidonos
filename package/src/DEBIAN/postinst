@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# Register CLI man page
+mv /etc/poseidonos-cli* /usr/share/man/man3/
+makewhatis
+
+# register poseidonos.service
 mv /etc/poseidonos.service /lib/systemd/system/poseidonos.service
 systemctl daemon-reload
 systemctl enable poseidonos.service

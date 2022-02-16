@@ -1,6 +1,13 @@
 #!/bin/bash
+
+# remove poseidonos.servie
 systemctl stop poseidonos.service
-systemctl daemon-reload
+systemctl disable poseidonos.service
 rm -rf /lib/systemd/system/poseidonos.service
+systemctl reset-failed
+systemctl daemon-reload
+
+# remove pos user library and config files
 rm -rf /usr/local/lib/spdk
+rm -rf /usr/local/etc
 rm -rf /etc/pos
