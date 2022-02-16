@@ -83,12 +83,12 @@ IOTranslator::Unregister(unsigned int arrayIndex)
 
 int
 IOTranslator::Translate(unsigned int arrayIndex, PartitionType part,
-    PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
+    list<PhysicalEntry>& pel, const LogicalEntry& le)
 {
     auto it = translators[arrayIndex].find(part);
     if (it != translators[arrayIndex].end())
     {
-        return it->second->Translate(dst, src);
+        return it->second->Translate(pel, le);
     }
 
     int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
@@ -125,13 +125,13 @@ IOTranslator::ByteTranslate(unsigned int arrayIndex, PartitionType part,
 }
 
 int
-IOTranslator::Convert(unsigned int arrayIndex, PartitionType part,
-    list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src)
+IOTranslator::GetParityList(unsigned int arrayIndex, PartitionType part,
+    list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src)
 {
     auto it = translators[arrayIndex].find(part);
     if (it != translators[arrayIndex].end())
     {
-        return it->second->Convert(dst, src);
+        return it->second->GetParityList(parity, src);
     }
 
     int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;

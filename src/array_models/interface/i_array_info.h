@@ -61,5 +61,6 @@ public:
     virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;
     virtual IArrayDevMgr* GetArrayManager(void) = 0;
+    virtual bool IsWriteThroughEnabled(void) = 0;
 };
 } // namespace pos

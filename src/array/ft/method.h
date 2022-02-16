@@ -69,8 +69,8 @@ public:
 // LCOV_EXCL_STOP
 
     const FtSizeInfo* GetSizeInfo(void) { return &ftSize_; }
-    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
-    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
+    virtual list<FtEntry> Translate(const LogicalEntry& le) = 0;
+    virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) = 0;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
     virtual bool CheckNumofDevsToConfigure(uint32_t numofDevs) = 0;
     RaidTypeEnum GetRaidType(void) { return raidType; }

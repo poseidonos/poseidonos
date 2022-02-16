@@ -46,11 +46,11 @@ class IIOTranslator
 {
 public:
     virtual int Translate(unsigned int arrayIndex, PartitionType part,
-        PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
+        list<PhysicalEntry>& pel, const LogicalEntry& le) = 0;
     virtual int ByteTranslate(unsigned int arrayIndex, PartitionType part,
         PhysicalByteAddr& dst, const LogicalByteAddr& src) = 0;
-    virtual int Convert(unsigned int arrayIndex, PartitionType part,
-        list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
+    virtual int GetParityList(unsigned int arrayIndex, PartitionType part,
+        list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) = 0;
     virtual int ByteConvert(unsigned int arrayIndex, PartitionType part,
         list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src) = 0;
 };

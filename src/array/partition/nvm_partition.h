@@ -49,9 +49,9 @@ public:
     virtual ~NvmPartition();
     int Create(uint64_t startLba, uint32_t blksPerChunk);
     void RegisterService(IPartitionServices* svc) override;
-    int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) override;
+    int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src);
-    int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
     int ByteConvert(list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src);
     bool IsByteAccessSupported(void) override;
 

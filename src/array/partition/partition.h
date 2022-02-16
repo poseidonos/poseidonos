@@ -70,7 +70,7 @@ public:
 
 protected:
     bool _IsValidAddress(const LogicalBlkAddr& lsa);
-    bool _IsValidEntry(const LogicalWriteEntry& entry);
+    bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
     void _UpdateLastLba(void);
     PartitionLogicalSize logicalSize;
     PartitionPhysicalSize physicalSize;

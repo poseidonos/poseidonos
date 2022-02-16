@@ -50,11 +50,11 @@ public:
     IOTranslator(void);
     virtual ~IOTranslator(void);
     int Translate(unsigned int arrayIndex, PartitionType part,
-        PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+        list<PhysicalEntry>& pel, const LogicalEntry& le) override;
     int ByteTranslate(unsigned int arrayIndex, PartitionType part,
         PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
-    int Convert(unsigned int arrayIndex, PartitionType part,
-        list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
+    int GetParityList(unsigned int arrayIndex, PartitionType part,
+        list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
     int ByteConvert(unsigned int arrayIndex, PartitionType part,
         list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src) override;
     bool Register(unsigned int arrayIndex, ArrayTranslator trans);

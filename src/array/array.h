@@ -84,7 +84,7 @@ public:
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
-    virtual void MountDone(void);
+    virtual void MountDone(bool isWT);
     virtual int CheckUnmountable(void);
     virtual int CheckDeletable(void);
 
@@ -100,11 +100,12 @@ public:
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
+    IArrayDevMgr* GetArrayManager(void) override;
+    bool IsWriteThroughEnabled(void) override;
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
     virtual bool ResumeRebuild(ArrayDevice* target);
-    IArrayDevMgr* GetArrayManager(void);
 
 private:
     int _LoadImpl(void);
@@ -137,6 +138,7 @@ private:
     int shutdownFlag = 0;
     ArrayServiceLayer* arrayService = nullptr;
     id_t uniqueId = 0;
+    bool isWTEnabled = false;
 };
 } // namespace pos
 #endif // ARRAY_H_

@@ -47,8 +47,8 @@ class Raid10 : public Method
 public:
     explicit Raid10(const PartitionPhysicalSize* pSize);
     virtual ~Raid10();
-    virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
-    virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
+    virtual list<FtEntry> Translate(const LogicalEntry& le) override;
+    virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;

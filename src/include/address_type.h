@@ -108,6 +108,12 @@ struct PhysicalByteAddr
     IArrayDevice* arrayDev;
 };
 
+struct LogicalEntry
+{
+    LogicalBlkAddr addr;
+    uint32_t blkCnt;
+};
+
 struct LogicalWriteEntry
 {
     LogicalBlkAddr addr;
@@ -120,6 +126,12 @@ struct LogicalByteWriteEntry
     LogicalByteAddr addr;
     uint32_t byteCnt;
     std::list<BufferEntry>* buffers;
+};
+
+struct PhysicalEntry
+{
+    PhysicalBlkAddr addr;
+    uint32_t blkCnt;
 };
 
 struct PhysicalWriteEntry
@@ -140,6 +152,12 @@ struct FtBlkAddr
 {
     StripeId stripeId;
     BlkOffset offset;
+};
+
+struct FtEntry
+{
+    FtBlkAddr addr;
+    uint32_t blkCnt;
 };
 
 struct FtWriteEntry

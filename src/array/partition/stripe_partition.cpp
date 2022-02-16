@@ -109,6 +109,53 @@ StripePartition::RegisterService(IPartitionServices* svc)
 }
 
 int
+StripePartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
+{
+    if (false == _IsValidEntry(le.addr.stripeId, le.addr.offset, le.blkCnt))
+    {
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
+            PARTITION_TYPE_STR[type], raidType, le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+        return error;
+    }
+    
+    list<FtEntry> feList = _L2FTranslate(le);
+    pel = _F2PTranslate(feList);
+
+    return 0;
+}
+
+int
+StripePartition::GetParityList(list<PhysicalWriteEntry>& parityList, const LogicalWriteEntry& src)
+{
+    if (false == _IsValidEntry(src.addr.stripeId, src.addr.offset, src.blkCnt))
+    {
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
+            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+        return error;
+    }
+
+    list<FtWriteEntry> fweList;
+    method->MakeParity(fweList, src);
+    parityList = _F2PTranslate(fweList);
+    return 0;
+}
+
+int
+StripePartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
+{
+    return -1;
+}
+
+int
+StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
+    const LogicalByteWriteEntry &src)
+{
+    return -1;
+}
+
+int
 StripePartition::_SetPhysicalAddress(uint64_t startLba, uint32_t segCnt)
 {
     physicalSize.startLba = startLba;
@@ -191,33 +238,92 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     return 0;
 }
 
-int
-StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
+list<FtEntry>
+StripePartition::_L2FTranslate(const LogicalEntry& le)
 {
-    if (false == _IsValidAddress(src))
-    {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
-        POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
-            PARTITION_TYPE_STR[type], raidType, src.stripeId, src.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
-        return error;
-    }
-
-    FtBlkAddr fsa;
-    method->Translate(fsa, src);
-
-    dst = _F2PTranslate(fsa);
-
-    return 0;
+    return method->Translate(le);
 }
 
-int
-StripePartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
+list<PhysicalEntry>
+StripePartition::_F2PTranslate(const list<FtEntry>& fel)
 {
-    return -1;
+    list<PhysicalEntry> peList;
+    const uint32_t chunkSize = physicalSize.blksPerChunk;
+    for (FtEntry fe : fel)
+    {
+        const uint32_t firstOffset = fe.addr.offset;
+        const uint32_t lastOffset = firstOffset + fe.blkCnt - 1;
+        const uint32_t chunkStart = firstOffset / chunkSize;
+        const uint32_t chunkEnd = lastOffset / chunkSize;
+        uint32_t startOffset = firstOffset - chunkSize * chunkStart;
+        uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
+        const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)fe.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
+
+        for (uint32_t i = chunkStart; i <= chunkEnd; i++)
+        {
+            PhysicalEntry physicalEntry;
+            physicalEntry.addr = {
+                .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
+                .arrayDev = devs.at(i) };
+            if (i != chunkEnd)
+            {
+                physicalEntry.blkCnt = chunkSize - startOffset;
+                startOffset = 0;
+            }
+            else
+            {
+                physicalEntry.blkCnt = endOffset - startOffset + 1;
+            }
+
+            peList.push_back(physicalEntry);
+        }
+    }
+    return peList;
+}
+
+list<PhysicalWriteEntry>
+StripePartition::_F2PTranslate(const list<FtWriteEntry>& fwel)
+{
+    list<PhysicalWriteEntry> pweList;
+    const uint32_t chunkSize = physicalSize.blksPerChunk;
+    for (FtWriteEntry fwe : fwel)
+    {
+        const uint32_t firstOffset = fwe.addr.offset;
+        const uint32_t lastOffset = firstOffset + fwe.blkCnt - 1;
+        const uint32_t chunkStart = firstOffset / chunkSize;
+        const uint32_t chunkEnd = lastOffset / chunkSize;
+
+        const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)fwe.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
+
+        uint32_t startOffset = firstOffset - chunkSize * chunkStart;
+        uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
+        
+        uint32_t bufferOffset = 0;
+        for (uint32_t i = chunkStart; i <= chunkEnd; i++)
+        {
+            PhysicalWriteEntry pwe;
+            pwe.addr = {
+                .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
+                .arrayDev = devs.at(i) };
+            if (i != chunkEnd)
+            {
+                pwe.blkCnt = chunkSize - startOffset;
+                startOffset = 0;
+            }
+            else
+            {
+                pwe.blkCnt = endOffset - startOffset + 1;
+            }
+            pwe.buffers = _SpliceBuffer(fwe.buffers, bufferOffset, pwe.blkCnt);
+            bufferOffset += pwe.blkCnt;
+            pweList.push_back(pwe);
+        }
+    }
+    return pweList;
 }
 
 PhysicalBlkAddr
-StripePartition::_F2PTranslate(const FtBlkAddr& fba)
+StripePartition::_Fba2Pba(const FtBlkAddr& fba)
 {
     PhysicalBlkAddr pba;
     uint32_t chunkIndex = fba.offset / physicalSize.blksPerChunk;
@@ -229,7 +335,7 @@ StripePartition::_F2PTranslate(const FtBlkAddr& fba)
 }
 
 FtBlkAddr
-StripePartition::_P2FTranslate(const PhysicalBlkAddr& pba)
+StripePartition::_Pba2Fba(const PhysicalBlkAddr& pba)
 {
     int chunkIndex = -1;
     for (uint32_t i = 0; i < devs.size(); i++)
@@ -248,46 +354,12 @@ StripePartition::_P2FTranslate(const PhysicalBlkAddr& pba)
 
     uint64_t ptnBlkOffset =
         (pba.lba - physicalSize.startLba) / ArrayConfig::SECTORS_PER_BLOCK;
-    FtBlkAddr fsa = {
+    FtBlkAddr fba = {
         .stripeId = (uint32_t)(ptnBlkOffset / physicalSize.blksPerChunk),
         .offset =
             (chunkIndex * physicalSize.blksPerChunk) + (ptnBlkOffset % physicalSize.blksPerChunk)};
 
-    return fsa;
-}
-
-int
-StripePartition::Convert(list<PhysicalWriteEntry>& dst,
-    const LogicalWriteEntry& src)
-{
-    if (false == _IsValidEntry(src))
-    {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
-        POS_TRACE_ERROR(error, "{} partition detects invalid address during convert. raidtype:{}, stripeId:{}, offset:{}, blkCnt:{}, totalStripes:{}, totalBlksPerStripe:{}, minWriteBlkCnt:{}",
-            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, src.blkCnt, logicalSize.totalStripes, logicalSize.blksPerStripe, logicalSize.minWriteBlkCnt);
-        return error;
-    }
-    dst.clear();
-    list<FtWriteEntry> ftEntries;
-    method->Convert(ftEntries, src);
-    for (FtWriteEntry& ftEntry : ftEntries)
-    {
-        int ret = 0;
-        ret = _ConvertToPhysical(dst, ftEntry);
-        if (0 != ret)
-        {
-            // TODO
-            assert(0);
-        }
-    }
-    return 0;
-}
-
-int
-StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
-    const LogicalByteWriteEntry &src)
-{
-    return -1;
+    return fba;
 }
 
 list<PhysicalBlkAddr>
@@ -295,54 +367,14 @@ StripePartition::_GetRebuildGroup(FtBlkAddr fba)
 {
     list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba);
     list<PhysicalBlkAddr> ret;
-    for (FtBlkAddr fsa : ftAddrs)
+    for (FtBlkAddr fba : ftAddrs)
     {
-        PhysicalBlkAddr pba = _F2PTranslate(fsa);
+        PhysicalBlkAddr pba = _Fba2Pba(fba);
         ret.push_back(pba);
     }
     return ret;
 }
 
-int
-StripePartition::_ConvertToPhysical(list<PhysicalWriteEntry>& dst,
-    FtWriteEntry& ftEntry)
-{
-    const uint32_t chunkSize = physicalSize.blksPerChunk;
-
-    const uint32_t firstOffset = ftEntry.addr.offset;
-    const uint32_t lastOffset = firstOffset + ftEntry.blkCnt - 1;
-    const uint32_t chunkStart = firstOffset / chunkSize;
-    const uint32_t chunkEnd = lastOffset / chunkSize;
-
-    const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)ftEntry.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
-
-    uint32_t startOffset = firstOffset - chunkSize * chunkStart;
-    uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
-
-    uint32_t bufferOffset = 0;
-    for (uint32_t i = chunkStart; i <= chunkEnd; i++)
-    {
-        PhysicalWriteEntry physicalEntry;
-        physicalEntry.addr = {
-            .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
-            .arrayDev = devs.at(i) };
-        if (i != chunkEnd)
-        {
-            physicalEntry.blkCnt = chunkSize - startOffset;
-            startOffset = 0;
-        }
-        else
-        {
-            physicalEntry.blkCnt = endOffset - startOffset + 1;
-        }
-        physicalEntry.buffers =
-            _SpliceBuffer(ftEntry.buffers, bufferOffset, physicalEntry.blkCnt);
-        bufferOffset += physicalEntry.blkCnt;
-        dst.push_back(physicalEntry);
-    }
-
-    return 0;
-}
 
 list<BufferEntry>
 StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t remain)
@@ -394,7 +426,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         PhysicalBlkAddr originPba = ubio->GetPba();
         BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
         originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
-        FtBlkAddr fba = _P2FTranslate(originPba);
+        FtBlkAddr fba = _Pba2Fba(originPba);
         out.srcAddr = _GetRebuildGroup(fba);
         out.recoverFunc = method->GetRecoverFunc();
 
@@ -419,7 +451,7 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
         ctx->size = GetPhysicalSize();
         {
             using namespace std::placeholders;
-            F2PTranslator trns = std::bind(&StripePartition::_F2PTranslate, this, _1);
+            F2PTranslator trns = std::bind(&StripePartition::_Fba2Pba, this, _1);
             ctx->translate = trns;
         }
         return ctx;

@@ -106,11 +106,10 @@ Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
 }
 
 bool
-Partition::_IsValidEntry(const LogicalWriteEntry& entry)
+Partition::_IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt)
 {
-    if (entry.addr.stripeId < logicalSize.totalStripes &&
-        entry.addr.offset + entry.blkCnt <= logicalSize.blksPerStripe &&
-        entry.blkCnt >= logicalSize.minWriteBlkCnt)
+    if (stripeId < logicalSize.totalStripes &&
+        offset + blkCnt <= logicalSize.blksPerStripe)
     {
         return true;
     }

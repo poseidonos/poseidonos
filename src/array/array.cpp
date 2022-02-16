@@ -155,12 +155,6 @@ Array::_LoadImpl(void)
     return ret;
 }
 
-IArrayDevMgr*
-Array::GetArrayManager(void)
-{
-    return devMgr_;
-}
-
 int
 Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
@@ -285,6 +279,7 @@ Array::Dispose(void)
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Dispose array {}", name_);
     _UnregisterService();
     state->SetUnmount();
+    isWTEnabled = false;
     // pthread_rwlock_unlock(&stateLock);
 }
 
@@ -294,6 +289,7 @@ Array::Shutdown(void)
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Shutdown array {}", name_);
     _UnregisterService();
     shutdownFlag = 1;
+    isWTEnabled = false;
 }
 
 void
@@ -535,6 +531,18 @@ Array::GetRebuildingProgress(void)
     return rebuilder->GetRebuildProgress(name_);
 }
 
+IArrayDevMgr*
+Array::GetArrayManager(void)
+{
+    return devMgr_;
+}
+
+bool
+Array::IsWriteThroughEnabled(void)
+{
+    return isWTEnabled;
+}
+
 int
 Array::_Flush(void)
 {
@@ -662,8 +670,9 @@ Array::DetachDevice(UblockSharedPtr uBlock)
 }
 
 void
-Array::MountDone(void)
+Array::MountDone(bool isWT)
 {
+    isWTEnabled = isWT;
     _CheckRebuildNecessity();
     int ret = _Flush();
     assert(ret == 0);

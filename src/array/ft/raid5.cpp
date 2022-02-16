@@ -55,19 +55,40 @@ Raid5::Raid5(const PartitionPhysicalSize* pSize)
     _BindRecoverFunc();
 }
 
-int
-Raid5::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
+list<FtEntry>
+Raid5::Translate(const LogicalEntry& le)
 {
-    dst = {.stripeId = src.stripeId,
-        .offset = src.offset};
+    uint32_t parityIndex = GetParityOffset(le.addr.stripeId).front();
+    uint32_t paritySize = ftSize_.blksPerChunk;
+    BlkOffset parityOffset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
+    BlkOffset startOffset = le.addr.offset;
+    BlkOffset lastOffset = startOffset + le.blkCnt - 1;
 
-    uint32_t chunkIndex = src.offset / ftSize_.blksPerChunk;
-    uint32_t parityIndex = GetParityOffset(src.stripeId).front();
-    if (chunkIndex >= parityIndex)
+    list<FtEntry> feList;
+    FtEntry fe;
+    fe.addr.stripeId = le.addr.stripeId;
+    fe.addr.offset = le.addr.offset;
+    fe.blkCnt = le.blkCnt;
+    if (parityOffset == startOffset)
     {
-        dst.offset += ftSize_.blksPerChunk;
+        fe.addr.offset += paritySize;
     }
-    return 0;
+    else if (parityOffset > startOffset && parityOffset <= lastOffset)
+    {
+        fe.blkCnt = parityOffset - startOffset;
+        feList.push_back(fe);
+        FtEntry feSecond;
+        feSecond.addr.stripeId = le.addr.stripeId;
+        feSecond.addr.offset = parityOffset + paritySize;
+        feSecond.blkCnt = le.blkCnt - fe.blkCnt;
+        feList.push_back(feSecond);
+    }
+    else
+    {
+        feList.push_back(fe);
+    }
+
+    return feList;
 }
 
 list<FtBlkAddr>
@@ -110,22 +131,17 @@ Raid5::GetRaidState(vector<ArrayDeviceState> devs)
 }
 
 int
-Raid5::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+Raid5::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
-    FtWriteEntry ftEntry;
-    ftEntry.addr = {.stripeId = src.addr.stripeId,
-        .offset = 0};
-    ftEntry.buffers = *(src.buffers);
-    BufferEntry parity = _AllocBuffer();
-    _ComputeParity(parity, *(src.buffers));
-    uint32_t parityOffset = GetParityOffset(ftEntry.addr.stripeId).front();
-    auto it = ftEntry.buffers.begin();
-    advance(it, parityOffset);
-    ftEntry.buffers.insert(it, parity);
-    ftEntry.blkCnt = src.blkCnt + ftSize_.backupBlkCnt;
-
-    dst.clear();
-    dst.push_front(ftEntry);
+    uint32_t parityOffset = GetParityOffset(src.addr.stripeId).front();
+    FtWriteEntry fwe;
+    fwe.addr.stripeId = src.addr.stripeId;
+    fwe.addr.offset = parityOffset * ftSize_.blksPerChunk;
+    fwe.blkCnt = ftSize_.blksPerChunk;
+    BufferEntry parity = _AllocChunk();
+    _ComputeParityChunk(parity, *(src.buffers));
+    fwe.buffers.push_back(parity);
+    ftl.push_back(fwe);
 
     return 0;
 }
@@ -138,23 +154,22 @@ Raid5::CheckNumofDevsToConfigure(uint32_t numofDevs)
 }
 
 BufferEntry
-Raid5::_AllocBuffer()
+Raid5::_AllocChunk()
 {
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
     void* mem = bufferPool->TryGetBuffer();
-    uint32_t blkCnt = ArrayConfig::BLOCKS_PER_CHUNK;
 
     // TODO error handling for the case of insufficient free parity buffer
     assert(nullptr != mem);
 
-    BufferEntry buffer(mem, blkCnt, true);
+    BufferEntry buffer(mem, ftSize_.blksPerChunk, true);
     buffer.SetBufferPool(bufferPool);
     return buffer;
 }
 
 void
-Raid5::_ComputeParity(BufferEntry& dst, const list<BufferEntry>& src)
+Raid5::_ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src)
 {
     uint32_t memSize = ftSize_.blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE;
     void* src1 = nullptr;

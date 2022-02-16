@@ -59,9 +59,9 @@ public:
     virtual ~StripePartition(void);
     virtual int Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks);
     void RegisterService(IPartitionServices* svc) override;
-    int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) override;
+    int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
-    int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
     int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
     bool IsByteAccessSupported(void) override;
     RaidState GetRaidState(void) override;
@@ -71,9 +71,12 @@ public:
     RaidTypeEnum GetRaidType(void) override { return raidType; }
 
 private:
-    FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);
-    PhysicalBlkAddr _F2PTranslate(const FtBlkAddr& fsa);
-    int _ConvertToPhysical(list<PhysicalWriteEntry>& dst, FtWriteEntry& src);
+    list<FtEntry> _L2FTranslate(const LogicalEntry& le);
+    list<PhysicalEntry> _F2PTranslate(const list<FtEntry>& fel);
+    list<PhysicalWriteEntry> _F2PTranslate(const list<FtWriteEntry>& fwel);
+    FtBlkAddr _Pba2Fba(const PhysicalBlkAddr& pba);
+    PhysicalBlkAddr _Fba2Pba(const FtBlkAddr& fsa);
+
     list<BufferEntry> _SpliceBuffer(
         list<BufferEntry>& src, uint32_t start, uint32_t remain);
     int _SetPhysicalAddress(uint64_t startLba, uint32_t segCnt);

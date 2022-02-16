@@ -47,9 +47,9 @@ public:
     {
     }
 // LCOV_EXCL_END
-    virtual int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
+    virtual int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) = 0;
+    virtual int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) = 0;
     virtual int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) = 0;
-    virtual int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
     virtual int ByteConvert(list<PhysicalByteWriteEntry>& dst,
         const LogicalByteWriteEntry& src) = 0;
     virtual bool IsByteAccessSupported(void) = 0;

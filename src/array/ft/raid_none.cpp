@@ -50,25 +50,21 @@ RaidNone::RaidNone(const PartitionPhysicalSize* pSize)
         .chunksPerStripe = 1};
 }
 
-int
-RaidNone::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
+list<FtEntry>
+RaidNone::Translate(const LogicalEntry& le)
 {
-    dst = {.stripeId = src.stripeId,
-        .offset = src.offset};
-    return 0;
+    FtEntry fe;
+    fe.addr.stripeId = le.addr.stripeId;
+    fe.addr.offset = le.addr.offset;
+    fe.blkCnt = le.blkCnt;
+
+    return list<FtEntry> { fe };
 }
 
 int
-RaidNone::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+RaidNone::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
-    FtWriteEntry ftEntry;
-    ftEntry.addr = {.stripeId = src.addr.stripeId,
-        .offset = src.addr.offset};
-    ftEntry.buffers = *(src.buffers);
-    ftEntry.blkCnt = src.blkCnt;
-    dst.clear();
-    dst.push_front(ftEntry);
-
+    ftl.clear();
     return 0;
 }
 

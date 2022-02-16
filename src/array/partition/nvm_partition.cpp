@@ -74,20 +74,29 @@ NvmPartition::RegisterService(IPartitionServices* svc)
 }
 
 int
-NvmPartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
+NvmPartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
 {
-    if (false == _IsValidAddress(src))
+    if (false == _IsValidEntry(le.addr.stripeId, le.addr.offset, le.blkCnt))
     {
         int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
-    dst.arrayDev = devs.front();
-    dst.lba = physicalSize.startLba +
-        (src.stripeId * logicalSize.blksPerStripe + src.offset) *
+    PhysicalEntry pe;
+    pe.addr.arrayDev = devs.front();
+    pe.addr.lba = physicalSize.startLba +
+        ((uint64_t)le.addr.stripeId * logicalSize.blksPerStripe + le.addr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK;
+    pe.blkCnt = le.blkCnt;
+    pel.push_back(pe);
+    return 0;
+}
 
+int
+GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src)
+{
+    parity.clear();
     return 0;
 }
 
@@ -107,28 +116,6 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
         (src.blkAddr.stripeId * logicalSize.blksPerStripe + src.blkAddr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
         src.byteOffset;
-
-    return 0;
-}
-
-int
-NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
-    const LogicalWriteEntry& src)
-{
-    if (false == _IsValidEntry(src))
-    {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
-        POS_TRACE_ERROR(error, "Invalid Address Error");
-        return error;
-    }
-
-    PhysicalWriteEntry physicalEntry;
-    Translate(physicalEntry.addr, src.addr);
-    physicalEntry.blkCnt = src.blkCnt;
-    physicalEntry.buffers = *(src.buffers);
-
-    dst.clear();
-    dst.push_back(physicalEntry);
 
     return 0;
 }

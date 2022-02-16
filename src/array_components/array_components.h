@@ -81,7 +81,7 @@ public:
     virtual ComponentsInfo* GetInfo(void);
     virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
     virtual int Load(void);
-    virtual int Mount(void);
+    virtual int Mount(bool isWTEnabled);
     virtual int Unmount(void);
     virtual int Delete(void);
     virtual int PrepareRebuild(bool& resume);

@@ -52,29 +52,26 @@ Raid10::Raid10(const PartitionPhysicalSize* pSize)
     _BindRecoverFunc();
 }
 
-int
-Raid10::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
+
+list<FtEntry>
+Raid10::Translate(const LogicalEntry& le)
 {
-    dst = {.stripeId = src.stripeId,
-        .offset = src.offset};
-    return 0;
+    FtEntry fe;
+    fe.addr.stripeId = le.addr.stripeId;
+    fe.addr.offset = le.addr.offset;
+    fe.blkCnt = le.blkCnt;
+    return list<FtEntry> { fe };
 }
 
 int
-Raid10::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
+Raid10::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
-    FtWriteEntry ftEntry;
-    Translate(ftEntry.addr, src.addr);
-    ftEntry.buffers = *(src.buffers);
-    ftEntry.blkCnt = src.blkCnt;
-
-    FtWriteEntry mirror(ftEntry);
-    mirror.addr.offset += ftSize_.backupBlkCnt;
-
-    dst.clear();
-    dst.push_back(ftEntry);
-    dst.push_back(mirror);
-
+    FtWriteEntry mirror;
+    mirror.addr.stripeId = src.addr.stripeId;
+    mirror.addr.offset = src.addr.offset + ftSize_.backupBlkCnt;
+    mirror.blkCnt = src.blkCnt;
+    mirror.buffers = *(src.buffers);
+    ftl.push_back(mirror);
     return 0;
 }
 

@@ -193,12 +193,12 @@ ArrayComponents::Load(void)
 }
 
 int
-ArrayComponents::Mount(void)
+ArrayComponents::Mount(bool isWTEnabled)
 {
     int ret = arrayMountSequence->Mount();
     if (ret == 0)
     {
-        array->MountDone();
+        array->MountDone(isWTEnabled);
     }
     return ret;
 }
