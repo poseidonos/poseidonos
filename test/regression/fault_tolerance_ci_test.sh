@@ -467,22 +467,33 @@ run_test()
 		((iter++))
 	done
 
+    echo "1. Start POS.."
 	bringup_ibofos create
-	write_pattern 0 ${dummy_range_blk} ${blk_size_kb} #dummy write
+	echo "2. Write Pattern 0.."
+    write_pattern 0 ${dummy_range_blk} ${blk_size_kb} #dummy write
 	write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
-	detach_device
+	echo "3. Detach a device.."
+    detach_device
+    echo "4. Write Pattern 1.."
 	write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
+    echo "5. Restart.."
 	shutdown_ibofos;
 	bringup_ibofos 0;
+    echo "6. Verify Pattern 0.."
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    echo "7. Verify Pattern 1.."
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
-
+    echo "8. Patterns are verified"
 	add_spare &
+    echo "9. Rebuilding..."
 	write_pattern ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # write #2
-
+    echo "10. Write Pattern 2 during Rebuilding..."
 	#rebuilding
+    echo "11. Verify Pattern 0.. during rebuilding"
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} 0 # read #0
+    echo "12. Verify Pattern 1.. during rebuilding"
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} 1 # read #1
+    echo "13. Verify Pattern 2.. during rebuilding"
 	verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} 2 # read #2
 	#rebuild done
 	waiting_for_rebuild_complete

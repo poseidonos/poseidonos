@@ -93,19 +93,6 @@ Partition::IsValidLba(uint64_t lba)
 }
 
 bool
-Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
-{
-    if (lsa.stripeId < logicalSize.totalStripes && lsa.offset < logicalSize.blksPerStripe)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool
 Partition::_IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt)
 {
     if (stripeId < logicalSize.totalStripes &&

@@ -56,15 +56,10 @@ public:
 
         mockITranslator = new NiceMock<MockIIOTranslator>;
         PhysicalBlkAddr tmpPba = {.lba = 0, .arrayDev = nullptr};
-        ON_CALL(*mockITranslator, Translate(arrayId, _, _, _)).WillByDefault([tmpPba](unsigned int arrayIndex, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr src) {
-            dst = tmpPba;
-            return 0;
-        });
-
-        PhysicalWriteEntry tmpPWE = {.addr = tmpPba, .blkCnt = 1};
-        PhysicalEntries tmpPWEs;
-        tmpPWEs.push_back(tmpPWE);
-        ON_CALL(*mockITranslator, Convert(arrayId, _, _, _)).WillByDefault([tmpPWEs](unsigned int arrayIndex, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) {
+        PhysicalEntry tmpPE = {.addr = tmpPba, .blkCnt = 1};
+        list<PhysicalEntry> tmpPWEs;
+        tmpPWEs.push_back(tmpPE);
+        ON_CALL(*mockITranslator, Translate(arrayId, _, _, _)).WillByDefault([tmpPWEs](unsigned int arrayIndex, PartitionType part, list<PhysicalEntry>& dst, const LogicalEntry& src) {
             dst = tmpPWEs;
             return 0;
         });
@@ -231,13 +226,13 @@ TEST_F(TranslatorTestFixture, GetPhysicalEntries)
 {
     //When: get physical entries
     Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
-    PhysicalEntries actual = translator.GetPhysicalEntries(nullptr, 0);
+    list<PhysicalEntry> actual = translator.GetPhysicalEntries(nullptr, 0);
 
     //Then: return a phyiscal entry
     EXPECT_EQ(actual.size(), 1);
 
     //Given: make the conversion return fail
-    ON_CALL(*mockITranslator, Convert(arrayId, _, _, _)).WillByDefault(Return(-1));
+    ON_CALL(*mockITranslator, Translate(arrayId, _, _, _)).WillByDefault(Return(-1));
 
     //When: get physical entries
     //Then: exception is thrown

@@ -63,17 +63,21 @@ Raid5::Translate(const LogicalEntry& le)
     BlkOffset parityOffset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
     BlkOffset startOffset = le.addr.offset;
     BlkOffset lastOffset = startOffset + le.blkCnt - 1;
+    uint32_t firstIndex = startOffset / ftSize_.blksPerChunk;
+    uint32_t lastIndex = lastOffset / ftSize_.blksPerChunk;
 
     list<FtEntry> feList;
     FtEntry fe;
     fe.addr.stripeId = le.addr.stripeId;
     fe.addr.offset = le.addr.offset;
     fe.blkCnt = le.blkCnt;
-    if (parityOffset == startOffset)
+    
+    if (parityIndex <= firstIndex)
     {
         fe.addr.offset += paritySize;
+        feList.push_back(fe);
     }
-    else if (parityOffset > startOffset && parityOffset <= lastOffset)
+    else if(firstIndex < parityIndex && parityIndex <= lastIndex)
     {
         fe.blkCnt = parityOffset - startOffset;
         feList.push_back(fe);
@@ -133,14 +137,15 @@ Raid5::GetRaidState(vector<ArrayDeviceState> devs)
 int
 Raid5::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
-    uint32_t parityOffset = GetParityOffset(src.addr.stripeId).front();
+    uint32_t parityIndex = GetParityOffset(src.addr.stripeId).front();
     FtWriteEntry fwe;
     fwe.addr.stripeId = src.addr.stripeId;
-    fwe.addr.offset = parityOffset * ftSize_.blksPerChunk;
+    fwe.addr.offset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
     fwe.blkCnt = ftSize_.blksPerChunk;
     BufferEntry parity = _AllocChunk();
     _ComputeParityChunk(parity, *(src.buffers));
     fwe.buffers.push_back(parity);
+    ftl.clear();
     ftl.push_back(fwe);
 
     return 0;
@@ -235,6 +240,7 @@ Raid5::_BindRecoverFunc(void)
 void
 Raid5::_RebuildData(void* dst, void* src, uint32_t dstSize)
 {
+    POS_TRACE_ERROR(EID(RAID_DEBUG_MSG), "RAID5 RebuildRead, size:{}, chkpstr:{}", dstSize, ftSize_.chunksPerStripe);
     using BlockData = char[dstSize];
     memset(dst, 0, dstSize);
     for (uint32_t i = 0; i < ftSize_.chunksPerStripe - 1; i++)

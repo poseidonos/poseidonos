@@ -118,7 +118,7 @@ StripePartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
             PARTITION_TYPE_STR[type], raidType, le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
-    
+
     list<FtEntry> feList = _L2FTranslate(le);
     pel = _F2PTranslate(feList);
 
@@ -135,10 +135,18 @@ StripePartition::GetParityList(list<PhysicalWriteEntry>& parityList, const Logic
             PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
+    if (src.blkCnt < logicalSize.minWriteBlkCnt)
+    {
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity 2. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
+            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+        return error;
+    }
 
     list<FtWriteEntry> fweList;
     method->MakeParity(fweList, src);
     parityList = _F2PTranslate(fweList);
+
     return 0;
 }
 
@@ -251,12 +259,12 @@ StripePartition::_F2PTranslate(const list<FtEntry>& fel)
     const uint32_t chunkSize = physicalSize.blksPerChunk;
     for (FtEntry fe : fel)
     {
-        const uint32_t firstOffset = fe.addr.offset;
-        const uint32_t lastOffset = firstOffset + fe.blkCnt - 1;
+        const BlkOffset firstOffset = fe.addr.offset;
+        const BlkOffset lastOffset = firstOffset + fe.blkCnt - 1;
         const uint32_t chunkStart = firstOffset / chunkSize;
         const uint32_t chunkEnd = lastOffset / chunkSize;
-        uint32_t startOffset = firstOffset - chunkSize * chunkStart;
-        uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
+        BlkOffset startOffset = firstOffset - chunkSize * chunkStart;
+        BlkOffset endOffset = lastOffset - chunkSize * chunkEnd;
         const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)fe.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
 
         for (uint32_t i = chunkStart; i <= chunkEnd; i++)
@@ -288,15 +296,13 @@ StripePartition::_F2PTranslate(const list<FtWriteEntry>& fwel)
     const uint32_t chunkSize = physicalSize.blksPerChunk;
     for (FtWriteEntry fwe : fwel)
     {
-        const uint32_t firstOffset = fwe.addr.offset;
-        const uint32_t lastOffset = firstOffset + fwe.blkCnt - 1;
+        const BlkOffset firstOffset = fwe.addr.offset;
+        const BlkOffset lastOffset = firstOffset + fwe.blkCnt - 1;
         const uint32_t chunkStart = firstOffset / chunkSize;
         const uint32_t chunkEnd = lastOffset / chunkSize;
-
+        BlkOffset startOffset = firstOffset - chunkSize * chunkStart;
+        BlkOffset endOffset = lastOffset - chunkSize * chunkEnd;
         const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)fwe.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
-
-        uint32_t startOffset = firstOffset - chunkSize * chunkStart;
-        uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
         
         uint32_t bufferOffset = 0;
         for (uint32_t i = chunkStart; i <= chunkEnd; i++)
@@ -383,9 +389,14 @@ StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t 
     list<BufferEntry> dst;
 
     uint32_t offset = 0;
+    // int i = 0;
     for (BufferEntry& buffer : src)
     {
+        // i++;
         uint32_t blkCnt = buffer.GetBlkCnt();
+        // POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "SPLICE ({}) BEL:{}, bufferBlkCnt:{}, start:{}, remain:{}",
+        //         i, src.size(), blkCnt, start, remain);
+
         if (offset <= start && offset + blkCnt > start)
         {
             BufferEntry split = buffer;
@@ -428,11 +439,24 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
         FtBlkAddr fba = _Pba2Fba(originPba);
         out.srcAddr = _GetRebuildGroup(fba);
+        int i = 0;
+        for (PhysicalBlkAddr& p : out.srcAddr)
+        {
+            i++;
+            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+            "GetRecoverMethod({}) for {} partition, lba:{}, size:{}, stripeId:{}, offset:{}, neighborDev:{}, neighborDevlba:{}",
+            i, PARTITION_TYPE_STR[type], originPba.lba, ubio->GetSize(), fba.stripeId, fba.offset, p.arrayDev->GetUblock()->GetName(), p.lba);
+        }
         out.recoverFunc = method->GetRecoverFunc();
 
         return (int)POS_EVENT_ID::SUCCESS;
     }
-    return (int)POS_EVENT_ID::RECOVER_INVALID_LBA;
+    else
+    {
+        int error = EID(RECOVER_INVALID_LBA);
+        POS_TRACE_ERROR(error, "Failed to get recover method for {} partition, lba:{}", PARTITION_TYPE_STR[type], lba);
+        return error;
+    }
 }
 
 unique_ptr<RebuildContext>

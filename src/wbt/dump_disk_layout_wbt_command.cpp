@@ -79,9 +79,14 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     unsigned int arrayIndex = info->arrayInfo->GetIndex();
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};
-
+    LogicalEntry logicalEntry {
+        .addr = lsa,
+        .blkCnt = 1
+    };
     PhysicalBlkAddr pba;
-    trans->Translate(arrayIndex, META_SSD, pba, lsa);
+    list<PhysicalEntry> physicalEntries;
+    trans->Translate(arrayIndex, META_SSD, physicalEntries, logicalEntry);
+    pba = physicalEntries.front().addr;
     out << "meta ssd start lba : " << pba.lba << std::endl;
 
     const PartitionLogicalSize* logicalSize = info->arrayInfo->GetSizeInfo(META_SSD);
@@ -89,7 +94,9 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
         logicalSize->blksPerChunk * ArrayConfig::SECTORS_PER_BLOCK;
     out << "meta ssd end lba : " << pba.lba + blk - 1 << std::endl;
 
-    trans->Translate(arrayIndex, USER_DATA, pba, lsa);
+    physicalEntries.clear();
+    trans->Translate(arrayIndex, USER_DATA, physicalEntries, logicalEntry);
+    pba = physicalEntries.front().addr;
     out << "user data start lba : " << pba.lba << std::endl;
 
     logicalSize = info->arrayInfo->GetSizeInfo(USER_DATA);
@@ -98,7 +105,9 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
 
     if (0 /*useNvm*/)
     {
-        trans->Translate(arrayIndex, WRITE_BUFFER, pba, lsa);
+        physicalEntries.clear();
+        trans->Translate(arrayIndex, WRITE_BUFFER, physicalEntries, logicalEntry);
+        pba = physicalEntries.front().addr;
         out << "write buffer start lba : " << pba.lba << std::endl;
 
         logicalSize = info->arrayInfo->GetSizeInfo(WRITE_BUFFER);

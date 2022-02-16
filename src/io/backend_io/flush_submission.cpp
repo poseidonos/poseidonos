@@ -35,23 +35,23 @@
 #include <list>
 #include <string>
 
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/meta_const.h"
+#include "src/array/service/array_service_layer.h"
+#include "src/device/base/ublock_device.h"
+#include "src/include/array_config.h"
 #include "src/include/backend_event.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/i_array_device.h"
+#include "src/include/meta_const.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_count.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
-#include "src/array/service/array_service_layer.h"
-#include "src/include/i_array_device.h"
-#include "src/include/array_config.h"
-#include "src/device/base/ublock_device.h"
 
 namespace pos
 {
 FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId)
 : FlushSubmission(inputStripe,
-    IIOSubmitHandler::GetInstance(), arrayId, ArrayService::Instance()->Getter()->GetTranslator())
+      IIOSubmitHandler::GetInstance(), arrayId, ArrayService::Instance()->Getter()->GetTranslator())
 {
 }
 
@@ -82,17 +82,28 @@ FlushSubmission::Execute(void)
         .stripeId = logicalWbStripeId,
         .offset = 0};
 
-    PhysicalBlkAddr physicalWriteEntry = {
+    void* basePointer = nullptr;
+
+    list<PhysicalEntry> physicalEntries;
+    PhysicalBlkAddr physicalBlkAddr = {
         .lba = 0,
         .arrayDev = nullptr};
-    void* basePointer = nullptr;
+
+    PhysicalEntry physicalEntry = {
+        .addr = physicalBlkAddr,
+        .blkCnt = 0};
+
+    LogicalEntry startWbLogicalEntry{
+        .addr = startWbLSA,
+        .blkCnt = 1 // only start address is required
+    };
 
     FlushCountSingleton::Instance()->pendingFlush++;
 
     if (likely(translator != nullptr))
     {
         int ret = translator->Translate(
-            arrayId, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
+            arrayId, WRITE_BUFFER, physicalEntries, startWbLogicalEntry);
         if (unlikely(ret != static_cast<int>(POS_EVENT_ID::SUCCESS)))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
@@ -102,12 +113,14 @@ FlushSubmission::Execute(void)
             FlushCountSingleton::Instance()->callbackNotCalledCount++;
             return true;
         }
-        if (likely(physicalWriteEntry.arrayDev != nullptr))
+
+        physicalEntry = physicalEntries.front();
+        if (likely(physicalEntry.addr.arrayDev != nullptr))
         {
-            basePointer = physicalWriteEntry.arrayDev->GetUblock()->GetByteAddress();
+            basePointer = physicalEntry.addr.arrayDev->GetUblock()->GetByteAddress();
         }
     }
-    char* offset = static_cast<char *>(basePointer) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
+    char* offset = static_cast<char*>(basePointer) + (physicalEntry.addr.lba * ArrayConfig::SECTOR_SIZE_BYTE);
     for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
     {
         BufferEntry bufferEntry(offset, BLOCKS_IN_CHUNK);

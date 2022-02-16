@@ -69,7 +69,6 @@ public:
     virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
 
 protected:
-    bool _IsValidAddress(const LogicalBlkAddr& lsa);
     bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
     void _UpdateLastLba(void);
     PartitionLogicalSize logicalSize;

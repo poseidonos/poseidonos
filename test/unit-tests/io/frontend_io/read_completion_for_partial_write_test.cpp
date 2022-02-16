@@ -92,11 +92,10 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_HandleCopyDone
     MockTranslator* translator = new NiceMock<MockTranslator>(vsa, volumeIo->GetArrayId());
     CopyParameter* copyParameter = new CopyParameter(volumeIo, translator, true);
     BufferEntry bufferEntry((void *)0xff00, 1);
-    PhysicalWriteEntry physicalWriteEntry;
+    PhysicalEntry physicalEntry;
 
-    physicalWriteEntry.buffers.push_back(bufferEntry);
-    PhysicalEntries physicalEntries;
-    physicalEntries.push_back(physicalWriteEntry);
+    list<PhysicalEntry> physicalEntries;
+    physicalEntries.push_back(physicalEntry);
     void *argument = (static_cast<void*>(copyParameter));
 
     ON_CALL(*mockVolumeIo, GetOldLsidEntry()).WillByDefault(ReturnRef(stripeAddr));

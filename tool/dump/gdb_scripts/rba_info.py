@@ -58,14 +58,14 @@ def rba_info(array_id, volume_id, rba_str):
         index = 0
         print("Array : %s" % addr)
         for type_index in range(0, 4):
-            partition_type = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions_._M_elems[%d].type_" % (addr, type_index))
+            partition_type = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions._M_elems[%d].type" % (addr, type_index))
             if (partition_type == stripeLoc):
                 index = type_index
                 break
 
-        startLba = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions_._M_elems[%d].physicalSize_.startLba" % (addr, index))
-        blksPerChunk = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions_._M_elems[%d].logicalSize_.blksPerChunk" % (addr, index))
-        chunksPerStripe = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions_._M_elems[%d].logicalSize_.chunksPerStripe" % (addr, index))
+        startLba = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions._M_elems[%d].physicalSize.startLba" % (addr, index))
+        blksPerChunk = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions._M_elems[%d].logicalSize.blksPerChunk" % (addr, index))
+        chunksPerStripe = gdb.parse_and_eval("((Array *)%s)->ptnMgr->partitions._M_elems[%d].logicalSize.chunksPerStripe" % (addr, index))
 
         print("==== Partition Info ====")
         print("stripleLoc : %s, startLba : %s, blksPerChunk : %s, chunksPerStripe : %s" % (stripeLoc, startLba, blksPerChunk, chunksPerStripe))

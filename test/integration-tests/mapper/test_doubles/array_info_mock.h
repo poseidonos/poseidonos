@@ -57,6 +57,7 @@ public:
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
+    virtual bool IsWriteThroughEnabled(void) override;
 #ifdef _ADMIN_ENABLED
     IArrayDevMgr* GetArrayManager(void) override { return nullptr; }
 #endif

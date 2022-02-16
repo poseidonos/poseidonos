@@ -247,7 +247,7 @@ TEST(ArrayManager, Mount_testIfTargetArrayCallsMount)
     EXPECT_CALL(*mockArrayComp, Mount).WillOnce(Return(MOUNT_SUCCESS));
     EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0));  // success
     // When
-    int actual = arrayMgr->Mount(existingArray);
+    int actual = arrayMgr->Mount(existingArray, false);
 
     // Then
     ASSERT_EQ(MOUNT_SUCCESS, actual);
@@ -276,7 +276,7 @@ TEST(ArrayManager, Mount_testIfLoadFailureIsReturnedWhenTargetArrayHasArrayBootR
         return EID(SUCCESS);
     });
     // When
-    int actual = arrayMgr->Mount(arrayName);
+    int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
     ASSERT_EQ(EID(ARRAY_LOAD_FAIL), actual);
@@ -302,7 +302,7 @@ TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
     });
 
     // When
-    int actual = arrayMgr->Mount(arrayName);
+    int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
     ASSERT_EQ(EID(ARRAY_WRONG_NAME), actual);

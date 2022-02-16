@@ -94,7 +94,7 @@ NvmPartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
 }
 
 int
-GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src)
+NvmPartition::GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src)
 {
     parity.clear();
     return 0;

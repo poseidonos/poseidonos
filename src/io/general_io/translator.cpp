@@ -249,7 +249,11 @@ Translator::GetPba(uint32_t blockIndex)
     LogicalBlkAddr lsa = _GetLsa(blockIndex);
     PartitionType partitionType = _GetPartitionType(blockIndex);
     PhysicalBlkAddr pba;
-    int ret = iTranslator->Translate(arrayId, partitionType, pba, lsa);
+    list<PhysicalEntry> physicalEntries;
+    LogicalEntry logicalEntry{
+        .addr = lsa,
+        .blkCnt = 1};
+    int ret = iTranslator->Translate(arrayId, partitionType, physicalEntries, logicalEntry);
     if (unlikely(ret != 0))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
@@ -258,6 +262,7 @@ Translator::GetPba(uint32_t blockIndex)
         throw eventId;
     }
 
+    pba = physicalEntries.front().addr;
     return pba;
 }
 
@@ -283,22 +288,18 @@ Translator::_GetLsa(uint32_t blockIndex)
     return lsa;
 }
 
-PhysicalEntries
+list<PhysicalEntry>
 Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
 {
     _CheckSingleBlock();
     LogicalBlkAddr lsa = _GetLsa(0);
     PartitionType partitionType = _GetPartitionType(0);
 
-    std::list<BufferEntry> buffers;
-    LogicalWriteEntry logicalEntry = {.addr = lsa, .blkCnt = blockCount, .buffers = &buffers};
-    BufferEntry buffer(mem, blockCount);
+    LogicalEntry logicalEntry = {.addr = lsa, .blkCnt = blockCount};
+    list<PhysicalEntry> physicalEntries;
 
-    logicalEntry.buffers->push_back(buffer);
-
-    PhysicalEntries entries;
-    int ret = iTranslator->Convert(
-        arrayId, partitionType, entries, logicalEntry);
+    int ret = iTranslator->Translate(
+        arrayId, partitionType, physicalEntries, logicalEntry);
     if (unlikely(ret != 0))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
@@ -306,7 +307,7 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
             "Translate() or Convert() is failed");
         throw eventId;
     }
-    return entries;
+    return physicalEntries;
 }
 
 PhysicalBlkAddr

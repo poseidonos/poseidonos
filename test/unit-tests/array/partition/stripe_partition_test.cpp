@@ -150,20 +150,24 @@ TEST(StripePartition, Translate_testIfFtBlkAddrIsMappedToPhysicalBlkAddr)
     auto psize = sPartition.GetPhysicalSize();
     auto lsize = sPartition.GetLogicalSize();
     StripeId MAX_BLK_OFFSET = psize->blksPerChunk * psize->chunksPerStripe - 1;
-    LogicalBlkAddr src{
+    LogicalBlkAddr srcaddr{
         .stripeId = lsize->totalStripes - 1,
         .offset = MAX_BLK_OFFSET / 2};
-    PhysicalBlkAddr dest;
+    LogicalEntry src{
+        .addr = srcaddr,
+        .blkCnt = 1
+    };
+    list<PhysicalEntry> dest;
 
     // When
     int actual = sPartition.Translate(dest, src);
 
     // Then
     ASSERT_EQ(0, actual);
-    int expectedChunkIndex = src.offset / psize->blksPerChunk;
-    ASSERT_EQ(devs.at(expectedChunkIndex), dest.arrayDev);
-    int expectedLba = psize->startLba + (src.stripeId * psize->blksPerChunk + src.offset % psize->blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
-    ASSERT_EQ(expectedLba, dest.lba);
+    int expectedChunkIndex = src.addr.offset / psize->blksPerChunk;
+    ASSERT_EQ(devs.at(expectedChunkIndex), dest.front().addr.arrayDev);
+    int expectedLba = psize->startLba + (src.addr.stripeId * psize->blksPerChunk + src.addr.offset % psize->blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
+    ASSERT_EQ(expectedLba, dest.front().addr.lba);
 
     // Wrap up
     for (auto dev : devs)
@@ -172,7 +176,7 @@ TEST(StripePartition, Translate_testIfFtBlkAddrIsMappedToPhysicalBlkAddr)
     }
 }
 
-TEST(StripePartition, Convert_testIfConvertWithRaid1FillsDestIn)
+TEST(StripePartition, GetParityList_testIfParityWithRaid10FillsDestIn)
 {
     // Given
     vector<ArrayDevice*> devs;
@@ -206,13 +210,11 @@ TEST(StripePartition, Convert_testIfConvertWithRaid1FillsDestIn)
     list<PhysicalWriteEntry> dest;
 
     // When
-    int actual = sPartition.Convert(dest, src);
+    int actual = sPartition.GetParityList(dest, src);
 
     // Then
     ASSERT_EQ(0, actual);
-    ASSERT_EQ(2, dest.size());
-    ASSERT_EQ(src.blkCnt, dest.front().blkCnt);
-    dest.pop_front();
+    ASSERT_EQ(1, dest.size());
     ASSERT_EQ(src.blkCnt, dest.front().blkCnt);
 
     // Wrap up

@@ -35,13 +35,18 @@
 #include <mutex>
 
 #include "Air.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/admin/smart_log_mgr.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array/service/array_service_layer.h"
+#include "src/bio/ubio.h"
+#include "src/bio/volume_io.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
 #include "src/event_scheduler/io_completer.h"
+#include "src/gc/flow_control/flow_control.h"
+#include "src/gc/flow_control/flow_control_service.h"
 #include "src/include/address_type.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
@@ -50,37 +55,30 @@
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/general_io/translator.h"
-#include "src/gc/flow_control/flow_control.h"
-#include "src/gc/flow_control/flow_control_service.h"
-#include "src/array/service/array_service_layer.h"
-#include "src/bio/ubio.h"
-#include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/state/state_manager.h"
-#include "Air.h"
-#include "src/admin/smart_log_mgr.h"
 
 /*To do Remove after adding array Idx by Array*/
 #include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
-
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
 : WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId()),
-    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
-    nullptr,
-    EventFrameworkApiSingleton::Instance()->IsReactorNow())
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
+      nullptr,
+      EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl,
-        bool isReactorNow)
+    bool isReactorNow)
 : Event(isReactorNow),
   volumeIo(volumeIo),
   volumeId(volumeIo->GetVolumeId()),
   blockAlignment(ChangeSectorToByte(volumeIo->GetSectorRba()),
-  volumeIo->GetSize()),
+      volumeIo->GetSize()),
   blockCount(blockAlignment.GetBlockCount()),
   allocatedBlockCount(0),
   processedBlockCount(0),
@@ -416,38 +414,29 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlkAddr startVsa = vsaRange.startVsa;
     Translator translator(startVsa, volumeIo->GetArrayId());
     void* mem = newVolumeIo->GetBuffer();
-    PhysicalEntries physicalEntries =
+    list<PhysicalEntry> physicalEntries =
         translator.GetPhysicalEntries(mem, vsaRange.numBlks);
 
     // TODO Support multiple buffers (for RAID1) - create additional VolumeIo
     assert(physicalEntries.size() == 1);
 
     newVolumeIo->SetVsa(startVsa);
-
-    for (auto& physicalEntry : physicalEntries)
+    PhysicalBlkAddr pba = physicalEntries.front().addr;
+    if (volumeIo != newVolumeIo)
     {
-        PhysicalBlkAddr pba = physicalEntry.addr;
-        assert(physicalEntry.buffers.size() == 1);
-
-        for (auto& buffer : physicalEntry.buffers)
-        {
-            if (volumeIo != newVolumeIo)
-            {
-                newVolumeIo->SetOriginUbio(volumeIo);
-            }
-            newVolumeIo->SetVsa(startVsa);
-            newVolumeIo->SetPba(pba);
-
-            CallbackSmartPtr blockMapUpdateRequest(
-                new BlockMapUpdateRequest(newVolumeIo, callback));
-
-            newVolumeIo->SetCallback(blockMapUpdateRequest);
-            StripeAddr lsidEntry = translator.GetLsidEntry(0);
-            newVolumeIo->SetLsidEntry(lsidEntry);
-
-            pba.lba += ChangeBlockToSector(buffer.GetBlkCnt());
-        }
+        newVolumeIo->SetOriginUbio(volumeIo);
     }
+    newVolumeIo->SetVsa(startVsa);
+    newVolumeIo->SetPba(pba);
+
+    CallbackSmartPtr blockMapUpdateRequest(
+        new BlockMapUpdateRequest(newVolumeIo, callback));
+
+    newVolumeIo->SetCallback(blockMapUpdateRequest);
+    StripeAddr lsidEntry = translator.GetLsidEntry(0);
+    newVolumeIo->SetLsidEntry(lsidEntry);
+
+    pba.lba += ChangeBlockToSector(vsaRange.numBlks);
 }
 
 void

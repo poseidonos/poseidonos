@@ -45,7 +45,7 @@ class IArrayMgmt
 public:
     virtual int Create(string name, DeviceSet<string> devs, string metaFt, string dataFt) = 0;
     virtual int Delete(string name) = 0;
-    virtual int Mount(string name) = 0;
+    virtual int Mount(string name, bool isWTEnabled) = 0;
     virtual int Unmount(string name) = 0;
     virtual int AddDevice(string name, string dev) = 0;
     virtual int RemoveDevice(string name, string dev) = 0;

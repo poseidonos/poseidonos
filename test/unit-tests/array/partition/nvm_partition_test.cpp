@@ -186,8 +186,12 @@ TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
     uint32_t blksPerChunk = 4096; // not interesting
     NvmPartition nvmPart(PartitionType::META_NVM, devs);
     nvmPart.Create(startLba, blksPerChunk);
-    LogicalBlkAddr invalidAddr = buildInvalidLogicalBlkAddr(nvmPart.GetLogicalSize()->totalStripes);
-    PhysicalBlkAddr ignored;
+    LogicalEntry invalidAddr;
+    LogicalBlkAddr invalidBlkAddr = buildInvalidLogicalBlkAddr(nvmPart.GetLogicalSize()->totalStripes);
+    invalidAddr.addr.stripeId = invalidBlkAddr.stripeId;
+    invalidAddr.addr.offset = invalidBlkAddr.offset;
+    invalidAddr.blkCnt = 1;
+    list<PhysicalEntry> ignored;
 
     // When
     int actual = nvmPart.Translate(ignored, invalidAddr);
@@ -212,9 +216,11 @@ TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
     NvmPartition nvmPart(PartitionType::META_NVM, devs);
     nvmPart.Create(startLba, blksPerChunk);
     uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    LogicalBlkAddr validAddr = buildValidLogicalBlkAddr(totalStripes,
+    LogicalEntry validAddr;
+    validAddr.addr  = buildValidLogicalBlkAddr(totalStripes,
         nvmPart.GetLogicalSize()->blksPerStripe);
-    PhysicalBlkAddr dest;
+    validAddr.blkCnt = 1;
+    list<PhysicalEntry> dest;
     // When
     int actual = nvmPart.Translate(dest, validAddr);
 
@@ -223,7 +229,7 @@ TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
     int expectedSrcBlock = totalStripes / 2 * nvmPart.GetLogicalSize()->blksPerStripe;
     int expectedSrcSector = expectedSrcBlock * ArrayConfig::SECTORS_PER_BLOCK;
     int expectedDestSector = expectedSrcSector + startLba;
-    ASSERT_EQ(expectedDestSector, dest.lba);
+    ASSERT_EQ(expectedDestSector, dest.front().addr.lba);
 }
 
 TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
@@ -295,34 +301,7 @@ TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
     ASSERT_EQ(expectedDestByte, dest.byteAddress);
 }
 
-TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
-{
-    // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
-    LogicalWriteEntry invalidEntry = buildInvalidLogicalWriteEntry(totalStripes, blksPerStripe);
-    std::list<PhysicalWriteEntry> ignored;
-
-    // When
-    int actual = nvmPart.Convert(ignored, invalidEntry);
-
-    // Then
-    ASSERT_EQ(EID(ARRAY_INVALID_ADDRESS_ERROR), actual);
-}
-
-TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
+TEST(NvmPartition, GetParityList_testIfValidEntryIsFilledIn)
 {
     // Given
     uint64_t startLba = 0; // not interesting
@@ -343,14 +322,10 @@ TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
     std::list<PhysicalWriteEntry> dest;
 
     // When
-    int actual = nvmPart.Convert(dest, validEntry);
+    int actual = nvmPart.GetParityList(dest, validEntry);
 
     // Then
-    ASSERT_EQ(1, dest.size());
-    PhysicalWriteEntry pWriteEntry = dest.front();
-    ASSERT_EQ(validEntry.blkCnt, pWriteEntry.blkCnt);
-    PhysicalBlkAddr phyBlkAddr = pWriteEntry.addr;
-    // The validation on phyBlkAddr will be skipped for now since it's already done as part of Translate() UT.
+    ASSERT_EQ(0, dest.size());
 }
 
 TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)

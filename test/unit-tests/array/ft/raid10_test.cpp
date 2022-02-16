@@ -41,21 +41,21 @@ TEST(Raid10, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
     StripeId STRIPE_ID = 1234;
     uint32_t OFFSET = 4567;
 
-    const LogicalBlkAddr src{
-        .stripeId = STRIPE_ID,
-        .offset = OFFSET};
-    FtBlkAddr dest;
+    LogicalEntry src;
+    src.addr.stripeId = STRIPE_ID;
+    src.addr.offset = OFFSET;
+    src.blkCnt = 1;
+    list<FtEntry> dest;
 
     // When
-    int actual = raid10.Translate(dest, src);
+    dest = raid10.Translate(src);
 
     // Then
-    ASSERT_EQ(0, actual);
-    ASSERT_EQ(STRIPE_ID, dest.stripeId);
-    ASSERT_EQ(OFFSET, dest.offset);
+    ASSERT_EQ(STRIPE_ID, dest.front().addr.stripeId);
+    ASSERT_EQ(OFFSET, dest.front().addr.offset);
 }
 
-TEST(Raid10, Convert_testIfDestinationIsFilledWithTwoItems)
+TEST(Raid10, MakeParity_testIfDestinationIsFilledWithTwoItems)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -81,17 +81,12 @@ TEST(Raid10, Convert_testIfDestinationIsFilledWithTwoItems)
     list<FtWriteEntry> dest;
 
     // When
-    int actual = raid10.Convert(dest, srcLogicalWriteEntry);
+    int actual = raid10.MakeParity(dest, srcLogicalWriteEntry);
 
     // Then
-    ASSERT_EQ(2, dest.size());
+    ASSERT_EQ(1, dest.size());
 
-    auto itor = dest.begin();
-    FtWriteEntry front = *itor++;
-    ASSERT_EQ(STRIPE_ID, front.addr.stripeId);
-    ASSERT_EQ(OFFSET, front.addr.offset);
-
-    FtWriteEntry mirror = *itor;
+    FtWriteEntry mirror = dest.front();
     ASSERT_EQ(STRIPE_ID, mirror.addr.stripeId);
     ASSERT_EQ(OFFSET + BACKUP_BLK_CNT, mirror.addr.offset);
 }

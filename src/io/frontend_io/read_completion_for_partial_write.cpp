@@ -32,19 +32,18 @@
 
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 
-#include "src/event_scheduler/io_completer.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/accel_engine_api.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/branch_prediction.h"
-#include "src/io/general_io/translator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/bio/volume_io.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
-
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
     VolumeIoSmartPtr volumeIo, uint32_t alignmentSize, uint32_t alignmentOffset,
     IWBStripeAllocator* inputIWBStripeAllocator, bool tested)
@@ -90,7 +89,8 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
             translator = &translatorLocal;
         }
         void* mem = volumeIo->GetBuffer();
-        PhysicalEntries physicalEntries = translator->GetPhysicalEntries(mem, 1);
+
+        list<PhysicalEntry> physicalEntries = translator->GetPhysicalEntries(mem, 1);
         VolumeIoSmartPtr split = volumeIo->GetOriginVolumeIo();
         StripeAddr lsidEntry = translator->GetLsidEntry(0);
         split->SetLsidEntry(lsidEntry);
@@ -101,11 +101,8 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
         for (auto& physicalEntry : physicalEntries)
         {
             PhysicalBlkAddr pba = physicalEntry.addr;
-            assert(physicalEntry.buffers.size() == 1);
-
-            for (auto& buffer : physicalEntry.buffers)
             {
-                uint32_t blockCount = buffer.GetBlkCnt();
+                uint32_t blockCount = 1;
                 assert(1 == blockCount);
                 volumeIo->dir = UbioDir::Write;
                 volumeIo->SetPba(pba);

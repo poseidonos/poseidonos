@@ -113,7 +113,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
         out << "no ft method in the userdata partition" << endl;
         return ret;
     }
-    FtBlkAddr fba = ptn->_P2FTranslate(pba);
+    FtBlkAddr fba = ptn->_Pba2Fba(pba);
     vector<uint32_t> parityIndexs = method->GetParityOffset(fba.stripeId);
     for (uint32_t parityIndex : parityIndexs)
     {

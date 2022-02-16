@@ -114,13 +114,19 @@ SubmitAsyncRead::Execute(
 
         for (uint32_t bufferIndex = 0; bufferIndex < bufferCount; bufferIndex++)
         {
-            PhysicalBlkAddr physicalBlkAddr;
+            //PhysicalBlkAddr physicalBlkAddr;
+            list<PhysicalEntry> physicalEntries;
+            LogicalEntry logicalEntry{
+                .addr = currentLSA,
+                .blkCnt = 1};
 
             // Ignore handling the return status.
             translator->Translate(
-                arrayId, partitionToIO, physicalBlkAddr, currentLSA);
+                arrayId, partitionToIO, physicalEntries, logicalEntry);
+            //arrayId, partitionToIO, physicalBlkAddr, currentLSA);
 
-            if (mergedIO->IsContiguous(physicalBlkAddr))
+            PhysicalEntry physicalEntry = physicalEntries.front();
+            if (mergedIO->IsContiguous(physicalEntry.addr))
             {
                 mergedIO->AddContiguousBlock();
             }
@@ -130,7 +136,7 @@ SubmitAsyncRead::Execute(
                 mergedIO->Process(arrayId);
 
                 void* newBuffer = currentBufferEntry.GetBlock(bufferIndex);
-                mergedIO->SetNewStart(newBuffer, physicalBlkAddr);
+                mergedIO->SetNewStart(newBuffer, physicalEntry.addr);
             }
 
             currentLSA.offset++;

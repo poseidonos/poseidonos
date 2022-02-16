@@ -73,7 +73,7 @@ public:
     virtual ~ArrayManager();
     virtual int Create(string name, DeviceSet<string> devs, string metaFt, string dataFt) override;
     virtual int Delete(string name) override;
-    virtual int Mount(string name) override;
+    virtual int Mount(string name, bool isWTEnabled) override;
     virtual int Unmount(string name) override;
     virtual int AddDevice(string name, string dev) override;
     virtual int RemoveDevice(string name, string dev) override;

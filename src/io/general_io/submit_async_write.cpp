@@ -45,9 +45,9 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
-#include "src/array_mgmt/array_manager.h"
-
 #include <set>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -90,10 +90,18 @@ SubmitAsyncWrite::Execute(
         .blkCnt = static_cast<uint32_t>(blockCount),
         .buffers = &bufferList};
 
-    std::list<PhysicalWriteEntry> physicalWriteEntries;
-    int ret = translator->Convert(
-        arrayId, partitionToIO, physicalWriteEntries, logicalWriteEntry);
-    if (ret != 0)
+    LogicalEntry logicalEntry = {
+        .addr = startLSA,
+        .blkCnt = static_cast<uint32_t>(blockCount)};
+
+    std::list<PhysicalEntry> physicalEntries;
+    int ret = translator->Translate(
+        arrayId, partitionToIO, physicalEntries, logicalEntry);
+
+    std::list<PhysicalWriteEntry> parityPhysicalWriteEntries;
+    int parityResult = translator->GetParityList(
+        arrayId, partitionToIO, parityPhysicalWriteEntries, logicalWriteEntry);
+    if (ret != 0 || parityResult != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
         EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
@@ -106,10 +114,16 @@ SubmitAsyncWrite::Execute(
     StripeId stripeId = startLSA.stripeId;
     if (partitionToIO == PartitionType::META_SSD)
     {
-        for (PhysicalWriteEntry& physicalWriteEntry : physicalWriteEntries)
+        for (PhysicalEntry& physicalEntry : physicalEntries)
+        {
+            targetDevices.insert(physicalEntry.addr.arrayDev);
+        }
+
+        for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
         {
             targetDevices.insert(physicalWriteEntry.addr.arrayDev);
         }
+
         bool result = locker->TryLock(targetDevices, stripeId);
         if (result == false)
         {
@@ -120,18 +134,52 @@ SubmitAsyncWrite::Execute(
     }
 
     uint32_t totalIoCount = 0;
-
-    for (PhysicalWriteEntry& physicalWriteEntry : physicalWriteEntries)
+    totalIoCount += bufferList.size();
+    for (PhysicalWriteEntry& parityPhysicalWriteEntry : parityPhysicalWriteEntries)
     {
-        totalIoCount += physicalWriteEntry.buffers.size();
+        assert(parityPhysicalWriteEntry.buffers.size() == 1);
+        totalIoCount += parityPhysicalWriteEntry.buffers.size();
     }
+
     callback->SetWaitingCount(1);
     CallbackSmartPtr arrayUnlocking(
         new ArrayUnlocking(targetDevices, stripeId, locker));
     arrayUnlocking->SetCallee(callback);
     arrayUnlocking->SetWaitingCount(totalIoCount);
     arrayUnlocking->SetEventType(callback->GetEventType());
-    for (PhysicalWriteEntry& physicalWriteEntry : physicalWriteEntries)
+
+    int index = 0;
+    list<BufferEntry>::iterator iter = bufferList.begin();
+    for (PhysicalEntry& physicalEntry : physicalEntries)
+    {
+        advance(iter, index);
+        BufferEntry& buffer = *iter;
+        UbioSmartPtr ubio(new Ubio(buffer.GetBufferPtr(),
+            buffer.GetBlkCnt() * Ubio::UNITS_PER_BLOCK, arrayId));
+        if (needTrim == false)
+        {
+            ubio->dir = UbioDir::Write;
+        }
+        else
+        {
+            ubio->dir = UbioDir::Deallocate;
+        }
+        ubio->SetPba(physicalEntry.addr);
+        CallbackSmartPtr event(new InternalWriteCompletion(buffer));
+        ubio->SetEventType(callback->GetEventType());
+        event->SetEventType(ubio->GetEventType());
+        event->SetCallee(arrayUnlocking);
+        ubio->SetCallback(event);
+
+        if (ioDispatcher->Submit(ubio) < 0)
+        {
+            errorToReturn =
+                _CheckAsyncWriteError(arrayId);
+        }
+        index++;
+    }
+
+    for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
     {
         for (BufferEntry& buffer : physicalWriteEntry.buffers)
         {
@@ -156,10 +204,10 @@ SubmitAsyncWrite::Execute(
             {
                 errorToReturn =
                     _CheckAsyncWriteError(arrayId);
-                continue;
             }
         }
     }
+
     if (errorToReturn != IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
     {
         errorToReturn = IOSubmitHandlerStatus::SUCCESS;

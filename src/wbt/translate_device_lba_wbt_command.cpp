@@ -94,8 +94,15 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     out << "logical offset : " << lsa.offset << std::endl;
 
     PhysicalBlkAddr pba;
+    list<PhysicalEntry> physicalEntries;
+    LogicalEntry logicalEntry{
+        .addr = lsa,
+        .blkCnt = 1
+    };
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
+    //ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
+    ret = trans->Translate(arrayIndex, USER_DATA, physicalEntries, logicalEntry);
+    pba = physicalEntries.front().addr;
     if (ret != 0 || pba.arrayDev == nullptr)
     {
         out << "translation failed" << std::endl;

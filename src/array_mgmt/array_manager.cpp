@@ -154,12 +154,12 @@ ArrayManager::Delete(string name)
 }
 
 int
-ArrayManager::Mount(string name)
+ArrayManager::Mount(string name, bool isWTEnabled)
 {
     return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
         telClient->RegisterPublisher(array->GetTelemetryPublisher());
-        int ret = array->Mount();
+        int ret = array->Mount(isWTEnabled);
         if (ret !=  EID(SUCCESS))
         {
             if (array->GetTelemetryPublisher() != nullptr)

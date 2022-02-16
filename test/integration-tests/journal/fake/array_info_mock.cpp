@@ -102,4 +102,10 @@ ArrayInfoMock::GetUpdateDatetime(void)
 {
     return "";
 }
+
+bool
+ArrayInfoMock::IsWriteThroughEnabled(void)
+{
+    return false;
+}
 } // namespace pos

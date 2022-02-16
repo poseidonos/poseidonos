@@ -30,6 +30,7 @@ public:
     virtual uint32_t GetRebuildingProgress(void);
     virtual string GetCreateDatetime(void);
     virtual string GetUpdateDatetime(void);
+    virtual bool IsWriteThroughEnabled(void);
 #ifdef _ADMIN_ENABLED
     virtual IArrayDevMgr*
     GetArrayManager(void)

@@ -14,7 +14,7 @@ public:
     using Translator::Translator;
     MOCK_METHOD(PhysicalBlkAddr, GetPba, (uint32_t blockIndex), (override));
     MOCK_METHOD(PhysicalBlkAddr, GetPba, (), (override));
-    MOCK_METHOD(PhysicalEntries, GetPhysicalEntries, (void* mem, uint32_t blockCount), (override));
+    MOCK_METHOD(list<PhysicalEntry>, GetPhysicalEntries, (void* mem, uint32_t blockCount), (override));
     MOCK_METHOD(StripeAddr, GetLsidEntry, (uint32_t blockIndex), (override));
     MOCK_METHOD(LsidRefResult, GetLsidRefResult, (uint32_t blockIndex), (override));
     MOCK_METHOD(bool, IsUnmapped, (), (override));

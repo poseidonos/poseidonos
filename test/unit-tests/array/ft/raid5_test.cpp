@@ -84,26 +84,26 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
     uint32_t STRIPE_ID = 13;
     uint32_t OFFSET = 400;
 
-    const LogicalBlkAddr src{
-        .stripeId = STRIPE_ID,
-        .offset = OFFSET};
+    LogicalEntry src;
+    src.addr.stripeId = STRIPE_ID;
+    src.addr.offset = OFFSET;
+    src.blkCnt = 1;
 
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     Raid5 raid5(&physicalSize);
-    FtBlkAddr dest;
+    list<FtEntry> dest;
 
     // When
-    int actual = raid5.Translate(dest, src);
+    dest = raid5.Translate(src);
 
     // Then
-    ASSERT_EQ(0, actual);
     int expectedChunkIndex = OFFSET / physicalSize.blksPerChunk;        // 400 / 27 == 14
     int expectedParityIndex = STRIPE_ID % physicalSize.chunksPerStripe; // 13 % 10 == 3
     int expectedDestOffset = OFFSET + physicalSize.blksPerChunk;        // adjusted since expected chunk index is larger
-    ASSERT_EQ(expectedDestOffset, dest.offset);
+    ASSERT_EQ(expectedDestOffset, dest.front().addr.offset);
 }
 
-TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
+TEST(Raid5, MakeParity_testIfParityBufferIsProperlyCalculated)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -116,7 +116,7 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     EXPECT_CALL(mockAffMgr, GetNumaCount).WillRepeatedly(Return(1));
     EXPECT_CALL(mockAffMgr, GetNumaIdFromCurrentThread).WillRepeatedly(Return(0));
     BufferInfo info = {
-        .owner = "Raid5Test_Convert",
+        .owner = "Raid5Test_MakeParity",
         .size = 65535,
         .count = 1
     };
@@ -140,7 +140,7 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     LogicalBlkAddr lBlkAddr{
         .stripeId = 1234,
         .offset = 0};
-    const LogicalWriteEntry& src{
+     const LogicalWriteEntry& src{
         .addr = lBlkAddr,
         .blkCnt = 3,
         .buffers = &buffers};
@@ -148,13 +148,16 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     list<FtWriteEntry> dest;
 
     // When
-    int actual = raid5.Convert(dest, src);
+    int actual = raid5.MakeParity(dest, src);
 
     // Then: XORing 3 data + 1 parity should produce zero buffer
     ASSERT_EQ(0, actual);
     ASSERT_EQ(1, dest.size());
-    ASSERT_EQ(4, dest.front().buffers.size()); // 3 + 1
+    ASSERT_EQ(1, dest.front().buffers.size()); // one parity
     const int bufSize = ArrayConfig::BLOCK_SIZE_BYTE * NUM_BLOCKS;
+    dest.front().buffers.push_back(be1);
+    dest.front().buffers.push_back(be2);
+    dest.front().buffers.push_back(be3);
     verifyIfXORProducesZeroBuffer(dest.front().buffers, bufSize);
 }
 

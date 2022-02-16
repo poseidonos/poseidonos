@@ -78,8 +78,8 @@ TEST(IOTranslator, Translate_testIfArgumentsAreValid)
     EXPECT_CALL(*mockPart, Translate).WillOnce(Return(TRANSLATE_SUCCESS));
 
     // When
-    LogicalBlkAddr src;
-    PhysicalBlkAddr dst;
+    LogicalEntry src;
+    list<PhysicalEntry> dst;
     int actual = ioTranslator.Translate(mockArrayIndex, mockPartitionType, dst, src);
 
     // Then
@@ -96,15 +96,15 @@ TEST(IOTranslator, Translate_testIfThereIsNoTranslator)
     int NO_TRANSLATOR = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
 
     // When
-    LogicalBlkAddr src;
-    PhysicalBlkAddr dst;
+    LogicalEntry src;
+    list<PhysicalEntry> dst;
     int actual = ioTranslator.Translate(mockArrayIndex, mockPartitionType, dst, src);
 
     // Then
     ASSERT_EQ(NO_TRANSLATOR, actual);
 }
 
-TEST(IOTranslator, Convert_testIfArgumentsAreValid)
+TEST(IOTranslator, GetParityList_testIfArgumentsAreValid)
 {
     // Given
     IOTranslator ioTranslator;
@@ -116,16 +116,16 @@ TEST(IOTranslator, Convert_testIfArgumentsAreValid)
     MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
-    int CONVERT_SUCCESS = 0;
-    EXPECT_CALL(*mockPart, Convert).WillOnce(Return(CONVERT_SUCCESS));
+    int SUCCESS = 0;
+    EXPECT_CALL(*mockPart, GetParityList).WillOnce(Return(SUCCESS));
 
     // When
     LogicalWriteEntry src;
-    PhysicalEntries dst;
-    int actual = ioTranslator.Convert(mockArrayIndex, mockPartitionType, dst, src);
+    list<PhysicalWriteEntry> dst;
+    int actual = ioTranslator.GetParityList(mockArrayIndex, mockPartitionType, dst, src);
 
     // Then
-    ASSERT_EQ(CONVERT_SUCCESS, actual);
+    ASSERT_EQ(SUCCESS, actual);
 }
 
 
