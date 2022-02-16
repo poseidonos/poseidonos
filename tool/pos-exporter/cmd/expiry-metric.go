@@ -53,20 +53,29 @@ func _runExpiryManager() {
 
 			if (time.Now().Unix() - expiryVec[name][key]) >= valid_duration_second {
 
+				is_deleted := false
 				label_kv := parseExpiryVecKey(&key)
-				vec, exists := counters[name]
 
-				if exists {
+				if vec, exists := counters[name]; exists {
 					vec.Delete(*label_kv)
-				} else {
-					vec, exists := gauges[name]
-					if exists {
-						vec.Delete(*label_kv)
-					} else {
-						fmt.Printf("In the metric expiration process, unknown metric(%s) was accessed", name)
-					}
+					is_deleted = true
 				}
-				delete(expiryVec[name], key)
+
+				if vec, exists := gauges[name]; exists {
+					vec.Delete(*label_kv)
+					is_deleted = true
+				}
+
+				if collector, exists := histogramMap[name]; exists {
+					collector.RemoveHistogram(label_kv)
+					is_deleted = true
+				}
+
+				if is_deleted {
+					delete(expiryVec[name], key)
+				} else {
+					fmt.Printf("In the metric expiration process, unknown metric(%s) was accessed", name)
+				}
 			}
 		}
 	}
