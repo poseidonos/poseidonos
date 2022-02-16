@@ -121,10 +121,10 @@ SendMsg(sock_pool_t* client, string msg)
     if (ret < 0)
     {
         int event = (int)POS_EVENT_ID::CLI_MSG_SENDING_FAILURE;
-        POS_TRACE_ERROR(event, "fd={}, result={}, message={}", client->sockfd, ret, msg);
+        POS_TRACE_ERROR(event, "fd:{}, result:{}, message:{}", client->sockfd, ret, msg);
     }
     int event = (int)POS_EVENT_ID::CLI_MSG_SENT;
-    POS_TRACE_INFO(event, "fd={}, length={}, message={}", client->sockfd, ret, msg);
+    POS_TRACE_INFO(event, "fd:{}, length:{}, message:{}", client->sockfd, ret, msg);
 
     free(buffer);
     return ret;
@@ -146,7 +146,7 @@ AddClient(int sockfd)
     }
     pthread_mutex_unlock(&mutx);
     int event = (int)POS_EVENT_ID::CLI_ADD_CLIENT_FAILURE_MAX_CLIENT;
-    POS_TRACE_WARN(event, "max_client_count={}", MAX_CLI_CNT);
+    POS_TRACE_WARN(event, "max_client_count:{}", MAX_CLI_CNT);
     return nullptr;
 }
 
@@ -167,7 +167,7 @@ RemoveClient(int sockfd)
     pthread_mutex_unlock(&mutx);
 
     int event = (int)POS_EVENT_ID::CLI_CLIENT_DISCONNECTED;
-    POS_TRACE_INFO(event, "fd={}", sockfd);
+    POS_TRACE_INFO(event, "fd:{}", sockfd);
 }
 
 string
@@ -221,7 +221,7 @@ ClientThread(void* arg)
     if (str_len > 0)
     {
         int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVED;
-        POS_TRACE_INFO(event, "message={}", clnt->recv_buff);
+        POS_TRACE_INFO(event, "message:{}", clnt->recv_buff);
 
         if (clnt->work)
         {
@@ -261,7 +261,7 @@ ClientThread(void* arg)
     else
     {
         int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVE_FAILURE;
-        POS_TRACE_ERROR(event, "str_len={}, error={}", str_len, strerror(errno));
+        POS_TRACE_ERROR(event, "str_len:{}, error:{}", str_len, strerror(errno));
 
         if (clnt->work)
             pthread_mutex_unlock(&workmutx);
@@ -281,11 +281,11 @@ EnableReuseAddr(int sockfd)
     if (rc < 0)
     {
         int event = (int)POS_EVENT_ID::CLI_REUSE_ADDR_FAILURE;
-        POS_TRACE_WARN(event, "fd={}, optval={}, rc={}", sockfd, optval, rc);
+        POS_TRACE_WARN(event, "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
         return rc;
     }
     int event = (int)POS_EVENT_ID::CLI_REUSE_ADDR_ENABLED;
-    POS_TRACE_INFO(event, "fd={}, optval={}, rc={}", sockfd, optval, rc);
+    POS_TRACE_INFO(event, "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
     return 0;
 }
 
@@ -297,7 +297,7 @@ CreateSocket(int& sock)
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
         int event = (int)POS_EVENT_ID::CLI_SOCK_CREATE_FAILURE;
-        POS_TRACE_ERROR(event, "sock={}, domain={}, type={}, protocol={}",
+        POS_TRACE_ERROR(event, "sock:{}, domain:{}, type:{}, protocol:{}",
             sock, AF_INET, SOCK_STREAM, IPPROTO_TCP);
         return event;
     }
@@ -312,7 +312,7 @@ CreateSocket(int& sock)
     if (bind(sock, (struct sockaddr*)&servaddr, sizeof(struct sockaddr_in)) < 0)
     {
         int event = (int)POS_EVENT_ID::CLI_SOCK_BIND_FAILURE;
-        POS_TRACE_ERROR(event, "sock={}, server_ip={}, server_port={}, sin_family={}",
+        POS_TRACE_ERROR(event, "sock:{}, server_ip:{}, server_port:{}, sin_family:{}",
             sock, INADDR_ANY, SERV_PORT, AF_INET);
         return event;
     }
@@ -320,7 +320,7 @@ CreateSocket(int& sock)
     if (listen(sock, SOMAXCONN))
     {
         int event = (int)POS_EVENT_ID::CLI_SOCK_LISTEN_FAILURE;
-        POS_TRACE_ERROR(event, "sock={}, server_ip={}, server_port={}, sin_family={}",
+        POS_TRACE_ERROR(event, "sock:{}, server_ip:{}, server_port:{}, sin_family:{}",
             sock, INADDR_ANY, SERV_PORT, AF_INET);
         return event;
     }
@@ -408,7 +408,7 @@ CLIServer()
     if (efd < 0)
     {
         int event = (int)POS_EVENT_ID::CLI_EPOLL_CREATE_FAILURE;
-        POS_TRACE_ERROR(event, "fd={}, max_cli_count={}, efd={}",
+        POS_TRACE_ERROR(event, "fd:{}, max_cli_count:{}, efd:{}",
             sock_fd, MAX_CLI_CNT, efd);
         return;
     }
@@ -426,7 +426,7 @@ CLIServer()
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::CLI_SERVER_INITIALIZED, "max_cli_count={}", MAX_CLI_CNT);
+    POS_TRACE_INFO((int)POS_EVENT_ID::CLI_SERVER_INITIALIZED, "max_cli_count:{}", MAX_CLI_CNT);
     while (1)
     {
         int s_cnt = epoll_wait(efd, event, MAX_CLI_CNT, 1000);
@@ -449,12 +449,12 @@ CLIServer()
                 if (cli_fd < 0 || reqHandler->IsExit())
                 {
                     int event = (int)POS_EVENT_ID::CLI_SOCK_ACCEPT_FAILURE;
-                    POS_TRACE_WARN(event, "cli_fd={}, reqHandler->IsExit():", cli_fd, reqHandler->IsExit());
+                    POS_TRACE_WARN(event, "cli_fd:{}, reqHandler->IsExit():", cli_fd, reqHandler->IsExit());
                 }
                 else if (cli_fd >= 0)
                 {
                     int event = (int)POS_EVENT_ID::CLI_CLIENT_ACCEPTED;
-                    POS_TRACE_INFO(event, "fd={}, client_ip={}, client_port={}",
+                    POS_TRACE_INFO(event, "fd:{}, client_ip:{}, client_port:{}",
                         cli_fd, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
 
                     sock_pool_t* clnt = AddClient(cli_fd);

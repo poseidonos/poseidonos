@@ -409,58 +409,6 @@ PosEventId::GetString(POS_EVENT_ID eventId)
     return entryToReturn->message;
 }
 
-// TODO (mj): This function will be extended for other events
-std::string
-PosEventId::GetJsonLogMsg(int eventId)
-{
-    int targetIndex;
-    PosEventIdEntry* entryToReturn = nullptr;
-
-    if ((uint32_t)POS_EVENT_ID::QOS_START <= (uint32_t)eventId && (uint32_t)eventId < (uint32_t)POS_EVENT_ID::QOS_END)
-    {
-        targetIndex = (uint32_t)eventId - (uint32_t)POS_EVENT_ID::QOS_START;
-        entryToReturn = &QOS_EVENT_ENTRY[targetIndex];
-    }
-    else if ((uint32_t)POS_EVENT_ID::IONVMF_START <= (uint32_t)eventId && (uint32_t)eventId < (uint32_t)POS_EVENT_ID::IONVMF_END)
-    {
-        targetIndex = (uint32_t)eventId - (uint32_t)POS_EVENT_ID::IONVMF_START;
-        entryToReturn = &IOPATH_NVMF_EVENT_ENTRY[targetIndex];
-    }
-    else if ((uint32_t)POS_EVENT_ID::IOFRONTEND_START <= (uint32_t)eventId && (uint32_t)eventId < (uint32_t)POS_EVENT_ID::IOFRONTEND_END)
-    {
-        targetIndex = (uint32_t)eventId - (uint32_t)POS_EVENT_ID::IOFRONTEND_START;
-        entryToReturn = &IOPATH_FRONTEND_EVENT_ENTRY[targetIndex];
-    }
-    else if ((uint32_t)POS_EVENT_ID::IOBACKEND_START <= (uint32_t)eventId && (uint32_t)eventId < (uint32_t)POS_EVENT_ID::IOBACKEND_END)
-    {
-        targetIndex = (uint32_t)eventId - (uint32_t)POS_EVENT_ID::IOBACKEND_START;
-        entryToReturn = &IOPATH_BACKEND_EVENT_ENTRY[targetIndex];
-    }
-    else if ((uint32_t)POS_EVENT_ID::SYSTEM_START <= (uint32_t)eventId && (uint32_t)eventId < (uint32_t)POS_EVENT_ID::SYSTEM_END)
-    {
-        targetIndex = (uint32_t)eventId - (uint32_t)POS_EVENT_ID::SYSTEM_START;
-        entryToReturn = &SYSTEM_EVENT_ENTRY[targetIndex];
-    }
-    else
-    {
-        return RESERVED_EVENT_ENTRY.message;
-    }
-
-    if ((uint32_t)eventId != (uint32_t)entryToReturn->eventId)
-    {
-        POS_TRACE_ERROR((uint32_t)POS_EVENT_ID::EVENT_ID_MAPPING_WRONG,
-            "Mapping EventID with Message is wrong: Requested eventId: {}, "
-            "Mapped eventId: {} ",
-            eventId, entryToReturn->eventId);
-    }
-
-    std::string jsonLogMsg =
-        std::string("\"message\":") + "\"" + std::string(entryToReturn->message) + "\"" +
-        std::string(",\"cause\":") + "\"" + std::string(entryToReturn->cause) + "\"";
-
-    return jsonLogMsg;
-}
-
 void
 PosEventId::Print(POS_EVENT_ID id, EventLevel level)
 {

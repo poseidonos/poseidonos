@@ -34,13 +34,15 @@
 
 #define EID(X) ((int)POS_EVENT_ID::X)
 
+#include <map>
+
 enum class POS_EVENT_ID
 {
-    // ------------------- PoseidonOS (0 - 1499) -------------------
+    // ------------------- PoseidonOS (0 - 999) -------------------
     SUCCESS = 0,
-    POS_STARTED = 1000,
-    POS_TERMINATED = 1001,
-    POS_EVENT_ID_END = 1499,
+    POS_STARTED,
+    POS_TERMINATED,
+    POS_EVENT_ID_END = 999,
 
     // ------------------- CLI Server (1500 - 1599) -------------------
     CLI_EVENT_ID_START = 1500,
@@ -1027,3 +1029,92 @@ IsCliEvent(int eventId)
     return (((int)POS_EVENT_ID::CLI_EVENT_ID_START < eventId) &&
         (eventId < (int)POS_EVENT_ID::CLI_EVENT_ID_END));
 }
+
+// Event information
+class PosEventInfoEntry
+{
+    public:
+        PosEventInfoEntry(const char* eventName, const char* message,
+            const char* cause, const char* solution)
+        {
+            this->eventName = eventName;
+            this->message = message;
+            this->cause = cause;
+            this->solution = solution;
+        }
+        std::string GetEventName() { return eventName; }
+        std::string GetMessage() { return message; }
+        std::string GetCause() { return cause; }
+        std::string GetSolution() { return solution; }
+
+    private:
+        std::string eventName = "";
+        std::string message = "";
+        // mj: Fill in cause and solution for erroneous events only.
+        std::string cause = ""; 
+        std::string solution = "";
+};
+
+static const std::map<int, PosEventInfoEntry*> PosEventInfo =
+    {
+        // map<eventId, PosEventInfoEntry(eventName, message, cause)>
+        {(int)POS_EVENT_ID::CLI_SERVER_INITIALIZED,
+            new PosEventInfoEntry("CLI_SERVER_INITIALIZED",
+                "The CLI server has been initialized successfully.", "", "")},
+        {(int)POS_EVENT_ID::CLI_CLIENT_ACCEPTED,
+            new PosEventInfoEntry("CLI_CLIENT_ACCEPTED",
+                "A new client has been accepted (connected).", "", "")},
+        {(int)POS_EVENT_ID::CLI_CLIENT_DISCONNECTED,
+            new PosEventInfoEntry("CLI_CLIENT_DISCONNECTED",
+                "A client has been disconnected.", "", "")},
+        {(int)POS_EVENT_ID::CLI_MSG_RECEIVED,
+            new PosEventInfoEntry("CLI_MSG_RECEIVED",
+                "CLI server has recieved a message from a CLI client.", "", "")},
+        {(int)POS_EVENT_ID::CLI_MSG_SENT,
+            new PosEventInfoEntry("CLI_MSG_SENT",
+                "CLI server has sent a message to a client.", "", "")},
+        {(int)POS_EVENT_ID::CLI_MSG_SENDING_FAILURE,
+            new PosEventInfoEntry("CLI_MSG_SENDING_FAILURE,",
+                "CLI server has failed to send a message to a client.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SERVER_FINISH,
+            new PosEventInfoEntry("CLI_SERVER_FINISH",
+                "CLI server has finished successfully.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SERVER_THREAD_JOINED,
+            new PosEventInfoEntry("CLI_SERVER_THREAD_JOINED",
+                "A CLI server thread has joined. The main thread is blocked until the CLI processing finishes", "", "")},
+        {(int)POS_EVENT_ID::CLI_REUSE_ADDR_ENABLED,
+            new PosEventInfoEntry("CLI_REUSE_ADDR_ENABLED",
+                "CLI server has enabled to reuse address.", "", "")},
+        {(int)POS_EVENT_ID::CLI_REUSE_ADDR_FAILURE,
+            new PosEventInfoEntry("CLI_REUSE_ADDR_FAILURE",
+                "CLI server has failed to reuse address.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SOCK_CREATE_FAILURE,
+            new PosEventInfoEntry("CLI_SOCK_CREATE_FAILURE",
+                "CLI server has failed to create a socket.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SOCK_BIND_FAILURE,
+            new PosEventInfoEntry("CLI_SOCK_BIND_FAILURE",
+                "CLI server has failed to bind a socket.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SOCK_LISTEN_FAILURE,
+            new PosEventInfoEntry("CLI_SOCK_LISTEN_FAILURE",
+                "CLI server has failed to listen to a socket.", "", "")},
+        {(int)POS_EVENT_ID::CLI_EPOLL_CREATE_FAILURE,
+            new PosEventInfoEntry("CLI_EPOLL_CREATE_FAILURE",
+                "CLI server has failed to create a epoll.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SOCK_ACCEPT_FAILURE,
+            new PosEventInfoEntry("CLI_SOCK_ACCEPT_FAILURE",
+                "CLI server has failed to accept the client socket.", "", "")},
+        {(int)POS_EVENT_ID::CLI_ADD_CLIENT_FAILURE_MAX_CLIENT,
+            new PosEventInfoEntry("CLI_ADD_CLIENT_FAILURE_MAX_CLIENT",
+                "CLI server has failed to add a client.",
+                    "The number of clients exceeds the maximum.", "")},
+        {(int)POS_EVENT_ID::CLI_MSG_RECEIVE_FAILURE,
+            new PosEventInfoEntry("CLI_MSG_RECEIVE_FAILURE",
+                "CLI server has failed to receive a message from a client.", "", "")},
+        {(int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT,
+            new PosEventInfoEntry("CLI_SERVER_TIMED_OUT",
+                "CLI server has timed out.", "Command processing takes too long.", "")},
+        {(int)POS_EVENT_ID::CLI_SERVER_BUSY,
+            new PosEventInfoEntry("CLI_SERVER_BUSY",
+                "CLI server could not receive the command.",
+                "POS is processing a previously receieved command.", "Please try after a while.")},
+    };

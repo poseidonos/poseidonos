@@ -192,7 +192,7 @@ RequestHandler::TimedOut(const char* msg)
     JsonFormat jFormat;
 
     int event = (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT;
-    CliEventInfoEntry* entry = CliEventInfo.at(event);
+    PosEventInfoEntry* entry = PosEventInfo.at(event);
     return jFormat.MakeResponse(command, rid, event,
         fmt::format("event_name:{}, message:{}, cause:{}",
             entry->GetMessage(), entry->GetMessage(), entry->GetCause()),
@@ -209,7 +209,7 @@ RequestHandler::PosBusy(const char* msg)
     JsonFormat jFormat;
 
     int event = (int)POS_EVENT_ID::CLI_SERVER_BUSY;
-    CliEventInfoEntry* entry = CliEventInfo.at(event);
+    PosEventInfoEntry* entry = PosEventInfo.at(event);
     return jFormat.MakeResponse(command, rid, event,
         fmt::format("event_name:{}, message:{}, cause:{}",
             entry->GetMessage(), entry->GetMessage(), entry->GetCause()),

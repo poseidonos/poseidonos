@@ -98,33 +98,26 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldLog(lvl, eventId))
         {
-            if (preferences.IsStrLoggingEnabled())
+            try
             {
-                std::string desc = PosEventId::GetJsonLogMsg(eventId);
-                logger->iboflog_sink(loc, lvl, eventId, desc.c_str(), args...);
+                PosEventInfoEntry* entry = PosEventInfo.at(eventId);              
+                logger->iboflog_sink(loc, lvl, eventId,
+                        fmt::format(
+                            preferences.IsStrLoggingEnabled() ?
+                                "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
+                                "{} - MSG:\"{}\" CAUSE:\"{}\" SOLUTION:\"{}\" VARIABLES:\"{}\"",
+                            entry->GetEventName(), entry->GetMessage(),
+                            entry->GetCause(), entry->GetSolution(), fmt), args...);
             }
-            else
+            catch(const std::exception& e)
             {
-                // mj: CLI events are logged by this routine, because the namespaces
-                // between pos and pos_cli are separated.
-                if (IsCliEvent(eventId))
-                {
-                    try
-                    {
-                        pos_cli::CliEventInfoEntry* entry = pos_cli::CliEventInfo.at(eventId);
-                        logger->iboflog_sink(loc, lvl, eventId,
-                            fmt::format("{} - \"{}\" because \"{}\", variables:[ {} ]",
-                                entry->GetEventName(), entry->GetMessage(),
-                                entry->GetCause(), fmt), args...);
-                        return;
-                    }
-                    catch(const std::exception& e)
-                    {
-                        // TODO (mj): Handling method to be added
-                    }
-                }
-                // TODO (mj): The log entry format for other events will be modified.
-                logger->iboflog_sink(loc, lvl, eventId, fmt, args...);
+                // TODO (mj): currently, we print raw message
+                // when there is no information about the event in PosEventInfo.
+                // A method is required to enforce to add event information to
+                // PoSEventInfo.(e.g., invoking a compile error if eventId does not
+                // match with PosEventInfo)
+                logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
+                    e.what(), fmt), args...);
             }
         }
 #endif

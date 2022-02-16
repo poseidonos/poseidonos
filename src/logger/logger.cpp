@@ -55,8 +55,8 @@ BuildPattern(bool isStrLoggingEnabled)
         // TODO (mj): eventName, moduleName, errorCode
         // cause, trace, and variables fields will be added
         pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
-            ",:\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
-            "\"level\":\"%^%l%$\",\"description\":{ %v }},"};
+            ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
+            "\"level\":\"%^%l%$\",\"description\":{%v}},"};
     }
     else
     {

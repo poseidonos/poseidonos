@@ -52,7 +52,6 @@ class PosEventId
 {
 public:
     static const char*& GetString(POS_EVENT_ID eventId);
-    static std::string GetJsonLogMsg(int eventId);
     static void Print(POS_EVENT_ID id, EventLevel level);
     static void Print(POS_EVENT_ID id, EventLevel level,
         std::string& additionalMessage);
