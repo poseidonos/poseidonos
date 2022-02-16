@@ -34,7 +34,8 @@
 
 #define EID(X) ((int)POS_EVENT_ID::X)
 
-#include <map>
+#include <unordered_map>
+#include <string>
 
 enum class POS_EVENT_ID
 {
@@ -75,7 +76,7 @@ enum class POS_EVENT_ID
     STATE_CONTROL_REMOVED,
     STATE_CONTROL_DEBUG,
 
-    // --------------Volume (2000)-----------------------
+    // ---------------Volume (2000)-----------------------
     VOL_CREATED = 2000,
     VOL_DELETED = 2001,
     VOL_MOUNTED = 2002,
@@ -1023,13 +1024,6 @@ enum class POS_EVENT_ID
     RESERVED = 0x7FFFFFFF,
 };
 
-inline bool
-IsCliEvent(int eventId)
-{
-    return (((int)POS_EVENT_ID::CLI_EVENT_ID_START < eventId) &&
-        (eventId < (int)POS_EVENT_ID::CLI_EVENT_ID_END));
-}
-
 // Event information
 class PosEventInfoEntry
 {
@@ -1051,11 +1045,11 @@ class PosEventInfoEntry
         std::string eventName = "";
         std::string message = "";
         // mj: Fill in cause and solution for erroneous events only.
-        std::string cause = ""; 
+        std::string cause = "";
         std::string solution = "";
 };
 
-static const std::map<int, PosEventInfoEntry*> PosEventInfo =
+static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
     {
         // map<eventId, PosEventInfoEntry(eventName, message, cause)>
         {(int)POS_EVENT_ID::CLI_SERVER_INITIALIZED,

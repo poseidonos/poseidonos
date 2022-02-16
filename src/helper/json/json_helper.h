@@ -122,9 +122,9 @@ class JsonFormat
 {
 public:
     string MakeResponse(
-        string command, string rid, int code, string description, JsonElement info);
+        string command, string rid, int eventId, string description, JsonElement info);
     string MakeResponse(
-        string command, string rid, int code,
+        string command, string rid, int eventId,
         string description, JsonElement dataElem, JsonElement info);
 };
 

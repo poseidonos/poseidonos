@@ -33,7 +33,7 @@
 #include "src/cli/request_handler.h"
 
 #include <iostream>
-#include "spdlog/spdlog.h"
+#include "src/logger/logger.h"
 
 #include "src/cli/add_device_command.h"
 #include "src/cli/add_listener_command.h"
@@ -192,11 +192,8 @@ RequestHandler::TimedOut(const char* msg)
     JsonFormat jFormat;
 
     int event = (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT;
-    PosEventInfoEntry* entry = PosEventInfo.at(event);
-    return jFormat.MakeResponse(command, rid, event,
-        fmt::format("event_name:{}, message:{}, cause:{}",
-            entry->GetMessage(), entry->GetMessage(), entry->GetCause()),
-            GetPosInfo());
+    POS_TRACE_WARN(event, "");
+    return jFormat.MakeResponse(command, rid, event, "", GetPosInfo());
 }
 
 string
@@ -209,11 +206,8 @@ RequestHandler::PosBusy(const char* msg)
     JsonFormat jFormat;
 
     int event = (int)POS_EVENT_ID::CLI_SERVER_BUSY;
-    PosEventInfoEntry* entry = PosEventInfo.at(event);
-    return jFormat.MakeResponse(command, rid, event,
-        fmt::format("event_name:{}, message:{}, cause:{}",
-            entry->GetMessage(), entry->GetMessage(), entry->GetCause()),
-            GetPosInfo());
+    POS_TRACE_WARN(event, "");
+    return jFormat.MakeResponse(command, rid, event, "", GetPosInfo());
 }
 
 bool

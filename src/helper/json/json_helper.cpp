@@ -30,7 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <unordered_map>
+
 #include "json_helper.h"
+#include "src/include/pos_event_id.h"
 
 static void
 JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
@@ -186,15 +189,31 @@ JsonElement::ToJson(JsonFormatType type)
 
 string
 JsonFormat::MakeResponse(
-    string command, string rid, int code, string description, JsonElement info)
+    string command, string rid, int eventId, string description, JsonElement info)
 {
+    std::string eventName = "";
+    std::string cause = "";
+    std::string solution = "";
+    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
+                PosEventInfo.find(eventId);
+    if (it != PosEventInfo.end())
+    {
+        eventName = it->second->GetEventName();
+        cause = it->second->GetCause();
+        solution = it->second->GetSolution();
+    }
+
     JsonElement root("");
     root.SetAttribute(JsonAttribute("command", "\"" + command + "\""));
     root.SetAttribute(JsonAttribute("rid", "\"" + rid + "\""));
     JsonElement result = JsonElement("result");
     JsonElement status = JsonElement("status");
-    status.SetAttribute(JsonAttribute("code", code));
+    status.SetAttribute(JsonAttribute("code", eventId));
+    status.SetAttribute(JsonAttribute("eventName", "\"" + eventName + "\""));
     status.SetAttribute(JsonAttribute("description", "\"" + description + "\""));
+    status.SetAttribute(JsonAttribute("cause", "\"" + cause + "\""));
+    status.SetAttribute(JsonAttribute("solution", "\"" + solution + "\""));
+
     result.SetElement(status);
     root.SetElement(result);
     root.SetElement(info);
@@ -203,16 +222,32 @@ JsonFormat::MakeResponse(
 
 string
 JsonFormat::MakeResponse(
-    string command, string rid, int code,
+    string command, string rid, int eventId,
     string description, JsonElement dataElem, JsonElement info)
 {
+    std::string eventName = "";
+    std::string cause = "";
+    std::string solution = "";
+    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
+                PosEventInfo.find(eventId);
+    if (it != PosEventInfo.end())
+    {
+        eventName = it->second->GetEventName();
+        cause = it->second->GetCause();
+        solution = it->second->GetSolution();
+    }
+
     JsonElement root("");
     root.SetAttribute(JsonAttribute("command", "\"" + command + "\""));
     root.SetAttribute(JsonAttribute("rid", "\"" + rid + "\""));
     JsonElement result = JsonElement("result");
     JsonElement status = JsonElement("status");
-    status.SetAttribute(JsonAttribute("code", code));
+    status.SetAttribute(JsonAttribute("code", eventId));
+    status.SetAttribute(JsonAttribute("eventName", "\"" + eventName + "\""));
     status.SetAttribute(JsonAttribute("description", "\"" + description + "\""));
+    status.SetAttribute(JsonAttribute("cause", "\"" + cause + "\""));
+    status.SetAttribute(JsonAttribute("solution", "\"" + solution + "\""));
+
     result.SetElement(status);
     result.SetElement(dataElem);
     root.SetElement(result);

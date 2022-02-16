@@ -37,6 +37,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 #include "preferences.h"
 #include "spdlog/spdlog.h"
@@ -98,26 +99,32 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldLog(lvl, eventId))
         {
-            try
-            {
-                PosEventInfoEntry* entry = PosEventInfo.at(eventId);              
-                logger->iboflog_sink(loc, lvl, eventId,
-                        fmt::format(
-                            preferences.IsStrLoggingEnabled() ?
-                                "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
-                                "{} - MSG:\"{}\" CAUSE:\"{}\" SOLUTION:\"{}\" VARIABLES:\"{}\"",
-                            entry->GetEventName(), entry->GetMessage(),
-                            entry->GetCause(), entry->GetSolution(), fmt), args...);
-            }
-            catch(const std::exception& e)
+            std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
+                PosEventInfo.find(eventId);
+            if (it == PosEventInfo.end())
             {
                 // TODO (mj): currently, we print raw message
                 // when there is no information about the event in PosEventInfo.
                 // A method is required to enforce to add event information to
                 // PoSEventInfo.(e.g., invoking a compile error if eventId does not
                 // match with PosEventInfo)
-                logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
-                    e.what(), fmt), args...);
+                logger->iboflog_sink(loc, lvl, eventId,
+                    fmt::format(
+                        preferences.IsStrLoggingEnabled() ?
+                        "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
+                        "\tNONE - MSG:\"{}\" CAUSE:\"NONE\" SOLUTION:\"NONE\" VARIABLES:\"NONE\"",
+                    fmt), args...);
+            }
+            else
+            {
+                PosEventInfoEntry* entry = it->second;
+                logger->iboflog_sink(loc, lvl, eventId,
+                    fmt::format(
+                        preferences.IsStrLoggingEnabled() ?
+                            "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
+                            "\t{} - MSG:\"{}\" CAUSE:\"{}\" SOLUTION:\"{}\" VARIABLES:\"{}\"",
+                        entry->GetEventName(), entry->GetMessage(),
+                        entry->GetCause(), entry->GetSolution(), fmt), args...);
             }
         }
 #endif

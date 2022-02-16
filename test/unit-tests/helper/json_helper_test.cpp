@@ -1,8 +1,10 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <string>
 #include "src/helper/json/json_helper.h"
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include <iostream>
+#include <string>
 
 using ::testing::_;
 using ::testing::Return;
@@ -36,7 +38,7 @@ TEST(JsonFormat, MakeResponse_testJsonFormatIfElementContainsArray)
 
     // When
     string response = jFormat.MakeResponse("PEOPLE", "0000", 0, "List of people", dataElem, infoElem);
-    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"0000\",\"result\":{\"status\":{\"code\":0,\"description\":\"List of people\"},\"data\":{\"people\":[{\"name\":\"foo\",\"id\":1},{\"name\":\"bar\",\"id\":2}]}},\"sign\":{\"ver\":\" 1.0 + \"}}";
+    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"0000\",\"result\":{\"status\":{\"code\":0,\"eventName\":\"\",\"description\":\"List of people\",\"cause\":\"\",\"solution\":\"\"},\"data\":{\"people\":[{\"name\":\"foo\",\"id\":1},{\"name\":\"bar\",\"id\":2}]}},\"sign\":{\"ver\":\" 1.0 + \"}}";
 
     // Then
     EXPECT_EQ(response, expected);
@@ -51,7 +53,7 @@ TEST(JsonFormat, MakeResponse_testJsonFormatIfDataElementIsNotIncluded)
 
     // When
     string response = jFormat.MakeResponse("PEOPLE", "1111", 0, "There is no person", infoElem);
-    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"1111\",\"result\":{\"status\":{\"code\":0,\"description\":\"There is no person\"}},\"sign\":{\"ver\":\" 1.0 + \"}}";
+    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"1111\",\"result\":{\"status\":{\"code\":0,\"eventName\":\"\",\"description\":\"There is no person\",\"cause\":\"\",\"solution\":\"\"}},\"sign\":{\"ver\":\" 1.0 + \"}}";
 
     // Then
     EXPECT_EQ(response, expected);
