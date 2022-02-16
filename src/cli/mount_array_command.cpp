@@ -58,6 +58,17 @@ MountArrayCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["name"].get<std::string>();
     }
 
+    bool enableWT;
+    if (doc["param"].contains("enable_write_through") == true)
+    {
+        enableWT = doc["param"]["enable_write_through"].get<bool>();
+    }
+
+    if (enableWT)
+    {
+        // meaningless statement
+    }
+
     JsonFormat jFormat;
 
     IArrayMgmt* array = ArrayMgr();

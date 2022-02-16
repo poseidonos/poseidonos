@@ -10,7 +10,7 @@ Create an array for PoseidonOS.
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
 	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10] 
-	[--no-raid] [--no-buffer]
+	[--no-raid]
 
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 
@@ -30,7 +30,6 @@ poseidonos-cli array create [flags]
                             When the capacities of the data devices are different, the total capacity
                             of this array will be truncated based on the smallest one.
   -h, --help                help for create
-      --no-buffer           When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).
   -n, --no-raid             When specified, no RAID will be applied to this array (--raid flag will be ignored).Array with no RAID can have maximum 1 data device(s).
   -r, --raid string         The RAID type of the array to create. RAID5 is used when not specified. (default "RAID5")
   -s, --spare string        The name of device to be used as the spare.

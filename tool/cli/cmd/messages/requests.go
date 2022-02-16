@@ -67,6 +67,7 @@ type ListArrayParam struct {
 
 type MountArrayParam struct {
 	ARRAYNAME string `json:"name"`
+	ENABLEWT  bool   `json:"enable_write_through,omitempty"`
 }
 
 type UnmountArrayParam struct {

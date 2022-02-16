@@ -29,7 +29,6 @@ poseidonos-cli array autocreate [flags]
   -a, --array-name string   The name of the array to create.
   -b, --buffer string       The name of device to be used as buffer.
   -h, --help                help for autocreate
-      --no-buffer           When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).
   -n, --no-raid             When specified, no RAID will be applied to this array (--raid flag will be ignored).Array with no RAID can have maximum 1 data device(s).
   -d, --num-data-devs int   The number of of the data devices. POS will select the data
                             devices in the same NUMA as possible.

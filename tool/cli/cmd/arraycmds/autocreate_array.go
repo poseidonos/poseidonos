@@ -79,11 +79,6 @@ func buildAutoCreateArrayReq(command string) (messages.Request, error) {
 		autocreate_array_raid = "NONE"
 	}
 
-	if (autocreate_array_isNoBuffer == false) && (autocreate_array_bufferDevsList == "") {
-		err := errors.New("no buffer is specified.")
-		return req, err
-	}
-
 	bufferList := parseDevList(autocreate_array_bufferDevsList)
 
 	param := messages.AutocreateArrayParam{
@@ -132,6 +127,7 @@ devices in the same NUMA as possible.`)
 
 	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_bufferDevsList,
 		"buffer", "b", "", "The name of device to be used as buffer.")
+	AutocreateArrayCmd.MarkFlagRequired("buffer")
 
 	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_raid,
 		"raid", "r", "RAID5",
@@ -141,9 +137,4 @@ devices in the same NUMA as possible.`)
 		"no-raid", "n", false,
 		`When specified, no RAID will be applied to this array (--raid flag will be ignored).`+
 			`Array with no RAID can have maximum `+strconv.Itoa(maxNumDataDevsNoRaid)+` data device(s).`)
-
-	AutocreateArrayCmd.Flags().BoolVarP(&autocreate_array_isNoBuffer,
-		"no-buffer", "", false,
-		`When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).`)
-
 }

@@ -24,7 +24,7 @@ Create an array for PoseidonOS.
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
 	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10] 
-	[--no-raid] [--no-buffer]
+	[--no-raid]
 
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 
@@ -74,12 +74,6 @@ func buildCreateArrayReq(command string) (messages.Request, error) {
 	// and add them to a string array.
 	dataDevs := parseDevList(create_array_dataDevsList)
 	spareDevs := parseDevList(create_array_spareDevsList)
-
-	if (create_array_isNoBuffer == false) && (create_array_bufferList == "") {
-		err := errors.New("no buffer is specified.")
-		return req, err
-	}
-
 	bufferDevs := parseDevList(create_array_bufferList)
 
 	if create_array_isNoRaid == true {
@@ -116,7 +110,6 @@ var (
 	create_array_spareDevsList = ""
 	create_array_dataDevsList  = ""
 	create_array_isNoRaid      = false
-	create_array_isNoBuffer    = false
 )
 
 func init() {
@@ -134,12 +127,9 @@ of this array will be truncated based on the smallest one.`)
 	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList,
 		"spare", "s", "", "The name of device to be used as the spare.")
 
-	CreateArrayCmd.Flags().BoolVarP(&create_array_isNoBuffer,
-		"no-buffer", "", false,
-		`When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).`)
-
 	CreateArrayCmd.Flags().StringVarP(&create_array_bufferList,
 		"buffer", "b", "", "The name of device to be used as the buffer.")
+	CreateArrayCmd.MarkFlagRequired("buffer")
 
 	CreateArrayCmd.Flags().BoolVarP(&create_array_isNoRaid,
 		"no-raid", "n", false,

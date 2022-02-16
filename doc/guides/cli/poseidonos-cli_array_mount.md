@@ -23,8 +23,9 @@ poseidonos-cli array mount [flags]
 ### Options
 
 ```
-  -a, --array-name string   The name of the array to mount
-  -h, --help                help for mount
+  -a, --array-name string      The name of the array to mount
+  -w, --enable-write-through   When specified, the array to be mounted will work with write through mode.
+  -h, --help                   help for mount
 ```
 
 ### Options inherited from parent commands

@@ -92,7 +92,7 @@ ArrayCmd = "array" ,
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
-  ArrayName ;
+  ArrayName [ ("--enable-write-through" | "-w" ) ];
 
 UnmountArrayCmd = "unmount" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;
@@ -114,12 +114,12 @@ CreateArrayCmd = "create" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--data-devs" | "-d" ) , DeviceNameList ,
   [ ( "--spare" | "-s" ) , DeviceName ] , [ "--raid" ,
-  RaidType ] , [ "--no-buffer" ] ;
+  RaidType ] ;
 
 AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
-  [ "--raid" , RaidType ] , [ "--no-buffer" ] ;
+  [ "--raid" , RaidType ] ;
 
 VolumeCmd = "volume" ,
   ( VolumeCreateCmd  | VolumeDeleteCmd

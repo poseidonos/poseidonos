@@ -32,6 +32,7 @@ Example:
 
 		param := messages.MountArrayParam{
 			ARRAYNAME: mount_array_arrayName,
+			ENABLEWT:  mount_array_enableWriteThrough,
 		}
 
 		uuid := globals.GenerateUUID()
@@ -66,10 +67,15 @@ Example:
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var mount_array_arrayName = ""
+var mount_array_enableWriteThrough = false
 
 func init() {
 	MountArrayCmd.Flags().StringVarP(&mount_array_arrayName,
 		"array-name", "a", "",
 		"The name of the array to mount")
 	MountArrayCmd.MarkFlagRequired("array-name")
+
+	MountArrayCmd.Flags().BoolVarP(&mount_array_enableWriteThrough,
+		"enable-write-through", "w", false,
+		`When specified, the array to be mounted will work with write through mode.`)
 }
