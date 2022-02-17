@@ -39,15 +39,10 @@ message Metric
 
 message HistogramValue
 {
-  uint64 underflowCount = 1;
-  uint64 overflowCount  = 2;
-  int64 lowerBound = 3;
-  int64 upperBound = 4;
-  int32 zeroIndex = 5;
-  int32 bucketScale = 6;
-  int32 scaleType = 7;
-  repeated int64 bucketRange = 8;
-  repeated uint64 bucketCount = 9;
+  repeated int64 bucketRange = 1;
+  repeated uint64 bucketCount = 2;
+  int64 sum = 3;
+  uint64 totalCount = 4;
 }
 
 message Label

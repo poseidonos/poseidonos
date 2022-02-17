@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"math"
 	"sort"
 	"strings"
 
@@ -95,70 +94,15 @@ func getMapIndexString(labels *map[string]string) string {
 	return strings.Join(strKvPair, ",")
 }
 
-func CalculateUpperBound(in *HistogramMetric) []float64 {
-	var bucketSize = len(in.bucketCount)
-
-	// calculate upper bound
-	var upperBoundArray = make([]float64, bucketSize)
-	if in.scaleType == 0 {
-		for bucketIndex := range upperBoundArray {
-			var upperEq = (int32(bucketIndex) * int32(in.bucketScale)) + (int32(in.lowerBound) + int32(in.bucketScale))
-			upperBoundArray[bucketIndex] = float64(upperEq)
-		}
-	} else if in.scaleType == 1 {
-		var zeroIndex = int(in.zeroIndex)
-		var pow = int(in.bucketScale)
-		var curMulti = 1
-
-		// zero index
-		upperBoundArray[zeroIndex] = 1
-
-		// (zeroindex+1 ~ bucektSize)
-		curMulti = pow
-		for bucketIndex := zeroIndex + 1; bucketIndex < bucketSize; bucketIndex++ {
-			upperBoundArray[bucketIndex] = float64(curMulti)
-			curMulti = curMulti * pow
-		}
-
-		// (0 ~ zeroIndex)
-		for bucketIndex := 0; bucketIndex < zeroIndex; bucketIndex++ {
-			var lowerBoundPowIdx = int(math.Abs(float64(bucketIndex-zeroIndex))) - 1
-			var lowerBound = int(math.Pow(float64(in.bucketScale), float64(lowerBoundPowIdx)))
-			var upperBound = lowerBound / int(in.bucketScale)
-			upperBoundArray[bucketIndex] = float64(upperBound)
-			if upperBound != 0 {
-				upperBoundArray[bucketIndex] *= -1
-			}
-		}
-	}
-
-	return upperBoundArray
-}
-
 func (histogram *POSHistogram) UpdateHistogram(in *HistogramMetric) {
 	var bucketSize = len(in.bucketCount)
 	histogram.bucket = make(map[float64]uint64, bucketSize)
-	histogram.count = 0
-	histogram.sum = 0
+	histogram.count = in.totalCount
+	histogram.sum = float64(in.sum)
 
-	// accumulate sum (copy array)
-	var accSum = make([]uint64, bucketSize)
-	accSum[0] = in.bucketCount[0]
-	for i := 1; i < bucketSize; i++ {
-		accSum[i] = accSum[i-1] + in.bucketCount[i]
+	for i := 0; i < bucketSize; i++ {
+		histogram.bucket[float64(in.bucketRange[i])] = in.bucketCount[i]
 	}
-
-	// get upper bound
-	var upperBound = CalculateUpperBound(in)
-
-	for idx, value := range accSum {
-		histogram.bucket[upperBound[idx]] = value
-	}
-
-	// add overflow count ( for +inf )
-	histogram.count += accSum[len(accSum)-1]
-	histogram.count += in.overflowCount
-
 }
 
 func (histogram *POSHistogram) UpdateLabelKey(labelKey []string) {

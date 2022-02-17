@@ -95,16 +95,10 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 
 func parseToHistogramMetric(value *pb.HistogramValue) *HistogramMetric {
 	var hMetric = HistogramMetric{}
-
-	hMetric.underflowCount = value.GetUnderflowCount()
-	hMetric.overflowCount = value.GetOverflowCount()
-	hMetric.lowerBound = value.GetLowerBound()
-	hMetric.upperBound = value.GetUpperBound()
-	hMetric.zeroIndex = value.GetZeroIndex()
-	hMetric.bucketScale = value.GetBucketScale()
-	hMetric.scaleType = value.GetScaleType()
 	hMetric.bucketRange = value.GetBucketRange()
 	hMetric.bucketCount = value.GetBucketCount()
+	hMetric.sum = value.GetSum()
+	hMetric.totalCount = value.GetTotalCount()
 
 	return &hMetric
 }
