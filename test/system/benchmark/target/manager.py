@@ -35,23 +35,26 @@ class Target:
         if (self.prereq and self.prereq["CPU"]["RUN"]):
             prerequisite.cpu.Scaling(self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
         if (self.prereq and self.prereq["SSD"]["RUN"]):
-            prerequisite.ssd.Format(self.id, self.pw, self.nic_ssh, self.prereq["SSD"]["FORMAT"], self.spdk_dir)
+            prerequisite.ssd.Format(self.id, self.pw, self.nic_ssh, self.prereq["SSD"]["FORMAT"],
+                                    self.prereq["SSD"]["UDEV_FILE"], self.spdk_dir, self.pos_dir)
         if (self.prereq and self.prereq["MEMORY"]["RUN"]):
             prerequisite.memory.MaxMapCount(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["MAX_MAP_COUNT"])
             prerequisite.memory.DropCaches(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["DROP_CACHES"])
         if (self.prereq and self.prereq["NETWORK"]["RUN"]):
             prerequisite.network.IrqBalance(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
             prerequisite.network.TcpTune(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
-            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"], self.pos_dir)
+            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"],
+                                             self.pos_dir)
             prerequisite.network.Nic(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
         if (self.prereq and self.prereq["MODPROBE"]["RUN"]):
             prerequisite.modprobe.Modprobe(self.id, self.pw, self.nic_ssh, self.prereq["MODPROBE"]["MODs"])
         if (self.prereq and self.prereq["SPDK"]["RUN"]):
-            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.pos_dir)
+            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.spdk_dir)
         if (self.prereq and self.prereq["DEBUG"]["RUN"]):
             prerequisite.debug.Ulimit(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["ULIMIT"])
             prerequisite.debug.Apport(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["APPORT"])
-            prerequisite.debug.CorePattern(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["DUMP_DIR"], self.prereq["DEBUG"]["CORE_PATTERN"])
+            prerequisite.debug.CorePattern(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["DUMP_DIR"],
+                                           self.prereq["DEBUG"]["CORE_PATTERN"])
 
         result = pos.env.check_pos_running(self.id, self.pw, self.nic_ssh, self.pos_bin)
         if -1 == result:

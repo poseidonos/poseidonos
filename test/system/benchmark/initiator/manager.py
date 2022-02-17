@@ -34,12 +34,11 @@ class Initiator:
         if (self.prereq and self.prereq["NETWORK"]["RUN"]):
             prerequisite.network.IrqBalance(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
             prerequisite.network.TcpTune(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
-            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"], self.pos_dir)
             prerequisite.network.Nic(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
         if (self.prereq and self.prereq["MODPROBE"]["RUN"]):
             prerequisite.modprobe.Modprobe(self.id, self.pw, self.nic_ssh, self.prereq["MODPROBE"]["MODs"])
         if (self.prereq and self.prereq["SPDK"]["RUN"]):
-            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.pos_dir)
+            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.spdk_dir)
 
         if -1 == pos.env.remove_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
             return False

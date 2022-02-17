@@ -28,6 +28,7 @@ def play(json_cfg_file):
 
         try:
             lib.subproc.sync_run(f"mkdir -p {scenario['OUTPUT_DIR']}")
+            lib.subproc.sync_run(f"mkdir -p {scenario['OUTPUT_DIR']}/log")
         except KeyError:
             lib.printer.red(f"{__name__} [KeyError] JSON file Scenarios has no KEY 'OUTPUT_DIR'")
             sys.exit(1)
