@@ -62,13 +62,8 @@ constexpr HistogramValue::HistogramValue(
   , _bucketrange_cached_byte_size_()
   , bucketcount_()
   , _bucketcount_cached_byte_size_()
-  , underflowcount_(PROTOBUF_ULONGLONG(0))
-  , overflowcount_(PROTOBUF_ULONGLONG(0))
-  , lowerbound_(PROTOBUF_LONGLONG(0))
-  , upperbound_(PROTOBUF_LONGLONG(0))
-  , zeroindex_(0)
-  , bucketscale_(0)
-  , scaletype_(0){}
+  , sum_(PROTOBUF_LONGLONG(0))
+  , totalcount_(PROTOBUF_ULONGLONG(0)){}
 struct HistogramValueDefaultTypeInternal {
   constexpr HistogramValueDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -125,15 +120,10 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_metric_2eproto::offsets[] PROT
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, underflowcount_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, overflowcount_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, lowerbound_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, upperbound_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, zeroindex_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketscale_),
-  PROTOBUF_FIELD_OFFSET(::HistogramValue, scaletype_),
   PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketrange_),
   PROTOBUF_FIELD_OFFSET(::HistogramValue, bucketcount_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, sum_),
+  PROTOBUF_FIELD_OFFSET(::HistogramValue, totalcount_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Label, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -147,7 +137,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 6, -1, sizeof(::MetricPublishResponse)},
   { 12, -1, sizeof(::Metric)},
   { 24, -1, sizeof(::HistogramValue)},
-  { 38, -1, sizeof(::Label)},
+  { 33, -1, sizeof(::Label)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -166,21 +156,18 @@ const char descriptor_table_protodef_metric_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "\n\004name\030\003 \001(\t\022\026\n\014counterValue\030\004 \001(\004H\000\022\024\n\n"
   "gaugeValue\030\005 \001(\003H\000\022)\n\016histogramValue\030\006 \001"
   "(\0132\017.HistogramValueH\000\022\026\n\006labels\030\007 \003(\0132\006."
-  "LabelB\007\n\005value\"\314\001\n\016HistogramValue\022\026\n\016und"
-  "erflowCount\030\001 \001(\004\022\025\n\roverflowCount\030\002 \001(\004"
-  "\022\022\n\nlowerBound\030\003 \001(\003\022\022\n\nupperBound\030\004 \001(\003"
-  "\022\021\n\tzeroIndex\030\005 \001(\005\022\023\n\013bucketScale\030\006 \001(\005"
-  "\022\021\n\tscaleType\030\007 \001(\005\022\023\n\013bucketRange\030\010 \003(\003"
-  "\022\023\n\013bucketCount\030\t \003(\004\"#\n\005Label\022\013\n\003key\030\001 "
-  "\001(\t\022\r\n\005value\030\002 \001(\t*\?\n\013MetricTypes\022\t\n\005STA"
-  "RT\020\000\022\013\n\007COUNTER\020\001\022\t\n\005GAUGE\020\002\022\r\n\tHISTOGRA"
-  "M\020\0032Q\n\rMetricManager\022@\n\rMetricPublish\022\025."
-  "MetricPublishRequest\032\026.MetricPublishResp"
-  "onse\"\000B\014Z\npos.metricb\006proto3"
+  "LabelB\007\n\005value\"[\n\016HistogramValue\022\023\n\013buck"
+  "etRange\030\001 \003(\003\022\023\n\013bucketCount\030\002 \003(\004\022\013\n\003su"
+  "m\030\003 \001(\003\022\022\n\ntotalCount\030\004 \001(\004\"#\n\005Label\022\013\n\003"
+  "key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*\?\n\013MetricTypes\022"
+  "\t\n\005START\020\000\022\013\n\007COUNTER\020\001\022\t\n\005GAUGE\020\002\022\r\n\tHI"
+  "STOGRAM\020\0032Q\n\rMetricManager\022@\n\rMetricPubl"
+  "ish\022\025.MetricPublishRequest\032\026.MetricPubli"
+  "shResponse\"\000B\014Z\npos.metricb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_metric_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto = {
-  false, false, 708, descriptor_table_protodef_metric_2eproto, "metric.proto", 
+  false, false, 594, descriptor_table_protodef_metric_2eproto, "metric.proto", 
   &descriptor_table_metric_2eproto_once, nullptr, 0, 5,
   schemas, file_default_instances, TableStruct_metric_2eproto::offsets,
   file_level_metadata_metric_2eproto, file_level_enum_descriptors_metric_2eproto, file_level_service_descriptors_metric_2eproto,
@@ -1026,17 +1013,17 @@ HistogramValue::HistogramValue(const HistogramValue& from)
       bucketrange_(from.bucketrange_),
       bucketcount_(from.bucketcount_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&underflowcount_, &from.underflowcount_,
-    static_cast<size_t>(reinterpret_cast<char*>(&scaletype_) -
-    reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+  ::memcpy(&sum_, &from.sum_,
+    static_cast<size_t>(reinterpret_cast<char*>(&totalcount_) -
+    reinterpret_cast<char*>(&sum_)) + sizeof(totalcount_));
   // @@protoc_insertion_point(copy_constructor:HistogramValue)
 }
 
 void HistogramValue::SharedCtor() {
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&underflowcount_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&scaletype_) -
-    reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+    reinterpret_cast<char*>(&sum_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&totalcount_) -
+    reinterpret_cast<char*>(&sum_)) + sizeof(totalcount_));
 }
 
 HistogramValue::~HistogramValue() {
@@ -1067,9 +1054,9 @@ void HistogramValue::Clear() {
 
   bucketrange_.Clear();
   bucketcount_.Clear();
-  ::memset(&underflowcount_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&scaletype_) -
-      reinterpret_cast<char*>(&underflowcount_)) + sizeof(scaletype_));
+  ::memset(&sum_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&totalcount_) -
+      reinterpret_cast<char*>(&sum_)) + sizeof(totalcount_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1080,72 +1067,37 @@ const char* HistogramValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint64 underflowCount = 1;
+      // repeated int64 bucketRange = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          underflowcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // uint64 overflowCount = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          overflowcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int64 lowerBound = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          lowerbound_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int64 upperBound = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          upperbound_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 zeroIndex = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          zeroindex_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 bucketScale = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          bucketscale_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 scaleType = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
-          scaletype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // repeated int64 bucketRange = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedInt64Parser(_internal_mutable_bucketrange(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64) {
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8) {
           _internal_add_bucketrange(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated uint64 bucketCount = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+      // repeated uint64 bucketCount = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_bucketcount(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72) {
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16) {
           _internal_add_bucketcount(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int64 sum = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          sum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 totalCount = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          totalcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1177,64 +1129,34 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 underflowCount = 1;
-  if (this->underflowcount() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_underflowcount(), target);
-  }
-
-  // uint64 overflowCount = 2;
-  if (this->overflowcount() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_overflowcount(), target);
-  }
-
-  // int64 lowerBound = 3;
-  if (this->lowerbound() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(3, this->_internal_lowerbound(), target);
-  }
-
-  // int64 upperBound = 4;
-  if (this->upperbound() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(4, this->_internal_upperbound(), target);
-  }
-
-  // int32 zeroIndex = 5;
-  if (this->zeroindex() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_zeroindex(), target);
-  }
-
-  // int32 bucketScale = 6;
-  if (this->bucketscale() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_bucketscale(), target);
-  }
-
-  // int32 scaleType = 7;
-  if (this->scaletype() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_scaletype(), target);
-  }
-
-  // repeated int64 bucketRange = 8;
+  // repeated int64 bucketRange = 1;
   {
     int byte_size = _bucketrange_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteInt64Packed(
-          8, _internal_bucketrange(), byte_size, target);
+          1, _internal_bucketrange(), byte_size, target);
     }
   }
 
-  // repeated uint64 bucketCount = 9;
+  // repeated uint64 bucketCount = 2;
   {
     int byte_size = _bucketcount_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteUInt64Packed(
-          9, _internal_bucketcount(), byte_size, target);
+          2, _internal_bucketcount(), byte_size, target);
     }
+  }
+
+  // int64 sum = 3;
+  if (this->sum() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(3, this->_internal_sum(), target);
+  }
+
+  // uint64 totalCount = 4;
+  if (this->totalcount() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_totalcount(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1253,7 +1175,7 @@ size_t HistogramValue::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated int64 bucketRange = 8;
+  // repeated int64 bucketRange = 1;
   {
     size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       Int64Size(this->bucketrange_);
@@ -1268,7 +1190,7 @@ size_t HistogramValue::ByteSizeLong() const {
     total_size += data_size;
   }
 
-  // repeated uint64 bucketCount = 9;
+  // repeated uint64 bucketCount = 2;
   {
     size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       UInt64Size(this->bucketcount_);
@@ -1283,53 +1205,18 @@ size_t HistogramValue::ByteSizeLong() const {
     total_size += data_size;
   }
 
-  // uint64 underflowCount = 1;
-  if (this->underflowcount() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_underflowcount());
-  }
-
-  // uint64 overflowCount = 2;
-  if (this->overflowcount() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_overflowcount());
-  }
-
-  // int64 lowerBound = 3;
-  if (this->lowerbound() != 0) {
+  // int64 sum = 3;
+  if (this->sum() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-        this->_internal_lowerbound());
+        this->_internal_sum());
   }
 
-  // int64 upperBound = 4;
-  if (this->upperbound() != 0) {
+  // uint64 totalCount = 4;
+  if (this->totalcount() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-        this->_internal_upperbound());
-  }
-
-  // int32 zeroIndex = 5;
-  if (this->zeroindex() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_zeroindex());
-  }
-
-  // int32 bucketScale = 6;
-  if (this->bucketscale() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_bucketscale());
-  }
-
-  // int32 scaleType = 7;
-  if (this->scaletype() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_scaletype());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_totalcount());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1365,26 +1252,11 @@ void HistogramValue::MergeFrom(const HistogramValue& from) {
 
   bucketrange_.MergeFrom(from.bucketrange_);
   bucketcount_.MergeFrom(from.bucketcount_);
-  if (from.underflowcount() != 0) {
-    _internal_set_underflowcount(from._internal_underflowcount());
+  if (from.sum() != 0) {
+    _internal_set_sum(from._internal_sum());
   }
-  if (from.overflowcount() != 0) {
-    _internal_set_overflowcount(from._internal_overflowcount());
-  }
-  if (from.lowerbound() != 0) {
-    _internal_set_lowerbound(from._internal_lowerbound());
-  }
-  if (from.upperbound() != 0) {
-    _internal_set_upperbound(from._internal_upperbound());
-  }
-  if (from.zeroindex() != 0) {
-    _internal_set_zeroindex(from._internal_zeroindex());
-  }
-  if (from.bucketscale() != 0) {
-    _internal_set_bucketscale(from._internal_bucketscale());
-  }
-  if (from.scaletype() != 0) {
-    _internal_set_scaletype(from._internal_scaletype());
+  if (from.totalcount() != 0) {
+    _internal_set_totalcount(from._internal_totalcount());
   }
 }
 
@@ -1412,11 +1284,11 @@ void HistogramValue::InternalSwap(HistogramValue* other) {
   bucketrange_.InternalSwap(&other->bucketrange_);
   bucketcount_.InternalSwap(&other->bucketcount_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(HistogramValue, scaletype_)
-      + sizeof(HistogramValue::scaletype_)
-      - PROTOBUF_FIELD_OFFSET(HistogramValue, underflowcount_)>(
-          reinterpret_cast<char*>(&underflowcount_),
-          reinterpret_cast<char*>(&other->underflowcount_));
+      PROTOBUF_FIELD_OFFSET(HistogramValue, totalcount_)
+      + sizeof(HistogramValue::totalcount_)
+      - PROTOBUF_FIELD_OFFSET(HistogramValue, sum_)>(
+          reinterpret_cast<char*>(&sum_),
+          reinterpret_cast<char*>(&other->sum_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata HistogramValue::GetMetadata() const {

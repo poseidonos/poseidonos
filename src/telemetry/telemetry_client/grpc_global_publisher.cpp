@@ -91,6 +91,9 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
                 histValue->add_bucketrange(mitHistUpperBound[i]);
                 histValue->add_bucketcount(mitHistBucketCount[i]);
             }
+            histValue->set_sum(mit.GetHistogramValue()->GetSum());
+            histValue->set_totalcount(mit.GetHistogramValue()->GetTotalCount());
+            
             /**
              newly created HistogramValue will be removed by gRPC
              ref : https://developers.google.com/protocol-buffers/docs/reference/cpp-generated  , void set_allocated_foo(string* value

@@ -749,17 +749,12 @@ class HistogramValue PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kBucketRangeFieldNumber = 8,
-    kBucketCountFieldNumber = 9,
-    kUnderflowCountFieldNumber = 1,
-    kOverflowCountFieldNumber = 2,
-    kLowerBoundFieldNumber = 3,
-    kUpperBoundFieldNumber = 4,
-    kZeroIndexFieldNumber = 5,
-    kBucketScaleFieldNumber = 6,
-    kScaleTypeFieldNumber = 7,
+    kBucketRangeFieldNumber = 1,
+    kBucketCountFieldNumber = 2,
+    kSumFieldNumber = 3,
+    kTotalCountFieldNumber = 4,
   };
-  // repeated int64 bucketRange = 8;
+  // repeated int64 bucketRange = 1;
   int bucketrange_size() const;
   private:
   int _internal_bucketrange_size() const;
@@ -781,7 +776,7 @@ class HistogramValue PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
       mutable_bucketrange();
 
-  // repeated uint64 bucketCount = 9;
+  // repeated uint64 bucketCount = 2;
   int bucketcount_size() const;
   private:
   int _internal_bucketcount_size() const;
@@ -803,67 +798,22 @@ class HistogramValue PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
       mutable_bucketcount();
 
-  // uint64 underflowCount = 1;
-  void clear_underflowcount();
-  ::PROTOBUF_NAMESPACE_ID::uint64 underflowcount() const;
-  void set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // int64 sum = 3;
+  void clear_sum();
+  ::PROTOBUF_NAMESPACE_ID::int64 sum() const;
+  void set_sum(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_underflowcount() const;
-  void _internal_set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_sum() const;
+  void _internal_set_sum(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // uint64 overflowCount = 2;
-  void clear_overflowcount();
-  ::PROTOBUF_NAMESPACE_ID::uint64 overflowcount() const;
-  void set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 totalCount = 4;
+  void clear_totalcount();
+  ::PROTOBUF_NAMESPACE_ID::uint64 totalcount() const;
+  void set_totalcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_overflowcount() const;
-  void _internal_set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // int64 lowerBound = 3;
-  void clear_lowerbound();
-  ::PROTOBUF_NAMESPACE_ID::int64 lowerbound() const;
-  void set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lowerbound() const;
-  void _internal_set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // int64 upperBound = 4;
-  void clear_upperbound();
-  ::PROTOBUF_NAMESPACE_ID::int64 upperbound() const;
-  void set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_upperbound() const;
-  void _internal_set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // int32 zeroIndex = 5;
-  void clear_zeroindex();
-  ::PROTOBUF_NAMESPACE_ID::int32 zeroindex() const;
-  void set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_zeroindex() const;
-  void _internal_set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // int32 bucketScale = 6;
-  void clear_bucketscale();
-  ::PROTOBUF_NAMESPACE_ID::int32 bucketscale() const;
-  void set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_bucketscale() const;
-  void _internal_set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // int32 scaleType = 7;
-  void clear_scaletype();
-  ::PROTOBUF_NAMESPACE_ID::int32 scaletype() const;
-  void set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_scaletype() const;
-  void _internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_totalcount() const;
+  void _internal_set_totalcount(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:HistogramValue)
@@ -877,13 +827,8 @@ class HistogramValue PROTOBUF_FINAL :
   mutable std::atomic<int> _bucketrange_cached_byte_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > bucketcount_;
   mutable std::atomic<int> _bucketcount_cached_byte_size_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 underflowcount_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 overflowcount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 lowerbound_;
-  ::PROTOBUF_NAMESPACE_ID::int64 upperbound_;
-  ::PROTOBUF_NAMESPACE_ID::int32 zeroindex_;
-  ::PROTOBUF_NAMESPACE_ID::int32 bucketscale_;
-  ::PROTOBUF_NAMESPACE_ID::int32 scaletype_;
+  ::PROTOBUF_NAMESPACE_ID::int64 sum_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 totalcount_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_metric_2eproto;
 };
@@ -1409,147 +1354,7 @@ inline Metric::ValueCase Metric::value_case() const {
 
 // HistogramValue
 
-// uint64 underflowCount = 1;
-inline void HistogramValue::clear_underflowcount() {
-  underflowcount_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_underflowcount() const {
-  return underflowcount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::underflowcount() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.underflowCount)
-  return _internal_underflowcount();
-}
-inline void HistogramValue::_internal_set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  underflowcount_ = value;
-}
-inline void HistogramValue::set_underflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_underflowcount(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.underflowCount)
-}
-
-// uint64 overflowCount = 2;
-inline void HistogramValue::clear_overflowcount() {
-  overflowcount_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_overflowcount() const {
-  return overflowcount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::overflowcount() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.overflowCount)
-  return _internal_overflowcount();
-}
-inline void HistogramValue::_internal_set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  overflowcount_ = value;
-}
-inline void HistogramValue::set_overflowcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_overflowcount(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.overflowCount)
-}
-
-// int64 lowerBound = 3;
-inline void HistogramValue::clear_lowerbound() {
-  lowerbound_ = PROTOBUF_LONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_lowerbound() const {
-  return lowerbound_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::lowerbound() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.lowerBound)
-  return _internal_lowerbound();
-}
-inline void HistogramValue::_internal_set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  
-  lowerbound_ = value;
-}
-inline void HistogramValue::set_lowerbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_lowerbound(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.lowerBound)
-}
-
-// int64 upperBound = 4;
-inline void HistogramValue::clear_upperbound() {
-  upperbound_ = PROTOBUF_LONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_upperbound() const {
-  return upperbound_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::upperbound() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.upperBound)
-  return _internal_upperbound();
-}
-inline void HistogramValue::_internal_set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  
-  upperbound_ = value;
-}
-inline void HistogramValue::set_upperbound(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_upperbound(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.upperBound)
-}
-
-// int32 zeroIndex = 5;
-inline void HistogramValue::clear_zeroindex() {
-  zeroindex_ = 0;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_zeroindex() const {
-  return zeroindex_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::zeroindex() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.zeroIndex)
-  return _internal_zeroindex();
-}
-inline void HistogramValue::_internal_set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  zeroindex_ = value;
-}
-inline void HistogramValue::set_zeroindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_zeroindex(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.zeroIndex)
-}
-
-// int32 bucketScale = 6;
-inline void HistogramValue::clear_bucketscale() {
-  bucketscale_ = 0;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_bucketscale() const {
-  return bucketscale_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::bucketscale() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.bucketScale)
-  return _internal_bucketscale();
-}
-inline void HistogramValue::_internal_set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  bucketscale_ = value;
-}
-inline void HistogramValue::set_bucketscale(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_bucketscale(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.bucketScale)
-}
-
-// int32 scaleType = 7;
-inline void HistogramValue::clear_scaletype() {
-  scaletype_ = 0;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::_internal_scaletype() const {
-  return scaletype_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 HistogramValue::scaletype() const {
-  // @@protoc_insertion_point(field_get:HistogramValue.scaleType)
-  return _internal_scaletype();
-}
-inline void HistogramValue::_internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  scaletype_ = value;
-}
-inline void HistogramValue::set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_scaletype(value);
-  // @@protoc_insertion_point(field_set:HistogramValue.scaleType)
-}
-
-// repeated int64 bucketRange = 8;
+// repeated int64 bucketRange = 1;
 inline int HistogramValue::_internal_bucketrange_size() const {
   return bucketrange_.size();
 }
@@ -1596,7 +1401,7 @@ HistogramValue::mutable_bucketrange() {
   return _internal_mutable_bucketrange();
 }
 
-// repeated uint64 bucketCount = 9;
+// repeated uint64 bucketCount = 2;
 inline int HistogramValue::_internal_bucketcount_size() const {
   return bucketcount_.size();
 }
@@ -1641,6 +1446,46 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >
 HistogramValue::mutable_bucketcount() {
   // @@protoc_insertion_point(field_mutable_list:HistogramValue.bucketCount)
   return _internal_mutable_bucketcount();
+}
+
+// int64 sum = 3;
+inline void HistogramValue::clear_sum() {
+  sum_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::_internal_sum() const {
+  return sum_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramValue::sum() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.sum)
+  return _internal_sum();
+}
+inline void HistogramValue::_internal_set_sum(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  sum_ = value;
+}
+inline void HistogramValue::set_sum(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_sum(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.sum)
+}
+
+// uint64 totalCount = 4;
+inline void HistogramValue::clear_totalcount() {
+  totalcount_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::_internal_totalcount() const {
+  return totalcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 HistogramValue::totalcount() const {
+  // @@protoc_insertion_point(field_get:HistogramValue.totalCount)
+  return _internal_totalcount();
+}
+inline void HistogramValue::_internal_set_totalcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  totalcount_ = value;
+}
+inline void HistogramValue::set_totalcount(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_totalcount(value);
+  // @@protoc_insertion_point(field_set:HistogramValue.totalCount)
 }
 
 // -------------------------------------------------------------------
