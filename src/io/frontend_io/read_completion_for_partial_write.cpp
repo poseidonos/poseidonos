@@ -42,6 +42,8 @@
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
+#include "src/array_mgmt/array_manager.h"
+#include "src/io/frontend_io/write_for_parity.h"
 namespace pos
 {
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
@@ -107,10 +109,23 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
                 volumeIo->dir = UbioDir::Write;
                 volumeIo->SetPba(pba);
                 volumeIo->ClearCallback();
+                volumeIo->SetLsidEntry(lsidEntry);
                 CallbackSmartPtr splitCallback = split->GetCallback();
                 volumeIo->SetCallback(splitCallback);
                 if (likely(copyParam->tested == false))
                 {
+                    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+                    if (true == arrayInfo->IsWriteThroughEnabled())
+                    {
+                        WriteForParity writeForParity(volumeIo);
+                        bool ret  = writeForParity.Execute();
+                        if (ret == false)
+                        {
+                            POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_WRITE_FOR_PARITY_FAILED;
+                            POS_TRACE_ERROR(static_cast<int>(eventId),
+                                "Failed to copy user data to dram for parity");
+                        }
+                    }
                     _SendVolumeIo(volumeIo);
                 }
 

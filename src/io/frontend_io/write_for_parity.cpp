@@ -30,39 +30,45 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <list>
-#include <string>
-
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/event_scheduler/event.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/io/frontend_io/write_for_parity.h"
+#include "src/io/general_io/io_submit_handler.h"
+#include "src/bio/volume_io.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class Stripe;
-class IWBStripeAllocator;
-class IIOSubmitHandler;
-class IIOTranslator;
 
-class FlushSubmission : public Event
+WriteForParity::WriteForParity(VolumeIoSmartPtr inputVolumeIo, bool isFrontEnd)
+: Callback(isFrontEnd),
+  volumeIo(inputVolumeIo)
 {
-public:
-    FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
-    FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-        IIOTranslator* translator, bool isWTEnabled);
-    ~FlushSubmission(void) override;
-    bool Execute(void) override;
-    uint32_t GetBufferListSize(void);
 
-private:
-    Stripe* stripe;
-    IIOSubmitHandler* iIOSubmitHandler;
-    std::list<BufferEntry> bufferList;
-    int arrayId;
-    IIOTranslator* translator;
-    bool isWTEnabled;
-};
+}
 
-} // namespace pos
+bool
+WriteForParity::_DoSpecificJob(void)
+{
+    LogicalBlkAddr blkAddr = {
+        .stripeId = volumeIo->GetLsidEntry().stripeId,
+        .offset = volumeIo->GetVsa().offset
+    };
+    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    LogicalByteAddr byteAddr = {
+        .blkAddr = blkAddr, 
+        .byteOffset = 0,
+        .byteSize =(uint32_t)ChangeBlockToByte(blockCount)
+    };
+
+    IOSubmitHandlerStatus ioStatus =
+        IIOSubmitHandler::GetInstance()->SubmitAsyncByteIO(
+            IODirection::WRITE, volumeIo->GetBuffer(), byteAddr,
+            PartitionType::WRITE_BUFFER, nullptr, volumeIo->GetArrayId());
+
+    if ( IOSubmitHandlerStatus::SUCCESS != ioStatus)
+    {
+        return false;
+    }
+    return true;
+}
+
+} //namespace pos

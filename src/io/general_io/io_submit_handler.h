@@ -59,7 +59,7 @@ public:
         std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO,
-        CallbackSmartPtr callback, int arrayId);
+        CallbackSmartPtr callback, int arrayId, bool parityOnly = false);
 
     IOSubmitHandlerStatus SubmitAsyncByteIO(IODirection direction,
         void* buffer,

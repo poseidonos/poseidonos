@@ -44,24 +44,27 @@
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_count.h"
+#include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId)
+FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled)
 : FlushSubmission(inputStripe,
-      IIOSubmitHandler::GetInstance(), arrayId, ArrayService::Instance()->Getter()->GetTranslator())
+      IIOSubmitHandler::GetInstance(), arrayId, 
+      ArrayService::Instance()->Getter()->GetTranslator(), isWTEnabled)
 {
 }
 
 FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-    IIOTranslator* translator)
+    IIOTranslator* translator, bool isWTEnabled)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iIOSubmitHandler(ioSubmitHandler),
   arrayId(arrayId),
-  translator(translator)
+  translator(translator),
+  isWTEnabled(isWTEnabled)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -145,7 +148,7 @@ FlushSubmission::Execute(void)
         bufferList,
         startLSA, blocksInStripe,
         USER_DATA,
-        callback, arrayId);
+        callback, arrayId, isWTEnabled);
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }

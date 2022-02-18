@@ -62,6 +62,8 @@
 /*To do Remove after adding array Idx by Array*/
 #include "src/array_mgmt/array_manager.h"
 
+#include "src/io/frontend_io/write_for_parity.h"
+
 namespace pos
 {
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
@@ -208,10 +210,21 @@ WriteSubmission::_ProcessOwnedWrite(void)
 
 void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
-{
-    bool isRead = (volumeIo->dir == UbioDir::Read);
-    // If Read for partial write case, handling device failure is necessary.
-    ioDispatcher->Submit(volumeIo, false, isRead);
+{ 
+    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+    if (volumeIo->dir == UbioDir::Write && true == arrayInfo->IsWriteThroughEnabled())
+    {
+        WriteForParity writeForParity(volumeIo);
+        bool ret  = writeForParity.Execute();
+        if (ret == false)
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_WRITE_FOR_PARITY_FAILED;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Failed to copy user data to dram for parity");
+        }
+    }
+    // If Read for partial write case, handling device failure is necessary. 
+    ioDispatcher->Submit(volumeIo, false, true);
 }
 
 void
@@ -367,8 +380,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
-        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-            remainBlockCount);
+        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, 1);
         targetVsaRange = result.first;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 

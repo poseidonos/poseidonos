@@ -266,7 +266,7 @@ void
 AccelEngineApi::SubmitCopy(void* dst, void* src, uint64_t bytes, IoatCb cbFunction,
     void* cbArgument)
 {
-    if (likely(_IsChannelValid()) && !(bytes % ArrayConfig::SECTOR_SIZE_BYTE))
+    if (likely(_IsChannelValid()) && !(bytes % ArrayConfig::SECTOR_SIZE_BYTE) && (cbArgument != nullptr))
     {
         IoatArgument* ioatArg = new IoatArgument(dst, src, bytes, cbFunction, cbArgument);
         spdk_accel_submit_copy(spdkChannel, dst, src, bytes, CopyDone, ioatArg);

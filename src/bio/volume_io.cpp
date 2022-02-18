@@ -32,6 +32,8 @@
 
 #include "src/bio/volume_io.h"
 
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/core_const.h"
@@ -103,25 +105,32 @@ VolumeIo::GetOriginVolumeIo(void)
 bool
 VolumeIo::IsPollingNecessary(void)
 {
-    if (dir == UbioDir::Read)
+    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(this->GetArrayId())->arrayInfo;
+    if (arrayInfo->IsWriteThroughEnabled())
     {
         return true;
     }
     else
     {
-        if (GetSectorOffsetInBlock(GetSectorRba()) != 0)
+        if (dir == UbioDir::Read)
         {
             return true;
         }
-        uint64_t endAddress = GetSectorRba() + ChangeByteToSector(GetSize());
+        else
+        {
+            if (GetSectorOffsetInBlock(GetSectorRba()) != 0)
+            {
+                return true;
+            }
+            uint64_t endAddress = GetSectorRba() + ChangeByteToSector(GetSize());
 
-        if (GetSectorOffsetInBlock(endAddress) != 0)
-        {
-            return true;
+            if (GetSectorOffsetInBlock(endAddress) != 0)
+            {
+                return true;
+            }
         }
+        return false;
     }
-
-    return false;
 }
 
 uint32_t

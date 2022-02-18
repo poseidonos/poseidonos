@@ -32,8 +32,10 @@
 
 #pragma once
 
+#include "src/array_models/interface/i_array_info.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {
@@ -46,7 +48,7 @@ class WriteCompletion : public Callback
 public:
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo);
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo,
-        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow);
+        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow, EventScheduler* inpuEventScheduler);
     ~WriteCompletion(void) override;
 
 private:
@@ -56,5 +58,7 @@ private:
 
     VolumeIoSmartPtr volumeIo;
     IWBStripeAllocator* iWBStripeAllocator;
+    EventScheduler* eventScheduler;
+    IArrayInfo* arrayInfo;
 };
 } // namespace pos

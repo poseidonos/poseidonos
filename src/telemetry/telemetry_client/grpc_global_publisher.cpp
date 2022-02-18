@@ -137,7 +137,7 @@ GrpcGlobalPublisher::_SendMessage(MetricPublishRequest* request, uint32_t numMet
     grpc::Status status = stub->MetricPublish(&cliContext, *request, &response);
     if (status.ok() != true)
     {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
+        //POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
         return -1;
     }
     else

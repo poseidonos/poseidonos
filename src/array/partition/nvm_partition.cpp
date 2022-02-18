@@ -116,7 +116,6 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
         (src.blkAddr.stripeId * logicalSize.blksPerStripe + src.blkAddr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
         src.byteOffset;
-
     return 0;
 }
 
@@ -198,13 +197,13 @@ NvmPartition::_IsValidByteAddress(const LogicalByteAddr& lsa)
     uint64_t start_blk_offset = lsa.blkAddr.offset + lsa.byteOffset / block_size;
     uint64_t start_stripe_id = lsa.blkAddr.stripeId + start_blk_offset / logicalSize.blksPerStripe;
     uint64_t end_blk_offset = lsa.blkAddr.offset + (lsa.byteOffset + lsa.byteSize) / block_size;
-    uint64_t end_stripe_id = lsa.blkAddr.stripeId + end_blk_offset / logicalSize.blksPerStripe;
+    uint64_t end_stripe_id = lsa.blkAddr.stripeId + end_blk_offset / (logicalSize.blksPerStripe + 1);
 
     if (lsa.blkAddr.stripeId < logicalSize.totalStripes &&
         lsa.blkAddr.offset < logicalSize.blksPerStripe)
     {
         if (start_blk_offset < logicalSize.blksPerStripe &&
-            end_blk_offset < logicalSize.blksPerStripe &&
+            end_blk_offset <= logicalSize.blksPerStripe &&
             lsa.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
         {
             if (start_stripe_id < logicalSize.totalStripes &&
@@ -232,12 +231,12 @@ NvmPartition::_IsValidByteEntry(const LogicalByteWriteEntry& entry)
     uint64_t start_blk_offset = entry.addr.blkAddr.offset + entry.addr.byteOffset / block_size;
     uint64_t start_stripe_id = entry.addr.blkAddr.stripeId + start_blk_offset / logicalSize.blksPerStripe;
     uint64_t end_blk_offset = entry.addr.blkAddr.offset + (entry.addr.byteOffset + entry.addr.byteSize) / block_size;
-    uint64_t end_stripe_id = entry.addr.blkAddr.stripeId + end_blk_offset / logicalSize.blksPerStripe;
+    uint64_t end_stripe_id = entry.addr.blkAddr.stripeId + end_blk_offset / (logicalSize.blksPerStripe + 1);
 
     if (entry.addr.blkAddr.stripeId < logicalSize.totalStripes &&
         entry.addr.blkAddr.offset < logicalSize.blksPerStripe)
     {
-        if (end_blk_offset < logicalSize.blksPerStripe &&
+        if (end_blk_offset <= logicalSize.blksPerStripe &&
             entry.addr.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
         {
             if (end_stripe_id < logicalSize.totalStripes)

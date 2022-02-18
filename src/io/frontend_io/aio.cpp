@@ -38,6 +38,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "Air.h"
 #include "spdk/pos.h"
@@ -63,8 +64,12 @@
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_service.h"
 
+using namespace std;
+
 namespace pos
 {
+
+//static uint8_t tempBuffer[100000000];
 IOCtx::IOCtx(void)
 : cnt(0),
   needPollingCount(0)
@@ -222,7 +227,6 @@ AIO::CreateVolumeIo(pos_io& posIo)
     volumeIo->SetVolumeId(posIo.volume_id);
     uint64_t sectorRba = ChangeByteToSector(posIo.offset);
     volumeIo->SetSectorRba(sectorRba);
-
     CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
         ioContext));
 

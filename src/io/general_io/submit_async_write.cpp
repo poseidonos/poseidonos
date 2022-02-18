@@ -45,9 +45,8 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
-#include <set>
-
 #include "src/array_mgmt/array_manager.h"
+#include <set>
 
 namespace pos
 {
@@ -75,7 +74,7 @@ SubmitAsyncWrite::Execute(
     LogicalBlkAddr& startLSA, uint64_t blockCount,
     PartitionType partitionToIO,
     CallbackSmartPtr callback,
-    int arrayId, bool needTrim)
+    int arrayId, bool needTrim, bool parityOnly)
 {
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
 
@@ -94,13 +93,17 @@ SubmitAsyncWrite::Execute(
         .addr = startLSA,
         .blkCnt = static_cast<uint32_t>(blockCount)};
 
+    int ret = 0;
     std::list<PhysicalEntry> physicalEntries;
-    int ret = translator->Translate(
-        arrayId, partitionToIO, physicalEntries, logicalEntry);
-
+    if (parityOnly == false)
+    {
+        ret = translator->Translate(
+            arrayId, partitionToIO, physicalEntries, logicalEntry);
+    }
     std::list<PhysicalWriteEntry> parityPhysicalWriteEntries;
     int parityResult = translator->GetParityList(
         arrayId, partitionToIO, parityPhysicalWriteEntries, logicalWriteEntry);
+
     if (ret != 0 || parityResult != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
@@ -114,6 +117,15 @@ SubmitAsyncWrite::Execute(
     StripeId stripeId = startLSA.stripeId;
     if (partitionToIO == PartitionType::META_SSD)
     {
+        if (parityOnly == true)
+        {
+            
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+            IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+            POS_EVENT_ID eventId = POS_EVENT_ID::PARITY_ONLY_NOT_SUPPORTED;
+            POS_TRACE_ERROR(eventId, "Meta Partition with parity only is not supported");
+            return errorToReturn;
+        }
         for (PhysicalEntry& physicalEntry : physicalEntries)
         {
             targetDevices.insert(physicalEntry.addr.arrayDev);
@@ -134,10 +146,12 @@ SubmitAsyncWrite::Execute(
     }
 
     uint32_t totalIoCount = 0;
-    totalIoCount += bufferList.size();
+    if (parityOnly == false)
+    {
+        totalIoCount += bufferList.size();
+    }
     for (PhysicalWriteEntry& parityPhysicalWriteEntry : parityPhysicalWriteEntries)
     {
-        assert(parityPhysicalWriteEntry.buffers.size() == 1);
         totalIoCount += parityPhysicalWriteEntry.buffers.size();
     }
 
@@ -148,61 +162,32 @@ SubmitAsyncWrite::Execute(
     arrayUnlocking->SetWaitingCount(totalIoCount);
     arrayUnlocking->SetEventType(callback->GetEventType());
 
-    list<BufferEntry>::iterator iter = bufferList.begin();
-    for (PhysicalEntry& physicalEntry : physicalEntries)
+    if (parityOnly == false)
     {
-        BufferEntry& buffer = *iter;
-        UbioSmartPtr ubio(new Ubio(buffer.GetBufferPtr(),
-            buffer.GetBlkCnt() * Ubio::UNITS_PER_BLOCK, arrayId));
-        if (needTrim == false)
+        list<BufferEntry>::iterator iter = bufferList.begin();
+        for (PhysicalEntry& physicalEntry : physicalEntries)
         {
-            ubio->dir = UbioDir::Write;
-        }
-        else
-        {
-            ubio->dir = UbioDir::Deallocate;
-        }
-        ubio->SetPba(physicalEntry.addr);
-        CallbackSmartPtr event(new InternalWriteCompletion(buffer));
-        ubio->SetEventType(callback->GetEventType());
-        event->SetEventType(ubio->GetEventType());
-        event->SetCallee(arrayUnlocking);
-        ubio->SetCallback(event);
-
-        if (ioDispatcher->Submit(ubio) < 0)
-        {
-            errorToReturn =
-                _CheckAsyncWriteError(arrayId);
-        }
-        advance(iter, 1);
-    }
-
-    for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
-    {
-        for (BufferEntry& buffer : physicalWriteEntry.buffers)
-        {
-            UbioSmartPtr ubio(new Ubio(buffer.GetBufferPtr(),
-                buffer.GetBlkCnt() * Ubio::UNITS_PER_BLOCK, arrayId));
-            if (needTrim == false)
-            {
-                ubio->dir = UbioDir::Write;
-            }
-            else
-            {
-                ubio->dir = UbioDir::Deallocate;
-            }
-            ubio->SetPba(physicalWriteEntry.addr);
-            CallbackSmartPtr event(new InternalWriteCompletion(buffer));
-            ubio->SetEventType(callback->GetEventType());
-            event->SetEventType(ubio->GetEventType());
-            event->SetCallee(arrayUnlocking);
-            ubio->SetCallback(event);
+            BufferEntry& buffer = *iter;
+            UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalEntry.addr, arrayUnlocking, callback);
 
             if (ioDispatcher->Submit(ubio) < 0)
             {
                 errorToReturn =
                     _CheckAsyncWriteError(arrayId);
             }
+            advance(iter, 1);
+        }
+    }
+
+    for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
+    {
+        BufferEntry& buffer = physicalWriteEntry.buffers.front();
+        UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalWriteEntry.addr, arrayUnlocking, callback);
+
+        if (ioDispatcher->Submit(ubio) < 0)
+        {
+            errorToReturn =
+                _CheckAsyncWriteError(arrayId);
         }
     }
 
@@ -229,5 +214,28 @@ SubmitAsyncWrite::_CheckAsyncWriteError(int arrayId)
     }
 
     return IOSubmitHandlerStatus::SUCCESS;
+}
+
+UbioSmartPtr
+SubmitAsyncWrite::_SetupUbio(int arrayId, bool needTrim, BufferEntry& buffer,
+    PhysicalBlkAddr addr, CallbackSmartPtr arrayUnlocking, CallbackSmartPtr callback)
+{
+    UbioSmartPtr ubio(new Ubio(buffer.GetBufferPtr(),
+        buffer.GetBlkCnt() * Ubio::UNITS_PER_BLOCK, arrayId));
+    if (needTrim == false)
+    {
+        ubio->dir = UbioDir::Write;
+    }
+    else
+    {
+        ubio->dir = UbioDir::Deallocate;
+    }
+    ubio->SetPba(addr);
+    CallbackSmartPtr event(new InternalWriteCompletion(buffer));
+    ubio->SetEventType(callback->GetEventType());
+    event->SetEventType(ubio->GetEventType());
+    event->SetCallee(arrayUnlocking);
+    ubio->SetCallback(event);
+    return ubio;
 }
 } // namespace pos

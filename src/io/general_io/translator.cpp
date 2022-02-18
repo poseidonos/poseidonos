@@ -37,6 +37,7 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/branch_prediction.h"
@@ -282,7 +283,19 @@ Translator::_GetLsa(uint32_t blockIndex)
     {
         vsa = iVSAMap->GetRandomVSA(startRba + blockIndex);
     }
-    LogicalBlkAddr lsa = {.stripeId = lsidEntry.stripeId, .offset = vsa.offset};
+    
+    StripeId stripeId;
+    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
+    if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
+    {
+        stripeId = userLsid;
+    }
+    else
+    {
+        stripeId = lsidEntry.stripeId;
+    }
+
+    LogicalBlkAddr lsa = {.stripeId = stripeId, .offset = vsa.offset};
     return lsa;
 }
 
@@ -318,13 +331,21 @@ Translator::GetPba(void)
 PartitionType
 Translator::_GetPartitionType(uint32_t blockIndex)
 {
-    if (iStripeMap->IsInUserDataArea(GetLsidEntry(blockIndex)))
+    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
+    if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
     {
         return USER_DATA;
     }
     else
     {
-        return WRITE_BUFFER;
+        if (iStripeMap->IsInUserDataArea(GetLsidEntry(blockIndex)))
+        {
+            return USER_DATA;
+        }
+        else
+        {
+            return WRITE_BUFFER;
+        }
     }
 }
 

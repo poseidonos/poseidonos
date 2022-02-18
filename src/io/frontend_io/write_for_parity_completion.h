@@ -31,38 +31,11 @@
  */
 
 #pragma once
-
-#include <list>
-#include <string>
-
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/event_scheduler/event.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
-class Stripe;
-class IWBStripeAllocator;
-class IIOSubmitHandler;
-class IIOTranslator;
-
-class FlushSubmission : public Event
-{
-public:
-    FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
-    FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-        IIOTranslator* translator, bool isWTEnabled);
-    ~FlushSubmission(void) override;
-    bool Execute(void) override;
-    uint32_t GetBufferListSize(void);
-
-private:
-    Stripe* stripe;
-    IIOSubmitHandler* iIOSubmitHandler;
-    std::list<BufferEntry> bufferList;
-    int arrayId;
-    IIOTranslator* translator;
-    bool isWTEnabled;
-};
+class WriteForParityCompletion : public Callback
+{};   
 
 } // namespace pos
