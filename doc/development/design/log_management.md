@@ -27,52 +27,38 @@ PoseidonOS uses concepts defined in [Common Event Expression Architecture Overvi
 
 8. **Logging**: Logging is the act of collecting event records into logs. Examples of logging include storing log entries into a text log file, or storing audit record data in binary files or databases.
 
-# PoseidonOS EventID
-PoseidonOS **EventID** is the unique identifier of an event. Its format is defined as follows: 
-
-| Category | Category | Level | Reserved | Reserved | Reserved | Event Number | Event Number | Event Number |
-|----------|----------|-------|----------|----------|----------|--------------|--------------|--------------|
-
-Each field (column) in the table is represented as a digit. Thus, **EventID** of PoseidonOS is a 9-digit number.
-
-1. **Category**: this field indicates the category of this event. Categories can be array, volume, meta, I/O, and so on.
-2. **Level**: this field indicates the severity level of this event. PoseidonOS uses the same level values of [syslog](https://datatracker.ietf.org/doc/html/rfc3164) for compatibility. 
-    1. **Debug (7)**: this event is logged for debugging purpose. 
-    2. **Informational (6)**: this event is logged to examine that PoseidonOS is working as expected.
-    3. **Warning (4)**: this event can cause a possible problem. 
-    4. **Error (3)**: this event incurs an error, but PoseidonOS can continue to work. 
-    5. **Critical (2)**: this event incurs a critical failure that causes a termination of PoseidonOS. 
-3. **Reserved**: reserved fields for future use.
-4. **Event Number**: the unique identification number for the event in the category. 
-
-- **Example**: EventID 032000034
-  - Category: allocator (03)
-  - Level: Error (3)
-  - Event Number: Journal Checkpoint Completed (034)
-
-- ***Warning: please use a proper level for the event. For example, if you apply Info level to events that should have Debug level, the log can contain too much detail; the readability will be worse.***
-
 # PoseidonOS Log Entry
-PoseidonOS event log is designed for structured logging, which structurally formats the log message. The structured log messages are used as inputs to other systems for search, monitoring, analysis, security checks, and so on.
-
-A formal description of PoseidonOS event log entry format is defined in [PoseidonOS Event Log Entry JSON Schema](log_entry_schema.json) (in JSON schema form).
+PoseidonOS event log can be displayed in both JSON and plain-text forms. You can set the format via the configuration file (e.g., /etc/pos/pos.conf) or CLI ($poseidonos-cli logger set-preference).
+When PoseidonOS records event logs in JSON form, it is called structured logging. Structured logging will provide a deeper insight into the PoseidonOS system; you can utilize the structured event logs to monitor and analyze the system.
 
 **Example**
+
+Plain-text form
+
+Format: [pos_id][process_id][thread_id][datetime][level_short] event_name - MSG:"message" CAUSE:"cause" SOLUTION:"solution" VARIABLES:"comma_seperated_variables" @ source_code:line function() - POS: pos-verson
+
+```
+[10262307][21743][21776][2022-02-18 13:47:14.993519][1502][I]   CLI_CLIENT_ACCEPTED - MSG:"A new client has been accepted (connected)." CAUSE:"" SOLUTION:"" VARIABLES:"fd:655, client_ip:127.0.0.1, client_port:48492" @ cli_server.cpp:458 CLIServer() - POS: v0.10.6
+```
+
+JSON form (when structured logging is on)
 ```json
-{"instanceId": 1638929401,"eventId": 10005328,"datetime": "2021-12-09 03:00:93.999","level": "info","description":{"eventName":"ARRAY_CREATE_FAILURE","message":"Failed to create an array","cause": "Array name has a special character","trace":"","variables":[{"arrayName": "array1"},{"volumeName": "volum@1"}]},"source": "array_name_policy.cpp:80","posVersion":"pos-v0.10.0"}
+{"instance_id":10262307,"processId":21743,"threadId":21776,"posVersion":"v0.10.6","datetime":"2022-02-18 13:47:16.463356","logger_name":"pos_logger","level":"info","description":{"event_name:":"CLI_CLIENT_ACCEPTED","message":"A new client has been accepted (connected).","cause":"","solution":"","variables":"fd:655, client_ip:127.0.0.1, client_port:48680"},"source":"cli_server.cpp","line":"458","function":"CLIServer"}
 ```
 
 # Log Message
 Log message is the body of an event log. It describes which and why an event occurs. For a better readability of PoseidonOS event log, we introduce a guideline to log message format as follows.
 
-PoseidonOS event log message consists of two field: ***message*** and ***cause***. ***message*** field describes what the event is, and ***cause*** field describes why it occured. **We strongly recommend to clearly write log message in a sentence form (Subject + Verb + Object) as possible as you can**. Additional values that support log message should be recorded as **variables** field. An examples of event log message are as follows: 
+PoseidonOS event log message consists of three field: ***message***, and ***cause***, ***solution***, and ***variable***. ***message*** field describes what the event is, ***cause*** field describes why it occured, ***solution*** field describes how it can be resolved. Note that only erroneous events will have values in ***cause*** and ***solution*** fields. **We strongly recommend to clearly write those fields in a sentence form (Subject + Verb + Object) as possible as you can**. Additional values that support log message should be recorded as **variables** field. An examples of event log message are as follows: 
 - **Example 1**
   - "message": "PoseidonOS failed to create an array." 
   - "cause": "The specified array name contains a special character."
+  - "solution": "Remove special characters from the array name."
   - "variables": [{"array_name":"arr@y1"}]
 - **Example 2**
   - "message": "Volume has been created."
   - "cause": ""
+  - "solution": ""
   - "variables": [{"volume_name":"volume1","size":1024MB,"array_name":"array1"}]
 
 # Log File
