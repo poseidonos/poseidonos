@@ -57,14 +57,15 @@ BuildPattern(bool isStrLoggingEnabled)
         {"{\"instance_id\":" + std::to_string(instanceId) +
             ",\"processId\":%P,\"threadId\":%t" +
             ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
-            "\"level\":\"%^%l%$\",\"description\":{%v}},"};
+            "\"level\":\"%^%l%$\",\"description\":{%v}," + 
+            "\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"},"};
 
     // Plain Text Log Format
     // [POSInstanceId][Datetime][EventID]][LogLevel] -
     // Log Message at SourceFile and LineNumber
     const std::string plainTextpattern =
         '[' + std::to_string(instanceId) + ']' + "[%P][%t]" +
-            "[%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@";
+            "[%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@ %!()";
 
     pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 

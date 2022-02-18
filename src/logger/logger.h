@@ -124,7 +124,8 @@ public:
                             "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
                             "\t{} - MSG:\"{}\" CAUSE:\"{}\" SOLUTION:\"{}\" VARIABLES:\"{}\"",
                         entry->GetEventName(), entry->GetMessage(),
-                        entry->GetCause(), entry->GetSolution(), fmt), args...);
+                        entry->GetCause(), entry->GetSolution(),
+                    fmt), args...);
             }
         }
 #endif
