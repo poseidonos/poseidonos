@@ -44,28 +44,29 @@
 
 namespace pos
 {
+
+
 string
 BuildPattern(bool isStrLoggingEnabled)
 {
     id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
     std::string pattern = "";
 
-    if (isStrLoggingEnabled)
-    {
-        // TODO (mj): eventName, moduleName, errorCode
-        // cause, trace, and variables fields will be added
-        pattern = {"{\"instance_id\":" + std::to_string(instanceId) +
+    // Structured Log Format
+    const std::string strLogPattern =
+        {"{\"instance_id\":" + std::to_string(instanceId) +
+            "\"processId\":%P,\"threadId\":%t," +
             ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
             "\"level\":\"%^%l%$\",\"description\":{%v}},"};
-    }
-    else
-    {
-        // Conventional Log Format
-        // [POSInstanceId][Datetime][EventID]][LogLevel] -
-        // Log Message at SourceFile and LineNumber
-        pattern = '[' + std::to_string(instanceId) + ']'
-            + "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v @ %@";
-    }
+
+    // Plain Text Log Format
+    // [POSInstanceId][Datetime][EventID]][LogLevel] -
+    // Log Message at SourceFile and LineNumber
+    const std::string plainTextpattern =
+        '[' + std::to_string(instanceId) + ']' + "[%P][%t]" +
+            "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v @ %@";
+
+    pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 
     return pattern;
 }
