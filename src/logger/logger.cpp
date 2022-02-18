@@ -60,7 +60,7 @@ BuildPattern(bool isStrLoggingEnabled)
             ",\"processId\":%P,\"threadId\":%t" +
             ",\"posVersion\":" + "\"" + version + "\"" +
             ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"" +
-            ",\"level\":\"%^%l%$\",\"description\":{%v}" + 
+            ",\"level\":\"%^%l%$\",\"description\":{%v}" +
             ",\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"},"};
 
     // Plain Text Log Format

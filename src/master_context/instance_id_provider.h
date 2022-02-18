@@ -49,7 +49,7 @@ public:
 
 private:
     id_t instanceId;
-    const int instanceIdMask = 100000000;
+    const int INSTANCEID_MASK = 100000000;
 
     time_t _ReverseBits(time_t timeStamp);
 };
