@@ -44,7 +44,7 @@ InstanceIdProvider::InstanceIdProvider(void)
     // Bitwisely reverse timeStamp to make
     // multiple instanceIds distinguishable.
     timeStamp = _ReverseBits(timeStamp);
-    instanceId = (id_t) timeStamp % INSTANCEID_MASK;
+    instanceId = (id_t) timeStamp % DIGIT_LIMIT;
 }
 
 // ReverseBits reverses the bitstring of timeStamp.
