@@ -41,6 +41,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 #include "src/master_context/instance_id_provider.h"
+#include "src/master_context/version_provider.h"
 
 namespace pos
 {
@@ -49,6 +50,7 @@ namespace pos
 string
 BuildPattern(bool isStrLoggingEnabled)
 {
+    std::string version = VersionProviderSingleton::Instance()->GetVersion();
     id_t instanceId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
     std::string pattern = "";
 
@@ -56,16 +58,18 @@ BuildPattern(bool isStrLoggingEnabled)
     const std::string strLogPattern =
         {"{\"instance_id\":" + std::to_string(instanceId) +
             ",\"processId\":%P,\"threadId\":%t" +
-            ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
-            "\"level\":\"%^%l%$\",\"description\":{%v}," + 
-            "\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"},"};
+            ",\"posVersion\":" + "\"" + version + "\"" +
+            ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"" +
+            ",\"level\":\"%^%l%$\",\"description\":{%v}" + 
+            ",\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"},"};
 
     // Plain Text Log Format
-    // [POSInstanceId][Datetime][EventID]][LogLevel] -
-    // Log Message at SourceFile and LineNumber
+    // [POSInstanceId][ProcessID][ThreadID][Datetime][EventID]][LogLevel(Short)]
+    // Log Message @ SourceFile:LineNumber Function() pos-version
     const std::string plainTextpattern =
-        '[' + std::to_string(instanceId) + ']' + "[%P][%t]" +
-            "[%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@ %!()";
+        '[' + std::to_string(instanceId) + ']' +
+        "[%P][%t][%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@ %!()" +
+        " - POS: " + version;
 
     pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 
