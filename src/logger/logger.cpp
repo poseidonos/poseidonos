@@ -55,7 +55,7 @@ BuildPattern(bool isStrLoggingEnabled)
     // Structured Log Format
     const std::string strLogPattern =
         {"{\"instance_id\":" + std::to_string(instanceId) +
-            "\"processId\":%P,\"threadId\":%t," +
+            ",\"processId\":%P,\"threadId\":%t" +
             ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"," +
             "\"level\":\"%^%l%$\",\"description\":{%v}},"};
 
