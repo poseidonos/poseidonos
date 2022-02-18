@@ -64,7 +64,7 @@ BuildPattern(bool isStrLoggingEnabled)
     // Log Message at SourceFile and LineNumber
     const std::string plainTextpattern =
         '[' + std::to_string(instanceId) + ']' + "[%P][%t]" +
-            "[%Y-%m-%d %H:%M:%S.%f][%q][%l] %v @ %@";
+            "[%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@";
 
     pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 
