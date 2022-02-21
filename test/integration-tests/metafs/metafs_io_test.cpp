@@ -44,7 +44,7 @@ public:
     MetaFsIoTest(void)
     : TestMetaFs()
     {
-        // We intentionally set the array id to 0 in this fixture, just for testing purposes. 
+        // We intentionally set the array id to 0 in this fixture, just for testing purposes.
         arrayId = 0;
     }
     virtual ~MetaFsIoTest(void)
