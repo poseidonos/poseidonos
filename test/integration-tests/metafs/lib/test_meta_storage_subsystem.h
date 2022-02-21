@@ -38,8 +38,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/metafs/lib/metafs_file_io.h"
 #include "src/metafs/storage/mss.h"
+#include "test/integration-tests/metafs/lib/metafs_file_io.h"
 
 namespace pos
 {

@@ -115,7 +115,7 @@ TEST(MpioTester, Mpio_testCallbackForMemcpy)
     free(buf);
 }
 
-TEST(MpioTester, Id_testIfMpiosCanHaveThereUniqueId)
+TEST(MpioTester, Id_testIfMpiosCanHaveThereUniqueIdThatIncreasesOneMpioAfterAnother)
 {
     const uint64_t COUNT = 100;
     MpioIoInfo ioInfo;

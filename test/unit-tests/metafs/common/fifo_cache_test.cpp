@@ -42,7 +42,7 @@
 namespace pos
 {
 std::shared_ptr<MockMpio>
-GetMpio(std::pair<int, MetaLpnType> input)
+GetMockMpio(std::pair<int, MetaLpnType> input)
 {
     MpioIoInfo ioInfo;
     ioInfo.arrayId = input.first;
@@ -62,7 +62,7 @@ TEST(FifoCache, Find_testIfTheMethodCanRetriveCachedItem)
     ASSERT_TRUE(test.IsEmpty());
 
     pairInput = {0, 0};
-    auto mpio = GetMpio(pairInput);
+    auto mpio = GetMockMpio(pairInput);
     auto result = test.Push(pairInput, mpio);
     EXPECT_FALSE(test.IsEmpty());
     EXPECT_EQ(nullptr, result);
@@ -86,15 +86,15 @@ TEST(FifoCache, Insert_testIfTheMethodCanPushItemsCorrectly)
     ASSERT_TRUE(test.IsEmpty());
 
     pairInput = {0, 0};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(1, test.GetSize());
 
     pairInput = {0, 1};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(2, test.GetSize());
 
     // insert again
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(2, test.GetSize());
 }
 
@@ -108,25 +108,25 @@ TEST(FifoCache, Insert_testIfTheMethodCanRemoveOlestItemsCorrectly)
 
     // the oldest
     pairInput = {0, 0};
-    auto oldest = GetMpio(pairInput);
+    auto oldest = GetMockMpio(pairInput);
     EXPECT_EQ(nullptr, test.Push(pairInput, oldest));
     EXPECT_EQ(1, test.GetSize());
 
     pairInput = {0, 1};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(2, test.GetSize());
 
     pairInput = {0, 2};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(3, test.GetSize());
 
     // insert again
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(3, test.GetSize());
 
     // insert new
     pairInput = {0, 3};
-    EXPECT_EQ(oldest, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(oldest, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(3, test.GetSize());
 }
 
@@ -140,24 +140,24 @@ TEST(FifoCache, IsFull_testIfTheCacheCanShowWhetherItIsFull)
 
     // arrayId: 0, lpn: 0
     pairInput = {0, 0};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
 
     // arrayId: 0, lpn: 1
     pairInput = {0, 1};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
 
     // arrayId: 0, lpn: 2
     pairInput = {0, 2};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
 
     // arrayId: 0, lpn: 3
     pairInput = {0, 3};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_FALSE(test.IsFull());
 
     // arrayId: 0, lpn: 4
     pairInput = {0, 4};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_TRUE(test.IsFull());
 }
 
@@ -169,16 +169,16 @@ TEST(FifoCache, Pop_testIfTheMethodCanPopTheWantedItem)
 
     // arrayId: 0, lpn: 0
     pairInput = {0, 0};
-    ASSERT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    ASSERT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
 
     // arrayId: 0, lpn: 1
     pairInput = {0, 1};
-    auto mpio = GetMpio(pairInput);
+    auto mpio = GetMockMpio(pairInput);
     EXPECT_EQ(nullptr, test.Push(pairInput, mpio));
 
     // arrayId: 0, lpn: 2
     pairInput = {0, 2};
-    EXPECT_EQ(nullptr, test.Push(pairInput, GetMpio(pairInput)));
+    EXPECT_EQ(nullptr, test.Push(pairInput, GetMockMpio(pairInput)));
     EXPECT_EQ(3, test.GetSize());
 
     pairInput = {0, 1};
