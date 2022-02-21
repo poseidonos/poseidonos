@@ -84,7 +84,6 @@ def run_fio(workload, arrayId, volumeId, io_offset, io_size_bytes, verify_patter
     command += " --iodepth=" + str(q_depth) + ""
     command += " --readwrite=" + workload
     command += " --offset=" + str(io_offset)
-    command += " --cpus_allowed=\"10-11\""
     command += " --bs_unaligned=1"
     command += " --norandommap=1"
 

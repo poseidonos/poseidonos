@@ -11,6 +11,8 @@ ROOT_DIR=$(readlink -f $(dirname $0))/../..
 #Relative_Path_root="../.."
 BIN_DIR=${ROOT_DIR}/bin
 
+TARGET_MACHINE="pm"
+
 VM_IP_RANGE_1="10.1.11."
 VM_IP_RANGE_2="10.100.11."
 
@@ -113,10 +115,27 @@ pause()
 }
 
 
-while getopts "f:" opt
+check_if_it_is_pm()
+{
+    if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
+        return 1
+    elif [ "$TARGET_MACHINE" == "pm" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+
+while getopts "f:v:" opt
 do
     case "$opt" in
-        f) ip="$OPTARG"
+        f) 
+            ip="$OPTARG"
+            ;;
+        v) 
+            TARGET_MACHINE="vm"
+            ;;
     esac
 done
 
@@ -300,7 +319,10 @@ do
     ${BIN_DIR}/poseidonos-cli wbt write_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --pattern 0xdeadbeef --json-res > ${cliOutput}
     check_result 
 
-    if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
+    check_if_it_is_pm
+    let is_pm=$?
+
+    if [ $is_pm -eq 1 ]; then
         
         echo -[IO Path : unvme-ns-${count} : wbt write_uncorrectable_lba]------------------------------------------
         echo -[ wbt write_uncorrectable_lba is not supported at VM Test ]------------------------------------------        
@@ -320,7 +342,7 @@ do
     ${BIN_DIR}/poseidonos-cli wbt read_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --output dump.bin --json-res > ${cliOutput}
 
 
-    if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
+    if [ $is_pm -eq 1 ]; then
         check_result
     else 
         check_result_expected_fail

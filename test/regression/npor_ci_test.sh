@@ -35,6 +35,8 @@ Description
     -i [test_iteration_cnt]
         Repeat test sequence n times according to the given value
         Default setting value is 10
+    -s [volume_size_in_mb]
+        Volume size in mb to create for test
     -m
         Manual mode for pos start. You should start pos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
@@ -287,6 +289,9 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+
+    sleep 1
+
     target_nvme=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}' | head -n 1`
 
     if [ ${exec_mode} -ne 2 ] && [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
@@ -546,7 +551,7 @@ check_permission()
 
 check_permission
 
-while getopts "o:i:hx:d:f:t:" opt
+while getopts "o:i:hx:d:f:t:s:" opt
 do
     case "$opt" in
         o) test_option="$OPTARG"
@@ -556,6 +561,9 @@ do
         x) exec_mode="$OPTARG"
             ;;
         f) target_fabric_ip="$OPTARG"
+            ;;
+        s) ibof_phy_volume_size_mb="$OPTARG"
+            test_volume_size_mb="$OPTARG"
             ;;
         h) print_help
             ;;

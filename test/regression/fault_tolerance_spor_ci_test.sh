@@ -30,6 +30,8 @@ Description
         Manual mode for poseidonos start. You should start poseidonos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
     -f [target_fabric_ip]
+    -s [volume_size_in_mb]
+        Volume size in mb to create for test
     -h 
         Show script usage
 
@@ -215,6 +217,9 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+
+    sleep 1
+
     target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
 
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
@@ -552,7 +557,7 @@ run_iter()
 
 check_permission
 
-while getopts "t:i:hx:d:m:f:i:" opt
+while getopts "t:i:hx:d:m:f:i:s:" opt
 do
     case "$opt" in
         m) manual_ibofos_run_mode=1
@@ -562,6 +567,9 @@ do
         f) target_fabric_ip="$OPTARG"
             ;;
         i) total_iter="$OPTARG"
+            ;;
+        s) ibof_phy_volume_size_mb="$OPTARG"
+            test_volume_size_mb="$OPTARG"
             ;;
         ?) exit 2
             ;;

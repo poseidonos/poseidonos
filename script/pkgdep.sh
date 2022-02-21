@@ -64,6 +64,8 @@ if [ -f /etc/debian_version ]; then
     apt-get install -y numactl
     # for tbb
     apt install -y libtbb-dev
+    # for nvme modules
+    name=$(uname -r); apt-get install -y linux-modules-extra-${name}
 
 
 else
