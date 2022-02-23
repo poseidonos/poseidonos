@@ -50,7 +50,7 @@ public:
     virtual bool AddArrayInfo(int arrayId);
     virtual bool RemoveArrayInfo(int arrayId);
     void Execute(void);
-    bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
 private:
     MioHandler* tophalfHandler = nullptr;

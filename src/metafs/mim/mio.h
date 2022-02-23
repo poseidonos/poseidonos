@@ -35,19 +35,18 @@
 #include <condition_variable>
 #include <string>
 #include <vector>
-#include "metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "metafs_return_code.h"
 #include "metafs_io_request.h"
 #include "mim_state.h"
 #include "mpio.h"
 #include "mpio_list_context.h"
-#include "mpio_pool.h"
+#include "mpio_allocator.h"
 #include "metafs_aiocb_cxt.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 namespace pos
 {
-#define AsMioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
-
 using MpioDonePollerCb = std::function<void(void)>;
 using MioAsyncDoneCb = AsyncCallback;
 
@@ -88,24 +87,23 @@ private:
     MioState expNextState;
 };
 
-class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>
+class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>, public MetaFsStopwatch<MioTimestampStage>
 {
 public:
     Mio(void) = delete;
-    explicit Mio(MpioPool* mpioPool);
+    explicit Mio(MpioAllocator* mpioAllocator);
     Mio(const Mio& mio) = delete;
     Mio& operator=(const Mio& mio) = delete;
 
     virtual ~Mio(void);
 
-    virtual void InitStateHandler(void) override;
     virtual void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
     virtual void Reset(void);
 
     virtual void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
     virtual void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    virtual void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
+    virtual void SetIoCQ(MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
@@ -129,7 +127,8 @@ public:
 #endif
 
 protected:
-    void _BindMpioPool(MpioPool* mpioPool);
+    virtual void _InitStateHandler(void) override;
+    void _BindMpioAllocator(MpioAllocator* mpioAllocator);
     void _BuildMpioMap(void);
     void _PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
         MetaLpnType lpn, FileSizeType byteOffset, FileSizeType byteSize, FileBufType buf,
@@ -148,8 +147,8 @@ protected:
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
     MfsError error;
-    MetaFsIoQ<Mio*>* ioCQ;
-    MpioPool* mpioPool;
+    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
+    MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
 #if MPIO_CACHE_EN
     std::vector<MetaFsIoRequest*>* mergedRequestList = nullptr;

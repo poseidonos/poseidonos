@@ -18,12 +18,12 @@ poseidonos-cli device create [flags]
 ### Options
 
 ```
-      --block-size int       The block size of the buffer device.
+  -s, --block-size int       The block size of the buffer device. (default 512)
   -d, --device-name string   The name of the buffer device to create.
-      --device-type string   The type of the buffer device to create.
+  -t, --device-type string   The type of the buffer device to create. (default "uram")
   -h, --help                 help for create
-      --num-blocks int       The number of blocks of the buffer device.
-      --numa int             The NUMA node of the buffer device.
+  -b, --num-blocks int       The number of blocks of the buffer device. (default 8388608)
+  -n, --numa int             The NUMA node of the buffer device.
 ```
 
 ### Options inherited from parent commands

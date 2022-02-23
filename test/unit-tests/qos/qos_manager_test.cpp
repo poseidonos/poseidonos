@@ -7,7 +7,9 @@
 #include "test/unit-tests/qos/submission_adapter_mock.h"
 #include "test/unit-tests/qos/submission_notifier_mock.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
+#include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include <unistd.h>
+
 using ::testing::_;
 using ::testing::NiceMock;
 namespace pos
@@ -301,6 +303,20 @@ TEST(QosManager, Test_Delete_ArrayName_Map)
     qosManager.DeleteEntryArrayMap(arrayName);
     uint32_t noOfArrays = qosManager.GetNumberOfArrays();
     ASSERT_EQ(noOfArrays, 0);
+}
+
+TEST(QosManager, Initialize_FinalizeSpdkManager_Test)
+{
+    NiceMock<MockConfigManager>* mockConfigManager = CreateQosMockConfigManager(false);
+    NiceMock<MockSpdkPosNvmfCaller>* mockSpdkPosNvmfCaller =
+        new NiceMock<MockSpdkPosNvmfCaller>;
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
+     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    QosManager qosManager(mockSpdkEnvCaller, mockSpdkPosNvmfCaller, mockConfigManager, &mockEventFrameworkApi);
+    qosManager.InitializeSpdkManager();
+    qosManager.FinalizeSpdkManager();
+    delete mockConfigManager;
 }
 
 } // namespace pos

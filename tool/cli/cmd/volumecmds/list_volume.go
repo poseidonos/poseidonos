@@ -16,29 +16,46 @@ import (
 //TODO(mj): function for --detail flag needs to be implemented.
 var ListVolumeCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List all volumes of an array.",
+	Short: "List volumes of an array or display information of a volume.",
 	Long: `
-List all volumes of an array.
+List volumes of an array or display information of a volume.
 
 Syntax:
-	poseidonos-cli volume list [(--array-name | -a) ArrayName]
+	poseidonos-cli volume list (--array-name | -a) ArrayName [(--volume-name | -v) VolumeName]
 
-Example (listing volumes from a specific array):
+Example1 (listing volumes of an array):
 	poseidonos-cli volume list --array-name Array0
+
+Example2 (displaying a detailed information of a volume):
+	poseidonos-cli volume list --array-name Array0 --volume-name Volume0
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "LISTVOLUME"
+		var (
+			command = ""
+			param   interface{}
+		)
 
-		param := messages.ListVolumeParam{
-			ARRAYNAME: list_volume_arrayName,
+		if list_volume_volumeName != "" {
+			command = "VOLUMEINFO"
+
+			param = messages.VolumeInfoParam{
+				ARRAYNAME:  list_volume_arrayName,
+				VOLUMENAME: list_volume_volumeName,
+			}
+
+		} else {
+			command = "LISTVOLUME"
+
+			param = messages.ListVolumeParam{
+				ARRAYNAME: list_volume_arrayName,
+			}
+
 		}
 
-		uuid := globals.GenerateUUID()
+		req := messages.BuildReqWithParam(command, globals.GenerateUUID(), param)
 
-		listVolumeReq := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(listVolumeReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
 		}
@@ -65,13 +82,22 @@ Example (listing volumes from a specific array):
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var list_volume_arrayName = ""
+var (
+	list_volume_arrayName  = ""
+	list_volume_volumeName = ""
+)
 
 func init() {
 	ListVolumeCmd.Flags().StringVarP(&list_volume_arrayName,
 		"array-name", "a", "",
-		"The Name of the array of volumes to list")
+		"The name of the array of volumes to list")
 	ListVolumeCmd.MarkFlagRequired("array-name")
+
+	ListVolumeCmd.Flags().StringVarP(&list_volume_volumeName,
+		"volume-name", "v", "",
+		"The name of the volume of the array to list."+"\n"+
+			`When this is specified, the detailed information
+		of this volume will be displayed.`)
 }
 
 func PrintResponse(response string) {

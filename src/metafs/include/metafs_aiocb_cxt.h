@@ -35,6 +35,7 @@
 #include <string>
 #include <atomic>
 #include "os_header.h"
+#include "src/meta_file_intf/async_context.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "metafs_type.h"
 #include "src/bio/volume_io.h"
@@ -56,7 +57,8 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      tagId(0)
+      tagId(0),
+      priority(RequestPriority::Normal)
     {
         callbackCount = 0;
     }
@@ -70,24 +72,41 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      tagId(0)
+      tagId(0),
+      priority(RequestPriority::Normal)
     {
     }
 
-    void
-    SetTagId(uint32_t id)
+    MetaFsAioCbCxt(AsyncMetaFileIoCtx* ctx, int arrayId)
+    : opcode(ctx->opcode),
+      fd(ctx->fd),
+      arrayId(arrayId),
+      soffset(ctx->fileOffset),
+      nbytes(ctx->length),
+      buf((void*)ctx->buffer),
+      callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
+      rc(POS_EVENT_ID::MFS_END),
+      tagId(0),
+      priority(ctx->GetPriority())
+    {
+        callbackCount = 0;
+    }
+
+    virtual ~MetaFsAioCbCxt(void)
+    {
+    }
+
+    void SetTagId(uint32_t id)
     {
         this->tagId = id;
     }
 
-    uint32_t
-    GetTagId(void)
+    uint32_t GetTagId(void)
     {
         return tagId;
     }
 
-    bool
-    CheckIOError(void)
+    bool CheckIOError(void)
     {
         if (rc != POS_EVENT_ID::SUCCESS)
         {
@@ -96,8 +115,7 @@ public:
         return false;
     }
 
-    void
-    SetErrorStatus(MfsError err)
+    void SetErrorStatus(MfsError err)
     {
         // need more error handling
         if (err.first != 0)
@@ -114,8 +132,7 @@ public:
         }
     }
 
-    void
-    InvokeCallback(void)
+    void InvokeCallback(void)
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "[Mio ][InvokeCb   ] type={}, req.tagId={}, status={}", opcode, tagId, rc);
@@ -130,40 +147,59 @@ public:
         }
     }
 
-    MetaFsIoOpcode
-    GetOpCode(void)
+    MetaFsIoOpcode GetOpCode(void) const
     {
         return opcode;
     }
 
-    FileDescriptorType
-    GetFD(void)
+    FileDescriptorType GetFD(void) const
     {
         return fd;
     }
 
-    FileSizeType
-    GetOffset(void)
+    FileSizeType GetOffset(void) const
     {
         return soffset;
     }
 
-    FileSizeType
-    GetByteSize(void)
+    FileSizeType GetByteSize(void) const
     {
         return nbytes;
     }
 
-    void*
-    GetBuffer(void)
+    void* GetBuffer(void) const
     {
         return buf;
     }
 
-    void
-    SetCallbackCount(int cnt)
+    void SetCallbackCount(const int cnt)
     {
         callbackCount = cnt;
+    }
+
+    virtual void SetTopPriority(void)
+    {
+        priority = RequestPriority::Highest;
+    }
+
+    virtual void ClearTopPriority(void)
+    {
+        priority = RequestPriority::Normal;
+    }
+
+    virtual bool IsTopPriority(void) const
+    {
+        return (RequestPriority::Highest == priority);
+    }
+
+    virtual void SetPriority(const RequestPriority p)
+    {
+        priority = p;
+    }
+
+    virtual RequestPriority GetPriority(void) const
+    {
+        return priority;
     }
 
 private:
@@ -180,5 +216,6 @@ private:
     POS_EVENT_ID rc;
     uint32_t tagId;
     std::atomic<int> callbackCount;
+    RequestPriority priority;
 };
 } // namespace pos

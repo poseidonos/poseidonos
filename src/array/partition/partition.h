@@ -30,60 +30,55 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PARTITION_H_
-#define PARTITION_H_
+#pragma once
 
 #include <string>
 #include <vector>
+#include <array>
 
 #include "src/include/partition_type.h"
 #include "src/include/address_type.h"
+#include "src/include/raid_type.h"
+#include "src/include/raid_state.h"
 #include "src/array/device/array_device.h"
-#include "src/array/ft/method.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/array/service/io_translator/i_translator.h"
+#include "src/array/partition/i_partition_services.h"
 
 using namespace std;
 
 namespace pos
 {
-class Ubio;
 
 class Partition : public ITranslator
 {
 public:
-    Partition(
-        string array,
-        uint32_t arrayIndex,
-        PartitionType type,
-        PartitionPhysicalSize physicalSize,
-        vector<ArrayDevice*> devs,
-        Method* method);
+    Partition(vector<ArrayDevice*> d, PartitionType type);
     virtual ~Partition(void);
-
-    int Create(PartitionPhysicalSize size, vector<ArrayDevice*> devs);
+    virtual bool IsByteAccessSupported(void) = 0;
     const PartitionLogicalSize* GetLogicalSize();
     const PartitionPhysicalSize* GetPhysicalSize();
     bool IsValidLba(uint64_t lba);
     int FindDevice(ArrayDevice* dev);
-    Method* GetMethod(void);
-    virtual void Format(void) {}
-    virtual bool IsByteAccessSupported(void) = 0;
     virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
+    virtual void RegisterService(IPartitionServices* svc) {}
+    PartitionType GetType(void) { return type; }
+    uint64_t GetLastLba() { return lastLba; }
+    const vector<ArrayDevice*> GetDevs(void) { return devs; }
+    virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
 
 protected:
     bool _IsValidAddress(const LogicalBlkAddr& lsa);
     bool _IsValidEntry(const LogicalWriteEntry& entry);
-    string arrayName_;
-    uint32_t arrayIndex_;
-    PartitionType type_;
-    PartitionLogicalSize logicalSize_;
-    PartitionPhysicalSize physicalSize_;
-    vector<ArrayDevice*> devs_;
-    Method* method_ = nullptr;
-    uint64_t lastLba_ = 0;
+    void _UpdateLastLba(void);
+    PartitionLogicalSize logicalSize;
+    PartitionPhysicalSize physicalSize;
+    vector<ArrayDevice*> devs;
+    uint64_t lastLba = 0;
+    PartitionType type;
 };
 
+using Partitions = array<Partition*, PartitionType::TYPE_COUNT>;
+
 } // namespace pos
-#endif // PARTITION_H_

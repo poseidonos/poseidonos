@@ -1767,6 +1767,19 @@ index bbf33fdfe..9b7f254c9 100644
  endif
  
  DIRS-$(CONFIG_RBD) += rbd
+diff --git module/bdev/gpt/vbdev_gpt.c module/bdev/gpt/vbdev_gpt.c
+index c10c85aa3..243a21d8a 100644
+--- module/bdev/gpt/vbdev_gpt.c
++++ module/bdev/gpt/vbdev_gpt.c
+@@ -59,7 +59,7 @@ static struct spdk_bdev_module gpt_if = {
+ 	.examine_disk = vbdev_gpt_examine,
+ 
+ };
+-SPDK_BDEV_MODULE_REGISTER(gpt, &gpt_if)
++//SPDK_BDEV_MODULE_REGISTER(gpt, &gpt_if)
+ 
+ /* Base block device gpt context */
+ struct gpt_base {
 diff --git module/bdev/malloc/Makefile module/bdev/malloc/Makefile
 index 4db73241a..982ccd965 100644
 --- module/bdev/malloc/Makefile

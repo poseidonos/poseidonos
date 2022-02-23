@@ -47,6 +47,8 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+using namespace std;
+
 namespace pos
 {
 class TelemetryConfigFixture : public ::testing::Test
@@ -61,54 +63,57 @@ public:
     }
 
     virtual void
-    SetUp(void)
+    SetUp(void) override
     {
-        config = new TelemetryConfig(path, fileName);
+        config = make_shared<TelemetryConfig>(PATH, FILE_NAME);
     }
 
     virtual void
-    TearDown(void)
+    TearDown(void) override
     {
-        delete config;
     }
 
 protected:
-    TelemetryConfig* config;
-    std::string path = "./unit-tests/telemetry/telemetry_config/";
-    std::string fileName = "test.yaml";
+    shared_ptr<TelemetryConfig> config;
+    const string PATH = "./unit-tests/telemetry/telemetry_config/";
+    const string FILE_NAME = "test.yaml";
 };
+
+TEST(TelemetryConfig, testIfThereIsNoConfigurationFile)
+{
+    EXPECT_DEATH(new TelemetryConfig("invalid", "path"), "")
+        << "1. is the file config reader valid?\n2. is the conf file valid?";
+}
 
 TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCanBeAddedTwiceWithDifferentKeys)
 {
-    MockConfigObserver* observer = new MockConfigObserver();
-    MockConfigObserver* observer2 = new MockConfigObserver();
-    std::multimap<std::string, ConfigObserver*>& oMap = config->GetObserversMap();
+    const shared_ptr<MockConfigObserver> observer = make_shared<MockConfigObserver>();
+    const shared_ptr<MockConfigObserver> observer2 = make_shared<MockConfigObserver>();
+    multimap<string, shared_ptr<ConfigObserver>>& oMap = config->GetObserversMap();
 
-    std::string key1 = "key1";
-    std::string key2 = "key2";
-    std::string key3 = "key3";
-    std::string key4 = "key4";
+    const string key1 = "key1";
+    const string key2 = "key2";
+    const string key3 = "key3";
+    const string key4 = "key4";
 
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key1, observer), true);
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key2, observer), true);
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key3, observer), true);
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key3, observer2), true);
 
-    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key1)), 1);
-    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key2)), 1);
-    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key3)), 2);
-    EXPECT_EQ(oMap.count(config->GetKey(TelemetryConfigType::Client, key4)), 0);
-
-    delete observer;
+    EXPECT_EQ(oMap.count(config->GetCompositeKey(TelemetryConfigType::Client, key1)), 1);
+    EXPECT_EQ(oMap.count(config->GetCompositeKey(TelemetryConfigType::Client, key2)), 1);
+    EXPECT_EQ(oMap.count(config->GetCompositeKey(TelemetryConfigType::Client, key3)), 2);
+    EXPECT_EQ(oMap.count(config->GetCompositeKey(TelemetryConfigType::Client, key4)), 0);
 }
 
 TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotification)
 {
-    MockConfigObserver* observer = new MockConfigObserver();
+    const shared_ptr<MockConfigObserver> observer = make_shared<MockConfigObserver>();
     ClientConfig client;
-    std::string key = "enabled";
+    const string key = "enabled";
 
-    EXPECT_EQ(TelemetryConfigSingleton::Instance(path, fileName)->Register(TelemetryConfigType::Client, key, observer), true);
+    EXPECT_EQ(TelemetryConfigSingleton::Instance(PATH, FILE_NAME)->Register(TelemetryConfigType::Client, key, observer), true);
 
     // config won't call the observer due to last flag
     client.UpdateConfig(TelemetryConfigType::Client, key, true, false);
@@ -118,21 +123,18 @@ TEST_F(TelemetryConfigFixture, Register_testIfTheObserverCanBeReceivedNotificati
     // config will call the observer
     client.UpdateConfig(TelemetryConfigType::Client, key, true, true);
 
-    delete observer;
     TelemetryConfigSingleton::ResetInstance();
 }
 
 TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCannotBeRegisteredTwice)
 {
-    MockConfigObserver* observer = new MockConfigObserver();
-    std::multimap<std::string, ConfigObserver*>& oMap = config->GetObserversMap();
+    const shared_ptr<MockConfigObserver> observer = make_shared<MockConfigObserver>();
+    multimap<string, shared_ptr<ConfigObserver>>& oMap = config->GetObserversMap();
 
-    std::string key = "key";
+    const string key = "key";
 
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key, observer), true);
     EXPECT_EQ(config->Register(TelemetryConfigType::Client, key, observer), false);
-
-    delete observer;
 }
 
 TEST_F(TelemetryConfigFixture, Getter_testIfGrpcClientIsEnabledByDefault)
@@ -140,49 +142,8 @@ TEST_F(TelemetryConfigFixture, Getter_testIfGrpcClientIsEnabledByDefault)
     EXPECT_EQ(config->GetClient().IsEnabled(), true);
 }
 
-TEST_F(TelemetryConfigFixture, Getter_testIfGrpcServerIsEnabledByDefault)
-{
-    EXPECT_EQ(config->GetServer().IsEnabled(), true);
-}
-
-TEST_F(TelemetryConfigFixture, ConfigurationDir_testIfThePathIsCorrect)
-{
-    DefaultConfiguration conf;
-    EXPECT_EQ(0, config->ConfigurationDir().compare(conf.ConfigurationDir()));
-}
-
 TEST_F(TelemetryConfigFixture, ConfigurationFileName_testIfThePathIsCorrect)
 {
     EXPECT_EQ(0, config->ConfigurationFileName().compare("telemetry_default.yaml"));
-}
-
-TEST_F(TelemetryConfigFixture, CreateFile_testIfThePathWillBeCreated)
-{
-    std::string path = "./";
-    std::string fileName = "test.txt";
-
-    EXPECT_EQ(false, FileExists(path + fileName));
-
-    config->CreateFile(path, fileName);
-
-    EXPECT_EQ(true, FileExists(path + fileName));
-
-    config->RemoveFile(path, fileName);
-
-    EXPECT_EQ(false, FileExists(path + fileName));
-}
-
-TEST_F(TelemetryConfigFixture, RemoveFile_testIfThePathWillBeRemoved)
-{
-    std::string path = "./";
-    std::string fileName = "test.txt";
-
-    config->CreateFile(path, fileName);
-
-    EXPECT_EQ(true, FileExists(path + fileName));
-
-    config->RemoveFile(path, fileName);
-
-    EXPECT_EQ(false, FileExists(path + fileName));
 }
 } // namespace pos

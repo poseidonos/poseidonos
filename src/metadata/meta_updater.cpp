@@ -95,8 +95,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
 
     if (journal->IsEnabled() == true)
     {
-        MpageList dirty = _GetDirtyPages(volumeIo);
-        result = journalWriter->AddBlockMapUpdatedLog(volumeIo, dirty, blockMapUpdate);
+        result = journalWriter->AddBlockMapUpdatedLog(volumeIo, blockMapUpdate);
     }
     else
     {
@@ -114,23 +113,6 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
     return result;
 }
 
-MpageList
-MetaUpdater::_GetDirtyPages(VolumeIoSmartPtr volumeIo)
-{
-    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
-    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
-    MpageList dirty = vsaMap->GetDirtyVsaMapPages(volumeIo->GetVolumeId(), rba, blockCount);
-    return dirty;
-}
-
-MpageList
-MetaUpdater::_GetDirtyPages(BlkAddr rba, uint32_t volId)
-{
-    uint32_t blockCount = 1;
-    MpageList dirty = vsaMap->GetDirtyVsaMapPages(volId, rba, blockCount);
-    return dirty;
-}
-
 int
 MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
 {
@@ -142,11 +124,9 @@ MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
 
     if (journal->IsEnabled() == true)
     {
-        MpageList dirty = stripeMap->GetDirtyStripeMapPages(stripe->GetVsid());
         StripeAddr oldAddr = stripeMap->GetLSA(stripe->GetVsid());
 
-        result = journalWriter->AddStripeMapUpdatedLog(stripe, oldAddr,
-            dirty, stripeMapUpdate);
+        result = journalWriter->AddStripeMapUpdatedLog(stripe, oldAddr, stripeMapUpdate);
     }
     else
     {
@@ -175,24 +155,7 @@ MetaUpdater::UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList
 
     if (journal->IsEnabled() == true)
     {
-        StripeId stripeId = stripe->GetVsid();
-        MpageList volumeDirtyList;
-        uint32_t totalBlksPerUserStripe = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
-
-        for (uint32_t offset = 0; offset < totalBlksPerUserStripe; offset++)
-        {
-            BlkAddr rba;
-            uint32_t volId;
-            std::tie(rba, volId) = stripe->GetReverseMapEntry(offset);
-            MpageList dirty = _GetDirtyPages(rba, volId);
-            volumeDirtyList.insert(dirty.begin(), dirty.end());
-        }
-        uint32_t volumeId = mapUpdateInfoList.volumeId;
-        MapPageList dirtyMap;
-        dirtyMap[volumeId] = volumeDirtyList;
-        dirtyMap[STRIPE_MAP_ID] = stripeMap->GetDirtyStripeMapPages(stripeId);
-
-        result = journalWriter->AddGcStripeFlushedLog(mapUpdateInfoList, dirtyMap, gcMapUpdate);
+        result = journalWriter->AddGcStripeFlushedLog(mapUpdateInfoList, gcMapUpdate);
     }
     else
     {

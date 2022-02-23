@@ -220,19 +220,38 @@ Metadata::Flush(void)
 bool
 Metadata::NeedRebuildAgain(void)
 {
-    return allocator->GetIContextManager()->NeedRebuildAgain();
+    IContextManager* contextManager = allocator->GetIContextManager();
+    if (contextManager != nullptr)
+    {
+        return contextManager->NeedRebuildAgain();
+    }
+    else
+    {
+        int eventId = static_cast<int>(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR);
+        POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
+        return false;
+    }
 }
 
 int
 Metadata::PrepareRebuild(void)
 {
-    return allocator->GetIWBStripeAllocator()->PrepareRebuild();
+    return allocator->PrepareRebuild();
 }
 
 void
 Metadata::StopRebuilding(void)
 {
-    allocator->GetIContextManager()->StopRebuilding();
+    IContextManager* contextManager = allocator->GetIContextManager();
+    if (contextManager != nullptr)
+    {
+        contextManager->StopRebuilding();
+    }
+    else
+    {
+        int eventId = static_cast<int>(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR);
+        POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
+    }
 }
 
 } // namespace pos

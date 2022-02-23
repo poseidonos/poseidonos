@@ -30,7 +30,7 @@ TEST(CallbackSequenceController, NotifyCallbackCompleted_testIfCallbackCountDecr
     CallbackSequenceController sequenceController(numCallbacks, false);
 
     // When: All callbacks are completed
-    for (int i = 0; i < numCallbacks; i ++)
+    for (int i = 0; i < numCallbacks; i++)
     {
         sequenceController.NotifyCallbackCompleted();
     }

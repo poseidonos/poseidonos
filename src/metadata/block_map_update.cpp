@@ -31,13 +31,13 @@
 */
 
 #include "src/metadata/block_map_update.h"
-#include "src/io/general_io/vsa_range_maker.h"
+
 #include "src/bio/volume_io.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/logger/logger.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/general_io/vsa_range_maker.h"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {

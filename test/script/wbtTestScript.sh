@@ -267,14 +267,6 @@ echo -[Map : set_current_ssd_lsid]------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt set_current_ssd_lsid --input currentSsdLsid.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
-echo -[Map : get_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt get_user_segment_bitmap --output segmentBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
-check_result
-
-echo -[Map : set_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt set_user_segment_bitmap --input segmentBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
-check_result
-
 echo -[Map : get_segment_info]------------------------------------------
 ${BIN_DIR}/poseidonos-cli wbt get_segment_info --output segmentInfo.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result

@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Intel Corporation nor the names of its
- *       contributors may be used to endorse or promote products derived
+ *     * Neither the name of Samsung Electronics Corporation nor the names of
+ *       its contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -89,22 +89,11 @@ TEST(TelemetryAirDelegator, RegisterAirEvent_SimpleCall)
     // Then: Do nothing
 }
 
-TEST(TelemetryAirDelegator, dataHandler_RunState_ValidData)
+TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
 {
-    // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    // Given: TelemetryAirDelegator, air_data
+    TelemetryAirDelegator telAirDelegator {nullptr};
     auto& air_data = air::json("air_data");
-    auto& node_arr_vol = air::json("arr_vol");
-    auto& obj_1 = air::json("obj_1");
-    obj_1["filter"] = {"AIR_READ"};
-    obj_1["iops"] = {1234};
-    auto& obj_2 = air::json("obj_2");
-    obj_2["filter"] = {"AIR_WRITE"};
-    obj_2["iops"] = {5678};
-    node_arr_vol["objs"] = {obj_1, obj_2};
-    air_data["PERF_ARR_VOL"] = {node_arr_vol};
     int actual, expected = 0;
 
     // When: Call dataHandler
@@ -117,13 +106,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_ValidData)
 
 TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 {
-    // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    // Given: TelemetryAirDelegator, air_data
+    TelemetryAirDelegator telAirDelegator {nullptr};
     auto& air_data = air::json("air_data");
-    auto& node_arr_vol = air::json("arr_vol");
-    air_data["INVALID_NODE"] = {node_arr_vol};
+    auto& empty_node = air::json("empty_node");
+    air_data["PERF_ARR_VOL"] = {empty_node};
     int actual, expected = 2;
 
     // When: Call dataHandler
@@ -136,10 +123,8 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 
 TEST(TelemetryAirDelegator, dataHandler_EndState)
 {
-    // Given: MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishData).WillByDefault(Return(0));
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    // Given: TelemetryAirDelegator, air_data
+    TelemetryAirDelegator telAirDelegator {nullptr};
     auto& air_data = air::json("air_data");
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
     int actual, expected = 1;
@@ -149,6 +134,170 @@ TEST(TelemetryAirDelegator, dataHandler_EndState)
 
     // Then: Expect dataHandler returns one(normal stop, skip logic), Clear AIR data
     EXPECT_EQ(actual, expected);
+    air::json_clear();
+}
+
+TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
+{
+    // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
+    POSMetricVector* posMetricVector {nullptr};
+    NiceMock<MockTelemetryPublisher> mockTelPub;
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
+        [&] (POSMetricVector* posMetricVectorArg)
+        {
+            posMetricVector = posMetricVectorArg;
+            return 0;
+        }
+    );
+    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    auto& air_data = air::json("air_data");
+    air_data["interval"] = {3};
+    auto& perf_arr_vol = air::json("perf_arr_vol");
+    auto& obj_read = air::json("obj_read");
+    obj_read["filter"] = {"AIR_READ"};
+    obj_read["iops"] = {100};
+    obj_read["bw"] = {409600};
+    obj_read["index"] = {0x0306};
+    obj_read["target_id"] = {7824};
+    obj_read["target_name"] = {"reactor_0"};
+    auto& obj_write = air::json("obj_write");
+    obj_write["filter"] = {"AIR_WRITE"};
+    obj_write["iops"] = {10};
+    obj_write["bw"] = {1310720};
+    obj_write["index"] = {0x0306};
+    obj_write["target_id"] = {7824};
+    obj_write["target_name"] = {"reactor_0"};
+    perf_arr_vol["objs"] = {obj_read, obj_write};
+    air_data["PERF_ARR_VOL"] = {perf_arr_vol};
+    int actual, expected = 0;
+
+    // When: Call dataHandler
+    actual = telAirDelegator.dataHandler(air_data);
+
+    // Then: Expect dataHandler returns zero(success), Clear AIR data
+    EXPECT_EQ(actual, expected);
+    EXPECT_EQ(posMetricVector->size(), 4);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50000_READ_IOPS);
+    EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "3");
+    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50001_READ_RATE_BYTES_PER_SECOND);
+    EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 409600);
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_id"), "7824");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "3");
+    EXPECT_EQ(posMetricVector->at(2).GetName(), TEL50010_WRITE_IOPS);
+    EXPECT_EQ(posMetricVector->at(2).GetGaugeValue(), 10);
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_id"), "7824");
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("interval"), "3");
+    EXPECT_EQ(posMetricVector->at(3).GetName(), TEL50011_WRITE_RATE_BYTES_PER_SECOND);
+    EXPECT_EQ(posMetricVector->at(3).GetGaugeValue(), 1310720);
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_id"), "7824");
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("interval"), "3");
+    delete posMetricVector;
+    air::json_clear();
+}
+
+TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
+{
+    // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
+    POSMetricVector* posMetricVector {nullptr};
+    NiceMock<MockTelemetryPublisher> mockTelPub;
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
+        [&] (POSMetricVector* posMetricVectorArg)
+        {
+            posMetricVector = posMetricVectorArg;
+            return 0;
+        }
+    );
+    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    auto& air_data = air::json("air_data");
+    auto& lat_arr_vol_read = air::json("lat_arr_vol_read");
+    auto& obj = air::json("obj");
+    obj["mean"] = {234};
+    obj["max"] = {8472};
+    obj["index"] = {0x0306};
+    obj["sample_cnt"] = {50};
+    lat_arr_vol_read["objs"] += {obj};
+    air_data["LAT_ARR_VOL_READ"] = {lat_arr_vol_read};
+    int actual, expected = 0;
+
+    // When: Call dataHandler
+    actual = telAirDelegator.dataHandler(air_data);
+
+    // Then: Expect dataHandler returns zero(success), Clear AIR data
+    EXPECT_EQ(actual, expected);
+    EXPECT_EQ(posMetricVector->size(), 2);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50002_READ_LATENCY_MEAN_NS);
+    EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 234);
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("sample_count"), "50");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
+    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50003_READ_LATENCY_MAX_NS);
+    EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 8472);
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("sample_count"), "50");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
+    delete posMetricVector;
+    air::json_clear();
+}
+
+TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
+{
+    // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
+    POSMetricVector* posMetricVector {nullptr};
+    NiceMock<MockTelemetryPublisher> mockTelPub;
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
+        [&] (POSMetricVector* posMetricVectorArg)
+        {
+            posMetricVector = posMetricVectorArg;
+            return 0;
+        }
+    );
+    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    auto& air_data = air::json("air_data");
+    auto& lat_arr_vol_write = air::json("lat_arr_vol_write");
+    auto& obj = air::json("obj");
+    obj["mean"] = {36804};
+    obj["max"] = {7362942};
+    obj["index"] = {0x0306};
+    obj["sample_cnt"] = {50};
+    lat_arr_vol_write["objs"] += {obj};
+    air_data["LAT_ARR_VOL_WRITE"] = {lat_arr_vol_write};
+    int actual, expected = 0;
+
+    // When: Call dataHandler
+    actual = telAirDelegator.dataHandler(air_data);
+
+    // Then: Expect dataHandler returns zero(success), Clear AIR data
+    EXPECT_EQ(actual, expected);
+    EXPECT_EQ(posMetricVector->size(), 2);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50012_WRITE_LATENCY_MEAN_NS);
+    EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 36804);
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("sample_count"), "50");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
+    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50013_WRITE_LATENCY_MAX_NS);
+    EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 7362942);
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("sample_count"), "50");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
+    delete posMetricVector;
     air::json_clear();
 }
 

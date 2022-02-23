@@ -29,23 +29,35 @@ def create_array(buffer, data, spare, array, raid):
     param_str = ""
     if (buffer != ""):
         param_str += "-b " + buffer
+    else:
+        param_str += "--no-buffer"
     if (data != ""):
         param_str += " -d " + data
     if spare != "":
         param_str += " -s " + spare
     param_str += " --array-name " + array
     if raid != "":
-        param_str += " --raid " + raid
+        if raid == "NONE":
+            param_str += " --no-raid"
+        else:
+            param_str += " --raid " + raid
     return send_request("array create " + param_str)
 
 
 def auto_create_array(buffer, num_data, num_spare, array, raid):
-    param_str = "-b " + buffer
+    param_str = ""
+    if (buffer != ""):
+        param_str += "-b " + buffer
+    else:
+        param_str += "--no-buffer"
     param_str += " -d " + str(num_data)
     param_str += " -s " + str(num_spare)
     param_str += " --array-name " + array
     if raid != "":
-        param_str += " --raid " + raid
+        if raid == "NONE":
+            param_str += " --no-raid"
+        else:
+            param_str += " --raid " + raid
     return send_request("array autocreate " + param_str)
 
 

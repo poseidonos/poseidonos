@@ -35,26 +35,67 @@
 namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
+: opcode(MetaFsIoOpcode::Write),
+  fd(-1),
+  fileOffset(0),
+  length(0),
+  buffer(nullptr),
+  callback(nullptr),
+  error(0),
+  ioDoneCheckCallback(nullptr),
+  vsid(0),
+  priority(RequestPriority::Normal)
 {
 }
 
 void
 AsyncMetaFileIoCtx::HandleIoComplete(void* data)
 {
-    error = ioDoneCheckCallback(data);
-    callback(this);
+    if (ioDoneCheckCallback)
+        error = ioDoneCheckCallback(data);
+    if (callback)
+        callback(this);
 }
 
 int
-AsyncMetaFileIoCtx::GetError(void)
+AsyncMetaFileIoCtx::GetError(void) const
 {
     return error;
 }
 
 uint64_t
-AsyncMetaFileIoCtx::GetLength(void)
+AsyncMetaFileIoCtx::GetLength(void) const
 {
     return length;
 }
 
+void
+AsyncMetaFileIoCtx::SetTopPriority(void)
+{
+    priority = RequestPriority::Highest;
+}
+
+void
+AsyncMetaFileIoCtx::ClearTopPriority(void)
+{
+    priority = RequestPriority::Normal;
+}
+
+bool
+AsyncMetaFileIoCtx::IsTopPriority(void) const
+{
+    return (RequestPriority::Highest == priority);
+}
+
+void
+AsyncMetaFileIoCtx::SetPriority(const RequestPriority p)
+{
+    priority = p;
+}
+
+RequestPriority
+AsyncMetaFileIoCtx::GetPriority(void) const
+{
+    return priority;
+}
 } // namespace pos

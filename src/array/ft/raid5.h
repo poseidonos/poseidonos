@@ -48,36 +48,30 @@ class BufferPool;
 
 class Raid5 : public Method
 {
-    friend class ParityLocationWbtCommand;
-
 public:
-    Raid5(const PartitionPhysicalSize* physicalSize,
-        const uint64_t maxParityBufferCountPerNuma,
-        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
-        MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
+    explicit Raid5(const PartitionPhysicalSize* pSize);
     virtual ~Raid5();
-    virtual bool AllocParityPools();
+    virtual bool AllocParityPools(uint64_t maxParityBufferCntPerNuma,
+        AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
+        MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
     virtual void ClearParityPools();
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    vector<uint32_t> GetParityOffset(StripeId lsid) override;
+    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
 
     // This function is for unit testing only
     virtual int GetParityPoolSize();
 private:
-    virtual void _BindRecoverFunc(void) override;
+    void _BindRecoverFunc(void);
     void _RebuildData(void* dst, void* src, uint32_t size);
     BufferEntry _AllocBuffer();
     void _ComputeParity(BufferEntry& dst, const list<BufferEntry>& srcs);
     void _XorBlocks(void* dst, const void* src, uint32_t memSize);
     void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
-    uint32_t _GetParityOffset(StripeId lsid);
-
-    const uint64_t MAX_PARITY_BUFFER_COUNT_PER_NUMA;
-
     vector<BufferPool*> parityPools;
-
     AffinityManager* affinityManager;
     MemoryManager* memoryManager;
 };

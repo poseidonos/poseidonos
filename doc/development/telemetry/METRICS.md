@@ -1,40 +1,38 @@
-- [- _**VSAMapFlushedDirtyPageCount**_](#--vsamapflusheddirtypagecount)
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
-  - [_**PendingMioCount**_](#pendingmiocount)
-  - [_**PendingMpioCount**_](#pendingmpiocount)
+  - [_**UserRequest**_](#userrequest)
+  - [_**UserRequestCount**_](#userrequestcount)
+  - [_**FreeMioCount**_](#freemiocount)
+  - [_**FreeMpioCount**_](#freempiocount)
+  - [_**SumOfAllTheTimeSpentByMpio**_](#sumofallthetimespentbympio)
+  - [_**SumOfProcessedMpioCount**_](#sumofprocessedmpiocount)
+  - [_**SumOfAllTheTimeSpentByMio**_](#sumofallthetimespentbymio)
+  - [_**SumOfProcessedMioCount**_](#sumofprocessedmiocount)
 - [**Volume**](#volume)
-  - [_**ReadIops**_](#readiops)
-  - [_**ReadBandwidth**_](#readbandwidth)
-  - [_**ReadLatencyMean**_](#readlatencymean)
-  - [_**ReadLatencyMax**_](#readlatencymax)
-  - [_**WriteIops**_](#writeiops)
-  - [_**WriteBandwidth**_](#writebandwidth)
-  - [_**WriteLatencyMean**_](#writelatencymean)
-  - [_**WriteLatencyMax**_](#writelatencymax)
+  - [_**read_iops**_](#read_iops)
+  - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
+  - [_**read_latency_mean_ns**_](#read_latency_mean_ns)
+  - [_**read_latency_max_ns**_](#read_latency_max_ns)
+  - [_**write_iops**_](#write_iops)
+  - [_**write_rate_bytes_per_second**_](#write_rate_bytes_per_second)
+  - [_**write_latency_mean_ns**_](#write_latency_mean_ns)
+  - [_**write_latency_max_ns**_](#write_latency_max_ns)
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
-  - [_**RebuildCount**_](#rebuildcount)
-  - [_**GarbageCollectorStatus**_](#garbagecollectorstatus)
 - [**Meta**](#meta)
-  - [**Allocator**](#Allocator)
-    - [_**FreeSegmentCount**_](#freesegcnt)
-    - [_**ContextManagerPendingIoCount**_](#ctxmngpendingiocnt)
-    - [_**GCVictimSegId**_](#victimsegid)
-    - [_**GCMode**_](#gcmode)
-    - [_**AllocateRebuildSegId**_](#allocrebuildsegid)
-    - [_**ReleaseRebuildSegId**_](#relrebuildsegid)
-    - [_**VictimSegInvPgCnt**_](#victiminvpgcnt)
-    - [_**ProhibitUserblkAllocationOnOff**_](#prohibitalloconoff)
-  - [**Mapper**](#Mapper)
-    - [_**LoadedVolCnt**_](#loadedvolcnt)
-    - [_**UnmountedVolId**_](#unmountedvolid)
-    - [_**DeletedVolId**_](#deletedvolid)
-    - [_**MountedVolCnt**_](#mountedvolcnt)
-    - [_**VSAMapLoadPendingIoCnt**_](#vsamaploadpendingiocnt)
-    - [_**VSAMapFlushPendingIoCnt**_](#vsamapflushpendingiocnt)
-    - [_**StripeMapFlushPendingIoCnt**_](#stripemapflushpendingiocnt)
-    - [_**VSAMapFlushedDirtypgCnt**_](#vsamapflusheddirtypgcnt)
+  - [_**FreeSegmentCount**_](#freesegmentcount)
+  - [_**ContextManagerPendingIoCount**_](#contextmanagerpendingiocount)
+  - [_**GCVictimSegId**_](#gcvictimsegid)
+  - [_**GCMode**_](#gcmode)
+  - [_**VictimSegInvPgCnt**_](#victimseginvpgcnt)
+  - [_**ProhibitUserBlkAllocationOnOff**_](#prohibituserblkallocationonoff)
+  - [_**LoadedVolumeCount**_](#loadedvolumecount)
+  - [_**UnmountedVolumeCount**_](#unmountedvolumecount)
+  - [_**MountedVolumeCount**_](#mountedvolumecount)
+  - [_**VSAMapLoadPendingIoCount**_](#vsamaploadpendingiocount)
+  - [_**VSAMapFlushPendingIoCount**_](#vsamapflushpendingiocount)
+  - [_**StripeMapFlushPendingIoCount**_](#stripemapflushpendingiocount)
+  - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
 
 ---
 
@@ -60,27 +58,43 @@ Whether the previous shutdown was normal.
 
 ---
 
-### _**PendingMioCount**_
+### _**UserRequest**_
 
-**ID**: 40100
+**ID**: 40010
 
 **Type**: Count
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {"thread_name" : Integer, "io_type" : String, "array_id": Integer, "fd" : Integer}
 
 **Introduced**: v0.10.0
 
-The number of requests requested by user modules per a MetaLpn.
+The byte-sized value of reuqests from user modules.
 
 ---
 
-### _**PendingMpioCount**_
+### _**UserRequestCount**_
 
-**ID**: 40101
+**ID**: 40011
 
 **Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name" : Integer, "io_type" : String, "array_id": Integer, "fd" : Integer}
+
+**Introduced**: v0.10.0
+
+The count of reuqests from user modules.
+
+---
+
+### _**FreeMioCount**_
+
+**ID**: 40102
+
+**Type**: Gauge
 
 **Monitoring**: Mandatory
 
@@ -88,7 +102,87 @@ The number of requests requested by user modules per a MetaLpn.
 
 **Introduced**: v0.10.0
 
-The Count of requests for follow-up because the event worker has finished processing.
+The number of mio to allocate
+
+---
+
+### _**FreeMpioCount**_
+
+**ID**: 40103
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The number of mpio to allocate
+
+---
+
+### _**SumOfAllTheTimeSpentByMpio**_
+
+**ID**: 40104
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of all the time spent by mpio in specific period
+
+---
+
+### _**SumOfProcessedMpioCount**_
+
+**ID**: 40105
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of processed mpio count in specific period
+
+---
+
+### _**SumOfAllTheTimeSpentByMio**_
+
+**ID**: 40106
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of all the time spent by mio in specific period
+
+---
+
+### _**SumOfProcessedMioCount**_
+
+**ID**: 40107
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_name": String}
+
+**Introduced**: v0.10.0
+
+The Sum of processed mio count in specific period
 
 ---
 
@@ -97,7 +191,7 @@ The Count of requests for follow-up because the event worker has finished proces
 Volume group contains the metrics of volume.
 
 ---
-### _**ReadIops**_
+### _**read_iops**_
 
 **ID**: 50000
 
@@ -105,15 +199,15 @@ Volume group contains the metrics of volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The IOPS of read in the volume.
+The IOPS of read in a volume & an array.
 
 ---
 
-### _**ReadBandwidth**_
+### _**read_rate_bytes_per_second**_
 
 **ID**: 50001
 
@@ -121,15 +215,15 @@ The IOPS of read in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The bandwidth of read I/O in the volume.
+The rate(bytes/second) of read in a volume & an array.
 
 ---
 
-### _**ReadLatencyMean**_
+### _**read_latency_mean_ns**_
 
 **ID**: 50002
 
@@ -137,15 +231,15 @@ The bandwidth of read I/O in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of read latency in the volume.
+The mean value of read latency in a volume & an array.
 
 ---
 
-### _**ReadLatencyMax**_
+### _**read_latency_max_ns**_
 
 **ID**: 50003
 
@@ -153,15 +247,15 @@ The mean value of read latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The max value of read latency in the volume.
+The max value of read latency in a volume & an array.
 
 ---
 
-### _**WriteIops**_
+### _**write_iops**_
 
 **ID**: 50010
 
@@ -169,15 +263,15 @@ The max value of read latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The IOPS of write in the volume.
+The IOPS of write in a volume & an array.
 
 ---
 
-### _**WriteBandwidth**_
+### _**write_rate_bytes_per_second**_
 
 **ID**: 50011
 
@@ -185,15 +279,15 @@ The IOPS of write in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "thread_id": Integer, "thread_name": String, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The bandwidth of write I/O in the volume.
+The rate(bytes/second) of write in a volume & an array.
 
 ---
 
-### _**WriteLatencyMean**_
+### _**write_latency_mean_ns**_
 
 **ID**: 50012
 
@@ -201,15 +295,15 @@ The bandwidth of write I/O in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of write latency in the volume.
+The mean value of write latency in a volume & an array.
 
 ---
 
-### _**WriteLatencyMax**_
+### _**write_latency_max_ns**_
 
 **ID**: 50013
 
@@ -217,11 +311,11 @@ The mean value of write latency in the volume.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"volume_id": Integer, "array_id": Integer, "sample_count": Integer, "timestamp": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The max value of write latency in the volume.
+The max value of write latency in a volume & an array.
 
 ---
 
@@ -245,41 +339,12 @@ Array group contains the metrics of array
 
 The current status of the array
 
-0: Offline, 1: Normal, 2: Degraded, 3: Rebuilding
+0: NOT_EXIST, 1:EXIST_NORMAL, 2:EXIST_DEGRADED, 3:BROKEN, 4: TRY_MOUNT, 5:TRY_UNMOUNT, 6: NORMAL, 7:DEGRADED, 8:REBUILD
+
 
 ---
+## **Meta**
 
-### _**RebuildCount**_
-
-**ID**: 60002
-
-**Type**: Counter
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_unique_id", "array_name", "array_id"}
-
-**Introduced**: v0.10.0
-
-Total number of rebuilds triggered.
-
----
-
-### _**GarbageCollectorStatus**_
-
-**ID**: 60003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_unique_id", "array_name", "array_id"}
-
-**Introduced**: v0.10.0
-
-The current status of garbage collector in the array.
-
-0: None, 1: Normal, 2: Urgent
 
 ---
 ### _**FreeSegmentCount**_
@@ -339,7 +404,9 @@ Current victim segment
 
 **Introduced**: v0.10.0
 
-Current victim segment
+The current status of garbage collector in the array.
+
+0: None, 1: Normal, 2: Urgent
 
 ---
 ### _**VictimSegInvPgCnt**_

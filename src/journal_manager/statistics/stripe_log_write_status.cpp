@@ -41,7 +41,6 @@
 
 namespace pos
 {
-
 StripeLogWriteStatus::StripeLogWriteStatus(StripeId vsid)
 : StripeInfo(vsid),
   numFoundBlockMaps(0),
@@ -54,7 +53,6 @@ StripeLogWriteStatus::StripeLogWriteStatus(StripeId vsid)
     finalStripeAddr.stripeId = UNMAP_STRIPE;
     finalStripeAddr.stripeLoc = IN_WRITE_BUFFER_AREA;
 }
-
 
 StripeLogWriteStatus::~StripeLogWriteStatus(void)
 {

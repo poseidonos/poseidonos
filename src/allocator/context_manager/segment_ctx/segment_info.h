@@ -33,29 +33,52 @@
 #pragma once
 
 #include <atomic>
+#include <mutex>
 
 #include "src/include/address_type.h"
 
 namespace pos
 {
+enum class SegmentState
+{
+    FREE,
+    NVRAM,
+    SSD,
+    VICTIM,
+};
+
 class SegmentInfo
 {
 public:
     SegmentInfo(void);
+    SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
     ~SegmentInfo(void);
 
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(int cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
-    virtual int32_t DecreaseValidBlockCount(uint32_t dec);
+    virtual bool DecreaseValidBlockCount(uint32_t dec);
 
     virtual void SetOccupiedStripeCount(uint32_t cnt);
     virtual uint32_t GetOccupiedStripeCount(void);
     virtual uint32_t IncreaseOccupiedStripeCount(void);
 
+    virtual SegmentState GetState(void);
+
+    virtual void MoveToNvramState(void);
+    virtual bool MoveToSsdStateOrFreeStateIfItBecomesEmpty(void);
+    virtual void MoveToVictimState(void);
+
+    virtual uint32_t GetValidBlockCountIfSsdState(void);
+
 private:
+    void _MoveToFreeState(void);
+
     std::atomic<uint32_t> validBlockCount;
     std::atomic<uint32_t> occupiedStripeCount;
+
+    std::mutex seglock;
+    SegmentState state;
 };
 
 } // namespace pos

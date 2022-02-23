@@ -431,7 +431,7 @@ TEST_F(InodeManagerFixture, CheckFileCreated1)
     std::string fileName = "TESTFILE";
     MetaFileInode inode;
     inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileName = &fileName;
+    inode.data.basic.field.fileName = fileName;
     inode.data.basic.field.fileByteSize = 100;
     inode.data.basic.field.dataChunkSize = 4032;
     inode.data.basic.field.pagemapCnt = 1;
@@ -451,7 +451,7 @@ TEST_F(InodeManagerFixture, CheckInode0)
     std::string fileName = "TESTFILE";
     MetaFileInode inode;
     inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileName = &fileName;
+    inode.data.basic.field.fileName = fileName;
     inode.data.basic.field.fileByteSize = 100;
     inode.data.basic.field.dataChunkSize = 4032;
     inode.data.basic.field.pagemapCnt = 1;
@@ -472,7 +472,7 @@ TEST_F(InodeManagerFixture, CheckInode1)
     std::string fileName = "TESTFILE";
     MetaFileInode inode;
     inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileName = &fileName;
+    inode.data.basic.field.fileName = fileName;
     inode.data.basic.field.fileByteSize = 100;
     inode.data.basic.field.dataChunkSize = 4032;
     inode.data.basic.field.pagemapCnt = 1;

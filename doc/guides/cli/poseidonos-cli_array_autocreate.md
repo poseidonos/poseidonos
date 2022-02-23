@@ -13,6 +13,7 @@ create an array with the devices in the same NUMA.
 Syntax: 
 	poseidonos-cli array autocreate (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
 	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType]
+	[--no-raid] [--no-buffer]
 
 Example: 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
@@ -28,8 +29,10 @@ poseidonos-cli array autocreate [flags]
   -a, --array-name string   The name of the array to create.
   -b, --buffer string       The name of device to be used as buffer.
   -h, --help                help for autocreate
+      --no-buffer           When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).
+  -n, --no-raid             When specified, no RAID will be applied to this array (--raid flag will be ignored).Array with no RAID can have maximum 1 data device(s).
   -d, --num-data-devs int   The number of of the data devices. POS will select the data
-                            		devices in the same NUMA as possible.
+                            devices in the same NUMA as possible.
   -s, --num-spare int       Number of devices to be used as the spare.
   -r, --raid string         The RAID type of the array to create. RAID5 is used when not specified. (default "RAID5")
 ```

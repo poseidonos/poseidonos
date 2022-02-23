@@ -31,6 +31,7 @@
  */
 
 #include "src/journal_manager/log_buffer/log_write_context.h"
+
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 
 namespace pos
@@ -89,7 +90,7 @@ LogWriteContext::SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNu
 void
 LogWriteContext::IoDone(void)
 {
-    MapPageList emptyDirtyList;
+    MapList emptyDirtyList;
     logFilledNotifier->NotifyLogFilled(GetLogGroupId(), emptyDirtyList);
 
     LogBufferIoContext::IoDone();

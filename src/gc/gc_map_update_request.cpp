@@ -44,6 +44,7 @@
 #include "src/gc/copier_meta.h"
 #include "src/gc/gc_map_update_completion.h"
 #include "src/gc/gc_stripe_manager.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/backend_event.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_completion.h"
@@ -152,7 +153,7 @@ GcMapUpdateRequest::_UpdateMeta(void)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::GC_MAP_UPDATE_FAILED;
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            "gc ma update failed, arrayName:{}, stripeUserLsid:{}",
+            "gc map update failed, arrayName:{}, stripeUserLsid:{}",
             iArrayInfo->GetName(), mapUpdates.userLsid);
         return false;
     }

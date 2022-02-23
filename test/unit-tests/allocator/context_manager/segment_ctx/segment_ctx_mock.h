@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -23,28 +24,26 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(uint32_t, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(bool, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(void, SetSegmentState, (SegmentId segId, SegmentState state, bool needlock), (override));
-    MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId, bool needlock), (override));
-    MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
-    MOCK_METHOD(SegmentInfo*, GetSegmentInfo, (), (override));
-    MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));
+    MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId), (override));
+    MOCK_METHOD(void, ResetSegmentsStates, (), (override));
     MOCK_METHOD(void, AllocateSegment, (SegmentId segId), (override));
-    MOCK_METHOD(void, ReleaseSegment, (SegmentId segId), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
-    MOCK_METHOD(SegmentId, GetUsedSegment, (SegmentId startSegId), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegment, (), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegmentWoLock, (), (override));
-    MOCK_METHOD(void, SetAllocatedSegmentCount, (int count), (override));
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
-    MOCK_METHOD(int, GetTotalSegmentsCount, (), (override));
-    MOCK_METHOD(SegmentId, FindMostInvalidSSDSegment, (), (override));
+    MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
-    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
+    MOCK_METHOD(int, SetRebuildCompleted, (SegmentId segId), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (std::set<SegmentId>& segmentList), (override));
+    MOCK_METHOD(int, StopRebuilding, (), (override));
+    MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetRebuildSegmentList, (), (override));
+    MOCK_METHOD(bool, LoadRebuildList, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
 };

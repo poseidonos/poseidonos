@@ -59,10 +59,12 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   originalMsg(nullptr),
   requestCount(0),
   fileCtx(nullptr),
+  priority(RequestPriority::Normal),
   retryFlag(false),
   error(0)
 {
     ioDone = false;
+    StoreTimestamp(IoRequestStage::Create);
 }
 
 void
@@ -85,6 +87,7 @@ MetaFsIoRequest::CopyUserReqMsg(const MetaFsIoRequest& req)
     this->ioDone = false;
     this->error = false;
     this->fileCtx = req.fileCtx;
+    this->priority = req.priority;
 
     if (MetaIoMode::Sync == req.ioMode)
     {
@@ -178,6 +181,7 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
         if (0 == requestCount)
         {
             ioDone = true;
+            StoreTimestamp(IoRequestStage::Complete);
         }
     }
 

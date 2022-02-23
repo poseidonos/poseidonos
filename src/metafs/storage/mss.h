@@ -66,12 +66,11 @@ public:
     virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
     virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) = 0;
 
-    POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
+    virtual POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
         MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid);
-    POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
+    virtual POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
 
 protected:
-
     int arrayId;
 };
 } // namespace pos

@@ -40,67 +40,154 @@
 #include "src/device/base/ublock_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/array_config.h"
-#include "src/io_scheduler/io_dispatcher.h"
 #include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
-#include "src/state/state_manager.h"
+#include "src/array/ft/raid10.h"
+#include "src/array/ft/raid5.h"
+#include "src/array/ft/raid0.h"
+#include "src/array/ft/raid_none.h"
+#include "src/helper/calc/calc.h"
 
 namespace pos
 {
-const char* PARTITION_TYPE_STR[4] = {
-    "META_NVM",
-    "WRITE_BUFFER",
-    "META_SSD",
-    "USER_DATA"};
 
 StripePartition::StripePartition(
-    string array,
-    uint32_t arrayIndex,
     PartitionType type,
-    PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
-    Method* method)
-: StripePartition(array, arrayIndex, type, physicalSize, devs, method, IODispatcherSingleton::Instance())
-{}
-
-StripePartition::StripePartition(
-    string array,
-    uint32_t arrayIndex,
-    PartitionType type,
-    PartitionPhysicalSize physicalSize,
-    vector<ArrayDevice*> devs,
-    Method* method,
-    IODispatcher* ioDispatcher)
-: Partition(array, arrayIndex, type, physicalSize, devs, method),
+    RaidTypeEnum raid)
+: Partition(devs, type),
   RebuildTarget(type),
-  ioDispatcher_(ioDispatcher)
+  raidType(raid)
 {
-    _SetLogicalSize();
 }
 
 StripePartition::~StripePartition(void)
 {
+    delete method;
+    method = nullptr;
 }
 
 int
-StripePartition::_SetLogicalSize(void)
+StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks)
 {
-    const FtSizeInfo* ftSize = nullptr;
-    ftSize = method_->GetSizeInfo();
-    if (nullptr == ftSize)
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "StripePartition::Create, RaidType:{}", RaidType(raidType).ToString());
+
+    if (raidType == RaidTypeEnum::RAID10 && 0 != devs.size() % 2)
     {
-        return -1;
+        devs.pop_back();
     }
-    logicalSize_ = {
+    int ret = _SetPhysicalAddress(startLba, segCnt);
+    if (ret != 0)
+    {
+        return ret;
+    }
+    Partition::_UpdateLastLba();
+    ret = _SetMethod(totalNvmBlks);
+    if (ret != 0)
+    {
+        return ret;
+    }
+    _SetLogicalAddress();
+    return 0;
+}
+
+void
+StripePartition::RegisterService(IPartitionServices* svc)
+{
+    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
+    svc->AddTranslator(type, this);
+    if (method->IsRecoverable() == true)
+    {
+        svc->AddRebuildTarget(this);
+        svc->AddRecover(type, this);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target", 
+            PARTITION_TYPE_STR[type], RaidType(raidType).ToString());
+    }
+}
+
+int
+StripePartition::_SetPhysicalAddress(uint64_t startLba, uint32_t segCnt)
+{
+    physicalSize.startLba = startLba;
+    physicalSize.blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
+    physicalSize.chunksPerStripe = devs.size();
+    physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
+    physicalSize.totalSegments = segCnt;
+    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}",
+        startLba, RaidType(raidType).ToString(), physicalSize.totalSegments);
+
+    return 0;
+}
+
+void
+StripePartition::_SetLogicalAddress(void)
+{
+    const FtSizeInfo* ftSize = method->GetSizeInfo();
+    logicalSize = {
         .minWriteBlkCnt = ftSize->minWriteBlkCnt,
         .blksPerChunk = ftSize->blksPerChunk,
         .blksPerStripe = ftSize->blksPerStripe - ftSize->backupBlkCnt,
         .chunksPerStripe = ftSize->chunksPerStripe -
             (ftSize->backupBlkCnt / ftSize->blksPerChunk),
-        .stripesPerSegment = physicalSize_.stripesPerSegment,
+        .stripesPerSegment = physicalSize.stripesPerSegment,
         .totalStripes =
-            physicalSize_.stripesPerSegment * physicalSize_.totalSegments,
-        .totalSegments = physicalSize_.totalSegments};
+            physicalSize.stripesPerSegment * physicalSize.totalSegments,
+        .totalSegments = physicalSize.totalSegments};
+}
+
+int
+StripePartition::_SetMethod(uint64_t totalNvmBlks)
+{
+    if (raidType == RaidTypeEnum::RAID0)
+    {
+        Raid0* raid0 = new Raid0(&physicalSize);
+        method = raid0;
+    }
+    else if (raidType == RaidTypeEnum::RAID10)
+    {
+        Raid10* raid10 = new Raid10(&physicalSize);
+        method = raid10;
+    }
+    else if (raidType == RaidTypeEnum::RAID5)
+    {
+        Raid5* raid5 = new Raid5(&physicalSize);
+        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
+        uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
+        uint64_t maxGcStripes = 2048;
+        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
+        if (raid5->AllocParityPools(totalNvmStripes + maxGcStripes) == false)
+        {
+            delete raid5;
+            int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
+            POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\". Buffer pool allocation failed.");
+            return eventId;
+        }
+        method = raid5;
+    }
+    else if (raidType == RaidTypeEnum::NONE)
+    {
+        RaidNone* raidNone = new RaidNone(&physicalSize);
+        method = raidNone;
+    }
+    else
+    {
+        int eventId = EID(ARRAY_WRONG_FT_METHOD);
+        POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
+        return eventId;
+    }
+
+    size_t numofDevs = devs.size();
+    if (method->CheckNumofDevsToConfigure(numofDevs) == false)
+    {
+        int eventId = EID(ARRAY_DEVICE_COUNT_ERROR);
+        POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, actual:{}",
+            numofDevs);
+        delete method;
+        return eventId;
+    }
     return 0;
 }
 
@@ -109,13 +196,14 @@ StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 {
     if (false == _IsValidAddress(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        POS_TRACE_ERROR(error, "Invalid Address Error");
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
+            PARTITION_TYPE_STR[type], raidType, src.stripeId, src.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
 
     FtBlkAddr fsa;
-    method_->Translate(fsa, src);
+    method->Translate(fsa, src);
 
     dst = _F2PTranslate(fsa);
 
@@ -132,10 +220,10 @@ PhysicalBlkAddr
 StripePartition::_F2PTranslate(const FtBlkAddr& fba)
 {
     PhysicalBlkAddr pba;
-    uint32_t chunkIndex = fba.offset / physicalSize_.blksPerChunk;
-    pba.arrayDev = devs_.at(chunkIndex);
-    pba.lba = physicalSize_.startLba +
-        (fba.stripeId * physicalSize_.blksPerChunk + fba.offset % physicalSize_.blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
+    uint32_t chunkIndex = fba.offset / physicalSize.blksPerChunk;
+    pba.arrayDev = devs.at(chunkIndex);
+    pba.lba = physicalSize.startLba +
+        (fba.stripeId * physicalSize.blksPerChunk + fba.offset % physicalSize.blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
 
     return pba;
 }
@@ -144,9 +232,9 @@ FtBlkAddr
 StripePartition::_P2FTranslate(const PhysicalBlkAddr& pba)
 {
     int chunkIndex = -1;
-    for (uint32_t i = 0; i < devs_.size(); i++)
+    for (uint32_t i = 0; i < devs.size(); i++)
     {
-        if (pba.arrayDev == devs_.at(i))
+        if (pba.arrayDev == devs.at(i))
         {
             chunkIndex = i;
             break;
@@ -159,11 +247,11 @@ StripePartition::_P2FTranslate(const PhysicalBlkAddr& pba)
     }
 
     uint64_t ptnBlkOffset =
-        (pba.lba - physicalSize_.startLba) / ArrayConfig::SECTORS_PER_BLOCK;
+        (pba.lba - physicalSize.startLba) / ArrayConfig::SECTORS_PER_BLOCK;
     FtBlkAddr fsa = {
-        .stripeId = (uint32_t)(ptnBlkOffset / physicalSize_.blksPerChunk),
+        .stripeId = (uint32_t)(ptnBlkOffset / physicalSize.blksPerChunk),
         .offset =
-            (chunkIndex * physicalSize_.blksPerChunk) + (ptnBlkOffset % physicalSize_.blksPerChunk)};
+            (chunkIndex * physicalSize.blksPerChunk) + (ptnBlkOffset % physicalSize.blksPerChunk)};
 
     return fsa;
 }
@@ -174,13 +262,14 @@ StripePartition::Convert(list<PhysicalWriteEntry>& dst,
 {
     if (false == _IsValidEntry(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        POS_TRACE_ERROR(error, "Invalid Address Error");
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        POS_TRACE_ERROR(error, "{} partition detects invalid address during convert. raidtype:{}, stripeId:{}, offset:{}, blkCnt:{}, totalStripes:{}, totalBlksPerStripe:{}, minWriteBlkCnt:{}",
+            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, src.blkCnt, logicalSize.totalStripes, logicalSize.blksPerStripe, logicalSize.minWriteBlkCnt);
         return error;
     }
     dst.clear();
     list<FtWriteEntry> ftEntries;
-    method_->Convert(ftEntries, src);
+    method->Convert(ftEntries, src);
     for (FtWriteEntry& ftEntry : ftEntries)
     {
         int ret = 0;
@@ -204,7 +293,7 @@ StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
 list<PhysicalBlkAddr>
 StripePartition::_GetRebuildGroup(FtBlkAddr fba)
 {
-    list<FtBlkAddr> ftAddrs = method_->GetRebuildGroup(fba);
+    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba);
     list<PhysicalBlkAddr> ret;
     for (FtBlkAddr fsa : ftAddrs)
     {
@@ -218,14 +307,14 @@ int
 StripePartition::_ConvertToPhysical(list<PhysicalWriteEntry>& dst,
     FtWriteEntry& ftEntry)
 {
-    const uint32_t chunkSize = physicalSize_.blksPerChunk;
+    const uint32_t chunkSize = physicalSize.blksPerChunk;
 
     const uint32_t firstOffset = ftEntry.addr.offset;
     const uint32_t lastOffset = firstOffset + ftEntry.blkCnt - 1;
     const uint32_t chunkStart = firstOffset / chunkSize;
     const uint32_t chunkEnd = lastOffset / chunkSize;
 
-    const uint64_t stripeLba = physicalSize_.startLba + ((uint64_t)ftEntry.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
+    const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)ftEntry.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
 
     uint32_t startOffset = firstOffset - chunkSize * chunkStart;
     uint32_t endOffset = lastOffset - chunkSize * chunkEnd;
@@ -236,7 +325,7 @@ StripePartition::_ConvertToPhysical(list<PhysicalWriteEntry>& dst,
         PhysicalWriteEntry physicalEntry;
         physicalEntry.addr = {
             .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
-            .arrayDev = devs_.at(i) };
+            .arrayDev = devs.at(i) };
         if (i != chunkEnd)
         {
             physicalEntry.blkCnt = chunkSize - startOffset;
@@ -307,7 +396,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
         FtBlkAddr fba = _P2FTranslate(originPba);
         out.srcAddr = _GetRebuildGroup(fba);
-        out.recoverFunc = method_->GetRecoverFunc();
+        out.recoverFunc = method->GetRecoverFunc();
 
         return (int)POS_EVENT_ID::SUCCESS;
     }
@@ -322,13 +411,11 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
     if (index >= 0)
     {
         unique_ptr<RebuildContext> ctx(new RebuildContext());
-        ctx->raidType = method_->GetRaidType();
-        ctx->array = arrayName_;
-        ctx->arrayIndex = arrayIndex_;
-        ctx->part = PARTITION_TYPE_STR[type_];
+        ctx->raidType = raidType;
+        ctx->part = PARTITION_TYPE_STR[type];
         ctx->faultIdx = index;
         ctx->faultDev = fault;
-        ctx->stripeCnt = logicalSize_.totalStripes;
+        ctx->stripeCnt = logicalSize.totalStripes;
         ctx->size = GetPhysicalSize();
         {
             using namespace std::placeholders;
@@ -341,12 +428,6 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
     return nullptr;
 }
 
-void
-StripePartition::Format(void)
-{
-    _Trim();
-}
-
 bool
 StripePartition::IsByteAccessSupported(void)
 {
@@ -356,125 +437,9 @@ StripePartition::IsByteAccessSupported(void)
 RaidState
 StripePartition::GetRaidState(void)
 {
-    auto&& deviceStateList = Enumerable::Select(devs_,
+    auto&& deviceStateList = Enumerable::Select(devs,
         [](auto d) { return d->GetState(); });
 
-    return method_->GetRaidState(deviceStateList);
+    return method->GetRaidState(deviceStateList);
 }
-
-void
-StripePartition::_Trim(void)
-{
-    uint32_t blkCount = GetPhysicalSize()->totalSegments *
-        GetPhysicalSize()->stripesPerSegment *
-        GetPhysicalSize()->blksPerChunk;
-    uint64_t totalUnitCount = blkCount * Ubio::UNITS_PER_BLOCK;
-    uint32_t unitCount;
-    uint64_t startLba = GetPhysicalSize()->startLba;
-    uint32_t ubioUnit = UINT32_MAX;
-    int result = 0;
-    int trimResult = 0;
-    uint8_t dummyBuffer[Ubio::BYTES_PER_UNIT];
-
-    do
-    {
-        if (totalUnitCount >= ubioUnit)
-        {
-            unitCount = ubioUnit;
-        }
-        else
-        {
-            unitCount = totalUnitCount % ubioUnit;
-        }
-
-        UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, arrayIndex_));
-        ubio->dir = UbioDir::Deallocate;
-
-        for (uint32_t i = 0; i < devs_.size(); i++)
-        {
-            if (devs_[i]->GetState() == ArrayDeviceState::FAULT)
-            {
-                continue;
-            }
-
-            PhysicalBlkAddr pba = {
-                .lba = startLba,
-                .arrayDev = devs_[i] };
-            ubio->SetPba(pba);
-            ubio->SetUblock(devs_[i]->GetUblock());
-            result = ioDispatcher_->Submit(ubio, true);
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
-                "Try to trim from {} for {} on {}",
-                pba.lba, unitCount, devs_[i]->GetUblock()->GetName());
-
-            if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
-            {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
-                    "Trim Failed on {}", devs_[i]->GetUblock()->GetName());
-                trimResult = 1;
-            }
-        }
-
-        totalUnitCount -= unitCount;
-        startLba += unitCount;
-    } while (totalUnitCount != 0);
-
-    if (trimResult == 0)
-    {
-        result = _CheckTrimValue();
-
-        if (result == 0)
-        {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
-                "Trim Succeeded from {} ", startLba);
-        }
-        else
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
-                "Trim Succeeded with wrong value from {}", startLba);
-            // To Do : Write All Zeroes
-        }
-    }
-    else
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM, "Trim Failed on some devices");
-        // To Do : Write All Zeroes
-    }
-}
-
-int
-StripePartition::_CheckTrimValue(void)
-{
-    uint64_t startLba = GetPhysicalSize()->startLba;
-    uint64_t readUnitCount = 1;
-    void* readbuffer = Memory<Ubio::BYTES_PER_UNIT>::Alloc(readUnitCount);
-    void* zerobuffer = Memory<Ubio::BYTES_PER_UNIT>::Alloc(readUnitCount);
-    memset(zerobuffer, 0, Ubio::BYTES_PER_UNIT);
-    int result = 0;
-    int nonZeroResult = 0;
-
-    UbioSmartPtr readUbio(new Ubio(readbuffer, readUnitCount, arrayIndex_));
-    for (uint32_t i = 0; i < devs_.size(); i++)
-    {
-        PhysicalBlkAddr pba = {
-            .lba = startLba,
-            .arrayDev = devs_[i] };
-        readUbio->SetPba(pba);
-        ioDispatcher_->Submit(readUbio, true);
-        result = memcmp(readUbio->GetBuffer(), zerobuffer, Ubio::BYTES_PER_UNIT);
-
-        if (result != 0)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
-                "Trim Value is not Zero on {}", devs_[i]->GetUblock()->GetName());
-            nonZeroResult = 1;
-        }
-    }
-
-    Memory<Ubio::BYTES_PER_UNIT>::Free(readbuffer);
-    Memory<Ubio::BYTES_PER_UNIT>::Free(zerobuffer);
-
-    return nonZeroResult;
-}
-
 } // namespace pos

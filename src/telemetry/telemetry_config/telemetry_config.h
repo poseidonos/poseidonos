@@ -34,6 +34,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include "src/lib/singleton.h"
 #include "src/master_context/default_configuration.h"
@@ -48,62 +49,36 @@ namespace pos
 class TelemetryConfig
 {
 public:
-    TelemetryConfig(std::string path = "", std::string fileName = "");
+    TelemetryConfig(const std::string& path = "", const std::string& fileName = "");
     virtual ~TelemetryConfig(void);
 
-    virtual bool Register(TelemetryConfigType type, std::string key, ConfigObserver* observer);
-    virtual bool RequestToNotify(TelemetryConfigType type, std::string key, std::string value);
-
-    virtual ClientConfig& GetClient(void)
-    {
-        return fileReader->GetClient();
-    }
-
-    virtual ServerConfig& GetServer(void)
-    {
-        return fileReader->GetServer();
-    }
-
-    virtual std::string ConfigurationDir(void)
-    {
-        DefaultConfiguration conf;
-        return conf.ConfigurationDir();
-    }
-
-    virtual std::string ConfigurationFileName(void)
-    {
-        return TelemetryConfig::CONFIGURATION_NAME;
-    }
-
-    virtual void CreateFile(std::string path, std::string fileName);
-    virtual void RemoveFile(std::string path, std::string fileName);
-    virtual std::string GetKey(TelemetryConfigType type, std::string key);
+    virtual bool Register(const TelemetryConfigType type, const std::string& key, std::shared_ptr<ConfigObserver> observer);
+    virtual void RequestToNotify(const TelemetryConfigType type, const std::string& key, const std::string& value);
+    virtual ClientConfig& GetClient(void);
+    virtual const std::string ConfigurationFileName(void) const;
+    virtual const std::string GetCompositeKey(const TelemetryConfigType type, const std::string& key);
 
     // only for test
-    std::map<ConfigPriority, ConfigReader*>& GetReadersMap(void)
+    std::map<ConfigPriority, std::shared_ptr<ConfigReader>>& GetReadersMap(void)
     {
         return readers;
     }
 
     // only for test
-    std::multimap<std::string, ConfigObserver*>& GetObserversMap(void)
+    std::multimap<std::string, std::shared_ptr<ConfigObserver>>& GetObserversMap(void)
     {
         return observers;
     }
 
 private:
-    bool _Find(std::string key, ConfigObserver* observer);
-
-    CliConfigReader* cliReader = nullptr;
-    EnvVariableConfigReader* envReader = nullptr;
-    FileConfigReader* fileReader = nullptr;
+    bool _Find(const std::string& key, const std::shared_ptr<ConfigObserver> observer);
 
     const std::string CONFIGURATION_NAME = "telemetry_default.yaml";
 
     // priority to reader
-    std::map<ConfigPriority, ConfigReader*> readers;
+    std::map<ConfigPriority, std::shared_ptr<ConfigReader>> readers;
     // key to observer
-    std::multimap<std::string, ConfigObserver*> observers;
+    std::multimap<std::string, std::shared_ptr<ConfigObserver>> observers;
 };
 
 using TelemetryConfigSingleton = Singleton<TelemetryConfig>;

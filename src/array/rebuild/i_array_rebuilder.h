@@ -44,8 +44,8 @@ namespace pos
 class IArrayRebuilder
 {
 public:
-    virtual void Rebuild(string array, ArrayDevice* dev, RebuildComplete cb,
-                        list<RebuildTarget*>& tgt) = 0;
+    virtual void Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
+                        RebuildComplete cb, list<RebuildTarget*>& tgt) = 0;
     virtual void StopRebuild(string array) = 0;
     virtual void RebuildDone(RebuildResult result) = 0;
     virtual void WaitRebuildDone(string array) = 0;

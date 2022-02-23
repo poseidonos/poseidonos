@@ -146,7 +146,7 @@ TEST_F(LogWriteIntegrationTest, WriteLogs)
     writeTester->CompareLogs();
 }
 
-TEST_F(LogWriteIntegrationTest, PendLogWrite)
+TEST_F(LogWriteIntegrationTest, DISABLED_PendLogWrite)
 {
     POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::PendLogWrite");
 

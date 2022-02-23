@@ -48,11 +48,9 @@ enum class MioState
     Max,
 };
 
-#define MioMax static_cast<int>(MioState::Max)
-
 enum class MpAioState
 {
-    First = MioMax,
+    First = static_cast<int>(MioState::Max),
     Init = First,
     Ready,
     Read,
@@ -66,5 +64,36 @@ enum class MpAioState
     Complete,
     Last = Complete,
     Max,
+};
+
+enum class MioTimestampStage
+{
+    Allocate,
+    Initialize,
+    Issue,
+    Enqueue,
+    Dequeue,
+    Complete,
+    Release,
+    Count
+};
+
+enum class MpioTimestampStage
+{
+    Allocate,
+    Initialize,
+    Ready,
+    Read,
+    CheckReadStatus,
+
+    MergeData,
+    PrepareWrite,
+    Write,
+
+    Complete,
+    Enqueue,
+    Dequeue,
+    Release,
+    Count
 };
 } // namespace pos

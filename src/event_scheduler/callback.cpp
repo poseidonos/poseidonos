@@ -42,13 +42,16 @@
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
 #include "src/dump/dump_buffer.h"
+#include "src/signal_handler/user_signal_interface.h"
 
 namespace pos
 {
 
 const uint32_t Callback::CALLER_FRAME = 0;
 // 30 sec, default timeout
-const uint64_t Callback::DEFAULT_TIMEOUT_NS = 30ULL * 1000 * 1000 * 1000;
+const uint64_t Callback::DEFAULT_TIMEOUT_NS = 5ULL * 1000 * 1000 * 1000;
+const uint64_t Callback::MAX_TIMEOUT_SEC = 120ULL;
+uint64_t Callback::timeoutNs = Callback::DEFAULT_TIMEOUT_NS;
 static const char* DUMP_NAME = "Callback_Error";
 static const bool DEFAULT_DUMP_ON = true;
 
@@ -77,7 +80,7 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
         if (nullptr == timeoutChecker)
         {
             timeoutChecker = new SystemTimeoutChecker;
-            timeoutChecker->SetTimeout(DEFAULT_TIMEOUT_NS);
+            timeoutChecker->SetTimeout(timeoutNs);
         }
     }
 }
@@ -134,6 +137,19 @@ Callback::~Callback(void)
     }
 }
 // LCOV_EXCL_STOP
+
+void
+Callback::SetTimeout(uint64_t timeoutSec)
+{
+    if (timeoutSec > MAX_TIMEOUT_SEC)
+    {
+        timeoutSec = MAX_TIMEOUT_SEC;
+    }
+    if (timeoutSec != 0)
+    {
+        timeoutNs = timeoutSec * 1000ULL * 1000ULL * 1000ULL;
+    }
+}
 
 bool
 Callback::Execute(void)

@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef METHOD_H_
-#define METHOD_H_
+#pragma once
 
 #include <list>
 #include <vector>
@@ -41,6 +40,7 @@
 #include "src/include/raid_type.h"
 #include "src/include/raid_state.h"
 #include "src/include/array_device_state.h"
+#include "src/array_models/dto/partition_physical_size.h"
 
 using namespace std;
 
@@ -58,7 +58,8 @@ struct FtSizeInfo
 class Method
 {
 public:
-    Method()
+    explicit Method(RaidTypeEnum rt)
+    : raidType(rt)
     {
     }
 // LCOV_EXCL_START
@@ -67,24 +68,23 @@ public:
     }
 // LCOV_EXCL_STOP
 
-    RecoverFunc& GetRecoverFunc(void);
-    const FtSizeInfo* GetSizeInfo(void);
-
+    const FtSizeInfo* GetSizeInfo(void) { return &ftSize_; }
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
-    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) = 0;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
-    RaidType GetRaidType(void);
+    virtual bool CheckNumofDevsToConfigure(uint32_t numofDevs) = 0;
+    RaidTypeEnum GetRaidType(void) { return raidType; }
+    RecoverFunc& GetRecoverFunc(void) { return recoverFunc; }
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) { return list<FtBlkAddr>(); }
+    virtual vector<uint32_t> GetParityOffset(StripeId lsid) { return vector<uint32_t>(); }
+    virtual bool IsRecoverable(void) { return true; }
 
 protected:
-    virtual void _BindRecoverFunc(void) = 0;
-
     FtSizeInfo ftSize_ = {
         0,
     };
-    RecoverFunc recoverFunc_ = nullptr;
-    RaidType raidType;
+    RaidTypeEnum raidType;
+    RecoverFunc recoverFunc = nullptr;
 };
 
 } // namespace pos
-#endif // METHOD_H_

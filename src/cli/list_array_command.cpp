@@ -38,6 +38,8 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
 #include "src/mbr/mbr_info.h"
+#include "src/sys_info/space_info.h"
+
 namespace pos_cli
 {
 ListArrayCommand::ListArrayCommand(void)
@@ -88,26 +90,41 @@ ListArrayCommand::Execute(json& doc, string rid)
             string createDatetime(abr.createDatetime);
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
+
             ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
-            if (CompInfo != nullptr && CompInfo->arrayInfo != nullptr)
+            if (CompInfo == nullptr)
             {
-                IArrayInfo* info = CompInfo->arrayInfo;
+                POS_TRACE_ERROR(EID(ARRAY_GET_COMPONENTS_FAILURE),
+                    "Failed to list array"
+                    " because of failing to get componentsInfo"
+                    " with given array name. ArrayName: {}", arrayName);
+
+                return jFormat.MakeResponse("LISTARRAY", rid,
+                    EID(ARRAY_GET_COMPONENTS_FAILURE),
+                    "Failed to list array", data, GetPosInfo());
+            }
+            IArrayInfo* info = CompInfo->arrayInfo;
+            if (info == nullptr)
+            {
+                arrayStatus = "Fault";
+                arrayElement.SetAttribute(JsonAttribute("index", ARRAY_ERROR_INDEX));
+            }
+            else
+            {
                 if (info->GetState() >= ArrayStateEnum::NORMAL)
                 {
                     arrayStatus = "Mounted";
                 }
                 arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
-            }
-            else
-            {
-                arrayStatus = "Fault";
-                arrayElement.SetAttribute(JsonAttribute("index", ARRAY_ERROR_INDEX));
+                arrayElement.SetAttribute(JsonAttribute("data_raid", "\"" + info->GetDataRaidType() + "\""));
             }
 
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
-            arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
-            arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
+            arrayElement.SetAttribute(JsonAttribute("create_datetime", "\"" + createDatetime + "\""));
+            arrayElement.SetAttribute(JsonAttribute("update_datetime", "\"" + updateDatetime + "\""));
+            arrayElement.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
+            arrayElement.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
             jsonArrayList.AddElement(arrayElement);
         }
         data.SetArray(jsonArrayList);

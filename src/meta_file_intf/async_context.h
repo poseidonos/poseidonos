@@ -52,19 +52,26 @@ public:
 // LCOV_EXCL_STOP
 
     virtual void HandleIoComplete(void* data);
-    virtual int GetError(void);
-    virtual uint64_t GetLength(void);
+    virtual int GetError(void) const;
+    virtual uint64_t GetLength(void) const;
 
-    MetaFsIoOpcode opcode = MetaFsIoOpcode::Write;
-    int fd = -1;
-    uint64_t fileOffset = 0;
-    uint64_t length = 0;
-    char* buffer = nullptr;
-    MetaIoCbPtr callback = nullptr;
+    virtual void SetTopPriority(void);
+    virtual void ClearTopPriority(void);
+    virtual bool IsTopPriority(void) const;
+    virtual void SetPriority(const RequestPriority p);
+    virtual RequestPriority GetPriority(void) const;
 
-    int error = 0;
-    MetaFileIoCbPtr ioDoneCheckCallback = nullptr;
-    uint32_t vsid = 0;
+    MetaFsIoOpcode opcode;
+    int fd;
+    uint64_t fileOffset;
+    uint64_t length;
+    char* buffer;
+    MetaIoCbPtr callback;
+
+    int error;
+    MetaFileIoCbPtr ioDoneCheckCallback;
+    uint32_t vsid;
+    RequestPriority priority;
 };
 
 } // namespace pos

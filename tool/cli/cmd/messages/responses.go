@@ -73,17 +73,20 @@ type ArrayInfoResult struct {
 // The commands will be merged and this should be revised.
 type Array struct {
 	ARRAYINDEX         int      `json:"index"`
+	UNIQUEID           int      `json:"unique_id"`
 	ARRAYNAME          string   `json:"name"`
-	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
 	STATUS             string   `json:"status,omitempty"`
-	UPDATEDATETIME     string   `json:"updateDatetime,omitempty"`
-	SITUATION          string   `json:situation,omitempty"`
-	STATE              string   `json:state,omitempty"`
-	REBUILDINGPROGRESS int      `json:rebuilding_progress,omitempty"`
-	CAPACITY           uint64   `json:capacity,omitempty"`
-	USED               uint64   `json:used,omitempty"`
+	STATE              string   `json:"state,omitempty"`
+	SITUATION          string   `json:"situation,omitempty"`
+	CREATEDATETIME     string   `json:"create_datetime,omitempty"`
+	UPDATEDATETIME     string   `json:"update_datetime,omitempty"`
+	REBUILDINGPROGRESS int      `json:"rebuilding_progress,omitempty"`
+	CAPACITY           uint64   `json:"capacity,omitempty"`
+	USED               uint64   `json:"used,omitempty"`
+	GCMODE             string   `json:"gc_mode,omitempty"`
+	METARAID           string   `json:"meta_raid,omitempty"`
+	DATARAID           string   `json:"data_raid,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
-	GCMODE             string   `json:gcMode,omitempty"`
 }
 
 type Device struct {
@@ -119,6 +122,7 @@ type LoggerInfoResData struct {
 	FILTERENABLED        int    `json:"filter_enabled"`
 	FILTERINCLUDED       string `json:"filter_included"`
 	FILTEREXCLUDED       string `json:"filter_excluded"`
+	STRUCTUREDLOGGING    bool   `json:"structured_logging"`
 }
 
 // Response for GETLOGLEVEL command
@@ -140,47 +144,60 @@ type GetLogLevelResData struct {
 
 // Response for SMART command
 type SMARTLOGResponse struct {
-	RID     string      	`json:"rid"`
-	COMMAND string      	`json:"command"`
-	RESULT  SMARTLOGResult 	`json:"result,omitempty"`
-	INFO    Info      		`json:"info"`
+	RID     string         `json:"rid"`
+	COMMAND string         `json:"command"`
+	RESULT  SMARTLOGResult `json:"result,omitempty"`
+	INFO    Info           `json:"info"`
 }
 
 type SMARTLOGResult struct {
-	STATUS Status       `json:"status,omitempty"`
-	DATA   SMARTLog 	`json:"data,omitempty"`
+	STATUS Status   `json:"status,omitempty"`
+	DATA   SMARTLog `json:"data,omitempty"`
 }
 
 type SMARTLog struct {
-	AVAILABLESPARESPACE 	string `json:"available_spare_space"`
-	TEMPERATURE    			string `json:"temperature"`
-	DEVICERELIABILITY   	string `json:"device_reliability"`
-	READONLY   				string `json:"read_only"`
-	VOLATILEMEMORYBACKUP   	string `json:"volatile_memory_backup"`
-	CURRENTTEMPERATURE   	string `json:"current_temperature"`
-	AVAILABLESPARE   		string `json:"available_spare"`
-	AVAILABLESPARETHRESHOLD	string `json:"available_spare_threshold"`
-	LIFEPERCENTAGEUSED   	string `json:"life_percentage_used"`
-	DATAUNITSREAD   		string `json:"data_units_read"`
-	DATAUNITSWRITTEN   		string `json:"data_units_written"`
-	HOSTREADCOMMANDS   		string `json:"host_read_commands"`
-	HOSTWRITECOMMANDS   	string `json:"host_write_commands"`
-	CONTROLLERBUSYTIME   	string `json:"controller_busy_time"`
-	POWERCYCLES   			string `json:"power_cycles"`
-	POWERONHOURS   			string `json:"power_on_hours"`
-	UNSAFESHUTDOWNS   		string `json:"unsafe_shutdowns"`
+	AVAILABLESPARESPACE     string `json:"available_spare_space"`
+	TEMPERATURE             string `json:"temperature"`
+	DEVICERELIABILITY       string `json:"device_reliability"`
+	READONLY                string `json:"read_only"`
+	VOLATILEMEMORYBACKUP    string `json:"volatile_memory_backup"`
+	CURRENTTEMPERATURE      string `json:"current_temperature"`
+	AVAILABLESPARE          string `json:"available_spare"`
+	AVAILABLESPARETHRESHOLD string `json:"available_spare_threshold"`
+	LIFEPERCENTAGEUSED      string `json:"life_percentage_used"`
+	DATAUNITSREAD           string `json:"data_units_read"`
+	DATAUNITSWRITTEN        string `json:"data_units_written"`
+	HOSTREADCOMMANDS        string `json:"host_read_commands"`
+	HOSTWRITECOMMANDS       string `json:"host_write_commands"`
+	CONTROLLERBUSYTIME      string `json:"controller_busy_time"`
+	POWERCYCLES             string `json:"power_cycles"`
+	POWERONHOURS            string `json:"power_on_hours"`
+	UNSAFESHUTDOWNS         string `json:"unsafe_shutdowns"`
 	UNRECOVERABLEMEDIAERROS string `json:"unrecoverable_media_errors"`
 	LIFETIMEERRORLOGENTRIES string `json:"lifetime_error_log_entries"`
 	WARNINGTEMPERATURETIME  string `json:"warning_temperature_time"`
-	CRITICALTEMPERATURETIME string `json:"critical_temperature_time"`		
-	TEMPERATURESENSOR1		string `json:"temperature_sensor1,omitempty"`
-	TEMPERATURESENSOR2		string `json:"temperature_sensor2,omitempty"`
-	TEMPERATURESENSOR3		string `json:"temperature_sensor3,omitempty"`
-	TEMPERATURESENSOR4		string `json:"temperature_sensor4,omitempty"`
-	TEMPERATURESENSOR5		string `json:"temperature_sensor5,omitempty"`
-	TEMPERATURESENSOR6		string `json:"temperature_sensor6,omitempty"`
-	TEMPERATURESENSOR7		string `json:"temperature_sensor7,omitempty"`
-	TEMPERATURESENSOR8		string `json:"temperature_sensor8,omitempty"`
+	CRITICALTEMPERATURETIME string `json:"critical_temperature_time"`
+	TEMPERATURESENSOR1      string `json:"temperature_sensor1,omitempty"`
+	TEMPERATURESENSOR2      string `json:"temperature_sensor2,omitempty"`
+	TEMPERATURESENSOR3      string `json:"temperature_sensor3,omitempty"`
+	TEMPERATURESENSOR4      string `json:"temperature_sensor4,omitempty"`
+	TEMPERATURESENSOR5      string `json:"temperature_sensor5,omitempty"`
+	TEMPERATURESENSOR6      string `json:"temperature_sensor6,omitempty"`
+	TEMPERATURESENSOR7      string `json:"temperature_sensor7,omitempty"`
+	TEMPERATURESENSOR8      string `json:"temperature_sensor8,omitempty"`
+}
+
+// Response for VOLUMEINFO command
+type VolumeInfoResponse struct {
+	RID     string           `json:"rid"`
+	COMMAND string           `json:"command"`
+	RESULT  VolumeInfoResult `json:"result,omitempty"`
+	INFO    Info             `json:"info,omitempty"`
+}
+
+type VolumeInfoResult struct {
+	STATUS Status `json:"status,omitempty"`
+	DATA   Volume `json:"data,omitempty"`
 }
 
 // Response for LISTVOLUME command
@@ -203,7 +220,7 @@ type ListVolumeResData struct {
 
 type Volume struct {
 	VOLUMENAME string `json:"name"`
-	VOLUMEID   int    `json:"id"`
+	VOLUMEID   int    `json:"id,omitempty"`
 	TOTAL      uint64 `json:"total"`
 	REMAIN     uint64 `json:"remain"`
 	STATUS     string `json:"status"`
@@ -211,6 +228,9 @@ type Volume struct {
 	MAXBW      int    `json:"maxbw"`
 	MINIOPS    int    `json:"miniops"`
 	MINBW      int    `json:"minbw"`
+	SUBNQN     string `json:"subnqn,omitempty"`
+	UUID       string `json:"uuid,omitempty"`
+	ARRAYNAME  string `json:"array_name,omitempty"`
 }
 
 // Response for LISTDEVICE Command

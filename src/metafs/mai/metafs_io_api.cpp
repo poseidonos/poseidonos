@@ -44,10 +44,11 @@ MetaFsIoApi::MetaFsIoApi(void)
 }
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
-            MetaStorageSubsystem* storage, MetaIoManager* io)
+            MetaStorageSubsystem* storage, TelemetryPublisher* tp, MetaIoManager* io)
 {
     this->arrayId = arrayId;
     ctrlMgr = ctrl;
+    telemetryPublisher = tp;
     ioMgr = (nullptr == io) ? new MetaIoManager(storage) : io;
 }
 
@@ -73,6 +74,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = RequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -86,6 +88,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
     }
 
     return rc;
@@ -111,6 +114,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = RequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -124,6 +128,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, byteSize);
     }
 
     return rc;
@@ -146,6 +151,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = RequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -159,6 +165,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
     }
 
     return rc;
@@ -184,6 +191,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = RequestPriority::Normal;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -197,6 +205,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, fd, byteSize);
     }
 
     return rc;
@@ -224,6 +233,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
     reqMsg.aiocb = cxt;
     reqMsg.tagId = cxt->tagId;
     reqMsg.targetMediaType = mediaType;
+    reqMsg.priority = cxt->GetPriority();
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -240,6 +250,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
             "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
 
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, reqMsg.fd, reqMsg.byteSize);
     }
 
     return rc;
@@ -361,5 +372,30 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
         }
     }
     return rc;
+}
+
+void
+MetaFsIoApi::_SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize)
+{
+    std::string thread_name = std::to_string(sched_getcpu());
+    std::string io_type = (ioType == MetaIoRequestType::Read) ? "read" : "write";
+    std::string array_id = std::to_string(arrayId);
+    std::string file_descriptor = std::to_string(fd);
+
+    POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_COUNT);
+    metric.AddLabel("thread_name", thread_name);
+    metric.AddLabel("io_type", io_type);
+    metric.AddLabel("array_id", array_id);
+    metric.AddLabel("fd", file_descriptor);
+    metric.SetCountValue(byteSize);
+    telemetryPublisher->PublishMetric(metric);
+
+    POSMetric metricCnt(TEL40011_METAFS_USER_REQUEST_CNT, POSMetricTypes::MT_COUNT);
+    metricCnt.AddLabel("thread_name", thread_name);
+    metricCnt.AddLabel("io_type", io_type);
+    metricCnt.AddLabel("array_id", array_id);
+    metricCnt.AddLabel("fd", file_descriptor);
+    metricCnt.SetCountValue(1);
+    telemetryPublisher->PublishMetric(metric);
 }
 } // namespace pos

@@ -40,10 +40,10 @@ poseidonos-cli volume [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli volume create](poseidonos-cli_volume_create.md)	 - Create a volume from an array in PoseidonOS.
 * [poseidonos-cli volume delete](poseidonos-cli_volume_delete.md)	 - Delete a volume from PoseidonOS.
-* [poseidonos-cli volume list](poseidonos-cli_volume_list.md)	 - List all volumes of an array.
+* [poseidonos-cli volume list](poseidonos-cli_volume_list.md)	 - List volumes of an array or display information of a volume.
 * [poseidonos-cli volume mount](poseidonos-cli_volume_mount.md)	 - Mount a volume to the host.
 * [poseidonos-cli volume mount-with-subsystem](poseidonos-cli_volume_mount-with-subsystem.md)	 - Create a subsystem and add listener automatically. Mount a volume to Host.
 * [poseidonos-cli volume rename](poseidonos-cli_volume_rename.md)	 - Rename a volume of PoseidonOS.

@@ -32,8 +32,6 @@
 
 #include "partition_rebuild.h"
 #include "rebuilder.h"
-#include "raid1_rebuild.h"
-#include "raid5_rebuild.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"

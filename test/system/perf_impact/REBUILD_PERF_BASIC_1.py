@@ -172,8 +172,12 @@ def write_log(_log):
 
 def start_pos():
     write_log ("starting pos...")
-    pos.start_pos()
-    write_log ("pos is running")
+    ret = pos.start_pos()
+    if ret is False:
+        write_log("faild to start pos")
+        return False
+    write_log("pos is running")
+    return True
 
 def kill_pos():
     write_log ("killing pos...")
@@ -370,12 +374,14 @@ def execute(ip_addr, perf_impact):
     write_log("PERF IMPACT: " + perf_impact)
     print_time()
     pos_util.kill_process("poseidonos")
-    start_pos()
+    ret = start_pos()
+    if ret is False:
+        write_log("TEST FAILED WHILE INITIALIZATION")
+        kill_pos()
     ret = do_event(0)
     if ret == True:
         t = TestTimer(SECONDS_PER_MINUTE, timer_tick)
         t.start()
-        
     else:
         write_log ("TEST FAILED WHILE INITIALIZATION")
         kill_pos()

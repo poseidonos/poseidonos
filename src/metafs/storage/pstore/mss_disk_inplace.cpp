@@ -40,7 +40,7 @@ namespace pos
 MssDiskInplace::MssDiskInplace(void)
 {
     mediaType = MetaStorageType::Max;
-    partitionType = PartitionType::PARTITION_TYPE_MAX;
+    partitionType = PartitionType::TYPE_COUNT;
     array = nullptr;
 }
 

@@ -2,6 +2,8 @@ package arraycmds
 
 import (
 	"encoding/json"
+	"errors"
+	"strconv"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -24,6 +26,7 @@ create an array with the devices in the same NUMA.
 Syntax: 
 	poseidonos-cli array autocreate (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
 	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType]
+	[--no-raid] [--no-buffer]
 
 Example: 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
@@ -33,7 +36,12 @@ Example:
 
 		var command = "AUTOCREATEARRAY"
 
-		req := buildAutoCreateArrayReq(command)
+		req, err := buildAutoCreateArrayReq(command)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
@@ -58,35 +66,53 @@ Example:
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildAutoCreateArrayReq(command string) messages.Request {
+func buildAutoCreateArrayReq(command string) (messages.Request, error) {
 
-	// Assume that at most one device is used as a buffer.
-	var buffer [1]messages.DeviceNameList
-	buffer[0].DEVICENAME = autocreate_array_buffer
+	req := messages.Request{}
+
+	if autocreate_array_isNoRaid == true {
+		if autocreate_array_numDataDevs > maxNumDataDevsNoRaid {
+			err := errors.New(`array with no RAID can have maximum ` +
+				strconv.Itoa(maxNumDataDevsNoRaid) + ` data device(s).`)
+			return req, err
+		}
+		autocreate_array_raid = "NONE"
+	}
+
+	if (autocreate_array_isNoBuffer == false) && (autocreate_array_bufferDevsList == "") {
+		err := errors.New("no buffer is specified.")
+		return req, err
+	}
+
+	bufferList := parseDevList(autocreate_array_bufferDevsList)
 
 	param := messages.AutocreateArrayParam{
 		ARRAYNAME:    autocreate_array_arrayName,
 		RAID:         autocreate_array_raid,
-		BUFFER:       buffer,
-		NUMDATADEVS:  autocreate_array_dataDevs,
-		NUMSPAREDEVS: autocreate_array_spare,
+		BUFFER:       bufferList,
+		NUMDATADEVS:  autocreate_array_numDataDevs,
+		NUMSPAREDEVS: autocreate_array_numSpareDevs,
 	}
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.BuildReqWithParam(command, uuid, param)
+	req = messages.BuildReqWithParam(command, uuid, param)
 
-	return req
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var autocreate_array_arrayName = ""
-var autocreate_array_raid = ""
-var autocreate_array_buffer = ""
-var autocreate_array_spare = 0
-var autocreate_array_dataDevs = 0
+var (
+	autocreate_array_arrayName      = ""
+	autocreate_array_raid           = ""
+	autocreate_array_bufferDevsList = ""
+	autocreate_array_numDataDevs    = 0
+	autocreate_array_numSpareDevs   = 0
+	autocreate_array_isNoRaid       = false
+	autocreate_array_isNoBuffer     = false
+)
 
 func init() {
 	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_arrayName,
@@ -94,22 +120,30 @@ func init() {
 		"The name of the array to create.")
 	AutocreateArrayCmd.MarkFlagRequired("array-name")
 
-	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_dataDevs,
+	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_numDataDevs,
 		"num-data-devs", "d", 0,
 		`The number of of the data devices. POS will select the data
-		devices in the same NUMA as possible.`)
+devices in the same NUMA as possible.`)
 	AutocreateArrayCmd.MarkFlagRequired("data-devs")
 
-	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_spare,
+	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_numSpareDevs,
 		"num-spare", "s", 0,
 		"Number of devices to be used as the spare.")
 
-	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_buffer,
+	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_bufferDevsList,
 		"buffer", "b", "", "The name of device to be used as buffer.")
-	AutocreateArrayCmd.MarkFlagRequired("buffer")
 
 	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_raid,
 		"raid", "r", "RAID5",
 		"The RAID type of the array to create. RAID5 is used when not specified.")
+
+	AutocreateArrayCmd.Flags().BoolVarP(&autocreate_array_isNoRaid,
+		"no-raid", "n", false,
+		`When specified, no RAID will be applied to this array (--raid flag will be ignored).`+
+			`Array with no RAID can have maximum `+strconv.Itoa(maxNumDataDevsNoRaid)+` data device(s).`)
+
+	AutocreateArrayCmd.Flags().BoolVarP(&autocreate_array_isNoBuffer,
+		"no-buffer", "", false,
+		`When specified, no write buffer will be allocated to this array (--buffer flag will be ignored).`)
 
 }

@@ -20,6 +20,10 @@ class Fio:
         self.result_data.append({"title": "write_clat_99.9th", "index": [], "value": []})
         self.result_data.append({"title": "write_clat_99.99th", "index": [], "value": []})
         self.result_data.append({"title": "write_clat_max", "index": [], "value": []})
+        self.log_data = {}
+        self.log_data["bw"] = {}
+        self.log_data["iops"] = {}
+        self.log_data["clat"] = {}
 
     def AddEtaData(self, file, title):
         graph.fio_parser.GetEtaData(self.eta_data, file, title)
@@ -32,3 +36,27 @@ class Fio:
 
     def DrawResult(self):
         graph.draw.DrawResult(self.result_data, self.pic_name)
+
+    def AddLogData(self, dir, filename):
+        graph.fio_parser.GetLogData(self.log_data, dir, filename)
+
+    def DrawLog(self, filepath_name):
+        graph.draw.DrawLog(self.log_data, filepath_name)
+
+    def ClearLogData(self):
+        for data_type in self.log_data:
+            for job in self.log_data[data_type]:
+                self.log_data[data_type][job]["read"]["x"].clear()
+                self.log_data[data_type][job]["read"]["y"].clear()
+                self.log_data[data_type][job]["write"]["x"].clear()
+                self.log_data[data_type][job]["write"]["y"].clear()
+                self.log_data[data_type][job]["read"].clear()
+                self.log_data[data_type][job]["write"].clear()
+                self.log_data[data_type][job].clear()
+            self.log_data[data_type].clear()
+        self.log_data.clear()
+
+        self.log_data = {}
+        self.log_data["bw"] = {}
+        self.log_data["iops"] = {}
+        self.log_data["clat"] = {}

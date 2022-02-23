@@ -84,8 +84,8 @@ IOLocker::Unregister(vector<ArrayDevice*> devList)
     }
     group.RemoveDevice(devList);
     size_t newSize = lockers.size();
-    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unregister, {} devs removed, size: {} -> {}",
-        devList.size(), prevSize, newSize);
+    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unregister, size: {} -> {}",
+        prevSize, newSize);
 }
 
 bool
@@ -94,8 +94,6 @@ IOLocker::TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to)
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        // TODO(SRM) expect a path that will not be reached
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryBusyLock, no locker exists");
         return true;
     }
 
@@ -111,8 +109,6 @@ IOLocker::TryLock(set<IArrayDevice*>& devs, StripeId val)
         StripeLocker* locker = _Find(d);
         if (locker == nullptr)
         {
-            // TODO(SRM) expect a path that will not be reached
-            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
             return true;
         }
         lockersByGroup.insert(locker);
@@ -147,11 +143,6 @@ IOLocker::Unlock(IArrayDevice* dev, StripeId val)
     {
         locker->Unlock(val);
     }
-    else
-    {
-        // TODO(SRM) expect a path that will not be reached
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unlock, no locker exists");
-    }
 }
 
 void
@@ -161,12 +152,10 @@ IOLocker::Unlock(set<IArrayDevice*>& devs, StripeId val)
     for (IArrayDevice* d : devs)
     {
         StripeLocker* locker = _Find(d);
-        if (locker == nullptr)
+        if (locker != nullptr)
         {
-            // TODO(SRM) expect a path that will not be reached
-            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unlock, no locker exists");
+            lockersByGroup.insert(locker);
         }
-        lockersByGroup.insert(locker);
     }
     for (StripeLocker* locker : lockersByGroup)
     {
@@ -180,11 +169,8 @@ IOLocker::ResetBusyLock(IArrayDevice* dev)
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        // TODO(SRM) expect a path that will not be reached
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::ResetBusyLock, no locker exists");
         return true;
     }
-
     return locker->ResetBusyLock();
 }
 

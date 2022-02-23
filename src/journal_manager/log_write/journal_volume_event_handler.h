@@ -68,6 +68,7 @@ public:
     virtual void MetaFlushed(void) override;
 
     virtual void VolumeDeletedLogWriteDone(int volumeId);
+    virtual void RetryVolumeDeletedLogWrite(int volumeId, uint64_t segCtxVersion);
 
 private:
     int _WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion);

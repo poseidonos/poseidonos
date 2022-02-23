@@ -26,10 +26,15 @@ def execute():
     fio.wait_fio(fio_proc)
     api.detach_ssd_and_attach(DETACH_TARGET_DEV)
     code = -1
+    retry = 0
+    maxRetry = 20
     while code != 0:
-            out = cli.add_device(FIRST_SPARE, ARRAYNAME)
-            code = json_parser.get_response_code(out)
-            print ("add spare response: " + str(code))
+        retry = retry + 1
+        if retry is maxRetry:
+            return "fail"
+        out = cli.add_device(FIRST_SPARE, ARRAYNAME)
+        code = json_parser.get_response_code(out)
+        print("add spare, try: " + str(retry) + "response: " + str(code))
     print(FIRST_SPARE + " is added as a spare")
     out = cli.add_device(SECOND_SPARE, ARRAYNAME)
     code = json_parser.get_response_code(out)

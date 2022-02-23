@@ -44,10 +44,11 @@ WriteMpio::WriteMpio(void* mdPageBuf)
   currBuf(nullptr)
 {
     assert(mdPageBuf != nullptr);
+    _InitStateHandler();
 }
 
 void
-WriteMpio::InitStateHandler(void)
+WriteMpio::_InitStateHandler(void)
 {
     RegisterStateHandler(MpAioState::Init,
         new MpioStateExecuteEntry(MpAioState::Init, AsMpioStateEntryPoint(&WriteMpio::_Init, this), MpAioState::Ready));

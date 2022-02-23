@@ -71,7 +71,7 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
 }
 
 int
-CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
+CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
 {
     int ret = 0;
 
@@ -80,7 +80,7 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
 
     assert(numMapsToFlush == 0);
 
-    numMapsToFlush = pendingDirtyPages.size();
+    numMapsToFlush = pendingDirtyMaps.size();
     numMapsFlushed = 0;
 
     if (numMapsToFlush == numMapsFlushed)
@@ -92,14 +92,12 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
         int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
         POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush", numMapsToFlush);
 
-        for (auto mapIt = pendingDirtyPages.begin(); mapIt != pendingDirtyPages.end(); mapIt++)
+        for (auto mapId : pendingDirtyMaps)
         {
             eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
-            POS_TRACE_DEBUG(eventId, "Request to flush map {}, {} pages",
-                mapIt->first, (mapIt->second).size());
 
-            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapIt->first));
-            ret = mapFlush->FlushDirtyMpagesGiven(mapIt->first, eventMapFlush, mapIt->second);
+            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId));
+            ret = mapFlush->FlushDirtyMpages(mapId, eventMapFlush);
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status

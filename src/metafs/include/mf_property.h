@@ -64,9 +64,13 @@ class MetaFilePropertySet
 {
 public:
     MetaFilePropertySet(void)
-    : ioAccPattern(MetaFileAccessPattern::Default),
-      ioOpType(MetaFileDominant::Default),
-      integrity(MetaFileIntegrityType::Default)
+    : MetaFilePropertySet(MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default)
+    {
+    }
+    MetaFilePropertySet(MetaFileAccessPattern pattern, MetaFileDominant dominant, MetaFileIntegrityType integrity)
+    : ioAccPattern(pattern),
+      ioOpType(dominant),
+      integrity(integrity)
     {
     }
     MetaFileAccessPattern ioAccPattern;

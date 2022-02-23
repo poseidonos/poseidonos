@@ -45,6 +45,7 @@
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
+#include "src/journal_manager/log_write/volume_deleted_log_write_request_callback.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -103,7 +104,7 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
         "Write volume deleted log, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
     int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
-    if (ret != 0)
+    if ((int)POS_EVENT_ID::SUCCESS > ret)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
             "Writing volume deleted log failed (volume id {})", volumeId);
@@ -131,7 +132,20 @@ JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxV
         logFactory->CreateVolumeDeletedLogWriteContext(volumeId, segCtxVersion, callback);
 
     logWriteInProgress = true;
-    return logWriteHandler->AddLog(logWriteContext);
+    int ret = logWriteHandler->AddLog(logWriteContext);
+
+    if ((int)POS_EVENT_ID::SUCCESS < ret)
+    {
+        EventSmartPtr volumeDeleteLogWriteRequest(new VolumeDeletedLogWriteRequestCallback(this, volumeId, segCtxVersion));
+        eventScheduler->EnqueueEvent(volumeDeleteLogWriteRequest);
+    }
+
+    return ret;
+}
+
+void JournalVolumeEventHandler::RetryVolumeDeletedLogWrite(int volumeId, uint64_t segCtxVersion)
+{
+    _WriteVolumeDeletedLog(volumeId, segCtxVersion);
 }
 
 int

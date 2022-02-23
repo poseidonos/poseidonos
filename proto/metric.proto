@@ -3,8 +3,10 @@ syntax="proto3";
 option go_package = "pos.metric";
 
 enum MetricTypes {
-  COUNTER = 0;
-  GUAGE = 1;
+  START = 0;
+  COUNTER = 1;
+  GAUGE = 2;
+  HISTOGRAM = 3;
 }
 
 service MetricManager {
@@ -30,8 +32,22 @@ message Metric
   oneof value {
     uint64 counterValue = 4;
     int64 gaugeValue = 5;
+    HistogramValue histogramValue = 6;
   }
-  repeated Label labels = 6;
+  repeated Label labels = 7;
+}
+
+message HistogramValue
+{
+  uint64 underflowCount = 1;
+  uint64 overflowCount  = 2;
+  int64 lowerBound = 3;
+  int64 upperBound = 4;
+  int32 zeroIndex = 5;
+  int32 bucketScale = 6;
+  int32 scaleType = 7;
+  repeated int64 bucketRange = 8;
+  repeated uint64 bucketCount = 9;
 }
 
 message Label

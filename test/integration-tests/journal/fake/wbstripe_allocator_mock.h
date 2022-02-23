@@ -27,12 +27,11 @@ public:
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override {}
 
     virtual void FlushActiveStripes(uint32_t volumeId) {}
+    virtual bool FinalizeActiveStripes(int volumeId) {}
     virtual void GetWbStripes(FlushIoSmartPtr flushIo) {}
 
     virtual void FlushAllActiveStripes(void) override {}
     virtual int FlushPendingActiveStripes(void) { return 0; }
-
-    virtual int PrepareRebuild(void) override { return 0; }
 };
 
 } // namespace pos

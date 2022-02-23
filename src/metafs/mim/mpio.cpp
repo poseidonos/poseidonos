@@ -49,7 +49,8 @@ Mpio::Mpio(void* mdPageBuf)
   error(0),
   errorStopState(false),
   forceSyncIO(false),
-  cacheState(MpioCacheState::Init)
+  cacheState(MpioCacheState::Init),
+  priority(RequestPriority::Normal)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -63,7 +64,8 @@ Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoI
   error(0),
   errorStopState(false),
   forceSyncIO(forceSyncIO),
-  cacheState(MpioCacheState::Init)
+  cacheState(MpioCacheState::Init),
+  priority(RequestPriority::Normal)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -80,6 +82,8 @@ Mpio::Reset(void)
     // clear error info
     error = 0;
     errorStopState = false;
+
+    ResetTimestamp();
 }
 
 // LCOV_EXCL_START
@@ -110,6 +114,18 @@ Mpio::GetErrorStatus(void)
 {
     MfsError err(this->error, this->errorStopState);
     return err;
+}
+
+void
+Mpio::SetPriority(RequestPriority p)
+{
+    priority = p;
+}
+
+RequestPriority
+Mpio::GetPriority(void)
+{
+    return priority;
 }
 
 void

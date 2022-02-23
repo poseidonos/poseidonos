@@ -34,12 +34,11 @@
 
 #include <functional>
 
+#include "src/bio/volume_io.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"
-
-#include "src/bio/volume_io.h"
 #include "src/mapper/include/mpage_info.h"
-#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
@@ -53,15 +52,15 @@ public:
     MapUpdateLogWriteContext(void) = default;
 
     // For UT
-    MapUpdateLogWriteContext(MapPageList dirtyList, EventSmartPtr callback,
+    MapUpdateLogWriteContext(MapList dirtyList, EventSmartPtr callback,
         LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer);
 
-    MapUpdateLogWriteContext(LogHandlerInterface* log, MapPageList dirtyList,
+    MapUpdateLogWriteContext(LogHandlerInterface* log, MapList dirtyList,
         EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier,
         CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
-    MapPageList& GetDirtyList(void);
+    MapList& GetDirtyList(void);
     virtual void IoDone(void) override;
 
     // For UT
@@ -73,7 +72,7 @@ public:
 
 protected:
     CallbackSequenceController* sequenceController;
-    MapPageList dirty;
+    MapList dirty;
 };
 
 } // namespace pos

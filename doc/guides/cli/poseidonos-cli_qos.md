@@ -43,7 +43,7 @@ poseidonos-cli qos [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli qos create](poseidonos-cli_qos_create.md)	 - Create qos policy for a volume(s) of PoseidonOS.
 * [poseidonos-cli qos list](poseidonos-cli_qos_list.md)	 - List QoS policy for a volume(s) of PoseidonOS.
 * [poseidonos-cli qos reset](poseidonos-cli_qos_reset.md)	 - Reset QoS policy for a volume(s) of PoseidonOS.

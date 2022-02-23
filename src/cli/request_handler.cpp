@@ -58,6 +58,7 @@
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
 #include "src/cli/list_volume_command.h"
+#include "src/cli/volume_info_command.h"
 #include "src/cli/list_wbt_command.h"
 #include "src/cli/logger_info_command.h"
 #include "src/cli/mount_array_command.h"
@@ -70,6 +71,7 @@
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_log_command.h"
+#include "src/cli/set_log_preference_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
 #include "src/cli/start_telemetry_command.h"
@@ -110,6 +112,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();
     cmdDictionary["UNMOUNTVOLUME"] = new UnmountVolumeCommand();
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
+    cmdDictionary["VOLUMEINFO"] = new VolumeInfoCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
     cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["STOPPOS"] = new StopPosCommand();
@@ -117,6 +120,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();
     cmdDictionary["SETLOGLEVEL"] = new SetLogLevelCommand();
     cmdDictionary["GETLOGLEVEL"] = new GetLogLevelCommand();
+    cmdDictionary["SETLOGPREFERENCE"] = new SetLogPreferenceCommand();
     cmdDictionary["LISTWBT"] = new ListWbtCommand();
     cmdDictionary["WBT"] = new HandleWbtCommand();
     cmdDictionary["LISTQOSPOLICIES"] = new QosListPoliciesCommand();

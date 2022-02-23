@@ -58,16 +58,15 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
   ioCQ(nullptr),
   cpuStallCnt(0),
   coreId(coreId),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  metricSumOfSpendTime(0),
+  metricSumOfMioCount(0)
 {
-    ioCQ = new MetaFsIoQ<Mio*>();
-    ioSQ = new MetaFsIoQ<MetaFsIoRequest*>();
+    ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
+    ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
 
-    std::string cqName("IoCQ-" + std::to_string(coreId));
-    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
-
-    mpioPool = new MpioPool(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
-    mioPool = new MioPool(mpioPool, MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    mpioAllocator = new MpioAllocator(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    _CreateMioPool();
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
@@ -79,20 +78,19 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
         threadId, coreId);
 }
 
-MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
-        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
+MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
         TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
   mioPool(mioPool),
-  mpioPool(mpioPool),
+  mpioAllocator(mpioAllocator),
   cpuStallCnt(0),
   coreId(coreId),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  metricSumOfSpendTime(0),
+  metricSumOfMioCount(0)
 {
-    std::string cqName("IoCQ-" + std::to_string(coreId));
-    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
-
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     lastTime = std::chrono::steady_clock::now();
@@ -102,7 +100,7 @@ MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* io
 
 MioHandler::~MioHandler(void)
 {
-    delete mpioPool;
+    delete mpioAllocator;
     delete mioPool;
 
     for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
@@ -124,10 +122,21 @@ MioHandler::~MioHandler(void)
 }
 
 void
+MioHandler::_CreateMioPool(void)
+{
+    mioPool = new MetaFsPool<Mio*>(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    for (uint32_t i = 0; i < MAX_CONCURRENT_MIO_PROC_THRESHOLD; ++i)
+    {
+        mioPool->AddToPool(new Mio(mpioAllocator));
+    }
+    mioTagIdAllocator.Reset();
+}
+
+void
 MioHandler::BindPartialMpioHandler(MpioHandler* ptMpioHandler)
 {
     this->bottomhalfHandler = ptMpioHandler;
-    this->bottomhalfHandler->BindMpioPool(mpioPool);
+    this->bottomhalfHandler->BindMpioAllocator(mpioAllocator);
 
     partialMpioDoneNotifier = AsEntryPointParam1(&MpioHandler::EnqueuePartialMpio, bottomhalfHandler);
     mpioDonePoller = AsEntryPointNoParam(&MpioHandler::BottomhalfMioProcessing, bottomhalfHandler);
@@ -136,8 +145,10 @@ MioHandler::BindPartialMpioHandler(MpioHandler* ptMpioHandler)
 void
 MioHandler::_HandleIoSQ(void)
 {
+    _SendPeriodicMetrics();
+
     // if mio is not available, no new request can be serviced.
-    if (mioPool->IsEmpty())
+    if (!mioPool->GetFreeCount())
     {
         return;
     }
@@ -152,6 +163,7 @@ MioHandler::_HandleIoSQ(void)
         }
         return;
     }
+    reqMsg->StoreTimestamp(IoRequestStage::Dequeue);
     cpuStallCnt = 0;
 
 #if RANGE_OVERLAP_CHECK_EN // range overlap enable
@@ -173,22 +185,38 @@ MioHandler::_HandleIoSQ(void)
     _RegisterRangeLockInfo(reqMsg);
 #endif
     ExecuteMio(*mio);
-
-    _SendMetric(ioSQ->GetItemCnt());
 }
 
 void
-MioHandler::_SendMetric(uint32_t size)
+MioHandler::_SendPeriodicMetrics(void)
 {
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
 
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
-        POSMetric metric(TEL40100_METAFS_PENDING_MIO_CNT, POSMetricTypes::MT_COUNT);
-        metric.AddLabel("thread_name", to_string(coreId));
-        metric.SetCountValue(size);
-        telemetryPublisher->PublishMetric(metric);
+        std::string thread_name = to_string(coreId);
+        POSMetric metricFreeMioCnt(TEL40102_METAFS_FREE_MIO_CNT, POSMetricTypes::MT_GAUGE);
+        metricFreeMioCnt.AddLabel("thread_name", thread_name);
+        metricFreeMioCnt.SetGaugeValue(mioPool->GetFreeCount());
+        telemetryPublisher->PublishMetric(metricFreeMioCnt);
+
+        if (metricSumOfMioCount != 0)
+        {
+            POSMetric metricTime(TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO, POSMetricTypes::MT_GAUGE);
+            metricTime.AddLabel("thread_name", thread_name);
+            metricTime.SetGaugeValue(metricSumOfSpendTime);
+            telemetryPublisher->PublishMetric(metricTime);
+
+            POSMetric metricCount(TEL40107_METAFS_SUM_OF_MIO_COUNT, POSMetricTypes::MT_GAUGE);
+            metricCount.AddLabel("thread_name", thread_name);
+            metricCount.SetGaugeValue(metricSumOfMioCount);
+            telemetryPublisher->PublishMetric(metricCount);
+
+            metricSumOfSpendTime = 0;
+            metricSumOfMioCount = 0;
+        }
+
         lastTime = currentTime;
     }
 }
@@ -199,6 +227,8 @@ MioHandler::_HandleIoCQ(void)
     Mio* mio = ioCQ->Dequeue();
     if (mio)
     {
+        mio->StoreTimestamp(MioTimestampStage::Dequeue);
+
         while (mio->IsCompleted() != true)
         {
         }
@@ -320,32 +350,34 @@ MioHandler::TophalfMioProcessing(void)
     _HandleIoCQ();
 }
 
-bool
+void
 MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    if (false == ioSQ->Enqueue(reqMsg))
-    {
-        return false;
-    }
-    return true;
+    ioSQ->Enqueue(reqMsg, reqMsg->priority);
+    reqMsg->StoreTimestamp(IoRequestStage::Enqueue);
 }
 
 void
 MioHandler::_FinalizeMio(Mio* mio)
 {
+    mio->StoreTimestamp(MioTimestampStage::Release);
+    metricSumOfSpendTime += mio->GetElapsedInMilli(MioTimestampStage::Allocate, MioTimestampStage::Release).count();
+    metricSumOfMioCount++;
+    mio->Reset();
     mioPool->Release(mio);
 }
 
 Mio*
 MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 {
-    Mio* mio = mioPool->Alloc();
+    Mio* mio = mioPool->TryAlloc();
 
     if (nullptr == mio)
         return nullptr;
 
     MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
 
+    mio->StoreTimestamp(MioTimestampStage::Allocate);
     mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayId)->GetMss());
 
     if (false == mio->IsSyncIO())

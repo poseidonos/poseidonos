@@ -39,7 +39,7 @@ poseidonos-cli device [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli device create](poseidonos-cli_device_create.md)	 - Create a buffer device.
 * [poseidonos-cli device list](poseidonos-cli_device_list.md)	 - List all devices in the system.
 * [poseidonos-cli device scan](poseidonos-cli_device_scan.md)	 - Scan devices in the system.

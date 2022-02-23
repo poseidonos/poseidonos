@@ -64,7 +64,6 @@ public:
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
-    virtual int FlushRebuildContext(EventSmartPtr callback, bool sync);
 
     virtual void WaitPendingIo(IOTYPE type);
 

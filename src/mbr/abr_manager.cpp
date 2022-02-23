@@ -73,6 +73,8 @@ AbrManager::LoadAbr(ArrayMeta& meta)
     }
     meta.id = arrayIndex;
     meta.arrayName = abr->arrayName;
+    meta.dataRaidType = abr->dataRaidType;
+    meta.metaRaidType = abr->metaRaidType;
     int nvmNum = abr->nvmDevNum;
     int dataNum = abr->dataDevNum;
     int spareNum = abr->spareDevNum;

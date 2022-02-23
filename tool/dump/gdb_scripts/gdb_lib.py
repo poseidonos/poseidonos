@@ -9,6 +9,16 @@ import core_dump_lib
 import gdb_lib
 
 
+def get_spdk_value(inp_str):
+    tmp_str = gdb.execute("p " + inp_str, to_string=True)
+    return tmp_str.split(" ")[-1].rstrip("\n")
+
+
+def get_spdk_str(inp_str):
+    tmp_str = gdb.execute("p " + inp_str, to_string=True)
+    return tmp_str.split("\"")[1]
+
+
 def show_callback_list(callback_mem):
 
     callback_set = (gdb.execute("p *((Callback *) %s) " %
@@ -80,7 +90,7 @@ def switch_to_c_stack():
             split_str = line.split()
             if (len(split_str) >= 2):
                 thread_num = int(split_str[1])
-        if ("in pos::" not in line):
+        if ("in pos::" not in line and "#" in line):
             split_str = line.split()
             callstack_num = int(split_str[0].lstrip("#"))
             break

@@ -1,3 +1,2 @@
 POS_ADD_UNIT_TEST(array_name_policy_ut array_name_policy_test.cpp)
-POS_ADD_UNIT_TEST(array_interface_ut array_interface_test.cpp)
 POS_ADD_UNIT_TEST(array_ut array_test.cpp)

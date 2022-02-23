@@ -30,15 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/include/metafs_service.h"
+#include "test/integration-tests/metafs/metafs_test_fixture.h"
 
 #include <string>
 
-#include "test/integration-tests/metafs/metafs_test_fixture.h"
+#include "src/metafs/include/metafs_service.h"
 
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::Matcher;
+using ::testing::NiceMock;
 using ::testing::Return;
 
 namespace pos
@@ -54,11 +54,11 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     _SetArrayInfo();
     _SetThreadModel();
 
-    storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    storage = new TestMetaStorageSubsystem(arrayId);
 
     mgmt = new MetaFsManagementApi(arrayId, storage);
     ctrl = new MetaFsFileControlApi(arrayId, storage);
-    io = new MetaFsIoApi(arrayId, ctrl, storage);
+    io = new MetaFsIoApi(arrayId, ctrl, storage, tpForMetafs);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
 
     metaFs = new MetaFs(arrayInfo, isLoaded, mgmt, ctrl, io, wbt, storage, tpForMetafs);
@@ -74,11 +74,12 @@ MetaFsTestFixture::~MetaFsTestFixture(void)
 void
 MetaFsTestFixture::_SetArrayInfo(void)
 {
-    memset(ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::PARTITION_TYPE_MAX);
-    ptnSize[PartitionType::META_NVM].totalStripes = 2048;
-    ptnSize[PartitionType::META_NVM].blksPerStripe = 64;
-    ptnSize[PartitionType::META_SSD].totalStripes = 293888;
-    ptnSize[PartitionType::META_SSD].blksPerStripe = 64;
+    memset(ptnSize, 0x0, sizeof(PartitionLogicalSize) * PartitionType::TYPE_COUNT);
+
+    ptnSize[PartitionType::META_NVM].totalStripes = 1024;
+    ptnSize[PartitionType::META_NVM].blksPerStripe = 32;
+    ptnSize[PartitionType::META_SSD].totalStripes = 2048;
+    ptnSize[PartitionType::META_SSD].blksPerStripe = 32;
 
     arrayInfo = new NiceMock<MockIArrayInfo>();
 

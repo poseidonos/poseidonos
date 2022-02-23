@@ -1,25 +1,66 @@
 {
-    "Targets":
-    [
+    "Targets": [
         {
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
             "DIR": "/home/psd/ibofos",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "127.0.0.1",
                 "IP1": "127.0.0.1"
             },
-            "SPDK":
-            {                
-                "TRANSPORT": 
-                {
+            "PREREQUISITE": {
+                "CPU": {
+                    "RUN": false,
+                    "SCALING": "max"
+                },
+                "SSD": {
+                    "RUN": false,
+                    "FORMAT": true
+                },
+                "MEMORY": {
+                    "RUN": false,
+                    "MAX_MAP_COUNT": 65535,
+                    "DROP_CACHES": 3
+                },
+                "NETWORK": {
+                    "RUN": false,
+                    "IRQ_BALANCE": "stop",
+                    "TCP_TUNE": "max",
+                    "IRQ_AFFINITYs": [
+                        {
+                            "NIC": "ens5f0",
+                            "CPU_LIST": "88-94"
+                        }
+                    ],
+                    "NICs": [
+                        {
+                            "INTERFACE": "ens5f0",
+                            "IP": "10.100.2.12",
+                            "NETMASK": 24,
+                            "MTU": 9000
+                        }
+                    ]
+                },
+                "SPDK": {
+                    "RUN": false,
+                    "HUGE_EVEN_ALLOC": "yes",
+                    "NRHUGE": 65536
+                },
+                "DEBUG": {
+                    "RUN": false,
+                    "ULIMIT": "unlimited",
+                    "APPORT": "disable",
+                    "DUMP_DIR": "/etc/pos/core",
+                    "CORE_PATTERN": "/etc/pos/core/%E.core"
+                }
+            },
+            "SPDK": {
+                "TRANSPORT": {
                     "TYPE": "tcp",
                     "NUM_SHARED_BUFFER": 4096
                 },
-                "SUBSYSTEMs":
-                [
+                "SUBSYSTEMs": [
                     {
                         "NQN": "nqn.2020-10.pos\\:subsystem01",
                         "SN": "POS00000000000001",
@@ -40,29 +81,25 @@
                     }
                 ]
             },
-            "POS":
-            {                
+            "POS": {
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "pos.conf",
                 "LOG": "pos.log",
-                "ARRAYs":
-                [
+                "ARRAYs": [
                     {
                         "NAME": "ARR0",
                         "RAID_TYPE": "RAID5",
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2",
                         "SPARE_DEVICE_LIST": "unvme-ns-3",
-                        "BUFFER_DEVICE":
-                        {
+                        "BUFFER_DEVICE": {
                             "NAME": "uram0",
                             "TYPE": "uram",
                             "NUM_BLOCKS": 2097152,
                             "BLOCK_SIZE": 512,
                             "NUMA": 0
                         },
-                        "VOLUMEs":
-                        [
+                        "VOLUMEs": [
                             {
                                 "NAME": "VOL1",
                                 "SIZE": 2147483648,
@@ -82,31 +119,26 @@
                     }
                 ]
             },
-            "AUTO_GENERATE":
-            {
+            "AUTO_GENERATE": {
                 "USE": "no"
             }
         }
     ],
-    "Initiators":
-    [
+    "Initiators": [
         {
             "NAME": "Initiator01",
             "ID": "root",
             "PW": "psd",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "127.0.0.1"
             },
-            "SPDK":
-            {
+            "SPDK": {
                 "DIR": "/home/psd/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         }
     ],
-    "Scenarios":
-    [
+    "Scenarios": [
         {
             "NAME": "fio_precommit",
             "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"

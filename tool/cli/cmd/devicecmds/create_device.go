@@ -65,9 +65,9 @@ Syntax:
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var create_device_deviceName = ""
-var create_device_numBlocks = 0
-var create_device_blockSize = 0
-var create_device_deviceType = ""
+var create_device_numBlocks = 8388608
+var create_device_blockSize = 512
+var create_device_deviceType = "uram"
 var create_device_numa = 0
 
 func init() {
@@ -77,21 +77,18 @@ func init() {
 	CreateDeviceCmd.MarkFlagRequired("device-name")
 
 	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceType,
-		"device-type", "", "",
+		"device-type", "t", "uram",
 		"The type of the buffer device to create.")
-	CreateDeviceCmd.MarkFlagRequired("device-type")
 
 	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks,
-		"num-blocks", "", 0,
+		"num-blocks", "b", 8388608,
 		"The number of blocks of the buffer device.")
-	CreateDeviceCmd.MarkFlagRequired("num-blocks")
 
 	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize,
-		"block-size", "", 0,
+		"block-size", "s", 512,
 		"The block size of the buffer device.")
-	CreateDeviceCmd.MarkFlagRequired("block-size")
 
 	CreateDeviceCmd.Flags().IntVarP(&create_device_numa,
-		"numa", "", 0,
+		"numa", "n", 0,
 		"The NUMA node of the buffer device.")
 }

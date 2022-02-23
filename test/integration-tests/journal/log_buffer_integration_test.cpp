@@ -13,12 +13,10 @@
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
 namespace pos
 {
-
 using ::testing::Return;
 
 JournalLogBufferIntegrationTest::JournalLogBufferIntegrationTest(void)
@@ -104,12 +102,10 @@ JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(TEST_VOLUME_ID);
 
-    MpageList dirty;
-
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateBlockMapLogWriteContext(volumeIo, dirty, callback);
+        factory.CreateBlockMapLogWriteContext(volumeIo, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
@@ -120,15 +116,13 @@ JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 {
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     StripeAddr oldAddr =
-    {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 0
-    };
-    MpageList dummyDirty;
+        {
+            .stripeLoc = IN_WRITE_BUFFER_AREA,
+            .stripeId = 0};
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, dummyDirty, callback);
+        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
 
@@ -154,10 +148,9 @@ JournalLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
         mapUpdates.blockMapUpdateList.push_back(mapUpdate);
     }
 
-    MapPageList dummyDirty;
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
-        factory.CreateGcBlockMapLogWriteContext(mapUpdates, dummyDirty, callback);
+        factory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
 
@@ -183,10 +176,9 @@ JournalLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
         mapUpdates.blockMapUpdateList.push_back(mapUpdate);
     }
 
-    MapPageList dummyDirty;
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
-        factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, dummyDirty, callback);
+        factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
 

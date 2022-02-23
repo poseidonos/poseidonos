@@ -23,6 +23,8 @@ Symbol
 
 Identifier = Letter , { Letter | Digit | "-" | "_" } ;
 
+BooleanValue = "true" | "false" ;
+
 ArrayName = Identifier ;
 
 DeviceName = Identifier ;
@@ -53,7 +55,14 @@ BufCacheSize = Number ;
 
 NumSharedBuffers = Number ;
 
-RaidType = [ "RAID5" | "raid5" ] ;
+RaidType = 
+  [ "RAID5"
+  | "raid5"
+  | "RAID0"
+  | "raid0"
+  | "RAID10"
+  | "raid10"
+  ] ;
 
 SubsystemNQN = Letter , { Letter | Digit | "-" | "_" } ;
 
@@ -105,12 +114,12 @@ CreateArrayCmd = "create" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--data-devs" | "-d" ) , DeviceNameList ,
   [ ( "--spare" | "-s" ) , DeviceName ] , [ "--raid" ,
-  RaidType ] ;
+  RaidType ] , [ "--no-buffer" ] ;
 
 AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
-  [ "--raid" , RaidType ] ;
+  [ "--raid" , RaidType ] , [ "--no-buffer" ] ;
 
 VolumeCmd = "volume" ,
   ( VolumeCreateCmd  | VolumeDeleteCmd
@@ -146,8 +155,8 @@ VolumeUnmountCmd = "unmount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--force" ] ;
 
-VolumeListCmd = "list" , [ ( "--array-name" | "-a" ) ,
-  ArrayName ] ;
+VolumeListCmd = "list" , ( "--array-name" | "-a" ) ,
+  ArrayName , [ ( "--volume-name" | "-v" ) , VolumeName ] ;
 
 VolumeRenameCmd = "rename" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--new-volume-name" | "-n" ) ,
@@ -161,9 +170,9 @@ DeviceCmd = "device" ,
   ) ;
 
 CreateDeviceCmd = "create" , ( "--device-name" | "-d" ) ,
-  DeviceName , "--num-blocks" , { Digit } ,
-  "--block-size" , { Digit } , "--device-type" ,
-  DeviceType ;
+  DeviceName , [ "--num-blocks" , { Digit } ] ,
+  [ "--block-size" , { Digit } ] , [ "--device-type" ,
+  DeviceType ] ;
 
 ScanDeviceCmd = "scan" ;
 
@@ -193,6 +202,7 @@ LoggerCmd = "logger" ,
   | GetLogLevelCmd
   | ApplyLogFilterCmd
   | LoggerInfoCmd
+  | SetPreferenceCmd
   ) ;
 
 SetLogLevelCmd = "set-level" , "--level" , LogLevel ;
@@ -210,6 +220,9 @@ GetLogLevelCmd = "get-level" ;
 ApplyLogFilterCmd = "apply-filter" ;
 
 LoggerInfoCmd = "info" ;
+
+SetPreferenceCmd = "set-preference" , [ "--log-json" ,
+  BooleanValue ] ;
 
 QosCmd = "qos" ,
   ( QosVolumePolicyCmd
@@ -274,7 +287,8 @@ DevelCmd = "devel" ,
 
 ResetMbrCmd = "resetmbr" ;
 
-StopRebuildingCmd = "stop-rebuilding" , ( "--array-name" | "-a" ) , ArrayName ;
+StopRebuildingCmd = "stop-rebuilding" , ( "--array-name" | "-a" ) ,
+  ArrayName ;
 
 UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
   ( "flush"

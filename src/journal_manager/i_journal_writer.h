@@ -34,8 +34,8 @@
 
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
@@ -44,12 +44,9 @@ class Stripe;
 class IJournalWriter
 {
 public:
-    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent) = 0;
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-        MpageList dirty, EventSmartPtr callbackEvent) = 0;
-    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
-        MapPageList dirty, EventSmartPtr callbackEvent) = 0;
+    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent) = 0;
+    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent) = 0;
+    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent) = 0;
 };
 
 } // namespace pos

@@ -32,8 +32,8 @@
 
 #pragma once
 
-#include <vector>
 #include <mutex>
+#include <vector>
 
 #include "log_group_buffer_status.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
@@ -62,7 +62,7 @@ public:
     virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
     virtual void LogWriteCanceled(int logGroupId);
 
-    virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
+    virtual void LogFilled(int logGroupId, MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
     uint64_t GetNumLogsAdded(void);

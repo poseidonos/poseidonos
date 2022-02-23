@@ -38,26 +38,15 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/device/base/ublock_device.h"
+#include "src/helper/calc/calc.h"
 
 namespace pos
 {
-NvmPartition::NvmPartition(string array,
-    uint32_t arrayIndex,
+NvmPartition::NvmPartition(
     PartitionType type,
-    PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs)
-: Partition(array, arrayIndex, type, physicalSize, devs, nullptr)
+: Partition(devs, type)
 {
-    logicalSize_.minWriteBlkCnt = 1;
-    logicalSize_.blksPerChunk = physicalSize.blksPerChunk;
-    logicalSize_.blksPerStripe =
-        physicalSize.blksPerChunk * physicalSize.chunksPerStripe;
-    logicalSize_.totalStripes =
-        physicalSize.stripesPerSegment * physicalSize.totalSegments;
-    logicalSize_.totalSegments = physicalSize.totalSegments;
-    logicalSize_.chunksPerStripe = physicalSize.chunksPerStripe;
-    logicalSize_.stripesPerSegment =
-        logicalSize_.totalStripes / logicalSize_.totalSegments;
 }
 
 NvmPartition::~NvmPartition()
@@ -65,19 +54,39 @@ NvmPartition::~NvmPartition()
 }
 
 int
+NvmPartition::Create(uint64_t startLba, uint32_t blksPerChunk)
+{
+    int ret = _SetPhysicalAddress(startLba, blksPerChunk);
+    if (ret != 0)
+    {
+        return ret;
+    }
+    Partition::_UpdateLastLba();
+    _SetLogicalAddress();
+    return ret;
+}
+
+void
+NvmPartition::RegisterService(IPartitionServices* svc)
+{
+    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::RegisterService");
+    svc->AddTranslator(type, this);
+}
+
+int
 NvmPartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 {
     if (false == _IsValidAddress(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
-    dst.arrayDev = devs_.front();
-    dst.lba = physicalSize_.startLba +
-        (src.stripeId * logicalSize_.blksPerStripe + src.offset) *
-            ArrayConfig::SECTORS_PER_BLOCK;
+    dst.arrayDev = devs.front();
+    dst.lba = physicalSize.startLba +
+        (src.stripeId * logicalSize.blksPerStripe + src.offset) *
+        ArrayConfig::SECTORS_PER_BLOCK;
 
     return 0;
 }
@@ -87,15 +96,15 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
 {
     if (false == _IsValidByteAddress(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
-    dst.arrayDev = devs_.front();
+    dst.arrayDev = devs.front();
     void* base = dst.arrayDev->GetUblockPtr()->GetByteAddress();
-    dst.byteAddress = reinterpret_cast<uint64_t>(base) + (physicalSize_.startLba +
-        (src.blkAddr.stripeId * logicalSize_.blksPerStripe + src.blkAddr.offset) *
+    dst.byteAddress = reinterpret_cast<uint64_t>(base) + (physicalSize.startLba +
+        (src.blkAddr.stripeId * logicalSize.blksPerStripe + src.blkAddr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
         src.byteOffset;
 
@@ -108,7 +117,7 @@ NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
 {
     if (false == _IsValidEntry(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
@@ -130,7 +139,7 @@ NvmPartition::ByteConvert(list<PhysicalByteWriteEntry>& dst,
 {
     if (false == _IsValidByteEntry(src))
     {
-        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
@@ -153,24 +162,66 @@ NvmPartition::IsByteAccessSupported(void)
     return true;
 }
 
+int
+NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
+{
+    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
+        startLba, blksPerChunk, devs.size(), devs.front()->GetUblock()->GetName());
+    physicalSize.startLba = startLba;
+    physicalSize.blksPerChunk = blksPerChunk;
+    physicalSize.chunksPerStripe = ArrayConfig::NVM_DEVICE_COUNT;
+    physicalSize.totalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
+    if (type == PartitionType::WRITE_BUFFER)
+    {
+        physicalSize.stripesPerSegment = (devs.front()->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE -
+            DIV_ROUND_UP(physicalSize.startLba, (uint64_t)ArrayConfig::SECTORS_PER_BLOCK)) / blksPerChunk;
+        POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, WRITE_BUFFER, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+            startLba, blksPerChunk, physicalSize.stripesPerSegment);
+    }
+    else if (type == PartitionType::META_NVM)
+    {
+        physicalSize.stripesPerSegment = ArrayConfig::META_NVM_SIZE /
+            (ArrayConfig::BLOCK_SIZE_BYTE * physicalSize.blksPerChunk * physicalSize.chunksPerStripe);
+        POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, META_NVM, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+            startLba, blksPerChunk, physicalSize.stripesPerSegment);
+    }
+
+    return 0;
+}
+
+void
+NvmPartition::_SetLogicalAddress(void)
+{
+    logicalSize.minWriteBlkCnt = 1;
+    logicalSize.blksPerChunk = physicalSize.blksPerChunk;
+    logicalSize.blksPerStripe =
+        physicalSize.blksPerChunk * physicalSize.chunksPerStripe;
+    logicalSize.totalStripes =
+        physicalSize.stripesPerSegment * physicalSize.totalSegments;
+    logicalSize.totalSegments = physicalSize.totalSegments;
+    logicalSize.chunksPerStripe = physicalSize.chunksPerStripe;
+    logicalSize.stripesPerSegment =
+        logicalSize.totalStripes / logicalSize.totalSegments;
+}
+
 bool
 NvmPartition::_IsValidByteAddress(const LogicalByteAddr& lsa)
 {
     uint32_t block_size = ArrayConfig::BLOCK_SIZE_BYTE;
     uint64_t start_blk_offset = lsa.blkAddr.offset + lsa.byteOffset / block_size;
-    uint64_t start_stripe_id = lsa.blkAddr.stripeId + start_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t start_stripe_id = lsa.blkAddr.stripeId + start_blk_offset / logicalSize.blksPerStripe;
     uint64_t end_blk_offset = lsa.blkAddr.offset + (lsa.byteOffset + lsa.byteSize) / block_size;
-    uint64_t end_stripe_id = lsa.blkAddr.stripeId + end_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t end_stripe_id = lsa.blkAddr.stripeId + end_blk_offset / logicalSize.blksPerStripe;
 
-    if (lsa.blkAddr.stripeId < logicalSize_.totalStripes &&
-        lsa.blkAddr.offset < logicalSize_.blksPerStripe)
+    if (lsa.blkAddr.stripeId < logicalSize.totalStripes &&
+        lsa.blkAddr.offset < logicalSize.blksPerStripe)
     {
-        if (start_blk_offset < logicalSize_.blksPerStripe &&
-            end_blk_offset < logicalSize_.blksPerStripe &&
+        if (start_blk_offset < logicalSize.blksPerStripe &&
+            end_blk_offset < logicalSize.blksPerStripe &&
             lsa.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
         {
-            if (start_stripe_id < logicalSize_.totalStripes &&
-                end_stripe_id < logicalSize_.totalStripes)
+            if (start_stripe_id < logicalSize.totalStripes &&
+                end_stripe_id < logicalSize.totalStripes)
             {
                 if (start_stripe_id == end_stripe_id)
                 {
@@ -192,17 +243,17 @@ NvmPartition::_IsValidByteEntry(const LogicalByteWriteEntry& entry)
 {
     uint32_t block_size = ArrayConfig::BLOCK_SIZE_BYTE;
     uint64_t start_blk_offset = entry.addr.blkAddr.offset + entry.addr.byteOffset / block_size;
-    uint64_t start_stripe_id = entry.addr.blkAddr.stripeId + start_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t start_stripe_id = entry.addr.blkAddr.stripeId + start_blk_offset / logicalSize.blksPerStripe;
     uint64_t end_blk_offset = entry.addr.blkAddr.offset + (entry.addr.byteOffset + entry.addr.byteSize) / block_size;
-    uint64_t end_stripe_id = entry.addr.blkAddr.stripeId + end_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t end_stripe_id = entry.addr.blkAddr.stripeId + end_blk_offset / logicalSize.blksPerStripe;
 
-    if (entry.addr.blkAddr.stripeId < logicalSize_.totalStripes &&
-        entry.addr.blkAddr.offset < logicalSize_.blksPerStripe)
+    if (entry.addr.blkAddr.stripeId < logicalSize.totalStripes &&
+        entry.addr.blkAddr.offset < logicalSize.blksPerStripe)
     {
-        if (end_blk_offset < logicalSize_.blksPerStripe &&
+        if (end_blk_offset < logicalSize.blksPerStripe &&
             entry.addr.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
         {
-            if (end_stripe_id < logicalSize_.totalStripes)
+            if (end_stripe_id < logicalSize.totalStripes)
             {
                 if (start_stripe_id == end_stripe_id)
                 {

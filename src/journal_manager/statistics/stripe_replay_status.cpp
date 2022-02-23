@@ -32,11 +32,11 @@
 
 #include "stripe_replay_status.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-#include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -103,7 +103,7 @@ StripeReplayStatus::Print(void)
         os << numUpdatedBlockMaps << " block updated";
         os << "(" << firstBlockOffset << "-" << lastBlockOffset << "), ";
 
-        int numSkippedStripeMapUpdate = (stripeMapReplayed == true)?0:1;
+        int numSkippedStripeMapUpdate = (stripeMapReplayed == true) ? 0 : 1;
         os << (numFoundBlockMaps - numUpdatedBlockMaps) << " blk/";
         os << numSkippedStripeMapUpdate << "stripe update skipped";
     }

@@ -34,10 +34,10 @@
 
 #include <functional>
 
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/config/log_buffer_layout.h"
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -201,7 +201,7 @@ BufferOffsetAllocator::LogWriteCanceled(int id)
 }
 
 void
-BufferOffsetAllocator::LogFilled(int id, MapPageList& dirty)
+BufferOffsetAllocator::LogFilled(int id, MapList& dirty)
 {
     statusList[id]->LogFilled();
     _TryToSetFull(id);

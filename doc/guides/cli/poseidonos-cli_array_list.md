@@ -1,14 +1,15 @@
 ## poseidonos-cli array list
 
-List arrays of PoseidonOS.
+List arrays of PoseidonOS or display information of an array.
 
 ### Synopsis
 
 
-List arrays in PoseidonOS. When you specify the name of a specific
-array, this command will display the detailed information about 
-the array. Otherwise, this command will display the brief information
-about all the arrays in PoseidonOS. 
+List arrays of PoseidonOS or display information of an array.
+When you specify the name of a specific array, this command will
+display the detailed information about the array. Otherwise, this
+command will display the brief information about all the arrays
+in PoseidonOS. 
 
 Syntax:
 	poseidonos-cli array list [(--array-name | -a) ArrayName]

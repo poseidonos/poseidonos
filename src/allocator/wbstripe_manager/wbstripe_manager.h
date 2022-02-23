@@ -33,6 +33,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -64,6 +65,7 @@ public:
     virtual void Dispose(void);
 
     virtual Stripe* GetStripe(StripeAddr& lsidEntry) override;
+    virtual Stripe* GetStripe(StripeId wbLsid) override;
     virtual void FreeWBStripeId(StripeId lsid) override;
 
     virtual void FlushActiveStripes(uint32_t volumeId) override;
@@ -71,23 +73,24 @@ public:
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override;
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override;
-    virtual void FlushAllActiveStripes(void) override;
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
     virtual void SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
-    virtual int FlushPendingActiveStripes(void) override;
-    virtual int PrepareRebuild(void) override;
-    virtual Stripe* GetStripe(StripeId wbLsid) override;
 
-    virtual void PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
+    virtual void FlushAllActiveStripes(void) override;
+    virtual bool FinalizeActiveStripes(int volumeId) override;
+    virtual int FlushPendingActiveStripes(void) override;
+    virtual int FlushOnlineStripesInSegment(std::set<SegmentId>& segments);
+
     virtual void FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
     virtual int CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
 
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
 
-protected: // for UT
-    int _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone);
+protected:
+    void _PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
+    void _GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes);
     Stripe* _FinishActiveStripe(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(VirtualBlkAddr tail);

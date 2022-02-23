@@ -92,7 +92,7 @@ TEST(ContextManager, FlushContexts_testFlushStarted)
     EXPECT_LE(0, ret);
 }
 
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdate)
+TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentIsNotFreed)
 {
     // given
     NiceMock<MockAllocatorAddressInfo> addrInfo;
@@ -113,7 +113,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdate)
     ctxManager.UpdateOccupiedStripeCount(5);
 }
 
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreed)
+TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentFreed)
 {
     // given
     NiceMock<MockAllocatorAddressInfo> addrInfo;
@@ -129,111 +129,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreed)
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAndRebuildListNotUpdated)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext);
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAndRebuildTargetUpdatedAndFileFlushFails)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext);
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAndRebuildTargetUpdatedAndGcIsUrgent)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext);
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
-TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAndRebuildTargetUpdatedAndGcIsNotUrgent)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-
-    EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext);
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NORMAL_GC));
-    EXPECT_CALL(*blockAllocStatus, PermitUserBlockAllocation).Times(1);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -282,16 +178,14 @@ TEST(ContextManager, AllocateGCVictimSegment_TestIfVictimIsUpdated)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
-    EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(15));
-    EXPECT_CALL(*segCtx, SetSegmentState(15, SegmentState::VICTIM, true));
+    EXPECT_CALL(*segCtx, AllocateGCVictimSegment).WillOnce(Return(15));
 
     // when 1
     int ret = ctxManager.AllocateGCVictimSegment();
     // then
     EXPECT_EQ(15, ret);
 
-    EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(UNMAP_SEGMENT));
-    EXPECT_CALL(*segCtx, SetSegmentState).Times(0);
+    EXPECT_CALL(*segCtx, AllocateGCVictimSegment).WillOnce(Return(UNMAP_SEGMENT));
 
     // when 2.
     ret = ctxManager.AllocateGCVictimSegment();
@@ -456,22 +350,21 @@ TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(0));
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(0));
     // when 1.
     int ret = ctxManager.ReleaseRebuildSegment(5);
     // then 1.
     EXPECT_EQ(0, ret);
 
     // given 2.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(-1));
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(-1));
     // when 2.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 2.
     EXPECT_EQ(-1, ret);
 
     // given 3.
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext);
+    EXPECT_CALL(*segCtx, SetRebuildCompleted(5)).WillOnce(Return(0));
     // when 3.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 3.
@@ -490,7 +383,7 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleByPassFunc)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
-    EXPECT_CALL(*reCtx, NeedRebuildAgain).WillOnce(Return(true));
+    EXPECT_CALL(*segCtx, LoadRebuildList).WillOnce(Return(true));
 
     // when
     bool ret = ctxManager.NeedRebuildAgain();
@@ -705,7 +598,7 @@ TEST(ContextManager, IncreaseValidBlockCount_TestSimple)
     sut.IncreaseValidBlockCount(0, 1);
 }
 
-TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
+TEST(ContextManager, MakeRebuildTargetSegmentList_TestwithFlushOrwithoutFlush)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -717,21 +610,31 @@ TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
+    std::set<SegmentId> segmentList;
+
     // given 1.
     EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(-1));
     // when 1.
-    int ret = ctxManager.MakeRebuildTarget();
+    int ret = ctxManager.MakeRebuildTargetSegmentList(segmentList);
     // then 1.
     EXPECT_EQ(-1, ret);
 
     // given 2.
-    EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext).WillOnce(Return(0));
-    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
+    segmentList.clear();
+    EXPECT_CALL(*segCtx, MakeRebuildTarget)
+        .WillOnce([&](std::set<SegmentId>& segmentList)
+        {
+            segmentList.emplace(0);
+            segmentList.emplace(1);
+            return 0;
+        });
     // when 1.
-    ret = ctxManager.MakeRebuildTarget();
+    ret = ctxManager.MakeRebuildTargetSegmentList(segmentList);
     // then 1.
-    EXPECT_EQ(7, ret);
+    EXPECT_EQ(0, ret);
+
+    std::set<SegmentId> expected = {0, 1};
+    EXPECT_EQ(segmentList, expected);
 }
 
 TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)
@@ -745,7 +648,7 @@ TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)
     NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
-    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
+    EXPECT_CALL(*segCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
     // when
     int ret = ctxManager.GetRebuildTargetSegmentCount();
     // then
@@ -765,15 +668,14 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(-1));
+    EXPECT_CALL(*segCtx, StopRebuilding).WillOnce(Return(-1));
     // when 1.
     int ret = ctxManager.StopRebuilding();
     // then 1.
     EXPECT_EQ(-1, ret);
 
     // given 2.
-    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(1));
-    EXPECT_CALL(*ioManager, FlushRebuildContext).WillOnce(Return(0));
+    EXPECT_CALL(*segCtx, StopRebuilding).WillOnce(Return(0));
 
     // when 1.
     ret = ctxManager.StopRebuilding();

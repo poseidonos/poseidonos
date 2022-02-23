@@ -2,12 +2,16 @@
 ## What Is POS Volume?
 POS volume is storage resource visible as a block device to a client host. Internally, POS volume is an NVM namespace and attached to one of the NVM subsystems on a target. When POS volume is mounted, the corresponding NVM namespace allows incoming connection and is accessible to initiator(s). When the connection is established, NVM subsystem creates a new controller, from which point the initiator can send/receive block requests over the connection. This process is illustrated in the following figure.
 
+![target](../images/target.png)
+
 Here are a few constraints on the relationship among the components:
 
 - POS volume cannot be shared by multiple NVM namespaces. 
 - NVM controller is associated with one host at a time.
 
 The following figure elaborates more on how block devices on an initiator are mapped to NVM namespaces on a target. The target is exposing two NVM namespaces from NVM subsystem 0 and another two from NVM subsystem 1. Each NVM namespace is called as POS volume and abstracted as a block device on the initiator. The naming convention of a standard NVMe-oF block device is, /dev/nvme{subsystem number}n{namespace number}. For example, /dev/nvme1n1 will be mapped to (NVM subsystem 1, NVM namespace 1) on a target. 
+
+![nvme_device_on_initiator](../images/nvme_device_on_initiator.png)
 
 ```bash
 Node             SN                   Model                                    Namespace Usage                      Format           FW Rev
