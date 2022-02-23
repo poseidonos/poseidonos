@@ -87,6 +87,10 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
     EXPECT_CALL(*ptrMockUblockDev3, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
     EXPECT_CALL(*ptrMockUblockDev4, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+
+    EXPECT_CALL(svc, AddTranslator(PartitionType::JOURNAL_SSD, _)).Times(1);
+    EXPECT_CALL(svc, AddRecover(PartitionType::JOURNAL_SSD, _)).Times(1);
+
     EXPECT_CALL(svc, AddTranslator(PartitionType::META_SSD, _)).Times(1);
     EXPECT_CALL(svc, AddRecover(PartitionType::META_SSD, _)).Times(1);
 
@@ -102,7 +106,7 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(svc, AddTranslator(PartitionType::WRITE_BUFFER, _)).Times(1);
 
     // verify the number of invocations
-    EXPECT_CALL(svc, AddRebuildTarget).Times(2); // one for nvm and the other for userdata
+    EXPECT_CALL(svc, AddRebuildTarget).Times(3); // journal ssd ,meta ssd, and user data ssd
 
     // When 1: PartitionManager creates all partitions
     int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
@@ -175,6 +179,9 @@ TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
     EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(HETERO_DEV_SIZE));
     EXPECT_CALL(*ptrMockUblockDev3, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
     EXPECT_CALL(*ptrMockUblockDev4, GetSize).WillRepeatedly(Return(DATA_DEV_SIZE));
+    EXPECT_CALL(svc, AddTranslator(PartitionType::JOURNAL_SSD, _)).Times(1);
+    EXPECT_CALL(svc, AddRecover(PartitionType::JOURNAL_SSD, _)).Times(1);
+
     EXPECT_CALL(svc, AddTranslator(PartitionType::META_SSD, _)).Times(1);
     EXPECT_CALL(svc, AddRecover(PartitionType::META_SSD, _)).Times(1);
 
@@ -190,7 +197,7 @@ TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
     EXPECT_CALL(svc, AddTranslator(PartitionType::WRITE_BUFFER, _)).Times(1);
 
     // verify the number of invocations
-    EXPECT_CALL(svc, AddRebuildTarget).Times(2); // one for nvm and the other for userdata
+    EXPECT_CALL(svc, AddRebuildTarget).Times(3); // journal ssd ,meta ssd, and user data ssd
 
     // When 1: PartitionManager creates all partitions
     int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
