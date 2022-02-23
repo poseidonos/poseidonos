@@ -1,7 +1,7 @@
 
 posgdb
 
-PLEASE EXECUTE IN FOS CALLSTACK (NOT IN SPDK or ANOTHER LIB STACK)
+PLEASE EXECUTE IN POS CALLSTACK (NOT IN SPDK or ANOTHER LIB STACK)
 custom gdb command for utilizing debugging.
 
 source posgdb.py
