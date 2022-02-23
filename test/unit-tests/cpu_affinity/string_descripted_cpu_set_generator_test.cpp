@@ -15,9 +15,6 @@ TEST(StringDescriptedCpuSetGenerator, StringDescriptedCpuSetGenerator_Stack_NonM
             CoreDescription{CoreType::EVENT_WORKER, {3, 0}, "3-5"},
             CoreDescription{CoreType::GENERAL_USAGE, {1, 0}, "6"},
             CoreDescription{CoreType::QOS, {1, 0}, "7"},
-            CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
-            CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
-            CoreDescription{CoreType::AIR, {1, 0}, "11"},
         };
     // When : Create StringDescriptedCpuSetGenerator on stack
     StringDescriptedCpuSetGenerator stringDescriptedCpuSetGenerator(TEST_CORE_DESCRIPTIONS, false);
@@ -36,9 +33,6 @@ TEST(StringDescriptedCpuSetGenerator, StringDescriptedCpuSetGenerator_Heap_Mask)
             CoreDescription{CoreType::EVENT_WORKER, {3, 0}, "3-5"},
             CoreDescription{CoreType::GENERAL_USAGE, {1, 0}, "6"},
             CoreDescription{CoreType::QOS, {1, 0}, "7"},
-            CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
-            CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
-            CoreDescription{CoreType::AIR, {1, 0}, "11"},
         };
     // When : Create StringDescriptedCpuSetGenerator on stack
     StringDescriptedCpuSetGenerator* stringDescriptedCpuSetGenerator = new StringDescriptedCpuSetGenerator(TEST_CORE_DESCRIPTIONS, false);

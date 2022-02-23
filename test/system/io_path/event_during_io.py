@@ -215,9 +215,14 @@ if __name__ == "__main__":
                         action='store_true', help='IO + Volume unmount or delete')
     parser.add_argument('-p', '--precommit',
                         action='store_true', help='short and simple test')
+    parser.add_argument('-s', '--size',
+                        help='Volume size in bytes')
     args = parser.parse_args()
     if (args.fabrics != None):
         target_ip = args.fabrics
+
+    if (args.size != None):
+        volume_size = args.size
 
     bringup_argument = {
         'log_path': log_path,
