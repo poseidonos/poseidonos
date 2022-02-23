@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "src/allocator/i_context_manager.h"
-#include "src/event_scheduler/event.h"
 
 using ::testing::_;
 using ::testing::AtLeast;

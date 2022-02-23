@@ -32,8 +32,8 @@
 
 #pragma once
 
-#include "src/journal_manager/i_journal_writer.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/journal_manager/i_journal_writer.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
@@ -54,13 +54,16 @@ public:
     virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWriteEventFactory,
         JournalEventFactory* journalEventFactory, JournalingStatus* status);
 
-    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent);
-    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
+    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
+        MpageList dirty, EventSmartPtr callbackEvent);
+    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
+        MpageList dirty, EventSmartPtr callbackEvent);
+    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
+        MapPageList dirty, EventSmartPtr callbackEvent);
 
 private:
     int _CanBeWritten(void);
-    int _AddGcLogs(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
+    int _AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
 
     LogWriteHandler* logWriteHandler;
     LogWriteContextFactory* logFactory;

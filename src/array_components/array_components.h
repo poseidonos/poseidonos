@@ -79,7 +79,7 @@ public:
         ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
     virtual ComponentsInfo* GetInfo(void);
-    virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Load(void);
     virtual int Mount(void);
     virtual int Unmount(void);

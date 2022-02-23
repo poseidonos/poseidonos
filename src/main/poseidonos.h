@@ -40,7 +40,6 @@ namespace pos
 class IoRecoveryEventFactory;
 class TelemetryAirDelegator;
 class TelemetryPublisher;
-class SignalHandler;
 
 class Poseidonos
 {
@@ -51,7 +50,6 @@ public:
 
 private:
     void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
     void _InitSpdk(int argc, char** argv);
 
     void _InitAffinity(void);
@@ -70,6 +68,5 @@ private:
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
     TelemetryAirDelegator* telemetryAirDelegator = nullptr;
     TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
 };
 } // namespace pos

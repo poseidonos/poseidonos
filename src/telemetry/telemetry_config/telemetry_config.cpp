@@ -46,28 +46,30 @@
 #include <cstdio>
 
 #include "src/helper/file/directory.h"
+#include "src/helper/file/file.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-TelemetryConfig::TelemetryConfig(const std::string& path, const std::string& fileName)
+TelemetryConfig::TelemetryConfig(std::string path, std::string fileName)
 {
-    readers.insert({ConfigPriority::Priority_1st, std::make_shared<CliConfigReader>()});
-    readers.insert({ConfigPriority::Priority_2nd, std::make_shared<EnvVariableConfigReader>()});
-    readers.insert({ConfigPriority::Priority_3rd, std::make_shared<FileConfigReader>()});
+    cliReader = new CliConfigReader();
+    envReader = new EnvVariableConfigReader();
+    fileReader = new FileConfigReader();
 
-    // for test
+    readers.insert({ConfigPriority::Priority_1st, cliReader});
+    readers.insert({ConfigPriority::Priority_2nd, envReader});
+    readers.insert({ConfigPriority::Priority_3rd, fileReader});
+
     std::string fileFullPath = path + fileName;
 
     if (!path.compare("") && !fileName.compare(""))
     {
-        DefaultConfiguration conf;
-        fileFullPath = conf.ConfigurationDir() + ConfigurationFileName();
+        fileFullPath = ConfigurationDir() + ConfigurationFileName();
     }
 
-    std::shared_ptr<FileConfigReader> fileReader = std::dynamic_pointer_cast<FileConfigReader>(readers[ConfigPriority::Priority_3rd]);
-    if ((nullptr != fileReader) && (false == fileReader->Init(fileFullPath)))
+    if (!fileReader->Init(fileFullPath))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
             "Poseidon OS will stop by invalid telemetry config.");
@@ -80,55 +82,79 @@ TelemetryConfig::TelemetryConfig(const std::string& path, const std::string& fil
 
 TelemetryConfig::~TelemetryConfig(void)
 {
+    for (auto it = readers.begin(); it != readers.end(); it++)
+    {
+        delete it->second;
+    }
     readers.clear();
     observers.clear();
 }
 
 bool
-TelemetryConfig::Register(const TelemetryConfigType type, const std::string& key, std::shared_ptr<ConfigObserver> observer)
+TelemetryConfig::Register(TelemetryConfigType type, std::string key, ConfigObserver* observer)
 {
-    const std::string newKey = GetCompositeKey(type, key);
+    std::string newKey = GetKey(type, key);
 
-    if (_Find(newKey, observer))
+    if (true == _Find(newKey, observer))
+    {
         return false;
+    }
 
     observers.insert({newKey, observer});
 
     return true;
 }
 
-void
-TelemetryConfig::RequestToNotify(const TelemetryConfigType type, const std::string& key, const std::string& value)
+bool
+TelemetryConfig::RequestToNotify(TelemetryConfigType type, std::string key, std::string value)
 {
-    const std::string newKey = GetCompositeKey(type, key);
+    std::string newKey = GetKey(type, key);
+    bool existed = false;
 
     for (auto it = observers.lower_bound(newKey); it != observers.upper_bound(newKey); ++it)
+    {
         it->second->Notify(key, value);
+        existed = true;
+    }
+
+    return existed;
 }
 
-ClientConfig&
-TelemetryConfig::GetClient(void)
+void
+TelemetryConfig::CreateFile(std::string path, std::string fileName)
 {
-    std::shared_ptr<FileConfigReader> fileReader =
-        std::dynamic_pointer_cast<FileConfigReader>(readers[ConfigPriority::Priority_3rd]);
+    string filePath = path + fileName;
 
-    return fileReader->GetClient();
+    if (false == DirExists(path))
+        MakeDir(path);
+
+    if (true == FileExists(filePath))
+        return;
+
+    std::ofstream outfile(filePath.data());
+
+    outfile.close();
 }
 
-const std::string
-TelemetryConfig::ConfigurationFileName(void) const
+void
+TelemetryConfig::RemoveFile(std::string path, std::string fileName)
 {
-    return TelemetryConfig::CONFIGURATION_NAME;
+    string filePath = path + fileName;
+
+    if (false == FileExists(filePath))
+        return;
+
+    remove(filePath.c_str());
 }
 
-const std::string
-TelemetryConfig::GetCompositeKey(const TelemetryConfigType type, const std::string& key)
+std::string
+TelemetryConfig::GetKey(TelemetryConfigType type, std::string key)
 {
     return (to_string(type) + "|" + key);
 }
 
 bool
-TelemetryConfig::_Find(const std::string& key, const std::shared_ptr<ConfigObserver> observer)
+TelemetryConfig::_Find(std::string key, ConfigObserver* observer)
 {
     for (auto it = observers.lower_bound(key); it != observers.upper_bound(key); ++it)
     {

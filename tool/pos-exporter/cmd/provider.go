@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	uri             = "/metrics"
+	uri             = "/pos-metrics"
 	providerAddress = ":2112"
 )
 

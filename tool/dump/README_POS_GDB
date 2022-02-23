@@ -41,9 +41,3 @@ posgdb [command] [subcommand]
 
 11) posgdb volume io
    summary of volume io
-
-12) posgdb volume info
-   Indicates relation between (spdk bdev, subsystem) <-> (Array, volume Id)
-
-13) posgdb rba info [array_id] [volume_id] [rba(4k unit)]
-   see rba's stripe id and location

@@ -128,8 +128,8 @@ BwIopsRateLimit::ResetRateLimit(uint32_t id1, uint32_t id2, double offset,
 void
 BwIopsRateLimit::UpdateRateLimit(uint32_t id1, uint32_t id2, uint64_t bwVal)
 {
-    bwRateLimit[id1][id2] -= bwVal * POLLING_FREQ_PER_QOS_SLICE;
-    iopsRateLimit[id1][id2] -= POLLING_FREQ_PER_QOS_SLICE;
+    bwRateLimit[id1][id2] -= bwVal;
+    iopsRateLimit[id1][id2]--;
 }
 } // namespace pos
 

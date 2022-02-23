@@ -32,16 +32,17 @@
 
 #pragma once
 
-#include <set>
 #include <string>
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
-#include "src/allocator/context_manager/segment_ctx/segment_list.h"
+#include "src/allocator/context_manager/segment_ctx/segment_lock.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
+#include "src/lib/bitmap.h"
 
 namespace pos
 {
@@ -53,7 +54,8 @@ public:
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        SegmentList* freeSegmentList, SegmentList* rebuildSegmentList,
+        SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
+        BitMapMutex* segmentBitmap,
         RebuildCtx* rebuildCtx_,
         AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
@@ -73,30 +75,34 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
-    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
-    virtual SegmentState GetSegmentState(SegmentId segId);
-    virtual void ResetSegmentsStates(void);
+
+    virtual void SetSegmentState(SegmentId segId, SegmentState state, bool needlock);
+    virtual SegmentState GetSegmentState(SegmentId segId, bool needlock);
+    virtual std::mutex& GetSegStateLock(SegmentId segId);
+
+    virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
+    virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
     virtual void AllocateSegment(SegmentId segId);
+    virtual void ReleaseSegment(SegmentId segId);
     virtual SegmentId AllocateFreeSegment(void);
 
+    virtual SegmentId GetUsedSegment(SegmentId startSegId);
     virtual uint64_t GetNumOfFreeSegment(void);
     virtual uint64_t GetNumOfFreeSegmentWoLock(void);
+    virtual void SetAllocatedSegmentCount(int count);
     virtual int GetAllocatedSegmentCount(void);
+    virtual int GetTotalSegmentsCount(void);
 
-    virtual SegmentId AllocateGCVictimSegment(void);
+    virtual SegmentId FindMostInvalidSSDSegment(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
-    virtual int SetRebuildCompleted(SegmentId segId);
-    virtual int MakeRebuildTarget(std::set<SegmentId>& segmentList);
-    virtual int StopRebuilding(void);
-    virtual uint32_t GetRebuildTargetSegmentCount(void);
-    virtual std::set<SegmentId> GetRebuildSegmentList(void);
-    virtual bool LoadRebuildList(void);
+    virtual int MakeRebuildTarget(void);
 
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
@@ -105,29 +111,24 @@ public:
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
-    void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
-    SegmentId _FindMostInvalidSSDSegment(void);
-    void _SegmentFreed(SegmentId segId);
-
-    void _RebuildFreeSegmentList(void);
-    void _BuildRebuildSegmentList(void);
-    void _ResetSegmentIdInRebuilding(void);
+    void _FreeSegment(SegmentId segId);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
+    SegmentStates* segmentStates;
 
-    SegmentList* freeList;
-    SegmentList* rebuildList;
-    SegmentId rebuildingSegment;
+    BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
 
+    uint32_t numSegments;
     bool initialized;
 
     AllocatorAddressInfo* addrInfo;
 
     std::mutex segCtxLock;
+    SegmentLock* segStateLocks;
 
     RebuildCtx* rebuildCtx;
     TelemetryPublisher* tp;

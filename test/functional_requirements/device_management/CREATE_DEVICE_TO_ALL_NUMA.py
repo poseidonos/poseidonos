@@ -56,9 +56,7 @@ def find_created_device_in_list(device_names):
 
 def execute():
     pos_util.kill_process("poseidonos")
-    ret = pos.start_pos_without_bringup()
-    if ret is False:
-        return "fail", ""
+    pos.start_pos_without_bringup()
     create_device_per_numa()
     device_names, response = get_device_names()
     result = find_created_device_in_list(device_names)

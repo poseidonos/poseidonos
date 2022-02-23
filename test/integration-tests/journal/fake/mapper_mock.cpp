@@ -3,17 +3,15 @@
 #include <thread>
 
 #include "src/event_scheduler/event.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
-using ::testing::NiceMock;
 using ::testing::StrictMock;
 
 namespace pos
 {
-MockMapper::MockMapper(TestInfo* _testInfo, IArrayInfo* info, IStateControl* iState)
-: Mapper(info, nullptr)
+MockMapper::MockMapper(TestInfo* testInfo, IArrayInfo* info, IStateControl* iState)
+: Mapper(info, nullptr),
+  testInfo(testInfo)
 {
-    testInfo = _testInfo;
     flushHandler.resize(testInfo->numMap);
     for (int mapId = 0; mapId < testInfo->numMap; mapId++)
     {
@@ -22,8 +20,8 @@ MockMapper::MockMapper(TestInfo* _testInfo, IArrayInfo* info, IStateControl* iSt
 
     stripeMapFlushHandler = new MapFlushHandlerMock(STRIPE_MAP_ID);
 
-    ON_CALL(*this, FlushDirtyMpages).WillByDefault(::testing::Invoke(this,
-        &MockMapper::_FlushDirtyMpages));
+    ON_CALL(*this, FlushDirtyMpagesGiven).WillByDefault(::testing::Invoke(this,
+        &MockMapper::_FlushDirtyMpagesGiven));
 
     vsaMap = new StrictMock<VSAMapMock>(testInfo);
     stripeMap = new StrictMock<StripeMapMock>(testInfo);
@@ -78,17 +76,15 @@ MockMapper::StoreAll(void)
 }
 
 int
-MockMapper::_FlushDirtyMpages(int mapId, EventSmartPtr callback)
+MockMapper::_FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages)
 {
     if (mapId == -1)
     {
-        POS_TRACE_INFO(EID(MAP_FLUSH_STARTED), "Issue Flush StripeMap");
-        return stripeMapFlushHandler->FlushTouchedPages(callback);
+        return stripeMapFlushHandler->FlushMapWithPageList(dirtyPages, callback);
     }
     else
     {
-        POS_TRACE_INFO(EID(MAP_FLUSH_STARTED), "Issue Flush VSAMap, Map ID :{}", mapId);
-        return flushHandler[mapId]->FlushTouchedPages(callback);
+        return flushHandler[mapId]->FlushMapWithPageList(dirtyPages, callback);
     }
 }
 } // namespace pos

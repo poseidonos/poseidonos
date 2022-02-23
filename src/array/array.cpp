@@ -44,8 +44,7 @@
 #include "src/include/i_array_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/master_context/unique_id_generator.h"
-#include "src/io_scheduler/io_dispatcher.h"
+#include "src/master_context/instance_id_provider.h"
 
 namespace pos
 {
@@ -53,16 +52,16 @@ const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
 : Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name),
-      DeviceManagerSingleton::Instance(), new PartitionManager(), new ArrayState(iState),
-      new PartitionServices(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
+      DeviceManagerSingleton::Instance(), new PartitionManager(name, abr), new ArrayState(iState),
+      new ArrayInterface(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
 {
 }
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
     ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState,
-    PartitionServices* svc, EventScheduler* eventScheduler, ArrayServiceLayer* arrayService)
+    ArrayInterface* arrayInterface, EventScheduler* eventScheduler, ArrayServiceLayer* arrayService)
 : state(arrayState),
-  svc(svc),
+  intf(arrayInterface),
   ptnMgr(ptnMgr),
   name_(name),
   devMgr_(devMgr) /*initialize with devMgr*/,
@@ -77,7 +76,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
 
 Array::~Array(void)
 {
-    delete svc;
+    delete intf;
     delete ptnMgr;
     delete state;
     delete devMgr_;
@@ -142,15 +141,13 @@ Array::_LoadImpl(void)
         return ret;
     }
 
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "MetaRaid:{}, DataRaid:{}", meta.metaRaidType, meta.dataRaidType);
-    ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
+    ret = _CreatePartitions();
     if (ret != 0)
     {
         return ret;
     }
 
     RaidState rs = ptnMgr->GetRaidState();
-    state->EnableStatePublisher(uniqueId);
     state->SetLoad(rs);
     return ret;
 }
@@ -162,26 +159,16 @@ Array::GetArrayManager(void)
 }
 
 int
-Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
+Array::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     int ret = 0;
-    bool needSpare = true;
     ArrayMeta meta;
     ArrayNamePolicy namePolicy;
-    UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
     ret = state->IsCreatable();
     if (ret != 0)
     {
-        goto error;
-    }
-
-    needSpare = RaidType(dataFt) != RaidTypeEnum::NONE && RaidType(dataFt) != RaidTypeEnum::RAID0;
-    if (needSpare == false && nameSet.spares.size() > 0)
-    {
-        ret = EID(ARRAY_NO_NEED_SPARE);
-        POS_TRACE_INFO(ret, "Unnecessary spare device requested. RaidType {} does not require spare device", dataFt);
         goto error;
     }
 
@@ -197,13 +184,17 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
         goto error;
     }
 
-    uniqueId = uIdGen.GenerateUniqueId();
-    state->EnableStatePublisher(uniqueId);
+    if (dataRaidType != "RAID5")
+    {
+        ret = (int)POS_EVENT_ID::ARRAY_WRONG_FT_METHOD;
+        goto error;
+    }
+    uniqueId = InstanceIdProviderSingleton::Instance()->GetInstanceId();
 
     meta.arrayName = name_;
     meta.devs = devMgr_->ExportToMeta();
-    meta.metaRaidType = metaFt;
-    meta.dataRaidType = dataFt;
+    meta.metaRaidType = "RAID1";
+    meta.dataRaidType = "dataRaidType";
     meta.unique_id = uniqueId;
     ret = abrControl->CreateAbr(meta);
     if (ret != 0)
@@ -221,23 +212,23 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
         }
     }
 
-    ret = _Flush(meta);
+    ret = _Flush();
     if (ret != 0)
     {
         goto error;
     }
 
-    ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
+    ret = _CreatePartitions();
     if (ret != 0)
     {
         goto error;
     }
 
-    ptnMgr->FormatPartition(PartitionType::META_SSD, index_, IODispatcherSingleton::Instance());
+    ptnMgr->FormatMetaPartition();
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} is successfully created", name_);
+    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully created", name_);
     return 0;
 
 error:
@@ -347,7 +338,12 @@ Array::Delete(void)
 
     _DeletePartitions();
     devMgr_->Clear();
-    abrControl->DeleteAbr(name_);
+    ret = abrControl->DeleteAbr(name_);
+    if (ret != 0)
+    {
+        goto error;
+    }
+
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
@@ -481,13 +477,13 @@ Array::GetIndex(void)
 string
 Array::GetMetaRaidType(void)
 {
-    return RaidType(ptnMgr->GetRaidType(PartitionType::META_SSD)).ToString();
+    return "RAID1";
 }
 
 string
 Array::GetDataRaidType(void)
 {
-    return RaidType(ptnMgr->GetRaidType(PartitionType::USER_DATA)).ToString();
+    return "RAID5";
 }
 
 string
@@ -534,33 +530,21 @@ Array::_Flush(void)
     meta.metaRaidType = GetMetaRaidType();
     meta.dataRaidType = GetDataRaidType();
     meta.devs = devMgr_->ExportToMeta();
-    return _Flush(meta);
-}
 
-int
-Array::_Flush(ArrayMeta& meta)
-{
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Trying to save Array to MBR, name:{}, metaRaid:{}, dataRaid:{}",
-        meta.arrayName, meta.metaRaidType, meta.dataRaidType);
     return abrControl->SaveAbr(meta);
 }
 
 int
-Array::_CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid)
+Array::_CreatePartitions(void)
 {
     DeviceSet<ArrayDevice*> devs = devMgr_->Export();
-    ArrayDevice* nvm = nullptr;
-    if (devs.nvm.size() > 0)
-    {
-        nvm = devs.nvm.front();
-    }
-    return ptnMgr->CreatePartitions(nvm, devs.data, metaRaid, dataRaid, svc);
+    return ptnMgr->CreateAll(devs.nvm, devs.data, intf, index_);
 }
 
 void
 Array::_DeletePartitions(void)
 {
-    ptnMgr->DeletePartitions();
+    ptnMgr->DeleteAll(intf);
 }
 
 bool
@@ -873,13 +857,12 @@ Array::TriggerRebuild(ArrayDevice* target)
     POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
-    uint32_t arrId = index_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
-    list<RebuildTarget*> tasks = svc->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
+    list<RebuildTarget*> tasks = intf->GetRebuildTargets();
+    thread t([arrRebuilder, arrName, target, cb, tasks]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, target, cb, targets);
     });
 
     t.detach();
@@ -908,13 +891,12 @@ Array::ResumeRebuild(ArrayDevice* target)
     POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
-    uint32_t arrId = index_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
-    list<RebuildTarget*> tasks = svc->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
+    list<RebuildTarget*> tasks = intf->GetRebuildTargets();
+    thread t([arrRebuilder, arrName, target, cb, tasks]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, target, cb, targets);
     });
 
     t.detach();
@@ -926,16 +908,12 @@ int
 Array::_RegisterService(void)
 {
     auto ret = arrayService->Setter()->Register(name_, index_,
-        svc->GetTranslator(), svc->GetRecover(), this);
+        intf->GetTranslator(), intf->GetRecover(), this);
     if (ret)
     {
         if (devMgr_ != nullptr)
         {
-            RaidTypeEnum metaRaid = ptnMgr->GetRaidType(PartitionType::META_SSD);
-            if (metaRaid == RaidTypeEnum::RAID10)
-            {
-                IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
-            }
+            IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
             return 0;
         }
     }

@@ -42,6 +42,7 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
@@ -85,8 +86,6 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     AllocatorFileIo* segmentFileIo = new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo, arrayId);
     AllocatorFileIo* allocatorFileIo = new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo, arrayId);
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
-
-    rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
 }
 
 ContextManager::~ContextManager(void)
@@ -160,13 +159,33 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {
-    return segmentCtx->AllocateFreeSegment();
+    SegmentId segId = segmentCtx->AllocateFreeSegment();
+
+    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
+    if (segId != UNMAP_SEGMENT)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
+        POSMetricValue v;
+        v.gauge = segId;
+        telPublisher->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
+    }
+    return segId;
 }
 
 SegmentId
 ContextManager::AllocateGCVictimSegment(void)
 {
-    return segmentCtx->AllocateGCVictimSegment();
+    SegmentId victimSegment = segmentCtx->FindMostInvalidSSDSegment();
+    if (victimSegment != UNMAP_SEGMENT)
+    {
+        segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
+
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, segmentCtx->GetNumOfFreeSegmentWoLock());
+        POSMetricValue v;
+        v.gauge = victimSegment;
+        telPublisher->PublishData(TEL30002_ALCT_GCVICTIM_SEG, v, MT_GAUGE);
+    }
+    return victimSegment;
 }
 
 GcMode
@@ -229,32 +248,52 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
-    return segmentCtx->GetRebuildTargetSegment();
+    SegmentId segId = segmentCtx->GetRebuildTargetSegment();
+    return segId;
 }
 
 bool
 ContextManager::NeedRebuildAgain(void)
 {
-    bool needToContinue = segmentCtx->LoadRebuildList();
-    return needToContinue;
+    return rebuildCtx->NeedRebuildAgain();
 }
 
 int
 ContextManager::ReleaseRebuildSegment(SegmentId segId)
 {
-    return segmentCtx->SetRebuildCompleted(segId);
+    int ret = rebuildCtx->ReleaseRebuildSegment(segId);
+    if (ret == 1) // need to flush
+    {
+        ioManager->FlushRebuildContext(nullptr, false);
+        ret = 0;
+    }
+    return ret;
 }
 
 int
-ContextManager::MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList)
+ContextManager::MakeRebuildTarget(void)
 {
-    return segmentCtx->MakeRebuildTarget(segmentList);
+    int ret = segmentCtx->MakeRebuildTarget();
+    if (ret == 1) // need to flush
+    {
+        ioManager->FlushRebuildContext(nullptr, false);
+        ret = rebuildCtx->GetRebuildTargetSegmentCount();
+    }
+    return ret;
 }
 
 int
 ContextManager::StopRebuilding(void)
 {
-    return segmentCtx->StopRebuilding();
+    std::unique_lock<std::mutex> lock(ctxLock);
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
+    int ret = rebuildCtx->StopRebuilding();
+    if (ret == 1) // need to flush
+    {
+        ioManager->FlushRebuildContext(nullptr, false);
+        ret = 0;
+    }
+    return ret;
 }
 
 char*
@@ -274,12 +313,19 @@ ContextManager::GetContextSectionSize(int owner, int section)
 uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
-    return segmentCtx->GetRebuildTargetSegmentCount();
+    return rebuildCtx->GetRebuildTargetSegmentCount();
 }
 
 void
 ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
+    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
+    int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
+    if (ret == 1)
+    {
+        ioManager->FlushRebuildContext(nullptr, false);
+    }
     if (GetCurrentGcMode() != MODE_URGENT_GC)
     {
         blockAllocStatus->PermitUserBlockAllocation();

@@ -44,11 +44,12 @@ namespace pos
 class NvmPartition : public Partition
 {
 public:
-    NvmPartition(PartitionType type,
+    NvmPartition(string array,
+                 uint32_t arrayIndex,
+                 PartitionType type,
+                 PartitionPhysicalSize physicalSize,
                  vector<ArrayDevice*> devs);
     virtual ~NvmPartition();
-    int Create(uint64_t startLba, uint32_t blksPerChunk);
-    void RegisterService(IPartitionServices* svc) override;
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src);
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
@@ -56,8 +57,6 @@ public:
     bool IsByteAccessSupported(void) override;
 
 private:
-    int _SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk);
-    void _SetLogicalAddress(void);
     bool _IsValidByteAddress(const LogicalByteAddr& lsa);
     bool _IsValidByteEntry(const LogicalByteWriteEntry& entry);
 };

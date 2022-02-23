@@ -14,12 +14,13 @@ namespace pos
 TEST(MapUpdateLogWriteContext, GetDirtyList_testIfExecutedSuccessfully)
 {
     // Given
-    MapList expectDirtyMap;
-    expectDirtyMap.emplace(1);
+    MpageList dirty{1};
+    MapPageList expectDirtyMap;
+    expectDirtyMap[0] = dirty;
     MapUpdateLogWriteContext mapUpdatedLogWriteContext(expectDirtyMap, nullptr, nullptr, nullptr);
 
     // When
-    MapList result = mapUpdatedLogWriteContext.GetDirtyList();
+    MapPageList result = mapUpdatedLogWriteContext.GetDirtyList();
 
     // Then
     EXPECT_EQ(expectDirtyMap, result);
@@ -31,8 +32,8 @@ TEST(MapUpdateLogWriteContext, LogWriteDone_testIfExecutedSuccessfully)
     NiceMock<MockEvent>* clientCallback = new NiceMock<MockEvent>;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
     NiceMock<MockCallbackSequenceController> sequencer;
-    MapList dirtyMap;
-    MapUpdateLogWriteContext mapUpdatedLogWriteContext(dirtyMap, EventSmartPtr(clientCallback), &notifier, &sequencer);
+    MapPageList dirtyList;
+    MapUpdateLogWriteContext mapUpdatedLogWriteContext(dirtyList, EventSmartPtr(clientCallback), &notifier, &sequencer);
 
     // When, Then
     bool retResult = true;

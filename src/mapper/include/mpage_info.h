@@ -34,7 +34,7 @@
 
 #include "src/bio/ubio.h"
 #include <map>
-#include <unordered_set>
+#include <set>
 
 namespace pos
 {
@@ -42,9 +42,8 @@ namespace pos
 const int STRIPE_MAP_ID = -1;
 
 using MpageNum = uint64_t;
-using MpageList = std::unordered_set<MpageNum>;
+using MpageList = std::set<MpageNum>;
 using MapPageList = std::map<int, MpageList>; // K: mapId
-using MapList = std::unordered_set<uint32_t>;
 using VsaArray = std::array<VirtualBlkAddr, MAX_PROCESSABLE_BLOCK_COUNT>;
 
 } // namespace pos

@@ -33,8 +33,6 @@
 #ifndef META_FILE_NAME_MOCK_H
 #define META_FILE_NAME_MOCK_H
 
-#include <string>
-
 #include <gmock/gmock.h>
 
 #include "src/metafs/common/meta_file_name.h"
@@ -43,10 +41,6 @@ class MockMetaFileName : public MetaFileName
 {
 public:
     using MetaFileName::MetaFileName;
-
-    MOCK_METHOD(std::string, ToString, (), (override));
-    MOCK_METHOD(const char*, ToChar, (), (override));
-    MOCK_METHOD(size_t, GetLength, (), (override));
 };
 
 #endif // META_FILE_NAME_MOCK_H

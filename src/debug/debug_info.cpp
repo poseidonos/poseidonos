@@ -57,7 +57,6 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
-#include "src/signal_handler/signal_handler.h"
 #include "src/spdk_wrapper/spdk.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
@@ -140,7 +139,6 @@ DebugInfo::Update(void)
     telemetryClient = TelemetryClientSingleton::Instance();
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
-    signalHandler = SignalHandlerSingleton::Instance();
 }
 // LCOV_EXCL_STOP
 } // namespace pos

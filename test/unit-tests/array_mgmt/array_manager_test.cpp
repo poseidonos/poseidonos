@@ -87,7 +87,7 @@ TEST(ArrayManager, Create_testIfFailsToCreateArrayWithExistingName)
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     // When
-    int actual = arrayMgr->Create(existingArray, DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayMgr->Create(existingArray, DeviceSet<string>(), "some-raid");
 
     // Then
     ASSERT_EQ(EID(ARRAY_ALREADY_EXIST), actual);
@@ -108,7 +108,7 @@ TEST(ArrayManager, Create_testIfFailsToCreateArrayWhenMaxArrayCntIsReached)
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     // When
-    int actual = arrayMgr->Create("new-array", DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayMgr->Create("new-array", DeviceSet<string>(), "some-raid");
 
     // Then
     ASSERT_EQ(EID(ARRAY_CNT_EXCEEDED), actual);
@@ -132,7 +132,7 @@ TEST(ArrayManager, Create_testIfArrayObjectIsFreedAndArrayMapNotUpdatedWhenCreat
     EXPECT_CALL(*mockArrayComp, Create).WillOnce(Return(CREATION_FAILURE));
 
     // When
-    int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "some-raid");
 
     // Then
     ASSERT_EQ(CREATION_FAILURE, actual);
@@ -157,7 +157,7 @@ TEST(ArrayManager, Create_testIfArrayMapUpdatedWhenCreationSucceeds)
     // EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0)); // success
 
     // When
-    int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "some-raid");
 
     // Then
     ASSERT_EQ(0, actual);

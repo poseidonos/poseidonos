@@ -37,7 +37,6 @@
 #include "src/include/raid_state.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
-#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #include <condition_variable>
 #include <mutex>
@@ -48,8 +47,7 @@ namespace pos
 class ArrayState : public IStateObserver
 {
 public:
-    ArrayState(IStateControl* iState,
-        TelemetryClient* telemetryClient = TelemetryClientSingleton::Instance());
+    ArrayState(IStateControl* iState);
     virtual ~ArrayState(void);
 
     virtual void SetState(ArrayStateEnum nextState);
@@ -79,12 +77,10 @@ public:
     virtual StateContext* GetSysState(void);
 
     virtual void StateChanged(StateContext* prev, StateContext* next) override;
-    virtual void EnableStatePublisher(id_t arrayUniqueId);
 
 private:
     void _SetState(ArrayStateEnum newState);
     bool _WaitState(StateContext* goal);
-    void _PublishCurrentState();
 
     IStateControl* iStateControl;
 
@@ -96,10 +92,6 @@ private:
     std::condition_variable cv;
 
     ArrayStateType state = ArrayStateEnum::NOT_EXIST;
-    string arrayUniqueId;
-    bool publisherEnabled = false;
-    TelemetryPublisher* publisher = nullptr;
-    TelemetryClient* telemetryClient = nullptr;
 };
 
 } // namespace pos

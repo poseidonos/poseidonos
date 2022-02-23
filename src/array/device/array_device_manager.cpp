@@ -41,7 +41,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_list.h"
-#include "src/helper/enumerable/query.h"
 
 namespace pos
 {
@@ -162,13 +161,8 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 
             dev = new ArrayDevice(uBlock, meta.state);
         }
-        devs_->AddData(dev);
-    }
 
-    ret = _CheckActiveSsdsCount(devs_->GetDevs().data);
-    if (0 != ret)
-    {
-        return ret;
+        devs_->AddData(dev);
     }
 
     for (DeviceMeta meta : metaSet.spares)
@@ -205,10 +199,10 @@ ArrayDeviceManager::AddSpare(string devName)
         return -2; // TODO
     }
 
-    uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
-    if (baseCapa > spare->GetSize())
+    ArrayDevice* baseline = _GetBaseline(devs_->GetDevs().data);
+    if (baseline->GetUblock()->GetSize() != spare->GetSize())
     {
-        return EID(ARRAY_SSD_CAPACITY_ERROR);
+        return EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
     }
 
     devs_->AddSpare(new ArrayDevice(spare));
@@ -218,6 +212,12 @@ ArrayDeviceManager::AddSpare(string devName)
 int
 ArrayDeviceManager::_CheckDevs(const ArrayDeviceSet& devSet)
 {
+    int ret = _CheckFaultTolerance(devSet);
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     for (ArrayDevice* dev : devSet.nvm)
     {
         if (nullptr != dev->GetUblock() && false == dev->GetUblock()->IsAlive())
@@ -259,12 +259,9 @@ ArrayDeviceManager::ExportToMeta(void)
 {
     DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
     DeviceSet<DeviceMeta> metaSet;
-    if (_d.nvm.size() > 0)
-    {
-        string sn = _d.nvm.at(0)->GetUblock()->GetSN();
-        DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
-        metaSet.nvm.push_back(nvmMeta);
-    }
+    string sn = _d.nvm.at(0)->GetUblock()->GetSN();
+    DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
+    metaSet.nvm.push_back(nvmMeta);
 
     for (ArrayDevice* dev : _d.data)
     {
@@ -388,29 +385,103 @@ int
 ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
 {
     ArrayDeviceSet devSet = devs->GetDevs();
-    int ret = _CheckDevs(devSet);
+
+    int ret = _CheckDevsCount(devSet);
     if (0 != ret)
     {
         return ret;
     }
 
-    ret = _CheckActiveSsdsCount(devSet.data);
+    ret = _CheckDevs(devSet);
     if (0 != ret)
     {
         return ret;
     }
 
-    if (devSet.nvm.size() > 0)
+    ret = _CheckNvmCapacity(devSet);
+    if (0 != ret)
     {
-        ret = _CheckNvmCapacity(devSet);
-        if (0 != ret)
-        {
-            return ret;
-        }
+        return ret;
     }
 
     ret = _CheckSsdsCapacity(devSet);
+
     return ret;
+}
+
+int
+ArrayDeviceManager::_CheckDevsCount(ArrayDeviceSet devSet)
+{
+    uint32_t nvmCnt = devSet.nvm.size();
+
+    uint32_t activeDataCnt = 0;
+    uint32_t faultDataCnt = 0;
+    for (ArrayDevice* dev : devSet.data)
+    {
+        if (dev->GetUblock() != nullptr)
+        {
+            activeDataCnt++;
+        }
+        else
+        {
+            faultDataCnt++;
+        }
+    }
+    uint32_t spareCnt = devSet.spares.size();
+    uint32_t totalCnt = activeDataCnt + spareCnt;
+
+    int ret = 0;
+    uint32_t errEventId = (uint32_t)POS_EVENT_ID::ARRAY_DEVICE_COUNT_ERROR;
+
+    uint32_t maxNvmCnt = ArrayConfig::NVM_DEVICE_COUNT;
+    uint32_t minDataCnt = ArrayConfig::MINIMUM_DATA_DEVICE_COUNT;
+    uint32_t maxDataCnt = ArrayConfig::MAXIMUM_DEVICE_COUNT;
+
+    if (nvmCnt != maxNvmCnt)
+    {
+        POS_TRACE_ERROR(errEventId,
+            "The number of nvm device must be {}", maxNvmCnt);
+        ret = errEventId;
+    }
+    else if (activeDataCnt + faultDataCnt < minDataCnt)
+    {
+        POS_TRACE_ERROR(errEventId,
+            "The number of data disks must be {} or more", minDataCnt);
+        ret = errEventId;
+    }
+    else if (totalCnt > maxDataCnt)
+    {
+        POS_TRACE_ERROR(errEventId,
+            "The number of disks must be no more {}", maxDataCnt);
+        ret = errEventId;
+    }
+
+    return ret;
+}
+
+int
+ArrayDeviceManager::_CheckFaultTolerance(DeviceSet<ArrayDevice*> devSet)
+{
+    int faultDevCnt = 0;
+    for (ArrayDevice* dev : devSet.data)
+    {
+        if (dev->GetState() != ArrayDeviceState::NORMAL)
+        {
+            faultDevCnt++;
+        }
+    }
+
+    const int brokenCnt = 2;
+    if (faultDevCnt >= brokenCnt)
+    {
+        uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_BROKEN_ERROR;
+        POS_TRACE_ERROR(eventId,
+            "Array cannot be configured due to faults of {} data devices",
+            faultDevCnt);
+        return eventId;
+    }
+
+    return 0;
 }
 
 int
@@ -429,24 +500,6 @@ ArrayDeviceManager::_CheckNvmCapacity(const DeviceSet<ArrayDevice*>& devSet)
 
     return 0;
 }
-
-int
-ArrayDeviceManager::_CheckActiveSsdsCount(const vector<ArrayDevice*>& devs)
-{
-    const int errorId = EID(ARRAY_DEVICE_COUNT_ERROR);
-    if (devs.size() > 0)
-    {
-        auto&& devList = Enumerable::Where(devs,
-            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
-        if (devList.size() > 0)
-        {
-            return 0;
-        }
-    }
-    POS_TRACE_WARN(errorId, "Failed to load array: all devices in this array is in the fault state. At least one normal state device is required to configure Array");
-    return errorId;
-}
-
 
 uint64_t
 ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
@@ -468,9 +521,10 @@ ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
 int
 ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 {
-    uint64_t baseCapa = _GetBaseCapacity(devSet.data);
+    ArrayDevice* baseline = _GetBaseline(devSet.data);
+    uint64_t capacityBytes = baseline->GetUblock()->GetSize();
 
-    if (baseCapa < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || baseCapa > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
+    if (capacityBytes < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || capacityBytes > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
     {
         uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_SSD_CAPACITY_ERROR;
         POS_TRACE_ERROR(eventId,
@@ -479,17 +533,21 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
             ArrayConfig::MAXIMUM_SSD_SIZE_BYTE / SIZE_TB);
         return eventId;
     }
-
-    if (devSet.spares.size() > 0)
+    for (ArrayDevice* dev : devSet.data)
     {
-        uint64_t minSpareCapa = _GetBaseCapacity(devSet.spares);
-        if (minSpareCapa < baseCapa)
+        if (ArrayDeviceState::NORMAL == dev->GetState() && capacityBytes != dev->GetUblock()->GetSize())
         {
-            uint32_t eventId = EID(ARRAY_SSD_CAPACITY_ERROR);
-            POS_TRACE_ERROR(eventId,
-                "The capacity of all spare devices must be equal to or greater than the smallest of the data devices, minData:{}, minSpare:{}",
-                baseCapa,
-                minSpareCapa);
+            int eventId = EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
+            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
+            return eventId;
+        }
+    }
+    for (ArrayDevice* dev : devSet.spares)
+    {
+        if (capacityBytes != dev->GetUblock()->GetSize())
+        {
+            int eventId = EID(ARRAY_SSD_SAME_CAPACITY_ERROR);
+            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
             return eventId;
         }
     }
@@ -537,21 +595,24 @@ ArrayDeviceManager::GetDev(string devSn)
     return GetDev(dev);
 }
 
-uint64_t
-ArrayDeviceManager::_GetBaseCapacity(const vector<ArrayDevice*>& devs)
+ArrayDevice*
+ArrayDeviceManager::_GetBaseline(const vector<ArrayDevice*>& devs)
 {
-    auto&& devList = Enumerable::Where(devs,
-        [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
-
-    ArrayDevice* base = Enumerable::Minimum(devList,
-        [](auto d) { return d->GetUblock()->GetSize(); });
-
-    if (base == nullptr)
+    ArrayDevice* baseline = nullptr;
+    for (ArrayDevice* dev : devs)
     {
-        POS_TRACE_WARN(EID(ARRAY_DEBUG_MSG), "Failed to acquire base capaicty, device cnt: {}", devList.size());
-        return 0;
+        if (ArrayDeviceState::FAULT != dev->GetState())
+        {
+            baseline = dev;
+            break;
+        }
     }
-    return base->GetUblock()->GetSize();
+    if (nullptr == baseline)
+    {
+        assert(0);
+    }
+
+    return baseline;
 }
 
 void

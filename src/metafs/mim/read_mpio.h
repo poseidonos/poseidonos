@@ -48,9 +48,9 @@ public:
     {
         return MpioType::Read;
     }
+    virtual void InitStateHandler(void) override;
 
 protected:
-    virtual void _InitStateHandler(void) override;
     bool _HandleError(MpAioState expNextState);
 
 private:

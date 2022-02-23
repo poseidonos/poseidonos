@@ -36,7 +36,7 @@ poseidonos-cli subsystem [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 * [poseidonos-cli subsystem add-listener](poseidonos-cli_subsystem_add-listener.md)	 - Add a listener to an NVMe-oF subsystem
 * [poseidonos-cli subsystem create](poseidonos-cli_subsystem_create.md)	 - Create an NVMe-oF subsystem to PoseidonOS.
 * [poseidonos-cli subsystem create-transport](poseidonos-cli_subsystem_create-transport.md)	 - Create NVMf transport to PoseidonOS.

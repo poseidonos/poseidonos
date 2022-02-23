@@ -53,7 +53,7 @@ public:
 
     virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer, EventScheduler* scheduler);
 
-    virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback);
+    virtual int Start(MapPageList pendingDirtyPages, EventSmartPtr callback);
     virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);

@@ -30,11 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #include "src/journal_manager/log_write/log_write_statistics.h"
 
 #include "src/journal_manager/log/log_handler.h"
-#include "src/journal_manager/statistics/stripe_info.h"
 #include "src/journal_manager/statistics/stripe_log_write_status.h"
+#include "src/journal_manager/statistics/stripe_info.h"
 
 namespace pos
 {

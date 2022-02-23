@@ -93,7 +93,6 @@ public:
     void SetWaitingCount(uint32_t inputWaitingCount);
     virtual void SetCallee(CallbackSmartPtr callee);
     void InformError(IOErrorType inputIOErrorType);
-    static void SetTimeout(uint64_t timeout);
 
 protected:
     virtual uint32_t _GetErrorCount(void);
@@ -120,9 +119,7 @@ private:
     CallbackType type;
     uint64_t objectAddress;
 
-    static uint64_t timeoutNs;
     static const uint32_t CALLER_FRAME;
     static const uint64_t DEFAULT_TIMEOUT_NS;
-    static const uint64_t MAX_TIMEOUT_SEC;
 };
 } // namespace pos

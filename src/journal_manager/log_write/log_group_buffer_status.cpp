@@ -103,7 +103,7 @@ LogGroupBufferStatus::_AllocateIfNotFull(uint32_t logSize, uint64_t& offset)
         nextOffset += logSize;
         numLogsAdded++;
 
-        return (int)POS_EVENT_ID::SUCCESS;
+        return 0;
     }
     else
     {

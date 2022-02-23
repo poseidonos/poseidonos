@@ -49,7 +49,7 @@ StripeMapUpdatedLogHandler::StripeMapUpdatedLogHandler(StripeMapUpdatedLog& log)
 }
 
 bool
-StripeMapUpdatedLogHandler::operator==(const StripeMapUpdatedLogHandler log)
+StripeMapUpdatedLogHandler::operator==(const  StripeMapUpdatedLogHandler log)
 {
     return ((dat.vsid == log.dat.vsid) && (dat.newMap == log.dat.newMap));
 }

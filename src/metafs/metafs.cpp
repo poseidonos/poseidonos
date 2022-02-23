@@ -55,13 +55,12 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 
     metaStorage = new MssOnDisk(arrayId);
 
-    telemetryPublisher = new TelemetryPublisher("metafs_" + to_string(arrayId));
-    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
-
     mgmt = new MetaFsManagementApi(arrayId, metaStorage);
     ctrl = new MetaFsFileControlApi(arrayId, metaStorage);
-    io = new MetaFsIoApi(arrayId, ctrl, metaStorage, telemetryPublisher);
+    io = new MetaFsIoApi(arrayId, ctrl, metaStorage);
     wbt = new MetaFsWBTApi(arrayId, ctrl);
+    telemetryPublisher = new TelemetryPublisher("metafs_" + to_string(arrayId));
+    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }

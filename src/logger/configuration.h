@@ -45,7 +45,6 @@ public:
     uint32_t LogSizePerFileInMB();
     uint32_t NumOfLogFilesForRotation();
     string LogLevel();
-    bool IsStrLoggingEnabled();
 
 private:
     const uint32_t SIZE_MB = 50;
@@ -55,8 +54,5 @@ private:
     const uint32_t MAX_ROTATION = 100;
     const uint32_t MIN_ROTATION = 1;
     const string LOG_LEVEL = "debug";
-    // TODO (mj): The default value of STRUCTURED_LOGGING will be
-    // TRUE after implementing structured logging functionality.
-    const bool ENABLE_STRUCTURED_LOGGING = false;
 };
 } // namespace pos_logger

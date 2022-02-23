@@ -32,8 +32,6 @@
 
 #include "buffered_segment_context_manager.h"
 
-#include <unordered_map>
-
 #include "buffered_segment_context.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/config/journal_configuration.h"

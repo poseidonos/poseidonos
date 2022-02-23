@@ -39,16 +39,14 @@
 #include "src/logger/logger.h"
 namespace pos
 {
-ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
-                        ArrayDevice* dev, RebuildComplete cb,
-                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory)
+ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
+    list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
-        arrayName, tgt.size());
+        "ArrayRebuild::ArrayRebuild() array {} with total {} tasks", array, tgt.size());
 
-    RebuildProgress* prog = new RebuildProgress(arrayName);
-    RebuildLogger* rLogger = new RebuildLogger(arrayName);
+    RebuildProgress* prog = new RebuildProgress(array);
+    RebuildLogger* rLogger = new RebuildLogger(array);
     list<PartitionRebuild*> partRebuild;
 
     for (RebuildTarget* tar : tgt)
@@ -61,8 +59,6 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
-                bhvr->GetContext()->array = arrayName;
-                bhvr->GetContext()->arrayIndex = arrayId;
                 bhvr->GetContext()->prog = prog;
                 bhvr->GetContext()->logger = rLogger;
                 bhvr->UpdateProgress(0);
@@ -78,7 +74,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
             }
         }
     }
-    Init(arrayName, dev, cb, partRebuild, prog, rLogger);
+    Init(array, dev, cb, partRebuild, prog, rLogger);
 }
 
 void

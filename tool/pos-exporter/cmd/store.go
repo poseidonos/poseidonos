@@ -5,9 +5,8 @@ import (
 )
 
 var (
-	counters     = make(map[string]*prometheus.CounterVec)
-	gauges       = make(map[string]*prometheus.GaugeVec)
-	histogramMap = make(map[string]*POSHistogramCollector)
+	counters = make(map[string]*prometheus.CounterVec)
+	gauges   = make(map[string]*prometheus.GaugeVec)
 )
 
 func getLabelKeys(labels *map[string]string) *[]string {
@@ -46,29 +45,4 @@ func addGauge(in *GaugeMetric) {
 	}
 	vec.With(*in.labels).Set(float64(in.value))
 
-}
-
-func addHistogram(in *HistogramMetric) {
-	histVector, exists := histogramMap[in.name]
-	if !exists {
-		histVector = NewPOSHistogramCollector(in.name, getSortedKeyFromLabelMap(in.labels))
-		histogramMap[in.name] = histVector
-		prometheus.MustRegister(histVector)
-	}
-
-	hist := histVector.FindHistogram(in.labels)
-	if hist == nil {
-		hist = NewPOSHistogram(len(in.bucketCount))
-		histVector.AddHistogram(in.labels, hist)
-	}
-
-	// Update Label Key, Value
-	var labelKeys = getSortedKeyFromLabelMap(in.labels)
-	var labelValues = make([]string, len(labelKeys))
-	for idx := range labelKeys {
-		labelValues[idx] = (*in.labels)[labelKeys[idx]]
-	}
-	hist.UpdateLabelKey(labelKeys)
-	hist.UpdateLabelValues(labelValues)
-	hist.UpdateHistogram(in)
 }

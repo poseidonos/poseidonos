@@ -8,7 +8,8 @@ Executing the following command will display how to enable the command autocompl
 ```bash
 /poseidonos/ibofos/bin$ ./poseidonos-cli completion --help
 
-Completion command generates an auto-completion script for bash, zsh, fish, or powershell.
+This command generates the auto completion script for bash or zsh
+shelles.
 
 To load completions:
 
@@ -41,24 +42,8 @@ Zsh:
 
   # You will need to start a new shell for this setup to take effect.
 
-Fish:
-
-  $ poseidonos-cli completion fish | source
-
-  # To load completions for each session, execute once:
-  $ poseidonos-cli completion fish > ~/.config/fish/completions/poseidonos-cli.fish
-
-PowerShell:
-
-  PS> poseidonos-cli completion powershell | Out-String | Invoke-Expression
-
-  # To load completions for every new session, run:
-  PS> poseidonos-cli completion powershell > poseidonos-cli.ps1
-  # Add source /yourpath/poseidonos-cli.ps1 file from your PowerShell profile.
-
 Usage:
-  poseidonos-cli completion [bash|zsh|fish|powershell]
-
+  poseidonos-cli completion [bash|zsh]
 ```
 
 Follow the instructions according to your shell. After restarting the shell, you will be able to TAB to complete the command automatically.
@@ -70,16 +55,16 @@ You can combine POS CLI with the popular linux commands such as grep and awk. He
 The device list command will display all the devices in the system. 
 ```bash
 /poseidonos/bin$ ./poseidonos-cli device list
-| Name       | SerialNumber(SN) | Address      | Class  | MN              | NUMA | Size          |
-| ---------- | ---------------- | ------------ | ------ | --------------- | ---- | ------------- |
-| unvme-ns-0 | 016              | 0000:4e:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-1 | 017              | 0000:52:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-2 | 018              | 0000:69:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-3 | 019              | 0000:6c:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-4 | 020              | 0000:ce:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
-| unvme-ns-5 | 021              | 0000:d1:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
-| unvme-ns-6 | 022              | 0000:e7:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
-| unvme-ns-7 | 023              | 0000:ea:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
+Name           |SerialNumber(SN)     |Address        |Class         |MN                                       |NUMA   |Size
+-------------- |-------------------  |-------------- |------------- |--------------------------               |------ |------------------
+unvme-ns-0     |016                  |0000:4e:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-1     |017                  |0000:52:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-2     |018                  |0000:69:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-3     |019                  |0000:6c:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-4     |020                  |0000:ce:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
+unvme-ns-5     |021                  |0000:d1:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
+unvme-ns-6     |022                  |0000:e7:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
+unvme-ns-7     |023                  |0000:ea:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
 ```
 Using grep, you can display the information of specific devices, arrays, or volumes as in the following examples:
 
@@ -90,15 +75,15 @@ unvme-ns-4     |020                  |0000:ce:00.0   |SYSTEM        |SAMSUNG SSD
 
 # Displaying the information of all the devices except for "unvme-ns-4".
 /poseiondonos/bin$ ./poseidonos-cli device list | grep -v unvme-ns-4
-| Name       | SerialNumber(SN) | Address      | Class  | MN              | NUMA | Size          |
-| ---------- | ---------------- | ------------ | ------ | --------------- | ---- | ------------- |
-| unvme-ns-0 | 016              | 0000:4e:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-1 | 017              | 0000:52:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-2 | 018              | 0000:69:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-3 | 019              | 0000:6c:00.0 | SYSTEM | SAMSUNG SSD -Q- | 0    | 3840755982336 |
-| unvme-ns-5 | 021              | 0000:d1:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
-| unvme-ns-6 | 022              | 0000:e7:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
-| unvme-ns-7 | 023              | 0000:ea:00.0 | SYSTEM | SAMSUNG SSD -Q- | 1    | 3840755982336 |
+Name           |SerialNumber(SN)     |Address        |Class         |MN                                       |NUMA   |Size
+-------------- |-------------------  |-------------- |------------- |--------------------------               |------ |------------------
+unvme-ns-0     |016                  |0000:4e:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-1     |017                  |0000:52:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-2     |018                  |0000:69:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-3     |019                  |0000:6c:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |0      |3840755982336
+unvme-ns-5     |021                  |0000:d1:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
+unvme-ns-6     |022                  |0000:e7:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
+unvme-ns-7     |023                  |0000:ea:00.0   |SYSTEM        |SAMSUNG SSD -Q-                          |1      |3840755982336
 ```
 
 Using awk, you can display the conditional information of specific devices, arrays, or volumes as in the following examples:

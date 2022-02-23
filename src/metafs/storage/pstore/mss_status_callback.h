@@ -108,10 +108,6 @@ public:
     {
         return cxt->arrayId;
     }
-    MssAioData* GetIoContext(void)
-    {
-        return cxt;
-    }
 
 private:
     MssAioData* cxt;

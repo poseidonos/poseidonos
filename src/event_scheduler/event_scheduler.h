@@ -78,7 +78,7 @@ public:
 
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
-    bool _CheckContention(BackendEvent eventId);
+    bool _CheckContention(void);
     void _CheckAndSetQueueOccupancy(BackendEvent eventId);
     bool _GetQueueOccupancy(BackendEvent eventId);
     bool _NoContentionCycleDone(uint32_t cycles);

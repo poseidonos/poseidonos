@@ -59,7 +59,7 @@ TEST(ArrayComponents, Create_testIfRemoveStateIsInvokedWhenCreationFails)
     EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1); // one by Create() and the other by destructor
 
     // When
-    int actual = arrayComps.Create(DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayComps.Create(DeviceSet<string>(), "mock-raidtype");
 
     // Then
     ASSERT_EQ(EID(ARRAY_BROKEN_ERROR), actual);
@@ -84,7 +84,7 @@ TEST(ArrayComponents, Create_testIfGetStateAndSubscribeIsInvokedWhenCreationSucc
     EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1);
 
     // When
-    int actual = arrayComps.Create(DeviceSet<string>(), "RAID10", "RAID5");
+    int actual = arrayComps.Create(DeviceSet<string>(), "mock-raidtype");
 
     // Then
     ASSERT_EQ(0, actual);

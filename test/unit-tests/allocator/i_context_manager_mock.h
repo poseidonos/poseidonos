@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/allocator/i_context_manager.h"
 
 namespace pos
@@ -17,6 +19,7 @@ public:
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
     MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));

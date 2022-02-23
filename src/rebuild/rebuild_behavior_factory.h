@@ -33,8 +33,8 @@
 #pragma once
 
 #include "rebuild_behavior.h"
-#include "stripe_based_race_rebuild.h"
-#include "segment_based_rebuild.h"
+#include "raid1_rebuild.h"
+#include "raid5_rebuild.h"
 #include "src/allocator_service/allocator_service.h"
 
 #include <memory>

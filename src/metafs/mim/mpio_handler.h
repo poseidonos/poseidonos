@@ -33,8 +33,8 @@
 #pragma once
 
 #include "mfs_io_handler_base.h"
-#include "src/metafs/mim/metafs_io_multilevel_q.h"
-#include "mpio_allocator.h"
+#include "metafs_io_q.h"
+#include "mpio_pool.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 #include <string>
@@ -47,22 +47,21 @@ class MpioHandler
 public:
     explicit MpioHandler(int threadId, int coreId,
                     TelemetryPublisher* tp = nullptr,
-                    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = nullptr);
+                    MetaFsIoQ<Mpio*>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
-    virtual void BindMpioAllocator(MpioAllocator* mpioAllocator);
+    virtual void BindMpioPool(MpioPool* mpioPool);
     virtual void BottomhalfMioProcessing(void);
 
 private:
-    void _SendPeriodicMetrics(void);
+    void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
+    void _SendMetric(uint32_t size);
 
-    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* partialMpioDoneQ;
-    MpioAllocator* mpioAllocator;
+    MetaFsIoQ<Mpio*>* partialMpioDoneQ;
+    MpioPool* mpioPool;
     int coreId;
-    TelemetryPublisher* telemetryPublisher;
+    TelemetryPublisher* telemetryPublisher = nullptr;
     std::chrono::steady_clock::time_point lastTime;
-    int64_t metricSumOfSpendTime;
-    int64_t metricSumOfMpioCount;
 };
 } // namespace pos

@@ -32,7 +32,6 @@
 
 #pragma once
 
-#include <set>
 #include <string>
 #include <vector>
 
@@ -80,9 +79,9 @@ public:
     virtual SegmentId AllocateRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
     virtual bool NeedRebuildAgain(void);
+    virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
-    virtual int MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList);
     virtual int GetNumOfFreeSegment(bool needLock);
     virtual GcMode GetCurrentGcMode(void);
     virtual int GetGcThreshold(GcMode mode);

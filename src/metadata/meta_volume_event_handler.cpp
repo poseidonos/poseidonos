@@ -35,7 +35,6 @@
 #include "src/allocator/allocator.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/allocator/i_wbstripe_allocator.h"
 
 namespace pos
 {
@@ -89,8 +88,7 @@ int
 MetaVolumeEventHandler::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     int result;
-    IWBStripeAllocator* wbStripeManager = allocator->GetIWBStripeAllocator();
-    bool preResult = wbStripeManager->FinalizeActiveStripes(volEventBase->volId);
+    bool preResult = allocator->FinalizeActiveStripes(volEventBase->volId);
     if (preResult == true)
     {
         bool flushMapRequired = (journal == nullptr);

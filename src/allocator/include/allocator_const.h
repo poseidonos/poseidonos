@@ -59,6 +59,8 @@ enum SegmentCtxSection
 {
     SC_HEADER = 0,
     SC_SEGMENT_INFO,
+    AC_SEGMENT_STATES,
+    AC_ALLOCATE_SEGMENT_BITMAP,
     NUM_SEGMENT_CTX_SECTION
 };
 
@@ -81,6 +83,7 @@ enum RebuildCtxSection
 
 enum WBTAllocatorMetaType
 {
+    WBT_SEGMENT_BITMAP,
     WBT_CURRENT_SSD_LSID,
     WBT_SEGMENT_STATES,
     WBT_WBLSID_BITMAP,

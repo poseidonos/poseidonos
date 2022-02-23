@@ -47,7 +47,7 @@ TEST(LogBufferWriteDoneNotifier, NotifyLogFilled_testIfExecutedSuccessfully)
 
     // When, Then
     int logGroupId = 0;
-    MapList dirty;
+    MapPageList dirty;
     EXPECT_CALL(event, LogFilled(logGroupId, dirty));
     notifier.NotifyLogFilled(logGroupId, dirty);
 }

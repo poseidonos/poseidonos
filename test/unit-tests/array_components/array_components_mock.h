@@ -12,7 +12,7 @@ class MockArrayComponents : public ArrayComponents
 {
 public:
     using ArrayComponents::ArrayComponents;
-    MOCK_METHOD(int, Create, (DeviceSet<string> nameSet, string metaFt, string dataFt), (override));
+    MOCK_METHOD(int, Create, (DeviceSet<string> nameSet, string dataRaidType), (override));
     MOCK_METHOD(int, Load, (), (override));
     MOCK_METHOD(int, Mount, (), (override));
     MOCK_METHOD(int, Unmount, (), (override));

@@ -42,7 +42,6 @@ SUBDIRS = allocator \
         device/base \
         cli \
         lib \
-        signal_handler \
         state \
         sys_event \
         main \

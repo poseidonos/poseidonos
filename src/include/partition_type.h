@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include <string>
-
 namespace pos
 {
 enum PartitionType
@@ -42,16 +40,6 @@ enum PartitionType
     WRITE_BUFFER,
     META_SSD,
     USER_DATA,
-    JOURNAL_SSD,
-    TYPE_COUNT
-};
-
-static const std::string PARTITION_TYPE_STR[(int)PartitionType::TYPE_COUNT]
-{
-    "META_NVM",
-    "WRITE_BUFFER",
-    "META_SSD",
-    "USER_DATA",
-    "JOURNAL_SSD",
+    PARTITION_TYPE_MAX
 };
 } // namespace pos

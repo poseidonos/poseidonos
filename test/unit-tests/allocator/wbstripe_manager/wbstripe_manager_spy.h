@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -33,7 +33,6 @@
 #pragma once
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -77,9 +76,9 @@ public:
         return 0;
     }
     int
-    _GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes)
+    _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
     {
-        WBStripeManager::_GetOnlineStripes(segments, stripes);
+        WBStripeManager::_FlushOnlineStripes(vsidToCheckFlushDone);
         return 0;
     }
     void
@@ -89,7 +88,7 @@ public:
         {
             return;
         }
-        WBStripeManager::_PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
+        WBStripeManager::PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
     VirtualBlks
     _AllocateRemainingBlocks(VirtualBlkAddr tail)

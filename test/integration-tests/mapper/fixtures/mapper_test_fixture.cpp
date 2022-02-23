@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,18 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/include/smart_ptr_type.h"
+#include "src/metafs/include/metafs_service.h"
 #include "test/integration-tests/mapper/fixtures/mapper_test_fixture.h"
+#include "test/integration-tests/mapper/utils/mapper_it_const.h"
+#include "test/integration-tests/mapper/test_doubles/map_flush_done_event_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 
 #include <string>
 
-#include "src/include/smart_ptr_type.h"
-#include "src/metafs/include/metafs_service.h"
-#include "test/integration-tests/mapper/test_doubles/map_flush_done_event_mock.h"
-#include "test/integration-tests/mapper/utils/mapper_it_const.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-
 namespace pos
 {
+
 std::map<int, uint64_t> MapperTestFixture::createdVolumeInfo;
 std::vector<uint32_t> MapperTestFixture::rbas0, MapperTestFixture::vsids0, MapperTestFixture::offsets0;
 std::vector<uint32_t> MapperTestFixture::rbas1, MapperTestFixture::vsids1, MapperTestFixture::offsets1;
@@ -134,12 +134,8 @@ MapperTestFixture::_GetRbaMax(int volId)
 void
 MapperTestFixture::_SetVSAs(int volumeId, BlkAddr rba, StripeId vsidOrig, BlkOffset offsetOrig)
 {
-    VirtualBlkAddr vsaOrig = {
-        .stripeId = vsidOrig,
-        .offset = offsetOrig};
-    VirtualBlks vb = {
-        .startVsa = vsaOrig,
-        .numBlks = 1};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsidOrig, .offset = offsetOrig };
+    VirtualBlks vb = { .startVsa = vsaOrig, .numBlks = 1 };
     IVSAMap* iVSAMap = mapperSUT->GetIVSAMap();
     int reti = iVSAMap->SetVSAs(volumeId, rba, vb);
     EXPECT_EQ(reti, RET_INT_SUCCESS);
@@ -153,9 +149,7 @@ MapperTestFixture::_GetAndCompareVSA(int volumeId, BlkAddr rba, StripeId vsidOri
     int reti = iVSAMap->GetVSAs(volumeId, rba, 1, va);
     EXPECT_EQ(reti, RET_INT_SUCCESS);
 
-    VirtualBlkAddr vsaOrig = {
-        .stripeId = vsidOrig,
-        .offset = offsetOrig};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsidOrig, .offset = offsetOrig };
     EXPECT_EQ(va[0], vsaOrig);
 }
 
@@ -170,9 +164,7 @@ MapperTestFixture::_SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc)
 void
 MapperTestFixture::_GetAndCompareLSA(StripeId vsid, StripeId lsidOrig, StripeLoc locOrig)
 {
-    StripeAddr lsaOrig = {
-        .stripeLoc = locOrig,
-        .stripeId = lsidOrig};
+    StripeAddr lsaOrig = { .stripeLoc = locOrig, .stripeId = lsidOrig };
     IStripeMap* iStripeMap = mapperSUT->GetIStripeMap();
     StripeAddr lsa = iStripeMap->GetLSA(vsid);
     EXPECT_EQ(lsa, lsaOrig);
@@ -184,7 +176,7 @@ MapperTestFixture::_SimulateNPOR(void)
     _UnmountVolume(0);
     delete mapperSUT;
 
-    mapperSUT = new Mapper(nullptr, mockArrayInfo, nullptr);
+    mapperSUT = new Mapper(mockArrayInfo, nullptr);
     mapperSUT->Init();
     _LoadVolume(0);
     _MountVolume(0);
@@ -195,7 +187,7 @@ MapperTestFixture::_SimulateSPOR(void)
 {
     delete mapperSUT;
 
-    mapperSUT = new Mapper(nullptr, mockArrayInfo, nullptr);
+    mapperSUT = new Mapper(mockArrayInfo, nullptr);
     mapperSUT->Init();
     _LoadVolume(0);
     _MountVolume(0);
@@ -225,7 +217,7 @@ void
 MapperTestFixture::_FlushDirtyPagesGiven(int mapId, MpageList& dirtyPages)
 {
     EventSmartPtr callback(new MapFlushDoneEvent(mapId, this));
-    mapperSUT->FlushDirtyMpages(mapId, callback);
+    mapperSUT->FlushDirtyMpagesGiven(mapId, callback, dirtyPages);
 }
 
 void
@@ -245,4 +237,4 @@ MapperTestFixture::FlushDoneCallback(int mapId)
     }
 }
 
-} // namespace pos
+}   // namespace pos

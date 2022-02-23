@@ -48,7 +48,7 @@ namespace pos
 {
 MpageList IMapFlush::DEFAULT_DIRTYPAGE_SET;
 
-Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan_, StripeMapManager* stripeMan_, ReverseMapManager* revMapMan_, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_)
+Mapper::Mapper(TelemetryPublisher* tp_, MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan_, StripeMapManager* stripeMan_, ReverseMapManager* revMapMan_, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_)
 : addrInfo(addrInfo_),
   vsaMapManager(vsaMapMan_),
   stripeMapManager(stripeMan_),
@@ -56,7 +56,6 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
   mapperWbt(mapperWbt_),
   metaFs(metaFs_),
   tp(tp_),
-  tc(tc_),
   isInitialized(false),
   numMapLoadedVol(0),
   numMountedVol(0)
@@ -68,7 +67,7 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
     }
     if (tp == nullptr)
     {
-        tp = new TelemetryPublisher(("Mapper"));
+        tp = new TelemetryPublisher("Mapper");
         tp->AddDefaultLabel("array_name", arrayName);
     }
     if (vsaMapManager == nullptr)
@@ -87,13 +86,12 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
     {
         mapperWbt = new MapperWbt(addrInfo, vsaMapManager, stripeMapManager, reverseMapManager);
     }
-    _ClearVolumeState();
 }
 
 Mapper::Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_)
-: Mapper(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
+: Mapper(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, iarrayInfo, metaFs_)
 {
-    tc = TelemetryClientSingleton::Instance();
+    _ClearVolumeState();
 }
 
 // LCOV_EXCL_START
@@ -163,9 +161,9 @@ Mapper::Init(void)
         {
             metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(addrInfo->GetArrayId());
         }
-        if ((tc != nullptr) && (tp != nullptr))
+        if (tp != nullptr)
         {
-            tc->RegisterPublisher(tp);
+            TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
         }
         int mpageSize = _GetMpageSize();
         addrInfo->SetupAddressInfo(mpageSize);

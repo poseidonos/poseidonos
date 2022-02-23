@@ -64,7 +64,8 @@ LogWriteContextFactory::Init(JournalConfiguration* journalConfig,
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent)
+LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
+    MpageList dirty, EventSmartPtr callbackEvent)
 {
     uint32_t volId = volumeIo->GetVolumeId();
     BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetSectorRba());
@@ -77,17 +78,18 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     BlockWriteDoneLogHandler* log = new BlockWriteDoneLogHandler(volId, startRba,
         numBlks, startVsa, wbIndex, writeBufferStripeAddress);
 
-    MapList dirtyMap;
-    dirtyMap.emplace(volId);
+    MapPageList dirtyMap;
+    dirtyMap.emplace(volId, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
-    StripeAddr oldAddr, EventSmartPtr callbackEvent)
+    StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent)
 {
     StripeAddr newAddr = {
         .stripeLoc = IN_USER_AREA,
@@ -95,30 +97,31 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
 
     StripeMapUpdatedLogHandler* log = new StripeMapUpdatedLogHandler(stripe->GetVsid(), oldAddr, newAddr);
 
-    MapList dirtyMap;
-    dirtyMap.emplace(STRIPE_MAP_ID);
+    MapPageList dirtyMap;
+    dirtyMap.emplace(STRIPE_MAP_ID, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateGcBlockMapLogWriteContext(GcStripeMapUpdateList mapUpdates,
-    EventSmartPtr callbackEvent)
+    MapPageList dirty, EventSmartPtr callbackEvent)
 {
-    GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+    GcBlockWriteDoneLogHandler* log
+        = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
 
-    MapList dummyDirty;
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dummyDirty, callbackEvent, notifier, sequenceController);
+        dirty, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 std::vector<LogWriteContext*>
 LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList mapUpdates,
-    EventSmartPtr callbackEvent)
+    MapPageList dirty, EventSmartPtr callbackEvent)
 {
     std::vector<LogWriteContext*> returnList;
 
@@ -137,11 +140,11 @@ LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList m
             list.push_back(mapUpdates.blockMapUpdateList[startOffset + offset]);
         }
 
-        GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, list);
+        GcBlockWriteDoneLogHandler* log
+            = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, list);
 
-        MapList dummyDirty;
         MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-            dummyDirty, callbackEvent, notifier, sequenceController);
+            dirty, callbackEvent, notifier, sequenceController);
 
         returnList.push_back(logWriteContext);
 
@@ -164,16 +167,14 @@ LogWriteContextFactory::_GetMaxNumGcBlockMapUpdateInAContext(void)
 
 LogWriteContext*
 LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(GcStripeMapUpdateList mapUpdates,
-    EventSmartPtr callbackEvent)
+    MapPageList dirty, EventSmartPtr callbackEvent)
 {
-    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(mapUpdates.volumeId, mapUpdates.vsid,
+    GcStripeFlushedLogHandler* log
+        = new GcStripeFlushedLogHandler(mapUpdates.volumeId, mapUpdates.vsid,
         mapUpdates.wbLsid, mapUpdates.userLsid, mapUpdates.blockMapUpdateList.size());
 
-    MapList dirtyMap;
-    dirtyMap.emplace(STRIPE_MAP_ID);
-    dirtyMap.emplace(mapUpdates.volumeId);
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dirtyMap, callbackEvent, notifier, sequenceController);
+        dirty, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }

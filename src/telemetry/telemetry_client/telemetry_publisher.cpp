@@ -69,12 +69,6 @@ TelemetryPublisher::GetName(void)
 }
 
 void
-TelemetryPublisher::SetName(std::string name_)
-{
-    name = name_;
-}
-
-void
 TelemetryPublisher::StartPublishing(void)
 {
     turnOn = true;

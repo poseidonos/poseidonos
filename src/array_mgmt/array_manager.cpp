@@ -101,7 +101,7 @@ ArrayManager::~ArrayManager()
 }
 
 int
-ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
+ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
 {
     if (_FindArray(name) != nullptr)
     {
@@ -116,7 +116,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
     }
 
     ArrayComponents* array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
-    int ret = array->Create(devs, metaFt, dataFt);
+    int ret = array->Create(devs, raidtype);
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         arrayList.emplace(name, array);
@@ -372,7 +372,7 @@ ArrayManager::ResetMbr(void)
             result = array->GetArray()->CheckDeletable();
             if (result != 0)
             {
-                POS_TRACE_WARN(result, "Cannot delete array " + iter.first);
+                POS_TRACE_WARN(deleteResult, "Cannot delete array " + iter.first);
                 return result;
             }
         }

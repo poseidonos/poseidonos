@@ -70,7 +70,7 @@ public:
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
 
-    virtual int PrepareRebuild(void);
+    virtual bool FinalizeActiveStripes(int volumeId);
 
     void SetNormalGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;

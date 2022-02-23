@@ -1,6 +1,0 @@
-Package: poseidonos
-Version: 0.10.6
-Maintainer: PoseidonOS Packaging
-Description: PoseidonOS
-Architecture: amd64
-Depends: libibverbs-dev, librdmacm-dev, libjsoncpp-dev, libpciaccess-dev, libpciaccess-dev, libnuma-dev, uuid-dev, ibverbs-utils, libsystemd-dev, jq, rapidjson-dev, libmnl-dev, autoconf, libtool, bison, flex, xfsprogs, libpmemblk-dev, meson, libjsonrpccpp-dev, libjsoncpp-dev, libc-ares-dev, pkg-config, pigz, mandoc, libyaml-cpp-dev, libtbb-dev

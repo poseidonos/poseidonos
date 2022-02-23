@@ -76,4 +76,5 @@ public:
 #define RANGE_OVERLAP_CHECK_EN 1
 #define MPIO_CACHE_EN 0
 #define NVRAM_BYTE_ACCESS_DIRECT_EN 1
+#define FAKE_META_FILE_DIR "/tmp/mfs_fake/" // also applied to fake_metafs_management_api.cpp
 } // namespace pos

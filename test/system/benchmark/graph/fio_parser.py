@@ -1,6 +1,5 @@
 import json
 import lib
-import os
 
 
 def ToFloat(str_val):
@@ -68,51 +67,5 @@ def GetResultData(data, file, title):
             data[9]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.900000"])
             data[10]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.990000"])
             data[11]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["max"])
-    except Exception as e:
-        lib.printer.red(f"{__name__} [Error] {e}")
-
-
-def GetSingleLogFile(data, file, index):
-    try:
-        data[index] = {}
-        data[index]["read"] = {}
-        data[index]["read"]["x"] = []
-        data[index]["read"]["y"] = []
-        data[index]["write"] = {}
-        data[index]["write"]["x"] = []
-        data[index]["write"]["y"] = []
-        fp = open(file, "r")
-        lines = fp.readlines()
-        for line in lines:
-            line_spliter = line.split(',')
-            if (4 <= len(line_spliter)):
-                if ("0" in line_spliter[2]):
-                    data[index]["read"]["x"].append(int(line_spliter[0]))
-                    data[index]["read"]["y"].append(int(line_spliter[1]))
-                elif ("1" in line_spliter[2]):
-                    data[index]["write"]["x"].append(int(line_spliter[0]))
-                    data[index]["write"]["y"].append(int(line_spliter[1]))
-    except Exception as e:
-        lib.printer.red(f"{__name__} [Error] {e}")
-
-
-def GetLogData(data, dir, filename):
-    try:  # data는 Fio의 log_data 딕셔너리
-        bw_file_prefix = f"{filename}_bw"
-        iops_file_prefix = f"{filename}_iops"
-        clat_file_prefix = f"{filename}_clat"
-
-        files = os.listdir(dir)
-        files.sort()
-        for file in files:
-            if bw_file_prefix in file:
-                bw_spliter = file.split('.')
-                GetSingleLogFile(data["bw"], f"{dir}/{file}", bw_spliter[1])
-            elif iops_file_prefix in file:
-                iops_spliter = file.split('.')
-                GetSingleLogFile(data["iops"], f"{dir}/{file}", iops_spliter[1])
-            elif clat_file_prefix in file:
-                clat_spliter = file.split('.')
-                GetSingleLogFile(data["clat"], f"{dir}/{file}", clat_spliter[1])
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")

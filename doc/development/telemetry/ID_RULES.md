@@ -49,21 +49,21 @@ MetaFs ID Range : 40000 ~ 49999
 ## **Volume**
 Volume ID Range : 50000 ~ 59999
 
-50000 read_iops
+50000 ReadIops
 
-50001 read_rate_bytes_per_second
+50001 ReadBandwidth
 
-50002 read_latency_mean_ns
+50002 ReadLatencyMean
 
-50003 read_latency_max_ns
+50003 ReadLatencyMax
 
-50010 write_iops
+50010 WriteIops
 
-50011 write_rate_bytes_per_second
+50011 WriteBandwidth
 
-50012 write_latency_mean_ns
+50012 WriteLatencyMean
 
-50013 write_latency_max_ns
+50013 WriteLatencyMax
 
 ---
 
@@ -71,5 +71,9 @@ Volume ID Range : 50000 ~ 59999
 Array ID Range : 60000 ~ 70000
 
 60001 ArrayStatus
+
+60002 RebuildCounts
+
+60003 GarbageCollectorStatus
 
 ---

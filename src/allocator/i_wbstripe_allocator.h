@@ -51,12 +51,13 @@ public:
     virtual void GetWbStripes(FlushIoSmartPtr flushIo) = 0;
 
     virtual void FlushAllActiveStripes(void) = 0;
-    virtual bool FinalizeActiveStripes(int volumeId) = 0;
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) = 0;
     virtual void SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) = 0;
     virtual int FlushPendingActiveStripes(void) = 0;
+
+    virtual int PrepareRebuild(void) = 0;
 };
 
 } // namespace pos

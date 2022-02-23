@@ -78,11 +78,12 @@ public:
 private:
     int _CheckDevs(const ArrayDeviceSet& devSet);
     int _CheckConstraints(ArrayDeviceList* devs);
+    int _CheckDevsCount(ArrayDeviceSet devSet);
+    int _CheckFaultTolerance(ArrayDeviceSet devSet);
     int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
     int _CheckNvmCapacity(const ArrayDeviceSet& devSet);
-    int _CheckActiveSsdsCount(const vector<ArrayDevice*>& devs);
     uint64_t _ComputeMinNvmCapacity(const uint32_t logicalChunkCount);
-    uint64_t _GetBaseCapacity(const vector<ArrayDevice*>& devs);
+    ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
 
     ArrayDeviceList* devs_ = nullptr;
     DeviceManager* sysDevMgr_;

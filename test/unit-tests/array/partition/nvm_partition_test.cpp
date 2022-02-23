@@ -4,7 +4,6 @@
 
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
-#include "src/helper/calc/calc.h"
 #include "test/unit-tests/array/ft/buffer_entry_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
@@ -94,99 +93,45 @@ buildInvalidLogicalWriteEntry(uint32_t totalStripes, uint32_t blksPerStripe)
     return lWriteEntry;
 }
 
-TEST(NvmPartition, NvmPartition_testIfCreateMetaNvmInitializesPhysicalAndLogicalSizeProperly)
+TEST(NvmPartition, NvmPartition_testIfConstructorInitializesLogicalSizeProperly)
 {
     // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
     vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint64_t startLba = 0; // not interesting
-    uint32_t blksPerChunk = 4096; // not interesting
+
     // When
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+
     // Then
-    uint32_t devcnt = ArrayConfig::NVM_DEVICE_COUNT;
-    uint64_t metaNvmSize = ArrayConfig::META_NVM_SIZE;
-    uint32_t blkSizeByte = ArrayConfig::BLOCK_SIZE_BYTE;
-    uint32_t nvmSegSize = ArrayConfig::NVM_SEGMENT_SIZE;
-
-    const PartitionPhysicalSize* pPhysicalSize = nvmPart.GetPhysicalSize();
-    ASSERT_EQ(startLba, pPhysicalSize->startLba);
-    ASSERT_EQ(blksPerChunk, pPhysicalSize->blksPerChunk);
-    ASSERT_EQ(devcnt, pPhysicalSize->chunksPerStripe);
-    ASSERT_EQ(nvmSegSize, pPhysicalSize->totalSegments);
-    ASSERT_EQ(metaNvmSize / (blkSizeByte * blksPerChunk * devcnt), pPhysicalSize->stripesPerSegment);
-
     const PartitionLogicalSize* pLogicalSize = nvmPart.GetLogicalSize();
     ASSERT_EQ(1, pLogicalSize->minWriteBlkCnt);
-    ASSERT_EQ(pPhysicalSize->blksPerChunk, pLogicalSize->blksPerChunk);
-    ASSERT_EQ(pPhysicalSize->blksPerChunk * pPhysicalSize->chunksPerStripe, pLogicalSize->blksPerStripe);
-    ASSERT_EQ(pPhysicalSize->stripesPerSegment * pPhysicalSize->totalSegments, pLogicalSize->totalStripes);
-    ASSERT_EQ(pPhysicalSize->totalSegments, pLogicalSize->totalSegments);
-    ASSERT_EQ(pPhysicalSize->stripesPerSegment, pLogicalSize->stripesPerSegment);
-}
-
-TEST(NvmPartition, NvmPartition_testIfCreateWriteBufferInitializesPhysicalAndLogicalSizeProperly)
-{
-    // Given
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 1024; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint64_t startLba = 0; // not interesting
-    uint32_t blksPerChunk = 4096; // not interesting
-    // When
-    NvmPartition nvmPart(PartitionType::WRITE_BUFFER, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    // Then
-    uint32_t devcnt = ArrayConfig::NVM_DEVICE_COUNT;
-    uint64_t sectorsPerBlk = ArrayConfig::SECTORS_PER_BLOCK;
-    uint32_t blkSizeByte = ArrayConfig::BLOCK_SIZE_BYTE;
-    uint32_t nvmSegSize = ArrayConfig::NVM_SEGMENT_SIZE;
-
-    const PartitionPhysicalSize* pPhysicalSize = nvmPart.GetPhysicalSize();
-    ASSERT_EQ(startLba, pPhysicalSize->startLba);
-    ASSERT_EQ(blksPerChunk, pPhysicalSize->blksPerChunk);
-    ASSERT_EQ(devcnt, pPhysicalSize->chunksPerStripe);
-    ASSERT_EQ(nvmSegSize, pPhysicalSize->totalSegments);
-    uint32_t expectStrPerSeg = (nvmSize / blkSizeByte - DIV_ROUND_UP(startLba, sectorsPerBlk)) / blksPerChunk;
-    ASSERT_EQ(expectStrPerSeg, pPhysicalSize->stripesPerSegment);
-
-    const PartitionLogicalSize* pLogicalSize = nvmPart.GetLogicalSize();
-    ASSERT_EQ(1, pLogicalSize->minWriteBlkCnt);
-    ASSERT_EQ(pPhysicalSize->blksPerChunk, pLogicalSize->blksPerChunk);
-    ASSERT_EQ(pPhysicalSize->blksPerChunk * pPhysicalSize->chunksPerStripe, pLogicalSize->blksPerStripe);
-    ASSERT_EQ(pPhysicalSize->stripesPerSegment * pPhysicalSize->totalSegments, pLogicalSize->totalStripes);
-    ASSERT_EQ(pPhysicalSize->totalSegments, pLogicalSize->totalSegments);
-    ASSERT_EQ(pPhysicalSize->stripesPerSegment, pLogicalSize->stripesPerSegment);
+    ASSERT_EQ(partPhySize.blksPerChunk, pLogicalSize->blksPerChunk);
+    ASSERT_EQ(partPhySize.blksPerChunk * partPhySize.chunksPerStripe, pLogicalSize->blksPerStripe);
+    ASSERT_EQ(partPhySize.stripesPerSegment * partPhySize.totalSegments, pLogicalSize->totalStripes);
+    ASSERT_EQ(partPhySize.totalSegments, pLogicalSize->totalSegments);
+    ASSERT_EQ(partPhySize.stripesPerSegment, pLogicalSize->stripesPerSegment);
 }
 
 TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
 {
     // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
+    LogicalBlkAddr invalidAddr = buildInvalidLogicalBlkAddr(totalStripes);
     vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint64_t startLba = 0; // not interesting
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    LogicalBlkAddr invalidAddr = buildInvalidLogicalBlkAddr(nvmPart.GetLogicalSize()->totalStripes);
+
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalBlkAddr ignored;
 
     // When
@@ -199,22 +144,21 @@ TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
 TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
+    LogicalBlkAddr validAddr = buildValidLogicalBlkAddr(totalStripes, blksPerStripe);
     vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    LogicalBlkAddr validAddr = buildValidLogicalBlkAddr(totalStripes,
-        nvmPart.GetLogicalSize()->blksPerStripe);
+    devs.push_back(nullptr); // putting dummy 'cause I'm not interested
+
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalBlkAddr dest;
+
     // When
     int actual = nvmPart.Translate(dest, validAddr);
 
@@ -222,33 +166,29 @@ TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
     ASSERT_EQ(0, actual);
     int expectedSrcBlock = totalStripes / 2 * nvmPart.GetLogicalSize()->blksPerStripe;
     int expectedSrcSector = expectedSrcBlock * ArrayConfig::SECTORS_PER_BLOCK;
-    int expectedDestSector = expectedSrcSector + startLba;
+    int expectedDestSector = expectedSrcSector + partPhySize.startLba;
     ASSERT_EQ(expectedDestSector, dest.lba);
 }
 
 TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
+    PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interseting */,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
     uint32_t testByteOffset = 10;
     LogicalBlkAddr logicalByteAddr = buildInvalidLogicalBlkAddr(totalStripes);
     LogicalByteAddr invalidAddr;
     invalidAddr.blkAddr = logicalByteAddr;
     invalidAddr.byteOffset = testByteOffset;
+    vector<ArrayDevice*> devs;
+
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalByteAddr ignored;
 
     // When
@@ -261,27 +201,30 @@ TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
 TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    EXPECT_CALL(*mockUblock, GetByteAddress).WillOnce(Return((void*)0));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
-    LogicalBlkAddr logicalblkAddr = buildValidLogicalBlkAddr(totalStripes, blksPerStripe);
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
     uint32_t testByteOffset = 5;
+    LogicalBlkAddr logicalblkAddr = buildValidLogicalBlkAddr(totalStripes, blksPerStripe);
     LogicalByteAddr validAddr;
     validAddr.blkAddr = logicalblkAddr;
     validAddr.byteOffset = testByteOffset;
     validAddr.byteSize = 10;
+    vector<ArrayDevice*> devs;
+    string mockDevName = "mockDev";
+    MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
+    MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
+    devs.push_back(mockArrayDevice);
+
+    EXPECT_CALL(*mockArrayDevice, GetUblockPtr).WillRepeatedly(Return(mockUblockDevice));
+    EXPECT_CALL(*mockUblockDevice, GetByteAddress).WillOnce(Return((void*)0));
+
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalByteAddr dest;
 
     // When
@@ -291,28 +234,27 @@ TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
     ASSERT_EQ(0, actual);
     int expectedSrcBlock = totalStripes / 2 * nvmPart.GetLogicalSize()->blksPerStripe;
     int expectedSrcSector = expectedSrcBlock * ArrayConfig::SECTORS_PER_BLOCK;
-    int expectedDestByte = (expectedSrcSector + startLba) * ArrayConfig::SECTOR_SIZE_BYTE + testByteOffset;
+    int expectedDestByte = (expectedSrcSector + partPhySize.startLba) * ArrayConfig::SECTOR_SIZE_BYTE + testByteOffset;
     ASSERT_EQ(expectedDestByte, dest.byteAddress);
+
+    delete mockArrayDevice;
+    delete mockUblockDevice;
 }
 
 TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
+    PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
     LogicalWriteEntry invalidEntry = buildInvalidLogicalWriteEntry(totalStripes, blksPerStripe);
+    vector<ArrayDevice*> devs;
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalWriteEntry> ignored;
 
     // When
@@ -325,21 +267,18 @@ TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
 TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
     LogicalWriteEntry validEntry = buildValidLogicalWriteEntry(totalStripes, blksPerStripe);
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalWriteEntry> dest;
 
     // When
@@ -356,23 +295,25 @@ TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
 TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)
 {
     // Given
-    uint64_t startLba = 0; // not interesting
-    vector<ArrayDevice*> devs;
-    uint64_t nvmSize = 1024 * 1024 * 4; // not interesting
-    string nvmName = "uram0";
-    shared_ptr<MockUBlockDevice> mockUblock = make_shared<MockUBlockDevice>(nvmName, nvmSize, nullptr);
-    EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(nvmName.c_str()));
-    EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(nvmSize));
-    EXPECT_CALL(*mockUblock, GetByteAddress).WillOnce(Return((void*)0));
-    ArrayDevice nvm(mockUblock);
-    devs.push_back(&nvm);
-    uint32_t blksPerChunk = 4096; // not interesting
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
-    nvmPart.Create(startLba, blksPerChunk);
-    uint32_t totalStripes = nvmPart.GetLogicalSize()->totalStripes;
-    uint32_t blksPerStripe = nvmPart.GetLogicalSize()->blksPerChunk;
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
     uint32_t blkCnt = 10; // bytes to convert
     LogicalByteWriteEntry validEntry = buildValidLogicalByteWriteEntry(totalStripes, blkCnt);
+    vector<ArrayDevice*> devs;
+    string mockDevName = "mockDev";
+    MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
+    MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
+    devs.push_back(mockArrayDevice);
+
+    EXPECT_CALL(*mockArrayDevice, GetUblockPtr).WillRepeatedly(Return(mockUblockDevice));
+    EXPECT_CALL(*mockUblockDevice, GetByteAddress).WillOnce(Return((void*)0));
+
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalByteWriteEntry> dest;
 
     // When
@@ -383,20 +324,64 @@ TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)
     PhysicalByteWriteEntry pWriteEntry = dest.front();
     ASSERT_EQ(validEntry.byteCnt, pWriteEntry.byteCnt);
     PhysicalByteAddr phyByteAddr = pWriteEntry.addr;
+
+    delete mockArrayDevice;
+    delete mockUblockDevice;
 }
 
 TEST(NvmPartition, IsByteAccessSupported_testIfReturnValueCorrect)
 {
     // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
     vector<ArrayDevice*> devs;
     devs.push_back(nullptr); // 'cause I'm not interested
-    NvmPartition nvmPart(PartitionType::META_NVM, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
 
     // When
     bool actual = nvmPart.IsByteAccessSupported();
 
     // Then
     ASSERT_TRUE(actual);
+}
+
+TEST(NvmPartition, GetMethod_testIfNoMethodReturnedForNvmPartition)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+    // When
+    Method* actual = nvmPart.GetMethod();
+    // Then
+    ASSERT_EQ(nullptr, actual);
+}
+
+TEST(NvmPartition, Format_dummyTestForCoverage)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+    // When
+    nvmPart.Format(); // nothing happens
+    // Then
 }
 
 TEST(NvmPartition, Include_testCopyOperatorOfIncludedStructure)

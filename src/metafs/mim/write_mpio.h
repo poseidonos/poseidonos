@@ -46,9 +46,9 @@ public:
     {
         return MpioType::Write;
     }
+    virtual void InitStateHandler(void) override;
 
 protected:
-    virtual void _InitStateHandler(void) override;
     bool _MergeMDPage(void* userBuf, FileSizeType userWByteOffset, FileSizeType userWByteSize, void* mdpageBuf);
     bool _HandleError(MpAioState expNextState);
 

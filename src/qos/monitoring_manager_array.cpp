@@ -369,13 +369,10 @@ QosMonitoringManagerArray::UpdateContextUserRebuildPolicy(void)
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
     qos_rebuild_policy rebuildPolicy = qosManager->GetRebuildPolicy(arrName);
 
-    if (rebuildPolicy.rebuildImpact != PRIORITY_INVALID)
+    if (rebuildUserPolicy.GetRebuildImpact() != rebuildPolicy.rebuildImpact)
     {
-        if (rebuildUserPolicy.GetRebuildImpact() != rebuildPolicy.rebuildImpact)
-        {
-            rebuildUserPolicy.SetRebuildImpact(rebuildPolicy.rebuildImpact);
-            rebuildUserPolicy.SetPolicyChange(true);
-        }
+        rebuildUserPolicy.SetRebuildImpact(rebuildPolicy.rebuildImpact);
+        rebuildUserPolicy.SetPolicyChange(true);
     }
 }
 

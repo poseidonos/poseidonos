@@ -39,6 +39,7 @@
 
 namespace pos
 {
+
 class LogList
 {
 public:

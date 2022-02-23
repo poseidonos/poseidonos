@@ -6,71 +6,50 @@ namespace pos
 {
 TEST(SegmentInfo, SegmentInfo_Constructor)
 {
-    {
-        SegmentInfo segInfo;
-    }
+    SegmentInfo segInfo();
+}
 
-    {
-        SegmentInfo* segInfo = new SegmentInfo();
-        delete segInfo;
-    }
+TEST(SegmentInfo, GetValidBlockCount_TestSimpleGetter)
+{
+    // given
+    SegmentInfo segInfos;
+    segInfos.SetValidBlockCount(5);
+    // when
+    int ret = segInfos.GetValidBlockCount();
+    // then
+    EXPECT_EQ(5, ret);
 }
 
 TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
 {
+    // given
     SegmentInfo segInfos;
-
+    // when
     segInfos.SetValidBlockCount(5);
-    EXPECT_EQ(segInfos.GetValidBlockCount(), 5);
-
-    segInfos.SetValidBlockCount(3);
-    EXPECT_EQ(segInfos.GetValidBlockCount(), 3);
-
-    segInfos.SetValidBlockCount(10);
-    EXPECT_EQ(segInfos.GetValidBlockCount(), 10);
+    // then
+    int ret = segInfos.GetValidBlockCount();
+    EXPECT_EQ(5, ret);
 }
 
 TEST(SegmentInfo, IncreaseValidBlockCount_TestIncreaseValue)
 {
+    // given
     SegmentInfo segInfos;
-
-    EXPECT_EQ(segInfos.IncreaseValidBlockCount(5), 5);
-    EXPECT_EQ(segInfos.IncreaseValidBlockCount(3), 8);
-    EXPECT_EQ(segInfos.IncreaseValidBlockCount(10), 18);
+    // when
+    int ret = segInfos.IncreaseValidBlockCount(5);
+    // then
+    EXPECT_EQ(5, ret);
 }
 
-TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToNonZero)
+TEST(SegmentInfo, DecreaseValidBlockCount_TestDecreaseValue)
 {
     // given
-    SegmentInfo segInfos(10, 0, SegmentState::FREE);
+    SegmentInfo segInfos;
+    segInfos.IncreaseValidBlockCount(5);
     // when
-    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
+    int ret = segInfos.DecreaseValidBlockCount(3);
     // then
-    EXPECT_EQ(segmentFreed, false);
-}
-
-TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenSsdState)
-{
-    // given
-    SegmentInfo segInfos(3, 10, SegmentState::SSD);
-    // when
-    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
-    // then
-    EXPECT_EQ(segmentFreed, true);
-    EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
-    EXPECT_EQ(segInfos.GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfos.GetOccupiedStripeCount(), 0);
-}
-
-TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenNvramState)
-{
-    // given
-    SegmentInfo segInfos(3, 10, SegmentState::NVRAM);
-    // when
-    bool segmentFreed = segInfos.DecreaseValidBlockCount(3);
-    // then
-    EXPECT_EQ(segmentFreed, false);
-    EXPECT_NE(segInfos.GetState(), SegmentState::FREE);
+    EXPECT_EQ(2, ret);
 }
 
 TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)
@@ -84,76 +63,26 @@ TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)
     EXPECT_EQ(3, ret);
 }
 
+TEST(SegmentInfo, GetOccupiedStripeCount_TestSimpleGetter)
+{
+    // given
+    SegmentInfo segInfos;
+    // when
+    segInfos.SetOccupiedStripeCount(7);
+    // then
+    int ret = segInfos.GetOccupiedStripeCount();
+    EXPECT_EQ(7, ret);
+}
+
 TEST(SegmentInfo, IncreaseOccupiedStripeCount_TestIncreaseValue)
 {
     // given
     SegmentInfo segInfos;
-    // when, then
-    EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 1);
-    EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 2);
-    EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 3);
-    EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 4);
-    EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 5);
-}
-
-TEST(SegmentInfo, MoveToNvramState_testIfStateChanged)
-{
-    // given
-    SegmentInfo segInfos;
     // when
-    segInfos.MoveToNvramState();
+    segInfos.SetOccupiedStripeCount(7);
     // then
-    EXPECT_EQ(segInfos.GetState(), SegmentState::NVRAM);
-}
-
-TEST(SegmentInfo, MoveToSsdState_testIfStateChangedToSSD)
-{
-    // given
-    SegmentInfo segInfos(10, 10, SegmentState::NVRAM);
-    // when
-    segInfos.MoveToSsdStateOrFreeStateIfItBecomesEmpty();
-    // then
-    EXPECT_EQ(segInfos.GetState(), SegmentState::SSD);
-}
-
-TEST(SegmentInfo, MoveToSsdState_testIfStateChangedToFree)
-{
-    // given
-    SegmentInfo segInfos(0, 10, SegmentState::NVRAM);
-    // when
-    segInfos.MoveToSsdStateOrFreeStateIfItBecomesEmpty();
-    // then
-    EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
-}
-
-TEST(SegmentInfo, MoveToVictimState_testIfStateChanged)
-{
-    // given
-    SegmentInfo segInfos(10, 10, SegmentState::SSD);
-    // when
-    segInfos.MoveToVictimState();
-    // then
-    EXPECT_EQ(segInfos.GetState(), SegmentState::VICTIM);
-}
-
-TEST(SegmentInfo, GetValidBlockCountIfSsdState_testIfValidCountIsReturnedWhenItsSsdState)
-{
-    // given
-    SegmentInfo segInfos(34, 10, SegmentState::SSD);
-    // when
-    EXPECT_EQ(segInfos.GetValidBlockCountIfSsdState(), 34);
-}
-
-TEST(SegmentInfo, GetValidBlockCountIfSsdState_testIfValidCountIsReturnedWhenItsNotSsdState)
-{
-    SegmentInfo freeSegInfo(0, 0, SegmentState::FREE);
-    EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
-
-    SegmentInfo nvramSegInfo(30, 0, SegmentState::NVRAM);
-    EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
-
-    SegmentInfo victimSegInfo(30, 0, SegmentState::VICTIM);
-    EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
+    int ret = segInfos.IncreaseOccupiedStripeCount();
+    EXPECT_EQ(8, ret);
 }
 
 } // namespace pos

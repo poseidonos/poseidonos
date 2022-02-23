@@ -4,7 +4,6 @@
 
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/allocator/allocator_mock.h"
-#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/i_journal_volume_event_handler_mock.h"
 #include "test/unit-tests/mapper/i_mapper_volume_event_handler_mock.h"
@@ -183,8 +182,6 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountSuccess)
     NiceMock<MockIMapperVolumeEventHandler> mapper;
     NiceMock<MockAllocator> allocator;
     NiceMock<MockIJournalVolumeEventHandler> journal;
-    NiceMock<MockIWBStripeAllocator> wbStripeManager;
-
     MetaVolumeEventHandler handler(&info, &mapper, &allocator, &journal);
 
     VolumeEventBase volumeEvent = {
@@ -196,8 +193,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountSuccess)
 
     {
         InSequence s;
-        EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-        EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+        EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
         EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
     }
 
@@ -212,8 +208,6 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenActiveStripeF
     NiceMock<MockIMapperVolumeEventHandler> mapper;
     NiceMock<MockAllocator> allocator;
     NiceMock<MockIJournalVolumeEventHandler> journal;
-    NiceMock<MockIWBStripeAllocator> wbStripeManager;
-
     MetaVolumeEventHandler handler(&info, &mapper, &allocator, &journal);
 
     VolumeEventBase volumeEvent = {
@@ -223,8 +217,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenActiveStripeF
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(false));
+    EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(false));
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).Times(0);
     int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
@@ -238,8 +231,6 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenVolumeMapUnmo
     NiceMock<MockIMapperVolumeEventHandler> mapper;
     NiceMock<MockAllocator> allocator;
     NiceMock<MockIJournalVolumeEventHandler> journal;
-    NiceMock<MockIWBStripeAllocator> wbStripeManager;
-
     MetaVolumeEventHandler handler(&info, &mapper, &allocator, &journal);
 
     VolumeEventBase volumeEvent = {
@@ -249,8 +240,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenVolumeMapUnmo
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+    EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
     int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
@@ -263,8 +253,6 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfMapFlushIsNotRequestedWhenJou
     NiceMock<MockIArrayInfo> info;
     NiceMock<MockIMapperVolumeEventHandler> mapper;
     NiceMock<MockAllocator> allocator;
-    NiceMock<MockIWBStripeAllocator> wbStripeManager;
-
     MetaVolumeEventHandler handler(&info, &mapper, &allocator, nullptr);
 
     VolumeEventBase volumeEvent = {
@@ -274,8 +262,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfMapFlushIsNotRequestedWhenJou
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+    EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
 
     // flushMapRequired should be TRUE when journal disabled
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, true)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));

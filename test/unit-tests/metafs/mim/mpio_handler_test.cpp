@@ -31,17 +31,14 @@
  */
 
 #include "src/metafs/mim/mpio_handler.h"
-
-#include <gtest/gtest.h>
-
-#include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_q_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
 #include "test/unit-tests/metafs/mim/write_mpio_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include <gtest/gtest.h>
 
-using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::AtLeast;
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -51,20 +48,22 @@ TEST(MpioHandler, Normal)
 
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>;
 
-    MockMpioAllocator* allocator = new MockMpioAllocator(100);
-
+    MockMpioPool* pool = new MockMpioPool(100);
+    EXPECT_CALL(*pool, GetPoolSize);
 #if MPIO_CACHE_EN
-    EXPECT_CALL(*allocator, TryReleaseTheOldestCache).Times(AtLeast(1));
+    EXPECT_CALL(*pool, ReleaseCache).WillRepeatedly(Return());
 #endif
     MockWriteMpio* mpio = new MockWriteMpio(this);
-    EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
+    EXPECT_CALL(*mpio, ExecuteAsyncState).WillRepeatedly(Return());
 
-    MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
-    EXPECT_CALL(*doneQ, Enqueue).Times(AtLeast(1));
+    MockMetaFsIoQ<Mpio*>* doneQ = new MockMetaFsIoQ<Mpio*>();
+    EXPECT_CALL(*doneQ, Init);
+    EXPECT_CALL(*doneQ, Enqueue).WillRepeatedly(Return(true));
     EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
+    EXPECT_CALL(*doneQ, GetItemCnt).WillRepeatedly(Return(0));
 
     MpioHandler* handler = new MpioHandler(0, 0, tp, doneQ);
-    handler->BindMpioAllocator(allocator);
+    handler->BindMpioPool(pool);
 
     for (int i = 0; i < MAX_COUNT; i++)
     {
@@ -77,7 +76,7 @@ TEST(MpioHandler, Normal)
     }
 
     delete handler;
-    delete allocator;
+    delete pool;
     delete mpio;
     delete tp;
 }

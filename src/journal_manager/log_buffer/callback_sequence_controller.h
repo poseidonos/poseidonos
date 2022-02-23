@@ -32,11 +32,12 @@
 
 #pragma once
 
-#include <atomic>
 #include <mutex>
+#include <atomic>
 
 namespace pos
 {
+
 class CallbackSequenceController
 {
 public:

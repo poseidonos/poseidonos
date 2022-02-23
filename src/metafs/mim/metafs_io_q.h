@@ -32,37 +32,176 @@
 
 #pragma once
 
-#include <tbb/concurrent_queue.h>
+#include <queue>
+#include <utility>
+
+#include "mfs_lockless_q.h"
+#include "metafs_spinlock.h"
+#include "os_header.h"
+
+#if defined UNVME_BUILD
+#define RTE_LOCKLESS_Q 0 // need SPDK/DPDK rte libraries.
+#else
+#define RTE_LOCKLESS_Q 0 // for UTs.
+#endif
 
 namespace pos
 {
-/* 'ItemT' should be a pointer type of certain object */
-template<typename ItemT>
+/* MetaFsIoQ is a general purpose lock-less Q adopting DPDK RTE Ring library */
+template<typename T> // 'T' should be a pointer type of certain object
 class MetaFsIoQ
 {
 public:
-    MetaFsIoQ(void)
-    {
-    }
-    virtual ~MetaFsIoQ(void)
-    {
-    }
-    virtual bool IsEmpty(void) const
-    {
-        return queue_.empty();
-    }
-    virtual void Enqueue(const ItemT obj)
-    {
-        queue_.push(obj);
-    }
-    virtual ItemT Dequeue(void)
-    {
-        ItemT t;
-        if (queue_.try_pop(t)) return t;
-        return nullptr;
-    }
+    MetaFsIoQ(void);
+    explicit MetaFsIoQ(uint32_t weight);
+    virtual ~MetaFsIoQ(void);
+
+    virtual void Init(const char* qName, uint32_t numEntries);
+    virtual bool IsAllQEmpty(void);
+    virtual bool IsEmpty(void);
+    virtual uint32_t GetItemCnt(void);
+    virtual void SetWeightFactor(uint32_t weight);
+    virtual uint32_t GetWeightFactor(void);
+    virtual bool Enqueue(T obj);
+    virtual T Dequeue(void);
+    virtual void CleanQEntry(void);
 
 private:
-    tbb::concurrent_queue<ItemT> queue_;
+#if (1 == RTE_LOCKLESS_Q)
+    MetaFsLockLessQ<T> q;
+#else
+    std::queue<T> q;
+#endif
+
+    uint32_t weightFactor;
+    MetaFsSpinLock qlock;
+    uint32_t elements;
 };
+
+template<typename T>
+MetaFsIoQ<T>::MetaFsIoQ(void)
+: weightFactor(0),
+  elements(0)
+{
+}
+
+template<typename T>
+MetaFsIoQ<T>::MetaFsIoQ(uint32_t weight)
+: weightFactor(weight)
+{
+}
+
+template<typename T>
+MetaFsIoQ<T>::~MetaFsIoQ(void)
+{
+}
+
+template<typename T>
+void
+MetaFsIoQ<T>::Init(const char* qName, uint32_t numEntries)
+{
+#if (1 == RTE_LOCKLESS_Q)
+    q.Init(qName, LockLessQType::MPMC, numEntries, rte_socket_id());
+#endif
+}
+
+template<typename T>
+void
+MetaFsIoQ<T>::SetWeightFactor(uint32_t weight)
+{
+    this->weightFactor = weight;
+}
+
+template<typename T>
+uint32_t
+MetaFsIoQ<T>::GetWeightFactor(void)
+{
+    return weightFactor;
+}
+
+template<typename T>
+bool
+MetaFsIoQ<T>::IsAllQEmpty(void)
+{
+    return IsEmpty();
+}
+
+template<typename T>
+bool
+MetaFsIoQ<T>::IsEmpty(void)
+{
+#if (1 == RTE_LOCKLESS_Q)
+    return q.IsEmpty();
+#else
+    SPIN_LOCK_GUARD_IN_SCOPE(qlock);
+    return q.empty();
+#endif
+}
+
+template<typename T>
+uint32_t
+MetaFsIoQ<T>::GetItemCnt(void)
+{
+#if (1 == RTE_LOCKLESS_Q)
+    return q.GetItemCount();
+#else
+    SPIN_LOCK_GUARD_IN_SCOPE(qlock);
+    return q.size();
+#endif
+}
+
+template<typename T>
+bool
+MetaFsIoQ<T>::Enqueue(T obj)
+{
+#if (1 == RTE_LOCKLESS_Q)
+    q.Push(obj);
+#else
+    SPIN_LOCK_GUARD_IN_SCOPE(qlock);
+    q.push(obj);
+#endif
+    elements++;
+
+    return true;
+}
+
+template<typename T>
+T
+MetaFsIoQ<T>::Dequeue(void)
+{
+#if (1 == RTE_LOCKLESS_Q)
+    if (q.IsEmpty())
+    {
+        return nullptr;
+    }
+    T obj = q.Pop();
+    elements--;
+#else
+
+    SPIN_LOCK_GUARD_IN_SCOPE(qlock);
+    if (q.empty())
+    {
+        return nullptr;
+    }
+    T obj = q.front();
+    if (obj)
+    {
+        q.pop();
+        elements--;
+    }
+#endif
+    return obj;
+}
+
+template<typename T>
+void
+MetaFsIoQ<T>::CleanQEntry(void)
+{
+    SPIN_LOCK_GUARD_IN_SCOPE(qlock);
+
+    std::queue<T> empty;
+    std::swap(q, empty);
+
+    elements = 0;
+}
 } // namespace pos

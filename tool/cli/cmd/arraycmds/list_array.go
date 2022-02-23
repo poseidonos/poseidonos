@@ -16,13 +16,12 @@ import (
 //TODO(mj): function for --detail flag needs to be implemented.
 var ListArrayCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List arrays of PoseidonOS or display information of an array.",
+	Short: "List arrays of PoseidonOS.",
 	Long: `
-List arrays of PoseidonOS or display information of an array.
-When you specify the name of a specific array, this command will
-display the detailed information about the array. Otherwise, this
-command will display the brief information about all the arrays
-in PoseidonOS. 
+List arrays in PoseidonOS. When you specify the name of a specific
+array, this command will display the detailed information about 
+the array. Otherwise, this command will display the brief information
+about all the arrays in PoseidonOS. 
 
 Syntax:
 	poseidonos-cli array list [(--array-name | -a) ArrayName]
@@ -38,30 +37,27 @@ Example 2 (listing a specific array):
 		// TODO(mj): Currently, ARRAYLIST command sends ARRAYINFO command to the server
 		// when an array is specified.
 		// Those commands will be merged later.
-		var (
-			command = ""
-			req     = messages.Request{}
-		)
+		var command = ""
+		var req = messages.Request{}
+		if list_array_arrayName == "" {
+			command = "LISTARRAY"
 
-		if list_array_arrayName != "" {
+			uuid := globals.GenerateUUID()
 
+			req = messages.Request{
+				RID:       uuid,
+				COMMAND:   command,
+				REQUESTOR: "cli",
+			}
+		} else {
 			command = "ARRAYINFO"
-
 			param := messages.ListArrayParam{
 				ARRAYNAME: list_array_arrayName,
 			}
 
-			req = messages.BuildReqWithParam(command, globals.GenerateUUID(), param)
+			uuid := globals.GenerateUUID()
 
-		} else {
-			command = "LISTARRAY"
-
-			req = messages.Request{
-				RID:       globals.GenerateUUID(),
-				COMMAND:   command,
-				REQUESTOR: "cli",
-			}
-
+			req = messages.BuildReqWithParam(command, uuid, param)
 		}
 
 		reqJSON, err := json.Marshal(req)

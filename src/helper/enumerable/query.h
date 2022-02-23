@@ -126,35 +126,4 @@ auto Select(S&& s, F f)
     return result;
 }
 
-template<typename S/*Source*/, typename F/*Sort by*/>
-auto Minimum(S&& s, F f)
-{
-    using type_t = std::decay_t<decltype(*std::begin(s))>;
-    type_t ret = *std::begin(s);
-    for (auto&& i : s)
-    {
-        if (f(ret) > f(i))
-        {
-            ret = i;
-        }
-    }
-    return ret;
-}
-
-template<typename S/*Source*/, typename F/*Sort by*/>
-auto Maximum(S&& s, F f)
-{
-    using type_t = std::decay_t<decltype(*std::begin(s))>;
-    type_t ret = *std::begin(s);
-    for (auto&& i : s)
-    {
-        if (f(ret) < f(i))
-        {
-            ret = i;
-        }
-    }
-    return ret;
-}
-
-
 } // namespace Enumerable

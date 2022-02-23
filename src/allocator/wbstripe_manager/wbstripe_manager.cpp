@@ -160,6 +160,7 @@ WBStripeManager::GetStripe(StripeAddr& lsa)
 void
 WBStripeManager::FreeWBStripeId(StripeId lsid)
 {
+    std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
     allocCtx->ReleaseWbStripe(lsid);
     QosManagerSingleton::Instance()->DecreaseUsedStripeCnt(arrayName);
@@ -170,7 +171,7 @@ WBStripeManager::FlushActiveStripes(uint32_t volumeId)
 {
     if (volumeManager->GetVolumeStatus(volumeId) == Mounted)
     {
-        _PickActiveStripe(volumeId, stripesToFlush4FlushCmd[volumeId], vsidToCheckFlushDone4FlushCmd[volumeId]);
+        PickActiveStripe(volumeId, stripesToFlush4FlushCmd[volumeId], vsidToCheckFlushDone4FlushCmd[volumeId]);
     }
     // This variable is not used.
     vsidToCheckFlushDone4FlushCmd[volumeId].clear();
@@ -237,21 +238,6 @@ WBStripeManager::FlushAllActiveStripes(void)
     }
 }
 
-bool
-WBStripeManager::FinalizeActiveStripes(int volumeId)
-{
-    std::vector<Stripe*> stripesToFlush;
-    std::vector<StripeId> vsidToCheckFlushDone;
-
-    {
-        std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
-        _PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
-    }
-
-    FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
-    return true;
-}
-
 int
 WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos)
 {
@@ -301,18 +287,46 @@ WBStripeManager::FlushPendingActiveStripes(void)
 }
 
 int
-WBStripeManager::FlushOnlineStripesInSegment(std::set<SegmentId>& segments)
+WBStripeManager::PrepareRebuild(void)
 {
     std::vector<Stripe*> stripesToFlush;
     std::vector<StripeId> vsidToCheckFlushDone;
 
-    // Add online stripe IDs to vsidToCheckFlushDone
-    _GetOnlineStripes(segments, vsidToCheckFlushDone);
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
+    blockManager->TurnOffBlkAllocation();
 
-    // Add active stripe IDs to vsidToCheckFlushDone and Stripe to stripesToFlush
-    CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
+    // Check rebuildTargetSegments data structure
+    int ret = contextManager->MakeRebuildTarget();
+    if (ret <= NO_REBUILD_TARGET_USER_SEGMENT)
+    {
+        blockManager->TurnOnBlkAllocation();
+        return ret;
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "MakeRebuildTarget Done @PrepareRebuild()");
 
+    // Let nextSsdLsid point non-rebuild target segment
+    ret = contextManager->SetNextSsdLsid();
+    if (ret < 0)
+    {
+        blockManager->TurnOnBlkAllocation();
+        return ret;
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
+
+    // Online stripes beyond target segments should be flushed
+    ret = _FlushOnlineStripes(vsidToCheckFlushDone);
+    if (ret < 0)
+    {
+        blockManager->TurnOnBlkAllocation();
+        return ret;
+    }
+
+    ret = CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
     FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
+
+    blockManager->TurnOnBlkAllocation();
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild()");
 
     return 0;
 }
@@ -324,10 +338,12 @@ WBStripeManager::GetStripe(StripeId wbLsid)
 }
 
 //------------------------------------------------------------------------------
-void
-WBStripeManager::_GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes)
+int
+WBStripeManager::_FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
 {
-    for (auto it = segments.begin(); it != segments.end(); ++it)
+    // Flush Online Stripes Beyond Target Segment
+    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
+    for (auto it = rbCtx->GetRebuildTargetSegmentsBegin(); it != rbCtx->GetRebuildTargetSegmentsEnd(); ++it)
     {
         StripeId startVsid = *it * addrInfo->GetstripesPerSegment();
         StripeId endVsid = startVsid + addrInfo->GetstripesPerSegment();
@@ -339,11 +355,13 @@ WBStripeManager::_GetOnlineStripes(std::set<SegmentId>& segments, std::vector<St
                 Stripe* stripe = GetStripe(lsa);
                 if (stripe != nullptr && stripe->IsFinished() == false && stripe->GetBlksRemaining() == 0)
                 {
-                    stripes.emplace_back(stripe->GetVsid());
+                    vsidToCheckFlushDone.push_back(stripe->GetVsid());
                 }
             }
         }
     }
+
+    return 0;
 }
 
 int
@@ -351,13 +369,13 @@ WBStripeManager::CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std
 {
     for (uint32_t volumeId = 0; volumeId < numVolumes; ++volumeId)
     {
-        _PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
+        PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
     return 0;
 }
 
 void
-WBStripeManager::_PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
+WBStripeManager::PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
 {
     Stripe* activeStripe = nullptr;
     ASTailArrayIdx index = volumeId;

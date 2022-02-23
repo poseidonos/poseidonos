@@ -8,6 +8,7 @@
 
 namespace pos
 {
+
 using StripeList = std::vector<StripeTestFixture>;
 using Volumes = std::unordered_set<int>;
 
@@ -18,10 +19,10 @@ public:
     virtual ~JournalVolumeIntegrationTest(void) = default;
 
     StripeList WriteStripes(int numVolumes);
-    void DeleteVolumes(Volumes& volumesToDelete);
-    void CheckVolumeDeleteLogsWritten(Volumes& volumesToDelete);
-    void ExpectReplayStripes(StripeList& writtenStripes,
-        int numVolumes, Volumes& volumesToDelete);
+    void DeleteVolumes(Volumes &volumesToDelete);
+    void CheckVolumeDeleteLogsWritten(Volumes &volumesToDelete);
+    void ExpectReplayStripes(StripeList &writtenStripes,
+        int numVolumes, Volumes &volumesToDelete);
     void ExpectReplayTail(int numVolumesWritten);
 
 protected:

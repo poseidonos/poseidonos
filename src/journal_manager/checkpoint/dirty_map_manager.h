@@ -35,7 +35,7 @@
 #include <mutex>
 #include <vector>
 
-#include "src/journal_manager/checkpoint/dirty_map_list.h"
+#include "src/journal_manager/checkpoint/dirty_page_list.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/mapper/include/mpage_info.h"
 
@@ -48,18 +48,18 @@ public:
     virtual ~DirtyMapManager(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration);
-    void Init(std::vector<DirtyMapList*> dirtyPages);
+    void Init(std::vector<DirtyPageList* > dirtyPages);
     virtual void Dispose(void);
 
-    virtual MapList GetDirtyList(int logGroupId);
-    virtual MapList GetTotalDirtyList(void);
+    virtual MapPageList GetDirtyList(int logGroupId);
+    virtual MapPageList GetTotalDirtyList(void);
     virtual void DeleteDirtyList(int volumeId);
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
+    virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:
-    std::vector<DirtyMapList*> pendingDirtyMaps;
+    std::vector<DirtyPageList*> pendingDirtyPages;
 };
 
 } // namespace pos

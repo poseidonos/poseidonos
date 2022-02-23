@@ -33,12 +33,13 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 
 namespace pos
 {
 class ConfigObserver
 {
 public:
-    virtual bool Notify(const std::string& key, const std::string& value) = 0;
+    virtual bool Notify(std::string key, std::string value) = 0;
 };
 } // namespace pos

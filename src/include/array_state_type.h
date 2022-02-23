@@ -40,7 +40,7 @@ namespace pos
 
 enum class ArrayStateEnum
 {
-    NOT_EXIST = 0,
+    NOT_EXIST,
     EXIST_NORMAL,
     EXIST_DEGRADED,
     BROKEN,
@@ -63,7 +63,6 @@ public:
     bool operator == (const ArrayStateEnum t) const { return val == t; }
     bool operator != (const ArrayStateEnum t) const { return val != t; }
     string ToString(void) const { return STATE_STR[(int)val]; }
-    ArrayStateEnum ToEnum(void) const { return val; }
 
 private:
     ArrayStateEnum val;

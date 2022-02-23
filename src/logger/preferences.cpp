@@ -45,8 +45,6 @@ Preferences::Preferences()
     logfileSize = conf.LogSizePerFileInMB();
     logRotation = conf.NumOfLogFilesForRotation();
     logLevel = StringToLogLevel(conf.LogLevel());
-    EnableStructuredLogging = conf.IsStrLoggingEnabled();
-
     ApplyFilter();
 }
 
@@ -100,7 +98,6 @@ Preferences::ToJson()
         data.SetAttribute(JsonAttribute("filter_included", "\"" + filter.IncludeRule() + "\""));
         data.SetAttribute(JsonAttribute("filter_excluded", "\"" + filter.ExcludeRule() + "\""));
     }
-    data.SetAttribute(JsonAttribute("structured_logging", EnableStructuredLogging ? "true" : "false"));
 
     return data;
 }
@@ -135,13 +132,4 @@ Preferences::StringToLogLevel(string lvl)
     }
     return spdlog::level::off;
 }
-
-int
-Preferences::SetStrLogging(bool input)
-{
-    EnableStructuredLogging = input;
-
-    return (int)POS_EVENT_ID::SUCCESS;
-}
-
 } // namespace pos_logger

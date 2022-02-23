@@ -34,20 +34,46 @@
 
 #include "src/include/array_config.h"
 #include "../device/array_device.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
+#include "src/array/ft/method.h"
 
 namespace pos
 {
-Partition::Partition(vector<ArrayDevice*> d, PartitionType type)
-: devs(d),
-  type(type)
+Partition::Partition(
+    string array,
+    uint32_t arrayIndex,
+    PartitionType type,
+    PartitionPhysicalSize physicalSize,
+    vector<ArrayDevice*> devs,
+    Method* method)
+: arrayName_(array),
+  arrayIndex_(arrayIndex),
+  type_(type),
+  physicalSize_(physicalSize),
+  devs_(devs),
+  method_(method)
 {
+    logicalSize_ = {
+        .minWriteBlkCnt = 1,
+        .blksPerChunk = physicalSize_.blksPerChunk,
+        .blksPerStripe =
+            physicalSize_.blksPerChunk * physicalSize_.chunksPerStripe,
+        .chunksPerStripe = physicalSize_.chunksPerStripe,
+        .stripesPerSegment = physicalSize_.stripesPerSegment,
+        .totalStripes =
+            physicalSize_.stripesPerSegment * physicalSize_.totalSegments,
+        .totalSegments = physicalSize_.totalSegments};
+
+    lastLba_ = physicalSize_.startLba +
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        physicalSize_.blksPerChunk * physicalSize_.stripesPerSegment *
+        physicalSize_.totalSegments;
 }
 
 // LCOV_EXCL_START
 Partition::~Partition(void)
 {
+    delete method_;
+    method_ = nullptr;
 }
 // LCOV_EXCL_STOP
 
@@ -55,7 +81,7 @@ int
 Partition::FindDevice(ArrayDevice* target)
 {
     int i = 0;
-    for (ArrayDevice* dev : devs)
+    for (ArrayDevice* dev : devs_)
     {
         if (dev == target)
         {
@@ -67,22 +93,28 @@ Partition::FindDevice(ArrayDevice* target)
     return -1;
 }
 
+Method*
+Partition::GetMethod(void)
+{
+    return method_;
+}
+
 const PartitionLogicalSize*
 Partition::GetLogicalSize(void)
 {
-    return &logicalSize;
+    return &logicalSize_;
 }
 
 const PartitionPhysicalSize*
 Partition::GetPhysicalSize(void)
 {
-    return &physicalSize;
+    return &physicalSize_;
 }
 
 bool
 Partition::IsValidLba(uint64_t lba)
 {
-    if (physicalSize.startLba > lba || lastLba <= lba)
+    if (physicalSize_.startLba > lba || lastLba_ <= lba)
     {
         return false;
     }
@@ -95,7 +127,7 @@ Partition::IsValidLba(uint64_t lba)
 bool
 Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
 {
-    if (lsa.stripeId < logicalSize.totalStripes && lsa.offset < logicalSize.blksPerStripe)
+    if (lsa.stripeId < logicalSize_.totalStripes && lsa.offset < logicalSize_.blksPerStripe)
     {
         return true;
     }
@@ -108,9 +140,7 @@ Partition::_IsValidAddress(const LogicalBlkAddr& lsa)
 bool
 Partition::_IsValidEntry(const LogicalWriteEntry& entry)
 {
-    if (entry.addr.stripeId < logicalSize.totalStripes &&
-        entry.addr.offset + entry.blkCnt <= logicalSize.blksPerStripe &&
-        entry.blkCnt >= logicalSize.minWriteBlkCnt)
+    if (entry.addr.stripeId < logicalSize_.totalStripes && (entry.addr.offset + entry.blkCnt) <= logicalSize_.blksPerStripe && entry.blkCnt >= logicalSize_.minWriteBlkCnt)
     {
         return true;
     }
@@ -118,17 +148,6 @@ Partition::_IsValidEntry(const LogicalWriteEntry& entry)
     {
         return false;
     }
-}
-
-void
-Partition::_UpdateLastLba(void)
-{
-    lastLba = physicalSize.startLba +
-        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
-        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
-        physicalSize.totalSegments;
-
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
 }
 
 } // namespace pos

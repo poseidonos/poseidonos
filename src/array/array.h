@@ -36,7 +36,7 @@
 #include <list>
 #include <string>
 
-#include "src/array/partition/partition_services.h"
+#include "array_interface.h"
 #include "src/array/device/array_device_manager.h"
 #include "src/array/meta/array_meta.h"
 #include "src/array/partition/partition_manager.h"
@@ -61,7 +61,6 @@ class MbrManager;
 class UBlockDevice;
 class IAbrControl;
 class IStateControl;
-class TelemetryPublishser;
 
 class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 {
@@ -71,14 +70,14 @@ class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
-        PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
+        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler,
         ArrayServiceLayer* arrayservice);
     virtual ~Array(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual int Load(void);
-    virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType);
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
@@ -108,10 +107,9 @@ public:
 
 private:
     int _LoadImpl(void);
-    int _CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid);
+    int _CreatePartitions(void);
     void _DeletePartitions(void);
     int _Flush(void);
-    int _Flush(ArrayMeta& meta);
     int _CheckRebuildNecessity(ArrayDevice* target);
     void _RebuildDone(RebuildResult result);
     void _DetachSpare(ArrayDevice* target);
@@ -122,7 +120,7 @@ private:
     bool _CheckIndexIsValid(void);
 
     ArrayState* state = nullptr;
-    PartitionServices* svc = nullptr;
+    ArrayInterface* intf = nullptr;
     PartitionManager* ptnMgr = nullptr;
 
     string name_;

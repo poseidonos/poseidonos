@@ -33,117 +33,34 @@
 #pragma once
 
 #include "metafs_common.h"
-#include "src/include/pos_event_id.h"
 #include <string>
 #include <array>
-#include <algorithm>
 
 class MetaFileName
 {
 public:
-    MetaFileName(void)
-    {
-        memset(str.data(), 0, MAX_FILE_NAME_LENGTH + 1);
-    }
-
-    MetaFileName(const MetaFileName& original)
-    {
-        std::copy(std::begin(original.str), std::end(original.str), std::begin(str));
-    }
-
-    MetaFileName(const string& fileName)
-    {
-        if (!_IsValidFileName(fileName))
-            assert(false);
-
-        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH + 1);
-    }
-
-    MetaFileName(const string* fileName) : MetaFileName(*fileName)
-    {
-        if (!_IsValidPtr(fileName) || !_IsValidFileName(*fileName))
-            assert(false);
-    }
-
     MetaFileName&
-    operator=(const std::string& fileName)
+    operator=(const std::string* fileName)
     {
-        if (!_IsValidFileName(fileName))
-            assert(false);
-
-        strncpy(str.data(), fileName.c_str(), MAX_FILE_NAME_LENGTH + 1);
+        assert(fileName->size() < MAX_FILE_NAME_LENGTH);
+        memcpy(str.data(), fileName->data(), fileName->length());
         return *this;
     }
 
-    MetaFileName& operator=(const std::string* fileName)
+    std::string
+    ToString(void)
     {
-        if (!_IsValidPtr(fileName) || !_IsValidFileName(*fileName))
-            assert(false);
-
-        return *this = *fileName;
+        std::string fileName(std::begin(str), std::end(str));
+        fileName.erase(std::find(fileName.begin(), fileName.end(), '\0'), fileName.end());
+        return fileName;
     }
 
-    bool operator==(const std::string& fileName)
-    {
-        return (0 == fileName.compare(ToString()));
-    }
-
-    bool operator!=(const std::string& fileName)
-    {
-        return !(*this == fileName);
-    }
-
-    bool operator==(MetaFileName& fileName)
-    {
-        return (0 == fileName.ToString().compare(ToString()));
-    }
-
-    bool operator!=(MetaFileName& fileName)
-    {
-        return !(*this == fileName);
-    }
-
-    std::string ToString(void)
-    {
-        return std::string(str.data());
-    }
-
-    const char* ToChar(void)
+    const char*
+    ToChar(void)
     {
         return reinterpret_cast<const char*>(&str);
     }
 
-    size_t GetLength(void)
-    {
-        return ToString().length();
-    }
-
-    static const size_t MAX_FILE_NAME_LENGTH = 127;
-
-private:
-    bool _IsValidPtr(const std::string* fileName)
-    {
-        if (nullptr == fileName)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-                "The file name is nullptr");
-            return false;
-        }
-        return true;
-    }
-
-    bool _IsValidFileName(const std::string& fileName)
-    {
-        if (fileName.length() > MAX_FILE_NAME_LENGTH)
-        {
-            const size_t MAX_SIZE = MAX_FILE_NAME_LENGTH;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-                "The file name({}) is too long (len: {}, max_allowed: {})",
-                fileName, fileName.length(), MAX_SIZE);
-            return false;
-        }
-        return true;
-    }
-
-    std::array<char, MAX_FILE_NAME_LENGTH + 1> str;
+    static const uint32_t MAX_FILE_NAME_LENGTH = 128;
+    std::array<char, MAX_FILE_NAME_LENGTH> str = { 0, };
 };

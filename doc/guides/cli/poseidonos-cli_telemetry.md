@@ -41,7 +41,7 @@ poseidonos-cli telemetry [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 * [poseidonos-cli telemetry start](poseidonos-cli_telemetry_start.md)	 - Start the collection of telemetry data in PoseidonOS.
 * [poseidonos-cli telemetry stop](poseidonos-cli_telemetry_stop.md)	 - Stop the collection of telemetry data in PoseidonOS.
 

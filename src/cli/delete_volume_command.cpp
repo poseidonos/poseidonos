@@ -71,7 +71,7 @@ DeleteVolumeCommand::Execute(json& doc, string rid)
             ret = volMgr->Delete(volName);
         }
 
-        if (SUCCESS == ret)
+        if (ret == SUCCESS)
         {
             return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
                 volName + "is deleted successfully", GetPosInfo());

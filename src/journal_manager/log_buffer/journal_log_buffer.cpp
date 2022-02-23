@@ -70,7 +70,7 @@ JournalLogBuffer::~JournalLogBuffer(void)
 {
     if (initializedDataBuffer != nullptr)
     {
-        delete[] initializedDataBuffer;
+        delete [] initializedDataBuffer;
     }
     delete logFile;
 }
@@ -176,7 +176,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     logBufferReadReq->length = groupSize;
     logBufferReadReq->buffer = (char*)buffer;
     logBufferReadReq->callback = std::bind(&JournalLogBuffer::_LogBufferReadDone,
-        this, std::placeholders::_1);
+                                 this, std::placeholders::_1);
 
     logBufferReadDone = false;
     int ret = logFile->AsyncIO(logBufferReadReq);

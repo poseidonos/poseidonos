@@ -54,6 +54,9 @@ MetaFsService::~MetaFsService(void)
         // exit scheduler thread
         ioScheduler->ExitThread();
 
+        // clear MultQ
+        ioScheduler->ClearQ();
+
         // delete the scheduler
         delete ioScheduler;
     }
@@ -89,7 +92,7 @@ MetaFsService::Deregister(std::string& arrayName)
 }
 
 MetaFs*
-MetaFsService::GetMetaFs(std::string& arrayName) const
+MetaFsService::GetMetaFs(std::string& arrayName)
 {
     auto iter = arrayNameToId.find(arrayName);
     if (iter == arrayNameToId.end())
@@ -103,7 +106,7 @@ MetaFsService::GetMetaFs(std::string& arrayName) const
 }
 
 MetaFs*
-MetaFsService::GetMetaFs(int arrayId) const
+MetaFsService::GetMetaFs(int arrayId)
 {
     return fileSystems[arrayId];
 }

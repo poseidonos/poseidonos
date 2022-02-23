@@ -5,8 +5,8 @@
 #include "test/unit-tests/array/rebuild/rebuild_context_mock.h"
 #include "test/unit-tests/array_models/dto/partition_physical_size_mock.h"
 #include "test/unit-tests/rebuild/rebuild_behavior_mock.h"
-#include "test/unit-tests/rebuild/stripe_based_race_rebuild_mock.h"
-#include "test/unit-tests/rebuild/segment_based_rebuild_mock.h"
+#include "test/unit-tests/rebuild/raid1_rebuild_mock.h"
+#include "test/unit-tests/rebuild/raid5_rebuild_mock.h"
 #include "test/unit-tests/rebuild/partition_rebuild_mock.h"
 #include "test/unit-tests/rebuild/rebuild_behavior_factory_mock.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
@@ -35,7 +35,7 @@ TEST(ArrayRebuild, ArrayRebuild_testConstructor)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, nullptr, nullptr, targetPartitions, nullptr);
 
     // Then
 }
@@ -71,7 +71,7 @@ TEST(ArrayRebuild, StartRebuild_testIfJobContainsEmptyTaskWhenArrayRebuildStart)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, &arrayDev, nullptr, targetPartitions, nullptr);
     ar->Start();
     // Then
 }
@@ -85,7 +85,7 @@ TEST(ArrayRebuild, DiscardRebuild_testIfNeedToDiscardBecauseThereAreNoTasks)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, &arrayDev, nullptr, targetPartitions, nullptr);
     ar->Discard();
     RebuildState state = ar->GetState();
 
@@ -128,7 +128,7 @@ TEST(ArrayRebuild, GetState_testIfStateIsReadyBeforeRebuildStarts)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, nullptr, nullptr, targetPartitions, nullptr);
     RebuildState state = ar->GetState();
 
     // Then
@@ -162,3 +162,4 @@ TEST(ArrayRebuild, GetProgress_testIfProgressIsZeroBeforeStartRebuild)
 }
 
 } // namespace pos
+

@@ -72,6 +72,9 @@ public:
     virtual int UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) override;
 
 private:
+    MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+    MpageList _GetDirtyPages(BlkAddr rba, uint32_t volId);
+
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
     IContextManager* contextManager;

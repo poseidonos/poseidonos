@@ -5,7 +5,8 @@ Generate completion script
 ### Synopsis
 
 
-Completion command generates an auto completion script for bash, zsh, fish, or powershell.
+This command generates the auto completion script for bash or zsh
+shelles.
 
 To load completions:
 
@@ -38,7 +39,7 @@ Zsh:
 
   # You will need to start a new shell for this setup to take effect.
 
-Fish:
+fish:
 
   $ poseidonos-cli completion fish | source
 
@@ -55,7 +56,7 @@ PowerShell:
 
 
 ```
-poseidonos-cli completion [bash|zsh|fish|powershell]
+poseidonos-cli completion [bash|zsh]
 ```
 
 ### Options
@@ -78,5 +79,5 @@ poseidonos-cli completion [bash|zsh|fish|powershell]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 

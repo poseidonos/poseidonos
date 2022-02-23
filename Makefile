@@ -27,7 +27,7 @@ DOCDIR = $(TOP)/doc
 #################################################
 # nvme driver : unvme, libaio
 
-POS_VERSION = v0.10.6
+POS_VERSION = v0.10.5
 
 DEFINE += -DPOS_VERSION=\"$(POS_VERSION)\"
 DEFINE += -DUNVME_BUILD
@@ -130,7 +130,6 @@ LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
 LDFLAGS += -no-pie -laio -ltcmalloc
 LDFLAGS += -lnuma
 LDFLAGS += -lyaml-cpp
-LDFLAGS += -ltbb
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli
@@ -257,21 +256,12 @@ poseidonos: makedir
 makedir:
 	@`[ -d $(BINDIR) ] || mkdir -p $(BINDIR)`
 
-package: poseidonos
-	cp -rf lib/spdk package/usr/local/lib/
-	cp -f bin/poseidonos package/usr/local/bin/
-	@`[ -d debian ] || mkdir -p debian`
-	dpkg-deb --build package debian/poseidonos.deb
-
 clean :
 	@$(MAKE) -C src clean
 	@$(MAKE) -C proto clean
 	@rm -rf $(BINDIR)
-	@rm -rf package/usr/local/bin/poseidonos
-	@rm -rf package/usr/local/lib/spdk
-	@rm -rf debian/
 
-.PHONY: all install clean udev_install udev_uninstall makedir package
+.PHONY: all install clean udev_install udev_uninstall makedir
 
 include $(SPDK_ROOT_DIR)/mk/spdk.deps.mk
 export INCLUDE SRCS CPPFLAGS DEFINE

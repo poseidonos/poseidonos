@@ -22,7 +22,6 @@ import pending_iocontext
 import pending_ubio
 import backend_io
 import volume_io
-import rba_info
 
 class PosGdbCmd(gdb.Command):
 
@@ -88,14 +87,7 @@ class PosGdbCmd(gdb.Command):
         elif ('backend io' == args):
             backend_io.backend_io()
         elif ('volume io' == args):
-            volume_io.pending_volume_io()
-        elif ('volume info' == args):
-            volume_io.bdev_information()
-        elif ('rba info' in args):
-            array_id = args.split()[2]
-            volume_id = args.split()[3]
-            rba = args.split()[4]
-            rba_info.rba_info(array_id, volume_id, rba)
+            volume_io.volume_io()
         else:
             print("Help : ")
             help_f = open(current_path + '/README_POS_GDB')

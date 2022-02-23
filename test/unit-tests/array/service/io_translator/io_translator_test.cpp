@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/array/ft/raid10.h"
+#include "src/array/ft/raid1.h"
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/array/partition/stripe_partition_mock.h"
 
@@ -28,8 +28,16 @@ TEST(IOTranslator, Register_testIfArgumentsAreValid)
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
     vector<ArrayDevice*> devs;
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    PartitionPhysicalSize physicalSize{
+        .startLba = 5,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
+
     // When
     bool actual = ioTranslator.Register(mockArrayIndex, trans);
 
@@ -52,7 +60,8 @@ TEST(IOTranslator, Unregister_testIfArgumentsAreValid)
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
         .totalSegments = 30};
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
 
@@ -71,7 +80,14 @@ TEST(IOTranslator, Translate_testIfArgumentsAreValid)
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
     vector<ArrayDevice*> devs;
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    PartitionPhysicalSize physicalSize{
+        .startLba = 5,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
     int TRANSLATE_SUCCESS = 0;
@@ -113,7 +129,14 @@ TEST(IOTranslator, Convert_testIfArgumentsAreValid)
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
     vector<ArrayDevice*> devs;
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    PartitionPhysicalSize physicalSize{
+        .startLba = 5,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
     int CONVERT_SUCCESS = 0;
@@ -138,7 +161,14 @@ TEST(IOTranslator, ByteTranslate_testIfArgumentsAreValid)
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
     vector<ArrayDevice*> devs;
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    PartitionPhysicalSize physicalSize{
+        .startLba = 5,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
     bool BYTEACCESS_SUPPORTED = true;
@@ -164,7 +194,14 @@ TEST(IOTranslator, ByteConvert_testIfArgumentsAreValid)
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
     vector<ArrayDevice*> devs;
-    MockStripePartition* mockPart = new MockStripePartition(mockPartitionType, devs, RaidTypeEnum::RAID5);
+    PartitionPhysicalSize physicalSize{
+        .startLba = 5,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* method = new Raid1(&physicalSize);
+    MockStripePartition* mockPart = new MockStripePartition(mockArrayName, mockArrayIndex, mockPartitionType, physicalSize, devs, method);
     trans.emplace(mockPartitionType, mockPart);
     ioTranslator.Register(mockArrayIndex, trans);
     bool BYTEACCESS_SUPPORTED = true;

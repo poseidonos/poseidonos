@@ -1,20 +1,17 @@
 ## poseidonos-cli volume list
 
-List volumes of an array or display information of a volume.
+List all volumes of an array.
 
 ### Synopsis
 
 
-List volumes of an array or display information of a volume.
+List all volumes of an array.
 
 Syntax:
-	poseidonos-cli volume list (--array-name | -a) ArrayName [(--volume-name | -v) VolumeName]
+	poseidonos-cli volume list [(--array-name | -a) ArrayName]
 
-Example1 (listing volumes of an array):
+Example (listing volumes from a specific array):
 	poseidonos-cli volume list --array-name Array0
-
-Example2 (displaying a detailed information of a volume):
-	poseidonos-cli volume list --array-name Array0 --volume-name Volume0
           
 
 ```
@@ -24,11 +21,8 @@ poseidonos-cli volume list [flags]
 ### Options
 
 ```
-  -a, --array-name string    The name of the array of volumes to list
-  -h, --help                 help for list
-  -v, --volume-name string   The name of the volume of the array to list.
-                             When this is specified, the detailed information
-                             		of this volume will be displayed.
+  -a, --array-name string   The Name of the array of volumes to list
+  -h, --help                help for list
 ```
 
 ### Options inherited from parent commands

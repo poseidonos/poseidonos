@@ -174,37 +174,19 @@ Allocator::GetIContextReplayer(void)
     return (IContextReplayer*)contextManager->GetContextReplayer();
 }
 
-int
-Allocator::PrepareRebuild(void)
+bool
+Allocator::FinalizeActiveStripes(int volumeId)
 {
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
-    blockManager->TurnOffBlkAllocation();
+    std::vector<Stripe*> stripesToFlush;
+    std::vector<StripeId> vsidToCheckFlushDone;
 
-    std::set<SegmentId> rebuildSegments;
-    int ret = contextManager->MakeRebuildTargetSegmentList(rebuildSegments);
-    if (ret < 0 || rebuildSegments.size() == 0)
     {
-        // Error occured or there's no segments to rebuild
-        blockManager->TurnOnBlkAllocation();
-        return ret;
+        std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
+        wbStripeManager->PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "MakeRebuildTarget Done @PrepareRebuild()");
 
-    ret = contextManager->SetNextSsdLsid();
-    if (ret < 0)
-    {
-        blockManager->TurnOnBlkAllocation();
-        return ret;
-    }
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
-
-    ret = wbStripeManager->FlushOnlineStripesInSegment(rebuildSegments);
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
-
-    blockManager->TurnOnBlkAllocation();
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild() with return {}", ret);
-
-    return ret;
+    wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
+    return true;
 }
 
 void
@@ -322,6 +304,21 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
                 allocCtx->SetAllocatedWbStripeCount(numBitsSet);
             }
         }
+        else if (WBT_SEGMENT_BITMAP == type)
+        {
+            uint32_t numBitsSet = 0;
+            ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, sizeof(numBitsSet), (char*)&numBitsSet);
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(segment bitmap) from {} Failed, ret:{}", fname, ret);
+                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+            }
+            else
+            {
+                SegmentCtx* segCtx = contextManager->GetSegmentCtx();
+                segCtx->SetAllocatedSegmentCount(numBitsSet);
+            }
+        }
         // ACTIVE_STRIPE_TAIL, CURRENT_SSD_LSID, SEGMENT_STATE
         else
         {
@@ -345,6 +342,7 @@ Allocator::GetInstantMetaInfo(std::string fname)
     std::ostringstream oss;
     std::ofstream ofs(fname, std::ofstream::app);
     AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
+    RebuildCtx* rebuildCtx = contextManager->GetRebuildCtx();
     SegmentCtx* segCtx = contextManager->GetSegmentCtx();
     oss << "<< WriteBuffers >>" << std::endl;
     oss << "Set:" << std::dec << allocCtx->GetAllocatedWbStripeCount() << " / ToTal:" << allocCtx->GetNumTotalWbStripe() << std::endl;
@@ -361,11 +359,11 @@ Allocator::GetInstantMetaInfo(std::string fname)
     oss << std::endl;
 
     oss << "<< Segments >>" << std::endl;
-    oss << "Set:" << std::dec << segCtx->GetAllocatedSegmentCount() << " / ToTal:" << addrInfo->GetnumUserAreaSegments() << std::endl;
+    oss << "Set:" << std::dec << segCtx->GetAllocatedSegmentCount() << " / ToTal:" << segCtx->GetTotalSegmentsCount() << std::endl;
     oss << "currentSsdLsid: " << allocCtx->GetCurrentSsdLsid() << std::endl;
     for (uint32_t segmentId = 0; segmentId < addrInfo->GetnumUserAreaSegments(); ++segmentId)
     {
-        SegmentState state = segCtx->GetSegmentState(segmentId);
+        SegmentState state = segCtx->GetSegmentState(segmentId, false);
         if ((segmentId > 0) && (segmentId % 4 == 0))
         {
             oss << std::endl;
@@ -377,11 +375,10 @@ Allocator::GetInstantMetaInfo(std::string fname)
 
     oss << "<< Rebuild >>" << std::endl;
     oss << "NeedRebuildCont:" << std::boolalpha << contextManager->NeedRebuildAgain() << std::endl;
-    oss << "TargetSegmentCount:" << segCtx->GetRebuildTargetSegmentCount() << std::endl;
+    oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentCount() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
-    std::set<SegmentId> segmentList = segCtx->GetRebuildSegmentList();
-    for (RTSegmentIter iter = segmentList.begin(); iter != segmentList.end(); ++iter, ++cnt)
+    for (RTSegmentIter iter = rebuildCtx->GetRebuildTargetSegmentsBegin(); iter != rebuildCtx->GetRebuildTargetSegmentsEnd(); ++iter, ++cnt)
     {
         if (cnt > 0 && (cnt % 16 == 0))
         {
@@ -427,9 +424,8 @@ void
 Allocator::_CreateSubmodules(void)
 {
     addrInfo = new AllocatorAddressInfo();
-    std::string arrName = iArrayInfo->GetName();
-    tp = new TelemetryPublisher(("Allocator"));
-    tp->AddDefaultLabel("array_name", arrName);
+    tp = new TelemetryPublisher("Allocator");
+    tp->AddDefaultLabel("array_name", iArrayInfo->GetName());
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());

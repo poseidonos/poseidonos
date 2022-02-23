@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
+
 import subprocess
 import sys
 import cli
 import json_parser
-import time
-sys.path.append("../../functional_requirements/")
-import api
 
 POS_ROOT = '../../../'
 LOG_PATH = 'pos.log'
@@ -33,29 +31,12 @@ def start_pos_without_bringup():
                 stdout=output_file, stderr=output_file)
         isExecuted = True
     subprocess.call(["sleep", "3"])
-    tryCnt = 0
-    maxRetry = 20
-    ret = api.check_pos_alive()
-    while ret is False:
-        tryCnt += 1
-        if tryCnt == maxRetry:
-            print("failed to initialize pos server")
-            kill_pos()
-            return False
-        time.sleep(1)
-        print("waiting for pos server initialization, " + str(tryCnt) + " time(s) retried")
-        ret = api.check_pos_alive()
-    print("pos is ready")
-    return True
 
 
 def start_pos():
-    ret = start_pos_without_bringup()
-    if ret is False:
-        return False
+    start_pos_without_bringup()
     pos_bringup = POS_ROOT + "/test/system/lib/bring_up.sh"
     subprocess.call([pos_bringup, "-t", TR_TYPE, "-a", TR_ADDR])
-    return True
 
 
 def exit_pos():

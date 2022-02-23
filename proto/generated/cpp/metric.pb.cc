@@ -30,7 +30,7 @@ struct MetricPublishRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MetricPublishRequestDefaultTypeInternal _MetricPublishRequest_default_instance_;
 constexpr MetricPublishResponse::MetricPublishResponse(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : totalreceivedmetrics_(PROTOBUF_ULONGLONG(0)){}
+  : totalreceivedmetrics_(PROTOBUF_LONGLONG(0)){}
 struct MetricPublishResponseDefaultTypeInternal {
   constexpr MetricPublishResponseDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -122,20 +122,19 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 const char descriptor_table_protodef_metric_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014metric.proto\"0\n\024MetricPublishRequest\022\030"
   "\n\007metrics\030\001 \003(\0132\007.Metric\"5\n\025MetricPublis"
-  "hResponse\022\034\n\024totalReceivedMetrics\030\001 \001(\004\""
+  "hResponse\022\034\n\024totalReceivedMetrics\030\001 \001(\003\""
   "\201\001\n\006Metric\022\032\n\004type\030\001 \001(\0162\014.MetricTypes\022\014"
   "\n\004name\030\003 \001(\t\022\026\n\014counterValue\030\004 \001(\004H\000\022\024\n\n"
-  "gaugeValue\030\005 \001(\003H\000\022\026\n\006labels\030\006 \003(\0132\006.Lab"
+  "guageValue\030\005 \001(\003H\000\022\026\n\006labels\030\006 \003(\0132\006.Lab"
   "elB\007\n\005value\"#\n\005Label\022\013\n\003key\030\001 \001(\t\022\r\n\005val"
-  "ue\030\002 \001(\t*0\n\013MetricTypes\022\t\n\005START\020\000\022\013\n\007CO"
-  "UNTER\020\001\022\t\n\005GAUGE\020\0022Q\n\rMetricManager\022@\n\rM"
-  "etricPublish\022\025.MetricPublishRequest\032\026.Me"
-  "tricPublishResponse\"\000B\014Z\npos.metricb\006pro"
-  "to3"
+  "ue\030\002 \001(\t*%\n\013MetricTypes\022\013\n\007COUNTER\020\000\022\t\n\005"
+  "GUAGE\020\0012Q\n\rMetricManager\022@\n\rMetricPublis"
+  "h\022\025.MetricPublishRequest\032\026.MetricPublish"
+  "Response\"\000B\014Z\npos.metricb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_metric_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_metric_2eproto = {
-  false, false, 443, descriptor_table_protodef_metric_2eproto, "metric.proto", 
+  false, false, 432, descriptor_table_protodef_metric_2eproto, "metric.proto", 
   &descriptor_table_metric_2eproto_once, nullptr, 0, 4,
   schemas, file_default_instances, TableStruct_metric_2eproto::offsets,
   file_level_metadata_metric_2eproto, file_level_enum_descriptors_metric_2eproto, file_level_service_descriptors_metric_2eproto,
@@ -156,7 +155,6 @@ bool MetricTypes_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:
-    case 2:
       return true;
     default:
       return false;
@@ -378,7 +376,7 @@ MetricPublishResponse::MetricPublishResponse(const MetricPublishResponse& from)
 }
 
 void MetricPublishResponse::SharedCtor() {
-totalreceivedmetrics_ = PROTOBUF_ULONGLONG(0);
+totalreceivedmetrics_ = PROTOBUF_LONGLONG(0);
 }
 
 MetricPublishResponse::~MetricPublishResponse() {
@@ -407,7 +405,7 @@ void MetricPublishResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  totalreceivedmetrics_ = PROTOBUF_ULONGLONG(0);
+  totalreceivedmetrics_ = PROTOBUF_LONGLONG(0);
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -418,7 +416,7 @@ const char* MetricPublishResponse::_InternalParse(const char* ptr, ::PROTOBUF_NA
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint64 totalReceivedMetrics = 1;
+      // int64 totalReceivedMetrics = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
           totalreceivedmetrics_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
@@ -453,10 +451,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 totalReceivedMetrics = 1;
+  // int64 totalReceivedMetrics = 1;
   if (this->totalreceivedmetrics() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_totalreceivedmetrics(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(1, this->_internal_totalreceivedmetrics(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -475,10 +473,10 @@ size_t MetricPublishResponse::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // uint64 totalReceivedMetrics = 1;
+  // int64 totalReceivedMetrics = 1;
   if (this->totalreceivedmetrics() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
         this->_internal_totalreceivedmetrics());
   }
 
@@ -576,8 +574,8 @@ Metric::Metric(const Metric& from)
       _internal_set_countervalue(from._internal_countervalue());
       break;
     }
-    case kGaugeValue: {
-      _internal_set_gaugevalue(from._internal_gaugevalue());
+    case kGuageValue: {
+      _internal_set_guagevalue(from._internal_guagevalue());
       break;
     }
     case VALUE_NOT_SET: {
@@ -624,7 +622,7 @@ void Metric::clear_value() {
       // No need to clear
       break;
     }
-    case kGaugeValue: {
+    case kGuageValue: {
       // No need to clear
       break;
     }
@@ -680,10 +678,10 @@ const char* Metric::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // int64 gaugeValue = 5;
+      // int64 guageValue = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          _internal_set_gaugevalue(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          _internal_set_guagevalue(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -750,10 +748,10 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_countervalue(), target);
   }
 
-  // int64 gaugeValue = 5;
-  if (_internal_has_gaugevalue()) {
+  // int64 guageValue = 5;
+  if (_internal_has_guagevalue()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(5, this->_internal_gaugevalue(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(5, this->_internal_guagevalue(), target);
   }
 
   // repeated .Label labels = 6;
@@ -808,11 +806,11 @@ size_t Metric::ByteSizeLong() const {
           this->_internal_countervalue());
       break;
     }
-    // int64 gaugeValue = 5;
-    case kGaugeValue: {
+    // int64 guageValue = 5;
+    case kGuageValue: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_gaugevalue());
+          this->_internal_guagevalue());
       break;
     }
     case VALUE_NOT_SET: {
@@ -862,8 +860,8 @@ void Metric::MergeFrom(const Metric& from) {
       _internal_set_countervalue(from._internal_countervalue());
       break;
     }
-    case kGaugeValue: {
-      _internal_set_gaugevalue(from._internal_gaugevalue());
+    case kGuageValue: {
+      _internal_set_guagevalue(from._internal_guagevalue());
       break;
     }
     case VALUE_NOT_SET: {

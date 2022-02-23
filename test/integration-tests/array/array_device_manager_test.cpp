@@ -6,7 +6,6 @@
 #include "test/unit-tests/array/device/array_device_list_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
-#include "test/unit-tests/array/device/array_device_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -542,10 +541,10 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr))
         .WillOnce(Return(nvm1UblockDevPtr))
-        .WillOnce(Return(data1UblockDevPtr))
-        .WillOnce(Return(data2UblockDevPtr))
-        .WillOnce(Return(data3UblockDevPtr))
-        .WillOnce(Return(spare1UblockDevPtr));
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr));
     SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
 
     arrDevMgr.ImportByName(nameSet);
@@ -710,42 +709,29 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
     // Given
     MockDeviceManager mockSysDevMgr;
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
-    uint64_t EXPECTED_DEV_SIZE = 1024*100;
-    uint64_t SMALLER_DEV_SIZE = 1024*80;
-    string spareName = "mock-spareDev";
-    shared_ptr<MockUBlockDevice> ptrMockUblockDev1 = make_shared<MockUBlockDevice>("mock-dataDev1", EXPECTED_DEV_SIZE, nullptr);
-    shared_ptr<MockUBlockDevice> ptrMockUblockDev2 = make_shared<MockUBlockDevice>("mock-dataDev2", EXPECTED_DEV_SIZE, nullptr);
-    shared_ptr<MockUBlockDevice> ptrMockUblockDev3 = make_shared<MockUBlockDevice>("mock-dataDev3", EXPECTED_DEV_SIZE, nullptr);
-    shared_ptr<MockUBlockDevice> ptrMockSpare = make_shared<MockUBlockDevice>(spareName, SMALLER_DEV_SIZE, nullptr);
-    MockArrayDevice dataDev1(ptrMockUblockDev1), dataDev2(ptrMockUblockDev2), dataDev3(ptrMockUblockDev3);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.data.push_back(&dataDev1);
-    deviceSet.data.push_back(&dataDev2);
-    deviceSet.data.push_back(&dataDev3);
+    string devName = "spare1";
+    int EXPECTED_DEV_SIZE = 121212;
+    auto data1 = MockUblockDevice("data1");
+    auto spare1 = MockUblockDevice(devName.c_str());
 
+    ArrayDevice data1Dev(data1, ArrayDeviceState::NORMAL);
+    DeviceSet<ArrayDevice*> deviceSet;
+    deviceSet.data.push_back(&data1Dev);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
+    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
+    EXPECT_CALL(*spare1.get(), GetClass).WillOnce(Return(DeviceClass::SYSTEM));
+    EXPECT_CALL(*spare1.get(), IsAlive).WillOnce(Return(true));
+    EXPECT_CALL(*spare1.get(), GetSize).WillOnce(Return(EXPECTED_DEV_SIZE + 1)); // intentionally passing in wrong capacity
+    EXPECT_CALL(*data1.get(), GetSize).WillOnce(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillRepeatedly(Return(ptrMockSpare));
-    EXPECT_CALL(*ptrMockSpare, GetClass).WillOnce(Return(DeviceClass::SYSTEM));
-    EXPECT_CALL(*ptrMockSpare, IsAlive).WillOnce(Return(true));
-    EXPECT_CALL(*ptrMockSpare, GetSize).WillRepeatedly(Return(SMALLER_DEV_SIZE)); // intentionally passing in smaller capacity
-    EXPECT_CALL(*ptrMockUblockDev1, GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
-    EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
-    EXPECT_CALL(*ptrMockUblockDev3, GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
-    EXPECT_CALL(dataDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev1));
-    EXPECT_CALL(dataDev2, GetUblock).WillRepeatedly(Return(ptrMockUblockDev2));
-    EXPECT_CALL(dataDev3, GetUblock).WillRepeatedly(Return(ptrMockUblockDev3));
-    EXPECT_CALL(dataDev1, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
-    EXPECT_CALL(dataDev2, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
-    EXPECT_CALL(dataDev3, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
 
     // When
-    int actual = arrDevMgr.AddSpare(spareName);
+    int actual = arrDevMgr.AddSpare(devName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_SSD_CAPACITY_ERROR), actual);
+    ASSERT_EQ(EID(ARRAY_SSD_SAME_CAPACITY_ERROR), actual);
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
@@ -767,8 +753,8 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
     EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
     EXPECT_CALL(*spare1.get(), GetClass).WillOnce(Return(DeviceClass::SYSTEM));
     EXPECT_CALL(*spare1.get(), IsAlive).WillOnce(Return(true));
-    EXPECT_CALL(*spare1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
-    EXPECT_CALL(*data1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
+    EXPECT_CALL(*spare1.get(), GetSize).WillOnce(Return(EXPECTED_DEV_SIZE));
+    EXPECT_CALL(*data1.get(), GetSize).WillOnce(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     EXPECT_CALL(*mockArrayDeviceList, AddSpare(_)).WillOnce([](ArrayDevice* dev)
     {

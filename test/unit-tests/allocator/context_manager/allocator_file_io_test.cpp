@@ -237,7 +237,7 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
     EXPECT_CALL(client, GetSignature).WillRepeatedly(Return(0xAFAFAFAF));
 
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
+    char* buffer[NUM_ALLOCATOR_CTX_SECTION];
 
     buffer[0] = (char*)(new CtxHeader());
     ((CtxHeader*)buffer[0])->sig = 0xAFAFAFAF;
@@ -277,7 +277,6 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
 
             ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
-
             return 0;
         });
 
@@ -286,7 +285,7 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(fileManager.GetNumFilesFlushing(), 0);
 
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
+    for (int sectionId = 0; sectionId < NUM_ALLOCATOR_CTX_SECTION; sectionId++)
     {
         delete[] buffer[sectionId];
     }

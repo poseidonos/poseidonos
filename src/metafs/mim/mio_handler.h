@@ -38,11 +38,11 @@
 #include <unordered_map>
 #include <chrono>
 
-#include "metafs_io_multilevel_q.h"
+#include "metafs_io_multi_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
-#include "src/metafs/lib/metafs_pool.h"
-#include "src/metafs/mim/mio.h"
+#include "mio_pool.h"
+#include "mpio.h"
 #include "mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -53,15 +53,15 @@ class MioHandler
 public:
     MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
     // for test
-    MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
+    MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
+        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool,
         TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
     virtual void TophalfMioProcessing(void);
     virtual void BindPartialMpioHandler(MpioHandler* ptMpioHandler);
 
-    virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
     virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     virtual void ExecuteMio(Mio& mio);
 
@@ -85,18 +85,17 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
-    void _SendPeriodicMetrics(void);
-    void _CreateMioPool(void);
+    void _SendMetric(uint32_t size);
 #if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 #endif
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ;
-    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
+    MetaFsIoQ<MetaFsIoRequest*>* ioSQ;
+    MetaFsIoQ<Mio*>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
-    MetaFsPool<Mio*>* mioPool;
-    MpioAllocator* mpioAllocator;
+    MioPool* mioPool;
+    MpioPool* mpioPool;
     int cpuStallCnt;
     MioAsyncDoneCb mioCompletionCallback;
     PartialMpioDoneCb partialMpioDoneNotifier;
@@ -112,7 +111,5 @@ private:
 
     TelemetryPublisher* telemetryPublisher = nullptr;
     std::chrono::steady_clock::time_point lastTime;
-    int64_t metricSumOfSpendTime;
-    int64_t metricSumOfMioCount;
 };
 } // namespace pos

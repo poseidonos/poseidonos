@@ -41,7 +41,7 @@ TEST(ArrayRebuilder, Rebuild_testIfMetaPartitionAndDataPartitionTriggerRebuild)
     targetPartitions.push_back(&metaPart);
 
     // When
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions);
+    rebuilder->Rebuild(arrayName, &arrayDev, nullptr, targetPartitions);
 
     // Then
     bool ret = rebuilder->IsRebuilding(arrayName);
@@ -71,7 +71,7 @@ TEST(ArrayRebuilder, ResumeRebuild_testIfNeedToResumeRebuild)
     targetPartitions.push_back(&metaPart);
 
     // When
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions);
+    rebuilder->Rebuild(arrayName, &arrayDev, nullptr, targetPartitions);
 
     // Then : note that meta partition is removed from rebuild target
     ASSERT_EQ(1, targetPartitions.size());
@@ -102,7 +102,7 @@ TEST(ArrayRebuilder, Discard_testErrorOccuredDuringPrepareRebuild)
 
     // When
     RebuildResult rebResult;
-    rebuilder->Rebuild(arrayName, 0, &arrayDev,
+    rebuilder->Rebuild(arrayName, &arrayDev,
         [&rebResult](RebuildResult res) -> void { rebResult = res; },
         targetPartitions);
 
@@ -132,7 +132,7 @@ TEST(ArrayRebuilder, StopRebuild_testIfJobInProgressInvokesStopMethod)
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     targetPartitions.push_back(&dataPart);
     targetPartitions.push_back(&metaPart);
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions);
+    rebuilder->Rebuild(arrayName, &arrayDev, nullptr, targetPartitions);
 
     // When
     rebuilder->StopRebuild(arrayName);

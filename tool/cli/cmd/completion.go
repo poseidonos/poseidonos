@@ -7,10 +7,11 @@ import (
 )
 
 var completionCmd = &cobra.Command{
-	Use:   "completion [bash|zsh|fish|powershell]",
+	Use:   "completion [bash|zsh]",
 	Short: "Generate completion script",
 	Long: `
-Completion command generates an auto completion script for bash, zsh, fish, or powershell.
+This command generates the auto completion script for bash or zsh
+shelles.
 
 To load completions:
 
@@ -43,7 +44,7 @@ Zsh:
 
   # You will need to start a new shell for this setup to take effect.
 
-Fish:
+fish:
 
   $ poseidonos-cli completion fish | source
 

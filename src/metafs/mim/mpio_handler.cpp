@@ -37,19 +37,17 @@
 
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
+MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoQ<Mpio*>* doneQ)
 : partialMpioDoneQ(doneQ),
-  mpioAllocator(nullptr),
+  mpioPool(nullptr),
   coreId(coreId),
-  telemetryPublisher(tp),
-  metricSumOfSpendTime(0),
-  metricSumOfMpioCount(0)
+  telemetryPublisher(tp)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
-        partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, RequestPriority>();
+        partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
 
     lastTime = std::chrono::steady_clock::now();
 }
@@ -66,15 +64,23 @@ MpioHandler::~MpioHandler(void)
 void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
-    partialMpioDoneQ->Enqueue(mpio, mpio->GetPriority());
-    mpio->StoreTimestamp(MpioTimestampStage::Enqueue);
+    partialMpioDoneQ->Enqueue(mpio);
 }
 
 void
-MpioHandler::BindMpioAllocator(MpioAllocator* mpioAllocator)
+MpioHandler::BindMpioPool(MpioPool* mpioPool)
 {
-    assert(this->mpioAllocator == nullptr && mpioAllocator != nullptr);
-    this->mpioAllocator = mpioAllocator;
+    assert(this->mpioPool == nullptr && mpioPool != nullptr);
+    this->mpioPool = mpioPool;
+
+    _InitPartialMpioDoneQ(mpioPool->GetPoolSize());
+}
+
+void
+MpioHandler::_InitPartialMpioDoneQ(size_t mpioDoneQSize)
+{
+    std::string partialqName("PartialMpioDQ = " + std::to_string(coreId));
+    partialMpioDoneQ->Init(partialqName.c_str(), mpioDoneQSize);
 }
 
 void
@@ -83,56 +89,33 @@ MpioHandler::BottomhalfMioProcessing(void)
     Mpio* mpio = partialMpioDoneQ->Dequeue();
     if (mpio)
     {
-        mpio->StoreTimestamp(MpioTimestampStage::Dequeue);
-
         mpio->ExecuteAsyncState();
 
         if (mpio->IsCompleted())
         {
-            mpio->StoreTimestamp(MpioTimestampStage::Release);
-            metricSumOfSpendTime += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
-            metricSumOfMpioCount++;
-            mpioAllocator->Release(mpio);
+            mpioPool->Release(mpio);
         }
+
+        _SendMetric(partialMpioDoneQ->GetItemCnt());
     }
 
 #if MPIO_CACHE_EN
-    mpioAllocator->TryReleaseTheOldestCache();
+    mpioPool->ReleaseCache();
 #endif
-
-    _SendPeriodicMetrics();
 }
 
 void
-MpioHandler::_SendPeriodicMetrics()
+MpioHandler::_SendMetric(uint32_t size)
 {
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
 
     if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
     {
-        std::string thread_name = to_string(coreId);
-        POSMetric metricFreeMpioCnt(TEL40103_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
-        metricFreeMpioCnt.AddLabel("thread_name", thread_name);
-        metricFreeMpioCnt.SetGaugeValue(mpioAllocator->GetFreeCount());
-        telemetryPublisher->PublishMetric(metricFreeMpioCnt);
-
-        if (metricSumOfMpioCount != 0)
-        {
-            POSMetric metricTime(TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO, POSMetricTypes::MT_GAUGE);
-            metricTime.AddLabel("thread_name", thread_name);
-            metricTime.SetGaugeValue(metricSumOfSpendTime);
-            telemetryPublisher->PublishMetric(metricTime);
-
-            POSMetric metricCount(TEL40105_METAFS_SUM_OF_MPIO_COUNT, POSMetricTypes::MT_GAUGE);
-            metricCount.AddLabel("thread_name", thread_name);
-            metricCount.SetGaugeValue(metricSumOfMpioCount);
-            telemetryPublisher->PublishMetric(metricCount);
-
-            metricSumOfSpendTime = 0;
-            metricSumOfMpioCount = 0;
-        }
-
+        POSMetric metric(TEL40101_METAFS_PENDING_MPIO_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("thread_name", to_string(coreId));
+        metric.SetCountValue(size);
+        telemetryPublisher->PublishMetric(metric);
         lastTime = currentTime;
     }
 }

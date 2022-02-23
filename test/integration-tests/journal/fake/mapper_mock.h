@@ -4,9 +4,10 @@
 
 #include "gmock/gmock.h"
 #include "src/mapper/mapper.h"
+
 #include "test/integration-tests/journal/fake/map_flush_handler_mock.h"
-#include "test/integration-tests/journal/fake/stripemap_mock.h"
 #include "test/integration-tests/journal/fake/vsamap_mock.h"
+#include "test/integration-tests/journal/fake/stripemap_mock.h"
 #include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 
@@ -14,7 +15,6 @@ using ::testing::StrictMock;
 
 namespace pos
 {
-class TelemetryPublisher;
 class MockMapper : public Mapper
 {
 public:
@@ -24,8 +24,8 @@ public:
     MpageList GetVsaMapDirtyPages(int volId, BlkAddr rba, uint32_t numBlks);
     MpageList GetStripeMapDirtyPages(StripeId vsid);
 
-    MOCK_METHOD(int, FlushDirtyMpages,
-        (int mapId, EventSmartPtr callback), (override));
+    MOCK_METHOD(int, FlushDirtyMpagesGiven,
+        (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
 
     IVSAMap* GetIVSAMap(void) override;
     IStripeMap* GetIStripeMap(void) override;
@@ -37,7 +37,7 @@ public:
     virtual int StoreAll(void) override;
 
 private:
-    int _FlushDirtyMpages(int mapId, EventSmartPtr callback);
+    int _FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages);
 
     TestInfo* testInfo;
 

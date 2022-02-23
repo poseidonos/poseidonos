@@ -13,8 +13,8 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided with the
  *       distribution.
- *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -53,7 +53,6 @@
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::_;
@@ -111,14 +110,13 @@ public:
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
         tp = new NiceMock<MockTelemetryPublisher>;
-        tc = new NiceMock<MockTelemetryClient>;
 
-        journal = new JournalManager(config, statusProvider,
+        journal = new JournalManager(tp, config, statusProvider,
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
             bufferedSegmentContext, dirtyMapManager, logFilledNotifier,
-            callbackSequenceController, replayHandler, arrayInfo, tp);
+            callbackSequenceController, replayHandler, arrayInfo);
     }
 
     virtual void
@@ -126,7 +124,6 @@ public:
     {
         delete journal;
         delete arrayInfo;
-        delete tc;
     }
 
 protected:
@@ -151,7 +148,6 @@ protected:
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockTelemetryPublisher>* tp;
-    NiceMock<MockTelemetryClient>* tc;
 };
 
 TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
@@ -199,7 +195,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -238,7 +234,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -256,7 +252,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfFailedToOpenLogBuffer)
 
     // Then: JournalManager return the error code
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(expectReturnCode, actualReturnCode);
 }
 
@@ -273,7 +269,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfJournalEnabledOptionIsChanged)
 
     // Then: Journal manager bypass the process of replay
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     int expectReturnCode = 0;
 
     EXPECT_EQ(expectReturnCode, actualReturnCode);
@@ -283,7 +279,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(nullptr, config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization
@@ -305,7 +301,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfReplayFailed)
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(-1));
 
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // Then: Journal manager should be return the error code to indicate that replay is failed
     int expectedReturnCode = -EID(JOURNAL_REPLAY_FAILED);
@@ -383,7 +379,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -403,7 +399,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);

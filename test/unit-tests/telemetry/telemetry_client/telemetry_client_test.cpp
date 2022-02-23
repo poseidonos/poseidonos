@@ -15,8 +15,17 @@ TEST(TelemetryClient, RegisterClient_TestRegisterDeregister)
     int ret = telClient.RegisterPublisher(tp);
     // then 2.
     EXPECT_EQ(0, ret);
+    // when 2.
+    ret = telClient.RegisterPublisher(tp);
+    // then 2.
+    EXPECT_EQ(-1, ret);
     // given 3.
     telClient.DeregisterPublisher(tp->GetName());
+    telClient.DeregisterPublisher(tp->GetName());
+    // when 3.
+    ret = telClient.RegisterPublisher(tp);
+    // then 3.
+    EXPECT_EQ(0, ret);
     delete tp;
 }
 
@@ -27,14 +36,14 @@ TEST(TelemetryClient, StartPublisher_TestStartAndStop)
     TelemetryClient telClient;
     telClient.RegisterPublisher(tp);
     // when 1.
-    telClient.StartPublisher(tp->GetName());
+    telClient.StartPublisher("a");
     // then 1.
-    bool ret = telClient.IsPublisherRunning(tp->GetName());
+    bool ret = telClient.IsPublisherRunning("a");
     EXPECT_EQ(true, ret);
     // when 2.
-    telClient.StopPublisher(tp->GetName());
+    telClient.StopPublisher("a");
     // then 2.
-    ret = telClient.IsPublisherRunning(tp->GetName());
+    ret = telClient.IsPublisherRunning("a");
     EXPECT_EQ(false, ret);
     delete tp;
 }
@@ -50,16 +59,16 @@ TEST(TelemetryClient, StartTelemetryPublisherAll_TestStartAndStopAll)
     // when 1.
     telClient.StartAllPublisher();
     // then 1.
-    bool ret = telClient.IsPublisherRunning(tp->GetName());
+    bool ret = telClient.IsPublisherRunning("a");
     EXPECT_EQ(true, ret);
-    ret = telClient.IsPublisherRunning(tp2->GetName());
+    ret = telClient.IsPublisherRunning("b");
     EXPECT_EQ(true, ret);
     // when 2.
     telClient.StopAllPublisher();
     // then 2.
-    ret = telClient.IsPublisherRunning(tp->GetName());
+    ret = telClient.IsPublisherRunning("a");
     EXPECT_EQ(false, ret);
-    ret = telClient.IsPublisherRunning(tp2->GetName());
+    ret = telClient.IsPublisherRunning("b");
     EXPECT_EQ(false, ret);
     delete tp;
     delete tp2;

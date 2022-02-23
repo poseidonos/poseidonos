@@ -1,11 +1,11 @@
 ## poseidonos-cli logger apply-filter
 
-Apply a filtering policy to logger.
+Apply a filtering policy to the logger.
 
 ### Synopsis
 
 
-Apply a filtering policy to logger.
+Apply a filtering policy to the logger.
 
 Syntax:
 	poseidonos-cli logger apply-filter

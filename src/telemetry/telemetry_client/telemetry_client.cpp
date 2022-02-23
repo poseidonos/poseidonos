@@ -41,8 +41,6 @@ namespace pos
 TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
 {
     globalPublisher = new GrpcGlobalPublisher(channel_);
-    publisherId = 0;
-    defaultEnable = false;
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -58,18 +56,20 @@ TelemetryClient::~TelemetryClient(void)
 int
 TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
 {
-    assert(publisher != nullptr);
     std::string name = publisher->GetName();
-    name = to_string(publisherId.fetch_add(1)) + name;
-    publisher->SetName(name);
-    publisherList.emplace(name, publisher);
-    publisher->SetGlobalPublisher(globalPublisher);
-    if (defaultEnable == true)
+    auto ret = publisherList.find(name);
+    if (ret != publisherList.end())
     {
-        publisher->StartPublishing();
+        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! tried to add a publisher already registered:{}", name);
+        return -1;
     }
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}, turnOn:{}", name, publisherList.size(), defaultEnable);
-    return 0;
+    else
+    {
+        publisherList.emplace(name, publisher);
+        publisher->SetGlobalPublisher(globalPublisher);
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}", name, publisherList.size());
+        return 0;
+    }
 }
 
 int
@@ -113,7 +113,6 @@ bool
 TelemetryClient::StartAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start all publishers");
-    defaultEnable = true;
     for (auto &p : publisherList)
     {
         p.second->StartPublishing();
@@ -126,7 +125,6 @@ bool
 TelemetryClient::StopAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop all publishers");
-    defaultEnable = false;
     for (auto &p : publisherList)
     {
         p.second->StopPublishing();
@@ -176,7 +174,7 @@ TelemetryClient::StopUsingDataPoolForAllPublisher(void)
 }
 
 bool
-TelemetryClient::Notify(const std::string& key, const std::string& value)
+TelemetryClient::Notify(std::string key, std::string value)
 {
     if (0 == key.compare("enabled"))
     {

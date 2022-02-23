@@ -49,11 +49,4 @@ enum class MetaFsIoOpcode
     Read,
 };
 
-enum class RequestPriority
-{
-    Highest,
-    Normal,
-    MAX
-};
-
 }   // namespace pos

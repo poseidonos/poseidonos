@@ -32,16 +32,15 @@
 
 #pragma once
 
-#include <string>
-
 #include "src/allocator/i_context_manager.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/i_journal_manager.h"
-#include "src/journal_manager/i_journal_status_provider.h"
-#include "src/journal_manager/i_journal_writer.h"
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
+#include "src/journal_manager/i_journal_manager.h"
+#include "src/journal_manager/i_journal_writer.h"
+#include "src/journal_manager/i_journal_status_provider.h"
+#include <string>
 
 namespace pos
 {
@@ -90,9 +89,8 @@ class JournalManager : public IMountSequence, public IJournalManager
 {
 public:
     JournalManager(void);
-    JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
     JournalManager(IArrayInfo* info, IStateControl* iState);
-    JournalManager(JournalConfiguration* config,
+    JournalManager(TelemetryPublisher* tp, JournalConfiguration* config,
         JournalStatusProvider* journalStatusProvider,
         LogWriteContextFactory* logWriteContextFactory,
         JournalEventFactory* journalEventFactory,
@@ -108,8 +106,7 @@ public:
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
         ReplayHandler* replayHandler,
-        IArrayInfo* arrayInfo,
-        TelemetryPublisher* tp);
+        IArrayInfo* arrayInfo);
     virtual ~JournalManager(void);
 
     virtual bool IsEnabled(void) override;
@@ -136,7 +133,7 @@ public:
     IJournalStatusProvider* GetJournalStatusProvider(void);
 
 protected:
-    void _InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
@@ -178,8 +175,8 @@ protected:
     CallbackSequenceController* sequenceController;
 
     ReplayHandler* replayHandler;
-    TelemetryPublisher* telemetryPublisher;
-    TelemetryClient* telemetryClient;
+    TelemetryPublisher* tp;
+    TelemetryClient* telClient;
 };
 
 } // namespace pos

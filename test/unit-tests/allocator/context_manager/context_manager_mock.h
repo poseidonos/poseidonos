@@ -19,9 +19,9 @@ public:
     MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
     MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
     MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
-    MOCK_METHOD(int, MakeRebuildTargetSegmentList, (std::set<SegmentId>& segmentList), (override));
     MOCK_METHOD(int, GetNumOfFreeSegment, (bool needLock), (override));
     MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));

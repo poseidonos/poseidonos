@@ -1,12 +1,13 @@
 #include "journal_volume_integration_test.h"
 
 using ::testing::_;
-using ::testing::AtLeast;
 using ::testing::InSequence;
 using ::testing::Return;
+using ::testing::AtLeast;
 
 namespace pos
 {
+
 JournalVolumeIntegrationTest::JournalVolumeIntegrationTest(void)
 : JournalManagerTestFixture(GetLogFileName())
 {
@@ -43,9 +44,9 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 }
 
 void
-JournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
+JournalVolumeIntegrationTest::DeleteVolumes(Volumes &volumesToDelete)
 {
-    EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
+    EXPECT_CALL(*testMapper, FlushDirtyMpagesGiven).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
@@ -56,7 +57,7 @@ JournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 }
 
 void
-JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDelete)
+JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes &volumesToDelete)
 {
     LogList logList;
     EXPECT_TRUE(journal->GetLogs(logList) == 0);
@@ -83,8 +84,8 @@ JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDel
 }
 
 void
-JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList& writtenStripes,
-    int numVolumes, Volumes& deletedVolumes)
+JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList &writtenStripes,
+    int numVolumes, Volumes &deletedVolumes)
 {
     replayTester->ExpectReturningUnmapStripes();
 

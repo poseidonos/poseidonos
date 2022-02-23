@@ -178,7 +178,12 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         ctx->ioDoneCheckCallback =
             std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 
-        rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(storage));
+        MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx->opcode, ctx->fd,
+            arrayId, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
+            AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
+
+        MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+        rc = metaFs->io->SubmitIO(aioCb, storageType);
     }
 
     if (POS_EVENT_ID::SUCCESS != rc)

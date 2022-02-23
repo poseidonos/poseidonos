@@ -75,15 +75,14 @@ template<> ::MetricPublishResponse* Arena::CreateMaybeMessage<::MetricPublishRes
 PROTOBUF_NAMESPACE_CLOSE
 
 enum MetricTypes : int {
-  START = 0,
-  COUNTER = 1,
-  GAUGE = 2,
+  COUNTER = 0,
+  GUAGE = 1,
   MetricTypes_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   MetricTypes_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool MetricTypes_IsValid(int value);
-constexpr MetricTypes MetricTypes_MIN = START;
-constexpr MetricTypes MetricTypes_MAX = GAUGE;
+constexpr MetricTypes MetricTypes_MIN = COUNTER;
+constexpr MetricTypes MetricTypes_MAX = GUAGE;
 constexpr int MetricTypes_ARRAYSIZE = MetricTypes_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MetricTypes_descriptor();
@@ -363,13 +362,13 @@ class MetricPublishResponse PROTOBUF_FINAL :
   enum : int {
     kTotalReceivedMetricsFieldNumber = 1,
   };
-  // uint64 totalReceivedMetrics = 1;
+  // int64 totalReceivedMetrics = 1;
   void clear_totalreceivedmetrics();
-  ::PROTOBUF_NAMESPACE_ID::uint64 totalreceivedmetrics() const;
-  void set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 totalreceivedmetrics() const;
+  void set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_totalreceivedmetrics() const;
-  void _internal_set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_totalreceivedmetrics() const;
+  void _internal_set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:MetricPublishResponse)
@@ -379,7 +378,7 @@ class MetricPublishResponse PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 totalreceivedmetrics_;
+  ::PROTOBUF_NAMESPACE_ID::int64 totalreceivedmetrics_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_metric_2eproto;
 };
@@ -425,7 +424,7 @@ class Metric PROTOBUF_FINAL :
   }
   enum ValueCase {
     kCounterValue = 4,
-    kGaugeValue = 5,
+    kGuageValue = 5,
     VALUE_NOT_SET = 0,
   };
 
@@ -508,7 +507,7 @@ class Metric PROTOBUF_FINAL :
     kNameFieldNumber = 3,
     kTypeFieldNumber = 1,
     kCounterValueFieldNumber = 4,
-    kGaugeValueFieldNumber = 5,
+    kGuageValueFieldNumber = 5,
   };
   // repeated .Label labels = 6;
   int labels_size() const;
@@ -566,17 +565,17 @@ class Metric PROTOBUF_FINAL :
   void _internal_set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // int64 gaugeValue = 5;
-  bool has_gaugevalue() const;
+  // int64 guageValue = 5;
+  bool has_guagevalue() const;
   private:
-  bool _internal_has_gaugevalue() const;
+  bool _internal_has_guagevalue() const;
   public:
-  void clear_gaugevalue();
-  ::PROTOBUF_NAMESPACE_ID::int64 gaugevalue() const;
-  void set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
+  void clear_guagevalue();
+  ::PROTOBUF_NAMESPACE_ID::int64 guagevalue() const;
+  void set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_gaugevalue() const;
-  void _internal_set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_guagevalue() const;
+  void _internal_set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   void clear_value();
@@ -585,7 +584,7 @@ class Metric PROTOBUF_FINAL :
  private:
   class _Internal;
   void set_has_countervalue();
-  void set_has_gaugevalue();
+  void set_has_guagevalue();
 
   inline bool has_value() const;
   inline void clear_has_value();
@@ -600,7 +599,7 @@ class Metric PROTOBUF_FINAL :
     constexpr ValueUnion() : _constinit_{} {}
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     ::PROTOBUF_NAMESPACE_ID::uint64 countervalue_;
-    ::PROTOBUF_NAMESPACE_ID::int64 gaugevalue_;
+    ::PROTOBUF_NAMESPACE_ID::int64 guagevalue_;
   } value_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
@@ -823,22 +822,22 @@ MetricPublishRequest::metrics() const {
 
 // MetricPublishResponse
 
-// uint64 totalReceivedMetrics = 1;
+// int64 totalReceivedMetrics = 1;
 inline void MetricPublishResponse::clear_totalreceivedmetrics() {
-  totalreceivedmetrics_ = PROTOBUF_ULONGLONG(0);
+  totalreceivedmetrics_ = PROTOBUF_LONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricPublishResponse::_internal_totalreceivedmetrics() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 MetricPublishResponse::_internal_totalreceivedmetrics() const {
   return totalreceivedmetrics_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricPublishResponse::totalreceivedmetrics() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 MetricPublishResponse::totalreceivedmetrics() const {
   // @@protoc_insertion_point(field_get:MetricPublishResponse.totalReceivedMetrics)
   return _internal_totalreceivedmetrics();
 }
-inline void MetricPublishResponse::_internal_set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void MetricPublishResponse::_internal_set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::int64 value) {
   
   totalreceivedmetrics_ = value;
 }
-inline void MetricPublishResponse::set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void MetricPublishResponse::set_totalreceivedmetrics(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_totalreceivedmetrics(value);
   // @@protoc_insertion_point(field_set:MetricPublishResponse.totalReceivedMetrics)
 }
@@ -966,42 +965,42 @@ inline void Metric::set_countervalue(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:Metric.counterValue)
 }
 
-// int64 gaugeValue = 5;
-inline bool Metric::_internal_has_gaugevalue() const {
-  return value_case() == kGaugeValue;
+// int64 guageValue = 5;
+inline bool Metric::_internal_has_guagevalue() const {
+  return value_case() == kGuageValue;
 }
-inline bool Metric::has_gaugevalue() const {
-  return _internal_has_gaugevalue();
+inline bool Metric::has_guagevalue() const {
+  return _internal_has_guagevalue();
 }
-inline void Metric::set_has_gaugevalue() {
-  _oneof_case_[0] = kGaugeValue;
+inline void Metric::set_has_guagevalue() {
+  _oneof_case_[0] = kGuageValue;
 }
-inline void Metric::clear_gaugevalue() {
-  if (_internal_has_gaugevalue()) {
-    value_.gaugevalue_ = PROTOBUF_LONGLONG(0);
+inline void Metric::clear_guagevalue() {
+  if (_internal_has_guagevalue()) {
+    value_.guagevalue_ = PROTOBUF_LONGLONG(0);
     clear_has_value();
   }
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::_internal_gaugevalue() const {
-  if (_internal_has_gaugevalue()) {
-    return value_.gaugevalue_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::_internal_guagevalue() const {
+  if (_internal_has_guagevalue()) {
+    return value_.guagevalue_;
   }
   return PROTOBUF_LONGLONG(0);
 }
-inline void Metric::_internal_set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  if (!_internal_has_gaugevalue()) {
+inline void Metric::_internal_set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  if (!_internal_has_guagevalue()) {
     clear_value();
-    set_has_gaugevalue();
+    set_has_guagevalue();
   }
-  value_.gaugevalue_ = value;
+  value_.guagevalue_ = value;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::gaugevalue() const {
-  // @@protoc_insertion_point(field_get:Metric.gaugeValue)
-  return _internal_gaugevalue();
+inline ::PROTOBUF_NAMESPACE_ID::int64 Metric::guagevalue() const {
+  // @@protoc_insertion_point(field_get:Metric.guageValue)
+  return _internal_guagevalue();
 }
-inline void Metric::set_gaugevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_gaugevalue(value);
-  // @@protoc_insertion_point(field_set:Metric.gaugeValue)
+inline void Metric::set_guagevalue(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_guagevalue(value);
+  // @@protoc_insertion_point(field_set:Metric.guageValue)
 }
 
 // repeated .Label labels = 6;

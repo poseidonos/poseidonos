@@ -49,7 +49,7 @@ const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
 :   state(nullptr),
-    svc(nullptr),
+    intf(nullptr),
     ptnMgr(nullptr),
     devMgr_(nullptr),
     sysDevMgr(nullptr),

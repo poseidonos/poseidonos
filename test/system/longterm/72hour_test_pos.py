@@ -177,12 +177,8 @@ def write_log(_log):
 
 def start_pos():
     write_log ("starting pos...")
-    ret = pos.start_pos()
-    if ret is False:
-        write_log("faild to start pos")
-        return False
+    pos.start_pos()
     write_log ("pos is running")
-    return True
 
 def exit_pos():
     write_log ("exiting pos...")
@@ -208,10 +204,7 @@ def restart_pos():
     if ret == False:
         write_log("pos restarting failed while exiting")
         return False
-    ret = start_pos()
-    if ret is False:
-        write_log("pos restarting failed while starting")
-        return False
+    start_pos()
     write_log("pos has been restarted")
     return True
 
@@ -338,9 +331,7 @@ def tick_hour():
 
 def init_test():
     # pos_util.kill_process("poseidonos")
-    ret = start_pos()
-    if ret is False:
-        return False
+    start_pos()
     scan_dev()
     mbr_reset()
     create_array()

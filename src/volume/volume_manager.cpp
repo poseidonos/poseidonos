@@ -168,6 +168,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     {
         return ret;
     }
+
     VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     // setting default values for miniops and minbw
     uint64_t defaultMinIops = 0;

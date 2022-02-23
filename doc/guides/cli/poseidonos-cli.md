@@ -1,10 +1,10 @@
 ## poseidonos-cli
 
-poseidonos-cli - A command-line interface for PoseidonOS
+poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 
 ### Synopsis
 
-poseidonos-cli - A command-line interface for PoseidonOS
+poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 
 	PoseidonOS command-ine interface (PoseidonOS CLI) is a management tool for PoseidonOS.
 	Using PoseidonOS CLI, you can start/stop PoseidonOS and manage arrays, devices, and volumes of PoseidonOS.
@@ -30,7 +30,6 @@ poseidonos-cli [flags]
       --json-res      Print response in JSON form.
       --port string   Set the port number to PoseidonOS for this command. (default "18716")
       --unit          Display unit (B, KB, MB, ...) when displaying capacity.
-      --version       Display the version information.
 ```
 
 ### SEE ALSO

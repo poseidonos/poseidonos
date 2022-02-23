@@ -159,10 +159,10 @@ ArrayComponents::GetInfo(void)
 }
 
 int
-ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
+ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Creating array component for {}", arrayName);
-    int ret = array->Create(nameSet, metaFt, dataFt);
+    int ret = array->Create(nameSet, dataRaidType);
     if (ret != 0)
     {
         return ret;

@@ -30,17 +30,11 @@ check_started()
 
 wait_started()
 {
-    loop_count=0
     check_started
     while [ $? -eq 0 ];
     do
-        let loop_count=loop_count+1
-        echo "Wait poseidonos for $loop_count seconds"
-        sleep 1
-        if [ $loop_count -gt 300 ];then
-            echo "Failed to execute poseidonos"
-            exit -1
-        fi
+        echo "Wait poseidonOS"
+        sleep 0.5
         check_started
     done
 }

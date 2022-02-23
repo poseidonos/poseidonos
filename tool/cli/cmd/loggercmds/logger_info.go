@@ -14,9 +14,9 @@ import (
 
 var LoggerInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Display the current preference of logger.",
+	Short: "Get the current settings of the logger.",
 	Long: `
-Display the current preference of logger.
+Get the current settings of the logger.
 
 Syntax:
 	poseidonos-cli logger info

@@ -21,7 +21,6 @@ public:
     MOCK_METHOD(int, GetNumEntries, (), (override));
     MOCK_METHOD(int, PublishData, (std::string id_, POSMetricValue value_, POSMetricTypes type_), (override));
     MOCK_METHOD(int, PublishMetric, (POSMetric metric), (override));
-    MOCK_METHOD(int, PublishMetricList, (POSMetricVector* metricList), (override));
     MOCK_METHOD(void, SetGlobalPublisher, (IGlobalPublisher * gp), (override));
 };
 

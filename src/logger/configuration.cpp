@@ -86,18 +86,4 @@ Configuration::LogLevel()
     }
     return LOG_LEVEL;
 }
-
-bool
-Configuration::IsStrLoggingEnabled()
-{
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
-    bool enable_structured_logging = false;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "enable_structured_logging",
-        &enable_structured_logging, ConfigType::CONFIG_TYPE_BOOL);
-    if (ret == SUCCESS)
-    {
-        return enable_structured_logging;
-    }
-    return ENABLE_STRUCTURED_LOGGING;
-}
 } // namespace pos_logger

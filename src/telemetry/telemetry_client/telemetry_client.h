@@ -61,13 +61,11 @@ public:
     virtual bool StopUsingDataPool(std::string name);
     virtual bool StartUsingDataPoolForAllPublisher(void);
     virtual bool StopUsingDataPoolForAllPublisher(void);
-    virtual bool Notify(const std::string& key, const std::string& value) override;
+    virtual bool Notify(std::string key, std::string value);
 
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;
     GrpcGlobalPublisher* globalPublisher;
-    std::atomic<uint64_t> publisherId;
-    bool defaultEnable;
 };
 
 using TelemetryClientSingleton = Singleton<TelemetryClient>;

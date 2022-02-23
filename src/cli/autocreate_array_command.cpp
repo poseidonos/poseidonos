@@ -64,15 +64,10 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["name"].get<std::string>();
     }
 
-    string dataFt = "RAID5";
+    string raidType = "RAID5";
     if (doc["param"].contains("raidtype") == true)
     {
-        dataFt = doc["param"]["raidtype"].get<std::string>();
-    }
-    string metaFt = "RAID10";
-    if (dataFt == "RAID0" || dataFt == "NONE")
-    {
-        metaFt = dataFt;
+        raidType = doc["param"]["raidtype"].get<std::string>();
     }
 
     if (doc["param"].contains("buffer"))
@@ -106,8 +101,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
 
     IArrayMgmt* array = ArrayMgr();
     // TODO(SRM): interactive cli to select from multiple-options.
-    int ret = array->Create(arrayName, res.options.front().devs, metaFt, dataFt);
-
+    int ret = array->Create(arrayName, res.options.front().devs, raidType);
     if (0 != ret)
     {
         return jFormat.MakeResponse(

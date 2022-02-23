@@ -31,11 +31,11 @@
  */
 
 #include "stripe_info.h"
-
 #include "src/journal_manager/log/log_event.h"
 
 namespace pos
 {
+
 StripeInfo::StripeInfo(StripeId inputVsid)
 {
     _Reset();

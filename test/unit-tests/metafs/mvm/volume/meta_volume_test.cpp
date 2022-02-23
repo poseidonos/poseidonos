@@ -657,7 +657,7 @@ TEST_F(MetaVolumeFixture, CopyInode_testIfCopyMethodWillBeSuccess)
     std::string fileName = "TESTFILE";
     MetaFileInodeInfo inodeInfo;
     MetaFileInode inode;
-    inode.data.basic.field.fileName = fileName;
+    inode.data.basic.field.fileName = &fileName;
     inode.data.basic.field.fd = 0;
 
     EXPECT_CALL(*inodeMgr, GetFileInode).WillOnce(ReturnRef(inode));

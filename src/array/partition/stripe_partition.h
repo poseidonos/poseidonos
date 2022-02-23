@@ -30,7 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef STRIPE_PARTITION_H_
+#define STRIPE_PARTITION_H_
 
 #include <list>
 #include <memory>
@@ -41,7 +42,6 @@
 #include "src/array/rebuild/rebuild_target.h"
 #include "src/array/service/io_recover/i_recover.h"
 #include "src/io_scheduler/io_dispatcher.h"
-#include "src/array/ft/method.h"
 
 using namespace std;
 
@@ -53,22 +53,29 @@ class StripePartition : public Partition, public IRecover, public RebuildTarget
     friend class ParityLocationWbtCommand;
 
 public:
-    StripePartition(PartitionType type,
+    StripePartition(string array,
+                    uint32_t arrayIndex,
+                    PartitionType type,
+                    PartitionPhysicalSize physicalSize,
                     vector<ArrayDevice *> devs,
-                    RaidTypeEnum raid);
-    virtual ~StripePartition(void);
-    virtual int Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks);
-    void RegisterService(IPartitionServices* svc) override;
+                    Method *method);
+    StripePartition(string array,
+                    uint32_t arrayIndex,
+                    PartitionType type,
+                    PartitionPhysicalSize physicalSize,
+                    vector<ArrayDevice *> devs,
+                    Method *method,
+                    IODispatcher* ioDispatcher);
+    virtual ~StripePartition();
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
     int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
-    bool IsByteAccessSupported(void) override;
-    RaidState GetRaidState(void) override;
     int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) override;
     unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
-    Method* GetMethod(void) { return method; }
-    RaidTypeEnum GetRaidType(void) override { return raidType; }
+    void Format(void) override;
+    bool IsByteAccessSupported(void) override;
+    RaidState GetRaidState(void) override;
 
 private:
     FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);
@@ -76,12 +83,12 @@ private:
     int _ConvertToPhysical(list<PhysicalWriteEntry>& dst, FtWriteEntry& src);
     list<BufferEntry> _SpliceBuffer(
         list<BufferEntry>& src, uint32_t start, uint32_t remain);
-    int _SetPhysicalAddress(uint64_t startLba, uint32_t segCnt);
-    void _SetLogicalAddress(void);
-    int _SetMethod(uint64_t totalNvmBlks);
+    int _SetLogicalSize(void);
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
-    RaidTypeEnum raidType;
-    Method* method = nullptr;
+    void _Trim(void);
+    int _CheckTrimValue(void);
+    IODispatcher* ioDispatcher_;
 };
 
 } // namespace pos
+#endif // STRIPE_PARTITION_H_

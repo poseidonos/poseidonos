@@ -1,11 +1,11 @@
 #pragma once
 
-#include "block_allocator_mock.h"
 #include "gmock/gmock.h"
+#include "src/allocator/allocator.h"
 #include "i_context_manager_mock.h"
 #include "i_context_replayer_mock.h"
-#include "src/allocator/allocator.h"
 #include "wbstripe_allocator_mock.h"
+#include "block_allocator_mock.h"
 
 namespace pos
 {
@@ -26,6 +26,7 @@ public:
 
     virtual IContextReplayer* GetIContextReplayer(void) override;
     IContextReplayerMock* GetIContextReplayerMock(void);
+
 
 private:
     WBStripeAllocatorMock* wbStripeAllocatorMock;

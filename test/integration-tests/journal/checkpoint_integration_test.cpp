@@ -45,20 +45,19 @@ TEST_F(CheckpointIntegrationTest, TriggerCheckpoint)
 
     writeTester->WriteLogsWithSize(logGroupSize);
     writeTester->WaitForAllLogWriteDone();
-    MapList dirtyMaps = writeTester->GetDirtyMap();
+    MapPageList dirtyPages = writeTester->GetDirtyMap();
 
     // This is dummy writes
     writeTester->WriteLogsWithSize(logGroupSize / 2);
     writeTester->WaitForAllLogWriteDone();
 
-    EXPECT_TRUE(journal->GetNumDirtyMap(0) == static_cast<int>(dirtyMaps.size()));
-    for (auto mapId : dirtyMaps)
+    EXPECT_TRUE(journal->GetNumDirtyMap(0) == static_cast<int>(dirtyPages.size()));
+    for (auto it = dirtyPages.begin(); it != dirtyPages.end(); it++)
     {
         EXPECT_CALL(*testMapper,
-            FlushDirtyMpages(mapId, _))
-            .Times(1);
+            FlushDirtyMpagesGiven(it->first, ::_, it->second)).Times(1);
     }
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(1);
 
     journal->StartCheckpoint();
     WaitForAllCheckpointDone();

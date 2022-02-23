@@ -46,7 +46,7 @@ public:
     using MioHandler::MioHandler;
     MOCK_METHOD(void, TophalfMioProcessing, ());
     MOCK_METHOD(void, BindPartialMpioHandler, (MpioHandler* ptMpioHandler));
-    MOCK_METHOD(void, EnqueueNewReq, (MetaFsIoRequest* reqMsg));
+    MOCK_METHOD(bool, EnqueueNewReq, (MetaFsIoRequest* reqMsg));
     MOCK_METHOD(Mio*, DispatchMio, (MetaFsIoRequest& reqMsg));
     MOCK_METHOD(void, ExecuteMio, (Mio& mio));
     MOCK_METHOD(bool, AddArrayInfo, (int arrayId));

@@ -56,6 +56,7 @@
 #include "get_partition_size_wbt_command.h"
 #include "get_segment_info_wbt_command.h"
 #include "get_segment_valid_block_count_wbt_command.h"
+#include "get_user_segment_bitmap_wbt_command.h"
 #include "get_wb_lsid_bitmap_wbt_command.h"
 #include "nvme_cli_command.h"
 #include "open_file_wbt_command.h"
@@ -73,6 +74,7 @@
 #include "set_current_ssd_lsid_wbt_command.h"
 #include "set_gc_threshold_wbt_command.h"
 #include "set_segment_info_wbt_command.h"
+#include "set_user_segment_bitmap_wbt_command.h"
 #include "set_wb_lsid_bitmap_wbt_command.h"
 #include "setup_meta_fio_test_wbt_command.h"
 #include "translate_device_lba_wbt_command.h"
@@ -126,6 +128,9 @@ WbtCmdHandler::PrepareWbtCommands(void)
 
     wbtCommandMap["get_current_ssd_lsid"] = std::make_unique<GetCurrentSsdLsidWbtCommand>();
     wbtCommandMap["set_current_ssd_lsid"] = std::make_unique<SetCurrentSsdLsidWbtCommand>();
+
+    wbtCommandMap["get_user_segment_bitmap"] = std::make_unique<GetUserSegmentBitmapWbtCommand>();
+    wbtCommandMap["set_user_segment_bitmap"] = std::make_unique<SetUserSegmentBitmapWbtCommand>();
 
     wbtCommandMap["get_segment_info"] = std::make_unique<GetSegmentInfoWbtCommand>();
     wbtCommandMap["set_segment_info"] = std::make_unique<SetSegmentInfoWbtCommand>();

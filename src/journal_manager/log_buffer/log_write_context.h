@@ -32,9 +32,10 @@
 
 #pragma once
 
-#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {

@@ -32,11 +32,12 @@
 
 #include "log_write_handler.h"
 
-#include "buffer_offset_allocator.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_write/log_write_statistics.h"
 #include "src/journal_manager/replay/replay_stripe.h"
+#include "buffer_offset_allocator.h"
+
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -86,11 +87,29 @@ LogWriteHandler::Dispose(void)
 int
 LogWriteHandler::AddLog(LogWriteContext* context)
 {
+    int ret = 0;
+    if (waitingList->AddToListIfNotEmpty(context) == false)
+    {
+        ret = _AddLogInternal(context);
+    }
+    return ret;
+}
+
+void
+LogWriteHandler::AddLogToWaitingList(LogWriteContext* context)
+{
+    waitingList->AddToList(context);
+}
+
+int
+LogWriteHandler::_AddLogInternal(LogWriteContext* context)
+{
     uint64_t allocatedOffset = 0;
 
-    int result = bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
+    int allocationResult =
+        bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
 
-    if ((int)POS_EVENT_ID::SUCCESS == result)
+    if (allocationResult == 0)
     {
         int groupId = bufferAllocator->GetLogGroupId(allocatedOffset);
         uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
@@ -98,8 +117,8 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
         context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
 
-        result = logBuffer->WriteLog(context);
-        if ((int)POS_EVENT_ID::SUCCESS == result)
+        int result = logBuffer->WriteLog(context);
+        if (result == 0)
         {
             numIosRequested++;
         }
@@ -108,18 +127,20 @@ LogWriteHandler::AddLog(LogWriteContext* context)
             delete context;
 
             // This is to cancel the buffer allocation
-            POS_TRACE_ERROR(result, "Log write failed due to io error and canceled buffer allocation");
             bufferAllocator->LogWriteCanceled(groupId);
         }
+        // TODO(huijeong.kim) move to no-journal mode, if failed
+        return result;
     }
-
-    return result;
-}
-
-void
-LogWriteHandler::AddLogToWaitingList(LogWriteContext* context)
-{
-    waitingList->AddToList(context);
+    else if (allocationResult > 0)
+    {
+        waitingList->AddToList(context);
+        return 0;
+    }
+    else
+    {
+        return allocationResult;
+    }
 }
 
 void
@@ -166,12 +187,12 @@ LogWriteHandler::_StartWaitingIos(void)
     auto log = waitingList->GetWaitingIo();
     if (log != nullptr)
     {
-        AddLog(log);
+        _AddLogInternal(log);
     }
 }
 
 void
-LogWriteHandler::LogFilled(int logGroupId, MapList& dirty)
+LogWriteHandler::LogFilled(int logGroupId, MapPageList& dirty)
 {
     // Nothing to do
 }

@@ -34,6 +34,7 @@
 
 namespace pos
 {
+
 LogList::LogList(void)
 {
 }

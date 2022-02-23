@@ -75,7 +75,5 @@ private:
     ReactorHeap* reactorMinHeap;
     QosInternalManagerType nextManagerType;
     IThrottlingLogic *throttlingLogic;
-    int64_t currentVolumeBw[MAX_VOLUME_COUNT];
-    int64_t currentVolumeIops[MAX_VOLUME_COUNT];
 };
 } // namespace pos

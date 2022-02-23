@@ -69,7 +69,8 @@ TEST(WBStripeManager, FreeWBStripeId_TestSimpleCaller)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManager wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, allocCtx, &addrInfo, ctxManager, blkManager, "", 0);
-
+    std::mutex lock;
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(lock));
     EXPECT_CALL(*allocCtx, ReleaseWbStripe).Times(1);
     // when
     wbStripeManager.FreeWBStripeId(0);
@@ -97,10 +98,6 @@ TEST(WBStripeManager, FlushActiveStripes_TestVolumeMounted)
         wbStripeManager.PushStripeToStripeArray(stripe);
     }
     // given 1.
-    std::mutex lock;
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(UNMAP_VSA));
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail);
     EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Mounted));
     // when
     wbStripeManager.FlushActiveStripes(77);
@@ -173,36 +170,6 @@ TEST(WBStripeManager, FinalizeWriteIO_TestAddFlushStripe)
     delete ctxManager;
     delete iStripeMap;
     delete stripe;
-}
-
-TEST(WBStripeManager, FinalizeActiveStripes_TestSimpleCall)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(5);
-    addrInfo.SetnumWbStripes(3);
-    addrInfo.SetchunksPerStripe(3);
-    addrInfo.SetblksPerStripe(1);
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    WBStripeManager wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, allocCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    wbStripeManager.Init();
-
-    std::mutex lock, allocLock;
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(lock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(allocLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(UNMAP_VSA));
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail);
-
-    bool ret = wbStripeManager.FinalizeActiveStripes(0);
-    EXPECT_EQ(ret, true);
-
-    delete allocCtx;
-    delete ctxManager;
-    delete iStripeMap;
-    delete blkManager;
 }
 
 TEST(WBStripeManager, ReferLsidCnt_TestwithAllConditions)
@@ -468,7 +435,7 @@ TEST(WBStripeManager, FlushPendingActiveStripes_TestwithStripeVecwithSuccessStri
     delete stripetoFlush;
 }
 
-TEST(WBStripeManager, FlushOnlineStripesInSegment_TestwithAllConditions)
+TEST(WBStripeManager, PrepareRebuild_TestwithAllConditions)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -487,24 +454,42 @@ TEST(WBStripeManager, FlushOnlineStripesInSegment_TestwithAllConditions)
     wbStripeManager.PushStripeToStripeArray(stripe2);
     // given 1.
     std::mutex lock;
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(UNMAP_VSA));
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTarget).WillOnce(Return(NO_REBUILD_TARGET_USER_SEGMENT));
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
     // when 1.
-    std::set<SegmentId> targetSegmentList;
-    int ret = wbStripeManager.FlushOnlineStripesInSegment(targetSegmentList);
+    int ret = wbStripeManager.PrepareRebuild();
     // then 1.
-    EXPECT_EQ(0, ret);
-
+    EXPECT_EQ(NO_REBUILD_TARGET_USER_SEGMENT, ret);
     // given 2.
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTarget).WillOnce(Return(1));
+    EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(-1));
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
+    // when 2.
+    ret = wbStripeManager.PrepareRebuild();
+    // then 2.
+    EXPECT_EQ(-1, ret);
+    // given 3.
+    std::set<SegmentId> targetSegmentList;
+    auto begin = targetSegmentList.begin();
+    auto end = targetSegmentList.end();
     VirtualBlkAddr tail = {.stripeId = 0, .offset = 0};
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(tail));
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
+    EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
+    EXPECT_CALL(*ctxManager, MakeRebuildTarget).WillOnce(Return(1));
+    EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(0));
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentsBegin).WillOnce(Return(begin));
+    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentsEnd).WillOnce(Return(end));
+    EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
     EXPECT_CALL(*iStripeMap, IsInUserDataArea).WillOnce(Return(false)).WillOnce(Return(true));
     StripeAddr lsa = {
         .stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA,
         .stripeId = 0};
     // when 3.
-    ret = wbStripeManager.FlushOnlineStripesInSegment(targetSegmentList);
+    ret = wbStripeManager.PrepareRebuild();
     // then 3.
     EXPECT_EQ(0, ret);
 
@@ -589,232 +574,268 @@ TEST(WBStripeManager, _AllocateRemainingBlocks_TestFunc)
     delete reverseMap;
 }
 
-TEST(WBStripeManager, _GetOnlineStripes_TestFuncSuccess)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(1);
-
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-    wbStripeManager.PushStripeToStripeArray(stripe);
-
-    std::set<SegmentId> segmentIds = {0, 1};
-    StripeAddr lsa = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 0};
-    StripeAddr lsa2 = {
-        .stripeLoc = IN_USER_AREA,
-        .stripeId = 1};
-    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
-    EXPECT_CALL(*iStripeMap, IsInWriteBufferArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_WRITE_BUFFER_AREA;
-        });
-    EXPECT_CALL(*iStripeMap, IsInUserDataArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_USER_AREA;
-        });
-
-    EXPECT_CALL(*stripe, IsFinished).WillOnce(Return(false));
-    EXPECT_CALL(*stripe, GetBlksRemaining).WillOnce(Return(0));
-    EXPECT_CALL(*stripe, GetVsid).WillOnce(Return(10));
-
-    // when
-    std::vector<StripeId> stripeIds;
-    wbStripeManager._GetOnlineStripes(segmentIds, stripeIds);
-    std::vector<StripeId> expected = {10};
-    EXPECT_EQ(stripeIds, expected);
-
-    delete blkManager;
-    delete ctxManager;
-    delete iStripeMap;
-    delete stripe;
-}
-
-TEST(WBStripeManager, _GetOnlineStripes_TestFuncSuccess2)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(1);
-
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
-    NiceMock<MockStripe>* stripe1 = new NiceMock<MockStripe>();
-    NiceMock<MockStripe>* stripe2 = new NiceMock<MockStripe>();
-    wbStripeManager.PushStripeToStripeArray(stripe1);
-    wbStripeManager.PushStripeToStripeArray(stripe2);
-
-    std::set<SegmentId> segmentIds = {0, 1};
-    StripeAddr lsa = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 0};
-    StripeAddr lsa2 = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 1};
-    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
-    EXPECT_CALL(*iStripeMap, IsInWriteBufferArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_WRITE_BUFFER_AREA;
-        });
-    EXPECT_CALL(*iStripeMap, IsInUserDataArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_USER_AREA;
-        });
-
-    EXPECT_CALL(*stripe1, GetBlksRemaining).WillOnce(Return(0));
-    EXPECT_CALL(*stripe1, IsFinished).WillOnce(Return(false));
-    EXPECT_CALL(*stripe1, GetVsid).WillOnce(Return(10));
-
-    EXPECT_CALL(*stripe2, IsFinished).WillOnce(Return(false));
-    EXPECT_CALL(*stripe2, GetBlksRemaining).WillOnce(Return(0));
-    EXPECT_CALL(*stripe2, GetVsid).WillOnce(Return(20));
-
-    // when
-    std::vector<StripeId> stripeIds;
-    int ret = wbStripeManager._GetOnlineStripes(segmentIds, stripeIds);
-    std::vector<StripeId> expected = {10, 20};
-    EXPECT_EQ(stripeIds, expected);
-    delete blkManager;
-    delete ctxManager;
-    delete iStripeMap;
-    delete stripe1;
-    delete stripe2;
-}
-
-TEST(WBStripeManager, _GetOnlineStripes_TestFuncSuccess3)
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncSuccess)
 {
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(1);
     addrInfo.SetblksPerStripe(1);
     addrInfo.SetstripesPerSegment(1);
-
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 2;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     wbStripeManager.PushStripeToStripeArray(stripe);
-
-    std::set<SegmentId> segmentIds = {0, 1};
-
+    std::vector<StripeId> vecStripeId;
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 2; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     StripeAddr lsa = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 0};
     StripeAddr lsa2 = {
         .stripeLoc = IN_USER_AREA,
         .stripeId = 1};
-
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
-    EXPECT_CALL(*iStripeMap, IsInWriteBufferArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_WRITE_BUFFER_AREA;
-        });
-    EXPECT_CALL(*iStripeMap, IsInUserDataArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_USER_AREA;
-        });
-
-    EXPECT_CALL(*stripe, IsFinished).WillOnce(Return(false));
-    EXPECT_CALL(*stripe, GetBlksRemaining).WillOnce(Return(10));
-
     // when
-    std::vector<StripeId> stripeIds;
-    wbStripeManager._GetOnlineStripes(segmentIds, stripeIds);
-
-    EXPECT_EQ(stripeIds.empty(), true);
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
     delete blkManager;
     delete ctxManager;
     delete iStripeMap;
+    delete reCtx;
     delete stripe;
 }
 
-TEST(WBStripeManager, _GetOnlineStripes_TestFuncSuccess4)
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncSuccess2)
 {
     // given
     AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(1);
+    addrInfo.SetblksPerStripe(1);
     addrInfo.SetstripesPerSegment(1);
-
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 2;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     wbStripeManager.PushStripeToStripeArray(stripe);
-
-    std::set<SegmentId> segmentIds = {0, 1};
-
+    std::vector<StripeId> vecStripeId;
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 2; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     StripeAddr lsa = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 0};
     StripeAddr lsa2 = {
-        .stripeLoc = IN_USER_AREA,
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 1};
-
+    EXPECT_CALL(*stripe, GetBlksRemaining).WillOnce(Return(0));
+    EXPECT_CALL(*iStripeMap, IsInWriteBufferArea).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
-    EXPECT_CALL(*iStripeMap, IsInWriteBufferArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_WRITE_BUFFER_AREA;
-        });
-    EXPECT_CALL(*iStripeMap, IsInUserDataArea)
-        .WillRepeatedly([&](StripeAddr entry)
-        {
-            return entry.stripeLoc == IN_USER_AREA;
-        });
-
-    EXPECT_CALL(*stripe, IsFinished).WillOnce(Return(true));
     // when
-    std::vector<StripeId> stripeIds;
-    wbStripeManager._GetOnlineStripes(segmentIds, stripeIds);
-
-    EXPECT_EQ(stripeIds.empty(), true);
-
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
     delete blkManager;
     delete ctxManager;
     delete iStripeMap;
+    delete reCtx;
     delete stripe;
 }
 
-TEST(WBStripeManager, _GetOnlineStripes_TestFuncSuccess5)
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase1)
 {
     // given
     AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(1);
+    addrInfo.SetblksPerStripe(1);
     addrInfo.SetstripesPerSegment(1);
-
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 2;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     wbStripeManager.PushStripeToStripeArray(stripe);
+    std::vector<StripeId> vecStripeId;
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 2; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    StripeAddr lsa = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 0};
+    StripeAddr lsa2 = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 1};
+    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
 
-    std::set<SegmentId> segmentIds = {0};
+    // when
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
+    delete blkManager;
+    delete ctxManager;
+    delete iStripeMap;
+    delete reCtx;
+    delete stripe;
+}
 
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase2)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(1);
+    addrInfo.SetblksPerStripe(1);
+    addrInfo.SetstripesPerSegment(1);
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 2;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    wbStripeManager.PushStripeToStripeArray(stripe);
+    std::vector<StripeId> vecStripeId;
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 2; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     StripeAddr lsa = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = UNMAP_STRIPE};
+    StripeAddr lsa2 = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = UNMAP_STRIPE};
+    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
 
     // when
-    std::vector<StripeId> stripeIds;
-    wbStripeManager._GetOnlineStripes(segmentIds, stripeIds);
-    EXPECT_EQ(stripeIds.empty(), true);
-
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
     delete blkManager;
     delete ctxManager;
     delete iStripeMap;
+    delete reCtx;
+    delete stripe;
+}
+
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase3)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(1);
+    addrInfo.SetblksPerStripe(1);
+    addrInfo.SetstripesPerSegment(1);
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 1;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    wbStripeManager.PushStripeToStripeArray(stripe);
+    std::vector<StripeId> vecStripeId;
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 1; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 0};
+    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa));
+    // when
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
+    delete blkManager;
+    delete ctxManager;
+    delete iStripeMap;
+    delete reCtx;
+    delete stripe;
+}
+
+TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase4)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(1);
+    addrInfo.SetblksPerStripe(1);
+    addrInfo.SetstripesPerSegment(1);
+    RebuildCtxHeader header;
+    header.sig = RebuildCtx::SIG_REBUILD_CTX;
+    header.numTargetSegments = 1;
+    RebuildCtx* reCtx = new RebuildCtx(nullptr, &header, &addrInfo);
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    WBStripeManagerSpy wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, nullptr, &addrInfo, ctxManager, blkManager, "", 0);
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    wbStripeManager.PushStripeToStripeArray(stripe);
+    std::vector<StripeId> vecStripeId;
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
+    for (int i = 0; i < 1; i++)
+    {
+        buf2[i] = i;
+    }
+    reCtx->AfterLoad(buf);
+    StripeId stId = 0;
+    vecStripeId.push_back(stId);
+
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 0};
+    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa));
+    // when
+    int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
+    delete blkManager;
+    delete ctxManager;
+    delete iStripeMap;
+    delete reCtx;
     delete stripe;
 }
 

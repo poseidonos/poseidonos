@@ -62,8 +62,6 @@ if [ -f /etc/debian_version ]; then
     apt-get install -y libyaml-cpp-dev
     # for numa test
     apt-get install -y numactl
-    # for tbb
-    apt install -y libtbb-dev
 
 
 else

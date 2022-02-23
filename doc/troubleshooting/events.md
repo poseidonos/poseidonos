@@ -113,6 +113,7 @@
 | 2505       | ARRAY_DEVICE_COUNT_ERROR                        |                 |                                                                                                                          |   |
 | 2506       | ARRAY_NVM_CAPACITY_ERROR                        | WARN            | NVM device size error                                                                                                    |   |
 | 2507       | ARRAY_SSD_CAPACITY_ERROR                        | ERROR           | SSD capacity is not valid. Valid capacity is from {}GB to {}TB                                                           |   |
+| 2508       | ARRAY_SSD_SAME_CAPACITY_ERROR                   | WARN            | SSDs must be the same sizes                                                                                              |   |
 | 2509       | ARRAY_MBR_READ_ERROR                            |                 |                                                                                                                          |   |
 | 2510       | ARRAY_MBR_WRITE_ERROR                           | ERROR           | MBR Write Error                                                                                                          |   |
 | 2511       | ARRAY_FT_METHOD_ERROR                           |                 |                                                                                                                          |   |

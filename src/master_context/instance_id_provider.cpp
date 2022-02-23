@@ -39,31 +39,7 @@ namespace pos
 {
 InstanceIdProvider::InstanceIdProvider(void)
 {
-    time_t timeStamp = time(NULL);
-
-    // Bitwisely reverse timeStamp to make
-    // multiple instanceIds distinguishable.
-    timeStamp = _ReverseBits(timeStamp);
-    instanceId = (id_t) timeStamp;
-}
-
-// ReverseBits reverses the bitstring of timeStamp.
-// Example: 1100 -> 0011
-time_t
-InstanceIdProvider::_ReverseBits(time_t timeStamp)
-{
-    time_t rev = 0;
-
-    while (timeStamp > 0)
-    {
-        rev <<= 1;
-
-        if (timeStamp & 1)
-            rev ^= 1;
-
-        timeStamp >>= 1;
-    }
-    return rev;
+    instanceId = (id_t) time(NULL);
 }
 
 InstanceIdProvider::~InstanceIdProvider(void)

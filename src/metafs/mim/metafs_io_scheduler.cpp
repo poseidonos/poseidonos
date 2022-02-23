@@ -38,10 +38,15 @@
 
 namespace pos
 {
+thread_local uint32_t MetaFsIoScheduler::currentThreadQId;
+thread_local bool MetaFsIoScheduler::initializedQid;
+
 MetaFsIoScheduler::MetaFsIoScheduler(int threadId, int coreId, int coreCount)
 : MetaFsIoHandlerBase(threadId, coreId),
   totalMioHandlerCnt(0)
 {
+    currentCoreId = 0;
+    maxCoreCount = MetaFsConfig::DEFAULT_MAX_CORE_COUNT;
 }
 
 MetaFsIoScheduler::~MetaFsIoScheduler(void)
@@ -49,6 +54,7 @@ MetaFsIoScheduler::~MetaFsIoScheduler(void)
     threadExit = true;
 
     ClearHandlerThread(); // exit mioHandler threads
+    ClearQ();             // clear MultiQ
 }
 
 void
@@ -65,15 +71,22 @@ MetaFsIoScheduler::ClearHandlerThread(void)
 }
 
 void
+MetaFsIoScheduler::ClearQ(void)
+{
+    ioMultiQ.Clear();
+}
+
+void
 MetaFsIoScheduler::RegisterMioHandler(ScalableMetaIoWorker* metaIoWorker)
 {
     metaIoWorkerList.push_back(metaIoWorker);
     totalMioHandlerCnt++;
 }
 
-void
+bool
 MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
 {
+    bool isQueued = true;
     FileSizeType chunkSize = reqMsg->fileCtx->chunkSize;
     uint64_t byteOffset = 0;
     MetaLpnType fileBaseLpn = reqMsg->fileCtx->fileBaseLpn;
@@ -129,17 +142,36 @@ MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
         byteOffset += cloneReqMsg->byteSize;
         cloneReqMsg->baseMetaLpn = idx;
 
-        metaIoWorkerList[idx % totalMioHandlerCnt]->EnqueueNewReq(cloneReqMsg);
+        isQueued = metaIoWorkerList[idx % totalMioHandlerCnt]->EnqueueNewReq(cloneReqMsg);
+
+        if (!isQueued)
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_QUEUE_PUSH_FAILED,
+                "Failed to enqueue new request...");
+
+            delete cloneReqMsg;
+            break;
+        }
     }
 
     // delete msg instance, this instance was only for meta scheduler
     delete reqMsg;
+
+    return isQueued;
 }
 
-void
+bool
 MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    ioMultiQ.Enqueue(reqMsg, reqMsg->priority);
+    if (false == initializedQid)
+    {
+        initializedQid = true;
+        currentThreadQId = sched_getcpu();
+    }
+
+    bool isQueued = ioMultiQ.EnqueueReqMsg(currentThreadQId, reqMsg);
+
+    return isQueued;
 }
 
 bool
@@ -201,14 +233,44 @@ MetaFsIoScheduler::Execute(void)
 
         if (nullptr != reqMsg)
         {
-            IssueRequest(reqMsg);
+            bool isQueued = IssueRequest(reqMsg);
+
+            if (unlikely(false == isQueued))
+            {
+                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                    "It was failed to issue tagId={}, fd={}",
+                    reqMsg->tagId, reqMsg->fd);
+            }
         }
     }
+}
+
+uint32_t
+MetaFsIoScheduler::_GetCoreId(void)
+{
+    currentCoreId++;
+    if (currentCoreId >= maxCoreCount)
+        currentCoreId = 0;
+    return currentCoreId;
 }
 
 MetaFsIoRequest*
 MetaFsIoScheduler::_FetchPendingNewReq(void)
 {
-    return ioMultiQ.Dequeue();
+    uint32_t count = 1;
+
+    MetaFsIoRequest* reqMsg = nullptr;
+    do
+    {
+        uint32_t coreId = _GetCoreId();
+        reqMsg = ioMultiQ.DequeueReqMsg(coreId);
+        if (reqMsg != nullptr)
+        {
+            break;
+        }
+        count++;
+    } while (count <= maxCoreCount);
+
+    return reqMsg;
 }
 } // namespace pos

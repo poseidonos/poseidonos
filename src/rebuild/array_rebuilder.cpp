@@ -44,8 +44,8 @@ ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
 }
 
 void
-ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
-                        RebuildComplete cb, list<RebuildTarget*>& tgt)
+ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
+    RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild {}, {} target partitions", array, tgt.size());
@@ -84,7 +84,7 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
         }
     }
     RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
-    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dev, cb, tgt, &factory);
+    ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt, &factory);
     jobsInProgress.emplace(array, job);
     mtxStart.unlock();
     if (ret == 0)

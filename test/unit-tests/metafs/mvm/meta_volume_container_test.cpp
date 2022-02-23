@@ -393,14 +393,14 @@ TEST_F(MetaVolumeContainerTexture, CheckInode)
 {
     std::string fileName = "TESTFILE";
     MetaFileInode inode;
-    inode.data.basic.field.fileName = fileName;
+    inode.data.basic.field.fileName = &fileName;
     inode.data.basic.field.fd = 0;
 
     EXPECT_CALL(*ssdVolume, GetInode)
         .WillOnce(ReturnRef(inode));
 
     MetaFileInode& inode0 = container->GetInode(0, MetaVolumeType::SsdVolume);
-    EXPECT_TRUE(inode0.data.basic.field.fileName == fileName);
+        EXPECT_EQ(inode0.data.basic.field.fileName.ToString(), fileName);
 
     delete ssdVolume;
     delete nvramVolume;
@@ -425,7 +425,7 @@ TEST_F(MetaVolumeContainerTexture, CopyInode_testIfCopyMethodWillBeSuccess)
     std::string fileName = "TESTFILE";
     MetaFileInodeInfo inodeInfo;
     MetaFileInode inode;
-    inode.data.basic.field.fileName = fileName;
+    inode.data.basic.field.fileName = &fileName;
     inode.data.basic.field.fd = 0;
 
     EXPECT_CALL(*ssdVolume, CopyInodeToInodeInfo).WillOnce(Return(true));

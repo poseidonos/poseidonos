@@ -85,15 +85,6 @@ QosArrayManager::GetVolumePolicy(uint32_t volId)
     std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
     return volPolicyCli[volId];
 }
-
-void
-QosArrayManager::ResetVolumeThrottling(void)
-{
-    for (int volId = 0; volId < MAX_VOLUME_COUNT; volId++)
-    {
-        qosVolumeManager->ResetVolumeThrottling(volId, arrayId);
-    }
-}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

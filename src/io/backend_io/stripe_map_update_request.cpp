@@ -131,9 +131,8 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
     }
 
     int result = iMetaUpdater->UpdateStripeMap(stripe, completionEvent);
-    if (unlikely(EID(SUCCESS) != result))
+    if (unlikely(result > 0))
     {
-        // TODO (dh.ihm) Need to make fatal error (ret < 0) handle path.
         POS_EVENT_ID eventId =
             POS_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED;
         std::stringstream message;

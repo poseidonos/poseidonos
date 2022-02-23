@@ -20,6 +20,9 @@
 #include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_lock_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_states_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"
@@ -48,6 +51,13 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     EXPECT_CALL(*allocatorAddressInfo, GetnumUserAreaSegments).WillRepeatedly(Return(TEST_SEG_CNT));
     EXPECT_CALL(*allocatorAddressInfo, IsUT).WillRepeatedly(Return(true));
 
+    // SegmentCtx (Mock)
+    NiceMock<MockSegmentCtx>* segmentCtx = new NiceMock<MockSegmentCtx>();
+    std::mutex segCtxLock;
+    std::mutex segStateLock;
+    EXPECT_CALL(*segmentCtx, GetOccupiedStripeCount).WillRepeatedly(Return(STRIPE_PER_SEGMENT));
+    EXPECT_CALL(*segmentCtx, GetSegmentCtxLock).WillRepeatedly(ReturnRef(segStateLock));
+
     // WbStripeCtx (Mock)
     NiceMock<MockAllocatorCtx>* allocatorCtx = new NiceMock<MockAllocatorCtx>();
 
@@ -63,25 +73,39 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     // TelemetryPublisher (Mock)
     NiceMock<MockTelemetryPublisher>* telemetryPublisher = new NiceMock<MockTelemetryPublisher>();
 
-    // RebuildCtx (Mock)
-    NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
+    // RebuildCtx (Real)
+    RebuildCtx* rebuildCtx = new RebuildCtx(nullptr, allocatorAddressInfo);
 
-    // SegmentCtx (Real)
-    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo);
+    // Context IO Manager (Real)
+    // Allocator File Io (Real)
+    AllocatorFileIo* rebuildFileIo = new NiceMock<AllocatorFileIo>;
+    AllocatorFileIo* segmentFileIo = new NiceMock<AllocatorFileIo>;
+    AllocatorFileIo* allocatorFileIo = new NiceMock<AllocatorFileIo>;
+    ContextIoManager* contextIoManager = new ContextIoManager(allocatorAddressInfo, telemetryPublisher, rebuildFileIo, segmentFileIo, allocatorFileIo);
+
+    // ContextManager (Real)
+    ContextManager contextManager(telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
+        gcCtx, blockAllocStatus, contextIoManager,
+        contextReplayer, allocatorAddressInfo, ARRAY_ID);
+
+    // Prepare Test
+    contextManager.Init();
+    rebuildCtx->EmplaceRebuildTargetSegment(0);
+    rebuildCtx->SetTargetSegmentCnt(TEST_SEG_CNT);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
     {
         int nanoSec = std::rand() % 100;
-        std::thread th1(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
+        std::thread th1(&RebuildCtx::GetRebuildTargetSegment, rebuildCtx);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th2(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
+        std::thread th2(&RebuildCtx::FreeSegmentInRebuildTarget, rebuildCtx, 0);
         th1.join();
         th2.join();
 
-        std::thread th3(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
+        std::thread th3(&RebuildCtx::FreeSegmentInRebuildTarget, rebuildCtx, 0);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th4(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
+        std::thread th4(&RebuildCtx::GetRebuildTargetSegment, rebuildCtx);
         th3.join();
         th4.join();
     }
@@ -175,7 +199,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
         });
 
     // When 2. Flushing rebuild contexts started
-    // ioManager.FlushRebuildContext(nullptr, false);
+    ioManager.FlushRebuildContext(nullptr, false);
 
     // Wait for all flush completed
     {
@@ -232,7 +256,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     SegmentState expectedState = SegmentState::SSD;
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        SegmentState actualState = segmentCtx->GetSegmentState(segId);
+        SegmentState actualState = segmentCtx->GetSegmentState(segId, false);
         EXPECT_EQ(expectedState, actualState);
     }
 
@@ -247,7 +271,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     int expectedOccupiedCount = 0;
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        SegmentState actualState = segmentCtx->GetSegmentState(segId);
+        SegmentState actualState = segmentCtx->GetSegmentState(segId, false);
         EXPECT_EQ(expectedState, actualState);
 
         int actualOccupiedCount = segmentCtx->GetOccupiedStripeCount(segId);

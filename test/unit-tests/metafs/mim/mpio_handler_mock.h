@@ -45,7 +45,7 @@ class MockMpioHandler : public MpioHandler
 public:
     using MpioHandler::MpioHandler;
     MOCK_METHOD(void, EnqueuePartialMpio, (Mpio* mpio));
-    MOCK_METHOD(void, BindMpioAllocator, (MpioAllocator* mpioAllocator));
+    MOCK_METHOD(void, BindMpioPool, (MpioPool* mpioPool));
     MOCK_METHOD(void, BottomhalfMioProcessing, ());
 };
 

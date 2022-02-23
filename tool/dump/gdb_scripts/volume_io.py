@@ -5,35 +5,20 @@ import os
 current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, current_path)
 sys.path.insert(1, current_path + "/../")
-
-import gdb_lib
 import core_dump_lib
+import gdb_lib
 
 
 def bdev_information():
-    index = 0
+    gdb_lib.switch_to_c_stack()
+    tmp_str = "g_pos_disks->tqh_first"
     while(1):
-        addr = gdb_lib.get_spdk_value("g_nvmf_tgts.tqh_first->subsystems[%d]" % index)
-        if (addr == '0x0' or addr == '0'):
+        addr = gdb.parse_and_eval(tmp_str)
+        if (addr == "0" or addr == "0x0"):
             break
-        subnqn = gdb_lib.get_spdk_str("g_nvmf_tgts.tqh_first->subsystems[%d]->subnqn" % index)
-        print("")
-        print("")
-        print("######## subsystem id : %d, subsystem nqn : %s #########" % (index, subnqn))
-        nsindex = 0
-        addr = gdb_lib.get_spdk_value("g_nvmf_tgts.tqh_first->subsystems[%d]->ns" % (index))
-        if (addr == '0x0' or addr == '0'):
-            index = index + 1
-            continue
-        while (1):
-            addr = gdb_lib.get_spdk_value("g_nvmf_tgts.tqh_first->subsystems[%d]->ns[%d]" % (index, nsindex))
-            if (addr == '0x0' or addr == '0'):
-                break
-            nsid = gdb_lib.get_spdk_value("g_nvmf_tgts.tqh_first->subsystems[%d]->ns[%d].nsid" % (index, nsindex))
-            bdev_name = gdb_lib.get_spdk_value("g_nvmf_tgts.tqh_first->subsystems[%d]->ns[%d]->bdev.name" % (index, nsindex))
-            print("namespace id : %s, namespace bdev name : %s" % (nsid, bdev_name))
-            nsindex = nsindex + 1
-        index = index + 1
+        val = gdb.parse_and_eval(tmp_str + "->volume->name")
+        print(val)
+        tmp_str = tmp_str + "->link.tqe_next"
 
 
 def pending_volume_io():
@@ -61,3 +46,8 @@ def pending_volume_io():
 
             print("volume %d pendingGc : %s pendingHostIo : %s" % (vol, pending_unmounted_io, pending_mounted_io))
         index = index + 1
+
+
+def volume_io():
+    pending_volume_io()
+    bdev_information()

@@ -153,7 +153,14 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
         (int)reqMsg.ioMode, reqMsg.byteOffsetInFile, reqMsg.byteSize,
         reqMsg.byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
 
-    ioScheduler->EnqueueNewReq(cloneReqMsg);
+    bool reqQueued = ioScheduler->EnqueueNewReq(cloneReqMsg);
+
+    if (!reqQueued)
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
+            "Failed to enqueue new request...");
+        return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+    }
 
     if (reqMsg.IsSyncIO())
     {

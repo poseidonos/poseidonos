@@ -81,8 +81,6 @@ public:
     }
 
     int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
-    int SetStrLogging(bool input);
-    bool IsStrLoggingEnabled() { return EnableStructuredLogging; }
     JsonElement ToJson();
     int ApplyFilter();
     int ApplyFilter(string filePath);
@@ -103,6 +101,5 @@ private:
     uint32_t logRotation;
     spdlog::level::level_enum logLevel;
     Filter filter;
-    bool EnableStructuredLogging;
 };
 } // namespace pos_logger

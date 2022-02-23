@@ -106,9 +106,9 @@ ScalableMetaIoWorker::Execute(void)
     }
 }
 
-void
+bool
 ScalableMetaIoWorker::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    tophalfHandler->EnqueueNewReq(reqMsg);
+    return tophalfHandler->EnqueueNewReq(reqMsg);
 }
 } // namespace pos

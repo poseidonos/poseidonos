@@ -31,7 +31,6 @@ var isVerbose bool
 var isDebug bool
 var isJson bool
 var isQuiet bool
-var displayVersion bool
 
 var ip string
 var port string
@@ -58,16 +57,13 @@ var minbw uint64
 var prio uint
 var weight uint
 
-var (
-	PosCliVersion string
-	GitCommit     string
-	BuildTime     string
-)
+var GitCommit string
+var BuildTime string
 
 var RootCmd = &cobra.Command{
 	Use:   "poseidonos-cli",
-	Short: "poseidonos-cli - A command-line interface for PoseidonOS",
-	Long: `poseidonos-cli - A command-line interface for PoseidonOS
+	Short: "poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]",
+	Long: `poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
 
 	PoseidonOS command-ine interface (PoseidonOS CLI) is a management tool for PoseidonOS.
 	Using PoseidonOS CLI, you can start/stop PoseidonOS and manage arrays, devices, and volumes of PoseidonOS.
@@ -78,22 +74,11 @@ Syntax:
   poseidonos-cli [global-flags] commands subcommand [flags]
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if displayVersion == true {
-			fmt.Println("poseidonos-cli version " + getVersion())
-			os.Exit(0)
-		}
-
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
 		}
 	},
-}
-
-func getVersion() string {
-	intBldTime, _ := strconv.ParseInt(BuildTime, 10, 64)
-	unixTime := time.Unix(intBldTime, 0)
-	return PosCliVersion + "-" + unixTime.Format("200601021")
 }
 
 func Execute() {
@@ -103,13 +88,8 @@ func Execute() {
 }
 
 func init() {
-	regFlags()
 	regGlobalFlags()
 	addCmd()
-}
-
-func regFlags() {
-	RootCmd.Flags().BoolVar(&displayVersion, "version", false, "Display the version information.")
 }
 
 func regGlobalFlags() {

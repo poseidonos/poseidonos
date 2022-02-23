@@ -41,7 +41,6 @@
 #include "src/metafs/storage/mss.h"
 #include "src/metafs/mim/meta_io_manager.h"
 #include "src/metafs/mai/metafs_file_control_api.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -50,8 +49,7 @@ class MetaFsIoApi
 public:
     MetaFsIoApi(void);
     MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
-                    MetaStorageSubsystem* storage, TelemetryPublisher* tp,
-                    MetaIoManager* io = nullptr);
+                    MetaStorageSubsystem* storage, MetaIoManager* io = nullptr);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,
@@ -78,12 +76,10 @@ private:
     void _AddExtraIoReqInfo(MetaFsIoRequest& reqMsg);
     POS_EVENT_ID _CheckFileIoBoundary(MetaFsIoRequest& reqMsg);
     POS_EVENT_ID _CheckReqSanity(MetaFsIoRequest& reqMsg);
-    void _SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize);
 
     int arrayId = INT32_MAX;
     bool isNormal = false;
     MetaIoManager* ioMgr = nullptr;
     MetaFsFileControlApi* ctrlMgr = nullptr;
-    TelemetryPublisher* telemetryPublisher = nullptr;
 };
 } // namespace pos

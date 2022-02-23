@@ -206,6 +206,23 @@ ContextIoManager::_FlushCompleted(void)
     }
 }
 
+int
+ContextIoManager::FlushRebuildContext(EventSmartPtr callback, bool sync)
+{
+    AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
+    int ret = fileIo[REBUILD_CTX]->Flush(completion);
+
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
+        "[RebuildCtxFlush] sync:{}, rebuildIssuedCount:{}, start to flush",
+        sync, _GetNumRebuildFlush());
+
+    if (ret == 0 && sync == true)
+    {
+        WaitPendingIo(IOTYPE_FLUSH);
+    }
+    return ret;
+}
+
 uint64_t
 ContextIoManager::GetStoredContextVersion(int owner)
 {

@@ -30,37 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "partition.h"
-#include "partition_formatter.h"
-#include "src/include/raid_type.h"
+#ifndef PARTITION_MANAGER_H_
+#define PARTITION_MANAGER_H_
 
 #include <array>
+#include <string>
 #include <vector>
 
+#include "partition.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/cpu_affinity/affinity_manager.h"
 using namespace std;
 
 namespace pos
 {
-class IODispatcher;
+class Ubio;
+class ArrayInterface;
+class IAbrControl;
+
 class PartitionManager
 {
     friend class ParityLocationWbtCommand;
 
 public:
-    PartitionManager(void);
+    PartitionManager(
+        string array,
+        IAbrControl* abr,
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
+        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance());
     virtual ~PartitionManager(void);
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
-    virtual int CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc);
-    virtual void DeletePartitions(void);
-    virtual void FormatPartition(PartitionType type, uint32_t arrayId, IODispatcher* io);
+    virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
+        ArrayInterface* intf, uint32_t arrayIndex);
+    virtual void DeleteAll(ArrayInterface* intf);
+    virtual void FormatMetaPartition(void);
     virtual RaidState GetRaidState(void);
-    virtual RaidTypeEnum GetRaidType(PartitionType type);
 
 private:
-    Partitions partitions;
+    int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateUserData(const vector<ArrayDevice*> devs, ArrayDevice* nvm, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
+    void _DeleteAllPartitions(void);
+    ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
+
+    string arrayName_ = "";
+    array<Partition*, PartitionType::PARTITION_TYPE_MAX> partitions_;
+    IAbrControl* abrControl = nullptr;
+    AffinityManager* affinityManager = nullptr;
+    IODispatcher* ioDispatcher = nullptr;
 };
 
 } // namespace pos
+#endif // PARTITION_MANAGER_H_
