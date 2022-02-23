@@ -18,7 +18,7 @@ public:
 
     void PublishCounter(std::string name, label_t labelList, uint64_t value);
     void PublishGauge(std::string name, label_t labelList, int64_t value);
-    void PublishHistogram(std::string name, label_t labelList, int64_t upperBound, uint64_t bucketCount, int64_t sum, uint64_t totalCount);
+    void PublishHistogram(std::string name, label_t labelList, std::vector<int64_t> upperBound, std::vector<uint64_t> bucketCount, int64_t sum, uint64_t totalCount);
 
 private:
     void addLabelListIntoMetric(Metric* metric, const label_t& labelList);
@@ -72,13 +72,30 @@ void POSMetricPublisher::PublishGauge(std::string name, label_t labelList, int64
     messageSend(request);
 }
 
-void POSMetricPublisher::PublishHistogram(std::string name, label_t labelList, int64_t upperBound, uint64_t bucketCount, int64_t sum, uint64_t totalCount) {
+void POSMetricPublisher::PublishHistogram(std::string name, label_t labelList, std::vector<int64_t> upperBound, std::vector<uint64_t> bucketCount, int64_t sum, uint64_t totalCount) {
     MetricPublishRequest *request = new MetricPublishRequest{};
     Metric* metric = request->add_metrics();
 
     metric->set_name(name.c_str());
     metric->set_type(MetricTypes::HISTOGRAM);
     addLabelListIntoMetric(metric, labelList);
+
+    // build histogram value
+    HistogramValue *hValue = new HistogramValue;
+    for(int64_t ub : upperBound) {
+        hValue->add_bucketrange(ub);
+    }
+    for(uint64_t bc : bucketCount) {
+        hValue->add_bucketcount(bc);
+    }
+    hValue->set_sum(sum);
+    hValue->set_totalcount(totalCount);
+
+    metric->set_allocated_histogramvalue(hValue);
+    messageSend(request);
+
+    delete request;
+   // delete hValue; // NOTE:: (set_allocated_histogram has ownership of hValue, so don't need to release after sending gRPC message)
 }
 
 static inline std::chrono::system_clock::time_point GetCurrentTime() {
@@ -100,7 +117,7 @@ static void SummaryTimeLog(std::string prefix, std::vector<int64_t>& timeLog) {
         min = std::min(min, timeEntry);
     }
 
-    printf("Test[%s] Avg=%.2f(us) Max=%lld(us) Min=%lld(us) \n", prefix.c_str(), sum/static_cast<double>(timeLog.size()), max, min);
+    printf("Test[%s, Items:%u] Total:%lld(ms) Avg=%.2f(us) Max=%lld(us) Min=%lld(us) \n", prefix.c_str(), timeLog.size(), sum/1000, sum/static_cast<double>(timeLog.size()), max, min);
 }
 
 
@@ -113,6 +130,12 @@ static void Test_MeasureSingleMetric() {
     labelList.push_back(std::pair<std::string,std::string>{"label1","label1_value"});
     labelList.push_back(std::pair<std::string,std::string>{"label2","label2_value"});
 
+    /* fixed upperBound, BucketCount for histogram */
+    std::vector<int64_t> upperBound{0,10,20,30};
+    std::vector<uint64_t> bucketCount{1,2,3,4};
+    int64_t bucketSum = 60; // 0+10+20+30
+    uint64_t bucketTotalCount = 4;
+
     std::vector<int64_t> timeLog;
     timeLog.resize(NUM_RUN);
     for(int i = 0; i < NUM_RUN; i++) {
@@ -120,8 +143,24 @@ static void Test_MeasureSingleMetric() {
         pub.PublishCounter("Test1_Counter", labelList, i);
         timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
     }
-    SummaryTimeLog("Counter 1000 Items", timeLog);
+    SummaryTimeLog("Counter Metric(Fixed Label)", timeLog);
 
+    timeLog.clear();
+    for(int i = 0; i < NUM_RUN; i++) {
+        auto s = GetCurrentTime();
+        pub.PublishGauge("Test1_Gauge", labelList, i);
+        timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
+    }
+    SummaryTimeLog("Gauge Metric(Fixed Label)", timeLog);
+
+
+    timeLog.clear();
+    for(int i = 0; i < NUM_RUN; i++) {
+        auto s = GetCurrentTime();
+        pub.PublishHistogram("Test1_Histogram", labelList, upperBound, bucketCount, bucketSum, bucketTotalCount);
+        timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
+    }
+    SummaryTimeLog("Histogram Metric(Fixed Label)", timeLog);
 }
 
 
