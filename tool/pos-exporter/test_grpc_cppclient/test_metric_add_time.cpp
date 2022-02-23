@@ -10,32 +10,37 @@
 
 
 
-static inline std::chrono::system_clock::time_point GetCurrentTime() {
+static inline std::chrono::system_clock::time_point GetCurrentTime()
+{
     return std::chrono::system_clock::now();
 }
 
-static int64_t GetElapsedTimeUS(std::chrono::system_clock::time_point start, std::chrono::system_clock::time_point end) {
+static int64_t GetElapsedTimeUS(std::chrono::system_clock::time_point start, std::chrono::system_clock::time_point end)
+{
     std::chrono::microseconds mil = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
     return mil.count();
 }
 
-static void SummaryTimeLog(std::string prefix, std::vector<int64_t>& timeLog) {
+static void SummaryTimeLog(std::string prefix, std::vector<int64_t>& timeLog)
+{
     int64_t sum = 0;
     int64_t max = INT_MIN;
     int64_t min = 1;
-    for(auto timeEntry : timeLog) {
+    for (auto timeEntry : timeLog)
+    {
         sum = sum + timeEntry;
         max = std::max(max, timeEntry);
         min = std::min(min, timeEntry);
     }
 
-    printf("Test[%s, Items:%u] Total:%ld(ms) Avg=%.2f(us) Max=%ld(us) Min=%ld(us) \n", 
-        prefix.c_str(), 
+    printf("Test[%s, Items:%u] Total:%ld(ms) Avg=%.2f(us) Max=%ld(us) Min=%ld(us) \n",
+        prefix.c_str(),
         (unsigned int) timeLog.size(), sum/1000, sum/static_cast<double>(timeLog.size()), max, min);
 }
 
 
-static void Test_MeasureSingleMetric() {
+static void Test_MeasureSingleMetric()
+{
     const int NUM_RUN = 10000;
     POSMetricPublisher pub(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
     label_t labelList;
@@ -52,7 +57,8 @@ static void Test_MeasureSingleMetric() {
 
     std::vector<int64_t> timeLog;
     timeLog.resize(NUM_RUN);
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
         auto s = GetCurrentTime();
         pub.PublishCounter("Test1_Counter", labelList, i);
         timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
@@ -60,7 +66,8 @@ static void Test_MeasureSingleMetric() {
     SummaryTimeLog("Counter Metric(Fixed Label)", timeLog);
 
     timeLog.clear();
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
         auto s = GetCurrentTime();
         pub.PublishGauge("Test1_Gauge", labelList, i);
         timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
@@ -69,7 +76,8 @@ static void Test_MeasureSingleMetric() {
 
 
     timeLog.clear();
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
         auto s = GetCurrentTime();
         pub.PublishHistogram("Test1_Histogram", labelList, upperBound, bucketCount, bucketSum, bucketTotalCount);
         timeLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
@@ -77,8 +85,8 @@ static void Test_MeasureSingleMetric() {
     SummaryTimeLog("Histogram Metric(Fixed Label)", timeLog);
 }
 
-
-static void Test_MeasureSingleMetric_DynamicLabel() {
+static void Test_MeasureSingleMetric_DynamicLabel()
+{
     const int NUM_RUN = 10000;
     POSMetricPublisher pub(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
     label_t labelList;
@@ -91,11 +99,13 @@ static void Test_MeasureSingleMetric_DynamicLabel() {
 
     std::vector<int64_t> timeLog;
     timeLog.resize(NUM_RUN);
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
 
         int labelCount = (std::rand() % 10) + 1;
         labelList.clear();
-        for(int j = 0; j < labelCount; j++) {
+        for (int j = 0; j < labelCount; j++)
+        {
             labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
         }
 
@@ -106,10 +116,12 @@ static void Test_MeasureSingleMetric_DynamicLabel() {
     SummaryTimeLog("Counter Metric(Dynamic Label)", timeLog);
 
     timeLog.clear();
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
         int labelCount = (std::rand() % 10) + 1;
         labelList.clear();
-        for(int j = 0; j < labelCount; j++) {
+        for (int j = 0; j < labelCount; j++)
+        {
             labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
         }
 
@@ -121,10 +133,12 @@ static void Test_MeasureSingleMetric_DynamicLabel() {
 
 
     timeLog.clear();
-    for(int i = 0; i < NUM_RUN; i++) {
+    for (int i = 0; i < NUM_RUN; i++)
+    {
         int labelCount = (std::rand() % 10) + 1;
         labelList.clear();
-        for(int j = 0; j < labelCount; j++) {
+        for (int j = 0; j < labelCount; j++)
+        {
             labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
         }
 
@@ -136,7 +150,8 @@ static void Test_MeasureSingleMetric_DynamicLabel() {
 }
 
 
-static void Test_MeasureConcurrentMetric_DynamicLabel() {
+static void Test_MeasureConcurrentMetric_DynamicLabel()
+{
     const int NUM_RUN = 10000;
     POSMetricPublisher pub(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
 
@@ -152,13 +167,16 @@ static void Test_MeasureConcurrentMetric_DynamicLabel() {
     printf("* Perform add multiple metric types simultaneously \n");
     printf("==========================================\n");
 
-    std::thread counterThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub) {
+    std::thread counterThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub)
+    {
         label_t labelList;
         printf(" ** (thread) add counter type metric \n");
-        for(int i = 0; i < nRun; i++) {
+        for (int i = 0; i < nRun; i++)
+        {
             int labelCount = (std::rand() % 10) + 1;
             labelList.clear();
-            for(int j = 0; j < labelCount; j++) {
+            for (int j = 0; j < labelCount; j++)
+            {
                 labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
             }
 
@@ -170,13 +188,16 @@ static void Test_MeasureConcurrentMetric_DynamicLabel() {
     
     
 
-    std::thread gaugeThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub) {
+    std::thread gaugeThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub)
+    {
         label_t labelList;
         printf(" ** (thread) add gauge type metric \n");
-        for(int i = 0; i < nRun; i++) {
+        for (int i = 0; i < nRun; i++)
+        {
             int labelCount = (std::rand() % 10) + 1;
             labelList.clear();
-            for(int j = 0; j < labelCount; j++) {
+            for (int j = 0; j < labelCount; j++)
+            {
                 labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
             }
 
@@ -188,7 +209,8 @@ static void Test_MeasureConcurrentMetric_DynamicLabel() {
     
     
 
-    std::thread histogramThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub) {
+    std::thread histogramThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub)
+    {
         /* fixed upperBound, BucketCount for histogram */
         std::vector<int64_t> upperBound{0,10,20,30};
         std::vector<uint64_t> bucketCount{1,2,3,4};
@@ -197,10 +219,12 @@ static void Test_MeasureConcurrentMetric_DynamicLabel() {
         label_t labelList;
 
         printf(" ** (thread) add histogram type metric \n");
-        for(int i = 0; i < nRun; i++) {
+        for (int i = 0; i < nRun; i++)
+        {
             int labelCount = (std::rand() % 10) + 1;
             labelList.clear();
-            for(int j = 0; j < labelCount; j++) {
+            for (int j = 0; j < labelCount; j++)
+            {
                 labelList.push_back(std::make_pair("label"+std::to_string(j), "label_v"+std::to_string(j)));
             }
 
@@ -219,8 +243,8 @@ static void Test_MeasureConcurrentMetric_DynamicLabel() {
     SummaryTimeLog("Histogram Metric(Concurrent + Dynamic Label)", timeLogHistogram);
 }
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 
     Test_MeasureSingleMetric();
     Test_MeasureSingleMetric_DynamicLabel();

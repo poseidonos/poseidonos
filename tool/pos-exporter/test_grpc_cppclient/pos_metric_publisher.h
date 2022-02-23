@@ -7,16 +7,19 @@
 #include <vector>
 #include <chrono>
 #include <random>
+#include <utility>
 #include <assert.h>
 
 #include <grpc++/grpc++.h>
 #include "metric/metric.grpc.pb.h"
 
-using label_t = std::vector<std::pair<std::string,std::string>>;
+using label_t = std::vector<std::pair<std::string, std::string>>;
 
-class POSMetricPublisher {
+class POSMetricPublisher
+{
 public:
-    POSMetricPublisher(std::shared_ptr<grpc::Channel> channel) {
+    POSMetricPublisher(std::shared_ptr<grpc::Channel> channel)
+    {
         stub = MetricManager::NewStub(channel);
     }
 
@@ -29,4 +32,3 @@ private:
     bool messageSend(MetricPublishRequest* request);
     std::unique_ptr<MetricManager::Stub> stub;
 };
-
