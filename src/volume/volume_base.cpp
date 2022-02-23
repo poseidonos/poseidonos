@@ -47,6 +47,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     arrayId = arrayIdx;
     name = volName;
     uuid = "";
+    attribute = VolumeAttribute::UserData;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
@@ -59,6 +60,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     arrayId = arrayIdx;
     name = volName;
     uuid = inputUuid;
+    attribute = VolumeAttribute::UserData;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     maxiops = _maxiops;

@@ -79,6 +79,7 @@ public:
     int VolumeID(std::string volName) override;
     int GetVolumeCount(void) override;
     int GetVolumeStatus(int volId) override;
+    int CheckVolumeValidity(int volId) override;
     uint64_t EntireVolumeSize(void) override;
     int GetVolumeSize(int volId, uint64_t& volSize) override;
     VolumeList* GetVolumeList(void) override;

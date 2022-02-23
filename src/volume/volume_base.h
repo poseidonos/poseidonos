@@ -43,10 +43,19 @@
 
 namespace pos
 {
+
+enum VolumeAttribute
+{
+    UserData,
+    HAJournalData,
+    MaxVolumeAttributes
+};
+
 enum VolumeStatus
 {
     Unmounted,
     Mounted,
+    InitialSyncMode,
     MaxVolumeStatus
 };
 
@@ -98,6 +107,11 @@ public:
     }
     void SetSubnqn(std::string inputSubNqn);
     void SetUuid(std::string inputUuid);
+    VolumeAttribute
+    GetAttribute(void)
+    {
+        return attribute;
+    }
     VolumeStatus
     GetStatus(void)
     {
@@ -146,6 +160,7 @@ public:
     int ID;
 
 protected:
+    VolumeAttribute attribute;
     VolumeStatus status;
     std::string name;
     std::string uuid;

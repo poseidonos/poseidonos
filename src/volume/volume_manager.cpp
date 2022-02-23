@@ -144,13 +144,13 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
     if (vol != nullptr)
     {
         volSize = vol->TotalSize();
-        return (int)POS_EVENT_ID::SUCCESS;
+        return static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
 
     volSize = 0;
-    POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+    POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
             "The requested volume does not exist");
-    return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+    return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
 }
 
 int
@@ -158,13 +158,13 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
 {
     if (initialized == false)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NOT_MOUNTED,
+        POS_TRACE_WARN(POS_EVENT_ID::ARRAY_NOT_MOUNTED,
                 "Array is not mounted");
-        return (int)POS_EVENT_ID::ARRAY_NOT_MOUNTED;
+        return static_cast<int>(POS_EVENT_ID::ARRAY_NOT_MOUNTED);
     }
 
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -179,7 +179,7 @@ int
 VolumeManager::Delete(std::string name)
 {
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -192,7 +192,7 @@ int
 VolumeManager::Mount(std::string name, std::string subnqn)
 {
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -205,7 +205,7 @@ int
 VolumeManager::Unmount(std::string name)
 {
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -218,7 +218,7 @@ int
 VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -231,7 +231,7 @@ int
 VolumeManager::Rename(std::string oldName, std::string newName)
 {
     int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
         return ret;
     }
@@ -241,14 +241,28 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 }
 
 int
+VolumeManager::CheckVolumeValidity(int volId)
+{
+    VolumeBase* vol = volumes.GetVolume(volId);
+
+    if (vol == nullptr)
+    {
+        POS_TRACE_INFO(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+    }
+
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+}
+
+int
 VolumeManager::GetVolumeStatus(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
     if (vol == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
 
     VolumeStatus status = vol->GetStatus();
@@ -268,9 +282,9 @@ VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeSta
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
             "The requested volume does not exist");
-        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
     bool success = volumes.IncreasePendingIOCountIfNotZero(volId, volumeStatus, ioCountToSubmit);
     if (success)
@@ -288,9 +302,9 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
             "The requested volume does not exist");
-        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
     volumes.DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
@@ -311,12 +325,12 @@ VolumeManager::VolumeName(int volId, std::string& name)
     if (vol != nullptr)
     {
         name = vol->GetName();
-        return (int)POS_EVENT_ID::SUCCESS;
+        return static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
 
-    POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+    POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
             "The requested volume does not exist");
-    return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+    return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
 }
 
 int
@@ -355,12 +369,12 @@ VolumeManager::_CheckPrerequisite(void)
 {
     if (stopped == true)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::SYSTEM_FAULT,
+        POS_TRACE_WARN(POS_EVENT_ID::SYSTEM_FAULT,
             "Cannot be performed in the STOP state");
-        return (int)POS_EVENT_ID::SYSTEM_FAULT;
+        return static_cast<int>(POS_EVENT_ID::SYSTEM_FAULT);
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
 std::string

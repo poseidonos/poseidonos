@@ -64,8 +64,8 @@ ReplayVolumeDeletion::Start(void)
         // If context version is increased after log is written, volume should be deleted
         if (vol.prevSegInfoVersion < storedContextVersion)
         {
-            int result = volumeManager->GetVolumeStatus(vol.volumeId);
-            if (result != (int)(POS_EVENT_ID::VOL_NOT_EXIST))
+            int result = volumeManager->CheckVolumeValidity(vol.volumeId);
+            if (result == static_cast<int>(POS_EVENT_ID::SUCCESS))
             {
                 std::string volname;
                 volumeManager->VolumeName(vol.volumeId, volname);
