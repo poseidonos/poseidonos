@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -51,7 +51,7 @@ func TestOnline1(t *testing.T) {
 
 	time.Sleep(time.Second)
 	httpres, _ := http.Get(fmt.Sprintf("http://%s:%s/metrics", TEST_HTTP_HOST, TEST_HTTP_PORT))
-	bodyString, _ := io.ReadAll(httpres.Body)
+	bodyString, _ := ioutil.ReadAll(httpres.Body)
 	strMetric := string(bodyString)
 	for _, line := range strings.Split(strMetric, "\n") {
 		if strings.Contains(line, "HistogramTest") {
@@ -96,7 +96,7 @@ func TestOnline2_DifferentValues(t *testing.T) {
 
 	time.Sleep(time.Second)
 	httpres, _ := http.Get(fmt.Sprintf("http://%s:%s/metrics", TEST_HTTP_HOST, TEST_HTTP_PORT))
-	bodyString, _ := io.ReadAll(httpres.Body)
+	bodyString, _ := ioutil.ReadAll(httpres.Body)
 	strMetric := string(bodyString)
 	for _, line := range strings.Split(strMetric, "\n") {
 		if strings.Contains(line, "HistogramTestDiffValue") {

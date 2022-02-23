@@ -85,8 +85,6 @@ func parseRequest(in *pb.MetricPublishRequest) error {
 			continue
 		}
 
-		touchExpiryVec(&name, labelMap)
-
 		mutex.Unlock()
 	}
 

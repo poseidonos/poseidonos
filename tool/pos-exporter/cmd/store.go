@@ -32,6 +32,8 @@ func addCounter(in *CounterMetric) {
 		counters[in.name] = vec
 	}
 	vec.With(*in.labels).Add(float64(in.value))
+
+	touchExpiryVec(&in.name, in.labels)
 }
 
 func addGauge(in *GaugeMetric) {
@@ -46,6 +48,7 @@ func addGauge(in *GaugeMetric) {
 	}
 	vec.With(*in.labels).Set(float64(in.value))
 
+	touchExpiryVec(&in.name, in.labels)
 }
 
 func addHistogram(in *HistogramMetric) {
@@ -71,4 +74,6 @@ func addHistogram(in *HistogramMetric) {
 	hist.UpdateLabelKey(labelKeys)
 	hist.UpdateLabelValues(labelValues)
 	hist.UpdateHistogram(in)
+
+	touchExpiryVec(&in.name, in.labels)
 }

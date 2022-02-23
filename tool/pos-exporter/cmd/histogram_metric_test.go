@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -167,7 +167,7 @@ func Test_POSHistogramCollector(t *testing.T) {
 	defer ts.Close()
 
 	res, _ := http.Get(ts.URL)
-	mBody, _ := io.ReadAll(res.Body)
+	mBody, _ := ioutil.ReadAll(res.Body)
 
 	var exp []string = make([]string, 10)
 	exp[0] = "# HELP histogram1_test1 POS Histogram"
@@ -260,7 +260,7 @@ func Test_POSHistogramCollector_DifferentValues(t *testing.T) {
 	hist1.UpdateHistogram(&hMetric)
 
 	res, _ := http.Get(ts.URL)
-	mBody, _ := io.ReadAll(res.Body)
+	mBody, _ := ioutil.ReadAll(res.Body)
 	var original = string(mBody)
 
 	if !strings.Contains(original, "prop_v2") {
@@ -329,7 +329,7 @@ func Test_POSHistogramCollector_BucketChangeTest(t *testing.T) {
 		hist.UpdateHistogram(&hMetric)
 
 		res, _ := http.Get(ts.URL)
-		mBody, _ := io.ReadAll(res.Body)
+		mBody, _ := ioutil.ReadAll(res.Body)
 		var original = string(mBody)
 		var expSum uint64 = 0
 
@@ -400,7 +400,7 @@ func Test_POSHistogramAddRemove(t *testing.T) {
 	defer ts.Close()
 
 	res, _ := http.Get(ts.URL)
-	mBody, _ := io.ReadAll(res.Body)
+	mBody, _ := ioutil.ReadAll(res.Body)
 
 	var original = string(mBody)
 	if !strings.Contains(original, "histogram5") {
@@ -450,7 +450,7 @@ func Test_POSHistogramAddRemove(t *testing.T) {
 	}
 
 	res, _ = http.Get(ts.URL)
-	mBody, _ = io.ReadAll(res.Body)
+	mBody, _ = ioutil.ReadAll(res.Body)
 	original = string(mBody)
 	if strings.Contains(original, "histogram5") {
 		fmt.Println("histogram5 exists after removing")
