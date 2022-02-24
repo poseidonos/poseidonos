@@ -92,10 +92,15 @@ QosArrayManager::GetMountedVolumes(std::list<uint32_t>& volumeList)
    qosVolumeManager->GetMountedVolumes(volumeList);
 }
 
+uint64_t
+QosArrayManager::GetDynamicVolumeThrottling(uint32_t volId, bool iops)
+{
+    return qosVolumeManager->GetDynamicVolumeThrottling(volId, iops);
+}
+
 void
 QosArrayManager::ResetVolumeThrottling(void)
 {
-    qosVolumeManager->GetTotalVolumeBandwidth();
     for (int volId = 0; volId < MAX_VOLUME_COUNT; volId++)
     {
         qosVolumeManager->ResetVolumeThrottling(volId, arrayId);
@@ -152,7 +157,6 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
                     }
                 }
             }
-            qosManager->InitGlobalThrottling();
             // Check if change in min policy or new volume policy
             std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
             auto it = minGuaranteeVolume.begin();
@@ -519,4 +523,11 @@ QosArrayManager::SetArrayName(std::string name)
     arrayName = name;
     qosVolumeManager->SetArrayName(arrayName);
 }
+
+void
+QosArrayManager::SetMinimumVolume(uint32_t volId, uint64_t value, bool iops)
+{
+    qosVolumeManager->SetMinimumVolume(volId, value, iops);
+}
+
 } // namespace pos

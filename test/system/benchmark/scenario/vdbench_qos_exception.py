@@ -15,10 +15,23 @@ workload_list = [
     "seq_w"
 ]
 vdbench_list = [
-    {"title" : "Write Sequential 128k",
-    "workload" : "seq_w",
-    "event" : r"seq_w,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
-    "start" : 3, "duration" : 40}
+    
+    #{"title" : "Write Sequential 128k",
+    # "workload" : "seq_w",
+    # "event" : r"seq_w,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
+     #"start" : 0, "duration" : 80},
+    #{"title" : "Read Sequential 128k",
+    #"workload" : "seq_r",
+    #"event" : r"seq_r,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
+    #"start" : 0, "duration" : 80},
+    #{"title" : "Write Random 4k",
+    # "workload" : "rand_w",
+    # "event" : r"rand_w,wd=rand,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
+    # "start" : 0, "duration" : 80},
+    {"title" : "Read Random 4k",
+    "workload" : "rand_r",
+    "event" : r"rand_r,wd=rand,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
+    "start" : 0, "duration" : 80}
 ]
 
 qos_list = [
@@ -30,17 +43,38 @@ qos_list = [
     },
     {
         "title": "Min Throttling",
-        "minbw" : 3200,
+        "minbw" : 900,
         "array" : "0",
-        "vol" : "1",
+        "vol" : "3",
         "start" : 20
     },
     {
-        "title": "Min Throttling 0",
-        "reset": True,
+        "title": "Min Throttling",
+        "minbw" : 800,
         "array" : "0",
-        "vol" : "1",
-        "start" : 30
+        "vol" : "4",
+        "start" : 25
+    },
+    {
+        "title": "Min Throttling",
+        "minbw" : 1200,
+        "array" : "0",
+        "vol" : "5",
+        "start" : 25
+    },
+    {
+        "title": "Min Throttling",
+        "minbw" : 0,
+        "array" : "0",
+        "vol" : "3",
+        "start" : 50
+    },
+    {
+        "title": "Min Throttling",
+        "minbw" : 0,
+        "array" : "0",
+        "vol" : "4",
+        "start" : 60
     },
 ]
 
@@ -70,7 +104,7 @@ def execute_qos_cli_event(test_target, current_time):
             if (result == False):
                 # test done
                 return True
-            
+
     # test done
     return False
 
@@ -175,11 +209,25 @@ def play(json_targets, json_inits, json_scenario):
                 break
         lib.printer.green(f" Qos Test With Vdbench End")
     # init wrapup
+
     for vdbench_elem in vdbench_list:
+        total_list = []
+        for index in range(0, vdbench_elem["start"] + vdbench_elem["duration"]):
+            total_list.append(0)
+        max_value = 0
+        for index in range(0, vdbench_elem["start"] + vdbench_elem["duration"]):
+            for key in vdbench_elem["result_array"]['Initiator01']:
+                    if (index < len(vdbench_elem["result_array"]['Initiator01'][key])):
+                        if (max_value < vdbench_elem["result_array"]['Initiator01'][key][index]):
+                            max_value = vdbench_elem["result_array"]['Initiator01'][key][index]
+                        total_list[index] = total_list[index] + vdbench_elem["result_array"]['Initiator01'][key][index]
+                        if (max_value < total_list[index]):
+                            max_value = total_list[index]
         if ("result_array" in vdbench_elem):
             print(vdbench_elem["title"])
             print(vdbench_elem["result_array"])
-            graph.draw.DrawResultDict(vdbench_elem["result_array"]['Initiator01'], f"{vdbench_elem['title']}_graph.png", 5000, "sec", "BW(MB/s)")
+            vdbench_elem["result_array"]['Initiator01']['total'] = total_list
+            graph.draw.DrawResultDict(vdbench_elem["result_array"]['Initiator01'], f"{vdbench_elem['title']}_graph.png", max_value * 1.2, "sec", "BW(MB/s)")
 
     for key in initiators:
         initiators[key].Wrapup(True, test_target.subsystem_list)

@@ -134,10 +134,10 @@ public:
     virtual bool IsMinimumPolicyInEffectInSystem(void);
     void ResetCorrection(void);
     void FinalizeSpdkManager(void);
-    std::tuple<uint64_t, uint64_t> GetTotalPerformance(void);
     void GetMountedVolumes(std::list<std::pair<uint32_t, uint32_t>>& volumeList);
     void ResetGlobalThrottling(void);
-    void InitGlobalThrottling(void);
+    void SetMinimumVolume(uint32_t arrayId, uint32_t volId, uint64_t value, bool iops);
+    void ControlThrottling(void);
 
 private:
     virtual void _Finalize(void);

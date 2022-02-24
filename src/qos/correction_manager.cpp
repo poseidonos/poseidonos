@@ -261,12 +261,12 @@ QosCorrectionManager::_DetermineWeight(std::vector<std::pair<uint32_t, uint32_t>
 void
 QosCorrectionManager::_HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> minVolId)
 {
-    std::list<std::pair<uint32_t, uint32_t>> allMountedVolumeList;
+    /*std::list<std::pair<uint32_t, uint32_t>> allMountedVolumeList;
     uint64_t globalMaxBw = 0, globalMaxIops = 0;
     std::tie(globalMaxBw, globalMaxIops) = qosManager->GetTotalPerformance();
     qosManager->GetMountedVolumes(allMountedVolumeList);
     _DetermineWeight(minVolId, allMountedVolumeList, false, globalMaxBw, volumeBwThrottling);
-    _DetermineWeight(minVolId, allMountedVolumeList, true, globalMaxIops, volumeIopsThrottling);
+    _DetermineWeight(minVolId, allMountedVolumeList, true, globalMaxIops, volumeIopsThrottling);*/
 }
 
 /* --------------------------------------------------------------------------*/
@@ -299,17 +299,8 @@ QosCorrectionManager::_HandleMaxThrottling(bool minPolicy)
         uint32_t volId = volPair.second;
         uint64_t userSetBwWeight = _GetUserMaxWeight(arrayId, volId, false);
         uint64_t userSetIops = _GetUserMaxWeight(arrayId, volId, true);
-       // if (minPolicy == false)
-       // {
-            qosManager->SetVolumeLimit(0, volId, userSetBwWeight, false, arrayId);
-            qosManager->SetVolumeLimit(0, volId, userSetIops, true, arrayId);
-            
-      //  }
-     //   else
-      //  {
-           // qosManager->SetVolumeLimit(0, volId, volumeBwThrottling[arrayId][volId], false, arrayId);
-          //  qosManager->SetVolumeLimit(0, volId, volumeIopsThrottling[arrayId][volId], true, arrayId);
-        
+        qosManager->SetVolumeLimit(0, volId, userSetBwWeight, false, arrayId);
+        qosManager->SetVolumeLimit(0, volId, userSetIops, true, arrayId);
     }
 }
 
@@ -320,6 +311,12 @@ QosCorrectionManager::_HandleMaxThrottling(bool minPolicy)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
+void
+QosCorrectionManager::ControlVolumeThrottling(void)
+{
+}
+
 void
 QosCorrectionManager::_HandleVolumeCorrection(void)
 {

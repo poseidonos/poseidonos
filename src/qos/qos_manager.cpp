@@ -302,19 +302,47 @@ QosManager::_PeriodicalJob(uint64_t* nextTick)
             *nextTick = now;
         }
         *nextTick = *nextTick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
-       // if (cnt >= 2)
-      //  {
-            ResetGlobalThrottling();
-        //    cnt = 0;
-       // }
-       // cnt++;
+        ControlThrottling();
     }
 }
 
 void
-QosManager::InitGlobalThrottling()
+QosManager::ControlThrottling(void)
 {
-    QosVolumeManager::InitGlobalThrottling();
+    ResetGlobalThrottling();
+
+    uint64_t totalMinVolumeBw = 0, totalMinVolumeIops = 0;
+    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
+    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
+    std::vector<std::pair<uint32_t, uint32_t>> minVols = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    for (auto iter : minVols)
+    {
+        uint32_t arrayId = iter.first;
+        uint32_t minVolId = iter.second;
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, minVolId);
+        if (volumeUserPolicy->IsMinimumVolume() == false)
+        {
+            SetMinimumVolume(arrayId, minVolId, 0, false);
+            SetMinimumVolume(arrayId, minVolId, 0, true);
+            continue;
+        }
+        bool flag = (volumeUserPolicy->IsBwPolicySet() == false);
+        if (flag == true)
+        {
+            totalMinVolumeIops += qosArrayManager[arrayId]->GetDynamicVolumeThrottling(minVolId, flag);
+            SetMinimumVolume(arrayId, minVolId, volumeUserPolicy->GetMinIops(), flag);
+        }
+        else
+        {
+            totalMinVolumeBw += qosArrayManager[arrayId]->GetDynamicVolumeThrottling(minVolId, flag);
+            SetMinimumVolume(arrayId, minVolId, volumeUserPolicy->GetMinBandwidth(), flag);
+        }
+        
+    }
+    uint64_t globalBw = QosVolumeManager::GetGlobalThrottling(false);
+    uint64_t globalIops = QosVolumeManager::GetGlobalThrottling(true);
+    QosVolumeManager::SetRemainingThrottling(globalBw, totalMinVolumeBw, false);
+    QosVolumeManager::SetRemainingThrottling(globalIops, totalMinVolumeIops, true);
 }
 
 void
@@ -337,6 +365,7 @@ QosManager::_QosWorker(void)
         nextManagerType = currentManager->GetNextManagerType();
         nextManager = _GetNextInternalManager(nextManagerType);
         currentManager = nextManager;
+
         _PeriodicalJob(&nextTick);
     }
 }
@@ -498,13 +527,12 @@ QosManager::ResetGlobalThrottling(void)
     QosVolumeManager::ResetGlobalThrottling();
 }
 
-std::tuple<uint64_t, uint64_t>
-QosManager::GetTotalPerformance(void)
+void
+QosManager::SetMinimumVolume(uint32_t arrayId, uint32_t volId, uint64_t value, bool iops)
 {
-    uint64_t bw = QosVolumeManager::GetTotalVolumeBandwidth();
-    uint64_t iops = QosVolumeManager::GetTotalVolumeIops();
-    return std::make_tuple(bw, iops);
+    qosArrayManager[arrayId]->SetMinimumVolume(volId, value, iops);
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

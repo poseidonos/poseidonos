@@ -71,22 +71,24 @@ def play(json_targets, json_inits, json_scenario):
             "rand_r"
         ]
         rd_list = [
-            r"seq_w,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(4\)",
-            r"seq_r,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(100\),forthreads=\(4\)",
-            r"rand_w,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
-            r"rand_r,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(100\),forthreads=\(128\)"
+            r"seq_w,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
+            r"seq_r,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(100\),forthreads=\(128\)",
+            r"rand_w,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(512\)",
+            r"rand_r,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(100\),forthreads=\(512\)"
         ]
         tc_list = [
+            #{
+            #    "title": "Reset Throttling",
+            #    "sc_list": [["reset", "", ""]]
+            #},
+            #{
+            #    "title": "Reset Throttling",
+            #    "sc_list": [["bw", "value", "100"], ["reset", "", ""]]
+            #},
             {
-                "title": "Reset Throttling",
-                "sc_list": [["reset", "", ""]]
+               "title": "",
+               "sc_list": [["bw", ["1"], ["3000"], "min"], ["bw", ["1"], ["3500"], "min"], ["bw", ["1"], ["4000"], "min"], ["reset", "", "", "min"]]
             },
-            {
-                "title": "Reset Throttling",
-                "sc_list": [["bw", "value", "100"], ["reset", "", ""]]
-            },
-            #   "title": "",
-            #   "sc_list": [["bw", ["1"], ["1900"], "min"], ["bw", ["1"], ["2200"], "min"], ["bw", ["1"], ["2400"], "min"], ["reset", "", "", "min"]]
             {
                 "title": "Throttle Max BW to 10% of Base Performance",
                 "sc_list": [["bw", "rate", "10"]]

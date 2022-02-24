@@ -82,6 +82,8 @@ public:
     bool IsMinimumPolicyInEffect(void);
     void SetArrayName(std::string arrayName);
     void ResetVolumeThrottling(void);
+    void SetMinimumVolume(uint32_t volId, uint64_t value, bool iops);
+    uint64_t GetDynamicVolumeThrottling(uint32_t volId, bool iops);
 
 private:
     void _Finalize(void);

@@ -64,6 +64,7 @@ public:
 
 private:
     void _SetNextManagerType(void);
+    void ControlVolumeThrottling(void);
     void _HandleVolumeCorrection(void);
     void _HandleMaxThrottling(bool minPolicy);
     void _HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> volId);

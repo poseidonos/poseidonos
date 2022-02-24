@@ -94,16 +94,18 @@ public:
     static void _VolumeMountHandler(void* arg1, void* arg2);
     static void _VolumeUnmountHandler(void* arg1, void* arg2);
     static void _VolumeDetachHandler(void* arg1, void* arg2);
-    static void ResetGlobalThrottling(void);
     static uint64_t GetTotalVolumeBandwidth(void);
     static uint64_t GetTotalVolumeIops(void);
     void GetMountedVolumes(std::list<uint32_t>& volumeList);
-    static void InitGlobalThrottling(void);
+    void SetMinimumVolume(uint32_t volId, uint64_t value, bool iops);
+    uint64_t GetDynamicVolumeThrottling(uint32_t volId, bool iops);
+
+    static uint64_t GetGlobalThrottling(bool iops);
+    static void ResetGlobalThrottling(void);
+    static void SetRemainingThrottling(uint64_t total, uint64_t minVolTotal, bool iops);
 
     static std::atomic<int64_t> globalBwThrottling;
-    static std::atomic<int64_t> globalCurrentBw;
     static std::atomic<int64_t> globalIopsThrottling;
-    static std::atomic<int64_t> globalCurrentIops;
     static std::atomic<int64_t> globalRemainingVolumeBw;
     static std::atomic<int64_t> globalRemainingVolumeIops;
 
@@ -115,7 +117,8 @@ private:
     bool _RateLimit(uint32_t reactor, int volId);
     bool _GlobalRateLimit(void);
     void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
-    bool _SpecialRateLimit(void);
+    bool _SpecialRateLimit(uint32_t volId);
+    bool _MinimumRateLimit(int volId);
 
     void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, VolumeIoSmartPtr io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
@@ -128,23 +131,33 @@ private:
     void _InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo);
     void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
     bool _PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId);
+    void _SubmitVolumeIo(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo);
+    static int64_t _GetThrottlingChange(int64_t remainingValue, int64_t plusUpdateUnit, uint64_t minusUpdateUnit);
+    static int64_t _ResetThrottlingCommon(int64_t remainingValue, uint64_t currentThrottlingValue);
 
     std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
+    std::atomic<int64_t> remainingDynamicVolumeBw[MAX_VOLUME_COUNT];
+    std::atomic<int64_t> remainingDynamicVolumeIops[MAX_VOLUME_COUNT];
     std::atomic<uint64_t> bwThrottling[MAX_VOLUME_COUNT];
     std::atomic<uint64_t> iopsThrottling[MAX_VOLUME_COUNT];
+    std::atomic<int64_t> dynamicBwThrottling[MAX_VOLUME_COUNT];
+    std::atomic<int64_t> dynamicIopsThrottling[MAX_VOLUME_COUNT];
     std::atomic<uint64_t> pendingIO[MAX_VOLUME_COUNT];
+
     std::atomic<bool> volumeMap[MAX_VOLUME_COUNT];
     std::mutex volumePendingIOLock[MAX_VOLUME_COUNT];
-    std::atomic<int64_t> remainingVolumeBw[MAX_VOLUME_COUNT];
-    std::atomic<uint64_t> currentVolumeBw[MAX_VOLUME_COUNT];
-    std::atomic<int64_t> remainingVolumeIops[MAX_VOLUME_COUNT];
-    std::atomic<uint64_t> currentVolumeIops[MAX_VOLUME_COUNT];
-    static std::atomic<int64_t> notThrottledVolumesThrottling;
-    static std::atomic<bool> isMinVolume[MAX_VOLUME_COUNT];
+
+    int64_t remainingVolumeBw[MAX_VOLUME_COUNT];
+    int64_t remainingVolumeIops[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> minVolumeBw[MAX_VOLUME_COUNT];
+    std::atomic<uint64_t> minVolumeIops[MAX_VOLUME_COUNT];
+    static std::atomic<int64_t> notThrottledVolumesThrottlingBw;
     static std::atomic<int64_t> remainingNotThrottledVolumesBw;
+    static std::atomic<int64_t> notThrottledVolumesThrottlingIops;
+    static std::atomic<int64_t> remainingNotThrottledVolumesIops;
 
     bool feQosEnabled;
     BwIopsRateLimit* bwIopsRateLimit;
@@ -158,8 +171,6 @@ private:
     SpdkPosNvmfCaller* spdkPosNvmfCaller;
     SpdkPosVolumeCaller* spdkPosVolumeCaller;
     VolumeEventPublisher* volumeEventPublisher;
-    
-
     pthread_rwlock_t nqnLock;
 };
 } // namespace pos

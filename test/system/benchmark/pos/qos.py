@@ -193,7 +193,6 @@ def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_na
             json_array = json.load(f)
         array_len = len(json_array)
 
-
         column_type = ""
         if limit_type == "iops":
             column_type = "rate"
