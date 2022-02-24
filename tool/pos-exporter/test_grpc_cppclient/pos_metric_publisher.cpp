@@ -1,6 +1,6 @@
 #include "pos_metric_publisher.h"
 
-bool POSMetricPublisher::MessageSend(MetricPublishRequest* request)
+bool POSMetricPublisher::_MessageSend(MetricPublishRequest* request)
 {
     MetricPublishResponse response;
     grpc::ClientContext context;
@@ -14,7 +14,7 @@ bool POSMetricPublisher::MessageSend(MetricPublishRequest* request)
     return true;
 }
 
-void POSMetricPublisher::AddLabelListIntoMetric(Metric* metric, const label_t& labelList)
+void POSMetricPublisher::_AddLabelListIntoMetric(Metric* metric, const label_t& labelList)
 {
     for (auto& kv : labelList)
     {
@@ -31,10 +31,10 @@ void POSMetricPublisher::PublishCounter(std::string name, label_t labelList, uin
 
     metric->set_name(name.c_str());
     metric->set_type(MetricTypes::COUNTER);
-    AddLabelListIntoMetric(metric, labelList);
+    _AddLabelListIntoMetric(metric, labelList);
     metric->set_countervalue(value);
 
-    bool ret = MessageSend(request);
+    bool ret = _MessageSend(request);
     assert(ret);
 
     delete request;
@@ -47,10 +47,10 @@ void POSMetricPublisher::PublishGauge(std::string name, label_t labelList, int64
 
     metric->set_name(name.c_str());
     metric->set_type(MetricTypes::GAUGE);
-    AddLabelListIntoMetric(metric, labelList);
+    _AddLabelListIntoMetric(metric, labelList);
     metric->set_gaugevalue(value);
 
-    bool ret = MessageSend(request);
+    bool ret = _MessageSend(request);
     assert(ret);
 
     delete request;
@@ -63,7 +63,7 @@ void POSMetricPublisher::PublishHistogram(std::string name, label_t labelList, s
 
     metric->set_name(name.c_str());
     metric->set_type(MetricTypes::HISTOGRAM);
-    AddLabelListIntoMetric(metric, labelList);
+    _AddLabelListIntoMetric(metric, labelList);
 
     // build histogram value
     HistogramValue *hValue = new HistogramValue;
@@ -79,7 +79,7 @@ void POSMetricPublisher::PublishHistogram(std::string name, label_t labelList, s
     hValue->set_totalcount(totalCount);
 
     metric->set_allocated_histogramvalue(hValue);
-    bool ret = MessageSend(request);
+    bool ret = _MessageSend(request);
     assert(ret);
 
     delete request; // NOTE(delete hValue):: (set_allocated_histogram has ownership of hValue, so don't need to release after sending gRPC message)

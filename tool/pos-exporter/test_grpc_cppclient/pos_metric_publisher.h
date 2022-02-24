@@ -28,7 +28,7 @@ public:
     void PublishHistogram(std::string name, label_t labelList, std::vector<int64_t> upperBound, std::vector<uint64_t> bucketCount, int64_t sum, uint64_t totalCount);
 
 private:
-    void AddLabelListIntoMetric(Metric* metric, const label_t& labelList);
-    bool MessageSend(MetricPublishRequest* request);
+    void _AddLabelListIntoMetric(Metric* metric, const label_t& labelList);
+    bool _MessageSend(MetricPublishRequest* request);
     std::unique_ptr<MetricManager::Stub> stub;
 };

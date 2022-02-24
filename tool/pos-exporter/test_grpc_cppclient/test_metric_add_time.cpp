@@ -46,8 +46,8 @@ static void Test_MeasureSingleMetric()
     label_t labelList;
 
     /* generate fixed label list */
-    labelList.push_back(std::pair<std::string,std::string>{"label1", "label1_value"});
-    labelList.push_back(std::pair<std::string,std::string>{"label2", "label2_value"});
+    labelList.push_back(std::make_pair("label1", "label1_value"));
+    labelList.push_back(std::make_pair("label2", "label2_value"));
 
     /* fixed upperBound, BucketCount for histogram */
     std::vector<int64_t> upperBound{0, 10, 20, 30};
@@ -228,11 +228,10 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
             tLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
         }
     }, NUM_RUN, std::ref(timeLogHistogram), &pub);
-
+    
     counterThread.join();
     gaugeThread.join();
     histogramThread.join();
-    
     SummaryTimeLog("Gauge Metric(Concurrent + Dynamic Label)", timeLogGauge);
     SummaryTimeLog("Gauge Metric(Concurrent + Dynamic Label)", timeLogGauge);
     SummaryTimeLog("Histogram Metric(Concurrent + Dynamic Label)", timeLogHistogram);
