@@ -228,7 +228,6 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
             tLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
         }
     }, NUM_RUN, std::ref(timeLogHistogram), &pub);
-    
     counterThread.join();
     gaugeThread.join();
     histogramThread.join();
