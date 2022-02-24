@@ -16,7 +16,7 @@ class Vdbench:
         self.vdfile = "test.vd"
         self.vdbench_dir = vdbench_dir
         self.jvm = jvm
-        self.column_list = ["timestamp", "rate", "MB/sec", "resp", "read_resp", "write_resp", "read_max", "write_max"]
+        self.column_list = ["timestamp", "rate", "MB/sec", "resp", "read_resp", "write_resp"]
         self.output_dir = output_dir
 
     def CreateVdFile(self, initiators, rd_list, rd_idx=0, mulit_host=False):

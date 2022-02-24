@@ -38,8 +38,11 @@ def GetLimitPerformance(base_perf, limit_type, limit_rate):
 
 
 def GetQosCommandOption(testcase, base_perf):
-    limit = {"type": "", "how": "", "value": 0.0}  # unit: kiops, MB/s
-    volume_list = {"type": "", }
+    min_flag = False
+    if (len(testcase) == 4 and testcase[3] == "min"):
+        min_flag = True
+    limit = {"type": "", "how": "", "value": 0.0, "min": min_flag}  # unit: kiops, MB/s
+    volume_list = {"type": "", "min": min_flag}
 
     limit["type"] = volume_list["type"] = testcase[0]
     if limit["type"] == "reset" or volume_list["type"] == "reset":
@@ -68,7 +71,7 @@ def ParseVolumeDict(volume_dict):
     volume_list = {}
 
     for key in volume_dict.keys():
-        if key == "type":
+        if key == "type" or key == "min":
             continue
         limit_value = volume_dict[key]
         if "-" in key:
@@ -84,6 +87,9 @@ def SetQosToAllVolumes(test_target, limit):
     limit_type = limit["type"]
     limit_how = limit["how"]
     limit_value = limit["value"]
+    min_flag = False
+    if ("min" in limit):
+        min_flag = limit["min"]
     total_limit_value = 0
 
     # Get total volume count
@@ -102,7 +108,7 @@ def SetQosToAllVolumes(test_target, limit):
     if "yes" == test_target.use_autogen:
         for array in test_target.array_volume_list.keys():
             for vol_name in test_target.array_volume_list[array]:
-                if -1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, volume_limit_value):
+                if -1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, volume_limit_value, min_flag):
                     return -1
 
     if limit_type == "reset" or volume_limit_value == 0:
@@ -119,8 +125,12 @@ def SetQosToAllVolumes(test_target, limit):
 
 def SetQosToEachVolumes(test_target, limit):
     limit_type = limit["type"]
-
-    volume_list = {}  # ex) {"1" 10, "3": 10 , "5": 30}
+    min_flag = False
+    print(limit)
+    if ("min" in limit):
+        min_flag = limit["min"]
+    volume_list = {}
+    # ex) {"1" : 10, "3": 10 , "5": 30}
     volume_list = ParseVolumeDict(limit)
 
     # Support only one array with auto gen
@@ -129,12 +139,12 @@ def SetQosToEachVolumes(test_target, limit):
         for key in list(volume_list.keys()):
             limit_value = volume_list[key]
             vol_name = "VOL" + str(key)
-            if -1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, limit_value):
+            if -1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, limit_value, min_flag):
                 lib.printer.red(" set qos failed")
     return volume_list
 
 
-def CheckQosThrottled(json_result_file, limit_type, expected_value, prev_expected_value, base_perf):
+def CheckQos(json_result_file, limit_type, expected_value, prev_expected_value, base_perf, min_flag=False):
     # Return value: [ throttled or not, actual_result(bw, iops) ]
     result = [True, []]
 
@@ -154,6 +164,9 @@ def CheckQosThrottled(json_result_file, limit_type, expected_value, prev_expecte
         column_type = "MB/sec"
 
     read_line_num = 3
+    sign = 1
+    if (min_flag is True):
+        sign = -1
     # Check result of last 3 in json file
     for i in range(0, min(read_line_num, array_len)):
         bw_value = float(json_array[array_len - i - 1]["MB/sec"])
@@ -162,10 +175,12 @@ def CheckQosThrottled(json_result_file, limit_type, expected_value, prev_expecte
             actual_value = bw_value
         elif column_type == "rate":
             actual_value = iops_value * 1000.0
-        print(f"  BW: {bw_value} MB/sec, IOPS: {iops_value}k")
+        if (expected_value == 0):
+            print(f"  BW: {bw_value} MB/sec, IOPS: {iops_value}k, actual value : {actual_value}")
+        else:
+            print(f"  BW: {bw_value} MB/sec, IOPS: {iops_value}k, actual value : {actual_value}, expected_value : {expected_value}")
         if expected_value is None:
             continue
-
         # Check result with expected value
         if expected_value == -1:  # check if the same as prev perf
             if (prev_expected_value[limit_type] * 0.9 > actual_value) or (prev_expected_value[limit_type] * 1.1 < actual_value):
@@ -175,7 +190,7 @@ def CheckQosThrottled(json_result_file, limit_type, expected_value, prev_expecte
             if (base_perf[limit_type] * 0.9 > actual_value) or (base_perf[limit_type] * 1.1 < actual_value):
                 print(f" Failed reset qos throttling: expected_value = {base_perf[limit_type]} with o/h +-10% , actual_value = {actual_value}")
                 result[0] = False
-        elif (actual_value > expected_value):
+        elif (actual_value * sign > expected_value * sign):
             print(f" Failed qos throttling: expected_value = {expected_value}, actual_value = {actual_value}")
             result[0] = False
 
@@ -186,23 +201,23 @@ def CheckQosThrottled(json_result_file, limit_type, expected_value, prev_expecte
     return result
 
 
-def CheckThrottledResult(limit_type, volume_list, volId, json_file):
+def CheckThrottledResult(limit_type, volume_list, volId, json_file, min_Flag=False):
     limit_value = None
     if volId in volume_list:
         limit_value = volume_list[volId]
 
     if limit_value is None:
-        CheckQosThrottled(json_file, limit_type, limit_value, {}, 0)
+        CheckQos(json_file, limit_type, limit_value, {}, 0, min_Flag)
         return True
     else:
         if limit_type == "iops":
             limit_value *= 1000
-        result = CheckQosThrottled(json_file, limit_type, limit_value, {}, 0)
+        result = CheckQos(json_file, limit_type, limit_value, {}, 0, min_Flag)
         return result[0]
 
 
 # vd_disk_name : {"/dev/nvme0n1": nvme001, ...}
-def CheckEachVolumeThrottled(init_name, volume_limit_list, vd_disk_names, test_vdbench, workload_name, volume_id_list):
+def CheckEachVolume(init_name, volume_limit_list, vd_disk_names, test_vdbench, workload_name, volume_id_list, min_flag=False):
     limit_type = volume_limit_list["type"]
 
     volume_list = {}  # {"1" 10, "3": 10 , "5": 30}
@@ -215,6 +230,8 @@ def CheckEachVolumeThrottled(init_name, volume_limit_list, vd_disk_names, test_v
         json_file = test_vdbench.ParseHtmlResult(file_name, workload_name)
         volId = volume_id_list[disk_name]
         print(f" -- Initiator: {init_name} , disk name: {disk_name} , volume id: {volId} -- ")
-        throttling_success = CheckThrottledResult(limit_type, volume_list, volId, json_file)
+        throttling_success = CheckThrottledResult(limit_type, volume_list, volId, json_file, min_flag)
         if (throttling_success is False):
-            print(f" disk name: {disk_name} (volume id:{volId}) failed throttling")
+            print(f" disk name: {disk_name} (volume id:{volId}) failed QoS")
+            return False
+    return True

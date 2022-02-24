@@ -17,7 +17,7 @@ def play(json_targets, json_inits, json_scenario):
     raw_date = datetime.now()
     now_date = raw_date.strftime("%y%m%d_%H%M%S")
     skip_workload = False
-
+    lib.subproc.set_allow_stdout()
     # validate arguments
     if 0 == len(json_targets):
         lib.printer.red(" TargetError: At least 1 target has to exist")
@@ -34,6 +34,7 @@ def play(json_targets, json_inits, json_scenario):
         except KeyError:
             lib.printer.red(" TargetError: Target KEY is invalid")
             return
+        target_obj.CliInLocal()
         if not target_obj.Prepare():
             skip_workload = True
             break
@@ -55,6 +56,7 @@ def play(json_targets, json_inits, json_scenario):
         initiators[init_name] = init_obj
 
     # check auto generate
+
     if "yes" != test_target.use_autogen:
         lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
@@ -69,10 +71,10 @@ def play(json_targets, json_inits, json_scenario):
             "rand_r"
         ]
         rd_list = [
-            r"seq_w,wd=seq,iorate=max,elapsed=33,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(4\)",
-            r"seq_r,wd=seq,iorate=max,elapsed=33,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(100\),forthreads=\(4\)",
-            r"rand_w,wd=rand,iorate=max,elapsed=36,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
-            r"rand_r,wd=rand,iorate=max,elapsed=36,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(100\),forthreads=\(128\)"
+            r"seq_w,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(4\)",
+            r"seq_r,wd=seq,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(100\),forthreads=\(4\)",
+            r"rand_w,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
+            r"rand_r,wd=rand,iorate=max,elapsed=18,interval=3,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(100\),forthreads=\(128\)"
         ]
         tc_list = [
             {
@@ -83,6 +85,8 @@ def play(json_targets, json_inits, json_scenario):
                 "title": "Reset Throttling",
                 "sc_list": [["bw", "value", "100"], ["reset", "", ""]]
             },
+            #   "title": "",
+            #   "sc_list": [["bw", ["1"], ["1900"], "min"], ["bw", ["1"], ["2200"], "min"], ["bw", ["1"], ["2400"], "min"], ["reset", "", "", "min"]]
             {
                 "title": "Throttle Max BW to 10% of Base Performance",
                 "sc_list": [["bw", "rate", "10"]]
@@ -149,6 +153,8 @@ def play(json_targets, json_inits, json_scenario):
         # run each test for each workload
         # make vd file with only 1 workload
         workload_count = len(workload_list)
+        error_return = False
+
         for rd_idx in range(0, workload_count):
             workload_name = workload_list[rd_idx]
 
@@ -204,25 +210,32 @@ def play(json_targets, json_inits, json_scenario):
                     if applyAllVolume is True:
                         first_init_vdbench.CopyVdbenchTotalResult(False, [workload_name])
                         result_file = json_scenario['OUTPUT_DIR'] + "/" + workload_name + ".json"
-                        [throttle_success, prev_expected_value] = pos.qos.CheckQosThrottled(result_file, limit["type"], expected_value, prev_expected_value, base_perf[workload_name])
+                        [throttle_success, prev_expected_value] = pos.qos.CheckQos(result_file, limit["type"], expected_value, prev_expected_value, base_perf[workload_name], limit["min"])
 
                     else:
                         for key in initiators:
                             init = initiators[key]
                             volume_id_list = init.GetVolumeIdOfDevice(vd_disk_names[key])
-                            throttle_success = pos.qos.CheckEachVolumeThrottled(key, limit, vd_disk_names[key], first_init_vdbench, workload_name, volume_id_list)
+                            throttle_success = pos.qos.CheckEachVolume(key, limit, vd_disk_names[key], first_init_vdbench, workload_name, volume_id_list, limit["min"])
 
                     if throttle_success is False:
-                        lib.printer.red(f" Failed to throttle to {expected_value}")
+                        lib.printer.red(f" Failed to QoS")
+                        error_return = True
+                        break
                     else:
                         lib.printer.green(f" Throttling success")
                     print("")
-
+                    if (error_return is True):
+                        break
+                if (error_return is True):
+                    break
                 # Reset Qos After Each Test
                 limit = {"type": "reset", "how": "", "value": 0}
                 pos.qos.SetQosToAllVolumes(test_target, limit)
                 prev_expected_value["bw"] = float(base_perf[workload_name]["bw"])
                 prev_expected_value["iops"] = float(base_perf[workload_name]["iops"])
+            if (error_return is True):
+                break
 
         lib.printer.green(f" Qos Test With Vdbench End")
 
