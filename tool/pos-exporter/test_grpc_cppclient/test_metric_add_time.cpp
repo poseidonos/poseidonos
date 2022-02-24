@@ -46,12 +46,12 @@ static void Test_MeasureSingleMetric()
     label_t labelList;
 
     /* generate fixed label list */
-    labelList.push_back(std::pair<std::string,std::string>{"label1","label1_value"});
-    labelList.push_back(std::pair<std::string,std::string>{"label2","label2_value"});
+    labelList.push_back(std::pair<std::string,std::string>{"label1", "label1_value"});
+    labelList.push_back(std::pair<std::string,std::string>{"label2", "label2_value"});
 
     /* fixed upperBound, BucketCount for histogram */
-    std::vector<int64_t> upperBound{0,10,20,30};
-    std::vector<uint64_t> bucketCount{1,2,3,4};
+    std::vector<int64_t> upperBound{0, 10, 20, 30};
+    std::vector<uint64_t> bucketCount{1, 2, 3, 4};
     int64_t bucketSum = 60; // 0+10+20+30
     uint64_t bucketTotalCount = 4;
 
@@ -92,8 +92,8 @@ static void Test_MeasureSingleMetric_DynamicLabel()
     label_t labelList;
 
     /* fixed upperBound, BucketCount for histogram */
-    std::vector<int64_t> upperBound{0,10,20,30};
-    std::vector<uint64_t> bucketCount{1,2,3,4};
+    std::vector<int64_t> upperBound{0, 10, 20, 30};
+    std::vector<uint64_t> bucketCount{1, 2, 3, 4};
     int64_t bucketSum = 60; // 0+10+20+30
     uint64_t bucketTotalCount = 4;
 
@@ -101,7 +101,6 @@ static void Test_MeasureSingleMetric_DynamicLabel()
     timeLog.resize(NUM_RUN);
     for (int i = 0; i < NUM_RUN; i++)
     {
-
         int labelCount = (std::rand() % 10) + 1;
         labelList.clear();
         for (int j = 0; j < labelCount; j++)
@@ -185,8 +184,6 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
             tLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
         }
     }, NUM_RUN, std::ref(timeLogCounter), &pub);
-    
-    
 
     std::thread gaugeThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub)
     {
@@ -206,14 +203,12 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
             tLog.push_back(GetElapsedTimeUS(s, GetCurrentTime()));
         }
     }, NUM_RUN, std::ref(timeLogGauge), &pub);
-    
-    
 
     std::thread histogramThread([](int nRun, std::vector<int64_t> &tLog, POSMetricPublisher *pPub)
     {
         /* fixed upperBound, BucketCount for histogram */
-        std::vector<int64_t> upperBound{0,10,20,30};
-        std::vector<uint64_t> bucketCount{1,2,3,4};
+        std::vector<int64_t> upperBound{0, 10, 20, 30};
+        std::vector<uint64_t> bucketCount{1, 2, 3, 4};
         int64_t bucketSum = 60; // 0+10+20+30
         uint64_t bucketTotalCount = 4;
         label_t labelList;
@@ -237,7 +232,7 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
     counterThread.join();
     gaugeThread.join();
     histogramThread.join();
-
+    
     SummaryTimeLog("Gauge Metric(Concurrent + Dynamic Label)", timeLogGauge);
     SummaryTimeLog("Gauge Metric(Concurrent + Dynamic Label)", timeLogGauge);
     SummaryTimeLog("Histogram Metric(Concurrent + Dynamic Label)", timeLogHistogram);

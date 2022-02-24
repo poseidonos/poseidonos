@@ -18,7 +18,7 @@ using label_t = std::vector<std::pair<std::string, std::string>>;
 class POSMetricPublisher
 {
 public:
-    POSMetricPublisher(std::shared_ptr<grpc::Channel> channel)
+    explicit POSMetricPublisher(std::shared_ptr<grpc::Channel> channel)
     {
         stub = MetricManager::NewStub(channel);
     }
@@ -28,7 +28,7 @@ public:
     void PublishHistogram(std::string name, label_t labelList, std::vector<int64_t> upperBound, std::vector<uint64_t> bucketCount, int64_t sum, uint64_t totalCount);
 
 private:
-    void addLabelListIntoMetric(Metric* metric, const label_t& labelList);
-    bool messageSend(MetricPublishRequest* request);
+    void AddLabelListIntoMetric(Metric* metric, const label_t& labelList);
+    bool MessageSend(MetricPublishRequest* request);
     std::unique_ptr<MetricManager::Stub> stub;
 };
