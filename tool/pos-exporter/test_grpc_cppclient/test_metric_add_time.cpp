@@ -52,11 +52,17 @@ static void Test_MeasureSingleMetric()
     /* fixed upperBound, BucketCount for histogram */
     std::vector<int64_t> upperBound{0, 10, 20, 30};
     std::vector<uint64_t> bucketCount{1, 2, 3, 4};
-    int64_t bucketSum = 60; // 0+10+20+30
-    uint64_t bucketTotalCount = 4;
+    int64_t bucketSum = 0;
+    uint64_t bucketTotalCount = bucketCount[bucketCount.size() - 1];
+
+    bucketSum += upperBound[0] * bucketCount[0];
+    for (size_t i = 1; i < bucketCount.size(); i++)
+    {
+        bucketSum += upperBound[i] * (bucketCount[i] - bucketCount[i-1]);
+    }
 
     std::vector<int64_t> timeLog;
-    timeLog.resize(NUM_RUN);
+    timeLog.reserve(NUM_RUN);
     for (int i = 0; i < NUM_RUN; i++)
     {
         auto s = GetCurrentTime();
@@ -94,11 +100,17 @@ static void Test_MeasureSingleMetric_DynamicLabel()
     /* fixed upperBound, BucketCount for histogram */
     std::vector<int64_t> upperBound{0, 10, 20, 30};
     std::vector<uint64_t> bucketCount{1, 2, 3, 4};
-    int64_t bucketSum = 60; // 0+10+20+30
-    uint64_t bucketTotalCount = 4;
+    int64_t bucketSum = 0;
+    uint64_t bucketTotalCount = bucketCount[bucketCount.size() - 1];
+
+    bucketSum += upperBound[0] * bucketCount[0];
+    for (size_t i = 1; i < bucketCount.size(); i++)
+    {
+        bucketSum += upperBound[i] * (bucketCount[i] - bucketCount[i-1]);
+    }
 
     std::vector<int64_t> timeLog;
-    timeLog.resize(NUM_RUN);
+    timeLog.reserve(NUM_RUN);
     for (int i = 0; i < NUM_RUN; i++)
     {
         int labelCount = (std::rand() % 10) + 1;
@@ -158,9 +170,9 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
     std::vector<int64_t> timeLogGauge;
     std::vector<int64_t> timeLogHistogram;
 
-    timeLogCounter.resize(NUM_RUN);
-    timeLogGauge.resize(NUM_RUN);
-    timeLogHistogram.resize(NUM_RUN);
+    timeLogCounter.reserve(NUM_RUN);
+    timeLogGauge.reserve(NUM_RUN);
+    timeLogHistogram.reserve(NUM_RUN);
 
     printf("==========================================\n");
     printf("* Perform add multiple metric types simultaneously \n");
@@ -209,9 +221,15 @@ static void Test_MeasureConcurrentMetric_DynamicLabel()
         /* fixed upperBound, BucketCount for histogram */
         std::vector<int64_t> upperBound{0, 10, 20, 30};
         std::vector<uint64_t> bucketCount{1, 2, 3, 4};
-        int64_t bucketSum = 60; // 0+10+20+30
-        uint64_t bucketTotalCount = 4;
+        int64_t bucketSum = 0;
+        uint64_t bucketTotalCount = bucketCount[bucketCount.size() - 1];
         label_t labelList;
+
+        bucketSum += upperBound[0] * bucketCount[0];
+        for (size_t i = 1; i < bucketCount.size(); i++)
+        {
+            bucketSum += upperBound[i] * (bucketCount[i] - bucketCount[i-1]);
+        }
 
         printf(" ** (thread) add histogram type metric \n");
         for (int i = 0; i < nRun; i++)
