@@ -37,39 +37,39 @@
 
 namespace pos
 {
-int
+void
 VolumeNamePolicy::CheckVolumeName(string name)
 {
     StringChecker checker(name);
     size_t len = checker.Length();
+
     if (len < MIN_LEN)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_TOO_SHORT,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_TOO_SHORT,
             "Volume name must be at least {} characters", MIN_LEN);
-        return (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT;
+
+        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_TOO_SHORT);
     }
     else if (len > MAX_LEN)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_TOO_LONG,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_TOO_LONG,
             "Volume name must be less or equal than {} characters", MAX_LEN);
-        return (int)POS_EVENT_ID::VOL_NAME_TOO_LONG;
+        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_TOO_LONG);
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
             "Blank cannot be placed at the beginning or end of a volume name");
-        return (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED;
+        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
             "Special characters cannot be used as volume names");
-        return (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED;
+        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
     }
-
-    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 } // namespace pos

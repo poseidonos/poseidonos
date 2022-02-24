@@ -61,10 +61,13 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
     uint64_t originalMinIops = vol->MinIOPS();
     uint64_t originalMinBw = vol->MinBW();
 
-    int ret = _SetVolumeQos(vol, maxiops, maxbw, miniops, minbw);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+    try
     {
-        return ret;
+        _SetVolumeQos(vol, maxiops, maxbw, miniops, minbw);
+    }
+    catch (int& exceptionEvent)
+    {
+        return static_cast<int>(exceptionEvent);
     }
 
     _SetVolumeEventBase(vol);
@@ -78,7 +81,7 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
 
-    ret = _SaveVolumes();
+    int ret = _SaveVolumes();
     if (ret != (int)POS_EVENT_ID::SUCCESS)
     {
         vol->SetMaxIOPS(originalMaxIops);

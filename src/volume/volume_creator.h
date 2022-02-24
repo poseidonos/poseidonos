@@ -35,16 +35,27 @@
 #include <string>
 
 #include "src/volume/volume_interface.h"
+#include "src/volume/volume_name_policy.h"
 
 namespace pos
 {
-class VolumeCreator : public VolumeInterface
+class VolumeCreator : public VolumeInterface, public VolumeNamePolicy
 {
 public:
     explicit VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeCreator(void) override;
 
     int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw);
+
+private:
+    void _CheckRequestValidity(string name, uint64_t size);
+    void _CreateVolume(string name, uint64_t size, uint64_t maxIops,
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw);
+    void _NotificationVolumeEvent();
+    void _SetUuid();
+    void _RollbackCreatedVolume(int exceptionEvent);
+
+    VolumeBase* vol;
 };
 
 }  // namespace pos

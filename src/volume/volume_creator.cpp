@@ -37,7 +37,6 @@
 #include "src/network/nvmf_target.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
-#include "src/volume/volume_name_policy.h"
 #include "src/volume/volume_list.h"
 
 namespace pos
@@ -46,61 +45,48 @@ namespace pos
 VolumeCreator::VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
 : VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
+    vol = nullptr;
 }
 
 VolumeCreator::~VolumeCreator(void)
 {
 }
 
-int
-VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
-        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+void
+VolumeCreator::_CheckRequestValidity(string name, uint64_t size)
 {
-    VolumeNamePolicy namePolicy;
-    int ret = namePolicy.CheckVolumeName(name);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        return ret;
-    }
+    CheckVolumeName(name);
 
     if (volumeList.GetID(name) >= 0)
     {
         POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED),
                 "Volume name is duplicated");
-        return static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED);
+        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED);
     }
 
-    ret = _CheckVolumeSize(size);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        return ret;
-    }
+    _CheckVolumeSize(size);
+}
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+void
+VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+{
+    vol = new Volume(arrayName, arrayID, name, size);
     if (vol == nullptr)
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL),
                 "Fail to allocate memory");
-        return static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL);
+        throw static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL);
     }
 
-    ret = _SetVolumeQos(vol, maxIops, maxBw, minIops, minBw);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        delete vol;
-        return ret; // error_create_vol_failed;
-    }
+    _SetVolumeQos(vol, maxIops, maxBw, minIops, minBw);
 
-    ret = volumeList.Add(vol);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        delete vol;
-        return ret; // error_create_vol_failed;
-    }
+    volumeList.Add(vol);
+}
 
-    POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::SUCCESS),
-            "Volume meta saved successfully");
-
+void
+VolumeCreator::_NotificationVolumeEvent()
+{
     _SetVolumeEventBase(vol);
     _SetVolumeEventPerf(vol);
     _SetVolumeArrayInfo();
@@ -109,31 +95,65 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
 
     if (res == false)
     {
-        volumeList.Remove(vol->ID);
-        return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        throw static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
+}
 
+void
+VolumeCreator::_SetUuid()
+{
     NvmfTarget nvmfTarget;
 
     std::string uuid = nvmfTarget.GetPosBdevUuid(vol->ID, vol->GetArrayName());
-
-    if (uuid.empty() == true)
-    {
-        // wait create bdev creation
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::VOL_CREATED),
-            "uuid : {}", uuid);
-    }
-
     vol->SetUuid(uuid);
+}
 
-    ret = _SaveVolumes();
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+void
+VolumeCreator::_RollbackCreatedVolume(int exceptionEvent)
+{
+    // [To do] cancel notificaiton
+    try
+    {
+    if (vol != nullptr)
     {
         volumeList.Remove(vol->ID);
-        return ret;
+        delete vol;
     }
+    }
+    catch(int& exceptionEvent)
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::VOL_EVENT_ROLLBACK_FAIL),
+            "Exception Fail POS EVENT ID : {}", exceptionEvent);
+    }
+}
 
-    _PrintLogVolumeQos(vol, 0, 0, 0, 0);
+int
+VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+{
+    try
+    {
+        _CheckRequestValidity(name, size);
+        _CreateVolume(name, size, maxIops, maxBw, minIops, minBw);
+
+        _NotificationVolumeEvent();
+
+        _SetUuid();
+
+        int ret = _SaveVolumes();
+        if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+        {
+            throw ret;
+        }
+
+        _PrintLogVolumeQos(vol, 0, 0, 0, 0);
+    }
+    catch (int& exceptionEvent)
+    {
+        _RollbackCreatedVolume(exceptionEvent);
+
+        return exceptionEvent;
+    }
 
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }

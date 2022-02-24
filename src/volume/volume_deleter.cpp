@@ -47,62 +47,68 @@ namespace pos
 VolumeDeleter::VolumeDeleter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
 : VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
+    vol = nullptr;
 }
 
 VolumeDeleter::~VolumeDeleter(void)
 {
 }
 
-int
-VolumeDeleter::Do(string name)
+void
+VolumeDeleter::_CheckRequestValidity(string name)
 {
-    VolumeBase* vol = volumeList.GetVolume(name);
+    vol = volumeList.GetVolume(name);
     if (vol == nullptr)
     {
         POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST),
                 "The requested volume does not exist");
-        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
 
     if (vol->GetStatus() == VolumeStatus::Mounted)
     {
         POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::DEL_MOUNTED_VOL),
                 "Unable to delete mounted volume");
-        return static_cast<int>(POS_EVENT_ID::DEL_MOUNTED_VOL);
+        throw static_cast<int>(POS_EVENT_ID::DEL_MOUNTED_VOL);
     }
+}
 
-    int volID = vol->ID;
-    string subNqn = vol->GetSubnqn();
-
-    volumeList.WaitUntilIdle(volID, VolumeStatus::Unmounted);
-
-    _SetVolumeEventBase(vol);
-    _SetVolumeArrayInfo();
-
-    bool res = eventPublisher->NotifyVolumeDeleted(&volumeEventBase, &volumeArrayInfo);
-
-    if (res == false)
+int
+VolumeDeleter::Do(string name)
+{
+    try
     {
-        return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
-    }
+        _CheckRequestValidity(name);
 
-    vol->SetValid(false); // remove tempo.
-    vol->SetSubnqn("");
+        volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Unmounted);
 
-    int ret = _SaveVolumes();
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        ret = volumeList.Remove(volID);
-        if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+        _SetVolumeEventBase(vol);
+        _SetVolumeArrayInfo();
+
+        bool res = eventPublisher->NotifyVolumeDeleted(&volumeEventBase, &volumeArrayInfo);
+        if (res == false)
         {
-            return ret;
+            throw static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        }
+
+        vol->SetValid(false); // remove tempo.
+        vol->SetSubnqn("");
+
+        int ret = _SaveVolumes();
+        if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+        {
+            volumeList.Remove(volumeEventBase.volId);
+        }
+        else
+        {
+            vol->SetValid(true); // undo remove
+            vol->SetSubnqn(volumeEventBase.subnqn);
+            throw ret;
         }
     }
-    else
+    catch(int& exceptionEvent)
     {
-        vol->SetValid(true); // undo remove
-        vol->SetSubnqn(subNqn);
-        return ret;
+        return exceptionEvent;
     }
 
     return static_cast<int>(POS_EVENT_ID::SUCCESS);

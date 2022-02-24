@@ -43,7 +43,7 @@ namespace pos
 class VolumeNamePolicy
 {
 public:
-    int CheckVolumeName(string name);
+    void CheckVolumeName(string name);
     // StringChecker
 private:
     const size_t MIN_LEN = 2;

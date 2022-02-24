@@ -66,63 +66,40 @@ VolumeInterface::~VolumeInterface(void)
 {
 }
 
-int
+void
 VolumeInterface::_CheckVolumeSize(uint64_t volumeSize)
 {
     if (volumeSize % SZ_1MB != 0 || volumeSize == 0)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
             "The requested size, {} is not aligned to MB", volumeSize);
-        return (int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED;
+        throw static_cast<int>(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED);
     }
 
     if (SpaceInfo::IsEnough(arrayName, volumeSize) == false)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_SIZE_EXCEEDED,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_SIZE_EXCEEDED,
             "The requested volume size is larger than the remaining space");
 
-        return (int)POS_EVENT_ID::VOL_SIZE_EXCEEDED;
+        throw static_cast<int>(POS_EVENT_ID::VOL_SIZE_EXCEEDED);
     }
-
-    return (int)POS_EVENT_ID::SUCCESS;
 }
 
-int
+void
 VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     if (volume == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
                 "The requested volume does not exist");
-        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
 
-    int ret = volume->SetMaxIOPS(maxIops);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        return ret;
-    }
-
-    ret = volume->SetMaxBW(maxBw);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        return ret;
-    }
-
-    ret = volume->SetMinIOPS(minIops);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        return ret;
-    }
-
-    ret = volume->SetMinBW(minBw);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        return ret;
-    }
-
-    return (int)POS_EVENT_ID::SUCCESS;
+    volume->SetMaxIOPS(maxIops);
+    volume->SetMaxBW(maxBw);
+    volume->SetMinIOPS(minIops);
+    volume->SetMinBW(minBw);
 }
 
 void
@@ -136,27 +113,27 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
 
     if (maxIops != originalMaxIops)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
             "Max iops is set on volume {} ({}->{})", volume->GetName(),
             originalMaxIops, maxIops);
     }
 
     if (maxBw != originalMaxBw)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
             "Max bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMaxBw, maxBw);
     }
     if (minIops != originalMinIops)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
             "Min iops is set on volume {} ({}->{})", volume->GetName(),
             originalMinIops, minIops);
     }
 
     if (minBw != originalMinBw)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
             "Min bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMinBw, minBw);
     }

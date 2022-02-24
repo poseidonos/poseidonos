@@ -158,51 +158,48 @@ VolumeBase::SetUuid(std::string inputUuid)
         POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
             "The volume has set uuid {}", inputUuid);
     }
+
     uuid = inputUuid;
 }
 
-int
+void
 VolumeBase::SetMaxIOPS(uint64_t val)
 {
     if ((val != 0 && val < MIN_IOPS_LIMIT) || val > MAX_IOPS_LIMIT)
     {
-        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
     }
     maxiops = val;
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
-int
+void
 VolumeBase::SetMaxBW(uint64_t val)
 {
     if ((val != 0 && val < MIN_BW_LIMIT) || val > MAX_BW_LIMIT)
     {
-        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
     }
     maxbw = val;
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
-int
+void
 VolumeBase::SetMinIOPS(uint64_t val)
 {
     if (val != 0 && val > MAX_IOPS_LIMIT)
     {
-        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
     }
     miniops = val;
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
-int
+void
 VolumeBase::SetMinBW(uint64_t val)
 {
     if (val != 0 && val > MAX_BW_LIMIT)
     {
-        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
     }
     minbw = val;
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
 uint64_t

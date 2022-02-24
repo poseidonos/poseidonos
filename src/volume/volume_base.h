@@ -147,10 +147,10 @@ public:
     {
         return minbw;
     }
-    int SetMaxIOPS(uint64_t val);
-    int SetMaxBW(uint64_t val);
-    int SetMinIOPS(uint64_t val);
-    int SetMinBW(uint64_t val);
+    void SetMaxIOPS(uint64_t val);
+    void SetMaxBW(uint64_t val);
+    void SetMinIOPS(uint64_t val);
+    void SetMinBW(uint64_t val);
     void
     Rename(std::string val)
     {

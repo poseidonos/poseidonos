@@ -49,7 +49,7 @@ public:
     void Clear();
     int Add(VolumeBase* volume);
     int Add(VolumeBase* volume, int id);
-    int Remove(int volId);
+    void Remove(int volId);
     int GetID(std::string volName);
     VolumeBase* GetVolume(int volId);
     VolumeBase* GetVolume(std::string volName);

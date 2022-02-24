@@ -45,6 +45,11 @@ public:
     ~VolumeDeleter(void) override;
 
     int Do(string name);
+
+private:
+    void _CheckRequestValidity(string name);
+
+    VolumeBase* vol;
 };
 
 }  // namespace pos

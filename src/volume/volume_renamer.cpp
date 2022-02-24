@@ -57,21 +57,25 @@ VolumeRenamer::Do(string oldname, string newname)
     VolumeBase* vol = volumeList.GetVolume(oldname);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
         return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
 
     if (volumeList.GetID(newname) >= 0)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_DUPLICATED, "Volume name is duplicated");
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_DUPLICATED, "Volume name is duplicated");
         return static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED);
     }
 
-    VolumeNamePolicy namePolicy;
-    int ret = namePolicy.CheckVolumeName(newname);
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+    int ret;
+    try
     {
-        return ret;
+        VolumeNamePolicy namePolicy;
+        namePolicy.CheckVolumeName(newname);
+    }
+    catch(int& exceptionEvent)
+    {
+        return exceptionEvent;
     }
 
     vol->Rename(newname);

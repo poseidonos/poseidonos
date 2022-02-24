@@ -76,22 +76,22 @@ VolumeList::Add(VolumeBase* volume)
 {
     if (volCnt == MAX_VOLUME_COUNT)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_CNT_EXCEEDED, "Excced maximum number of volumes");
-        return (int)POS_EVENT_ID::VOL_CNT_EXCEEDED;
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_CNT_EXCEEDED, "Excced maximum number of volumes");
+        return static_cast<int>(POS_EVENT_ID::VOL_CNT_EXCEEDED);
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     int id = _NewID();
     if (id < 0)
     {
-        return (int)POS_EVENT_ID::VOLID_ALLOC_FAIL;
+        return static_cast<int>(POS_EVENT_ID::VOLID_ALLOC_FAIL);
     }
     volume->ID = id;
     items[id] = volume;
     volCnt++;
     InitializePendingIOCount(id, VolumeStatus::Unmounted);
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-    return (int)POS_EVENT_ID::SUCCESS;
+    POS_TRACE_DEBUG(POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
 int
@@ -104,37 +104,36 @@ VolumeList::Add(VolumeBase* volume, int id)
         items[id] = volume;
         volCnt++;
         InitializePendingIOCount(id, VolumeStatus::Unmounted);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-        return (int)POS_EVENT_ID::SUCCESS;
+        POS_TRACE_DEBUG(POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+        return static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
 
-    POS_TRACE_ERROR((int)POS_EVENT_ID::VOL_SAMEID_EXIST, "The same ID volume exists");
-    return (int)POS_EVENT_ID::VOL_SAMEID_EXIST;
+    POS_TRACE_ERROR(POS_EVENT_ID::VOL_SAMEID_EXIST, "The same ID volume exists");
+    return static_cast<int>(POS_EVENT_ID::VOL_SAMEID_EXIST);
 }
 
-int
+void
 VolumeList::Remove(int volId)
 {
     if (volId < 0 || volId >= MAX_VOLUME_COUNT)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::INVALID_INDEX, "Invalid index error");
-        return (int)POS_EVENT_ID::INVALID_INDEX;
+        POS_TRACE_ERROR(POS_EVENT_ID::INVALID_INDEX, "Invalid index error");
+        throw static_cast<int>(POS_EVENT_ID::INVALID_INDEX);
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     VolumeBase* target = items[volId];
     if (target == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
+        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
     }
 
     delete target;
     items[volId] = nullptr;
     volCnt--;
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::VOL_REMOVED, "Volume removed from the list VOL_CNT {}", volCnt);
-    return (int)POS_EVENT_ID::SUCCESS;
+    POS_TRACE_INFO(POS_EVENT_ID::VOL_REMOVED, "Volume removed from the list VOL_CNT {}", volCnt);
 }
 
 int
@@ -144,7 +143,7 @@ VolumeList::_NewID()
     {
         if (items[i] == nullptr)
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume New ID: {}", i);
+            POS_TRACE_DEBUG(POS_EVENT_ID::SUCCESS, "Volume New ID: {}", i);
             return i;
         }
     }
