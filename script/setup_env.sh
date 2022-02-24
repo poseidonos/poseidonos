@@ -50,7 +50,6 @@ if [ "$CURRENT_MAX_MAP_COUNT" -lt "$MAX_MAP_COUNT" ]; then
     sudo sysctl -w vm.max_map_count=${MAX_MAP_COUNT}
 fi
 
-#modprobe nvme-fabrics
-modprobe nvme-fabrics
+modprobe nvme-tcp
 
 echo "Setup env. done!"
