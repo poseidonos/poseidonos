@@ -1,0 +1,103 @@
+{
+    "Targets":
+    [
+        {
+            "NAME": "Target01",
+            "ID": "root",
+            "PW": "psd",
+            "DIR": "/root/20220223/",
+            "NIC":
+            {
+                "SSH": "10.1.2.16",
+                "IP1": "10.100.22.16"
+            },
+            "SPDK":
+            {
+                "TRANSPORT": 
+                {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },                
+                "SUBSYSTEMs":
+                [
+                ]
+            },
+            "POS":
+            {
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CFG": "pos_for_pm_qos.conf",
+                "LOG": "pos.log",
+                "ARRAYs":
+                [
+                    {
+                        "NAME": "ARR0",
+                        "RAID_TYPE": "RAID5",
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3",
+                        "SPARE_DEVICE_LIST": "",
+                        "BUFFER_DEVICE":
+                        {
+                            "NAME": "uram0",
+                            "TYPE": "uram",
+                            "NUM_BLOCKS": 16777216,
+                            "BLOCK_SIZE": 512,
+                            "NUMA": 0
+                        },
+                        "VOLUMEs":
+                        [
+                        ]
+                    }
+                ]
+            },
+            "AUTO_GENERATE":
+            {
+                "USE": "yes",
+                "SUBSYSTEMs":
+                [
+                    {
+                        "NUM": 5,
+                        "IP": "IP1",
+                        "PORT": 1158,
+                        "INITIATOR": "Initiator01",
+                        "VOLUMEs":
+                        [
+                            {
+                                "ARRAY": "ARR0",
+                                "NUM": 5,
+                                "SIZE": 214748364800
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "Initiators":
+    [
+        {
+            "NAME": "Initiator01",
+            "ID": "root",
+            "PW": "psd",
+            "NIC":
+            {
+                "SSH": "10.1.2.30"
+            },
+            "SPDK":
+            {
+                "DIR": "/home/psd/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "VDBENCH":
+            {
+               "DIR": "/home/psd/vdbench"
+            }
+        }
+    ],
+    "Scenarios":
+    [
+        {
+            "NAME": "vdbench_qos_exception",
+            "OUTPUT_DIR": "./output"
+        }
+    ]
+}

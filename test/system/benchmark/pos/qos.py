@@ -82,6 +82,42 @@ def ParseVolumeDict(volume_dict):
             volume_list[int(key)] = limit_value
     return volume_list
 
+def SetQos(test_target, qos_cmd):
+    limit_type = "reset"
+    min_flag = False
+    volume_limit_value = "0"
+    if ("reset" in qos_cmd and qos_cmd["reset"] is True):
+        limit_type = "reset"
+        volume_limit_value = "0"
+    elif ("maxbw" in qos_cmd):
+        limit_type = "bw"
+        volume_limit_value = qos_cmd["maxbw"]
+    elif ("maxiops" in qos_cmd):
+        limit_type = "iops"
+        volume_limit_value = qos_cmd["maxiops"]
+    elif ("minbw" in qos_cmd):
+        limit_type = "bw"
+        min_flag = True
+        volume_limit_value = qos_cmd["minbw"]
+    elif ("miniops" in qos_cmd):
+        limit_type = "iops"
+        min_flag = True
+        volume_limit_value = qos_cmd["miniops"]
+
+    if "yes" == test_target.use_autogen:
+        if (qos_cmd["vol"] == "ALL"):
+            for array in test_target.array_volume_list.keys():
+                for vol_name in test_target.array_volume_list[array]:
+                    if (-1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, volume_limit_value, min_flag)):
+                        lib.printer.red(f"Fail to setting qos array : {array} vol : {vol_name}")
+                        return False
+        else:
+            vol_name = "VOL" + qos_cmd["vol"]
+            array = "ARR" + qos_cmd["array"]
+            if (-1 == pos.cli.set_qos(test_target.id, test_target.pw, test_target.nic_ssh, test_target.pos_cli, test_target.pos_dir, array, vol_name, limit_type, volume_limit_value, min_flag)):
+                lib.printer.red(f"Fail to setting qos array : {array} vol : {vol_name}")
+                return False
+    return True
 
 def SetQosToAllVolumes(test_target, limit):
     limit_type = limit["type"]
@@ -143,6 +179,39 @@ def SetQosToEachVolumes(test_target, limit):
                 lib.printer.red(" set qos failed")
     return volume_list
 
+def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_name):
+    # Return value: [ throttled or not, actual_result(bw, iops) ]
+    result_dict = {}
+    for disk_name in vd_disk_names:
+        file_name = test_vdbench.CopyHtmlResult(vd_disk_names[disk_name], init_name)
+        json_result_file = test_vdbench.ParseHtmlResult(file_name, workload_name)
+        # Load json file
+        json_config_file = f"./{json_result_file}"
+        with open(json_config_file, "r") as f:
+            json_array = json.load(f)
+        array_len = len(json_array)
+
+
+        column_type = ""
+        if limit_type == "iops":
+            column_type = "rate"
+        elif limit_type == "bw":
+            column_type = "MB/sec"
+        else:
+            limit_type = "bw"
+            column_type = "MB/sec"
+        result_array = []
+        # Check result of last 3 in json file
+        for i in range(0, array_len):
+            bw_value = float(json_array[i]["MB/sec"])
+            iops_value = float(json_array[i]["rate"])
+            if column_type == "MB/sec":
+                actual_value = bw_value
+            elif column_type == "rate":
+                actual_value = iops_value * 1000.0
+            result_array.append(actual_value)
+        result_dict[disk_name] = result_array
+    return result_array
 
 def CheckQos(json_result_file, limit_type, expected_value, prev_expected_value, base_perf, min_flag=False):
     # Return value: [ throttled or not, actual_result(bw, iops) ]

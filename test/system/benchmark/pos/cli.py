@@ -264,7 +264,7 @@ def set_qos(id, pw, ip, cli, dir, array_name, vol_name, limit_type, limit_value=
         if (min is True):
             prefix = "min"
         limit_value = int(limit_value)
-        if (limit_type.lower() != "reset" and limit_value < 10):
+        if (limit_type.lower() != "reset" and limit_value < 10 and limit_value != 0):
             lib.printer.red(f"Cannot throttle {limit_type} to {limit_value} (minimum_limit_value: {min_limit_value}). Qos Command is ignored")
             return -1
         if (limit_type.lower() == "reset"):
