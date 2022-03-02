@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(GrpcPublisher_ut grpc_publisher_test.cpp)
+POS_ADD_UNIT_TEST(GrpcSubscriber_ut grpc_subscriber_test.cpp)
+POS_ADD_UNIT_TEST(GrpcVolumeManagement_ut grpc_volume_management_test.cpp)
