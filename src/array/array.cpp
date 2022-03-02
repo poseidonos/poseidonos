@@ -364,8 +364,17 @@ int
 Array::AddSpare(string devName)
 {
     pthread_rwlock_rdlock(&stateLock);
+    string raidType = GetDataRaidType();
+    int ret = 0;
+    bool needSpare = RaidType(raidType) != RaidTypeEnum::NONE && RaidType(raidType) != RaidTypeEnum::RAID0;
+    if (needSpare == false)
+    {
+        ret = EID(ARRAY_NO_NEED_SPARE);
+        POS_TRACE_WARN(ret, "The Array {} does not support spare devices, RAIDTYPE:{}", name_, raidType);
+        return ret;
+    }
 
-    int ret = state->CanAddSpare();
+    ret = state->CanAddSpare();
     if (ret != 0)
     {
         pthread_rwlock_unlock(&stateLock);
