@@ -34,29 +34,17 @@
 
 #include <string>
 
-#include "src/volume/i_volume_checker.h"
-#include "src/volume/volume_list.h"
-#include "src/volume/volume_base.h"
-#include "src/qos/qos_common.h"
+#include "src/volume/volume_interface.h"
 
 namespace pos
 {
-class VolumeBase;
-
-class IVolumeEventManager : public IVolumeChecker
+class VolumeMetaUpdater : public VolumeInterface
 {
 public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume) = 0;
-    virtual int Delete(std::string name) = 0;
-    virtual int Mount(std::string name, std::string subnqn) = 0;
-    virtual int Unmount(std::string name) = 0;
-    virtual int Unmount(int volId) = 0;
-    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int Rename(std::string oldname, std::string newname) = 0;
-    virtual int UpdateVolumeMeta(void) = 0;
+    explicit VolumeMetaUpdater(VolumeList& volumeList, std::string arrayName, int arrayID);
+    ~VolumeMetaUpdater(void) override;
 
-    virtual int CheckVolumeValidity(std::string name) = 0;
-    virtual int CheckVolumeValidity(int volId) = 0;
+    int Do(void);
 };
 
-} // namespace pos
+}  // namespace pos

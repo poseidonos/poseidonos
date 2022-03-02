@@ -120,6 +120,18 @@ struct UnmountVolumeRequestDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UnmountVolumeRequestDefaultTypeInternal _UnmountVolumeRequest_default_instance_;
+constexpr UpdateVoluemMetaRequest::UpdateVoluemMetaRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : array_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct UpdateVoluemMetaRequestDefaultTypeInternal {
+  constexpr UpdateVoluemMetaRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~UpdateVoluemMetaRequestDefaultTypeInternal() {}
+  union {
+    UpdateVoluemMetaRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UpdateVoluemMetaRequestDefaultTypeInternal _UpdateVoluemMetaRequest_default_instance_;
 constexpr PosResponse::PosResponse(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : reason_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -461,7 +473,7 @@ struct ResumeWriteResponseDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ResumeWriteResponseDefaultTypeInternal _ResumeWriteResponse_default_instance_;
 }  // namespace pos_rpc
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5frpc_2eproto[32];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5frpc_2eproto[33];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_pos_5frpc_2eproto[4];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_pos_5frpc_2eproto = nullptr;
 
@@ -522,6 +534,12 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_pos_5frpc_2eproto::offsets[] P
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::pos_rpc::UnmountVolumeRequest, array_name_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::UnmountVolumeRequest, volume_name_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::UpdateVoluemMetaRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::UpdateVoluemMetaRequest, array_name_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::PosResponse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::PosResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -740,30 +758,31 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 35, -1, sizeof(::pos_rpc::DeleteVolumeRequest)},
   { 42, -1, sizeof(::pos_rpc::MountVolumeRequest)},
   { 49, -1, sizeof(::pos_rpc::UnmountVolumeRequest)},
-  { 56, 63, sizeof(::pos_rpc::PosResponse)},
-  { 65, -1, sizeof(::pos_rpc::GetArrayListRequest)},
-  { 70, -1, sizeof(::pos_rpc::ArrayInfo)},
-  { 79, 87, sizeof(::pos_rpc::ArrayListResponse)},
-  { 90, -1, sizeof(::pos_rpc::GetVolumeListRequest)},
-  { 96, -1, sizeof(::pos_rpc::VolumeInfo)},
-  { 105, 113, sizeof(::pos_rpc::VolumeListResponse)},
-  { 116, -1, sizeof(::pos_rpc::Chunk)},
-  { 122, -1, sizeof(::pos_rpc::ReadBlocksRequest)},
-  { 131, 139, sizeof(::pos_rpc::ReadBlocksResponse)},
-  { 142, -1, sizeof(::pos_rpc::WriteBlocksRequest)},
-  { 153, 160, sizeof(::pos_rpc::WriteBlocksResponse)},
-  { 162, -1, sizeof(::pos_rpc::WriteHostBlocksRequest)},
-  { 172, 179, sizeof(::pos_rpc::WriteHostBlocksResponse)},
-  { 181, -1, sizeof(::pos_rpc::CompleteHostWriteRequest)},
-  { 189, 196, sizeof(::pos_rpc::CompleteHostWriteResponse)},
-  { 198, -1, sizeof(::pos_rpc::StartVolumeSyncRequest)},
-  { 206, 213, sizeof(::pos_rpc::StartVolumeSyncResponse)},
-  { 215, -1, sizeof(::pos_rpc::FinishVolumeSyncRequest)},
-  { 223, 230, sizeof(::pos_rpc::FinishVolumeSyncResponse)},
-  { 232, -1, sizeof(::pos_rpc::SuspendWriteRequest)},
-  { 239, 246, sizeof(::pos_rpc::SuspendWriteResponse)},
-  { 248, -1, sizeof(::pos_rpc::ResumeWriteRequest)},
-  { 255, 262, sizeof(::pos_rpc::ResumeWriteResponse)},
+  { 56, -1, sizeof(::pos_rpc::UpdateVoluemMetaRequest)},
+  { 62, 69, sizeof(::pos_rpc::PosResponse)},
+  { 71, -1, sizeof(::pos_rpc::GetArrayListRequest)},
+  { 76, -1, sizeof(::pos_rpc::ArrayInfo)},
+  { 85, 93, sizeof(::pos_rpc::ArrayListResponse)},
+  { 96, -1, sizeof(::pos_rpc::GetVolumeListRequest)},
+  { 102, -1, sizeof(::pos_rpc::VolumeInfo)},
+  { 111, 119, sizeof(::pos_rpc::VolumeListResponse)},
+  { 122, -1, sizeof(::pos_rpc::Chunk)},
+  { 128, -1, sizeof(::pos_rpc::ReadBlocksRequest)},
+  { 137, 145, sizeof(::pos_rpc::ReadBlocksResponse)},
+  { 148, -1, sizeof(::pos_rpc::WriteBlocksRequest)},
+  { 159, 166, sizeof(::pos_rpc::WriteBlocksResponse)},
+  { 168, -1, sizeof(::pos_rpc::WriteHostBlocksRequest)},
+  { 178, 185, sizeof(::pos_rpc::WriteHostBlocksResponse)},
+  { 187, -1, sizeof(::pos_rpc::CompleteHostWriteRequest)},
+  { 195, 202, sizeof(::pos_rpc::CompleteHostWriteResponse)},
+  { 204, -1, sizeof(::pos_rpc::StartVolumeSyncRequest)},
+  { 212, 219, sizeof(::pos_rpc::StartVolumeSyncResponse)},
+  { 221, -1, sizeof(::pos_rpc::FinishVolumeSyncRequest)},
+  { 229, 236, sizeof(::pos_rpc::FinishVolumeSyncResponse)},
+  { 238, -1, sizeof(::pos_rpc::SuspendWriteRequest)},
+  { 245, 252, sizeof(::pos_rpc::SuspendWriteResponse)},
+  { 254, -1, sizeof(::pos_rpc::ResumeWriteRequest)},
+  { 261, 268, sizeof(::pos_rpc::ResumeWriteResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -775,6 +794,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_DeleteVolumeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_MountVolumeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_UnmountVolumeRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_UpdateVoluemMetaRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_PosResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_GetArrayListRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_ArrayInfo_default_instance_),
@@ -816,106 +836,109 @@ const char descriptor_table_protodef_pos_5frpc_2eproto[] PROTOBUF_SECTION_VARIAB
   "ame\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"=\n\022MountV"
   "olumeRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volu"
   "me_name\030\002 \001(\t\"\?\n\024UnmountVolumeRequest\022\022\n"
-  "\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"Q"
-  "\n\013PosResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc."
-  "PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reaso"
-  "n\"\025\n\023GetArrayListRequest\"\320\001\n\tArrayInfo\022\022"
-  "\n\narray_name\030\001 \001(\t\022\026\n\016total_capacity\030\002 \001"
-  "(\004\022\025\n\rused_capacity\030\003 \001(\004\022,\n\005state\030\004 \001(\016"
-  "2\035.pos_rpc.ArrayInfo.ArrayState\"R\n\nArray"
-  "State\022\013\n\007OFFLINE\020\000\022\t\n\005PAUSE\020\001\022\n\n\006NORMAL\020"
-  "\002\022\010\n\004BUSY\020\003\022\010\n\004STOP\020\004\022\014\n\010SNAPSHOT\020\005\"z\n\021A"
-  "rrayListResponse\022\"\n\006result\030\001 \001(\0162\022.pos_r"
-  "pc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022!\n\005inf"
-  "os\030\003 \003(\0132\022.pos_rpc.ArrayInfoB\t\n\007_reason\""
-  "*\n\024GetVolumeListRequest\022\022\n\narray_name\030\001 "
-  "\001(\t\"\270\001\n\nVolumeInfo\022\023\n\013volume_name\030\001 \001(\t\022"
-  "\026\n\016total_capacity\030\002 \001(\004\022\025\n\rused_capacity"
-  "\030\003 \001(\004\022.\n\005state\030\004 \001(\0162\037.pos_rpc.VolumeIn"
-  "fo.VolumeState\"6\n\013VolumeState\022\013\n\007UNKNOWN"
-  "\020\000\022\013\n\007MOUNTED\020\001\022\r\n\tUNMOUNTED\020\002\"|\n\022Volume"
-  "ListResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.P"
-  "osResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\"\n\005infos\030\003"
-  " \003(\0132\023.pos_rpc.VolumeInfoB\t\n\007_reason\"\030\n\005"
-  "Chunk\022\017\n\007content\030\001 \001(\014\"]\n\021ReadBlocksRequ"
-  "est\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002"
-  " \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\"v\n"
-  "\022ReadBlocksResponse\022\"\n\006result\030\001 \001(\0162\022.po"
-  "s_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\034\n\004"
-  "data\030\003 \003(\0132\016.pos_rpc.ChunkB\t\n\007_reason\"\211\001"
-  "\n\022WriteBlocksRequest\022\022\n\narray_name\030\001 \001(\t"
-  "\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnu"
-  "m_blocks\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\022\034\n\004data\030\006 \003("
-  "\0132\016.pos_rpc.Chunk\"Y\n\023WriteBlocksResponse"
-  "\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006"
-  "reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"o\n\026WriteHos"
-  "tBlocksRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013vo"
-  "lume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_bloc"
-  "ks\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\"]\n\027WriteHostBlocks"
-  "Response\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosRe"
-  "sult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"P\n\030"
-  "CompleteHostWriteRequest\022\022\n\narray_name\030\001"
-  " \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\"_"
-  "\n\031CompleteHostWriteResponse\022\"\n\006result\030\001 "
-  "\001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH"
-  "\000\210\001\001B\t\n\007_reason\"U\n\026StartVolumeSyncReques"
-  "t\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001"
-  "(\t\022\022\n\nis_primary\030\003 \001(\010\"]\n\027StartVolumeSyn"
-  "cResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosR"
-  "esult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"V\n"
-  "\027FinishVolumeSyncRequest\022\022\n\narray_name\030\001"
-  " \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\022\n\nis_primary\030"
-  "\003 \001(\010\"^\n\030FinishVolumeSyncResponse\022\"\n\006res"
-  "ult\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030"
-  "\002 \001(\tH\000\210\001\001B\t\n\007_reason\">\n\023SuspendWriteReq"
-  "uest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030"
-  "\002 \001(\t\"Z\n\024SuspendWriteResponse\022\"\n\006result\030"
-  "\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001("
-  "\tH\000\210\001\001B\t\n\007_reason\"=\n\022ResumeWriteRequest\022"
-  "\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t"
-  "\"Y\n\023ResumeWriteResponse\022\"\n\006result\030\001 \001(\0162"
+  "\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"-"
+  "\n\027UpdateVoluemMetaRequest\022\022\n\narray_name\030"
+  "\001 \001(\t\"Q\n\013PosResponse\022\"\n\006result\030\001 \001(\0162\022.p"
+  "os_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n"
+  "\007_reason\"\025\n\023GetArrayListRequest\"\320\001\n\tArra"
+  "yInfo\022\022\n\narray_name\030\001 \001(\t\022\026\n\016total_capac"
+  "ity\030\002 \001(\004\022\025\n\rused_capacity\030\003 \001(\004\022,\n\005stat"
+  "e\030\004 \001(\0162\035.pos_rpc.ArrayInfo.ArrayState\"R"
+  "\n\nArrayState\022\013\n\007OFFLINE\020\000\022\t\n\005PAUSE\020\001\022\n\n\006"
+  "NORMAL\020\002\022\010\n\004BUSY\020\003\022\010\n\004STOP\020\004\022\014\n\010SNAPSHOT"
+  "\020\005\"z\n\021ArrayListResponse\022\"\n\006result\030\001 \001(\0162"
   "\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001"
-  "B\t\n\007_reason*\"\n\tPosResult\022\013\n\007SUCCESS\020\000\022\010\n"
-  "\004FAIL\020\0012L\n\006Health\022B\n\005Check\022\033.pos_rpc.Hea"
-  "lthCheckRequest\032\034.pos_rpc.HealthCheckRes"
-  "ponse2\312\004\n\rPosManagement\022B\n\013CreateArray\022\033"
-  ".pos_rpc.CreateArrayRequest\032\024.pos_rpc.Po"
-  "sResponse\"\000\022B\n\013DeleteArray\022\033.pos_rpc.Del"
-  "eteArrayRequest\032\024.pos_rpc.PosResponse\"\000\022"
-  "D\n\014CreateVolume\022\034.pos_rpc.CreateVolumeRe"
-  "quest\032\024.pos_rpc.PosResponse\"\000\022D\n\014DeleteV"
-  "olume\022\034.pos_rpc.DeleteVolumeRequest\032\024.po"
-  "s_rpc.PosResponse\"\000\022B\n\013MountVolume\022\033.pos"
-  "_rpc.MountVolumeRequest\032\024.pos_rpc.PosRes"
-  "ponse\"\000\022F\n\rUnmountVolume\022\035.pos_rpc.Unmou"
-  "ntVolumeRequest\032\024.pos_rpc.PosResponse\"\000\022"
-  "J\n\014GetArrayList\022\034.pos_rpc.GetArrayListRe"
-  "quest\032\032.pos_rpc.ArrayListResponse\"\000\022M\n\rG"
-  "etVolumeList\022\035.pos_rpc.GetVolumeListRequ"
-  "est\032\033.pos_rpc.VolumeListResponse\"\0002\322\002\n\005P"
-  "osIo\022G\n\nReadBlocks\022\032.pos_rpc.ReadBlocksR"
-  "equest\032\033.pos_rpc.ReadBlocksResponse\"\000\022J\n"
-  "\013WriteBlocks\022\033.pos_rpc.WriteBlocksReques"
-  "t\032\034.pos_rpc.WriteBlocksResponse\"\000\022V\n\017Wri"
-  "teHostBlocks\022\037.pos_rpc.WriteHostBlocksRe"
-  "quest\032 .pos_rpc.WriteHostBlocksResponse\""
-  "\000\022\\\n\021CompleteHostWrite\022!.pos_rpc.Complet"
-  "eHostWriteRequest\032\".pos_rpc.CompleteHost"
-  "WriteResponse\"\0002\332\002\n\nPosControl\022V\n\017StartV"
-  "olumeSync\022\037.pos_rpc.StartVolumeSyncReque"
-  "st\032 .pos_rpc.StartVolumeSyncResponse\"\000\022Y"
-  "\n\020FinishVolumeSync\022 .pos_rpc.FinishVolum"
-  "eSyncRequest\032!.pos_rpc.FinishVolumeSyncR"
-  "esponse\"\000\022M\n\014SuspendWrite\022\034.pos_rpc.Susp"
-  "endWriteRequest\032\035.pos_rpc.SuspendWriteRe"
-  "sponse\"\000\022J\n\013ResumeWrite\022\033.pos_rpc.Resume"
-  "WriteRequest\032\034.pos_rpc.ResumeWriteRespon"
-  "se\"\000b\006proto3"
+  "\022!\n\005infos\030\003 \003(\0132\022.pos_rpc.ArrayInfoB\t\n\007_"
+  "reason\"*\n\024GetVolumeListRequest\022\022\n\narray_"
+  "name\030\001 \001(\t\"\270\001\n\nVolumeInfo\022\023\n\013volume_name"
+  "\030\001 \001(\t\022\026\n\016total_capacity\030\002 \001(\004\022\025\n\rused_c"
+  "apacity\030\003 \001(\004\022.\n\005state\030\004 \001(\0162\037.pos_rpc.V"
+  "olumeInfo.VolumeState\"6\n\013VolumeState\022\013\n\007"
+  "UNKNOWN\020\000\022\013\n\007MOUNTED\020\001\022\r\n\tUNMOUNTED\020\002\"|\n"
+  "\022VolumeListResponse\022\"\n\006result\030\001 \001(\0162\022.po"
+  "s_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\"\n\005"
+  "infos\030\003 \003(\0132\023.pos_rpc.VolumeInfoB\t\n\007_rea"
+  "son\"\030\n\005Chunk\022\017\n\007content\030\001 \001(\014\"]\n\021ReadBlo"
+  "cksRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume"
+  "_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004"
+  " \001(\004\"v\n\022ReadBlocksResponse\022\"\n\006result\030\001 \001"
+  "(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000"
+  "\210\001\001\022\034\n\004data\030\003 \003(\0132\016.pos_rpc.ChunkB\t\n\007_re"
+  "ason\"\211\001\n\022WriteBlocksRequest\022\022\n\narray_nam"
+  "e\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001("
+  "\004\022\022\n\nnum_blocks\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\022\034\n\004da"
+  "ta\030\006 \003(\0132\016.pos_rpc.Chunk\"Y\n\023WriteBlocksR"
+  "esponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosRes"
+  "ult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"o\n\026W"
+  "riteHostBlocksRequest\022\022\n\narray_name\030\001 \001("
+  "\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nn"
+  "um_blocks\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\"]\n\027WriteHos"
+  "tBlocksResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rp"
+  "c.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_rea"
+  "son\"P\n\030CompleteHostWriteRequest\022\022\n\narray"
+  "_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003lsn\030"
+  "\003 \001(\004\"_\n\031CompleteHostWriteResponse\022\"\n\006re"
+  "sult\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason"
+  "\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"U\n\026StartVolumeSyn"
+  "cRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_n"
+  "ame\030\002 \001(\t\022\022\n\nis_primary\030\003 \001(\010\"]\n\027StartVo"
+  "lumeSyncResponse\022\"\n\006result\030\001 \001(\0162\022.pos_r"
+  "pc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_re"
+  "ason\"V\n\027FinishVolumeSyncRequest\022\022\n\narray"
+  "_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\022\n\nis_p"
+  "rimary\030\003 \001(\010\"^\n\030FinishVolumeSyncResponse"
+  "\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006"
+  "reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\">\n\023SuspendW"
+  "riteRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volum"
+  "e_name\030\002 \001(\t\"Z\n\024SuspendWriteResponse\022\"\n\006"
+  "result\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reas"
+  "on\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"=\n\022ResumeWriteR"
+  "equest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_nam"
+  "e\030\002 \001(\t\"Y\n\023ResumeWriteResponse\022\"\n\006result"
+  "\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001"
+  "(\tH\000\210\001\001B\t\n\007_reason*\"\n\tPosResult\022\013\n\007SUCCE"
+  "SS\020\000\022\010\n\004FAIL\020\0012L\n\006Health\022B\n\005Check\022\033.pos_"
+  "rpc.HealthCheckRequest\032\034.pos_rpc.HealthC"
+  "heckResponse2\230\005\n\rPosManagement\022B\n\013Create"
+  "Array\022\033.pos_rpc.CreateArrayRequest\032\024.pos"
+  "_rpc.PosResponse\"\000\022B\n\013DeleteArray\022\033.pos_"
+  "rpc.DeleteArrayRequest\032\024.pos_rpc.PosResp"
+  "onse\"\000\022D\n\014CreateVolume\022\034.pos_rpc.CreateV"
+  "olumeRequest\032\024.pos_rpc.PosResponse\"\000\022D\n\014"
+  "DeleteVolume\022\034.pos_rpc.DeleteVolumeReque"
+  "st\032\024.pos_rpc.PosResponse\"\000\022B\n\013MountVolum"
+  "e\022\033.pos_rpc.MountVolumeRequest\032\024.pos_rpc"
+  ".PosResponse\"\000\022F\n\rUnmountVolume\022\035.pos_rp"
+  "c.UnmountVolumeRequest\032\024.pos_rpc.PosResp"
+  "onse\"\000\022L\n\020UpdateVoluemMeta\022 .pos_rpc.Upd"
+  "ateVoluemMetaRequest\032\024.pos_rpc.PosRespon"
+  "se\"\000\022J\n\014GetArrayList\022\034.pos_rpc.GetArrayL"
+  "istRequest\032\032.pos_rpc.ArrayListResponse\"\000"
+  "\022M\n\rGetVolumeList\022\035.pos_rpc.GetVolumeLis"
+  "tRequest\032\033.pos_rpc.VolumeListResponse\"\0002"
+  "\322\002\n\005PosIo\022G\n\nReadBlocks\022\032.pos_rpc.ReadBl"
+  "ocksRequest\032\033.pos_rpc.ReadBlocksResponse"
+  "\"\000\022J\n\013WriteBlocks\022\033.pos_rpc.WriteBlocksR"
+  "equest\032\034.pos_rpc.WriteBlocksResponse\"\000\022V"
+  "\n\017WriteHostBlocks\022\037.pos_rpc.WriteHostBlo"
+  "cksRequest\032 .pos_rpc.WriteHostBlocksResp"
+  "onse\"\000\022\\\n\021CompleteHostWrite\022!.pos_rpc.Co"
+  "mpleteHostWriteRequest\032\".pos_rpc.Complet"
+  "eHostWriteResponse\"\0002\332\002\n\nPosControl\022V\n\017S"
+  "tartVolumeSync\022\037.pos_rpc.StartVolumeSync"
+  "Request\032 .pos_rpc.StartVolumeSyncRespons"
+  "e\"\000\022Y\n\020FinishVolumeSync\022 .pos_rpc.Finish"
+  "VolumeSyncRequest\032!.pos_rpc.FinishVolume"
+  "SyncResponse\"\000\022M\n\014SuspendWrite\022\034.pos_rpc"
+  ".SuspendWriteRequest\032\035.pos_rpc.SuspendWr"
+  "iteResponse\"\000\022J\n\013ResumeWrite\022\033.pos_rpc.R"
+  "esumeWriteRequest\032\034.pos_rpc.ResumeWriteR"
+  "esponse\"\000b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_pos_5frpc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5frpc_2eproto = {
-  false, false, 4332, descriptor_table_protodef_pos_5frpc_2eproto, "pos_rpc.proto", 
-  &descriptor_table_pos_5frpc_2eproto_once, nullptr, 0, 32,
+  false, false, 4457, descriptor_table_protodef_pos_5frpc_2eproto, "pos_rpc.proto", 
+  &descriptor_table_pos_5frpc_2eproto_once, nullptr, 0, 33,
   schemas, file_default_instances, TableStruct_pos_5frpc_2eproto::offsets,
   file_level_metadata_pos_5frpc_2eproto, file_level_enum_descriptors_pos_5frpc_2eproto, file_level_service_descriptors_pos_5frpc_2eproto,
 };
@@ -2818,6 +2841,206 @@ void UnmountVolumeRequest::InternalSwap(UnmountVolumeRequest* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UnmountVolumeRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class UpdateVoluemMetaRequest::_Internal {
+ public:
+};
+
+UpdateVoluemMetaRequest::UpdateVoluemMetaRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:pos_rpc.UpdateVoluemMetaRequest)
+}
+UpdateVoluemMetaRequest::UpdateVoluemMetaRequest(const UpdateVoluemMetaRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_array_name().empty()) {
+    array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_array_name(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:pos_rpc.UpdateVoluemMetaRequest)
+}
+
+void UpdateVoluemMetaRequest::SharedCtor() {
+array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+UpdateVoluemMetaRequest::~UpdateVoluemMetaRequest() {
+  // @@protoc_insertion_point(destructor:pos_rpc.UpdateVoluemMetaRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void UpdateVoluemMetaRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  array_name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void UpdateVoluemMetaRequest::ArenaDtor(void* object) {
+  UpdateVoluemMetaRequest* _this = reinterpret_cast< UpdateVoluemMetaRequest* >(object);
+  (void)_this;
+}
+void UpdateVoluemMetaRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void UpdateVoluemMetaRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void UpdateVoluemMetaRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:pos_rpc.UpdateVoluemMetaRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  array_name_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* UpdateVoluemMetaRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string array_name = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_array_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.UpdateVoluemMetaRequest.array_name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* UpdateVoluemMetaRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pos_rpc.UpdateVoluemMetaRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string array_name = 1;
+  if (this->array_name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_array_name().data(), static_cast<int>(this->_internal_array_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "pos_rpc.UpdateVoluemMetaRequest.array_name");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_array_name(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:pos_rpc.UpdateVoluemMetaRequest)
+  return target;
+}
+
+size_t UpdateVoluemMetaRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:pos_rpc.UpdateVoluemMetaRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string array_name = 1;
+  if (this->array_name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_array_name());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void UpdateVoluemMetaRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pos_rpc.UpdateVoluemMetaRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const UpdateVoluemMetaRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<UpdateVoluemMetaRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pos_rpc.UpdateVoluemMetaRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pos_rpc.UpdateVoluemMetaRequest)
+    MergeFrom(*source);
+  }
+}
+
+void UpdateVoluemMetaRequest::MergeFrom(const UpdateVoluemMetaRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pos_rpc.UpdateVoluemMetaRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.array_name().size() > 0) {
+    _internal_set_array_name(from._internal_array_name());
+  }
+}
+
+void UpdateVoluemMetaRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pos_rpc.UpdateVoluemMetaRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void UpdateVoluemMetaRequest::CopyFrom(const UpdateVoluemMetaRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pos_rpc.UpdateVoluemMetaRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool UpdateVoluemMetaRequest::IsInitialized() const {
+  return true;
+}
+
+void UpdateVoluemMetaRequest::InternalSwap(UpdateVoluemMetaRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  array_name_.Swap(&other->array_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata UpdateVoluemMetaRequest::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -8964,6 +9187,9 @@ template<> PROTOBUF_NOINLINE ::pos_rpc::MountVolumeRequest* Arena::CreateMaybeMe
 }
 template<> PROTOBUF_NOINLINE ::pos_rpc::UnmountVolumeRequest* Arena::CreateMaybeMessage< ::pos_rpc::UnmountVolumeRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_rpc::UnmountVolumeRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::pos_rpc::UpdateVoluemMetaRequest* Arena::CreateMaybeMessage< ::pos_rpc::UpdateVoluemMetaRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::pos_rpc::UpdateVoluemMetaRequest >(arena);
 }
 template<> PROTOBUF_NOINLINE ::pos_rpc::PosResponse* Arena::CreateMaybeMessage< ::pos_rpc::PosResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_rpc::PosResponse >(arena);

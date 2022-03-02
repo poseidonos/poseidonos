@@ -47,7 +47,7 @@ struct TableStruct_pos_5frpc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[32]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[33]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -134,6 +134,9 @@ extern SuspendWriteResponseDefaultTypeInternal _SuspendWriteResponse_default_ins
 class UnmountVolumeRequest;
 struct UnmountVolumeRequestDefaultTypeInternal;
 extern UnmountVolumeRequestDefaultTypeInternal _UnmountVolumeRequest_default_instance_;
+class UpdateVoluemMetaRequest;
+struct UpdateVoluemMetaRequestDefaultTypeInternal;
+extern UpdateVoluemMetaRequestDefaultTypeInternal _UpdateVoluemMetaRequest_default_instance_;
 class VolumeInfo;
 struct VolumeInfoDefaultTypeInternal;
 extern VolumeInfoDefaultTypeInternal _VolumeInfo_default_instance_;
@@ -180,6 +183,7 @@ template<> ::pos_rpc::StartVolumeSyncResponse* Arena::CreateMaybeMessage<::pos_r
 template<> ::pos_rpc::SuspendWriteRequest* Arena::CreateMaybeMessage<::pos_rpc::SuspendWriteRequest>(Arena*);
 template<> ::pos_rpc::SuspendWriteResponse* Arena::CreateMaybeMessage<::pos_rpc::SuspendWriteResponse>(Arena*);
 template<> ::pos_rpc::UnmountVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::UnmountVolumeRequest>(Arena*);
+template<> ::pos_rpc::UpdateVoluemMetaRequest* Arena::CreateMaybeMessage<::pos_rpc::UpdateVoluemMetaRequest>(Arena*);
 template<> ::pos_rpc::VolumeInfo* Arena::CreateMaybeMessage<::pos_rpc::VolumeInfo>(Arena*);
 template<> ::pos_rpc::VolumeListResponse* Arena::CreateMaybeMessage<::pos_rpc::VolumeListResponse>(Arena*);
 template<> ::pos_rpc::WriteBlocksRequest* Arena::CreateMaybeMessage<::pos_rpc::WriteBlocksRequest>(Arena*);
@@ -1571,6 +1575,150 @@ class UnmountVolumeRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class UpdateVoluemMetaRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.UpdateVoluemMetaRequest) */ {
+ public:
+  inline UpdateVoluemMetaRequest() : UpdateVoluemMetaRequest(nullptr) {}
+  virtual ~UpdateVoluemMetaRequest();
+  explicit constexpr UpdateVoluemMetaRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UpdateVoluemMetaRequest(const UpdateVoluemMetaRequest& from);
+  UpdateVoluemMetaRequest(UpdateVoluemMetaRequest&& from) noexcept
+    : UpdateVoluemMetaRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline UpdateVoluemMetaRequest& operator=(const UpdateVoluemMetaRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UpdateVoluemMetaRequest& operator=(UpdateVoluemMetaRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UpdateVoluemMetaRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UpdateVoluemMetaRequest* internal_default_instance() {
+    return reinterpret_cast<const UpdateVoluemMetaRequest*>(
+               &_UpdateVoluemMetaRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(UpdateVoluemMetaRequest& a, UpdateVoluemMetaRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UpdateVoluemMetaRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UpdateVoluemMetaRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UpdateVoluemMetaRequest* New() const final {
+    return CreateMaybeMessage<UpdateVoluemMetaRequest>(nullptr);
+  }
+
+  UpdateVoluemMetaRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UpdateVoluemMetaRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UpdateVoluemMetaRequest& from);
+  void MergeFrom(const UpdateVoluemMetaRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UpdateVoluemMetaRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.UpdateVoluemMetaRequest";
+  }
+  protected:
+  explicit UpdateVoluemMetaRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayNameFieldNumber = 1,
+  };
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.UpdateVoluemMetaRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
 class PosResponse PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.PosResponse) */ {
  public:
@@ -1614,7 +1762,7 @@ class PosResponse PROTOBUF_FINAL :
                &_PosResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(PosResponse& a, PosResponse& b) {
     a.Swap(&b);
@@ -1774,7 +1922,7 @@ class GetArrayListRequest PROTOBUF_FINAL :
                &_GetArrayListRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(GetArrayListRequest& a, GetArrayListRequest& b) {
     a.Swap(&b);
@@ -1898,7 +2046,7 @@ class ArrayInfo PROTOBUF_FINAL :
                &_ArrayInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(ArrayInfo& a, ArrayInfo& b) {
     a.Swap(&b);
@@ -2113,7 +2261,7 @@ class ArrayListResponse PROTOBUF_FINAL :
                &_ArrayListResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(ArrayListResponse& a, ArrayListResponse& b) {
     a.Swap(&b);
@@ -2293,7 +2441,7 @@ class GetVolumeListRequest PROTOBUF_FINAL :
                &_GetVolumeListRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(GetVolumeListRequest& a, GetVolumeListRequest& b) {
     a.Swap(&b);
@@ -2437,7 +2585,7 @@ class VolumeInfo PROTOBUF_FINAL :
                &_VolumeInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(VolumeInfo& a, VolumeInfo& b) {
     a.Swap(&b);
@@ -2646,7 +2794,7 @@ class VolumeListResponse PROTOBUF_FINAL :
                &_VolumeListResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(VolumeListResponse& a, VolumeListResponse& b) {
     a.Swap(&b);
@@ -2826,7 +2974,7 @@ class Chunk PROTOBUF_FINAL :
                &_Chunk_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(Chunk& a, Chunk& b) {
     a.Swap(&b);
@@ -2970,7 +3118,7 @@ class ReadBlocksRequest PROTOBUF_FINAL :
                &_ReadBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(ReadBlocksRequest& a, ReadBlocksRequest& b) {
     a.Swap(&b);
@@ -3154,7 +3302,7 @@ class ReadBlocksResponse PROTOBUF_FINAL :
                &_ReadBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(ReadBlocksResponse& a, ReadBlocksResponse& b) {
     a.Swap(&b);
@@ -3334,7 +3482,7 @@ class WriteBlocksRequest PROTOBUF_FINAL :
                &_WriteBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    19;
 
   friend void swap(WriteBlocksRequest& a, WriteBlocksRequest& b) {
     a.Swap(&b);
@@ -3549,7 +3697,7 @@ class WriteBlocksResponse PROTOBUF_FINAL :
                &_WriteBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    20;
 
   friend void swap(WriteBlocksResponse& a, WriteBlocksResponse& b) {
     a.Swap(&b);
@@ -3709,7 +3857,7 @@ class WriteHostBlocksRequest PROTOBUF_FINAL :
                &_WriteHostBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(WriteHostBlocksRequest& a, WriteHostBlocksRequest& b) {
     a.Swap(&b);
@@ -3904,7 +4052,7 @@ class WriteHostBlocksResponse PROTOBUF_FINAL :
                &_WriteHostBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(WriteHostBlocksResponse& a, WriteHostBlocksResponse& b) {
     a.Swap(&b);
@@ -4064,7 +4212,7 @@ class CompleteHostWriteRequest PROTOBUF_FINAL :
                &_CompleteHostWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(CompleteHostWriteRequest& a, CompleteHostWriteRequest& b) {
     a.Swap(&b);
@@ -4237,7 +4385,7 @@ class CompleteHostWriteResponse PROTOBUF_FINAL :
                &_CompleteHostWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(CompleteHostWriteResponse& a, CompleteHostWriteResponse& b) {
     a.Swap(&b);
@@ -4397,7 +4545,7 @@ class StartVolumeSyncRequest PROTOBUF_FINAL :
                &_StartVolumeSyncRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(StartVolumeSyncRequest& a, StartVolumeSyncRequest& b) {
     a.Swap(&b);
@@ -4570,7 +4718,7 @@ class StartVolumeSyncResponse PROTOBUF_FINAL :
                &_StartVolumeSyncResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(StartVolumeSyncResponse& a, StartVolumeSyncResponse& b) {
     a.Swap(&b);
@@ -4730,7 +4878,7 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
                &_FinishVolumeSyncRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(FinishVolumeSyncRequest& a, FinishVolumeSyncRequest& b) {
     a.Swap(&b);
@@ -4903,7 +5051,7 @@ class FinishVolumeSyncResponse PROTOBUF_FINAL :
                &_FinishVolumeSyncResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(FinishVolumeSyncResponse& a, FinishVolumeSyncResponse& b) {
     a.Swap(&b);
@@ -5063,7 +5211,7 @@ class SuspendWriteRequest PROTOBUF_FINAL :
                &_SuspendWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(SuspendWriteRequest& a, SuspendWriteRequest& b) {
     a.Swap(&b);
@@ -5225,7 +5373,7 @@ class SuspendWriteResponse PROTOBUF_FINAL :
                &_SuspendWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(SuspendWriteResponse& a, SuspendWriteResponse& b) {
     a.Swap(&b);
@@ -5385,7 +5533,7 @@ class ResumeWriteRequest PROTOBUF_FINAL :
                &_ResumeWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(ResumeWriteRequest& a, ResumeWriteRequest& b) {
     a.Swap(&b);
@@ -5547,7 +5695,7 @@ class ResumeWriteResponse PROTOBUF_FINAL :
                &_ResumeWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ResumeWriteResponse& a, ResumeWriteResponse& b) {
     a.Swap(&b);
@@ -6442,6 +6590,71 @@ inline void UnmountVolumeRequest::set_allocated_volume_name(std::string* volume_
   volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.UnmountVolumeRequest.volume_name)
+}
+
+// -------------------------------------------------------------------
+
+// UpdateVoluemMetaRequest
+
+// string array_name = 1;
+inline void UpdateVoluemMetaRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& UpdateVoluemMetaRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.UpdateVoluemMetaRequest.array_name)
+  return _internal_array_name();
+}
+inline void UpdateVoluemMetaRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.UpdateVoluemMetaRequest.array_name)
+}
+inline std::string* UpdateVoluemMetaRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.UpdateVoluemMetaRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& UpdateVoluemMetaRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void UpdateVoluemMetaRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UpdateVoluemMetaRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.UpdateVoluemMetaRequest.array_name)
+}
+inline void UpdateVoluemMetaRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.UpdateVoluemMetaRequest.array_name)
+}
+inline void UpdateVoluemMetaRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.UpdateVoluemMetaRequest.array_name)
+}
+inline std::string* UpdateVoluemMetaRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UpdateVoluemMetaRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.UpdateVoluemMetaRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UpdateVoluemMetaRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.UpdateVoluemMetaRequest.array_name)
 }
 
 // -------------------------------------------------------------------
@@ -9282,6 +9495,8 @@ inline void ResumeWriteResponse::set_allocated_reason(std::string* reason) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

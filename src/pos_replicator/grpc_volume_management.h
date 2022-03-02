@@ -32,11 +32,10 @@
 
 #pragma once
 
-#pragma once
-
 #include "src/helper/json/json_helper.h"
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
+#include "src/volume/i_volume_event_manager.h"
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
 #include "proto/generated/cpp/pos_rpc.pb.h"
 
@@ -45,41 +44,57 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <grpc++/grpc++.h>
 
 namespace pos
 {
-class GrpcSubscriber final : public pos_rpc::PosIo::Service
+class GrpcVolumeManagement final : public pos_rpc::PosManagement::Service
 {
 public:
-    GrpcSubscriber(void);
-    ~GrpcSubscriber(void);
-
-    virtual ::grpc::Status WriteBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteBlocksRequest* request, 
-        pos_rpc::WriteBlocksResponse* response) override;
-
-    virtual ::grpc::Status WriteHostBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteHostBlocksRequest* request, 
-        pos_rpc::WriteHostBlocksResponse* response) override;
-
-    virtual ::grpc::Status ReadBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::ReadBlocksRequest* request, 
-        pos_rpc::ReadBlocksResponse* response) override;
-
-    virtual ::grpc::Status CompleteHostWrite(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::CompleteHostWriteRequest* request, 
-        pos_rpc::CompleteHostWriteResponse* response) override;
+    GrpcVolumeManagement(std::shared_ptr<grpc::Channel> channel_, IVolumeEventManager* volMgr);
+    ~GrpcVolumeManagement(void);
 
     void RunServer(std::string address);
 
-private:
-    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
-            std::pair<std::string, int> volumeSet);
+    virtual ::grpc::Status CreateArray(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::CreateArrayRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status DeleteArray(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::DeleteArrayRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status CreateVolume(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::CreateVolumeRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status DeleteVolume(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::DeleteVolumeRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status MountVolume(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::MountVolumeRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status UnmountVolume(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::UnmountVolumeRequest* request,
+        ::pos_rpc::PosResponse* response) override;
 
-    std::unique_ptr<::grpc::Server> posIoGrpcServer;
+    virtual ::grpc::Status UpdateVoluemMeta(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::UpdateVoluemMetaRequest* request,
+        ::pos_rpc::PosResponse* response) override;
+    virtual ::grpc::Status GetArrayList(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::GetArrayListRequest* request,
+        ::pos_rpc::ArrayListResponse* response) override;
+    virtual ::grpc::Status GetVolumeList(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::GetVolumeListRequest* request,
+        ::pos_rpc::VolumeListResponse* response) override;
+private:
+    std::unique_ptr<::grpc::Server> posMgrGrpcServer;
+    IVolumeEventManager* volEventManger;
 };
 }

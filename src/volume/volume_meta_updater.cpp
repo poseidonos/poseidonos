@@ -30,33 +30,38 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/volume/volume_meta_updater.h"
 
 #include <string>
 
-#include "src/volume/i_volume_checker.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/volume/volume_name_policy.h"
 #include "src/volume/volume_list.h"
-#include "src/volume/volume_base.h"
-#include "src/qos/qos_common.h"
 
 namespace pos
 {
-class VolumeBase;
 
-class IVolumeEventManager : public IVolumeChecker
+VolumeMetaUpdater::VolumeMetaUpdater(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
-public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume) = 0;
-    virtual int Delete(std::string name) = 0;
-    virtual int Mount(std::string name, std::string subnqn) = 0;
-    virtual int Unmount(std::string name) = 0;
-    virtual int Unmount(int volId) = 0;
-    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int Rename(std::string oldname, std::string newname) = 0;
-    virtual int UpdateVolumeMeta(void) = 0;
+}
 
-    virtual int CheckVolumeValidity(std::string name) = 0;
-    virtual int CheckVolumeValidity(int volId) = 0;
-};
+VolumeMetaUpdater::~VolumeMetaUpdater(void)
+{
+}
+
+int
+VolumeMetaUpdater::Do(void)
+{
+    int ret = _SaveVolumes();
+    if (ret != EID(SUCCESS))
+    {
+        POS_TRACE_WARN(EID(VOL_UPDATE_META_SAVE_FAIL), "Array {} VolumeMeta Update Fail", arrayName);
+        return ret;
+    }
+
+    return EID(SUCCESS);
+}
 
 } // namespace pos

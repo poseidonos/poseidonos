@@ -46,6 +46,7 @@
 #include "src/volume/volume_base.h"
 #include "src/volume/volume_deleter.h"
 #include "src/volume/volume_detacher.h"
+#include "src/volume/volume_meta_updater.h"
 #include "src/volume/volume_mounter.h"
 #include "src/volume/volume_loader.h"
 #include "src/volume/volume_unmounter.h"
@@ -329,6 +330,31 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeRenamer.Do(oldName, newName);
+}
+
+int
+VolumeManager::UpdateVolumeMeta(void)
+{
+    int ret = _CheckPrerequisite();
+    if (ret != EID(SUCCESS))
+    {
+        return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> exceptionLock(volumeExceptionLock, std::defer_lock);
+
+    ret = std::try_lock(exceptionLock, eventLock);
+
+    if (ret != -1)
+    {
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {}", ret);
+        
+        return EID(VOL_MGR_BUSY);
+    }
+
+    VolumeMetaUpdater volumeMetaUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
+    return volumeMetaUpdater.Do();
 }
 
 int

@@ -41,6 +41,11 @@ namespace pos
 PosReplicatorManager::PosReplicatorManager(void)
 : volumeSubscriberCnt(0)
 {
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        items[i] = nullptr;
+    }
+
     arrayConvertTable.clear();
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been constructed");
 }
@@ -73,6 +78,78 @@ PosReplicatorManager::Dispose(void)
     }
 
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been disposed");
+}
+
+void
+PosReplicatorManager::Clear(void)
+{
+    std::unique_lock<std::mutex> lock(listMutex);
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (items[i] != nullptr)
+        {
+            items[i] = nullptr;
+        }
+    }
+    volumeSubscriberCnt = 0;
+}
+
+int
+PosReplicatorManager::Register(int arrayId, ReplicatorVolumeSubscriber* volumeSubscriber)
+{
+    if (arrayId < 0)
+    {
+        POS_TRACE_ERROR(9999, "Fail to Register Volume Manager for Array {}", volumeSubscriber->GetArrayName());
+        return -1;
+    }
+
+    std::unique_lock<std::mutex> lock(listMutex);
+
+    if (items[arrayId] != nullptr)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} already exists", volumeSubscriber->GetArrayName());
+        return -1;
+    }
+
+    items[arrayId] = volumeSubscriber;
+    volumeSubscriberCnt++;
+    POS_TRACE_DEBUG(9999, "Volume manager for array {} is registered", volumeSubscriber->GetArrayName());
+
+    arrayConvertTable.push_back(std::pair<int, string>(arrayId, volumeSubscriber->GetArrayName()));
+
+    return 0;
+}
+
+void
+PosReplicatorManager::Unregister(int arrayId)
+{
+    if (arrayId < 0 || arrayId >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} does not exist", arrayId);
+        return;
+    }
+
+    std::unique_lock<std::mutex> lock(listMutex);
+    ReplicatorVolumeSubscriber* target = items[arrayId];
+    if (target == nullptr)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} does not exist", arrayId);
+        return;
+    }
+
+    items[arrayId] = nullptr;
+    volumeSubscriberCnt--;
+
+    for (auto it = arrayConvertTable.begin(); it != arrayConvertTable.end(); ++it)
+    {
+        if (it->first == arrayId)
+        {
+            arrayConvertTable.erase(it);
+            break;
+        }
+    }
+
+    POS_TRACE_DEBUG(9999, "Volume manager for array {} is unregistered", arrayId);
 }
 
 int
@@ -333,6 +410,7 @@ PosReplicatorManager::_MakeIoRequest(GrpcCallbackType callbackType, pos_io io, u
     aio.SubmitAsyncIO(volumeIo);
 }
 
+
 int
 PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int> arraySet, std::pair<std::string, int> volumeSet)
 {
@@ -345,7 +423,6 @@ PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int> arraySet, std
     {
         ret = EID(HA_INVALID_INPUT_ARGUMENT);
     }
-
     return ret;
 }
 
