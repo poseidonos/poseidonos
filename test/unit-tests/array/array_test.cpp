@@ -558,6 +558,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
     string spareDevName = "spareDev";
     MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
     UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
     EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
@@ -567,8 +568,9 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(0);
     EXPECT_CALL(mockAbrControl, SaveAbr).Times(0);
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
@@ -585,6 +587,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenStateIsNotProper)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     int STATE_CANNOT_ADD_SPARE = -1;
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(STATE_CANNOT_ADD_SPARE));
@@ -592,8 +595,9 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenStateIsNotProper)
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(0);
     EXPECT_CALL(mockAbrControl, SaveAbr).Times(0);
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
@@ -611,6 +615,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
 
     string spareDevName = "spareDev";
     MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
@@ -624,8 +629,9 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
     EXPECT_CALL(*rawPtr, GetSN).Times(1);
     EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).Times(1);
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare(spareDevName);
