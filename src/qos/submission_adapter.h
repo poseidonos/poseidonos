@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/bio/ubio.h"
+#include "src/bio/volume_io.h"
 
 namespace pos
 {
@@ -51,7 +52,7 @@ public:
     IbofIoSubmissionAdapter(void);
     virtual ~IbofIoSubmissionAdapter(void);
 
-    virtual void Do(pos_io* volIo) = 0;
+    virtual void Do(VolumeIoSmartPtr volIo) = 0;
 };
 
 } // namespace pos

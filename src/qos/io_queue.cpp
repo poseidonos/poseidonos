@@ -36,7 +36,6 @@
 
 namespace pos
 {
-template class IoQueue<pos_io*>;
 template class IoQueue<UbioSmartPtr>;
 /* --------------------------------------------------------------------------*/
 /**

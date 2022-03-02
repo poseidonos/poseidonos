@@ -258,7 +258,7 @@ QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t globa
 void
 QosCorrectionManager::_HandleMaxThrottling(void)
 {
-    std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
+ /*   std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
@@ -343,7 +343,7 @@ QosCorrectionManager::_HandleMaxThrottling(void)
             qosManager->SetVolumeLimit(it, volumeId, 0, false, arrayId);
             qosManager->SetVolumeLimit(it, volumeId, 0, true, arrayId);
         }
-    }
+    }*/
 }
 
 /* --------------------------------------------------------------------------*/

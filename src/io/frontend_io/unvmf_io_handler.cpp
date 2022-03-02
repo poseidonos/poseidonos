@@ -102,7 +102,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             case IO_TYPE::FLUSH:
             {
                 AIO aio;
-                aio.SubmitAsyncIO(*io);
+                aio.SubmitFlush(*io);
                 return POS_IO_STATUS_SUCCESS;
             }
             break;
@@ -120,10 +120,10 @@ UNVMfSubmitHandler(struct pos_io* io)
         IVolumeManager* volumeManager
             = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
 
+        AIO aio;
+        VolumeIoSmartPtr volumeIo = aio.CreateVolumeIo(*io);
         if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(io->volume_id)))
         {
-            AIO aio;
-            VolumeIoSmartPtr volumeIo = aio.CreateVolumeIo(*io);
             IoCompleter ioCompleter(volumeIo);
             ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
             return POS_IO_STATUS_SUCCESS;
@@ -132,12 +132,11 @@ UNVMfSubmitHandler(struct pos_io* io)
         if (true == qosManager->IsFeQosEnabled())
         {
             AioSubmissionAdapter aioSubmission;
-            qosManager->HandlePosIoSubmission(&aioSubmission, io);
+            qosManager->HandlePosIoSubmission(&aioSubmission, volumeIo);
         }
         else
         {
-            AIO aio;
-            aio.SubmitAsyncIO(*io);
+            aio.SubmitAsyncIO(volumeIo);
         }
     }
     catch (...)

@@ -185,8 +185,10 @@ def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_na
     for disk_name in vd_disk_names:
         file_name = test_vdbench.CopyHtmlResult(vd_disk_names[disk_name], init_name)
         json_result_file = test_vdbench.ParseHtmlResult(file_name, workload_name)
+
         # Load json file
         json_config_file = f"./{json_result_file}"
+
         with open(json_config_file, "r") as f:
             json_array = json.load(f)
         array_len = len(json_array)
@@ -211,7 +213,7 @@ def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_na
                 actual_value = iops_value * 1000.0
             result_array.append(actual_value)
         result_dict[disk_name] = result_array
-    return result_array
+    return result_dict
 
 def CheckQos(json_result_file, limit_type, expected_value, prev_expected_value, base_perf, min_flag=False):
     # Return value: [ throttled or not, actual_result(bw, iops) ]

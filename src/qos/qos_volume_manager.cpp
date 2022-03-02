@@ -76,13 +76,12 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
         {
             SetVolumeLimit(reactor, volId, DEFAULT_MAX_BW_IOPS, false);
             SetVolumeLimit(reactor, volId, DEFAULT_MAX_BW_IOPS, true);
-            pendingIO[reactor][volId] = 0;
+            pendingIO[volId] = 0;
         }
     }
     volumeEventPublisher->RegisterSubscriber(this, "", arrayId);
     bwIopsRateLimit = new BwIopsRateLimit;
     parameterQueue = new ParameterQueue;
-    ioQueue = new IoQueue<pos_io*>;
     for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
     {
         remainingVolumeBw[volId] = 0;
@@ -103,7 +102,7 @@ QosVolumeManager::~QosVolumeManager(void)
     volumeEventPublisher->RemoveSubscriber(this, "", arrayId);
     delete bwIopsRateLimit;
     delete parameterQueue;
-    delete ioQueue;
+//    delete ioQueue;
     if (spdkPosNvmfCaller != nullptr)
     {
         delete spdkPosNvmfCaller;
@@ -211,35 +210,35 @@ QosVolumeManager::_UpdateRateLimit(uint32_t reactor, int volId, uint64_t size)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
+QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr volIo)
 {
     if (false == feQosEnabled)
     {
         return;
     }
     uint32_t reactorId = eventFrameworkApi->GetCurrentReactor();
-    uint32_t volId = volIo->volume_id;
+    uint32_t volId = volIo->GetVolumeId();
     uint64_t currentBw = 0;
     uint64_t currentIO = 0;
     uint32_t blockSize = 0;
 
     currentBw = volumeQosParam[reactorId][volId].currentBW;
     currentIO = volumeQosParam[reactorId][volId].currentIOs;
-    blockSize = volIo->length;
+    blockSize = volIo->GetSize();
 
-    if ((pendingIO[reactorId][volId] == 0) &&
+    if ((pendingIO[volId] == 0) &&
         (_GlobalRateLimit(reactorId, volId) == false))
     {
-        currentBw = currentBw + volIo->length;
+        currentBw = currentBw + volIo->GetSize();
         currentIO++;
         aioSubmission->Do(volIo);
-        _UpdateRateLimit(reactorId, volId, volIo->length);
-        remainingVolumeBw[volId] -= volIo->length;
+        _UpdateRateLimit(reactorId, volId, volIo->GetSize());
+        remainingVolumeBw[volId] -= volIo->GetSize();
         remainingVolumeIops[volId] -= 1;
     }
     else
     {
-        pendingIO[reactorId][volId]++;
+        pendingIO[volId]++;
         _EnqueueVolumeUbio(reactorId, volId, volIo);
         while (!IsExitQosSet())
         {
@@ -247,18 +246,18 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
             {
                 break;
             }
-            pos_io* queuedVolumeIo = nullptr;
+            VolumeIoSmartPtr queuedVolumeIo = nullptr;
             queuedVolumeIo = _DequeueVolumeUbio(reactorId, volId);
             if (queuedVolumeIo == nullptr)
             {
                 break;
             }
-            currentBw = currentBw + queuedVolumeIo->length;
+            currentBw = currentBw + queuedVolumeIo->GetSize();
             currentIO++;
-            pendingIO[reactorId][volId]--;
+            pendingIO[volId]--;
             aioSubmission->Do(queuedVolumeIo);
-            _UpdateRateLimit(reactorId, volId, queuedVolumeIo->length);
-            remainingVolumeBw[volId] -= queuedVolumeIo->length;
+            _UpdateRateLimit(reactorId, volId, queuedVolumeIo->GetSize());
+            remainingVolumeBw[volId] -= queuedVolumeIo->GetSize();
             remainingVolumeIops[volId] -= 1;
         }
     }
@@ -314,9 +313,10 @@ QosVolumeManager::_ClearVolumeParameters(uint32_t volId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, pos_io* io)
+QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, VolumeIoSmartPtr io)
 {
-    ioQueue->EnqueueIo(reactorId, volId, io);
+    std::lock_guard<std::mutex> lock(volumePendingIOLock[volId]);
+    ioQueue[volId].push(io);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -326,10 +326,17 @@ QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, pos_io*
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-pos_io*
+VolumeIoSmartPtr
 QosVolumeManager::_DequeueVolumeUbio(uint32_t reactorId, uint32_t volId)
 {
-    return ioQueue->DequeueIo(reactorId, volId);
+    std::lock_guard<std::mutex> lock(volumePendingIOLock[volId]);
+    if(ioQueue[volId].empty() == true)
+    {
+        return nullptr;
+    }
+    VolumeIoSmartPtr volumeIo = ioQueue[volId].front();
+    ioQueue[volId].pop();
+    return volumeIo;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -679,9 +686,9 @@ QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetach
 void
 QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
 {
-    int64_t setBwLimit = GetVolumeLimit(reactor, volId, false);
+/*    int64_t setBwLimit = GetVolumeLimit(reactor, volId, false);
     int64_t setIopsLimit = GetVolumeLimit(reactor, volId, true);
-    bwIopsRateLimit->ResetRateLimit(reactor, volId, offset, setBwLimit, setIopsLimit);
+    bwIopsRateLimit->ResetRateLimit(reactor, volId, offset, setBwLimit, setIopsLimit);*/
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -694,7 +701,7 @@ int
 QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset)
 {
     uint32_t retVal = 0;
-    pos_io* queuedVolumeIo = nullptr;
+    VolumeIoSmartPtr queuedVolumeIo = nullptr;
     uint64_t currentBW = 0;
     uint64_t currentIO = 0;
     volList[reactor].clear();
@@ -708,40 +715,37 @@ QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aio
         }
     }
     pthread_rwlock_unlock(&nqnLock);
-    for (auto subsystem = volList[reactor].begin(); subsystem != volList[reactor].end(); subsystem++)
+  
+    for (uint32_t i = 0; i < MAX_VOLUME_COUNT; i++)
     {
-        std::vector<int>& volumeList = volList[reactor][subsystem->first];
-
-        for (uint32_t i = 0; i < volumeList.size(); i++)
+        int volId = i;
+        currentBW = 0;
+        currentIO = 0;
+        ResetRateLimit(reactor, volId, offset);
+        //_EnqueueVolumeParameter(reactor, volId, offset);
+        while (!IsExitQosSet())
         {
-            int volId = volumeList[i];
-            currentBW = 0;
-            currentIO = 0;
-            ResetRateLimit(reactor, volId, offset);
-            _EnqueueVolumeParameter(reactor, volId, offset);
-            while (!IsExitQosSet())
+            if (_GlobalRateLimit(reactor, volId) == true)
             {
-                if (_GlobalRateLimit(reactor, volId) == true)
-                {
-                    break;
-                }
-                queuedVolumeIo = _DequeueVolumeUbio(reactor, volId);
-                if (queuedVolumeIo == nullptr)
-                {
-                    break;
-                }
-                currentBW = currentBW + queuedVolumeIo->length;
-                currentIO++;
-                pendingIO[reactor][volId]--;
-                aioSubmission->Do(queuedVolumeIo);
-                _UpdateRateLimit(reactor, volId, queuedVolumeIo->length);
-                remainingVolumeBw[volId] -= queuedVolumeIo->length;
-                remainingVolumeIops[volId] -= 1;
+                break;
             }
-            volumeQosParam[reactor][volId].currentBW = currentBW;
-            volumeQosParam[reactor][volId].currentIOs = currentIO;
+            queuedVolumeIo = _DequeueVolumeUbio(reactor, volId);
+            if (queuedVolumeIo.get() == nullptr)
+            {
+                break;
+            }
+            currentBW = currentBW + queuedVolumeIo->GetSize();
+            currentIO++;
+            pendingIO[volId]--;
+            aioSubmission->Do(queuedVolumeIo);
+            _UpdateRateLimit(reactor, volId, queuedVolumeIo->GetSize());
+            remainingVolumeBw[volId] -= queuedVolumeIo->GetSize();
+            remainingVolumeIops[volId] -= 1;
         }
+        volumeQosParam[reactor][volId].currentBW = currentBW;
+        volumeQosParam[reactor][volId].currentIOs = currentIO;
     }
+
     return retVal;
 }
 
@@ -759,7 +763,7 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
     uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
     bool enqueueParameters = false;
 
-    enqueueParameters = !((currentBW == 0) && (pendingIO[reactor][volId] == 0));
+    enqueueParameters = !((currentBW == 0) && (pendingIO[volId] == 0));
     // Condition "(!((currentBW == 0) && (pendingIO[reactor][volId] == 0)))" means its an active volume.
     // For any inactive volume the BW and well as pending IO count will be 0. Any other cases would be active volume.
     // BW (0), Pending (0) ==> Non Active Volume

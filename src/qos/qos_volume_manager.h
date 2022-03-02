@@ -39,6 +39,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <mutex>
+#include "src/bio/volume_io.h"
 
 #include "src/spdk_wrapper/caller/spdk_pos_nvmf_caller.h"
 #include "src/spdk_wrapper/caller/spdk_pos_volume_caller.h"
@@ -77,7 +79,7 @@ public:
     int VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
     void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock = true);
-    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
+    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
     bw_iops_parameter DequeueParams(uint32_t reactor, uint32_t volId);
     int VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
@@ -101,9 +103,9 @@ private:
     bool _RateLimit(uint32_t reactor, int volId);
     bool _GlobalRateLimit(uint32_t reactor, int volId);
     void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
-    void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, pos_io* io);
+    void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, VolumeIoSmartPtr io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
-    pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
+    VolumeIoSmartPtr _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
     void _ClearVolumeParameters(uint32_t volId);
 
@@ -118,14 +120,15 @@ private:
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::atomic<uint64_t> volReactorWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::atomic<int64_t> volReactorIopsWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
-    uint64_t pendingIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
+    uint64_t pendingIO[MAX_VOLUME_COUNT];
+    std::mutex volumePendingIOLock[MAX_VOLUME_COUNT];
     std::atomic<int64_t> remainingVolumeBw[MAX_VOLUME_COUNT];
     std::atomic<int64_t> remainingVolumeIops[MAX_VOLUME_COUNT];
 
     bool feQosEnabled;
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
-    IoQueue<pos_io*>* ioQueue;
+    std::queue<VolumeIoSmartPtr> ioQueue[MAX_VOLUME_COUNT];
     QosContext* qosContext;
     QosArrayManager* qosArrayManager;
     QosManager* qosManager;
@@ -134,6 +137,7 @@ private:
     SpdkPosNvmfCaller* spdkPosNvmfCaller;
     SpdkPosVolumeCaller* spdkPosVolumeCaller;
     VolumeEventPublisher* volumeEventPublisher;
+    
 
     pthread_rwlock_t nqnLock;
 };

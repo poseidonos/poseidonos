@@ -252,17 +252,10 @@ QosManager::_Finalize(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
+QosManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr volIo)
 {
-    std::string arrayName(volIo->arrayName);
-    if (arrayNameMap.size() != 0)
-    {
-        if (arrayNameMap.find(arrayName) != arrayNameMap.end())
-        {
-            uint32_t arrayId = arrayNameMap[arrayName];
-            qosArrayManager[arrayId]->HandlePosIoSubmission(aioSubmission, volIo);
-        }
-    }
+    qosArrayManager[volIo->GetArrayId()]->HandlePosIoSubmission(aioSubmission, volIo);
+
 }
 
 /* --------------------------------------------------------------------------*/

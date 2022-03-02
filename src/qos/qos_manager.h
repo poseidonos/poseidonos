@@ -54,6 +54,7 @@
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
+#include "src/bio/volume_io.h"
 #include "submission_adapter.h"
 #include "submission_notifier.h"
 
@@ -109,7 +110,7 @@ public:
     uint32_t GetEventLog(BackendEvent event);
     uint32_t GetPendingBackendEvents(BackendEvent event);
     void CopyEventPolicy(void);
-    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
+    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
     virtual bool IsFeQosEnabled(void);
     qos_rebuild_policy GetRebuildPolicy(std::string arrayName);

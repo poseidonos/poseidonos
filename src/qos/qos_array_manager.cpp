@@ -312,7 +312,7 @@ QosArrayManager::GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePo
   */
 /* --------------------------------------------------------------------------*/
 void
-QosArrayManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
+QosArrayManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr volIo)
 {
     qosVolumeManager->HandlePosIoSubmission(aioSubmission, volIo);
 }

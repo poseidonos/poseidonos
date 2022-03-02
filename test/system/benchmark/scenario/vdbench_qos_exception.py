@@ -18,7 +18,7 @@ vdbench_list = [
     {"title" : "Write Sequential 128k",
     "workload" : "seq_w",
     "event" : r"seq_w,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
-    "start" : 3, "duration" : 80}
+    "start" : 3, "duration" : 40}
 ]
 
 qos_list = [
@@ -40,7 +40,7 @@ qos_list = [
         "reset": True,
         "array" : "0",
         "vol" : "1",
-        "start" : 50
+        "start" : 30
     },
 ]
 
@@ -178,8 +178,8 @@ def play(json_targets, json_inits, json_scenario):
     for vdbench_elem in vdbench_list:
         if ("result_array" in vdbench_elem):
             print(vdbench_elem["title"])
-            print(result_array)
-
+            print(vdbench_elem["result_array"])
+            graph.draw.DrawResultDict(vdbench_elem["result_array"]['Initiator01'], f"{vdbench_elem['title']}_graph.png", 5000, "sec", "BW(MB/s)")
 
     for key in initiators:
         initiators[key].Wrapup(True, test_target.subsystem_list)

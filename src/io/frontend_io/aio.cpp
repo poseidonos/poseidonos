@@ -262,7 +262,7 @@ AIO::_CreateFlushIo(pos_io& posIo)
 }
 
 void
-AIO::SubmitAsyncIO(pos_io& posIo)
+AIO::SubmitFlush(pos_io& posIo)
 {
     if (posIo.ioType == IO_TYPE::FLUSH)
     {
@@ -271,16 +271,20 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         SpdkEventScheduler::ExecuteOrScheduleEvent(flushIo->GetOriginCore(), std::make_shared<FlushCmdHandler>(flushIo));
         return;
     }
+}
 
-    VolumeIoSmartPtr volumeIo = CreateVolumeIo(posIo);
+void
+AIO::SubmitAsyncIO(VolumeIoSmartPtr volumeIo)
+{
+  //  VolumeIoSmartPtr volumeIo = CreateVolumeIo(posIo);
 
     uint32_t core = volumeIo->GetOriginCore();
-    uint32_t arr_vol_id = posIo.volume_id + (posIo.array_id << 8);
+    uint32_t arr_vol_id = volumeIo->GetVolumeId() + (volumeIo->GetArrayId() << 8);
     switch (volumeIo->dir)
     {
         case UbioDir::Write:
         {
-            airlog("PERF_ARR_VOL", "AIR_WRITE", arr_vol_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_WRITE", arr_vol_id, volumeIo->GetSize());
             SpdkEventScheduler::ExecuteOrScheduleEvent(core,
                 std::make_shared<WriteSubmission>(volumeIo));
         }
@@ -288,7 +292,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
 
         case UbioDir::Read:
         {
-            airlog("PERF_ARR_VOL", "AIR_READ", arr_vol_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_READ", arr_vol_id, volumeIo->GetSize());
             SpdkEventScheduler::ExecuteOrScheduleEvent(core,
                 std::make_shared<ReadSubmission>(volumeIo));
         }

@@ -38,6 +38,7 @@
 
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
+#include "src/bio/volume_io.h"
 #include "submission_adapter.h"
 #include "submission_notifier.h"
 
@@ -62,7 +63,7 @@ public:
     uint32_t GetUsedStripeCnt(void);
     void IncreaseUsedStripeCnt(void);
     void DecreaseUsedStripeCnt(void);
-    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
+    void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
     void VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset);
     bool IsFeQosEnabled(void);
     qos_rebuild_policy GetRebuildPolicy(void);

@@ -137,10 +137,29 @@ class Vdbench:
         return file_name
 
     def ParseHtmlResult(self, file_name, workload_name):
-        text = []
         f = open(f"./{file_name}.html", 'r')
+        result = []
+        append_list = [0, 2, 3, 6, 7, 8]
+        log_started_flag = False
+        for line in f:
+            st = line.split()
+            if "interval" in line:
+                log_started_flag = True
+                continue
+            if log_started_flag is False:
+                continue
+            if "rate" in line:
+                continue
+            if (len(st) < 9):
+                continue
+            row_result = []
 
-        line = f.readline()
+            for col_index in append_list:
+                row_result.append(st[col_index])
+
+            result.append(row_result)
+
+        """
         while "interval" not in line:
             if not line:
                 break
@@ -164,7 +183,7 @@ class Vdbench:
             for i in del_list:
                 row_result.append(j[i])
             result.append(row_result)
-
+        """
         with open(f"{file_name}.csv", 'w', newline='') as csvfile:
             wr = csv.writer(csvfile)
             wr.writerow(self.column_list)

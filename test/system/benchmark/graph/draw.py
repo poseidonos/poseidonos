@@ -97,6 +97,27 @@ def DrawEta(data, pic_name, graph_list):
         lib.printer.red(f"{__name__} [Error] {e}")
         plt.close(fig)
 
+def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
+    fig = plt.figure(figsize=(12, 12))
+    try:
+        plt.clf()  # plot 초기화
+        plt.rcParams.update({'font.size': 22})
+        x_axis = []
+        plt.ylim(ymin=0.0, ymax=max_y)
+        plt.xlabel(x_axis_label)
+        plt.ylabel(y_axis_label)
+        for key in dict_data:
+            x_axis = []
+            for index in range(0, len(dict_data[key])):
+                x_axis.append(index)
+            plt.plot(x_axis, dict_data[key], label = key)
+
+        plt.legend()
+        plt.savefig(f"output/{pic_name}_result.png", dpi=200)
+        plt.close(fig)
+    except Exception as e:
+        lib.printer.red(f"{__name__} [Error] {e}")
+        plt.close(fig)
 
 def DrawResult(data, pic_name):
     try:

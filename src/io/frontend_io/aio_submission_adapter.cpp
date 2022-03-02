@@ -44,10 +44,10 @@ AioSubmissionAdapter::~AioSubmissionAdapter(void)
 }
 
 void
-AioSubmissionAdapter::Do(pos_io* volIo)
+AioSubmissionAdapter::Do(VolumeIoSmartPtr volIo)
 {
     AIO aio;
-    aio.SubmitAsyncIO(*volIo);
+    aio.SubmitAsyncIO(volIo);
 }
 } // namespace pos
 

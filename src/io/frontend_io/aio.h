@@ -43,6 +43,7 @@
 #include "src/event_scheduler/callback.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_service.h"
+#include "src/bio/volume_io.h"
 namespace pos
 {
 struct IOCtx
@@ -83,10 +84,11 @@ class AIO
 {
 public:
     AIO(void);
-    void SubmitAsyncIO(pos_io& posIo);
+    void SubmitAsyncIO(VolumeIoSmartPtr volIo);
+    void SubmitFlush(pos_io& posIo);
     void CompleteIOs(void);
     VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
-    void SubmitAsyncAdmin(pos_io& io, IArrayMgmt* arrayManager = ArrayMgr());
+    void SubmitAsyncAdmin(pos_io& posIo, IArrayMgmt* arrayManager = ArrayMgr());
 
 private:
     static thread_local IOCtx ioContext;
