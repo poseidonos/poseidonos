@@ -26,6 +26,7 @@ public:
     MOCK_METHOD(IWBStripeAllocator*, GetIWBStripeAllocator, (), (override));
     MOCK_METHOD(IContextManager*, GetIContextManager, (), (override));
     MOCK_METHOD(IContextReplayer*, GetIContextReplayer, (), (override));
+    MOCK_METHOD(ISegmentCtx*, GetISegmentCtx, (), (override));
 };
 
 } // namespace pos

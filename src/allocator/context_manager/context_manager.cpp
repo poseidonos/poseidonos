@@ -124,15 +124,17 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 }
 
 void
-ContextManager::IncreaseValidBlockCount(SegmentId segId, uint32_t count)
+ContextManager::ValidateBlks(VirtualBlks blks)
 {
-    segmentCtx->IncreaseValidBlockCount(segId, count);
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    segmentCtx->IncreaseValidBlockCount(segId, blks.numBlks);
 }
 
 void
-ContextManager::DecreaseValidBlockCount(SegmentId segId, uint32_t count)
+ContextManager::InvalidateBlks(VirtualBlks blks)
 {
-    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, count);
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks);
     if (segmentFreed == true)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),

@@ -41,7 +41,7 @@ namespace pos
 {
 class IVSAMap;
 class IStripeMap;
-class IBlockAllocator;
+class ISegmentCtx;
 class IWBStripeAllocator;
 class IContextManager;
 class IArrayInfo;
@@ -51,7 +51,7 @@ class MetaEventFactory
 {
 public:
     MetaEventFactory(void) = default;
-    MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, IBlockAllocator* blockAllocator,
+    MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IArrayInfo* arrayInfo);
     virtual ~MetaEventFactory(void) = default;
 
@@ -62,7 +62,7 @@ public:
 private:
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IBlockAllocator* blockAllocator;
+    ISegmentCtx* segmentCtx;
     IWBStripeAllocator* wbStripeAllocator;
     IContextManager* contextManager;
     IArrayInfo* arrayInfo;

@@ -120,20 +120,6 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
 }
 
 void
-BlockManager::InvalidateBlks(VirtualBlks blks)
-{
-    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    contextManager->DecreaseValidBlockCount(segId, blks.numBlks);
-}
-
-void
-BlockManager::ValidateBlks(VirtualBlks blks)
-{
-    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    contextManager->IncreaseValidBlockCount(segId, blks.numBlks);
-}
-
-void
 BlockManager::ProhibitUserBlkAlloc(void)
 {
     POSMetricValue v;

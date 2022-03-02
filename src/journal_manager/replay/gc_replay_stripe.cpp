@@ -43,9 +43,9 @@ namespace pos
 {
 GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IContextReplayer* contextReplayer,
-    IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+    ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
-: ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, blockAllocator,
+: ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, segmentCtx,
       arrayInfo, wbReplayer, userReplayer),
   totalNumBlocks(0)
 {

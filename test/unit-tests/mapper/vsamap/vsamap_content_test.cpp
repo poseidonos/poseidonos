@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "src/mapper/address/mapper_address_info.h"
-#include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/io/frontend_io/flush_command_manager_mock.h"
 #include "test/unit-tests/mapper/address/mapper_address_info_mock.h"
 #include "test/unit-tests/mapper/map/map_mock.h"
@@ -21,12 +20,11 @@ TEST(VSAMapContent, SetEntry_TestFailCase)
 {
     NiceMock<MockMapperAddressInfo> info;
     NiceMock<MockFlushCmdManager>* fl = new NiceMock<MockFlushCmdManager>();
-    NiceMock<MockBlockManager>* bm = new NiceMock<MockBlockManager>();
     NiceMock<MockMapHeader>* header = new NiceMock<MockMapHeader>(0);
     NiceMock<MockMap>* map = new NiceMock<MockMap>(0, 4032);
     EXPECT_CALL(info, GetArrayId).Times(1);
     EXPECT_CALL(*fl, IsInternalFlushEnabled).WillOnce(Return(true));
-    VSAMapContent vsacon(0, &info, bm, fl, map, header);
+    VSAMapContent vsacon(0, &info, fl, map, header);
 
     VirtualBlkAddr vsa;
     vsa.offset = 0;
@@ -42,19 +40,17 @@ TEST(VSAMapContent, SetEntry_TestFailCase)
     EXPECT_EQ(-EID(VSAMAP_SET_FAILURE), ret);
 
     delete fl;
-    delete bm;
 }
 
 TEST(VSAMapContent, SetEntry_Success)
 {
     NiceMock<MockMapperAddressInfo> info;
     NiceMock<MockFlushCmdManager>* fl = new NiceMock<MockFlushCmdManager>();
-    NiceMock<MockBlockManager>* bm = new NiceMock<MockBlockManager>();
     NiceMock<MockMapHeader>* header = new NiceMock<MockMapHeader>(0);
     NiceMock<MockMap>* map = new NiceMock<MockMap>(0, 4032);
     EXPECT_CALL(*fl, IsInternalFlushEnabled).WillOnce(Return(true));
     EXPECT_CALL(info, GetArrayId).Times(1);
-    VSAMapContent vsacon(0, &info, bm, fl, map, header);
+    VSAMapContent vsacon(0, &info, fl, map, header);
     VirtualBlkAddr vsa;
     vsa.offset = 0;
     vsa.stripeId = 0;
@@ -69,7 +65,6 @@ TEST(VSAMapContent, SetEntry_Success)
     EXPECT_EQ(0, ret);
 
     delete fl;
-    delete bm;
 }
 
 } // namespace pos

@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
 #include "src/mapper/i_stripemap.h"
 
@@ -43,7 +43,7 @@ class Stripe;
 class StripeMapUpdate : public Callback
 {
 public:
-    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, IContextManager* contextManager);
+    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx);
     virtual ~StripeMapUpdate(void);
 
 private:
@@ -51,6 +51,6 @@ private:
 
     Stripe* stripe;
     IStripeMap* stripeMap;
-    IContextManager* contextManager;
+    ISegmentCtx* segmentCtx;
 };
 } // namespace pos

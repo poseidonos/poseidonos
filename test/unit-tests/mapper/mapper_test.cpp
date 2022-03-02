@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/mapper/address/mapper_address_info_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
@@ -488,11 +489,49 @@ TEST(Mapper, TestPrepareVolumeDelete_Failed)
     ret = mapper->PrepareVolumeDelete(1);
     EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
 
+    delete mapper;
+    delete arr;
+}
 
-    EXPECT_CALL(*vsaMan, NeedToDeleteFile).WillOnce(Return(false));
-    EXPECT_CALL(*vsaMan, InvalidateAllBlocks).WillOnce(Return(-1));
-    ret = mapper->PrepareVolumeDelete(1);
-    EXPECT_EQ(-EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), ret);
+TEST(Mapper, TestInvalidateAllBlocks_Success)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    NiceMock<MockISegmentCtx> segmentCtx;
+    int volId = 2;
+
+    EXPECT_CALL(*vsaMan, InvalidateAllBlocks(volId, _)).WillOnce(Return(0));
+    int ret = mapper->InvalidateAllBlocksTo(volId, &segmentCtx);
+    EXPECT_EQ(ret, 0);
+
+    delete mapper;
+    delete arr;
+}
+
+TEST(Mapper, TestInvalidateAllBlocks_Failed)
+{
+    NiceMock<MockIArrayInfo>* arr = new NiceMock<MockIArrayInfo>();
+    NiceMock<MockMapperAddressInfo>* addrInfo = new NiceMock<MockMapperAddressInfo>();
+    NiceMock<MockVSAMapManager>* vsaMan = new NiceMock<MockVSAMapManager>();
+    NiceMock<MockStripeMapManager>* strMan = new NiceMock<MockStripeMapManager>();
+    NiceMock<MockReverseMapManager>* revMan = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockMetaFs> mfs;
+    EXPECT_CALL(*arr, GetName).WillOnce(Return(""));
+    Mapper* mapper = new Mapper(nullptr, nullptr, nullptr, vsaMan, strMan, revMan, addrInfo, arr, &mfs);
+
+    NiceMock<MockISegmentCtx> segmentCtx;
+    int volId = 2;
+
+    EXPECT_CALL(*vsaMan, InvalidateAllBlocks(volId, _)).WillOnce(Return(-1));
+    int ret = mapper->InvalidateAllBlocksTo(volId, &segmentCtx);
+    EXPECT_EQ(ret, -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE));
 
     delete mapper;
     delete arr;

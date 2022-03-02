@@ -42,8 +42,6 @@ class IBlockAllocator
 public:
     virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) = 0;
     virtual Stripe* AllocateGcDestStripe(uint32_t volumeId) = 0;
-    virtual void InvalidateBlks(VirtualBlks blks) = 0;
-    virtual void ValidateBlks(VirtualBlks blks) = 0;
 
     virtual void ProhibitUserBlkAlloc(void) = 0;
     virtual void PermitUserBlkAlloc(void) = 0;

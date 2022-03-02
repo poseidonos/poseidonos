@@ -1,10 +1,10 @@
 #pragma once
 
-#include "block_allocator_mock.h"
 #include "gmock/gmock.h"
 #include "i_context_manager_mock.h"
 #include "i_context_replayer_mock.h"
 #include "src/allocator/allocator.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "wbstripe_allocator_mock.h"
 
 namespace pos
@@ -18,8 +18,8 @@ public:
     virtual IWBStripeAllocator* GetIWBStripeAllocator(void) override;
     WBStripeAllocatorMock* GetWBStripeAllocatorMock(void);
 
-    virtual IBlockAllocator* GetIBlockAllocator(void) override;
-    BlockAllocatorMock* GetBlockAllocatorMock(void);
+    virtual ISegmentCtx* GetISegmentCtx(void) override;
+    MockISegmentCtx* GetISegmentCtxMock(void);
 
     virtual IContextManager* GetIContextManager(void) override;
     IContextManagerMock* GetIContextManagerMock(void);
@@ -29,7 +29,7 @@ public:
 
 private:
     WBStripeAllocatorMock* wbStripeAllocatorMock;
-    BlockAllocatorMock* blockAllocatorMock;
+    MockISegmentCtx* segmentCtxMock;
     IContextManagerMock* contextManagerMock;
     IContextReplayerMock* contextReplayerMock;
 };

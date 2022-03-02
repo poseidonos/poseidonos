@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 
@@ -15,11 +15,11 @@ TEST(StripeMapUpdate, StripeMapUpdate_testIfConstructedSuccessfully)
 {
     NiceMock<MockStripe> stripe;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
+    NiceMock<MockISegmentCtx> segmentCtx;
 
-    StripeMapUpdate stripeMapUpdate(&stripe, &stripeMap, &contextManager);
+    StripeMapUpdate stripeMapUpdate(&stripe, &stripeMap, &segmentCtx);
 
-    StripeMapUpdate* stripeMapUpdateInHeap = new StripeMapUpdate(&stripe, &stripeMap, &contextManager);
+    StripeMapUpdate* stripeMapUpdateInHeap = new StripeMapUpdate(&stripe, &stripeMap, &segmentCtx);
     delete stripeMapUpdateInHeap;
 }
 
@@ -27,9 +27,9 @@ TEST(StripeMapUpdate, _DoSpecificJob_testIfMetadataUpdatedSuccessfully)
 {
     NiceMock<MockStripe> stripe;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
+    NiceMock<MockISegmentCtx> segmentCtx;
 
-    StripeMapUpdate stripeMapUpdate(&stripe, &stripeMap, &contextManager);
+    StripeMapUpdate stripeMapUpdate(&stripe, &stripeMap, &segmentCtx);
 
     StripeId vsid = 215;
     StripeId userLsid = 215;
@@ -38,7 +38,7 @@ TEST(StripeMapUpdate, _DoSpecificJob_testIfMetadataUpdatedSuccessfully)
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
 
     EXPECT_CALL(stripeMap, SetLSA(vsid, userLsid, IN_USER_AREA)).Times(1);
-    EXPECT_CALL(contextManager, UpdateOccupiedStripeCount(userLsid)).Times(1);
+    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
 
     bool result = stripeMapUpdate.Execute();
     EXPECT_EQ(result, true);

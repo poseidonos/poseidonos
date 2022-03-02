@@ -38,12 +38,12 @@
 
 namespace pos
 {
-ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
+ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, ISegmentCtx* segmentCtx,
     StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
     uint64_t numBlks, bool replaySegmentInfo)
 : ReplayEvent(status),
   vsaMap(vsaMap),
-  blockAllocator(blkAllocator),
+  segmentCtx(segmentCtx),
   volId(volId),
   startRba(startRba),
   startVsa(startVsa),
@@ -117,7 +117,7 @@ ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
         VirtualBlks blksToInvalidate = {
             .startVsa = read,
             .numBlks = 1};
-        blockAllocator->InvalidateBlks(blksToInvalidate);
+        segmentCtx->InvalidateBlks(blksToInvalidate);
         status->BlockInvalidated(blksToInvalidate.numBlks);
     }
 }
@@ -135,7 +135,7 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
 
     if (replaySegmentInfo == true)
     {
-        blockAllocator->ValidateBlks(virtualBlks);
+        segmentCtx->ValidateBlks(virtualBlks);
     }
 
     status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);

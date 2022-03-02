@@ -37,7 +37,6 @@
 
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
-#include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
@@ -58,11 +57,8 @@
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/journal_manager/status/journal_status_provider.h"
 #include "src/logger/logger.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/metafs/include/metafs_service.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -199,26 +195,8 @@ JournalManager::~JournalManager(void)
 }
 
 int
-JournalManager::Init(void)
-{
-    int arrayId = arrayInfo->GetIndex();
-    // TODO (huijeong.kim) Dependency injection should be moved to the constructor
-    return Init(MapperServiceSingleton::Instance()->GetIVSAMap(arrayId),
-        MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
-        MapperServiceSingleton::Instance()->GetIMapFlush(arrayId),
-        AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayId),
-        AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId),
-        AllocatorServiceSingleton::Instance()->GetIContextManager(arrayId),
-        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayId),
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId),
-        MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->ctrl,
-        EventSchedulerSingleton::Instance(),
-        TelemetryClientSingleton::Instance());
-}
-
-int
 JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+    IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
     IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
@@ -235,7 +213,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         {
             return result;
         }
-        _InitModules(tc, vsaMap, stripeMap, mapFlush, blockAllocator,
+        _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
             wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
         if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
@@ -401,7 +379,7 @@ JournalManager::_Reset(void)
 
 void
 JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+    IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IVolumeManager* volumeManager,
     EventScheduler* eventScheduler)
@@ -432,7 +410,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         config, contextManager, eventScheduler);
     journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus);
 
-    replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
+    replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 
     statusProvider->Init(bufferAllocator, config, logGroupReleaser);

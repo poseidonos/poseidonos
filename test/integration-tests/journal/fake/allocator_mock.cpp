@@ -8,14 +8,14 @@ AllocatorMock::AllocatorMock(IArrayInfo* info)
 : Allocator(info, nullptr)
 {
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
-    blockAllocatorMock = new StrictMock<BlockAllocatorMock>();
+    segmentCtxMock = new StrictMock<MockISegmentCtx>();
     contextManagerMock = new StrictMock<IContextManagerMock>();
     contextReplayerMock = new StrictMock<IContextReplayerMock>();
 }
 
 AllocatorMock::~AllocatorMock(void)
 {
-    delete blockAllocatorMock;
+    delete segmentCtxMock;
     delete wbStripeAllocatorMock;
     delete contextManagerMock;
     delete contextReplayerMock;
@@ -33,16 +33,16 @@ AllocatorMock::GetWBStripeAllocatorMock(void)
     return wbStripeAllocatorMock;
 }
 
-IBlockAllocator*
-AllocatorMock::GetIBlockAllocator(void)
+ISegmentCtx*
+AllocatorMock::GetISegmentCtx(void)
 {
-    return blockAllocatorMock;
+    return segmentCtxMock;
 }
 
-BlockAllocatorMock*
-AllocatorMock::GetBlockAllocatorMock(void)
+MockISegmentCtx*
+AllocatorMock::GetISegmentCtxMock(void)
 {
-    return blockAllocatorMock;
+    return segmentCtxMock;
 }
 
 IContextManager*

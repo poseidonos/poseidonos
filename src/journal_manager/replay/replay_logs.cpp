@@ -51,7 +51,7 @@ namespace pos
 {
 ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
     IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
     IContextManager* contextManager,
     IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
     ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
@@ -60,7 +60,7 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
   logDeleteChecker(deleteChecker),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
-  blockAllocator(blockAllocator),
+  segmentCtx(segmentCtx),
   wbStripeAllocator(wbStripeAllocator),
   contextManager(contextManager),
   contextReplayer(ctxReplayer),
@@ -269,7 +269,7 @@ ReplayLogs::_FindUserStripe(StripeId vsid)
     }
 
     ReplayStripe* stripe = new UserReplayStripe(vsid, vsaMap, stripeMap,
-        contextReplayer, blockAllocator, arrayInfo,
+        contextReplayer, segmentCtx, arrayInfo,
         wbStripeReplayer, userStripeReplayer);
 
     replayingStripeList.push_back(stripe);
@@ -289,7 +289,7 @@ ReplayLogs::_FindGcStripe(StripeId vsid)
     }
 
     ReplayStripe* stripe = new GcReplayStripe(vsid, vsaMap, stripeMap,
-        contextReplayer, blockAllocator, arrayInfo,
+        contextReplayer, segmentCtx, arrayInfo,
         wbStripeReplayer, userStripeReplayer);
 
     replayingStripeList.push_back(stripe);

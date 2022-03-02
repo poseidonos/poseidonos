@@ -37,20 +37,14 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/callback.h"
-#include "test/unit-tests/allocator/i_block_allocator_mock.h"
-#include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/io/general_io/vsa_range_maker_mock.h"
 #include "test/unit-tests/journal_manager/i_journal_manager_mock.h"
 #include "test/unit-tests/journal_manager/i_journal_writer_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
-#include "test/unit-tests/mapper/i_vsamap_mock.h"
-#include "test/unit-tests/mapper_service/mapper_service_mock.h"
 #include "test/unit-tests/metadata/meta_event_factory_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 
@@ -66,19 +60,15 @@ namespace pos
 TEST(MetaUpdater, MetaUpdater_testIfProductConstructorExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
     // When
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     // Then : Do nothing
 }
@@ -86,46 +76,36 @@ TEST(MetaUpdater, MetaUpdater_testIfProductConstructorExecutedSuccessfully)
 TEST(MetaUpdater, MetaUpdater_testIfUTConstructorExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
     // When
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     // Then : Do nothing
 }
 
 TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
-    ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
+    ON_CALL(metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
 
     EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, _)).WillOnce(Return(0));
@@ -138,26 +118,21 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 
 TEST(MetaUpdater, UpdateBlockMap_testIfFailsWhenJournalWriteFails)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
-    ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
+    ON_CALL(metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
 
     EXPECT_CALL(journalWriter, AddBlockMapUpdatedLog(volumeIo, _)).WillOnce(Return(-1));
@@ -168,19 +143,14 @@ TEST(MetaUpdater, UpdateBlockMap_testIfFailsWhenJournalWriteFails)
 
 TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessfullyWhenJournalDisabled)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
@@ -189,7 +159,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessfullyWhenJournalDisabled)
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
     CallbackSmartPtr metaCallbackSmartPtr(metaCallback);
 
-    ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
+    ON_CALL(metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
 
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(true));
@@ -202,19 +172,14 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessfullyWhenJournalDisabled)
 
 TEST(MetaUpdater, UpdateBlockMap_testIfMapUpdateEventIsEnqueuedToEventSchedulerWhenFailed)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
@@ -223,7 +188,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfMapUpdateEventIsEnqueuedToEventSchedulerW
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
     CallbackSmartPtr metaCallbackSmartPtr(metaCallback);
 
-    ON_CALL(*metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
+    ON_CALL(metaEventFactory, CreateBlockMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
 
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(false));
@@ -237,19 +202,14 @@ TEST(MetaUpdater, UpdateBlockMap_testIfMapUpdateEventIsEnqueuedToEventSchedulerW
 
 TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockStripe> stripe;
     ON_CALL(stripe, GetVsid).WillByDefault(Return(0));
@@ -257,7 +217,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
-    ON_CALL(*metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallback));
+    ON_CALL(metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
 
     StripeAddr oldAddr = {
@@ -273,19 +233,14 @@ TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
 
 TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventExecutedWhenJournalDisabled)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockStripe> stripe;
 
@@ -293,7 +248,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventExecutedWhenJournalD
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
     CallbackSmartPtr metaCallbackSmartPtr(metaCallback);
 
-    ON_CALL(*metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
+    ON_CALL(metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
 
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(true));
@@ -304,19 +259,14 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventExecutedWhenJournalD
 
 TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventIsEnqueuedToEventSchedulerWhenFailed)
 {
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     NiceMock<MockStripe> stripe;
 
@@ -324,7 +274,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventIsEnqueuedToEventSch
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
     CallbackSmartPtr metaCallbackSmartPtr(metaCallback);
 
-    ON_CALL(*metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
+    ON_CALL(metaEventFactory, CreateStripeMapUpdateEvent).WillByDefault(Return(metaCallbackSmartPtr));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
 
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(false));
@@ -337,19 +287,14 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventIsEnqueuedToEventSch
 TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 {
     // Given
-    NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockIJournalWriter> journalWriter;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
     NiceMock<MockIArrayInfo> arrayInfo;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
-        &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory, &arrayInfo);
+    MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
     // When
     uint32_t stripeId = 100;
@@ -362,7 +307,7 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
-    ON_CALL(*metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
+    ON_CALL(metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
     ON_CALL(stripe, GetVsid).WillByDefault(Return(stripeId));
 
@@ -383,9 +328,9 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalDisable)
     // Given
     NiceMock<MockIJournalManager> journal;
     NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
+    NiceMock<MockMetaEventFactory> metaEventFactory;
 
-    MetaUpdater metaUpdater(nullptr, nullptr, nullptr, nullptr, nullptr, &journal, nullptr, &eventScheduler, metaEventFactory, nullptr);
+    MetaUpdater metaUpdater(nullptr, &journal, nullptr, &eventScheduler, &metaEventFactory, nullptr);
 
     // When
     uint32_t stripeId = 100;
@@ -394,7 +339,7 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalDisable)
     std::map<SegmentId, uint32_t> invalidSegCnt;
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
-    ON_CALL(*metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
+    ON_CALL(metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
     ON_CALL(stripe, GetVsid).WillByDefault(Return(stripeId));
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);

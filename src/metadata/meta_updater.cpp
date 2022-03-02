@@ -46,27 +46,10 @@
 
 namespace pos
 {
-MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IContextManager* contextManager,
-    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-    IJournalManager* journal, IJournalWriter* journalWriter,
-    EventScheduler* eventScheduler, IArrayInfo* arrayInfo)
-: MetaUpdater(vsaMap, stripeMap, contextManager, blockAllocator, wbStripeAllocator,
-      journal, journalWriter, eventScheduler,
-      new MetaEventFactory(vsaMap, stripeMap, blockAllocator, wbStripeAllocator, contextManager, arrayInfo), arrayInfo)
-{
-}
-
-MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IContextManager* contextManager,
-    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+MetaUpdater::MetaUpdater(IStripeMap* stripeMap,
     IJournalManager* journal, IJournalWriter* journalWriter,
     EventScheduler* eventScheduler, MetaEventFactory* eventFactory, IArrayInfo* arrayInfo)
-: vsaMap(vsaMap),
-  stripeMap(stripeMap),
-  contextManager(contextManager),
-  blockAllocator(blockAllocator),
-  wbStripeAllocator(wbStripeAllocator),
+: stripeMap(stripeMap),
   journal(journal),
   journalWriter(journalWriter),
   eventScheduler(eventScheduler),
@@ -77,11 +60,6 @@ MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
 
 MetaUpdater::~MetaUpdater(void)
 {
-    if (metaEventFactory != nullptr)
-    {
-        delete metaEventFactory;
-        metaEventFactory = nullptr;
-    }
 }
 
 int

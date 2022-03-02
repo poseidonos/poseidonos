@@ -41,8 +41,10 @@ namespace pos
 class Mapper;
 class Allocator;
 class JournalManager;
+class MetaFsFileControlApi;
 
 class MetaUpdater;
+class MetaEventFactory;
 class MetaVolumeEventHandler;
 class MetaService;
 
@@ -50,7 +52,7 @@ class Metadata : public IMountSequence
 {
 public:
     Metadata(IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaService* service);
+    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaFsFileControlApi* metaFsCtrl, MetaService* service);
     virtual ~Metadata(void);
 
     virtual int Init(void) override;
@@ -63,16 +65,15 @@ public:
     virtual void StopRebuilding(void);
 
 private:
-    void _RegisterMetaServices(void);
-    void _UnregisterMetaSerivces(void);
-
     IArrayInfo* arrayInfo;
     Mapper* mapper;
     Allocator* allocator;
     JournalManager* journal;
-    MetaUpdater* metaUpdater;
+    MetaFsFileControlApi* metaFsCtrl;
     MetaVolumeEventHandler* volumeEventHandler;
-
     MetaService* metaService;
+
+    MetaUpdater* metaUpdater;
+    MetaEventFactory* metaEventFactory;
 };
 } // namespace pos

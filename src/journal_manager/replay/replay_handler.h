@@ -53,7 +53,7 @@ class LogReplayer;
 class IVSAMap;
 class IStripeMap;
 class IMapFlush;
-class IBlockAllocator;
+class ISegmentCtx;
 class IWBStripeAllocator;
 class IContextManager;
 class IContextReplayer;
@@ -69,7 +69,7 @@ public:
 
     virtual void Init(JournalConfiguration* journalConfiguration,
         JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+        IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
     virtual void Dispose(void);
@@ -79,7 +79,7 @@ public:
 private:
     void _InitializeExternalModuleReferences(void);
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+        IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
     void _AddTask(ReplayTask* task);

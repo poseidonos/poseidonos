@@ -42,12 +42,12 @@ namespace pos
 {
 ReplayEventFactory::ReplayEventFactory(StripeReplayStatus* status,
     IVSAMap* vsaMap, IStripeMap* stripeMap, IContextReplayer* ctxReplayer,
-    IBlockAllocator* blockAllocator, IArrayInfo* info, ActiveWBStripeReplayer* wbReplayer)
+    ISegmentCtx* segmentCtx, IArrayInfo* info, ActiveWBStripeReplayer* wbReplayer)
 : status(status),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
   contextReplayer(ctxReplayer),
-  blockAllocator(blockAllocator),
+  segmentCtx(segmentCtx),
   arrayInfo(info),
   wbReplayer(wbReplayer)
 {
@@ -57,7 +57,7 @@ ReplayEvent*
 ReplayEventFactory::CreateBlockWriteReplayEvent(int volId, BlkAddr startRba,
     VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo)
 {
-    ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, blockAllocator, status,
+    ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, segmentCtx, status,
         wbReplayer, volId, startRba, startVsa, numBlks, replaySegmentInfo);
     return blockMapUpdate;
 }

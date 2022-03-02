@@ -129,6 +129,7 @@ public:
     virtual int VolumeLoaded(int volId, uint64_t volSizeByte) override;
     virtual int VolumeUnmounted(int volId, bool flushMapRequired) override;
     virtual int PrepareVolumeDelete(int volId) override;
+    virtual int InvalidateAllBlocksTo(int volId, ISegmentCtx* segmentCtx) override;
     virtual int DeleteVolumeMap(int volumeId) override;
     virtual int VolumeDetached(vector<int> volList) override;
 

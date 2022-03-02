@@ -202,42 +202,6 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase3)
     delete reverseMap;
 }
 
-TEST(BlockManager, InvalidateBlks_TestSimpleSetter)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    BlockManager blkManager(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, ctxManager, 0);
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
-    // given 1.
-    EXPECT_CALL(*ctxManager, DecreaseValidBlockCount).Times(1);
-    // when 1.
-    blkManager.InvalidateBlks(blks);
-    // given 2.
-    EXPECT_CALL(*ctxManager, DecreaseValidBlockCount).Times(1);
-    // when 2.
-    blkManager.InvalidateBlks(blks);
-    delete ctxManager;
-}
-
-TEST(BlockManager, ValidateBlks_TestSimpleSetter)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    BlockManager blkManager(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, ctxManager, 0);
-    // given
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
-    EXPECT_CALL(*ctxManager, IncreaseValidBlockCount).Times(1);
-    // when
-    blkManager.ValidateBlks(blks);
-    delete ctxManager;
-}
-
 TEST(BlockManager, ProhibitUserBlkAlloc_TestSimpleSetter)
 {
     // given

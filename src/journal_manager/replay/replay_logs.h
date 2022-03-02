@@ -51,7 +51,7 @@ class IVSAMap;
 class IStripeMap;
 class IContextManager;
 class IContextReplayer;
-class IBlockAllocator;
+class ISegmentCtx;
 class IArrayInfo;
 
 class LogReplayer;
@@ -63,7 +63,7 @@ class ReplayLogs : public ReplayTask
 public:
     ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
         IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
@@ -89,7 +89,7 @@ private:
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IBlockAllocator* blockAllocator;
+    ISegmentCtx* segmentCtx;
     IWBStripeAllocator* wbStripeAllocator;
     IContextManager* contextManager;
     IContextReplayer* contextReplayer;

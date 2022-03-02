@@ -42,8 +42,8 @@
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator)
-: BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator,
+    ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator)
+: BlockMapUpdate(volumeIo, vsaMap, segmentCtx, wbStripeAllocator,
       new VsaRangeMaker(volumeIo->GetVolumeId(),
           ChangeSectorToBlock(volumeIo->GetSectorRba()),
           DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
@@ -51,12 +51,12 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
 }
 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
     VsaRangeMaker* vsaRangeMaker)
 : Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
   volumeIo(volumeIo),
   vsaMap(vsaMap),
-  blockAllocator(blockAllocator),
+  segmentCtx(segmentCtx),
   wbStripeAllocator(wbStripeAllocator),
   oldVsaRangeMaker(vsaRangeMaker)
 {
@@ -90,13 +90,13 @@ BlockMapUpdate::_DoSpecificJob(void)
          vsaRangeIndex++)
     {
         VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
-        blockAllocator->InvalidateBlks(vsaRange);
+        segmentCtx->InvalidateBlks(vsaRange);
 
         POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, POS_EVENT_ID::MAPPER_SUCCESS,
             "Invalidate rba {} vsid {}", ChangeSectorToBlock(volumeIo->GetSectorRba()), vsaRange.startVsa.stripeId);
     }
 
-    blockAllocator->ValidateBlks(targetVsaRange);
+    segmentCtx->ValidateBlks(targetVsaRange);
 
     return true;
 }

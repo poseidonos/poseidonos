@@ -174,6 +174,12 @@ Allocator::GetIContextReplayer(void)
     return (IContextReplayer*)contextManager->GetContextReplayer();
 }
 
+ISegmentCtx*
+Allocator::GetISegmentCtx(void)
+{
+    return contextManager->GetISegmentCtx();
+}
+
 int
 Allocator::PrepareRebuild(void)
 {

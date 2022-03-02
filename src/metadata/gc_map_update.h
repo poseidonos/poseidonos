@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 
+#include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
@@ -46,7 +47,7 @@ class Stripe;
 class IVSAMap;
 class IStripeMap;
 class IContextManager;
-class IBlockAllocator;
+class ISegmentCtx;
 class IArrayInfo;
 
 class GcMapUpdate : public Callback
@@ -54,7 +55,7 @@ class GcMapUpdate : public Callback
 public:
     GcMapUpdate(void);
     GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IBlockAllocator* blockAllocator, IContextManager* contextManager,
+        ISegmentCtx* segmentCtx, IContextManager* contextManager,
         IArrayInfo* arrayInfo, Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList,
         std::map<SegmentId, uint32_t> invalidSegCnt);
     virtual ~GcMapUpdate(void);
@@ -66,7 +67,7 @@ private:
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IBlockAllocator* blockAllocator;
+    ISegmentCtx* segmentCtx;
     IContextManager* contextManager;
     IArrayInfo* arrayInfo;
 

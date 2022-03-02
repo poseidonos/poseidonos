@@ -42,13 +42,13 @@
 namespace pos
 {
 GcMapUpdate::GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IBlockAllocator* blockAllocator, IContextManager* contextManager,
+    ISegmentCtx* segmentCtx, IContextManager* contextManager,
     IArrayInfo* arrayInfo, Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList,
     std::map<SegmentId, uint32_t> invalidSegCnt)
 : Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
-  blockAllocator(blockAllocator),
+  segmentCtx(segmentCtx),
   contextManager(contextManager),
   arrayInfo(arrayInfo),
   stripe(stripe),
@@ -105,7 +105,7 @@ GcMapUpdate::_InvalidateBlock(void)
         invalidVsa.offset = 0;
         VirtualBlks invalidVsaRange = {invalidVsa, invalidCnt};
 
-        blockAllocator->InvalidateBlks(invalidVsaRange);
+        segmentCtx->InvalidateBlks(invalidVsaRange);
     }
 }
 
@@ -115,7 +115,7 @@ GcMapUpdate::_ValidateBlock(StripeId stripeId, uint32_t cnt)
     VirtualBlkAddr writeVsa = {stripeId, 0};
     VirtualBlks writeVsaRange = {writeVsa, cnt};
 
-    blockAllocator->ValidateBlks(writeVsaRange);
+    segmentCtx->ValidateBlks(writeVsaRange);
 }
 
 } // namespace pos

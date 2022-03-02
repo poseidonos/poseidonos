@@ -30,9 +30,9 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <string>
-
 #include "src/metadata/metadata.h"
+
+#include <string>
 
 #include "src/allocator/allocator.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -40,8 +40,10 @@
 #include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
 #include "src/meta_service/meta_service.h"
+#include "src/metadata/meta_event_factory.h"
 #include "src/metadata/meta_updater.h"
 #include "src/metadata/meta_volume_event_handler.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -50,24 +52,43 @@ Metadata::Metadata(IArrayInfo* info, IStateControl* state)
       new Mapper(info, nullptr),
       new Allocator(info, state),
       new JournalManager(info, state),
+      MetaFsServiceSingleton::Instance()->GetMetaFs(info->GetIndex())->ctrl,
       MetaServiceSingleton::Instance())
 {
 }
 
 Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
-    JournalManager* journal, MetaService* service)
+    JournalManager* journal, MetaFsFileControlApi* metaFsCtrl, MetaService* service)
 : arrayInfo(info),
   mapper(mapper),
   allocator(allocator),
   journal(journal),
-  metaUpdater(nullptr),
+  metaFsCtrl(metaFsCtrl),
   volumeEventHandler(nullptr),
-  metaService(service)
+  metaService(service),
+  metaUpdater(nullptr),
+  metaEventFactory(nullptr)
 {
     volumeEventHandler = new MetaVolumeEventHandler(arrayInfo,
         mapper->GetVolumeEventHandler(),
         allocator,
         (journal->IsEnabled() ? journal->GetVolumeEventHandler() : nullptr));
+
+    metaEventFactory = new MetaEventFactory(
+        mapper->GetIVSAMap(),
+        mapper->GetIStripeMap(),
+        allocator->GetISegmentCtx(),
+        allocator->GetIWBStripeAllocator(),
+        allocator->GetIContextManager(),
+        arrayInfo);
+
+    metaUpdater = new MetaUpdater(
+        mapper->GetIStripeMap(),
+        journal,
+        journal->GetJournalWriter(),
+        EventSchedulerSingleton::Instance(),
+        metaEventFactory,
+        arrayInfo);
 }
 
 Metadata::~Metadata(void)
@@ -75,26 +96,37 @@ Metadata::~Metadata(void)
     if (journal != nullptr)
     {
         delete journal;
+        journal = nullptr;
     }
 
     if (allocator != nullptr)
     {
         delete allocator;
+        allocator = nullptr;
     }
 
     if (mapper != nullptr)
     {
         delete mapper;
-    }
-
-    if (metaUpdater != nullptr)
-    {
-        delete metaUpdater;
+        mapper = nullptr;
     }
 
     if (volumeEventHandler != nullptr)
     {
         delete volumeEventHandler;
+        volumeEventHandler = nullptr;
+    }
+
+    if (metaEventFactory != nullptr)
+    {
+        delete metaEventFactory;
+        metaEventFactory = nullptr;
+    }
+
+    if (metaUpdater != nullptr)
+    {
+        delete metaUpdater;
+        metaUpdater = nullptr;
     }
 }
 
@@ -129,38 +161,36 @@ Metadata::Init(void)
     //  as journal might request stripe flush and meta udpate in journal recovery
     // Meta update will be re-tried when journal is not ready
     // TODO (huijeong.kim) Split journal initialization and recovery
-    _RegisterMetaServices();
+    metaService->Register(arrayInfo->GetName(),
+        arrayInfo->GetIndex(), metaUpdater, journal->GetJournalStatusProvider());
 
     POS_TRACE_INFO(eventId, "Start initializing journal of array {}", arrayName);
-    result = journal->Init();
+    result = journal->Init(
+        mapper->GetIVSAMap(),
+        mapper->GetIStripeMap(),
+        mapper->GetIMapFlush(),
+        allocator->GetISegmentCtx(),
+        allocator->GetIWBStripeAllocator(),
+        allocator->GetIContextManager(),
+        allocator->GetIContextReplayer(),
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayInfo->GetIndex()),
+        metaFsCtrl,
+        EventSchedulerSingleton::Instance(),
+        TelemetryClientSingleton::Instance());
+
     if (result != 0)
     {
         POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Journal, array {}", arrayName);
         journal->Dispose();
         allocator->Dispose();
         mapper->Dispose();
-        _UnregisterMetaSerivces();
+
+        metaService->Unregister(arrayInfo->GetName());
+
         return result;
     }
 
     return result;
-}
-
-void
-Metadata::_RegisterMetaServices(void)
-{
-    metaUpdater = new MetaUpdater(mapper->GetIVSAMap(),
-        mapper->GetIStripeMap(),
-        allocator->GetIContextManager(),
-        allocator->GetIBlockAllocator(),
-        allocator->GetIWBStripeAllocator(),
-        journal,
-        journal->GetJournalWriter(),
-        EventSchedulerSingleton::Instance(),
-        arrayInfo);
-
-    metaService->Register(arrayInfo->GetName(),
-        arrayInfo->GetIndex(), metaUpdater, journal->GetJournalStatusProvider());
 }
 
 void
@@ -178,19 +208,7 @@ Metadata::Dispose(void)
     POS_TRACE_INFO(eventId, "Start disposing journal of array {}", arrayName);
     journal->Dispose();
 
-    _UnregisterMetaSerivces();
-}
-
-void
-Metadata::_UnregisterMetaSerivces(void)
-{
     metaService->Unregister(arrayInfo->GetName());
-
-    if (metaUpdater != nullptr)
-    {
-        delete metaUpdater;
-        metaUpdater = nullptr;
-    }
 }
 
 void
@@ -208,7 +226,7 @@ Metadata::Shutdown(void)
     POS_TRACE_INFO(eventId, "Start shutdown journal of array {}", arrayName);
     journal->Shutdown();
 
-    _UnregisterMetaSerivces();
+    metaService->Unregister(arrayInfo->GetName());
 }
 
 void

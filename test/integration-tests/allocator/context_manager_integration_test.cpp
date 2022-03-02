@@ -239,7 +239,16 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     // When: All of segments is overwritten
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        contextManager.DecreaseValidBlockCount(segId, maxValidBlkCount);
+        VirtualBlkAddr startVsa = {
+            .stripeId = segId * STRIPE_PER_SEGMENT,
+            .offset = 0,
+        };
+        VirtualBlks blks = {
+            .startVsa = startVsa,
+            .numBlks = maxValidBlkCount,
+        };
+
+        contextManager.InvalidateBlks(blks);
     }
 
     // Then: State of overwritten segments must be FREE and occupied stripe count is zero

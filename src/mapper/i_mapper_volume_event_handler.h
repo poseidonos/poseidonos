@@ -36,6 +36,8 @@
 
 namespace pos
 {
+class ISegmentCtx;
+
 class IMapperVolumeEventHandler
 {
 public:
@@ -46,7 +48,7 @@ public:
     virtual int VolumeDetached(std::vector<int> volList) = 0;
 
     virtual int PrepareVolumeDelete(int volId) = 0;
-
+    virtual int InvalidateAllBlocksTo(int volId, ISegmentCtx* segmentCtx) = 0;
     virtual int DeleteVolumeMap(int volId) = 0;
 };
 } // namespace pos

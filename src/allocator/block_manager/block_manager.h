@@ -57,8 +57,6 @@ public:
 
     virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override;
     virtual Stripe* AllocateGcDestStripe(uint32_t volumeId);
-    virtual void InvalidateBlks(VirtualBlks blks) override;
-    virtual void ValidateBlks(VirtualBlks blks) override;
     virtual void ProhibitUserBlkAlloc(void) override;
     virtual void PermitUserBlkAlloc(void) override;
 

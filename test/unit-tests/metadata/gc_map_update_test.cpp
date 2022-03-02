@@ -6,8 +6,8 @@
 #include <map>
 
 #include "src/journal_manager/log/gc_map_update_list.h"
-#include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
@@ -22,7 +22,7 @@ TEST(GcMapUpdate, GcMapUpdate_testIfConstructedSuccessfully)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockStripe> stripe;
@@ -32,7 +32,7 @@ TEST(GcMapUpdate, GcMapUpdate_testIfConstructedSuccessfully)
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.stripesPerSegment = 1;
     EXPECT_CALL(arrayInfo, GetSizeInfo).WillRepeatedly(Return(&partitionLogicalSize));
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &blockAllocator, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
 }
 
 TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
@@ -45,7 +45,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
 
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockStripe> stripe;
@@ -68,7 +68,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
     }
     invalidSegCnt[1] = 10;
 
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &blockAllocator, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
 
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
     ON_CALL(stripe, GetVsid).WillByDefault(Return(vsid));
@@ -80,10 +80,10 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
         EXPECT_CALL(vsaMap, SetVSAsInternal(testVolumeId, it.rba, vsaRange)).Times(1);
     }
 
-    EXPECT_CALL(blockAllocator, InvalidateBlks).Times(1);
+    EXPECT_CALL(segmentCtx, InvalidateBlks).Times(1);
     VirtualBlkAddr writeVsa = {vsid, 0};
     VirtualBlks writeVsaRange = {writeVsa, validMapCnt};
-    EXPECT_CALL(blockAllocator, ValidateBlks(writeVsaRange)).Times(1);
+    EXPECT_CALL(segmentCtx, ValidateBlks(writeVsaRange)).Times(1);
 
     bool result = gcMapUpdate.Execute();
     EXPECT_EQ(result, true);

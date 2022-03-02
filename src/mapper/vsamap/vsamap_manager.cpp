@@ -311,10 +311,10 @@ VSAMapManager::FlushAllMaps(void)
 }
 
 int
-VSAMapManager::InvalidateAllBlocks(int volId)
+VSAMapManager::InvalidateAllBlocks(int volId, ISegmentCtx* segmentCtx)
 {
     assert(vsaMaps[volId] != nullptr);
-    return vsaMaps[volId]->InvalidateAllBlocks();
+    return vsaMaps[volId]->InvalidateAllBlocks(segmentCtx);
 }
 
 bool

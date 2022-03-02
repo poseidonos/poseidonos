@@ -74,7 +74,7 @@ class IVSAMap;
 class IStripeMap;
 class IMapFlush;
 
-class IBlockAllocator;
+class ISegmentCtx;
 class IWBStripeAllocator;
 class IContextManager;
 class IContextReplayer;
@@ -86,7 +86,7 @@ class EventScheduler;
 class TelemetryPublisher;
 class TelemetryClient;
 
-class JournalManager : public IMountSequence, public IJournalManager
+class JournalManager : public IJournalManager
 {
 public:
     JournalManager(void);
@@ -114,16 +114,15 @@ public:
 
     virtual bool IsEnabled(void) override;
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
-
-    int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    virtual int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
+        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
         IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
         EventScheduler* eventScheduler, TelemetryClient* tc);
+
+    virtual void Dispose(void);
+    virtual void Shutdown(void);
+    virtual void Flush(void);
 
     JournalManagerStatus
     GetJournalManagerStatus(void)
@@ -138,7 +137,7 @@ public:
 protected:
     void _InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
         IVolumeManager* volumeManager, EventScheduler* eventScheduler);
     void _DisposeModules(void);

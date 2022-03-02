@@ -81,7 +81,7 @@ public:
     virtual void SetVSAMapContent(int volId, VSAMapContent* content);
 
     virtual bool NeedToDeleteFile(int volId);
-    virtual int InvalidateAllBlocks(int volId);
+    virtual int InvalidateAllBlocks(int volId, ISegmentCtx* segmentCtx);
     virtual int DeleteVSAMap(int volId);
 
     virtual bool IsVsaMapAccessible(int volId);

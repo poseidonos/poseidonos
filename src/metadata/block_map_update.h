@@ -32,12 +32,11 @@
 
 #pragma once
 
-#include "src/event_scheduler/callback.h"
-
-#include "src/mapper/i_vsamap.h"
-#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/event_scheduler/callback.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/mapper/i_vsamap.h"
 
 namespace pos
 {
@@ -47,9 +46,9 @@ class BlockMapUpdate : public Callback
 {
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator);
+        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator);
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         VsaRangeMaker* vsaRangeMaker);
     virtual ~BlockMapUpdate(void);
 
@@ -61,7 +60,7 @@ private:
 
     VolumeIoSmartPtr volumeIo;
     IVSAMap* vsaMap;
-    IBlockAllocator* blockAllocator;
+    ISegmentCtx* segmentCtx;
     IWBStripeAllocator* wbStripeAllocator;
     VsaRangeMaker* oldVsaRangeMaker;
 };

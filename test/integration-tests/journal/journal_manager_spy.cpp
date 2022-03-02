@@ -56,7 +56,7 @@ JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* m
 
     _InitModules(telemetryClient, mapper->GetIVSAMap(), mapper->GetIStripeMap(),
         mapper->GetIMapFlush(),
-        allocator->GetIBlockAllocator(),
+        allocator->GetISegmentCtx(),
         allocator->GetIWBStripeAllocator(),
         allocator->GetIContextManager(), allocator->GetIContextReplayer(),
         volumeManager, eventScheduler);

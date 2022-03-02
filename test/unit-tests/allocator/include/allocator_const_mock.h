@@ -20,6 +20,12 @@ public:
     using AllocatorCtxHeader::AllocatorCtxHeader;
 };
 
+class MockSegmentCtxHeader : public SegmentCtxHeader
+{
+public:
+    using SegmentCtxHeader::SegmentCtxHeader;
+};
+
 class MockRebuildCtxHeader : public RebuildCtxHeader
 {
 public:

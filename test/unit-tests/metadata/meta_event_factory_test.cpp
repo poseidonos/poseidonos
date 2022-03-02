@@ -6,8 +6,8 @@
 #include "src/metadata/block_map_update.h"
 #include "src/metadata/gc_map_update.h"
 #include "src/metadata/stripe_map_update.h"
-#include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
@@ -25,18 +25,18 @@ TEST(MetaEventFactory, MetaEventFactory_testIfConstructedSuccessfully)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
-    MetaEventFactory factory(&vsaMap, &stripeMap, &blockAllocator, &wbStripeAllocator, &contextManager, &arrayInfo);
+    MetaEventFactory factory(&vsaMap, &stripeMap, &segmentCtx, &wbStripeAllocator, &contextManager, &arrayInfo);
 }
 
 TEST(MetaEventFactory, CreateBlockMapUpdateEvent_testIfBlockMapUpdateEventCreatedSuccessfully)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -44,7 +44,7 @@ TEST(MetaEventFactory, CreateBlockMapUpdateEvent_testIfBlockMapUpdateEventCreate
     int arrayId = 2;
     MapperServiceSingleton::Instance()->RegisterMapper("", arrayId, &vsaMap, nullptr, nullptr, nullptr, nullptr);
 
-    MetaEventFactory factory(&vsaMap, &stripeMap, &blockAllocator, &wbStripeAllocator, &contextManager, &arrayInfo);
+    MetaEventFactory factory(&vsaMap, &stripeMap, &segmentCtx, &wbStripeAllocator, &contextManager, &arrayInfo);
 
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
@@ -72,7 +72,7 @@ TEST(MetaEventFactory, CreateGcMapUpdateEvent_testIfGcMapUpdateEventCreatedSucce
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -80,7 +80,7 @@ TEST(MetaEventFactory, CreateGcMapUpdateEvent_testIfGcMapUpdateEventCreatedSucce
     int arrayId = 2;
     MapperServiceSingleton::Instance()->RegisterMapper("", arrayId, &vsaMap, nullptr, nullptr, nullptr, nullptr);
 
-    MetaEventFactory factory(&vsaMap, &stripeMap, &blockAllocator, &wbStripeAllocator, &contextManager, &arrayInfo);
+    MetaEventFactory factory(&vsaMap, &stripeMap, &segmentCtx, &wbStripeAllocator, &contextManager, &arrayInfo);
 
     NiceMock<MockStripe> stripe;
     GcStripeMapUpdateList mapUpdateInfoList;

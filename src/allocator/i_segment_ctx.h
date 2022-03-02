@@ -32,48 +32,16 @@
 
 #pragma once
 
-#include "src/allocator/i_block_allocator.h"
-#include "src/io/frontend_io/flush_command_manager.h"
-#include "src/mapper/map/map_content.h"
-
-#include <string>
+#include "src/include/address_type.h"
 
 namespace pos
 {
-class ISegmentCtx;
-
-static const uint64_t HUNDRED_PERCENT = 100;
-
-class VSAMapContent : public MapContent
+class ISegmentCtx
 {
 public:
-    VSAMapContent(void) = default;
-    VSAMapContent(int mapId, MapperAddressInfo* addrInfo, FlushCmdManager* flm_, Map* map, MapHeader* header);
-    VSAMapContent(int mapId, MapperAddressInfo* addrInfo);
-    virtual ~VSAMapContent(void) = default;
-
-    virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries);
-    virtual int InMemoryInit(uint64_t volId, uint64_t numEntries, uint64_t mpageSize);
-    virtual VirtualBlkAddr GetEntry(BlkAddr rba);
-    virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
-
-    virtual int64_t GetNumUsedBlks(void);
-    virtual void SetCallback(EventSmartPtr cb);
-    virtual EventSmartPtr GetCallback(void);
-
-    int InvalidateAllBlocks(ISegmentCtx* segmentCtx);
-
-private:
-    void _UpdateUsedBlkCnt(VirtualBlkAddr vsa);
-
-    int64_t totalBlks;
-
-    FlushCmdManager* flushCmdManager;
-    uint32_t flushThreshold;
-    bool internalFlushEnabled;
-
-    int arrayId;
-    EventSmartPtr callback;
+    virtual void ValidateBlks(VirtualBlks blks) = 0;
+    virtual void InvalidateBlks(VirtualBlks blks) = 0;
+    virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
 };
 
 } // namespace pos

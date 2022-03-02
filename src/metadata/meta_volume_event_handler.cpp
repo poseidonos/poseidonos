@@ -36,6 +36,8 @@
 #include "src/journal_manager/journal_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
@@ -108,12 +110,22 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
 {
     int result = 0;
 
-    // Set Volume Map Deleting State and invalidate all blocks
+    // Set Volume Map Deleting State
     result = mapper->PrepareVolumeDelete(volEventBase->volId);
     if (result != 0)
     {
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
+
+    // Invalidate all blocks in the volume
+    result = mapper->InvalidateAllBlocksTo(volEventBase->volId, allocator->GetISegmentCtx());
+    if (result != 0)
+    {
+        return result;
+    }
+
+    POS_TRACE_INFO(EID(VOL_EVENT_OK),
+        "Mapper has successfully invalidated all blocks in the volume {}", volEventBase->volId);
 
     if (journal != nullptr)
     {
@@ -138,6 +150,9 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     {
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
+
+    POS_TRACE_INFO(EID(VOL_EVENT_OK),
+        "Mapper has successfully deleted the map of volume {}", volEventBase->volId);
 
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }

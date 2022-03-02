@@ -30,17 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/mapper/vsamap/vsamap_content.h"
+
+#include <string>
 
 #include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/include/branch_prediction.h"
-#include "src/mapper/vsamap/vsamap_content.h"
 #include "src/io/frontend_io/flush_command_manager.h"
-#include <string>
 
 namespace pos
 {
-VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_, FlushCmdManager* flm_, Map* map_, MapHeader* mapHeader_)
+VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, FlushCmdManager* flm_, Map* map_, MapHeader* mapHeader_)
 : MapContent(mapId, addrInfo),
   flushThreshold(0),
   internalFlushEnabled(false)
@@ -50,11 +52,6 @@ VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAlloc
     this->arrayId = addrInfo->GetArrayId();
     callback = nullptr;
 
-    iBlockAllocator = iBlockAllocator_;
-    if (iBlockAllocator == nullptr)
-    {
-        iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(addrInfo->GetArrayId());
-    }
     flushCmdManager = flm_;
     if (flushCmdManager == nullptr)
     {
@@ -67,7 +64,7 @@ VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAlloc
 }
 
 VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo)
-: VSAMapContent(mapId, addrInfo, nullptr, nullptr, nullptr, nullptr)
+: VSAMapContent(mapId, addrInfo, nullptr, nullptr, nullptr)
 {
 }
 
@@ -182,7 +179,7 @@ VSAMapContent::GetCallback(void)
 }
 
 int
-VSAMapContent::InvalidateAllBlocks(void)
+VSAMapContent::InvalidateAllBlocks(ISegmentCtx* segmentCtx)
 {
     uint32_t mpageId = 0;
 
@@ -198,7 +195,7 @@ VSAMapContent::InvalidateAllBlocks(void)
             if (IsUnMapVsa(vsa) == false)
             {
                 VirtualBlks vBlks = {.startVsa = vsa, .numBlks = 1};
-                iBlockAllocator->InvalidateBlks(vBlks);
+                segmentCtx->InvalidateBlks(vBlks);
             }
         }
 

@@ -553,17 +553,24 @@ Mapper::PrepareVolumeDelete(int volId)
         }
     }
 
-    // Mark all blocks in this volume up as Invalidated
-    if (0 != vsaMapManager->InvalidateAllBlocks(volId))
-    {
-        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} array:{} @VolumeDeleted", volId, arrayName);
-        return -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE);
-    }
-
     --numMapLoadedVol;
     POSMetricValue v;
     v.gauge = numMapLoadedVol;
     tp->PublishData(TEL33002_MAP_LOADED_VOL_CNT, v, MT_GAUGE);
+    return 0;
+}
+
+int
+Mapper::InvalidateAllBlocksTo(int volId, ISegmentCtx* segmentCtx)
+{
+    // Mark all blocks in this volume up as Invalidated
+    if (0 != vsaMapManager->InvalidateAllBlocks(volId, segmentCtx))
+    {
+        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE),
+            "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} array:{} @VolumeDeleted",
+            volId, arrayName);
+        return -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE);
+    }
     return 0;
 }
 

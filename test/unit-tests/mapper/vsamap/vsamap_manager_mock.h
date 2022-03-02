@@ -35,7 +35,7 @@ public:
     MOCK_METHOD(VSAMapContent*, GetVSAMapContent, (int volId), (override));
     MOCK_METHOD(void, SetVSAMapContent, (int volId, VSAMapContent* content), (override));
     MOCK_METHOD(bool, NeedToDeleteFile, (int volId), (override));
-    MOCK_METHOD(int, InvalidateAllBlocks, (int volId), (override));
+    MOCK_METHOD(int, InvalidateAllBlocks, (int volId, ISegmentCtx* segmentCtx), (override));
     MOCK_METHOD(int, DeleteVSAMap, (int volId), (override));
     MOCK_METHOD(bool, IsVsaMapAccessible, (int volId), (override));
     MOCK_METHOD(void, EnableVsaMapAccess, (int volId), (override));

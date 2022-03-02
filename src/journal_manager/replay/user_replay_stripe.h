@@ -42,7 +42,7 @@ class UserReplayStripe : public ReplayStripe
 public:
     UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* contextReplayer,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+        ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     UserReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,

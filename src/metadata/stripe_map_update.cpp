@@ -38,11 +38,11 @@
 
 namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, IContextManager* contextManager)
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx)
 : Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
   stripe(stripe),
   stripeMap(stripeMap),
-  contextManager(contextManager)
+  segmentCtx(segmentCtx)
 {
 }
 
@@ -55,7 +55,7 @@ StripeMapUpdate::_DoSpecificJob(void)
 {
     StripeId currentLsid = stripe->GetUserLsid();
     stripeMap->SetLSA(stripe->GetVsid(), currentLsid, IN_USER_AREA);
-    contextManager->UpdateOccupiedStripeCount(currentLsid);
+    segmentCtx->UpdateOccupiedStripeCount(currentLsid);
 
     return true;
 }

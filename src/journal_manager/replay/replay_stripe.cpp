@@ -41,12 +41,12 @@ namespace pos
 // Constructor for product code
 ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* inputVsaMap, IStripeMap* inputStripeMap,
     IContextReplayer* ctxReplayer,
-    IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+    ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
 : ReplayStripe(inputVsaMap, inputStripeMap, wbReplayer, userReplayer, nullptr, nullptr, nullptr)
 {
     status = new StripeReplayStatus(vsid);
-    replayEventFactory = new ReplayEventFactory(status, inputVsaMap, inputStripeMap, ctxReplayer, blockAllocator, arrayInfo, wbReplayer);
+    replayEventFactory = new ReplayEventFactory(status, inputVsaMap, inputStripeMap, ctxReplayer, segmentCtx, arrayInfo, wbReplayer);
 }
 
 // Constructor for unit test

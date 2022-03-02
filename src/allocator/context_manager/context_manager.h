@@ -42,6 +42,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/state/interface/i_state_control.h"
 
@@ -59,7 +60,7 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
 class ContextIoManager;
 
-class ContextManager : public IContextManager
+class ContextManager : public IContextManager, public ISegmentCtx
 {
 public:
     ContextManager(void) = default;
@@ -74,7 +75,6 @@ public:
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
-    virtual void UpdateOccupiedStripeCount(StripeId lsid);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
     virtual SegmentId AllocateRebuildTargetSegment(void);
@@ -88,15 +88,19 @@ public:
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
-    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t count);
-    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t count);
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual void InvalidateBlks(VirtualBlks blks) override;
+    virtual void UpdateOccupiedStripeCount(StripeId lsid) override;
 
     virtual int SetNextSsdLsid(void);
     virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
 
     virtual RebuildCtx* GetRebuildCtx(void) { return rebuildCtx; }
+
+    // TODO (huijeong.kim) remove mixed use of SegmentCtx and ISegmentCtx
     virtual SegmentCtx* GetSegmentCtx(void) { return segmentCtx; }
+    virtual ISegmentCtx* GetISegmentCtx(void) { return this; }
     virtual AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }

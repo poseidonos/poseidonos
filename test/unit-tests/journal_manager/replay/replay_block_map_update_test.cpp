@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/allocator/i_block_allocator_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/replay/active_wb_stripe_replayer_mock.h"
 #include "test/unit-tests/journal_manager/statistics/stripe_replay_status_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
@@ -18,7 +18,7 @@ namespace pos
 TEST(ReplayBlockMapUpdate, ReplayBlockMapUpdate_testIfConstructedSuccessfully)
 {
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockStripeReplayStatus> stripeReplayStatus;
     PendingStripeList list;
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(list);
@@ -31,7 +31,7 @@ TEST(ReplayBlockMapUpdate, ReplayBlockMapUpdate_testIfConstructedSuccessfully)
     uint64_t numBlks = 10;
     bool replaySegmentInfo = false;
 
-    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &blockAllocator,
+    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
         volId, startRba, startVsa, numBlks, replaySegmentInfo);
 }
@@ -40,7 +40,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockStripeReplayStatus> stripeReplayStatus;
     PendingStripeList list;
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(list);
@@ -53,7 +53,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
     uint32_t numBlks = 60;
     bool replaySegmentInfo = false;
 
-    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &blockAllocator,
+    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
         volId, startRba, startVsa, numBlks, replaySegmentInfo);
 
@@ -81,7 +81,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockStripeReplayStatus> stripeReplayStatus;
     PendingStripeList list;
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(list);
@@ -94,7 +94,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
     uint32_t numBlks = 60;
     bool replaySegmentInfo = false;
 
-    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &blockAllocator,
+    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
         volId, startRba, startVsa, numBlks, replaySegmentInfo);
 
@@ -140,7 +140,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsInvalidated)
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockStripeReplayStatus> stripeReplayStatus;
     PendingStripeList list;
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(list);
@@ -153,7 +153,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsInvalidated)
     uint32_t numBlks = 60;
     bool replaySegmentInfo = true;
 
-    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &blockAllocator,
+    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
         volId, startRba, startVsa, numBlks, replaySegmentInfo);
 
@@ -175,7 +175,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsInvalidated)
                 .stripeId = 200,
                 .offset = startVsa.offset + offset},
             .numBlks = 1};
-        EXPECT_CALL(blockAllocator, InvalidateBlks(blksToInvalidate)).Times(1);
+        EXPECT_CALL(segmentCtx, InvalidateBlks(blksToInvalidate)).Times(1);
     }
     EXPECT_CALL(stripeReplayStatus, BlockInvalidated).Times(numBlks);
 
@@ -187,7 +187,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsNotInvalidatedWhenOldVsaIsUnma
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockIBlockAllocator> blockAllocator;
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockStripeReplayStatus> stripeReplayStatus;
     PendingStripeList list;
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(list);
@@ -200,7 +200,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsNotInvalidatedWhenOldVsaIsUnma
     uint32_t numBlks = 60;
     bool replaySegmentInfo = true;
 
-    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &blockAllocator,
+    ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
         volId, startRba, startVsa, numBlks, replaySegmentInfo);
 
@@ -208,7 +208,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsNotInvalidatedWhenOldVsaIsUnma
     ON_CALL(vsaMap, GetVSAWithSyncOpen).WillByDefault(Return(UNMAP_VSA));
 
     // Then: No blocks should be invalidated
-    EXPECT_CALL(blockAllocator, InvalidateBlks).Times(0);
+    EXPECT_CALL(segmentCtx, InvalidateBlks).Times(0);
     EXPECT_CALL(stripeReplayStatus, BlockInvalidated).Times(0);
 
     int result = blockMapUpdateEvent.Replay();

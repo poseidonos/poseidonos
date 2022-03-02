@@ -43,7 +43,7 @@ namespace pos
 class IVSAMap;
 class IStripeMap;
 class IContextReplayer;
-class IBlockAllocator;
+class ISegmentCtx;
 class IArrayInfo;
 
 class LogHandlerInterface;
@@ -61,7 +61,7 @@ public:
     ReplayStripe(void) = delete;
     ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* ctxReplayer,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+        ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     ReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,

@@ -34,13 +34,13 @@
 
 #include <map>
 
-#include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
 #include "src/journal_manager/i_journal_manager.h"
 #include "src/journal_manager/i_journal_writer.h"
+#include "src/mapper/i_stripemap.h"
+#include "src/mapper/i_vsamap.h"
 #include "src/meta_service/i_meta_updater.h"
 
 namespace pos
@@ -54,14 +54,7 @@ class IContextManager;
 class MetaUpdater : public IMetaUpdater
 {
 public:
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter,
-        EventScheduler* eventScheduler, IArrayInfo* arrayInfo);
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    MetaUpdater(IStripeMap* stripeMap,
         IJournalManager* journal, IJournalWriter* journalWriter,
         EventScheduler* eventScheduler,
         MetaEventFactory* eventFactory, IArrayInfo* arrayInfo);
@@ -72,11 +65,8 @@ public:
     virtual int UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) override;
 
 private:
-    IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IContextManager* contextManager;
-    IBlockAllocator* blockAllocator;
-    IWBStripeAllocator* wbStripeAllocator;
+    ISegmentCtx* segmentCtx;
     IJournalManager* journal;
     IJournalWriter* journalWriter;
     EventScheduler* eventScheduler;

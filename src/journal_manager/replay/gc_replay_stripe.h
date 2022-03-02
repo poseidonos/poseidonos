@@ -41,7 +41,7 @@ class GcReplayStripe : public ReplayStripe
 public:
     GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* contextReplayer,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+        ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~GcReplayStripe(void) = default;
 
