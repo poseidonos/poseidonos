@@ -48,6 +48,7 @@
 #include "src/io/general_io/command_timeout_handler.h"
 #include "src/io/general_io/io_submit_handler_count.h"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
@@ -101,7 +102,8 @@ DebugInfo::DebugInfo(void)
   telemetryManagerService(nullptr),
   telemetryClient(nullptr),
   telemetryConfig(nullptr),
-  memoryManager(nullptr)
+  memoryManager(nullptr),
+  posReplicatorManager(nullptr)
 {
 }
 
@@ -142,6 +144,7 @@ DebugInfo::Update(void)
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
     signalHandler = SignalHandlerSingleton::Instance();
+    posReplicatorManager = PosReplicatorManagerSingleton::Instance();
 }
 // LCOV_EXCL_STOP
 } // namespace pos

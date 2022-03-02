@@ -60,12 +60,10 @@ GrpcPublisher::~GrpcPublisher(void)
 {
 }
 
-uint64_t
-GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size,
-    string volumeName, string arrayName, void* buf)
+int
+GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
+    string arrayName, void* buf, uint64_t& lsn)
 {
-    //bool ret = false;
-
     ::grpc::ClientContext cliContext;
     replicator_rpc::PushHostWriteRequest* request = new replicator_rpc::PushHostWriteRequest;
     replicator_rpc::PushHostWriteResponse response;
@@ -85,10 +83,16 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size,
 
     grpc::Status status = stub->PushHostWrite(&cliContext, *request, &response);
 
-    return response.lsn();
+    if (status.ok() == false)
+    {
+        return EID(HA_INVALID_RETUNR_LSN);
+    }
+    lsn = response.lsn();
+
+    return EID(SUCCESS);
 }
 
-bool
+int
 GrpcPublisher::CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName)
 {
     ::grpc::ClientContext cliContext;
@@ -101,10 +105,15 @@ GrpcPublisher::CompleteUserWrite(uint64_t lsn, string volumeName, string arrayNa
 
     grpc::Status status = stub->CompleteWrite(&cliContext, *request, &response);
 
-    return true;
+    if (status.ok() == false)
+    {
+        return EID(HA_COMPLETION_FAIL);
+    }
+
+    return EID(SUCCESS);
 }
 
-bool
+int
 GrpcPublisher::CompleteWrite(uint64_t lsn, string volumeName, string arrayName)
 {
     ::grpc::ClientContext cliContext;
@@ -117,10 +126,15 @@ GrpcPublisher::CompleteWrite(uint64_t lsn, string volumeName, string arrayName)
 
     grpc::Status status = stub->CompleteWrite(&cliContext, *request, &response);
 
-    return true;
+    if (status.ok() == false)
+    {
+        return EID(HA_COMPLETION_FAIL);
+    }
+
+    return EID(SUCCESS);
 }
 
-bool
+int
 GrpcPublisher::CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf)
 {
     ::grpc::ClientContext cliContext;
@@ -134,7 +148,12 @@ GrpcPublisher::CompleteRead(uint64_t lsn, uint64_t size, string volumeName, stri
 
     grpc::Status status = stub->CompleteRead(&cliContext, *request, &response);
 
-    return true;
+    if (status.ok() == false)
+    {
+        return EID(HA_COMPLETION_FAIL);
+    }
+
+    return EID(SUCCESS);
 }
 
 }

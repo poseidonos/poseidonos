@@ -89,8 +89,8 @@ DummyHaServer::PushHostWrite(
     ::grpc::ServerContext* context, const ::replicator_rpc::PushHostWriteRequest* request,
     ::replicator_rpc::PushHostWriteResponse* response)
 {
-    //
-    response->set_lsn(10);
+    // dummy respoane lsn = rba
+    response->set_lsn(request->rba());
     return ::grpc::Status::OK;
 }
 
