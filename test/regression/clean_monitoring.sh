@@ -8,11 +8,14 @@ do
         'r') OPT_REMOVE='true'
             ;;
         *)
-            echo "UNIMPLEMENTED OPTION -- ${OPTKEY}" >&2
+            echo "Unimplemented option -- ${OPTKEY}" >&2
             exit 1
             ;;
     esac
 done
 
-[ -z ${OPT_KILL} ] && echo 'Kill filebeat process' && pkill -9 filebeat
-[ -z ${OPT_REMOVE} ] && echo 'Clean up log files' && rm -rf /var/log/pos/*
+[ -z ${OPT_KILL} ] && echo 'Kill filebeat process' && pkill -9 filebeat; \
+                    echo 'Kill prometheus process' && pkill -9 prometheus; \
+                    echo 'Kill pos-exporter' && pkill -9 pos-exporter
+
+[ -z ${OPT_REMOVE} ] && echo 'Clean up log files' && rm -rf /var/log/pos/*;

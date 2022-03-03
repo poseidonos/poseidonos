@@ -14,6 +14,10 @@ BAMBOO_BUILD_NUMBER=""          # -b
 WORKING_DIR="test/regression/"
 CONFIG_DIR="config/"
 BINARY_DIR="bin/"
+TOOL_DIR="tool/"
+
+FILEBEAT="filebeat-7.0.0-linux-x86_64"
+PROMETHEUS="prometheus-2.33.4.linux-amd64"
 
 texecc()
 {
@@ -39,15 +43,19 @@ check_argument()
 
 init_monitoring()
 {
-    # Kill filebeat instance if exists (w/ -k)
+    # Kill instances related to monitoring if exists (w/ -k)
     # + Remove all pos logs (w/ -r)
     texecc "echo ${POS_TARGET_PW} | sudo -S ${WORKING_DIR}/clean_monitoring.sh -k -r"
 }
 
 setup_filebeat()
 {
+    # Clean up filebeat registry & Log
+    texecc "rm -rf ${BINARY_DIR}/${FILEBEAT}/"
+ 
     # Prepare filebeat executable
-    texecc "tar -xzvf tool/log_importer/filebeat-executable.tar.gz -C ${BINARY_DIR} > /dev/null"
+    texecc "mkdir -p ${BINARY_DIR} && \
+            tar -C ${BINARY_DIR} -xzf ${TOOL_DIR}/${FILEBEAT}.tar.gz ${FILEBEAT}/filebeat"
 
     # Setup required library
     texecc "python3 -m pip install --ignore-installed -r ${WORKING_DIR}/packages/requirement.txt > /dev/null"
@@ -55,17 +63,58 @@ setup_filebeat()
     # Create filebeat config
     texecc "echo ${POS_TARGET_PW} | sudo -S python3 ${WORKING_DIR}/gen_filebeat_config.py \
         --log_path ${POS_LOG_PATH} \
-        --output config/filebeat.yml \
+        --output ${CONFIG_DIR}/filebeat.yml \
         --tag CI \
-        --timezone `date +"%Z"` \
+        --timezone $(date +"%Z") \
         --destination ${POS_LOG_DESTINATION_ADDR} \
         --field bamboo_plan:${BAMBOO_PLAN_NAME},bamboo_build_number:${BAMBOO_BUILD_NUMBER} 2>/dev/null"
-
-    # Clean up filebeat registry & Log
-    texecc "rm -rf ${BINARY_DIR}/data ${BINARY_DIR}/logs"
-    
+   
     # Execute filebeat
-    texecc "nohup bin/filebeat --path.config ${CONFIG_DIR} </dev/null 1>>${BINARY_DIR}/filebeat_stdout.txt 2>${BINARY_DIR}/filebeat_stderr.txt &"
+    texecc "nohup \
+            ${BINARY_DIR}/${FILEBEAT}/filebeat \
+            --path.config ${CONFIG_DIR} \
+            --path.data ${BINARY_DIR}/${FILEBEAT}/filebeat_data \
+            --path.data ${BINARY_DIR}/${FILEBEAT}/filebeat_logs \
+            < /dev/null \
+            1>${BINARY_DIR}/${FILEBEAT}/filebeat_stdout.txt \
+            2>${BINARY_DIR}/${FILEBEAT}/filebeat_stderr.txt \
+            &"
+}
+
+run_pos-exporter()
+{
+    # run pos-exporter    
+    texecc "nohup ${BINARY_DIR}/pos-exporter \
+            < /dev/null \
+            1>${BINARY_DIR}/pos-exporter_stdout.txt \
+            2>${BINARY_DIR}/pos-exporter_stderr.txt \
+            &"
+}
+
+setup_prometheus()
+{
+    # Clean up prometheus
+    texecc "rm -rf ${BINARY_DIR}/${PROMETHEUS}/"
+
+    # Prepare filebeat executable
+    texecc "mkdir -p ${BINARY_DIR} && \
+            tar -C ${BINARY_DIR} -xzf ${TOOL_DIR}/${PROMETHEUS}.tar.gz ${PROMETHEUS}/prometheus"
+
+    # Create prometheus config
+    texecc "echo ${POS_TARGET_PW} | sudo -S python3 ${WORKING_DIR}/gen_prometheus_config.py \
+            --job ${BAMBOO_PLAN_NAME}_#${BAMBOO_BUILD_NUMBER} \
+            --target localhost:2112 \
+            --output ${CONFIG_DIR}/prometheus.yml 2>/dev/null"
+
+    # Execute prometheus
+    texecc "nohup ${BINARY_DIR}/${PROMETHEUS}/prometheus \
+            --config.file=\"${CONFIG_DIR}/prometheus.yml\" \
+            --web.enable-admin-api \
+            --storage.tsdb.path=\"${BINARY_DIR}/${PROMETHEUS}/data\" \
+            < /dev/null \
+            1>${BINARY_DIR}/${PROMETHEUS}/prometheus_stdout.txt \
+            2>${BINARY_DIR}/${PROMETHEUS}/prometheus_stderr.txt \
+            &"
 }
 
 setup_monitoring()
@@ -73,7 +122,9 @@ setup_monitoring()
     # For Log
     setup_filebeat
 
-    # TBD (Metrics, etc...)
+    # For Metric
+    setup_prometheus
+    run_pos-exporter
 }
 
 while getopts "i:u:p:r:d:n:b:" opt
@@ -92,6 +143,10 @@ do
         n) BAMBOO_PLAN_NAME=$(echo ${OPTARG} | sed -e 's/ /_/g')
             ;;
         b) BAMBOO_BUILD_NUMBER=$(echo ${OPTARG} | sed 's/'\''//g')
+            ;;
+        *)
+            echo "Unimplemented option -- ${opt}" >&2
+            exit 1
     esac
 done
 
