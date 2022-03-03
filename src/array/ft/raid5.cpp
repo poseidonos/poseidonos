@@ -240,7 +240,6 @@ Raid5::_BindRecoverFunc(void)
 void
 Raid5::_RebuildData(void* dst, void* src, uint32_t dstSize)
 {
-    POS_TRACE_ERROR(EID(RAID_DEBUG_MSG), "RAID5 RebuildRead, size:{}, chkpstr:{}", dstSize, ftSize_.chunksPerStripe);
     using BlockData = char[dstSize];
     memset(dst, 0, dstSize);
     for (uint32_t i = 0; i < ftSize_.chunksPerStripe - 1; i++)

@@ -96,6 +96,7 @@ bool
 Partition::_IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt)
 {
     if (stripeId < logicalSize.totalStripes &&
+        blkCnt > 0 &&
         offset + blkCnt <= logicalSize.blksPerStripe)
     {
         return true;

@@ -389,13 +389,9 @@ StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t 
     list<BufferEntry> dst;
 
     uint32_t offset = 0;
-    // int i = 0;
     for (BufferEntry& buffer : src)
     {
-        // i++;
         uint32_t blkCnt = buffer.GetBlkCnt();
-        // POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "SPLICE ({}) BEL:{}, bufferBlkCnt:{}, start:{}, remain:{}",
-        //         i, src.size(), blkCnt, start, remain);
 
         if (offset <= start && offset + blkCnt > start)
         {
@@ -439,14 +435,6 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
         FtBlkAddr fba = _Pba2Fba(originPba);
         out.srcAddr = _GetRebuildGroup(fba);
-        int i = 0;
-        for (PhysicalBlkAddr& p : out.srcAddr)
-        {
-            i++;
-            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
-            "GetRecoverMethod({}) for {} partition, lba:{}, size:{}, stripeId:{}, offset:{}, neighborDev:{}, neighborDevlba:{}",
-            i, PARTITION_TYPE_STR[type], originPba.lba, ubio->GetSize(), fba.stripeId, fba.offset, p.arrayDev->GetUblock()->GetName(), p.lba);
-        }
         out.recoverFunc = method->GetRecoverFunc();
 
         return (int)POS_EVENT_ID::SUCCESS;
