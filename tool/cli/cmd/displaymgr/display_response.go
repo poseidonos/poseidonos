@@ -8,6 +8,7 @@ import (
 	"os"
 	"pnconnector/src/util"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 
 	"code.cloudfoundry.org/bytefmt"
@@ -35,7 +36,8 @@ func printResToDebug(resJSON string) {
 	res := messages.Response{}
 	json.Unmarshal([]byte(resJSON), &res)
 
-	printStatus(res.RESULT.STATUS.CODE)
+	printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+		res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
 	statusInfo, _ := util.GetStatusInfo(res.RESULT.STATUS.CODE)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -64,7 +66,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "LISTARRAY":
 		res := messages.ListArrayResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
@@ -109,7 +116,13 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "ARRAYINFO":
 		res := messages.ArrayInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
 		array := res.RESULT.DATA
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -161,7 +174,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "LISTVOLUME":
 		res := messages.ListVolumeResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
@@ -210,7 +228,13 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "VOLUMEINFO":
 		res := messages.VolumeInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
 		volume := res.RESULT.DATA
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -235,7 +259,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "LISTDEVICE":
 		res := messages.ListDeviceResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
@@ -275,7 +304,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "SMARTLOG":
 		res := messages.SMARTLOGResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		fmt.Fprintln(w, "AvailableSpareSpace\t:", res.RESULT.DATA.AVAILABLESPARESPACE)
@@ -313,14 +347,24 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "GETLOGLEVEL":
 		res := messages.GetLogLevelResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		fmt.Println("Log level: " + res.RESULT.DATA.LEVEL)
 
 	case "LOGGERINFO":
 		res := messages.LoggerInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		loggerInfo := res.RESULT.DATA
 
@@ -341,25 +385,30 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "CREATEQOSVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
-		if 0 != res.RESULT.STATUS.CODE {
-			printStatus(res.RESULT.STATUS.CODE)
-			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
 		}
 
 	case "RESETQOSVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
-		if 0 != res.RESULT.STATUS.CODE {
-			printStatus(res.RESULT.STATUS.CODE)
-			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
 		}
 
 	case "LISTQOSPOLICIES":
 		res := messages.ListQosResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		if 0 != res.RESULT.STATUS.CODE {
-			printStatus(res.RESULT.STATUS.CODE)
-			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+
+		if globals.CliServerSuccessCode != res.RESULT.STATUS.CODE {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.SOLUTION, res.RESULT.STATUS.CAUSE)
 		} else {
 			for _, array := range res.RESULT.DATA.QOSARRAYNAME {
 				fmt.Println("Array Name: " + array.ARRNAME)
@@ -385,7 +434,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "LISTSUBSYSTEM":
 		res := messages.ListSubsystemResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
@@ -422,7 +476,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "SUBSYSTEMINFO":
 		res := messages.ListSubsystemResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
 
 		if len(res.RESULT.DATA.SUBSYSTEMLIST) != 0 {
 			subsystem := res.RESULT.DATA.SUBSYSTEMLIST[0]
@@ -468,7 +527,13 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	case "GETPOSINFO":
 		res := messages.POSInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
 		fmt.Println(res.RESULT.DATA.VERSION)
 
 	case "STARTPOS":
@@ -479,19 +544,21 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	default:
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
-		printStatus(res.RESULT.STATUS.CODE)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
 	}
 }
 
-func printStatus(code int) {
-	if code == 0 {
-		// TODO(mj): Which is better way when command has been successfully executed:
-		// printing out a message or nothing?
-		// fmt.Println("PoseidonOS: command has been successfully executed")
-	} else {
-		statusInfo, _ := util.GetStatusInfo(code)
-		fmt.Println("A problem occured during process with error code: " + strconv.Itoa(code))
-		fmt.Println("Problem: " + statusInfo.Description)
-		fmt.Println("Possible solution: " + statusInfo.Solution)
-	}
+func printEventInfo(code int, name string, desc string, cause string, solution string) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	fmt.Fprint(w, name+"\t-\t")
+	fmt.Fprint(w, desc)
+	fmt.Fprint(w, " because "+strings.ToLower(cause))
+	fmt.Fprintln(w, " (solution: "+solution+")")
+	w.Flush()
 }

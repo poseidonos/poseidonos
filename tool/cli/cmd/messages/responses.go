@@ -15,7 +15,10 @@ type Result struct {
 
 type Status struct {
 	CODE        int    `json:"code"`
+	EVENTNAME   string `json:"eventName"`
 	DESCRIPTION string `json:"description"`
+	CAUSE       string `json:"cause"`
+	SOLUTION    string `json:"solution"`
 }
 
 type Info struct {
@@ -266,13 +269,8 @@ type ListQosResponse struct {
 }
 
 type QosResult struct {
-	STATUS QosStatus     `json:"status"`
+	STATUS Status        `json:"status"`
 	DATA   ListQosResult `json:"data,omitempty"`
-}
-
-type QosStatus struct {
-	CODE        int    `json:"code"`
-	DESCRIPTION string `json:"description"`
 }
 
 type ListQosResult struct {

@@ -45,8 +45,8 @@ enum class POS_EVENT_ID
     POS_TERMINATED,
     POS_EVENT_ID_END = 999,
 
-    // ------------------- CLI Server (1500 - 1599) -------------------
-    CLI_EVENT_ID_START = 1500,
+    // ------------------- CLI Server (1200 - 1599) -------------------
+    CLI_EVENT_ID_START = 1200,
     CLI_SERVER_INITIALIZED,
     CLI_CLIENT_CREATED,
     CLI_CLIENT_CREATION_FAILURE,
@@ -70,6 +70,7 @@ enum class POS_EVENT_ID
     CLI_MSG_RECEIVE_FAILURE,
     CLI_SERVER_TIMED_OUT,
     CLI_SERVER_BUSY,
+    CLI_LIST_ARRAY_FAILURE_NO_DEVICE,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -179,7 +180,7 @@ enum class POS_EVENT_ID
     MBR_END,
     MBR_COUNT = MBR_END - MBR_START,
 
-    // --------------Array (2500)-----------------------
+    // ------------------- Array (2500 - 2699) -------------------
     ARRAY_START = 2500,
     ARRAY_STATE_ONLINE = ARRAY_START,
     ARRAY_STATE_OFFLINE,
@@ -952,6 +953,7 @@ enum class POS_EVENT_ID
     IOBACKEND_END,
     IOBACKEND_COUNT = IOBACKEND_END - IOBACKEND_START,
 
+    // --------------Device (5500)----------------
     DEVICE_START = 5500,
 
     UNVME_DAEMON_START = DEVICE_START,
@@ -1129,5 +1131,8 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "CLI server has detached a thread for CLI.", "", "")},
         {(int)POS_EVENT_ID::CLI_CLIENT_DETACHEMENT_FAILURE,
             new PosEventInfoEntry("CLI_CLIENT_DETACHEMENT_FAILURE",
-                "CLI server could not detach a thread for CLI", "", "")},
+                "CLI server could not detach a thread for CLI.", "", "")},
+        {(int)POS_EVENT_ID::CLI_LIST_ARRAY_FAILURE_NO_DEVICE,
+            new PosEventInfoEntry("CLI_LIST_ARRAY_FAILURE_NO_DEVICE",
+                "Failed to retrieve array list", "There is no device", "Try scanning device first")},
     };

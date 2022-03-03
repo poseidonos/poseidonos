@@ -71,8 +71,13 @@ ListArrayCommand::Execute(json& doc, string rid)
         }
         else
         {
-            return jFormat.MakeResponse("LISTARRAY", rid, result,
-                "List array failed", data, GetPosInfo());
+            if (result == EID(DEVICEMGR_DEVICE_NOT_FOUND))
+            {
+                int event = EID(CLI_LIST_ARRAY_FAILURE_NO_DEVICE);
+                POS_TRACE_WARN(event, "");
+                return jFormat.MakeResponse("LISTARRAY", rid, event,
+                    "failed to retrieve array list", data, GetPosInfo());
+            }
         }
     }
 

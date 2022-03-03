@@ -476,7 +476,7 @@ CLIServer()
                                     "thread_id:{}, error_code:{}", t_id, ret);
                             }
                             POS_TRACE_DEBUG(EID(CLI_CLIENT_CREATED), "thread_id:{}", t_id);
-                            
+
                             ret = pthread_detach(t_id);
                             if (ret != 0)
                             {
