@@ -71,13 +71,13 @@ Raid5::Translate(const LogicalEntry& le)
     fe.addr.stripeId = le.addr.stripeId;
     fe.addr.offset = le.addr.offset;
     fe.blkCnt = le.blkCnt;
-    
+
     if (parityIndex <= firstIndex)
     {
         fe.addr.offset += paritySize;
         feList.push_back(fe);
     }
-    else if(firstIndex < parityIndex && parityIndex <= lastIndex)
+    else if (firstIndex < parityIndex && parityIndex <= lastIndex)
     {
         fe.blkCnt = parityOffset - startOffset;
         feList.push_back(fe);

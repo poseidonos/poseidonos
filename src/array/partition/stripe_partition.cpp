@@ -303,7 +303,7 @@ StripePartition::_F2PTranslate(const list<FtWriteEntry>& fwel)
         BlkOffset startOffset = firstOffset - chunkSize * chunkStart;
         BlkOffset endOffset = lastOffset - chunkSize * chunkEnd;
         const uint64_t stripeLba = physicalSize.startLba + ((uint64_t)fwe.addr.stripeId * chunkSize * ArrayConfig::SECTORS_PER_BLOCK);
-        
+
         uint32_t bufferOffset = 0;
         for (uint32_t i = chunkStart; i <= chunkEnd; i++)
         {
