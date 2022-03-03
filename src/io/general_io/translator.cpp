@@ -250,7 +250,7 @@ Translator::GetPba(uint32_t blockIndex)
     PartitionType partitionType = _GetPartitionType(blockIndex);
     PhysicalBlkAddr pba;
     list<PhysicalEntry> physicalEntries;
-    LogicalEntry logicalEntry{
+    LogicalEntry logicalEntry = {
         .addr = lsa,
         .blkCnt = 1};
     int ret = iTranslator->Translate(arrayId, partitionType, physicalEntries, logicalEntry);
@@ -295,7 +295,7 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
     LogicalBlkAddr lsa = _GetLsa(0);
     PartitionType partitionType = _GetPartitionType(0);
 
-    LogicalEntry logicalEntry = {.addr = lsa, .blkCnt = blockCount};
+    LogicalEntry logicalEntry = {.addr = lsa,.blkCnt = blockCount};
     list<PhysicalEntry> physicalEntries;
 
     int ret = iTranslator->Translate(

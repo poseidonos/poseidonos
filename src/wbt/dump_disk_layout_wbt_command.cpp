@@ -79,10 +79,9 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     unsigned int arrayIndex = info->arrayInfo->GetIndex();
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};
-    LogicalEntry logicalEntry {
+    LogicalEntry logicalEntry = {
         .addr = lsa,
-        .blkCnt = 1
-    };
+        .blkCnt = 1};
     PhysicalBlkAddr pba;
     list<PhysicalEntry> physicalEntries;
     trans->Translate(arrayIndex, META_SSD, physicalEntries, logicalEntry);

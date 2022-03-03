@@ -114,16 +114,14 @@ SubmitAsyncRead::Execute(
 
         for (uint32_t bufferIndex = 0; bufferIndex < bufferCount; bufferIndex++)
         {
-            //PhysicalBlkAddr physicalBlkAddr;
             list<PhysicalEntry> physicalEntries;
-            LogicalEntry logicalEntry{
+            LogicalEntry logicalEntry = {
                 .addr = currentLSA,
                 .blkCnt = 1};
 
             // Ignore handling the return status.
             translator->Translate(
                 arrayId, partitionToIO, physicalEntries, logicalEntry);
-            //arrayId, partitionToIO, physicalBlkAddr, currentLSA);
 
             PhysicalEntry physicalEntry = physicalEntries.front();
             if (mergedIO->IsContiguous(physicalEntry.addr))

@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <list>
 #include <string>
 
 #include "src/allocator/i_wbstripe_allocator.h"

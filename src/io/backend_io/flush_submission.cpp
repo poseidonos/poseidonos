@@ -93,10 +93,9 @@ FlushSubmission::Execute(void)
         .addr = physicalBlkAddr,
         .blkCnt = 0};
 
-    LogicalEntry startWbLogicalEntry{
+    LogicalEntry startWbLogicalEntry = {
         .addr = startWbLSA,
-        .blkCnt = 1 // only start address is required
-    };
+        .blkCnt = 1};
 
     FlushCountSingleton::Instance()->pendingFlush++;
 

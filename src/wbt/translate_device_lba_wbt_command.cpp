@@ -95,12 +95,10 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
 
     PhysicalBlkAddr pba;
     list<PhysicalEntry> physicalEntries;
-    LogicalEntry logicalEntry{
+    LogicalEntry logicalEntry = {
         .addr = lsa,
-        .blkCnt = 1
-    };
+        .blkCnt = 1};
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    //ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
     ret = trans->Translate(arrayIndex, USER_DATA, physicalEntries, logicalEntry);
     pba = physicalEntries.front().addr;
     if (ret != 0 || pba.arrayDev == nullptr)

@@ -56,10 +56,11 @@ public:
 
         mockITranslator = new NiceMock<MockIIOTranslator>;
         PhysicalBlkAddr tmpPba = {.lba = 0, .arrayDev = nullptr};
-        PhysicalEntry tmpPE = {.addr = tmpPba, .blkCnt = 1};
+        PhysicalEntry tmpPE = {.addr = tmpPba,.blkCnt = 1};
         list<PhysicalEntry> tmpPWEs;
         tmpPWEs.push_back(tmpPE);
-        ON_CALL(*mockITranslator, Translate(arrayId, _, _, _)).WillByDefault([tmpPWEs](unsigned int arrayIndex, PartitionType part, list<PhysicalEntry>& dst, const LogicalEntry& src) {
+        ON_CALL(*mockITranslator, Translate(arrayId, _, _, _)).WillByDefault([tmpPWEs](unsigned int arrayIndex, PartitionType part, list<PhysicalEntry>& dst, const LogicalEntry& src)
+        {
             dst = tmpPWEs;
             return 0;
         });
