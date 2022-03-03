@@ -1,3 +1,4 @@
+
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -92,8 +93,7 @@ Wait()
         delete reqHandler;
         reqHandler = nullptr;
     }
-    int event = (int)POS_EVENT_ID::CLI_SERVER_THREAD_JOINED;
-    POS_TRACE_INFO(event, "");
+    POS_TRACE_INFO(EID(CLI_SERVER_THREAD_JOINED), "");
 }
 
 void
@@ -101,8 +101,7 @@ Exit()
 {
     std::unique_lock<std::mutex> lock(exitMutex);
     exit_flag = true;
-    int event = (int)POS_EVENT_ID::CLI_SERVER_FINISH;
-    POS_TRACE_INFO(event, "");
+    POS_TRACE_INFO(EID(CLI_SERVER_FINISH), "");
     exitCond.notify_all();
 }
 
@@ -120,11 +119,11 @@ SendMsg(sock_pool_t* client, string msg)
 
     if (ret < 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_MSG_SENDING_FAILURE;
-        POS_TRACE_ERROR(event, "fd:{}, result:{}, message:{}", client->sockfd, ret, msg);
+        POS_TRACE_ERROR(EID(CLI_MSG_SENDING_FAILURE),
+            "fd:{}, result:{}, message:{}", client->sockfd, ret, msg);
     }
-    int event = (int)POS_EVENT_ID::CLI_MSG_SENT;
-    POS_TRACE_INFO(event, "fd:{}, length:{}, message:{}", client->sockfd, ret, msg);
+    POS_TRACE_INFO(EID(CLI_MSG_SENT),
+        "fd:{}, length:{}, message:{}", client->sockfd, ret, msg);
 
     free(buffer);
     return ret;
@@ -145,8 +144,8 @@ AddClient(int sockfd)
         }
     }
     pthread_mutex_unlock(&mutx);
-    int event = (int)POS_EVENT_ID::CLI_ADD_CLIENT_FAILURE_MAX_CLIENT;
-    POS_TRACE_WARN(event, "max_client_count:{}", MAX_CLI_CNT);
+    POS_TRACE_WARN(EID(CLI_ADD_CLIENT_FAILURE_MAX_CLIENT),
+        "max_client_count:{}", MAX_CLI_CNT);
     return nullptr;
 }
 
@@ -166,8 +165,7 @@ RemoveClient(int sockfd)
     }
     pthread_mutex_unlock(&mutx);
 
-    int event = (int)POS_EVENT_ID::CLI_CLIENT_DISCONNECTED;
-    POS_TRACE_INFO(event, "fd:{}", sockfd);
+    POS_TRACE_INFO(EID(CLI_CLIENT_DISCONNECTED), "fd:{}", sockfd);
 }
 
 string
@@ -239,8 +237,7 @@ ClientThread(void* arg)
 
             if (timedout)
             {
-                int event = (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT;
-                POS_TRACE_INFO(event, "");
+                POS_TRACE_INFO(EID(CLI_SERVER_TIMED_OUT), "");
                 SendMsg(clnt, reqHandler->TimedOut(clnt->recv_buff));
             }
             else
@@ -260,8 +257,8 @@ ClientThread(void* arg)
     }
     else
     {
-        int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVE_FAILURE;
-        POS_TRACE_ERROR(event, "str_len:{}, error:{}", str_len, strerror(errno));
+        POS_TRACE_ERROR(EID(CLI_MSG_RECEIVE_FAILURE),
+            "str_len:{}, error:{}", str_len, strerror(errno));
 
         if (clnt->work)
             pthread_mutex_unlock(&workmutx);
@@ -280,12 +277,12 @@ EnableReuseAddr(int sockfd)
     int rc = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (rc < 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_REUSE_ADDR_FAILURE;
-        POS_TRACE_WARN(event, "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
+        POS_TRACE_WARN(EID(CLI_REUSE_ADDR_FAILURE),
+            "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
         return rc;
     }
-    int event = (int)POS_EVENT_ID::CLI_REUSE_ADDR_ENABLED;
-    POS_TRACE_INFO(event, "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
+    POS_TRACE_INFO(EID(CLI_REUSE_ADDR_ENABLED),
+        "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
     return 0;
 }
 
@@ -407,9 +404,8 @@ CLIServer()
     int efd = epoll_create(MAX_CLI_CNT);
     if (efd < 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_EPOLL_CREATE_FAILURE;
-        POS_TRACE_ERROR(event, "fd:{}, max_cli_count:{}, efd:{}",
-            sock_fd, MAX_CLI_CNT, efd);
+        POS_TRACE_ERROR(EID(CLI_EPOLL_CREATE_FAILURE),
+        "fd:{}, max_cli_count:{}, efd:{}", sock_fd, MAX_CLI_CNT, efd);
         return;
     }
 
@@ -426,7 +422,7 @@ CLIServer()
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::CLI_SERVER_INITIALIZED, "max_cli_count:{}", MAX_CLI_CNT);
+    POS_TRACE_INFO(EID(CLI_SERVER_INITIALIZED), "max_cli_count:{}", MAX_CLI_CNT);
     while (1)
     {
         int s_cnt = epoll_wait(efd, event, MAX_CLI_CNT, 1000);
@@ -448,13 +444,12 @@ CLIServer()
                 int cli_fd = accept(sock_fd, (struct sockaddr*)&cli_addr, &clilen);
                 if (cli_fd < 0 || reqHandler->IsExit())
                 {
-                    int event = (int)POS_EVENT_ID::CLI_SOCK_ACCEPT_FAILURE;
-                    POS_TRACE_WARN(event, "cli_fd:{}, reqHandler->IsExit():", cli_fd, reqHandler->IsExit());
+                    POS_TRACE_WARN(EID(CLI_SOCK_ACCEPT_FAILURE),
+                        "cli_fd:{}, reqHandler->IsExit():", cli_fd, reqHandler->IsExit());
                 }
                 else if (cli_fd >= 0)
                 {
-                    int event = (int)POS_EVENT_ID::CLI_CLIENT_ACCEPTED;
-                    POS_TRACE_INFO(event, "fd:{}, client_ip:{}, client_port:{}",
+                    POS_TRACE_INFO(EID(CLI_CLIENT_ACCEPTED), "fd:{}, client_ip:{}, client_port:{}",
                         cli_fd, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
 
                     sock_pool_t* clnt = AddClient(cli_fd);
@@ -473,8 +468,22 @@ CLIServer()
                         {
                             clnt->work = true;
                             pthread_t t_id;
-                            pthread_create(&t_id, NULL, ClientThread, (void*)clnt);
-                            pthread_detach(t_id);
+
+                            int ret = pthread_create(&t_id, NULL, ClientThread, (void*)clnt);
+                            if (ret != 0)
+                            {
+                                POS_TRACE_WARN(EID(CLI_CLIENT_CREATION_FAILURE),
+                                    "thread_id:{}, error_code:{}", t_id, ret);
+                            }
+                            POS_TRACE_DEBUG(EID(CLI_CLIENT_CREATED), "thread_id:{}", t_id);
+                            
+                            ret = pthread_detach(t_id);
+                            if (ret != 0)
+                            {
+                                POS_TRACE_WARN(EID(CLI_CLIENT_DETACHEMENT_FAILURE),
+                                    "thread_id:{}, error_code:{}", t_id, ret);
+                            }
+                            POS_TRACE_DEBUG(EID(CLI_CLIENT_DETACHED), "thread_id:{}", t_id);
                         }
                         else
                         {
