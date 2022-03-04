@@ -44,6 +44,7 @@
 #include "src/logger/logger.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "assert.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
 {
@@ -169,7 +170,8 @@ FlowControl::GetToken(FlowControlType type, int token)
         return token;
     }
 
-    uint32_t freeSegments = iContextManager->GetNumOfFreeSegment(false);
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    uint32_t freeSegments = segmentCtx->GetNumOfFreeSegmentWoLock();
     if (freeSegments > gcThreshold)
     {
         return token;
@@ -294,6 +296,7 @@ FlowControl::_TryForceResetToken(FlowControlType type)
 std::tuple<uint32_t, uint32_t>
 FlowControl::_DistributeToken(void)
 {
-    return tokenDistributer->Distribute(iContextManager->GetNumOfFreeSegment(false));
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    return tokenDistributer->Distribute(segmentCtx->GetNumOfFreeSegmentWoLock());
 }
 } // namespace pos

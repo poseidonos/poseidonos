@@ -46,14 +46,17 @@ public:
     void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
     virtual GcMode GetCurrentGcMode(int numFreeSegments);
+    void UpdateGcMode(pos::GcMode newGcMode);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;
 
 private:
-    int normalGcthreshold;
-    int urgentGcthreshold;
+    void _PrintInfo(pos::GcMode newGcMode, int numFreeSegments);
+    int normalGcThreshold;
+    int urgentGcThreshold;
     GcMode curGcMode;
+    GcMode prevGcMode;
 };
 
 } // namespace pos

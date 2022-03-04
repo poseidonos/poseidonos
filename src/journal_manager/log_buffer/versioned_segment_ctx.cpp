@@ -30,95 +30,95 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "buffered_segment_context_manager.h"
+#include "versioned_segment_ctx.h"
 
 #include <unordered_map>
 
-#include "buffered_segment_context.h"
+#include "versioned_segment_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-BufferedSegmentContextManager::BufferedSegmentContextManager(void)
+VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
-  bufferedSegCtx(nullptr),
+  versionedSegInfo(nullptr),
   numLogGroups(0)
 {
 }
 
-BufferedSegmentContextManager::~BufferedSegmentContextManager(void)
+VersionedSegmentCtx::~VersionedSegmentCtx(void)
 {
     Dispose();
 }
 
 void
-BufferedSegmentContextManager::Init(JournalConfiguration* journalConfiguration)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration)
 {
     config = journalConfiguration;
     numLogGroups = config->GetNumLogGroups();
-    bufferedSegCtx = new BufferedSegmentContext*[numLogGroups];
+    versionedSegInfo = new VersionedSegmentInfo*[numLogGroups];
     for (uint32_t index = 0; index < numLogGroups; index++)
     {
-        bufferedSegCtx[index] = new BufferedSegmentContext;
+        versionedSegInfo[index] = new VersionedSegmentInfo;
     }
 }
 
 void
-BufferedSegmentContextManager::Init(JournalConfiguration* journalConfiguration, BufferedSegmentContext** inputBufferedSegmentContext)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, VersionedSegmentInfo** inputVersionedSegmentInfo)
 {
     config = journalConfiguration;
     numLogGroups = config->GetNumLogGroups();
-    bufferedSegCtx = inputBufferedSegmentContext;
+    versionedSegInfo = inputVersionedSegmentInfo;
 }
 
 void
-BufferedSegmentContextManager::Dispose(void)
+VersionedSegmentCtx::Dispose(void)
 {
-    if (bufferedSegCtx != nullptr)
+    if (versionedSegInfo != nullptr)
     {
         for (uint32_t index = 0; index < numLogGroups; index++)
         {
-            if (bufferedSegCtx[index] != nullptr)
+            if (versionedSegInfo[index] != nullptr)
             {
-                delete bufferedSegCtx[index];
+                delete versionedSegInfo[index];
             }
         }
-        delete[] bufferedSegCtx;
-        bufferedSegCtx = nullptr;
+        delete[] versionedSegInfo;
+        versionedSegInfo = nullptr;
     }
 }
 
 void
-BufferedSegmentContextManager::IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt)
+VersionedSegmentCtx::IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt)
 {
-    BufferedSegmentContext* targetSegCtx = bufferedSegCtx[logGroupId];
-    targetSegCtx->IncreaseValidBlockCount(segId, cnt);
+    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
+    targetSegInfo->IncreaseValidBlockCount(segId, cnt);
     // TODO (cheolho.kang): Add ISegmentContext method after introduced
 }
 
 void
-BufferedSegmentContextManager::DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt)
+VersionedSegmentCtx::DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt)
 {
-    BufferedSegmentContext* targetSegCtx = bufferedSegCtx[logGroupId];
-    targetSegCtx->DecreaseValidBlockCount(segId, cnt);
+    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
+    targetSegInfo->DecreaseValidBlockCount(segId, cnt);
     // TODO (cheolho.kang): Add ISegmentContext method after introduced
 }
 
 void
-BufferedSegmentContextManager::IncreaseOccupiedStripeCount(uint32_t logGroupId, SegmentId segId)
+VersionedSegmentCtx::IncreaseOccupiedStripeCount(uint32_t logGroupId, SegmentId segId)
 {
-    BufferedSegmentContext* targetSegCtx = bufferedSegCtx[logGroupId];
-    targetSegCtx->IncreaseOccupiedStripeCount(segId);
+    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
+    targetSegInfo->IncreaseOccupiedStripeCount(segId);
     // TODO (cheolho.kang): Add ISegmentContext method after introduced
 }
 
 void
-BufferedSegmentContextManager::UpdateSegmentContext(uint32_t logGroupId)
+VersionedSegmentCtx::UpdateSegmentContext(uint32_t logGroupId)
 {
-    BufferedSegmentContext* targetSegCtx = bufferedSegCtx[logGroupId];
-    std::unordered_map<uint32_t, int> changedValidBlkCount = targetSegCtx->GetChangedValidBlockCount();
+    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
+    std::unordered_map<uint32_t, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
         if (it->second > 0)
@@ -131,7 +131,7 @@ BufferedSegmentContextManager::UpdateSegmentContext(uint32_t logGroupId)
         }
     }
 
-    std::unordered_map<uint32_t, uint32_t> changedOccupiedCount = targetSegCtx->GetChangedOccupiedStripeCount();
+    std::unordered_map<uint32_t, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
         if (it->second > 0)
@@ -139,12 +139,12 @@ BufferedSegmentContextManager::UpdateSegmentContext(uint32_t logGroupId)
             // TODO (cheolho.kang): Add ISegmentContext method after introduced
         }
     }
-    targetSegCtx->Reset();
+    targetSegInfo->Reset();
 }
 
 // TODO (cheolho.kang): Change return type to ISegmentContext
-BufferedSegmentContext*
-BufferedSegmentContextManager::GetSegmentContext(uint32_t logGroupId)
+VersionedSegmentInfo*
+VersionedSegmentCtx::GetSegmentInfo(uint32_t logGroupId)
 {
     if (logGroupId >= numLogGroups)
     {
@@ -152,7 +152,7 @@ BufferedSegmentContextManager::GetSegmentContext(uint32_t logGroupId)
             "Failed to get buffered segment context, Invalid log gorup ID: {}, Maximun log group ID: {}", logGroupId, numLogGroups);
         return nullptr;
     }
-    return bufferedSegCtx[logGroupId];
+    return versionedSegInfo[logGroupId];
 }
 
 } // namespace pos

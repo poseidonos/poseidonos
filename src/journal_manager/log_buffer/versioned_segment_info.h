@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
-#include <string>
+#include <atomic>
 #include <unordered_map>
-#include <vector>
 
-#include "src/journal_manager/log_buffer/buffered_segment_context.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {
-class MockBufferedSegmentContext : public BufferedSegmentContext
+class VersionedSegmentInfo
 {
 public:
-    using BufferedSegmentContext::BufferedSegmentContext;
-    MOCK_METHOD(void, Reset, (), (override));
-    MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(void, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD((std::unordered_map<uint32_t, int>), GetChangedValidBlockCount, (), (override));
-    MOCK_METHOD((std::unordered_map<uint32_t, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
+    VersionedSegmentInfo(void);
+    virtual ~VersionedSegmentInfo(void);
+
+    virtual void Reset(void);
+    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual void IncreaseOccupiedStripeCount(SegmentId segId);
+
+    virtual std::unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
+    virtual std::unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
+
+private:
+    std::unordered_map<SegmentId, int> changedValidBlockCount;
+    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
 };
 
 } // namespace pos

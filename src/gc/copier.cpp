@@ -46,6 +46,8 @@
 #include "src/include/backend_event.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 namespace pos
 {
@@ -172,13 +174,20 @@ void
 Copier::_CompareThresholdState(void)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    GcCtx* gcCtx = iContextManager->GetGcCtx();
 
-    GcMode gcMode = iContextManager->GetCurrentGcMode();
+    uint32_t arrayId = iContextManager->GetArrayId();
+    segmentCtx->UpdateGcFreeSegment(arrayId);
+    int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
+    GcMode gcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
+
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
         airlog("LAT_GetVictimSegment", "AIR_BEGIN", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
         airlog("LAT_GetVictimSegment", "AIR_END", 0, objAddr);
+
         if (UNMAP_SEGMENT != victimId)
         {
             _InitVariables();
@@ -186,7 +195,7 @@ Copier::_CompareThresholdState(void)
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
-            iContextManager->GetNumOfFreeSegment(true), victimId);
+                numFreeSegments, victimId);
         }
     }
 }

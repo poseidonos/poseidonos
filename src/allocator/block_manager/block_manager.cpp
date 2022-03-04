@@ -42,6 +42,7 @@
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
 {
@@ -269,10 +270,14 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     StripeId ssdLsid = allocCtx->UpdatePrevLsid();
+    SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
+    GcCtx* gcCtx = contextManager->GetGcCtx();
 
-    if (_IsSegmentFull(ssdLsid))
+    if (true == _IsSegmentFull(ssdLsid))
     {
-        if (contextManager->GetCurrentGcMode() == MODE_URGENT_GC)
+        segmentCtx->UpdateGcFreeSegment(arrayId);
+        int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
+        if (MODE_URGENT_GC == gcCtx->GetCurrentGcMode(numFreeSegments))
         {
             allocStatus->ProhibitUserBlockAllocation();
             if (isUserStripeAlloc)

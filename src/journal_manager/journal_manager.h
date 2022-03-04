@@ -42,6 +42,7 @@
 #include "src/journal_manager/i_journal_writer.h"
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos
 {
@@ -103,7 +104,7 @@ public:
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
         CheckpointManager* checkpointManager,
-        BufferedSegmentContextManager* bufferedSegCtxManager,
+        VersionedSegmentCtx* versionedSegCtx_,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
@@ -171,7 +172,7 @@ protected:
     LogGroupReleaser* logGroupReleaser;
 
     CheckpointManager* checkpointManager;
-    BufferedSegmentContextManager* bufferedSegCtxManager;
+    VersionedSegmentCtx* versionedSegCtx;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;

@@ -56,8 +56,6 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
-  curGcMode(MODE_NO_GC),
-  prevGcMode(MODE_NO_GC),
   arrayId(arrayId_)
 {
     // for UT
@@ -76,9 +74,11 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 {
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
-    segmentCtx = new SegmentCtx(tp, rebuildCtx, info);
     gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
+    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx, blockAllocStatus);
+
+
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
 
     AllocatorFileIo* rebuildFileIo = new AllocatorFileIo(REBUILD_CTX, rebuildCtx, addrInfo, arrayId);
@@ -119,7 +119,8 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
             "[FreeSegment] segmentId:{} freed by occupied stripe count", segId);
-        _NotifySegmentFreed(segId);
+
+        segmentCtx->UpdateGcFreeSegment(arrayId);
     }
 }
 
@@ -139,7 +140,8 @@ ContextManager::InvalidateBlks(VirtualBlks blks)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
             "[FreeSegment] segmentId:{} freed by valid block count", segId);
-        _NotifySegmentFreed(segId);
+
+        segmentCtx->UpdateGcFreeSegment(arrayId);
     }
 }
 
@@ -171,39 +173,10 @@ ContextManager::AllocateGCVictimSegment(void)
     return segmentCtx->AllocateGCVictimSegment();
 }
 
-GcMode
-ContextManager::GetCurrentGcMode(void)
-{
-    int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayId);
-    prevGcMode = curGcMode;
-    curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
-    if (prevGcMode != curGcMode)
-    {
-        POSMetricValue v;
-        v.gauge = curGcMode;
-        telPublisher->PublishData(TEL30003_ALCT_GCMODE, v, MT_GAUGE);
-    }
-    return curGcMode;
-}
-
 int
 ContextManager::GetGcThreshold(GcMode mode)
 {
     return mode == MODE_NORMAL_GC ? gcCtx->GetNormalGcThreshold() : gcCtx->GetUrgentThreshold();
-}
-
-int
-ContextManager::GetNumOfFreeSegment(bool needLock)
-{
-    if (needLock == true)
-    {
-        return segmentCtx->GetNumOfFreeSegment();
-    }
-    else
-    {
-        return segmentCtx->GetNumOfFreeSegmentWoLock();
-    }
 }
 
 int
@@ -271,22 +244,16 @@ ContextManager::GetContextSectionSize(int owner, int section)
     return ioManager->GetContextSectionSize(owner, section);
 }
 
-
-
 uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
 }
 
-void
-ContextManager::_NotifySegmentFreed(SegmentId segId)
+uint32_t
+ContextManager::GetArrayId(void)
 {
-    if (GetCurrentGcMode() != MODE_URGENT_GC)
-    {
-        blockAllocStatus->PermitUserBlockAllocation();
-    }
+    return arrayId;
 }
-
 
 } // namespace pos

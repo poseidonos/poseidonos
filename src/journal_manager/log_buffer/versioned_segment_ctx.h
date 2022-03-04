@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -38,18 +38,17 @@
 
 namespace pos
 {
-class BufferedSegmentContext;
+class VersionedSegmentInfo;
 class JournalConfiguration;
-class BufferedSegmentContextManager
-
+class VersionedSegmentCtx
 {
 public:
-    BufferedSegmentContextManager(void);
-    virtual ~BufferedSegmentContextManager(void);
+    VersionedSegmentCtx(void);
+    virtual ~VersionedSegmentCtx(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration);
     // For UT
-    void Init(JournalConfiguration* journalConfiguration, BufferedSegmentContext** inputBufferedSegmentContext);
+    void Init(JournalConfiguration* journalConfiguration, VersionedSegmentInfo** inputVersionedSegmentInfo);
     virtual void Dispose(void);
 
     virtual void IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt);
@@ -59,11 +58,11 @@ public:
 
     // TODO (cheolho.kang): Add method to get latest segment context
 
-    virtual BufferedSegmentContext* GetSegmentContext(uint32_t logGroupId);
+    virtual VersionedSegmentInfo* GetSegmentInfo(uint32_t logGroupId);
 
 private:
     JournalConfiguration* config;
-    BufferedSegmentContext** bufferedSegCtx;
+    VersionedSegmentInfo** versionedSegInfo;
     uint32_t numLogGroups;
 };
 

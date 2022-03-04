@@ -43,7 +43,7 @@
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/journal_writer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/buffered_segment_context_manager_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
@@ -79,7 +79,7 @@ public:
       logBuffer(nullptr),
       bufferAllocator(nullptr),
       logGroupReleaser(nullptr),
-      bufferedSegmentContext(nullptr),
+      versionedSegmentCtx(nullptr),
       dirtyMapManager(nullptr),
       logFilledNotifier(nullptr),
       replayHandler(nullptr),
@@ -104,7 +104,7 @@ public:
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
         checkpointManager = new NiceMock<MockCheckpointManager>;
-        bufferedSegmentContext = new NiceMock<MockBufferedSegmentContextManager>;
+        versionedSegmentCtx = new NiceMock<MockVersionedSegmentCtx>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
         callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
@@ -117,7 +117,7 @@ public:
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-            bufferedSegmentContext, dirtyMapManager, logFilledNotifier,
+            versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
             callbackSequenceController, replayHandler, arrayInfo, tp);
     }
 
@@ -144,7 +144,7 @@ protected:
     NiceMock<MockBufferOffsetAllocator>* bufferAllocator;
     NiceMock<MockLogGroupReleaser>* logGroupReleaser;
     NiceMock<MockCheckpointManager>* checkpointManager;
-    NiceMock<MockBufferedSegmentContextManager>* bufferedSegmentContext;
+    NiceMock<MockVersionedSegmentCtx>* versionedSegmentCtx;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
     NiceMock<MockCallbackSequenceController>* callbackSequenceController;
@@ -333,7 +333,7 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
     EXPECT_CALL(*logFilledNotifier, Dispose);
     EXPECT_CALL(*logWriteHandler, Dispose);
     EXPECT_CALL(*replayHandler, Dispose);
-    EXPECT_CALL(*bufferedSegmentContext, Dispose);
+    EXPECT_CALL(*versionedSegmentCtx, Dispose);
 
     // When: Journal is disposed
     journal->Dispose();

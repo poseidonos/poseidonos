@@ -51,7 +51,7 @@ public:
     CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback);
     virtual ~CheckpointHandler(void) = default;
 
-    virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer, EventScheduler* scheduler);
+    virtual void Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
 
     virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback);
     virtual int FlushCompleted(int metaId);

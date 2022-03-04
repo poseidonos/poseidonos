@@ -39,63 +39,79 @@ namespace pos
 {
 GcCtx::GcCtx(void)
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
+    normalGcThreshold = DEFAULT_GC_THRESHOLD;
+    urgentGcThreshold = DEFAULT_URGENT_THRESHOLD;
     curGcMode = MODE_NO_GC;
+    prevGcMode = MODE_NO_GC;
 }
 
 int
 GcCtx::GetNormalGcThreshold(void)
 {
-    return normalGcthreshold;
+    return normalGcThreshold;
 }
 
 int
 GcCtx::GetUrgentThreshold(void)
 {
-    return urgentGcthreshold;
+    return urgentGcThreshold;
 }
 
 void
 GcCtx::SetNormalGcThreshold(int inputThreshold)
 {
-    normalGcthreshold = inputThreshold;
+    normalGcThreshold = inputThreshold;
 }
 
 void
 GcCtx::SetUrgentThreshold(int inputThreshold)
 {
-    urgentGcthreshold = inputThreshold;
+    urgentGcThreshold = inputThreshold;
 }
 
 GcMode
 GcCtx::GetCurrentGcMode(int numFreeSegments)
 {
-    if (urgentGcthreshold >= numFreeSegments)
+    pos::GcMode newGcMode = MODE_NO_GC;
+
+    if (urgentGcThreshold >= numFreeSegments)
     {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
+        newGcMode = MODE_URGENT_GC;
     }
-    else if (normalGcthreshold >= numFreeSegments)
+    else if (normalGcThreshold >= numFreeSegments)
     {
-        if (curGcMode != MODE_NORMAL_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
+        newGcMode = MODE_NORMAL_GC;
     }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
+
+    _PrintInfo(newGcMode, numFreeSegments);
+    UpdateGcMode(newGcMode);
+
     return curGcMode;
+}
+
+void
+GcCtx::UpdateGcMode(pos::GcMode newGcMode)
+{
+    prevGcMode = curGcMode;
+    curGcMode = newGcMode;
+}
+
+void
+GcCtx::_PrintInfo(pos::GcMode newGcMode, int numFreeSegments)
+{
+    if (curGcMode != newGcMode)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE),
+            "Change GC STATE from GCState:{} to {}}, free segment count:{}",
+            (int)curGcMode, (int)newGcMode, numFreeSegments);
+
+        // TODO (dh.ihm) want to print out this here...
+        /*
+        POSMetricValue v;
+        v.gauge = curGcMode;
+        telPublisher->PublishData(TEL30003_ALCT_GCMODE, v, MT_GAUGE);
+        */
+    }
 }
 
 } // namespace pos

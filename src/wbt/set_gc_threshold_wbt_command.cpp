@@ -35,6 +35,8 @@
 #include <exception>
 #include <string>
 
+#include "src/cli/command.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/gc/garbage_collector.h"
@@ -100,8 +102,23 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
         iAllocatorWbt->SetNormalGcThreshold(numGcThreshold);
         iAllocatorWbt->SetUrgentThreshold(numUrgentThreshold);
+
         IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
-        if (iContextManager->GetCurrentGcMode() != MODE_URGENT_GC)
+        SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+        GcCtx* gcCtx = iContextManager->GetGcCtx();
+
+        ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        if (info == nullptr)
+        {
+            POS_TRACE_ERROR(EID(ARRAY_NOT_FOUND), "failed to get array info.!");
+            return returnValue;
+        }
+
+        uint32_t arrayId = iContextManager->GetArrayId();
+        segmentCtx->UpdateGcFreeSegment(arrayId);
+        int numOfFreeSegments = segmentCtx->GetNumOfFreeSegment();
+
+        if (MODE_URGENT_GC != gcCtx->GetCurrentGcMode(numOfFreeSegments))
         {
             IBlockAllocator* iBlockAllocator =
                 AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);

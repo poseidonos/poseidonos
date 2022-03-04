@@ -42,6 +42,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/garbage_collector.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
 {
@@ -76,7 +77,8 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     bool gcRunning = gc->GetGcRunning();
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
-    uint32_t freeSegments = iContextManager->GetNumOfFreeSegment(true);
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    uint32_t freeSegments = segmentCtx->GetNumOfFreeSegment();
     uint32_t numGcThreshold = iContextManager->GetGcThreshold(MODE_NORMAL_GC);
     uint32_t numUrgentThreshold = iContextManager->GetGcThreshold(MODE_URGENT_GC);
 

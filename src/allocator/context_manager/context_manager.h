@@ -83,8 +83,6 @@ public:
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual int MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList);
-    virtual int GetNumOfFreeSegment(bool needLock);
-    virtual GcMode GetCurrentGcMode(void);
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
@@ -108,9 +106,9 @@ public:
 
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
 
+    virtual uint32_t GetArrayId(void);
 private:
     void _ResetSegmentStates(void);
-    void _NotifySegmentFreed(SegmentId segId);
 
     ContextIoManager* ioManager;
 
@@ -122,8 +120,6 @@ private:
     AllocatorFileIo* fileIo[NUM_FILES];
     ContextReplayer* contextReplayer;
     GcCtx* gcCtx;
-    GcMode curGcMode;
-    GcMode prevGcMode;
     BlockAllocationStatus* blockAllocStatus;
 
     uint32_t arrayId;

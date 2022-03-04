@@ -19,9 +19,10 @@
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
-
+#include <test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h>
 #include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 #include "test/unit-tests/resource_manager/memory_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -52,6 +53,8 @@ public:
       victimStripes(nullptr),
       gcBufferPool(nullptr),
       stripeCopySubmissionPtr(nullptr),
+      gcCtx(nullptr),
+      segCtx(nullptr),
       reverseMapLoadCompletionPtr(nullptr)
     {
     }
@@ -99,6 +102,12 @@ public:
         stripeCopySubmissionPtr = std::make_shared<NiceMock<MockStripeCopySubmission>>(baseStripeId, nullptr, copyIndex);
         reverseMapLoadCompletionPtr = std::make_shared<NiceMock<MockReverseMapLoadCompletion>>();
         copier = new Copier(victimId, targetId, gcStatus, array, udSize, meta, iBlockAllocator, iContextManager, stripeCopySubmissionPtr, reverseMapLoadCompletionPtr);
+
+        gcCtx = new NiceMock<MockGcCtx>;
+        segCtx = new NiceMock<MockSegmentCtx>;
+
+        EXPECT_CALL(*iContextManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
+        EXPECT_CALL(*iContextManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
     }
 
     virtual void
@@ -106,6 +115,8 @@ public:
     {
         delete copier;
         delete array;
+        delete gcCtx;
+        delete segCtx;
         delete iBlockAllocator;
         delete iContextManager;
         delete memoryManager;
@@ -128,8 +139,10 @@ protected:
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockIReverseMap>* iReverseMap;
+    NiceMock<MockGcCtx>* gcCtx;
+    NiceMock<MockSegmentCtx>* segCtx;
 
-    std::vector<std::vector<VictimStripe*>>* victimStripes;    
+    std::vector<std::vector<VictimStripe*>>* victimStripes;
     std::vector<BufferPool*>* gcBufferPool;
     MockMemoryManager* memoryManager;
     CpuSetArray cpuSetArray;
@@ -157,14 +170,16 @@ protected:
 TEST_F(CopierTestFixture, Execute_NoGcMode)
 {
     // check gc mode when no gc situation
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NO_GC));
     EXPECT_FALSE(copier->Execute());
 }
 
 TEST_F(CopierTestFixture, Execute_testNormalGcAndGetUnmapSegmentId)
 {
     // check gc mode when normal gc situation and do not find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(UNMAP_SEGMENT));
     EXPECT_FALSE(copier->Execute());
 }
@@ -172,7 +187,8 @@ TEST_F(CopierTestFixture, Execute_testNormalGcAndGetUnmapSegmentId)
 TEST_F(CopierTestFixture, Execute_testNormalGcAndGetTestSegmentId)
 {
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 }
@@ -180,7 +196,8 @@ TEST_F(CopierTestFixture, Execute_testNormalGcAndGetTestSegmentId)
 TEST_F(CopierTestFixture, Execute_testUrgentGcAndGetTestSegmentId)
 {
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_URGENT_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_URGENT_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 }
@@ -195,7 +212,8 @@ TEST_F(CopierTestFixture, Execute_testPrepareState)
     }
 
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -214,7 +232,8 @@ TEST_F(CopierTestFixture, Execute_testCompleteState)
     }
 
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -243,7 +262,8 @@ TEST_F(CopierTestFixture, Execute_testDisableThresholdCheck)
     }
 
     // check gc mode state and disable threshold check test
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NO_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_TRUE(copier->IsEnableThresholdCheck());
     copier->DisableThresholdCheck();
@@ -263,7 +283,8 @@ TEST_F(CopierTestFixture, Execute_testStopWhenPrepareState)
 {
     EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
     // check gc mode state and disable threshold check test
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -292,7 +313,8 @@ TEST_F(CopierTestFixture, Execute_testStopWhenCompleteState)
     }
 
     // check gc mode state and disable threshold check test
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -334,7 +356,8 @@ TEST_F(CopierTestFixture, Execute_testPauseAndResume)
     }
 
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -375,16 +398,19 @@ TEST_F(CopierTestFixture, Execute_testComplexityScenario)
     }
 
     // check gc mode when no gc situation
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NO_GC));
     EXPECT_FALSE(copier->Execute());
 
     // check gc mode when normal gc situation and do not find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(UNMAP_SEGMENT));
     EXPECT_FALSE(copier->Execute());
 
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_NORMAL_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
     EXPECT_FALSE(copier->Execute());
 
@@ -402,7 +428,8 @@ TEST_F(CopierTestFixture, Execute_testComplexityScenario)
     EXPECT_FALSE(copier->Execute());
 
     // check gc mode when normal gc situation and find victim segment
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_URGENT_GC));
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillOnce(Return(GcMode::MODE_URGENT_GC));
     EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_2));
     EXPECT_FALSE(copier->Execute());
 
@@ -423,7 +450,8 @@ TEST_F(CopierTestFixture, Execute_testComplexityScenario)
     // gc resume test
     copier->Resume();
     EXPECT_FALSE(copier->IsPaused());
-    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillRepeatedly(Return(GcMode::MODE_NO_GC));
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    EXPECT_CALL(*gcCtx, GetCurrentGcMode(numFreeSegments)).WillRepeatedly(Return(GcMode::MODE_NO_GC));
     EXPECT_FALSE(copier->Execute());
 
     // gc stop test

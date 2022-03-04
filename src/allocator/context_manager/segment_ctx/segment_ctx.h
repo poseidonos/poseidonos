@@ -38,10 +38,12 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
+#include "src/allocator/context_manager/block_allocation_status.h"
 
 namespace pos
 {
@@ -51,12 +53,13 @@ class SegmentCtx : public IAllocatorFileIoClient
 public:
     SegmentCtx(void) = default;
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_);
+        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_,
+        BlockAllocationStatus* blockAllocStatus_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        SegmentList* rebuildSegmentList,
-        RebuildCtx* rebuildCtx_,
-        AllocatorAddressInfo* addrInfo_);
-    explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info);
+        SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_,
+        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_);
+    explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
+        AllocatorAddressInfo* info, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_);
     virtual ~SegmentCtx(void);
 
     // Only for UT
@@ -105,6 +108,8 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
+    virtual void UpdateGcFreeSegment(uint32_t arrayId);
+
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
 private:
@@ -138,6 +143,8 @@ private:
     std::mutex segCtxLock;
 
     RebuildCtx* rebuildCtx;
+    GcCtx* gcCtx;
+    BlockAllocationStatus* blockAllocStatus;
     TelemetryPublisher* tp;
 };
 

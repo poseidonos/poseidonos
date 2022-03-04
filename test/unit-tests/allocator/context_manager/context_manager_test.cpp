@@ -129,7 +129,6 @@ TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentFreed)
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -207,13 +206,13 @@ TEST(ContextManager, GetNumOfFreeSegment_TestSimpleGetter)
 
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(50));
     // when 1.
-    int ret = ctxManager.GetNumOfFreeSegment(true);
+    int ret = segCtx->GetNumOfFreeSegment();
     // then 1.
     EXPECT_EQ(50, ret);
     // given 2.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(50));
     // when 2.
-    ret = ctxManager.GetNumOfFreeSegment(false);
+    ret = segCtx->GetNumOfFreeSegmentWoLock();
     // then 2.
     EXPECT_EQ(50, ret);
 }
@@ -236,35 +235,41 @@ TEST(ContextManager, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment
     // given 1.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(11));
     // when 1.
-    GcMode ret = ctxManager.GetCurrentGcMode();
+    int numFreeSegments = segCtx->GetNumOfFreeSegment();
+    GcMode ret = gcCtx->GetCurrentGcMode(numFreeSegments);
+
     // then 1.
     EXPECT_EQ(MODE_NO_GC, ret);
 
     // given 2.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(10));
     // when 2.
-    ret = ctxManager.GetCurrentGcMode();
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
     // then 2.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 3.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(9));
     // when 3.
-    ret = ctxManager.GetCurrentGcMode();
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
     // then 3.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 4.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(5));
     // when 4.
-    ret = ctxManager.GetCurrentGcMode();
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
     // then 4.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 
     // given 5.
     EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(4));
     // when 5.
-    ret = ctxManager.GetCurrentGcMode();
+    numFreeSegments = segCtx->GetNumOfFreeSegment();
+    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
     // then 5.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 }

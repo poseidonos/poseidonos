@@ -21,8 +21,6 @@ public:
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(int, MakeRebuildTargetSegmentList, (std::set<SegmentId>& segmentList), (override));
-    MOCK_METHOD(int, GetNumOfFreeSegment, (bool needLock), (override));
-    MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));

@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log_buffer/buffered_segment_context.h"
+#include "src/journal_manager/log_buffer/versioned_segment_info.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -41,34 +41,34 @@ using testing::Return;
 
 namespace pos
 {
-TEST(BufferedSegmentContext, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedDecreasedAndReseted)
+TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedDecreasedAndReseted)
 {
     // Given
-    BufferedSegmentContext bufferedSegCtx;
+    VersionedSegmentInfo versionedSegInfo;
 
     // When
-    bufferedSegCtx.IncreaseValidBlockCount(2, 3);
-    bufferedSegCtx.DecreaseValidBlockCount(2, 1);
-    bufferedSegCtx.IncreaseValidBlockCount(1, 4);
+    versionedSegInfo.IncreaseValidBlockCount(2, 3);
+    versionedSegInfo.DecreaseValidBlockCount(2, 1);
+    versionedSegInfo.IncreaseValidBlockCount(1, 4);
 
     // Then
     std::unordered_map<uint32_t, int> expectChangedValidCount;
     expectChangedValidCount[2] = 2;
     expectChangedValidCount[1] = 4;
 
-    EXPECT_EQ(expectChangedValidCount, bufferedSegCtx.GetChangedValidBlockCount());
+    EXPECT_EQ(expectChangedValidCount, versionedSegInfo.GetChangedValidBlockCount());
 
     // When
-    bufferedSegCtx.Reset();
+    versionedSegInfo.Reset();
 
     // Then
-    EXPECT_EQ(true, bufferedSegCtx.GetChangedValidBlockCount().empty());
+    EXPECT_EQ(true, versionedSegInfo.GetChangedValidBlockCount().empty());
 }
 
-TEST(BufferedSegmentContext, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountIsIncreasedAndReseted)
+TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountIsIncreasedAndReseted)
 {
     // Given
-    BufferedSegmentContext bufferedSegCtx;
+    VersionedSegmentInfo versionedSegInfo;
 
     // When
     std::unordered_map<uint32_t, uint32_t> expectChangedOccupiedCount;
@@ -76,7 +76,7 @@ TEST(BufferedSegmentContext, IncreaseOccupiedStripeCount_testIfOccupiedStripeCou
     int increasedOccupiedCount = 5;
     for (int index = 0; index < increasedOccupiedCount; index++)
     {
-        bufferedSegCtx.IncreaseOccupiedStripeCount(targetSegment);
+        versionedSegInfo.IncreaseOccupiedStripeCount(targetSegment);
         expectChangedOccupiedCount[targetSegment]++;
     }
 
@@ -84,18 +84,18 @@ TEST(BufferedSegmentContext, IncreaseOccupiedStripeCount_testIfOccupiedStripeCou
     increasedOccupiedCount = 3;
     for (int index = 0; index < increasedOccupiedCount; index++)
     {
-        bufferedSegCtx.IncreaseOccupiedStripeCount(targetSegment);
+        versionedSegInfo.IncreaseOccupiedStripeCount(targetSegment);
         expectChangedOccupiedCount[targetSegment]++;
     }
 
     // Then
-    EXPECT_EQ(expectChangedOccupiedCount, bufferedSegCtx.GetChangedOccupiedStripeCount());
+    EXPECT_EQ(expectChangedOccupiedCount, versionedSegInfo.GetChangedOccupiedStripeCount());
 
     // When
-    bufferedSegCtx.Reset();
+    versionedSegInfo.Reset();
 
     // Then
-    EXPECT_EQ(true, bufferedSegCtx.GetChangedOccupiedStripeCount().empty());
+    EXPECT_EQ(true, versionedSegInfo.GetChangedOccupiedStripeCount().empty());
 }
 
 } // namespace pos

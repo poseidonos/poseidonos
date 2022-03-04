@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,55 +30,55 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "buffered_segment_context.h"
+#include "versioned_segment_info.h"
 
 #include <unordered_map>
 
 namespace pos
 {
-BufferedSegmentContext::BufferedSegmentContext(void)
+VersionedSegmentInfo::VersionedSegmentInfo(void)
 {
 }
 
-BufferedSegmentContext::~BufferedSegmentContext(void)
+VersionedSegmentInfo::~VersionedSegmentInfo(void)
 {
     changedValidBlockCount.clear();
     changedOccupiedStripeCount.clear();
 }
 
 void
-BufferedSegmentContext::Reset(void)
+VersionedSegmentInfo::Reset(void)
 {
     changedOccupiedStripeCount.clear();
     changedValidBlockCount.clear();
 }
 
 void
-BufferedSegmentContext::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
+VersionedSegmentInfo::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
     changedValidBlockCount[segId] += cnt;
 }
 
 void
-BufferedSegmentContext::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
+VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
     changedValidBlockCount[segId] -= cnt;
 }
 
 void
-BufferedSegmentContext::IncreaseOccupiedStripeCount(SegmentId segId)
+VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
 {
     changedOccupiedStripeCount[segId]++;
 }
 
 std::unordered_map<uint32_t, int>
-BufferedSegmentContext::GetChangedValidBlockCount(void)
+VersionedSegmentInfo::GetChangedValidBlockCount(void)
 {
     return this->changedValidBlockCount;
 }
 
 std::unordered_map<uint32_t, uint32_t>
-BufferedSegmentContext::GetChangedOccupiedStripeCount(void)
+VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;
 }

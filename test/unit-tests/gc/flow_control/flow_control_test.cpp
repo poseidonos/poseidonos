@@ -9,6 +9,8 @@
 #include <test/unit-tests/gc/flow_control/flow_control_service_mock.h>
 #include <test/unit-tests/gc/flow_control/token_distributer_mock.h>
 #include <test/unit-tests/gc/flow_control/flow_control_configuration_mock.h>
+#include <test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h>
+#include <test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h>
 
 using ::testing::Test;
 using ::testing::Return;
@@ -47,9 +49,11 @@ public:
         mockFlowControlConfiguration = new NiceMock<MockFlowControlConfiguration>(mockIArrayInfo, nullptr);
 
         flowControl = new FlowControl(mockIArrayInfo, mockIContextManager,
-                                    mockSystemTimeoutChecker,
-                                    mockFlowControlService, mockTokenDistributer,
-                                    mockFlowControlConfiguration);
+            mockSystemTimeoutChecker, mockFlowControlService, mockTokenDistributer,
+            mockFlowControlConfiguration);
+
+        mockSegmentCtx = new NiceMock<MockSegmentCtx>;
+        mockGcCtx = new NiceMock<MockGcCtx>;
     }
 
     virtual void
@@ -59,6 +63,8 @@ public:
         delete mockIArrayInfo;
         delete mockIContextManager;
         delete mockFlowControlService;
+        delete mockSegmentCtx;
+        delete mockGcCtx;
     }
 protected:
     FlowControl* flowControl;
@@ -70,6 +76,8 @@ protected:
     NiceMock<MockFlowControlService>* mockFlowControlService;
     NiceMock<MockTokenDistributer>* mockTokenDistributer;
     NiceMock<MockFlowControlConfiguration>* mockFlowControlConfiguration;
+    NiceMock<MockSegmentCtx>* mockSegmentCtx;
+    NiceMock<MockGcCtx>* mockGcCtx;
 };
 
 TEST_F(FlowControlTestFixture, Init_testInit)
@@ -173,6 +181,8 @@ TEST_F(FlowControlTestFixture, GetToken_testUserGetTokenWhenFlowControlDisabled)
 TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentMoreThanGCThreshold)
 {
     // Given: FlowControl enabled & use default configuration
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -190,7 +200,7 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentMoreThanGCThreshold)
     EXPECT_CALL(*mockFlowControlConfiguration, GetFlowControlStrategy()).WillRepeatedly(Return(FlowControlStrategy::LINEAR));
     flowControl->Init();
     // When: number of free segments > gc normal threshold
-    EXPECT_CALL(*mockIContextManager, GetNumOfFreeSegment(false)).WillOnce(Return(30));
+    EXPECT_CALL(*mockSegmentCtx, GetNumOfFreeSegmentWoLock()).WillOnce(Return(30));
     // Then: Return requested tokens
     FlowControlType type = FlowControlType::USER;
     int expected, token;
@@ -203,6 +213,8 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentMoreThanGCThreshold)
 TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdLinear)
 {
     // Given: FlowControl enabled & use default configuration
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -220,7 +232,7 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdLi
     EXPECT_CALL(*mockFlowControlConfiguration, GetFlowControlStrategy()).WillRepeatedly(Return(FlowControlStrategy::LINEAR));
     flowControl->Init();
     // When: number of free segments < gc normal threshold, token more than 0
-    EXPECT_CALL(*mockIContextManager, GetNumOfFreeSegment(false)).WillRepeatedly(Return(15));
+    EXPECT_CALL(*mockSegmentCtx, GetNumOfFreeSegmentWoLock()).WillRepeatedly(Return(15));
     EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(100, 100)));
     // Then: Return requested tokens
     FlowControlType type = FlowControlType::USER;
@@ -235,6 +247,8 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdLi
 TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdState)
 {
     // Given: FlowControl enabled & use default configuration
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -252,7 +266,7 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdSt
     EXPECT_CALL(*mockFlowControlConfiguration, GetFlowControlStrategy()).WillRepeatedly(Return(FlowControlStrategy::STATE));
     flowControl->Init();
     // When: number of free segments < gc normal threshold, token more than 0
-    EXPECT_CALL(*mockIContextManager, GetNumOfFreeSegment(false)).WillRepeatedly(Return(15));
+    EXPECT_CALL(*mockSegmentCtx, GetNumOfFreeSegmentWoLock()).WillRepeatedly(Return(15));
     EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(100, 100)));
     // Then: Return requested tokens
     FlowControlType type = FlowControlType::USER;
@@ -266,6 +280,8 @@ TEST_F(FlowControlTestFixture, GetToken_testWhenFreeSegmentLessThanGCThresholdSt
 TEST_F(FlowControlTestFixture, GetToken_testForceRefill)
 {
     // Given: FlowControl enabled & use default configuration
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -283,7 +299,7 @@ TEST_F(FlowControlTestFixture, GetToken_testForceRefill)
     EXPECT_CALL(*mockFlowControlConfiguration, GetFlowControlStrategy()).WillRepeatedly(Return(FlowControlStrategy::LINEAR));
     flowControl->Init();
     // When: number of free segments < gc normal threshold, fails to get token
-    EXPECT_CALL(*mockIContextManager, GetNumOfFreeSegment(false)).WillRepeatedly(Return(15));
+    EXPECT_CALL(*mockSegmentCtx, GetNumOfFreeSegmentWoLock()).WillRepeatedly(Return(15));
     EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(0, 100)));
     // Then: try to forceReset & refill token
     FlowControlType type = FlowControlType::USER;
@@ -327,6 +343,8 @@ TEST_F(FlowControlTestFixture, GetToken_testForceRefill)
 TEST_F(FlowControlTestFixture, ReturnToken_whenFlowControlDisabled)
 {
     // Given: FlowControl disabled
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -353,6 +371,8 @@ TEST_F(FlowControlTestFixture, ReturnToken_whenFlowControlDisabled)
 TEST_F(FlowControlTestFixture, ReturnToken_testReturnTokenWithNegativeToken)
 {
     // Given: FlowControl disabled
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));
@@ -379,6 +399,8 @@ TEST_F(FlowControlTestFixture, ReturnToken_testReturnTokenWithNegativeToken)
 TEST_F(FlowControlTestFixture, ReturnToken_testReturnToken)
 {
     // Given: FlowControl enabled & use default configuration
+    EXPECT_CALL(*mockIContextManager, GetSegmentCtx).WillRepeatedly(Return(mockSegmentCtx));
+    EXPECT_CALL(*mockIContextManager, GetGcCtx).WillRepeatedly(Return(mockGcCtx));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_NORMAL_GC)).WillOnce(Return(20));
     EXPECT_CALL(*mockIContextManager, GetGcThreshold(GcMode::MODE_URGENT_GC)).WillOnce(Return(5));
     EXPECT_CALL(*mockIArrayInfo, GetName()).WillOnce(Return("POSArray"));

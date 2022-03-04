@@ -9,6 +9,8 @@
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_list_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/block_allocation_status_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -30,7 +32,8 @@ public:
         // Do not use this test fixture when injecting number of segment infos
         EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(1));
 
-        segCtx = new SegmentCtx(&tp, &header, &segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+        segCtx = new SegmentCtx(&tp, &header, &segInfos, &rebuildSegmentList, &rebuildCtx,
+            &addrInfo, &gcCtx, &blockAllocStatus);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
             segCtx->SetSegmentList((SegmentState)state, &segmentList[state]);
@@ -52,6 +55,8 @@ protected:
     NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
     NiceMock<MockSegmentInfo> segInfos;
     NiceMock<MockRebuildCtx> rebuildCtx;
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
 };
 
 TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
@@ -63,7 +68,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     header.ctxVersion = 5;
     header.numValidSegment = 100;
 
-    SegmentCtx segCtx(nullptr, &header, nullptr, nullptr, nullptr, &addrInfo);
+    SegmentCtx segCtx(nullptr, &header, nullptr, nullptr, nullptr, &addrInfo, nullptr, nullptr);
 
     NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -87,7 +92,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
     header.sig = SegmentCtx::SIG_SEGMENT_CTX;
     SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::FREE);
 
-    SegmentCtx segCtx(nullptr, &header, segInfos, nullptr, nullptr, &addrInfo);
+    SegmentCtx segCtx(nullptr, &header, segInfos, nullptr, nullptr, &addrInfo, nullptr, nullptr);
 
     NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -108,7 +113,7 @@ TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
     // given
     SegmentCtxHeader* buf = new SegmentCtxHeader();
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
 
     // when
@@ -225,7 +230,10 @@ TEST(SegmentCtx, _SegmentFreed_testWhenSegmentIsInRebuilding)
     NiceMock<MockSegmentList> freeSegmentList, ssdSegmentList, rebuildSegmentList;
     SegmentInfo* segInfos = new SegmentInfo[4](1, 0, SegmentState::SSD);
 
-    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx, &blockAllocStatus);
     segmentCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
@@ -248,7 +256,10 @@ TEST(SegmentCtx, _SegmentFreed_testWhenSegmentIsRemovedFromTheRebuildList)
     NiceMock<MockSegmentList> freeSegmentList, ssdSegmentList, rebuildSegmentList;
     SegmentInfo* segInfos = new SegmentInfo[4](1, 0, SegmentState::SSD);
 
-    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx, &blockAllocStatus);
     segmentCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
@@ -285,7 +296,10 @@ TEST_F(SegmentCtxTestFixture, LoadRebuildList_testWhenRebuildListIsLoaded)
     NiceMock<MockSegmentList> freeSegmentList, ssdSegmentList, rebuildSegmentList;
     SegmentInfo* segInfos = new SegmentInfo[4](1, 0, SegmentState::SSD);
 
-    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx, &blockAllocStatus);
     segmentCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
@@ -393,7 +407,7 @@ TEST(SegmentCtx, Init_testInitAndClose)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
-    SegmentCtx segCtx(nullptr, nullptr, &addrInfo);
+    SegmentCtx segCtx(nullptr, nullptr, &addrInfo, nullptr, nullptr);
 
     // when
     segCtx.Init();
@@ -466,7 +480,10 @@ TEST(SegmentCtx, AllocateFreeSegment_testWhenFreeListIsEmpty)
     NiceMock<MockSegmentList> freeSegmentList;
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
-    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, rebuildCtx, addrInfo);
+
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, rebuildCtx, addrInfo, &gcCtx, &blockAllocStatus);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
 
     EXPECT_CALL(freeSegmentList, PopSegment).WillOnce(Return(UNMAP_SEGMENT));
@@ -487,7 +504,10 @@ TEST(SegmentCtx, AllocateFreeSegment_testWhenSegmentIsAllocated)
     NiceMock<MockSegmentList> freeSegmentList, nvramSegmentList;
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
-    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, rebuildCtx, addrInfo);
+
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, rebuildCtx, addrInfo, &gcCtx, &blockAllocStatus);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segCtx.SetSegmentList(SegmentState::NVRAM, &nvramSegmentList);
 
@@ -512,7 +532,9 @@ TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsFound)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
 
-    SegmentCtx segCtx(tp, nullptr, segInfos, &rebuildSegmentList, nullptr, addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segCtx(tp, nullptr, segInfos, &rebuildSegmentList, nullptr, addrInfo, &gcCtx, &blockAllocStatus);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
     segCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
@@ -544,7 +566,9 @@ TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsFoundFromTheRebu
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
 
-    SegmentCtx segCtx(tp, nullptr, segInfos, &rebuildSegmentList, nullptr, addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segCtx(tp, nullptr, segInfos, &rebuildSegmentList, nullptr, addrInfo, &gcCtx, &blockAllocStatus);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
     segCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
@@ -576,7 +600,9 @@ TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsNotFound)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentInfo* segInfos = new SegmentInfo[4](10, 0, SegmentState::NVRAM);
 
-    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, nullptr, addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, nullptr, addrInfo, &gcCtx, &blockAllocStatus);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
@@ -598,9 +624,12 @@ TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
     NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
     EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(1));
 
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+
     {
         SegmentInfo segInfos(100, 10, SegmentState::VICTIM);
-        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo, &gcCtx, &blockAllocStatus);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
             segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
@@ -611,7 +640,7 @@ TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
     }
     {
         SegmentInfo segInfos(100, 10, SegmentState::SSD);
-        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo, nullptr, nullptr);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
             segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
@@ -622,7 +651,7 @@ TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
     }
     {
         SegmentInfo segInfos(0, 10, SegmentState::SSD);
-        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo, nullptr, nullptr);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
             segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
@@ -633,7 +662,7 @@ TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
     }
     {
         SegmentInfo segInfos(0, 0, SegmentState::FREE);
-        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo);
+        SegmentCtx segCtx(nullptr, nullptr, &segInfos, nullptr, nullptr, &addrInfo, nullptr, nullptr);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
             segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
@@ -701,7 +730,9 @@ TEST(SegmentCtx, MakeRebuildTarget_TestMakeRebuildTarget)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
 
-    SegmentCtx segmentCtx(tp, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segmentCtx(tp, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo, &gcCtx, &blockAllocStatus);
     segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
     segmentCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
     segmentCtx.SetSegmentList(SegmentState::NVRAM, &nvramSegmentList);
@@ -737,7 +768,10 @@ TEST(SegmentCtx, SetRebuildCompleted_testIfSegmentIsRemovedFromTheList)
     NiceMock<MockSegmentList> ssdSegmentList, rebuildSegmentList;
     SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
 
-    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo);
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    SegmentCtx segmentCtx(nullptr, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx, &blockAllocStatus);
     segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
     EXPECT_CALL(rebuildSegmentList, PopSegment).WillOnce(Return(2));

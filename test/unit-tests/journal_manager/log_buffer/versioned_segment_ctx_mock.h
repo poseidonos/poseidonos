@@ -34,21 +34,21 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/journal_manager/log_buffer/buffered_segment_context_manager.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos
 {
-class MockBufferedSegmentContextManager : public BufferedSegmentContextManager
+class MockVersionedSegmentCtx : public VersionedSegmentCtx
 {
 public:
-    using BufferedSegmentContextManager::BufferedSegmentContextManager;
+    using VersionedSegmentCtx::VersionedSegmentCtx;
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (uint32_t logGroupId, SegmentId segId), (override));
     MOCK_METHOD(void, UpdateSegmentContext, (uint32_t logGroupId), (override));
-    MOCK_METHOD(BufferedSegmentContext*, GetSegmentContext, (uint32_t logGroupId), (override));
+    MOCK_METHOD(VersionedSegmentInfo*, GetSegmentInfo, (uint32_t logGroupId), (override));
 };
 
 } // namespace pos

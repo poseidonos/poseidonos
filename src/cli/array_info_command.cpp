@@ -148,7 +148,21 @@ ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
     }
 
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
-    GcMode gcMode = iContextManager->GetCurrentGcMode();
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    GcCtx* gcCtx = iContextManager->GetGcCtx();
+
+    JsonFormat jFormat;
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        return jFormat.MakeResponse("ARRAYINFO", " ", (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+            arrayName + " does not exist", GetPosInfo());
+    }
+
+    uint32_t arrayId = iContextManager->GetArrayId();
+    segmentCtx->UpdateGcFreeSegment(arrayId);
+    int numOfFreeSegments = segmentCtx->GetNumOfFreeSegment();
+    GcMode gcMode = gcCtx->GetCurrentGcMode(numOfFreeSegments);
 
     std::string strGCMode;
 

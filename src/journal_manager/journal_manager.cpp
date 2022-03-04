@@ -46,7 +46,6 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/buffered_segment_context_manager.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
@@ -75,7 +74,7 @@ JournalManager::JournalManager(void)
   bufferAllocator(nullptr),
   logGroupReleaser(nullptr),
   checkpointManager(nullptr),
-  bufferedSegCtxManager(nullptr),
+  versionedSegCtx(nullptr),
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
@@ -97,7 +96,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
     CheckpointManager* cpManager,
-    BufferedSegmentContextManager* bufSegCtxManager,
+    VersionedSegmentCtx* versionedSegCtx_,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
@@ -121,7 +120,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     logGroupReleaser = groupReleaser;
 
     checkpointManager = cpManager;
-    bufferedSegCtxManager = bufSegCtxManager;
+    versionedSegCtx = versionedSegCtx_;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
     sequenceController = callbackSequenceController;
@@ -145,7 +144,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       new BufferOffsetAllocator(),
       new LogGroupReleaser(),
       new CheckpointManager(),
-      new BufferedSegmentContextManager(),
+      new VersionedSegmentCtx(),
       new DirtyMapManager(),
       new LogBufferWriteDoneNotifier(),
       new CallbackSequenceController(),
@@ -189,7 +188,7 @@ JournalManager::~JournalManager(void)
     delete eventFactory;
 
     delete checkpointManager;
-    delete bufferedSegCtxManager;
+    delete versionedSegCtx;
     delete statusProvider;
     delete config;
 }
@@ -318,7 +317,7 @@ JournalManager::_DisposeModules(void)
     logFilledNotifier->Dispose();
     logWriteHandler->Dispose();
     replayHandler->Dispose();
-    bufferedSegCtxManager->Dispose();
+    versionedSegCtx->Dispose();
 }
 
 void
@@ -391,7 +390,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
-    bufferedSegCtxManager->Init(config);
+    versionedSegCtx->Init(config);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(eventScheduler, logWriteHandler);

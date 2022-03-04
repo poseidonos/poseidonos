@@ -39,18 +39,18 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
+#include "src/qos/qos_manager.h"
 namespace pos
 {
-SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_, blockAllocStatus_)
 {
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentList* rebuildSegmentList,
-    RebuildCtx* rebuildCtx_,
-    AllocatorAddressInfo* addrInfo_)
+    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_,
+    BlockAllocationStatus* blockAllocStatus_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   rebuildList(rebuildSegmentList),
@@ -58,6 +58,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   initialized(false),
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
+  gcCtx(gcCtx_),
+  blockAllocStatus(blockAllocStatus_),
   tp(tp_)
 {
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -81,8 +83,9 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
     }
 }
 
-SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info)
-: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info,
+    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_)
+: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_, blockAllocStatus_)
 {
 }
 
@@ -476,25 +479,33 @@ SegmentCtx::_UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment)
 void
 SegmentCtx::_SegmentFreed(SegmentId segmentId)
 {
-    if (rebuildingSegment == segmentId)
+    if (rebuildingSegment != segmentId)
+    {
+        if (true == rebuildList->RemoveFromList(segmentId))
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED),
+            "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
+
+            _FlushRebuildSegmentList();
+        }
+    }
+    else
     {
         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED),
             "segmentId:{} is reclaimed by GC, but still under rebuilding", segmentId);
         return;
     }
-    else if (rebuildList->RemoveFromList(segmentId) == true)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED),
-            "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
-
-        _FlushRebuildSegmentList();
-    }
 
     segmentList[SegmentState::FREE]->AddToList(segmentId);
 
-    uint32_t freeSegCount = GetNumOfFreeSegmentWoLock();
+    int numOfFreeSegments = GetNumOfFreeSegment();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
-        "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segmentId, freeSegCount);
+        "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segmentId, numOfFreeSegments);
+
+    if (MODE_URGENT_GC != gcCtx->GetCurrentGcMode(numOfFreeSegments))
+    {
+        blockAllocStatus->PermitUserBlockAllocation();
+    }
 }
 
 void
@@ -723,6 +734,13 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
             segmentInfos[segId].SetOccupiedStripeCount(src[segId]);
         }
     }
+}
+
+void
+SegmentCtx::UpdateGcFreeSegment(uint32_t arrayId)
+{
+    int numFreeSegments = GetNumOfFreeSegment();
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayId);
 }
 
 } // namespace pos

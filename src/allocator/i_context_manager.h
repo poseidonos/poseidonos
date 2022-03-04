@@ -36,6 +36,8 @@
 #include <vector>
 
 #include "src/allocator/include/allocator_const.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 namespace pos
 {
@@ -53,10 +55,11 @@ public:
     virtual int StopRebuilding(void) = 0;
     virtual bool NeedRebuildAgain(void) = 0;
     virtual uint32_t GetRebuildTargetSegmentCount(void) = 0;
-    virtual int GetNumOfFreeSegment(bool needLock) = 0;
-
-    virtual GcMode GetCurrentGcMode(void) = 0;
     virtual int GetGcThreshold(GcMode mode) = 0;
+
+    virtual SegmentCtx* GetSegmentCtx(void) = 0;
+    virtual GcCtx* GetGcCtx(void) = 0;
+    virtual uint32_t GetArrayId(void) = 0;
 };
 
 } // namespace pos
