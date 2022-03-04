@@ -31,19 +31,19 @@ PoseidonOS uses concepts defined in [Common Event Expression Architecture Overvi
 PoseidonOS event log can be displayed in both JSON and plain-text forms. You can set the format via the configuration file (e.g., /etc/pos/pos.conf) or CLI ($poseidonos-cli logger set-preference).
 When PoseidonOS records event logs in JSON form, it is called structured logging. Structured logging will provide a deeper insight into the PoseidonOS system; you can utilize the structured event logs to monitor and analyze the system.
 
-**Example**
+## Example
 
-Plain-text form
+### Plain-text form
 
-Format: [pos_id][process_id][thread_id][datetime][level_short] event_name - MSG:"message" CAUSE:"cause" SOLUTION:"solution" VARIABLES:"comma_seperated_variables" @ source_code:line function() - POS: pos-verson
+[datetime][process_id][thread_id][pos_id][event_id][level] event_name - MESSAGE because CAUSE, solution:SOLUTION, variables:COMMMA_SEPARATED_VARIABLES, source: FILE:LINE FUNCTION(), pos_version: VERSION
 
 ```
-[10262307][21743][21776][2022-02-18 13:47:14.993519][1502][I]   CLI_CLIENT_ACCEPTED - MSG:"A new client has been accepted (connected)." CAUSE:"" SOLUTION:"" VARIABLES:"fd:655, client_ip:127.0.0.1, client_port:48492" @ cli_server.cpp:458 CLIServer() - POS: v0.10.6
+[2022-03-04 15:56:08.557557315][23198][23302][78442531][1207][ info  ]     CLI_CLIENT_DISCONNECTED - A client has been disconnected., cause: , solution:, variables:fd:655, source: cli_server.cpp:168 RemoveClient(), pos_version: v0.10.6
 ```
 
-JSON form (when structured logging is on)
+### JSON form (when structured logging is on)
 ```json
-{"instance_id":10262307,"processId":21743,"threadId":21776,"posVersion":"v0.10.6","datetime":"2022-02-18 13:47:16.463356","logger_name":"pos_logger","level":"info","description":{"event_name:":"CLI_CLIENT_ACCEPTED","message":"A new client has been accepted (connected).","cause":"","solution":"","variables":"fd:655, client_ip:127.0.0.1, client_port:48680"},"source":"cli_server.cpp","line":"458","function":"CLIServer"}
+{"datetime":"2022-03-04 15:54:01.407056341","process_id":19646,"thread_id":19985,"pos_id":80861475,"event_id":1207,"level":"info","description":{"event_name:":"CLI_CLIENT_DISCONNECTED","message":"A client has been disconnected.","cause":"","solution":"","variables":"fd:655"},"source":"cli_server.cpp","line":"168","function":"RemoveClient","pos_version":"v0.10.6"},
 ```
 
 # Log Message

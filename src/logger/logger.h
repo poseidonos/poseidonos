@@ -112,7 +112,7 @@ public:
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
                         "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
-                        "\tNONE - MSG:\"{}\" CAUSE:\"NONE\" SOLUTION:\"NONE\" VARIABLES:\"NONE\"",
+                        "\tNONE - {}, cause: NONE, solution:NONE, vairables:NONE",
                     fmt), args...);
             }
             else
@@ -122,7 +122,7 @@ public:
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
                             "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
-                            "\t{} - MSG:\"{}\" CAUSE:\"{}\" SOLUTION:\"{}\" VARIABLES:\"{}\"",
+                            "\t{} - {}, cause: {}, solution:{}, variables:{}",
                         entry->GetEventName(), entry->GetMessage(),
                         entry->GetCause(), entry->GetSolution(),
                     fmt), args...);

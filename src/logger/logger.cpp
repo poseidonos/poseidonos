@@ -56,20 +56,21 @@ BuildPattern(bool isStrLoggingEnabled)
 
     // Structured Log Format
     const std::string strLogPattern =
-        {"{\"instance_id\":" + std::to_string(instanceId) +
-            ",\"processId\":%P,\"threadId\":%t" +
-            ",\"posVersion\":" + "\"" + version + "\"" +
-            ",\"datetime\":\"%Y-%m-%d %H:%M:%S.%f\",\"logger_name\":\"%n\"" +
+        {std::string("{\"datetime\":\"%Y-%m-%d %H:%M:%S.%F\"") +
+            ",\"process_id\":%P,\"thread_id\":%t" +
+            ",\"pos_id\":" + std::to_string(instanceId) +
+            ",\"event_id\":%q" +
             ",\"level\":\"%^%l%$\",\"description\":{%v}" +
-            ",\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"},"};
+            ",\"source\":\"%s\",\"line\":\"%#\",\"function\":\"%!\"" +
+            ",\"pos_version\":" + "\"" + version + "\"},"};
 
-    // Plain Text Log Format
-    // [POSInstanceId][ProcessID][ThreadID][Datetime][EventID]][LogLevel(Short)]
-    // Log Message @ SourceFile:LineNumber Function() pos-version
+    // Plain-text log entry format
+    // [datetime][process_id][thread_id][pos_id][event_id]][level]
+    // message, cause, source: file:line function_name(), pos_version: version
     const std::string plainTextpattern =
-        '[' + std::to_string(instanceId) + ']' +
-        "[%P][%t][%Y-%m-%d %H:%M:%S.%f][%q][%L] %v @ %@ %!()" +
-        " - POS: " + version;
+        std::string("[%Y-%m-%d %H:%M:%S.%F][%P][%t]") +
+        "[" + std::to_string(instanceId) + "]" +
+         "[%q][%=7l] %v, source: %@ %!(), pos_version: " + version;
 
     pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 
