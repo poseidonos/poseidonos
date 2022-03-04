@@ -52,39 +52,12 @@ TEST(AllocatorCtx, ResetDirtyVersion_TestSimpleSetter)
     allocCtx.ResetDirtyVersion();
 }
 
-TEST(AllocatorCtx, UpdatePrevLsid_TestSimpleSetter)
-{
-    // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
-    // when
-    allocCtx.UpdatePrevLsid();
-}
-
 TEST(AllocatorCtx, SetCurrentSsdLsid_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
     // when
     allocCtx.SetCurrentSsdLsid(10);
-}
-
-TEST(AllocatorCtx, RollbackCurrentSsdLsid_TestSimpleSetter)
-{
-    // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
-    // when
-    allocCtx.RollbackCurrentSsdLsid();
-}
-
-TEST(AllocatorCtx, SetPrevSsdLsid_TestSimpleSetter)
-{
-    // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
-    // when
-    allocCtx.SetPrevSsdLsid(10);
-    // then
-    int ret = allocCtx.GetPrevSsdLsid();
-    EXPECT_EQ(10, ret);
 }
 
 TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
@@ -124,17 +97,6 @@ TEST(AllocatorCtx, Init_InitAndClose)
         EXPECT_EQ(vsa, UNMAP_VSA);
     }
     allocCtx.Dispose();
-}
-
-TEST(AllocatorCtx, GetPrevSsdLsid_TestSimpleGetter)
-{
-    // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
-    allocCtx.SetPrevSsdLsid(10);
-    // when
-    int ret = allocCtx.GetPrevSsdLsid();
-    // then
-    EXPECT_EQ(10, ret);
 }
 
 TEST(AllocatorCtx, GetCurrentSsdLsid_TestSimpleGetter)

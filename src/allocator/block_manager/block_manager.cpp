@@ -46,12 +46,13 @@
 
 namespace pos
 {
-BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe)
 : addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
   allocStatus(allocStatus),
   arrayId(arrayId),
+  allocateBlocksFromSSDStripe(allocateBlocksFromSSDStripe),
   tp(tp_)
 {
     allocCtx = allocCtx_;
@@ -59,8 +60,8 @@ BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IRev
     iStripeMap = stripeMap_;
 }
 
-BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
-: BlockManager(tp_, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
+BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe)
+: BlockManager(tp_, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId, allocateBlocksFromSSDStripe)
 {
     allocCtx = contextManager->GetAllocatorCtx();
     allocStatus = contextManager->GetAllocationStatus();
@@ -80,7 +81,7 @@ BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
     }
 }
 
-VirtualBlks
+std::pair<VirtualBlks, StripeId>
 BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 {
     VirtualBlks allocatedBlks;
@@ -89,11 +90,10 @@ BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
     {
         allocatedBlks.startVsa = UNMAP_VSA;
         allocatedBlks.numBlks = 0;
-        return allocatedBlks;
+        return {allocatedBlks, UNMAP_STRIPE};
     }
 
-    allocatedBlks = _AllocateBlks(volumeId, numBlks);
-    return allocatedBlks;
+    return _AllocateBlks(volumeId, numBlks);
 }
 
 Stripe*
@@ -104,10 +104,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
         return nullptr;
     }
 
-    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt(arrayId);
-
-    // 2. SSD Logical StripeId/vsid Allocation
-    StripeId arrayLsid = _AllocateUserDataStripeIdInternal(false /*isUser*/);
+    StripeId arrayLsid = _AllocateSsdStripe();
     if (IsUnMapStripe(arrayLsid))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "failed to allocate gc stripe!");
@@ -162,145 +159,131 @@ BlockManager::TurnOnBlkAllocation(void)
     allocStatus->PermitBlockAllocation();
 }
 //----------------------------------------------------------------------------//
-VirtualBlks
+std::pair<VirtualBlks, StripeId>
 BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
 {
     assert(numBlks != 0);
     std::unique_lock<std::mutex> volLock(allocCtx->GetActiveStripeTailLock(asTailArrayIdx));
-    VirtualBlks allocatedBlks;
-    VirtualBlkAddr curVsa = allocCtx->GetActiveStripeTail(asTailArrayIdx);
+    StripeId allocatedWbLsid = UNMAP_STRIPE;
 
+    VirtualBlkAddr curVsa = allocCtx->GetActiveStripeTail(asTailArrayIdx);
     if (_IsStripeFull(curVsa) || IsUnMapStripe(curVsa.stripeId))
     {
-        StripeId newVsid = UNMAP_STRIPE;
-        int ret = _AllocateStripe(asTailArrayIdx, newVsid);
-        if (likely(ret == 0))
+        auto allocatedStripes = _AllocateStripesAndUpdateActiveStripeTail(asTailArrayIdx);
+        if (allocatedStripes.first == UNMAP_STRIPE || allocatedStripes.second == UNMAP_STRIPE)
         {
-            allocatedBlks = _AllocateWriteBufferBlksFromNewStripe(asTailArrayIdx, newVsid, numBlks);
+            return {{UNMAP_VSA, UINT32_MAX}, UNMAP_STRIPE};
         }
-        else
-        {
-            allocatedBlks.startVsa = UNMAP_VSA;
-            allocatedBlks.numBlks = UINT32_MAX;
-            return allocatedBlks;
-        }
-    }
-    else if (_IsValidOffset(curVsa.offset + numBlks - 1) == false)
-    {
-        allocatedBlks.startVsa = curVsa;
-        allocatedBlks.numBlks = addrInfo->GetblksPerStripe() - curVsa.offset;
 
-        VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = addrInfo->GetblksPerStripe()};
-        allocCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
-    }
-    else
-    {
-        allocatedBlks.startVsa = curVsa;
-        allocatedBlks.numBlks = numBlks;
-
-        VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = curVsa.offset + numBlks};
-        allocCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
+        allocatedWbLsid = allocatedStripes.first;
     }
 
-    return allocatedBlks;
+    VirtualBlks allocatedBlks = _AllocateBlocksFromActiveStripe(asTailArrayIdx, numBlks);
+    return {allocatedBlks, allocatedWbLsid};
 }
 
-VirtualBlks
-BlockManager::_AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayIdx, StripeId vsid, int numBlks)
+std::pair<StripeId, StripeId>
+BlockManager::_AllocateStripesAndUpdateActiveStripeTail(ASTailArrayIdx asTailArrayIdx)
 {
-    VirtualBlkAddr curVsa = {.stripeId = vsid, .offset = 0};
-
-    VirtualBlks allocatedBlks;
-    allocatedBlks.startVsa = curVsa;
-
-    if (_IsValidOffset(numBlks))
+    StripeId wbLsid = _AllocateWbStripe();
+    if (unlikely(wbLsid == UNMAP_STRIPE))
     {
-        allocatedBlks.numBlks = numBlks;
+        return {UNMAP_STRIPE, UNMAP_STRIPE};
     }
-    else
+
+    StripeId userLsid = _AllocateSsdStripeForUser(asTailArrayIdx);
+    if (unlikely(userLsid == UNMAP_STRIPE))
     {
-        allocatedBlks.numBlks = addrInfo->GetblksPerStripe();
-    }
-    curVsa.offset = allocatedBlks.numBlks;
-
-    // Temporally no lock required, as AllocateBlks and this function cannot be executed in parallel
-    // TODO(jk.man.kim): add or move lock to wbuf tail manager
-    allocCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
-
-    return allocatedBlks;
-}
-
-int
-BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
-{
-    // 1. WriteBuffer Logical StripeId Allocation
-    StripeId wbLsid = allocCtx->AllocFreeWbStripe();
-    if (wbLsid == UNMAP_STRIPE)
-    {
-        return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
+        _RollBackStripeIdAllocation(wbLsid);
+        return {UNMAP_STRIPE, UNMAP_STRIPE};
     }
 
     QosManagerSingleton::Instance()->IncreaseUsedStripeCnt(arrayId);
 
-    // 2. SSD Logical StripeId Allocation
-    bool isUserStripeAlloc = _IsUserStripeAllocation(asTailArrayIdx);
-    StripeId arrayLsid = _AllocateUserDataStripeIdInternal(isUserStripeAlloc);
-    if (IsUnMapStripe(arrayLsid))
+    StripeId newVsid = userLsid;
+    _AssignStripe(newVsid, wbLsid, asTailArrayIdx);
+
+    if (allocateBlocksFromSSDStripe == true)
     {
-        std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-        _RollBackStripeIdAllocation(wbLsid);
-        return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
+        // New blocks will be allocted from the ssd stripe in write-through mode
+        // WB stripe is allocated above, but will not be updated to the stripe map (temporally)
+        iStripeMap->SetLSA(newVsid, userLsid, IN_USER_AREA);
+    }
+    else
+    {
+        iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);
     }
 
-    StripeId newVsid = arrayLsid;
+    // Temporally no lock required, as AllocateBlks and this function cannot be executed in parallel
+    // TODO(jk.man.kim): add or move lock to wbuf tail manager
+    VirtualBlkAddr curVsa = {
+        .stripeId = newVsid,
+        .offset = 0};
+    allocCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
 
-    // 3. Get Stripe object for wbLsid and link it with reverse map for vsid
-    Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
-    stripe->Assign(newVsid, wbLsid, asTailArrayIdx);
-
-    // 4. Update the stripe map
-    iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);
-
-    vsid = newVsid;
-    return 0;
+    return {wbLsid, userLsid};
 }
 
 StripeId
-BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
+BlockManager::_AllocateWbStripe(void)
 {
-    std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    StripeId ssdLsid = allocCtx->UpdatePrevLsid();
-    SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
-    GcCtx* gcCtx = contextManager->GetGcCtx();
+    return allocCtx->AllocFreeWbStripe();
+}
+
+void
+BlockManager::_AssignStripe(StripeId vsid, StripeId wbLsid, ASTailArrayIdx asTailArrayIdx)
+{
+    Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
+    stripe->Assign(vsid, wbLsid, asTailArrayIdx);
+}
+
+StripeId
+BlockManager::_AllocateSsdStripeForUser(int volumeId)
+{
+    std::lock_guard<std::mutex> lock(allocCtx->GetCtxLock());
+    StripeId ssdLsid = allocCtx->GetCurrentSsdLsid() + 1;
 
     if (true == _IsSegmentFull(ssdLsid))
     {
-        segmentCtx->UpdateGcFreeSegment(arrayId);
-        int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-        if (MODE_URGENT_GC == gcCtx->GetCurrentGcMode(numFreeSegments))
+        if (allocStatus->IsUserBlockAllocationProhibited(volumeId) == true)
         {
-            allocStatus->ProhibitUserBlockAllocation();
-            if (isUserStripeAlloc)
-            {
-                return UNMAP_STRIPE;
-            }
+            ssdLsid = UNMAP_STRIPE;
         }
+        else
+        {
+            ssdLsid = _AllocateSegmentAndStripe();
+        }
+    }
+    allocCtx->SetCurrentSsdLsid(ssdLsid);
+    return ssdLsid;
+}
 
-        SegmentId segmentId = contextManager->AllocateFreeSegment();
-        if (segmentId == UNMAP_SEGMENT)
-        {
-            while (addrInfo->IsUT() != true)
-            {
-                usleep(1); // assert(false);
-            }
-            return UNMAP_STRIPE;
-        }
-        ssdLsid = segmentId * addrInfo->GetstripesPerSegment();
+StripeId
+BlockManager::_AllocateSsdStripe(void)
+{
+    std::lock_guard<std::mutex> lock(allocCtx->GetCtxLock());
+    StripeId ssdLsid = allocCtx->GetCurrentSsdLsid() + 1;
+
+    if (true == _IsSegmentFull(ssdLsid))
+    {
+        ssdLsid = _AllocateSegmentAndStripe();
+    }
+    allocCtx->SetCurrentSsdLsid(ssdLsid);
+    return ssdLsid;
+}
+
+StripeId
+BlockManager::_AllocateSegmentAndStripe(void)
+{
+    SegmentId segmentId = contextManager->AllocateFreeSegment();
+    if (segmentId == UNMAP_SEGMENT)
+    {
+        return UNMAP_STRIPE;
     }
 
-    allocCtx->SetCurrentSsdLsid(ssdLsid);
+    StripeId newStripe = segmentId * addrInfo->GetstripesPerSegment();
 
-    return ssdLsid;
+    return newStripe;
 }
 
 void
@@ -310,6 +293,29 @@ BlockManager::_RollBackStripeIdAllocation(StripeId wbLsid)
     {
         allocCtx->ReleaseWbStripe(wbLsid);
     }
+}
+
+VirtualBlks
+BlockManager::_AllocateBlocksFromActiveStripe(ASTailArrayIdx asTailArrayIdx, int numBlks)
+{
+    VirtualBlkAddr curVsa = allocCtx->GetActiveStripeTail(asTailArrayIdx);
+    VirtualBlkAddr updatedTail = curVsa;
+    VirtualBlks allocatedBlks;
+    allocatedBlks.startVsa = curVsa;
+
+    if (_IsValidOffset(curVsa.offset + numBlks - 1) == false)
+    {
+        allocatedBlks.numBlks = addrInfo->GetblksPerStripe() - curVsa.offset;
+        updatedTail.offset = addrInfo->GetblksPerStripe();
+    }
+    else
+    {
+        allocatedBlks.numBlks = numBlks;
+        updatedTail.offset = curVsa.offset + numBlks;
+    }
+    allocCtx->SetActiveStripeTail(asTailArrayIdx, updatedTail);
+
+    return allocatedBlks;
 }
 
 } // namespace pos

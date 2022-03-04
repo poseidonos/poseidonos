@@ -43,14 +43,13 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_, blockAllocStatus_)
+    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_)
 {
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_,
-    BlockAllocationStatus* blockAllocStatus_)
+    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   rebuildList(rebuildSegmentList),
@@ -59,7 +58,6 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
   gcCtx(gcCtx_),
-  blockAllocStatus(blockAllocStatus_),
   tp(tp_)
 {
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -83,9 +81,9 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
     }
 }
 
-SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* info,
-    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_)
-: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_, blockAllocStatus_)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
+    AllocatorAddressInfo* info, GcCtx* gcCtx_)
+: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_)
 {
 }
 
@@ -380,6 +378,7 @@ SegmentCtx::AllocateFreeSegment(void)
             POSMetricValue v;
             v.gauge = freeSegCount;
             tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
+            gcCtx->GetCurrentGcMode(freeSegCount);
 
             return segId;
         }
@@ -501,11 +500,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     int numOfFreeSegments = GetNumOfFreeSegment();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
         "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segmentId, numOfFreeSegments);
-
-    if (MODE_URGENT_GC != gcCtx->GetCurrentGcMode(numOfFreeSegments))
-    {
-        blockAllocStatus->PermitUserBlockAllocation();
-    }
+    gcCtx->GetCurrentGcMode(numOfFreeSegments);
 }
 
 void

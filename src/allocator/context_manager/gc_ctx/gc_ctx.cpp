@@ -32,12 +32,14 @@
 
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
+#include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+GcCtx::GcCtx(BlockAllocationStatus* allocStatus)
+: blockAllocStatus(allocStatus)
 {
     normalGcThreshold = DEFAULT_GC_THRESHOLD;
     urgentGcThreshold = DEFAULT_URGENT_THRESHOLD;
@@ -72,7 +74,7 @@ GcCtx::SetUrgentThreshold(int inputThreshold)
 GcMode
 GcCtx::GetCurrentGcMode(int numFreeSegments)
 {
-    pos::GcMode newGcMode = MODE_NO_GC;
+    pos::GcMode newGcMode = curGcMode;
 
     if (urgentGcThreshold >= numFreeSegments)
     {
@@ -83,14 +85,26 @@ GcCtx::GetCurrentGcMode(int numFreeSegments)
         newGcMode = MODE_NORMAL_GC;
     }
 
-    _PrintInfo(newGcMode, numFreeSegments);
-    UpdateGcMode(newGcMode);
+    if (curGcMode != newGcMode)
+    {
+        _PrintInfo(newGcMode, numFreeSegments);
+        _UpdateGcMode(newGcMode);
+
+        if (newGcMode == MODE_URGENT_GC)
+        {
+            blockAllocStatus->ProhibitBlockAllocation();
+        }
+        else if (newGcMode == MODE_NORMAL_GC)
+        {
+            blockAllocStatus->PermitUserBlockAllocation();
+        }
+    }
 
     return curGcMode;
 }
 
 void
-GcCtx::UpdateGcMode(pos::GcMode newGcMode)
+GcCtx::_UpdateGcMode(pos::GcMode newGcMode)
 {
     prevGcMode = curGcMode;
     curGcMode = newGcMode;

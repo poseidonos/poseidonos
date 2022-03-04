@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "src/include/address_type.h"
 
 namespace pos
@@ -40,7 +42,7 @@ class Stripe;
 class IBlockAllocator
 {
 public:
-    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) = 0;
+    virtual std::pair<VirtualBlks, StripeId> AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) = 0;
     virtual Stripe* AllocateGcDestStripe(uint32_t volumeId) = 0;
 
     virtual void ProhibitUserBlkAlloc(void) = 0;

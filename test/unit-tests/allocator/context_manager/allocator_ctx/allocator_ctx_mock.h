@@ -23,12 +23,8 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(StripeId, UpdatePrevLsid, (), (override));
     MOCK_METHOD(void, SetCurrentSsdLsid, (StripeId stripe), (override));
-    MOCK_METHOD(void, RollbackCurrentSsdLsid, (), (override));
     MOCK_METHOD(StripeId, GetCurrentSsdLsid, (), (override));
-    MOCK_METHOD(StripeId, GetPrevSsdLsid, (), (override));
-    MOCK_METHOD(void, SetPrevSsdLsid, (StripeId stripeId), (override));
     MOCK_METHOD(void, SetNextSsdLsid, (SegmentId segId), (override));
     MOCK_METHOD(void, AllocWbStripe, (StripeId stripeId), (override));
     MOCK_METHOD(StripeId, AllocFreeWbStripe, (), (override));

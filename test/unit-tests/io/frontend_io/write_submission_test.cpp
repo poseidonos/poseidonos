@@ -115,7 +115,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
 
     ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(std::make_pair(vsaRange, UNMAP_STRIPE)));
 
     bool actual, expected{true};
 
@@ -148,7 +148,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
 
     ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(std::make_pair(vsaRange, UNMAP_STRIPE)));
 
     bool actual, expected{true};
 
@@ -181,7 +181,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
 
     ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(std::make_pair(vsaRange, UNMAP_STRIPE)));
 
     bool actual, expected{true};
 

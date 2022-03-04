@@ -66,12 +66,8 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
-    virtual StripeId UpdatePrevLsid(void);
     virtual void SetCurrentSsdLsid(StripeId stripe);
-    virtual void RollbackCurrentSsdLsid(void);
     virtual StripeId GetCurrentSsdLsid(void);
-    virtual StripeId GetPrevSsdLsid(void);
-    virtual void SetPrevSsdLsid(StripeId stripeId);
     virtual void SetNextSsdLsid(SegmentId segId);
 
     virtual void AllocWbStripe(StripeId stripeId);
@@ -98,7 +94,6 @@ private:
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     BitMapMutex* allocWbLsidBitmap = nullptr;
 
-    StripeId prevSsdLsid;
     StripeId currentSsdLsid;
 
     AllocatorAddressInfo* addrInfo;

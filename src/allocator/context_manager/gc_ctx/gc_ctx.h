@@ -36,27 +36,33 @@
 
 namespace pos
 {
+class BlockAllocationStatus;
+
 class GcCtx
 {
 public:
-    GcCtx(void);
+    GcCtx(void) = default;
+    explicit GcCtx(BlockAllocationStatus* allocStatus);
     virtual ~GcCtx(void) = default;
     int GetNormalGcThreshold(void);
     int GetUrgentThreshold(void);
     void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
     virtual GcMode GetCurrentGcMode(int numFreeSegments);
-    void UpdateGcMode(pos::GcMode newGcMode);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;
 
 private:
+    void _UpdateGcMode(pos::GcMode newGcMode);
     void _PrintInfo(pos::GcMode newGcMode, int numFreeSegments);
+
     int normalGcThreshold;
     int urgentGcThreshold;
     GcMode curGcMode;
     GcMode prevGcMode;
+
+    BlockAllocationStatus* blockAllocStatus;
 };
 
 } // namespace pos

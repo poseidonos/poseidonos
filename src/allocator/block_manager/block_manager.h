@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <string>
+#include <utility>
 
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_block_allocator.h"
@@ -50,12 +51,12 @@ class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
-    BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe = false);
+    BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
 
-    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override;
+    virtual std::pair<VirtualBlks, StripeId> AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override;
     virtual Stripe* AllocateGcDestStripe(uint32_t volumeId);
     virtual void ProhibitUserBlkAlloc(void) override;
     virtual void PermitUserBlkAlloc(void) override;
@@ -65,14 +66,17 @@ public:
     virtual void TurnOffBlkAllocation(void);
     virtual void TurnOnBlkAllocation(void);
 
-protected: // for UT
-    VirtualBlks _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
-    VirtualBlks _AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayIdx, StripeId vsid, int numBlks);
-    int _AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid);
-    StripeId _AllocateWriteBufferStripeId(void);
-    StripeId _AllocateUserDataStripeIdInternal(bool stopAtUrgent);
+protected:
+    std::pair<VirtualBlks, StripeId> _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
+    std::pair<StripeId, StripeId> _AllocateStripesAndUpdateActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
+    VirtualBlks _AllocateBlocksFromActiveStripe(ASTailArrayIdx asTailArrayIdx, int numBlks);
+    StripeId _AllocateWbStripe(void);
+    StripeId _AllocateSsdStripeForUser(int volumeId);
+    StripeId _AllocateSsdStripe(void);
+    void _AssignStripe(StripeId vsid, StripeId wbLsid, ASTailArrayIdx asTailArrayIdx);
+    StripeId _AllocateSegmentAndStripe(void);
+
     void _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX);
-    void _IncreaseInvCount(SegmentId segId, int count = 1);
 
     bool _IsSegmentFull(StripeId stripeId)
     {
@@ -86,10 +90,6 @@ protected: // for UT
     {
         return stripeOffset < addrInfo->GetblksPerStripe();
     }
-    bool _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx)
-    {
-        return (asTailArrayIdx < MAX_VOLUME_COUNT);
-    }
 
     // DOCs
     AllocatorAddressInfo* addrInfo;
@@ -98,6 +98,7 @@ protected: // for UT
     BlockAllocationStatus* allocStatus;
 
     int arrayId;
+    bool allocateBlocksFromSSDStripe;
 
     AllocatorCtx* allocCtx;
     IReverseMap* iReverseMap;

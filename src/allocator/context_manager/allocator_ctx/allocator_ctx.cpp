@@ -55,7 +55,6 @@ AllocatorCtx::AllocatorCtx(TelemetryPublisher* tp_, AllocatorCtxHeader* header, 
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
     ctxHeader.numValidWbLsid = 0;
     ctxHeader.ctxVersion = 0;
-    prevSsdLsid = 0;
     currentSsdLsid = 0;
 
     if (header != nullptr)
@@ -92,7 +91,6 @@ AllocatorCtx::Init(void)
         activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
     }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
-    prevSsdLsid = STRIPES_PER_SEGMENT - 1;
 
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
@@ -120,27 +118,7 @@ AllocatorCtx::Dispose(void)
 void
 AllocatorCtx::SetNextSsdLsid(SegmentId segId)
 {
-    prevSsdLsid = currentSsdLsid;
     currentSsdLsid = segId * addrInfo->GetstripesPerSegment();
-}
-
-StripeId
-AllocatorCtx::GetPrevSsdLsid(void)
-{
-    return prevSsdLsid;
-}
-
-void
-AllocatorCtx::SetPrevSsdLsid(StripeId stripeId)
-{
-    prevSsdLsid = stripeId;
-}
-
-StripeId
-AllocatorCtx::UpdatePrevLsid(void)
-{
-    prevSsdLsid = currentSsdLsid;
-    return currentSsdLsid + 1;
 }
 
 void
@@ -153,12 +131,6 @@ StripeId
 AllocatorCtx::GetCurrentSsdLsid(void)
 {
     return currentSsdLsid;
-}
-
-void
-AllocatorCtx::RollbackCurrentSsdLsid(void)
-{
-    currentSsdLsid = prevSsdLsid;
 }
 
 void

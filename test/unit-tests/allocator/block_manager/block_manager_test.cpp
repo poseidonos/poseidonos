@@ -51,12 +51,14 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     BlockManager blkManager(tp, nullptr, nullptr, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    VirtualBlkAddr vsa;
-    vsa.offset = 0;
-    vsa.stripeId = 0;
     std::mutex wbCtxLock;
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillRepeatedly(ReturnRef(wbCtxLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
+
+    // given: Active stripe tail is not full
+    VirtualBlkAddr vsa = {
+        .stripeId = 0,
+        .offset = 0};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillRepeatedly(Return(vsa));
     EXPECT_CALL(blockAllocationStatus, ProhibitUserBlockAllocation).Times(1);
     EXPECT_CALL(blockAllocationStatus, TryProhibitBlockAllocation).Times(1);
     EXPECT_CALL(blockAllocationStatus, IsUserBlockAllocationProhibited)
@@ -66,21 +68,21 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
     // when 1.
-    VirtualBlks ret = blkManager.AllocateWriteBufferBlks(0, 1);
+    auto ret = blkManager.AllocateWriteBufferBlks(0, 1);
     // then 1.
-    EXPECT_EQ(1, ret.numBlks);
+    EXPECT_EQ(1, ret.first.numBlks);
     // given 2.
     blkManager.ProhibitUserBlkAlloc();
     // when 2.
     ret = blkManager.AllocateWriteBufferBlks(0, 1);
     // then 2.
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    EXPECT_EQ(UNMAP_VSA, ret.first.startVsa);
     // given 3.
     blkManager.BlockAllocating(0);
     // when 3.
     ret = blkManager.AllocateWriteBufferBlks(0, 1);
     // then 3.
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    EXPECT_EQ(UNMAP_VSA, ret.first.startVsa);
     delete iWbstripe;
     delete allocCtx;
     delete segCtx;
@@ -89,7 +91,47 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     delete tp;
 }
 
-TEST(BlockManager, AllocateGcDestStripe_TestFunc)
+TEST(BlockManager, AllocateGcDestStripe_testIfReturnsStripeWhenSuccessToAllocateUserLsid)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(32);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    std::mutex ctxLock, allocCtxLock;
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
+    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    // Given: Block allocation is not prohibited
+    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false));
+    // Given: Success to allocate ssd user stripe
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(5));
+
+    // when
+    Stripe* stripe = blkManager.AllocateGcDestStripe(0);
+
+    // then
+    EXPECT_NE(stripe, nullptr);
+    delete stripe;
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete segCtx;
+    delete gcCtx;
+    delete ctxManager;
+    delete reverseMap;
+}
+
+TEST(BlockManager, AllocateGcDestStripe_testIfReturnsStripeWhenSuccessToAllocateNewSegmentAndUserLsid)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -105,20 +147,25 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
-    std::mutex Lock;
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(Lock));
-    EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
-    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false)).WillOnce(Return(true));
-
+    std::mutex ctxLock, allocCtxLock;
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
+    // Given: Block allocation is not prohibited
+    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false));
+    // Given: The current ssd lsid is the last stripe of a segment
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
+    // Expect
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(2));
+
     // when
-    blkManager.AllocateGcDestStripe(0);
-    // given 2.
-    blkManager.BlockAllocating(0);
-    // when 2.
-    blkManager.AllocateGcDestStripe(0);
+    Stripe* stripe = blkManager.AllocateGcDestStripe(0);
+
+    // then
+    EXPECT_NE(stripe, nullptr);
+    delete stripe;
 
     delete iWbstripe;
     delete allocCtx;
@@ -129,12 +176,12 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     delete revMapPack;
 }
 
-TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase1)
+TEST(BlockManager, AllocateGcDestStripe_testIfReturnsNullIRightAwayInsteadOfBlockingForeverWhenFreeSegmentIsNotAvailable)
 {
     // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    ON_CALL(*addrInfo, GetstripesPerSegment).WillByDefault(Return(10));
-    ON_CALL(*addrInfo, GetblksPerStripe).WillByDefault(Return(32));
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(32);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
@@ -142,20 +189,20 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase1)
     NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, addrInfo, ctxManager, 0);
+    BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
-    std::mutex Lock;
-    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(Lock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(20));
-    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
+
+    std::mutex allocCtxLock;
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+    // Given: Block allocation is not prohibited
+    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillRepeatedly(Return(false));
+    // Given: The current ssd lsid is the last stripe of a segment
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
+    // Given: Failed to allocate new segment
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
 
     // when
     Stripe* ret = blkManager.AllocateGcDestStripe(0);
@@ -168,11 +215,9 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase1)
     delete gcCtx;
     delete ctxManager;
     delete reverseMap;
-    delete revMapPack;
-    delete addrInfo;
 }
 
-TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
+TEST(BlockManager, AllocateGcDestStripe_testIfReturnsNullWhenBlockAllocationIsProhibited)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -187,47 +232,12 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
-    std::mutex Lock;
-    EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillOnce(Return(false));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(Lock));
-    EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
 
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
-    // when
-    Stripe* ret = blkManager.AllocateGcDestStripe(0);
-
-    delete iWbstripe;
-    delete allocCtx;
-    delete segCtx;
-    delete gcCtx;
-    delete ctxManager;
-    delete reverseMap;
-    delete revMapPack;
-}
-
-TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase3)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    addrInfo.SetblksPerStripe(32);
-    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    BlockManager blkManager(nullptr, nullptr, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
-    blkManager.Init(iWbstripe);
+    // Given: Block allocation is prohibited
     EXPECT_CALL(blockAllocationStatus, IsBlockAllocationProhibited).WillRepeatedly(Return(true));
-
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-
     // when
     Stripe* ret = blkManager.AllocateGcDestStripe(0);
     // then
@@ -316,7 +326,7 @@ TEST(BlockManager, TurnOnBlkAllocation_TestSimpleSetter)
     blkManager.TurnOnBlkAllocation();
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase1)
+TEST(BlockManager, _AllocateBlks_testIfReturnsUnmapVsaWhenFailedToAllocateWbStripeId)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -333,18 +343,25 @@ TEST(BlockManager, _AllocateBlks_TestCase1)
     BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
-    // given 0.
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
+    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
+    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    // Given: Active stripe tail is full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 5};
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
+
+    // Given: Failed to allocate new write buffer stripe
     EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(UNMAP_STRIPE));
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
-    // when 0.
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    // when
+    auto ret = blkManager._AllocateBlks(0, 1);
+
     // then 0.
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    EXPECT_EQ(UNMAP_VSA, ret.first.startVsa);
+
     delete iWbstripe;
     delete allocCtx;
     delete segCtx;
@@ -354,7 +371,7 @@ TEST(BlockManager, _AllocateBlks_TestCase1)
     delete iStripeMap;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase2)
+TEST(BlockManager, _AllocateBlks_testIfReturnsUnmapVsaWhenUserBlockAllocationIsProhibited)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -370,23 +387,34 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
-
+    std::mutex wbLock, ctxLock, allocCtxLock;
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(blockAllocationStatus, ProhibitUserBlockAllocation).Times(1);
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-    EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
+
+    // Given: Active stripe tail is full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 5};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
+
+    // Given: Success to allocate new write buffer stripe
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
+
+    // Given: Current ssd segment is full
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
+
+    // Given: User block allocation is prohibited
+    EXPECT_CALL(blockAllocationStatus, IsUserBlockAllocationProhibited).WillOnce(Return(true));
 
     // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    auto ret = blkManager._AllocateBlks(0, 1);
+
     // then
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    EXPECT_EQ(UNMAP_VSA, ret.first.startVsa);
+
     delete iWbstripe;
     delete allocCtx;
     delete segCtx;
@@ -396,10 +424,12 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     delete iStripeMap;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase3_1)
+TEST(BlockManager, _AllocateBlks_testIfReturnsUnmapVsaWhenFailedToAllocateFreeSegment)
 {
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillRepeatedly(Return(10));
+    EXPECT_CALL(*addrInfo, GetblksPerStripe).WillRepeatedly(Return(5));
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
@@ -410,25 +440,34 @@ TEST(BlockManager, _AllocateBlks_TestCase3_1)
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
-    // given 2.
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
-    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillOnce(Return(10));
-    EXPECT_CALL(*addrInfo, GetblksPerStripe).WillOnce(Return(5));
+    std::mutex wbLock, ctxLock, allocCtxLock;
+
+    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillRepeatedly(ReturnRef(wbLock));
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
+    // Given: Active stripe tail is full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 5};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
+
+    // Given: Success to allocate new write buffer stripe
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
+
+    // Given: The current ssd lsid is the last stripe of a segment
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
+
+    // Given: Failed to allocate ssd user stripe
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
+
     // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    auto ret = blkManager._AllocateBlks(0, 1);
+
     // then
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    EXPECT_EQ(UNMAP_VSA, ret.first.startVsa);
 
     delete iWbstripe;
     delete allocCtx;
@@ -440,51 +479,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3_1)
     delete addrInfo;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase3_2)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    ON_CALL(*addrInfo, GetstripesPerSegment).WillByDefault(Return(10));
-    ON_CALL(*addrInfo, GetblksPerStripe).WillByDefault(Return(5));
-    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, addrInfo, ctxManager, 0);
-    blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
-    // given 2.
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-
-    // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
-    // then
-    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
-
-    delete iWbstripe;
-    delete allocCtx;
-    delete segCtx;
-    delete gcCtx;
-    delete ctxManager;
-    delete reverseMap;
-    delete iStripeMap;
-    delete addrInfo;
-}
-
-TEST(BlockManager, _AllocateBlks_TestCase4)
+TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -500,26 +495,54 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
     BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
 
-    // given
+    std::mutex wbLock, ctxLock, allocCtxLock;
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
-
-    EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
-    EXPECT_CALL(*stripe, Assign).Times(1);
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
+    // Given: Active stripe tail is full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 5};
+    VirtualBlkAddr newVsa = {
+        .stripeId = 0,
+        .offset = 0};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(newVsa));
+
+    // Given: Success to allocate new write buffer stripe
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(5));
+
+    // Given: The current ssd lsid is the last stripe of a segment
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
+
+    // Given: Success to allocate new ssd user stripe
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
+
+    EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(0)).Times(1);
+    EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
+    EXPECT_CALL(*stripe, Assign).Times(1);
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
+
+    EXPECT_CALL(*iStripeMap, SetLSA(0, _, IN_WRITE_BUFFER_AREA)).Times(1);
+    VirtualBlkAddr updatedVsa = {
+        .stripeId = 0,
+        .offset = 1};
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, updatedVsa)).Times(1);
+
     // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    auto ret = blkManager._AllocateBlks(0, 1);
+
+    // then
+    EXPECT_EQ(ret.first.startVsa.stripeId, 0);
+    EXPECT_EQ(ret.first.startVsa.offset, 0);
+    EXPECT_EQ(ret.first.numBlks, 1);
+
+    EXPECT_EQ(ret.second, 5);
 
     delete iWbstripe;
     delete allocCtx;
@@ -532,7 +555,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     delete stripe;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase5)
+TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNewStripeAllocation)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -546,29 +569,38 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0, true);
     blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
-    // given 4.
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+
+    std::mutex wbLock, ctxLock, allocCtxLock;
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
-    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
-
-    EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
-    EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*iStripeMap, SetLSA).Times(1);
-
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    // Given: Active stripe tail is not full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 0};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillRepeatedly(Return(vsa));
+
+    VirtualBlkAddr updatedVsa = {
+        .stripeId = 10,
+        .offset = 1};
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, updatedVsa)).Times(1);
+
+    // when
+    auto ret = blkManager._AllocateBlks(0, 1);
+
+    // then
+    EXPECT_EQ(ret.first.startVsa.stripeId, 10);
+    EXPECT_EQ(ret.first.startVsa.offset, 0);
+    EXPECT_EQ(ret.first.numBlks, 1);
+
+    EXPECT_EQ(ret.second, UNMAP_STRIPE);
 
     delete iWbstripe;
     delete allocCtx;
@@ -581,7 +613,7 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     delete stripe;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase6)
+TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -595,122 +627,105 @@ TEST(BlockManager, _AllocateBlks_TestCase6)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0, true);
     blkManager.Init(iWbstripe);
-    std::mutex wbLock, ctxLock;
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
+    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+
+    std::mutex wbLock, ctxLock, allocCtxLock;
     EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
+    EXPECT_CALL(*allocCtx, GetCtxLock).WillRepeatedly(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    // Given: Active stripe tail is full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 5};
+
+    StripeId newVsid = 13;
+    VirtualBlkAddr newVsa = {
+        .stripeId = newVsid,
+        .offset = 0};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(newVsa));
+
+    // Given: Success to allocate new write buffer stripe
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(5));
+
+    // Given: Success to allocate new user data stripe
+    EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(newVsid - 1));
+
+    EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(newVsid)).Times(1);
+    EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
+    EXPECT_CALL(*stripe, Assign).Times(1);
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
+
+    EXPECT_CALL(*iStripeMap, SetLSA(newVsid, newVsid, IN_USER_AREA)).Times(1);
+    VirtualBlkAddr updatedVsa = {
+        .stripeId = newVsid,
+        .offset = 1};
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, updatedVsa)).Times(1);
+
     // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
-    delete iWbstripe;
-    delete allocCtx;
-    delete segCtx;
-    delete gcCtx;
-    delete ctxManager;
-    delete reverseMap;
-    delete iStripeMap;
-}
+    auto ret = blkManager._AllocateBlks(0, 1);
 
-TEST(BlockManager, _AllocateBlks_TestCase7)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    addrInfo.SetblksPerStripe(5);
-    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
-    blkManager.Init(iWbstripe);
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
-    std::mutex wbLock, ctxLock;
-    // given
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-    // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
-
-    delete iWbstripe;
-    delete allocCtx;
-    delete segCtx;
-    delete gcCtx;
-    delete ctxManager;
-    delete reverseMap;
-    delete iStripeMap;
-}
-
-TEST(BlockManager, _AllocateBlks_TestCase8)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    addrInfo.SetblksPerStripe(5);
-    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
-    blkManager.Init(iWbstripe);
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
-    std::mutex wbLock, ctxLock;
-    // given
-    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
-    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-    // when
-    VirtualBlks ret = blkManager._AllocateBlks(0, 11);
-    delete iWbstripe;
-    delete allocCtx;
-    delete segCtx;
-    delete gcCtx;
-    delete ctxManager;
-    delete reverseMap;
-    delete iStripeMap;
-}
-
-TEST(BlockManager, _AllocateWriteBufferBlksFromNewStripe_TestInternalFunc)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
-    addrInfo.SetblksPerStripe(5);
-    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
-    blkManager.Init(iWbstripe);
-    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
-    std::mutex wbLock, ctxLock;
-
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
-    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
-    // when
-    VirtualBlks ret = blkManager._AllocateWriteBufferBlksFromNewStripe(0, 0, 11);
     // then
-    EXPECT_EQ(5, ret.numBlks);
+    EXPECT_EQ(ret.first.startVsa.stripeId, newVsid);
+    EXPECT_EQ(ret.first.startVsa.offset, 0);
+    EXPECT_EQ(ret.first.numBlks, 1);
+
+    EXPECT_EQ(ret.second, 5);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete segCtx;
+    delete gcCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete revMapPack;
+    delete iStripeMap;
+    delete stripe;
+}
+
+TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUnmapStripeIdWhenNewStripeIsNotAllocated)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(5);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    std::mutex wbLock, ctxLock;
+
+    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
+    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
+    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    // Given: Active stripe tail is not full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 3};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
+
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
+
+    // when
+    auto ret = blkManager._AllocateBlks(0, 2);
+
+    // Then
+    EXPECT_EQ(ret.first.startVsa.stripeId, 10);
+    EXPECT_EQ(ret.first.startVsa.offset, 3);
+    EXPECT_EQ(ret.first.numBlks, 2);
+    EXPECT_EQ(ret.second, UNMAP_STRIPE);
 
     delete iWbstripe;
     delete allocCtx;
@@ -721,8 +736,50 @@ TEST(BlockManager, _AllocateWriteBufferBlksFromNewStripe_TestInternalFunc)
     delete iStripeMap;
 }
 
-TEST(BlockManager, _AllocateStripe_TestInternalFunc)
+TEST(BlockManager, _AllocateBlks_testIfReturnsOnlyAllocatedBlockNumbaerWhenRequestedSizeIsLargerThanTheStripe)
 {
-}
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(5);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockBlockAllocationStatus> blockAllocationStatus;
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    std::mutex wbLock, ctxLock;
 
+    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
+    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
+    EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    // Given: Active stripe tail is not full
+    VirtualBlkAddr vsa = {
+        .stripeId = 10,
+        .offset = 3};
+    EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
+
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
+
+    // when
+    auto ret = blkManager._AllocateBlks(0, 11);
+
+    EXPECT_EQ(ret.first.startVsa.stripeId, 10);
+    EXPECT_EQ(ret.first.startVsa.offset, 3);
+    EXPECT_EQ(ret.first.numBlks, 2);
+    EXPECT_EQ(ret.second, UNMAP_STRIPE);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete segCtx;
+    delete gcCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete iStripeMap;
+}
 } // namespace pos

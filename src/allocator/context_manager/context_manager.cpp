@@ -74,10 +74,9 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 {
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
-    gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
-    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx, blockAllocStatus);
-
+    gcCtx = new GcCtx(blockAllocStatus);
+    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx);
 
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
 
@@ -164,6 +163,8 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {
+    // TODO(huijeong.kim) to reduce critical section
+    std::lock_guard<std::mutex> lock(ctxLock);
     return segmentCtx->AllocateFreeSegment();
 }
 

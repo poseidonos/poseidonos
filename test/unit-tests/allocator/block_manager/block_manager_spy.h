@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <string>
+#include <utility>
 
 #include "src/allocator/block_manager/block_manager.h"
 
@@ -44,25 +45,10 @@ class BlockManagerSpy : public BlockManager
 public:
     using BlockManager::BlockManager;
     ~BlockManagerSpy(void) = default;
-    VirtualBlks
+    std::pair<VirtualBlks, StripeId>
     _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
     {
         return BlockManager::_AllocateBlks(asTailArrayIdx, numBlks);
-    }
-    VirtualBlks
-    _AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayIdx, StripeId vsid, int numBlks)
-    {
-        return BlockManager::_AllocateWriteBufferBlksFromNewStripe(asTailArrayIdx, vsid, numBlks);
-    }
-    int
-    _AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
-    {
-        return BlockManager::_AllocateStripe(asTailArrayIdx, vsid);
-    }
-    void
-    _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX)
-    {
-        return BlockManager::_RollBackStripeIdAllocation(wbLsid);
     }
 };
 

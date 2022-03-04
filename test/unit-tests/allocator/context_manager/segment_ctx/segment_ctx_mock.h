@@ -1,5 +1,4 @@
 #include <gmock/gmock.h>
-#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -46,6 +45,7 @@ public:
     MOCK_METHOD(bool, LoadRebuildList, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
+    MOCK_METHOD(void, UpdateGcFreeSegment, (uint32_t arrayId), (override));
 };
 
 } // namespace pos

@@ -217,63 +217,6 @@ TEST(ContextManager, GetNumOfFreeSegment_TestSimpleGetter)
     EXPECT_EQ(50, ret);
 }
 
-TEST(ContextManager, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
-{
-    // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    GcCtx* gcCtx = new GcCtx();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
-
-    gcCtx->SetNormalGcThreshold(10);
-    gcCtx->SetUrgentThreshold(5);
-
-    // given 1.
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(11));
-    // when 1.
-    int numFreeSegments = segCtx->GetNumOfFreeSegment();
-    GcMode ret = gcCtx->GetCurrentGcMode(numFreeSegments);
-
-    // then 1.
-    EXPECT_EQ(MODE_NO_GC, ret);
-
-    // given 2.
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(10));
-    // when 2.
-    numFreeSegments = segCtx->GetNumOfFreeSegment();
-    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
-    // then 2.
-    EXPECT_EQ(MODE_NORMAL_GC, ret);
-
-    // given 3.
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(9));
-    // when 3.
-    numFreeSegments = segCtx->GetNumOfFreeSegment();
-    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
-    // then 3.
-    EXPECT_EQ(MODE_NORMAL_GC, ret);
-
-    // given 4.
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(5));
-    // when 4.
-    numFreeSegments = segCtx->GetNumOfFreeSegment();
-    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
-    // then 4.
-    EXPECT_EQ(MODE_URGENT_GC, ret);
-
-    // given 5.
-    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(4));
-    // when 5.
-    numFreeSegments = segCtx->GetNumOfFreeSegment();
-    ret = gcCtx->GetCurrentGcMode(numFreeSegments);
-    // then 5.
-    EXPECT_EQ(MODE_URGENT_GC, ret);
-}
-
 TEST(ContextManager, GetGcThreshold_TestSimpleGetterByMode)
 {
     // given

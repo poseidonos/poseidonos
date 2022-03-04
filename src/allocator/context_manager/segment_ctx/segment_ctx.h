@@ -43,7 +43,6 @@
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
-#include "src/allocator/context_manager/block_allocation_status.h"
 
 namespace pos
 {
@@ -53,13 +52,12 @@ class SegmentCtx : public IAllocatorFileIoClient
 public:
     SegmentCtx(void) = default;
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_,
-        BlockAllocationStatus* blockAllocStatus_);
+        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_,
-        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_);
+        GcCtx* gcCtx_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-        AllocatorAddressInfo* info, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_);
+        AllocatorAddressInfo* info, GcCtx* gcCtx_);
     virtual ~SegmentCtx(void);
 
     // Only for UT
@@ -144,7 +142,6 @@ private:
 
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
-    BlockAllocationStatus* blockAllocStatus;
     TelemetryPublisher* tp;
 };
 

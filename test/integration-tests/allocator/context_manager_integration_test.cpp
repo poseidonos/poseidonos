@@ -67,7 +67,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
 
     // SegmentCtx (Real)
-    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx, blockAllocStatus);
+    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
@@ -203,7 +203,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockContextReplayer>* contextReplayer = new NiceMock<MockContextReplayer>;
     NiceMock<MockTelemetryPublisher> tp;
-    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, blockAllocStatus);
+    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx);
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
 
     std::mutex allocatorLock;
