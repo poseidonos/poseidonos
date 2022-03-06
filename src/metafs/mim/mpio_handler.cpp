@@ -66,8 +66,8 @@ MpioHandler::~MpioHandler(void)
 void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
-    partialMpioDoneQ->Enqueue(mpio, mpio->GetPriority());
     mpio->StoreTimestamp(MpioTimestampStage::Enqueue);
+    partialMpioDoneQ->Enqueue(mpio, mpio->GetPriority());
 }
 
 void

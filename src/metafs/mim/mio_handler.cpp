@@ -347,8 +347,8 @@ MioHandler::TophalfMioProcessing(void)
 void
 MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    ioSQ->Enqueue(reqMsg, reqMsg->priority);
     reqMsg->StoreTimestamp(IoRequestStage::Enqueue);
+    ioSQ->Enqueue(reqMsg, reqMsg->priority);
 }
 
 void
