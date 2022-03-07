@@ -55,8 +55,10 @@ ApplyLogFilterCommand::Execute(json& doc, string rid)
     int ret = logger()->ApplyFilter();
     if (ret == SUCCESS)
     {
-        return jFormat.MakeResponse("APPLYLOGFILTER", rid, SUCCESS,
-            "filter is applied", GetPosInfo());
+        int event = EID(CLI_APPLY_FILTER_SUCCESS);
+        POS_TRACE_INFO(event, "");
+        return jFormat.MakeResponse("APPLYLOGFILTER", rid, event,
+            "log filter has been applied", GetPosInfo());
     }
 
     return jFormat.MakeResponse("APPLYLOGFILTER", rid, ret,

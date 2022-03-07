@@ -38,6 +38,7 @@
 
 #include "src/helper/string/string_helper.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos_logger
 {
@@ -72,9 +73,13 @@ Filter::ApplyFilter(string filePath)
     }
     else
     {
-        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND;
+        int event = EID(LOGGER_FILTER_POLICY_FILE_NOT_FOUND);
+        POS_TRACE_WARN(event, "file_path:{}", filePath);
+        return event;
     }
 
+    int event = EID(LOGGER_FILTER_APPLY_SUCCESS);
+    POS_TRACE_INFO(event, "file_path:{}", filePath);
     return 0;
 }
 
@@ -103,7 +108,9 @@ Filter::_Decode(string policy)
     vector<string> pol = _Split(policy, policyDelimiter);
     if (pol.size() != 2)
     {
-        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
+        POS_TRACE_WARN(event, "policy:{}", policy);
+        return event;
     }
     string mode = pol.at(0);
     string val = pol.at(1);
@@ -115,7 +122,9 @@ Filter::_Decode(string policy)
 
     if (mode != "include" && mode != "exclude")
     {
-        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
+        POS_TRACE_WARN(event, "policy:{}", policy);
+        return event;
     }
 
     vector<string> id = _Split(val, idDelimiter);
@@ -138,7 +147,9 @@ Filter::_Decode(string policy)
                 }
                 else
                 {
-                    return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+                            int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
+                            POS_TRACE_WARN(event, "policy:{}", policy);
+                            return event;
                 }
             }
             else
@@ -150,7 +161,9 @@ Filter::_Decode(string policy)
     catch (const std::exception& e)
     {
         filter.clear();
-        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
+        POS_TRACE_WARN(event, "policy:{}", policy);
+        return event;
     }
 
     if (mode == "include")

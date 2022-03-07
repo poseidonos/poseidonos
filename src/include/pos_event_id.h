@@ -76,6 +76,8 @@ enum class POS_EVENT_ID
     CLI_ADD_DEVICE_SUCCESS,
     CLI_ADD_LISTENER_FAILURE,
     CLI_ADD_LISTENER_SUCCESS,
+    CLI_APPLY_FILTER_FAILURE,
+    CLI_APPLY_FILTER_SUCCESS,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -631,7 +633,8 @@ enum class POS_EVENT_ID
 
     LOGGER_FILTER_POLICY_DECODE_FAIL = 4580,
     LOGGER_FILTER_POLICY_FILE_NOT_FOUND = 4581,
-    LOGGER_SET_LEVEL_FAILED = 4582,
+    LOGGER_SET_LEVEL_FAILED,
+    LOGGER_FILTER_APPLY_SUCCESS,
 
     // --------------QOS Related (4600)----------------
     QOS_START = 4600,
@@ -1155,4 +1158,13 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::CLI_ADD_LISTENER_SUCCESS,
             new PosEventInfoEntry("CLI_ADD_LISTENER_SUCCESS",
                 "a lisenter has been added successfully", "", "")},
+        {(int)POS_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND,
+            new PosEventInfoEntry("LOGGER_FILTER_POLICY_FILE_NOT_FOUND",
+                "failed to find a logger filter policy file", "", "")},
+        {(int)POS_EVENT_ID::LOGGER_FILTER_APPLY_SUCCESS,
+            new PosEventInfoEntry("LOGGER_FILTER_APPLY_SUCCESS",
+                "log filter has been successfully applied", "", "")},
+        {(int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL,
+            new PosEventInfoEntry("LOGGER_FILTER_POLICY_DECODE_FAIL",
+                "failed to decode logger filter policy", "", "")},
     };
