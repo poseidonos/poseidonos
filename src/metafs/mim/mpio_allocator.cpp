@@ -159,7 +159,6 @@ MpioAllocator::_TryAlloc(const MpioType mpioType)
         return nullptr;
 
     auto mpio = pool_[type]->TryAlloc();
-    mpio->StoreTimestamp(MpioTimestampStage::Allocate);
     return mpio;
 }
 

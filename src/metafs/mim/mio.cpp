@@ -222,6 +222,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     if (mpio == nullptr)
         return nullptr;
 
+    mpio->StoreTimestamp(MpioTimestampStage::Allocate);
     mpio->Setup(mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
     mpio->SetLocalAioCbCxt(mpioAsyncDoneCallback);
 
@@ -471,7 +472,6 @@ Mio::NotifyCompletionToClient(void)
         originReq->originalMsg->SetError(true);
     }
 
-    originReq->StoreTimestamp(IoRequestStage::Complete);
     originReq->originalMsg->NotifyIoCompletionToClient();
 }
 } // namespace pos

@@ -180,8 +180,8 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
 
         if (0 == requestCount)
         {
-            ioDone = true;
             StoreTimestamp(IoRequestStage::Complete);
+            ioDone = true;
         }
     }
 
