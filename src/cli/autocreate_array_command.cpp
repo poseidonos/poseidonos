@@ -100,8 +100,11 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     NumaAwaredArrayCreationResult res = creationDelegate.GetResult();
     if (res.code != 0)
     {
+        int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
+        POS_TRACE_WARN(event, "internal_event_code:{}", res.code);
         return jFormat.MakeResponse(
-            "AUTOCREATEARRAY", rid, res.code, "failed to create " + arrayName + "(code:" + to_string(res.code) + ")", GetPosInfo());
+            "AUTOCREATEARRAY", rid, event,
+                "failed to create " + arrayName + " (code:" + to_string(res.code) + ")", GetPosInfo());
     }
 
     IArrayMgmt* array = ArrayMgr();
@@ -110,14 +113,19 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
 
     if (0 != ret)
     {
+        int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
+        POS_TRACE_WARN(event, "internal_event_code:{}", ret);
         return jFormat.MakeResponse(
-            "AUTOCREATEARRAY", rid, ret, "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+            "AUTOCREATEARRAY", rid, event,
+                "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
     }
     else
     {
         QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
+        int event = EID(CLI_AUTOCREATE_ARRAY_SUCCESS);
+        POS_TRACE_INFO(event, "");
         return jFormat.MakeResponse("AUTOCREATEARRAY", rid, SUCCESS,
-            arrayName + " is created successfully", GetPosInfo());
+            arrayName + " has been created successfully", GetPosInfo());
     }
 }
 }; // namespace pos_cli

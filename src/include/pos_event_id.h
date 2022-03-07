@@ -80,6 +80,8 @@ enum class POS_EVENT_ID
     CLI_APPLY_FILTER_SUCCESS,
     CLI_ARRAY_INFO_NO_ARRAY_NAME,
     CLI_ARRAY_INFO_ARRAY_NOT_EXIST,
+    CLI_AUTOCREATE_ARRAY_FAILURE,
+    CLI_AUTOCREATE_ARRAY_SUCCESS,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1175,4 +1177,10 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::CLI_ARRAY_INFO_ARRAY_NOT_EXIST,
             new PosEventInfoEntry("CLI_ARRAY_INFO_ARRAY_NOT_EXIST",
                 "failed to retrieve array info", "array does not exist", "")},
+        {(int)POS_EVENT_ID::CLI_AUTOCREATE_ARRAY_FAILURE,
+            new PosEventInfoEntry("CLI_AUTOCREATE_ARRAY_FAILURE",
+                "failed to create an array via autocreate", "", "")},
+        {(int)POS_EVENT_ID::CLI_AUTOCREATE_ARRAY_SUCCESS,
+            new PosEventInfoEntry("CLI_AUTOCREATE_ARRAY_SUCCESS",
+                "an array has been created successfully via autocreate", "", "")},
     };
