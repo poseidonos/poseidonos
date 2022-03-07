@@ -1,2 +1,3 @@
 POS_ADD_UNIT_TEST(mfs_lockless_q_ut mfs_lockless_q_test.cpp)
 POS_ADD_UNIT_TEST(metafs_pool_ut metafs_pool_test.cpp)
+POS_ADD_UNIT_TEST(metafs_time_interval_ut metafs_time_interval_test.cpp)
