@@ -74,6 +74,8 @@ enum class POS_EVENT_ID
     CLI_ADD_DEVICE_FAILURE,
     CLI_ADD_DEVICE_FAILURE_NO_SPARE,
     CLI_ADD_DEVICE_SUCCESS,
+    CLI_ADD_LISTENER_FAILURE,
+    CLI_ADD_LISTENER_SUCCESS,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1146,5 +1148,11 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "failed to add spare device", "spare device is not specified", "please specify the spare device")},
         {(int)POS_EVENT_ID::CLI_ADD_DEVICE_SUCCESS,
             new PosEventInfoEntry("CLI_ADD_DEVICE_SUCCESS",
-                "Spare device has been added to an array", "", "")},
+                "spare device has been added to an array", "", "")},
+        {(int)POS_EVENT_ID::CLI_ADD_LISTENER_FAILURE,
+            new PosEventInfoEntry("CLI_ADD_LISTENER_FAILURE",
+                "failed to add listener", "", "")},
+        {(int)POS_EVENT_ID::CLI_ADD_LISTENER_SUCCESS,
+            new PosEventInfoEntry("CLI_ADD_LISTENER_SUCCESS",
+                "a lisenter has been added successfully", "", "")},
     };

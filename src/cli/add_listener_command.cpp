@@ -35,6 +35,7 @@
 #include "src/cli/cli_event_code.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/network/nvmf_target.h"
+#include "src/logger/logger.h"
 
 namespace pos_cli
 {
@@ -58,13 +59,16 @@ AddListenerCommand::Execute(json& doc, string rid)
     ret = _AddListener(doc);
     if (ret != SUCCESS)
     {
+        int event = EID(CLI_ADD_LISTENER_FAILURE);
+        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
-            "ADDLISTENER", rid, FAIL,
-            errorMessage, GetPosInfo());
+            "ADDLISTENER", rid, event, errorMessage, GetPosInfo());
     }
 
+    int event = EID(CLI_ADD_LISTENER_SUCCESS);
+    POS_TRACE_INFO(event, "");
     return jFormat.MakeResponse(
-        "ADDLISTENER", rid, SUCCESS,
+        "ADDLISTENER", rid, event,
         "Address ( " + doc["param"]["target_address"].get<string>() + " ) added to Subsystem ( " + subnqn + " )", GetPosInfo());
 }
 
