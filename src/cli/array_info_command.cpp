@@ -148,7 +148,7 @@ ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
     int isEnabled = gc->IsEnabled();
     if (0 != isEnabled)
     {
-        
+        return "N/A";
     }
 
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
