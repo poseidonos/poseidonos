@@ -65,21 +65,27 @@ AddDeviceCommand::Execute(json& doc, string rid)
         int ret = array->AddDevice(arrayName, devName);
         if (ret == 0)
         {
-            return jFormat.MakeResponse("ADDDEVICE", rid, SUCCESS,
-                devName + "is added to " + arrayName + " successfully", GetPosInfo());
+            int event = EID(CLI_ADD_DEVICE_SUCCESS);
+            POS_TRACE_INFO(event, "device_name:{}, array_name:{}", devName, arrayName);
+            return jFormat.MakeResponse("ADDDEVICE", rid, event,
+                devName + "has been added to " + arrayName + " successfully", GetPosInfo());
         }
         else
         {
-            return jFormat.MakeResponse("ADDDEVICE", rid, ret,
+            int event = EID(CLI_ADD_DEVICE_FAILURE);
+            POS_TRACE_WARN(event, "");
+            return jFormat.MakeResponse("ADDDEVICE", rid, event,
                 "failed to add " + devName + " to " + arrayName +
-                    "(code:" + to_string(ret) + ")",
+                    "internal event:" + to_string(ret) + ")",
                 GetPosInfo());
         }
     }
     else
     {
-        return jFormat.MakeResponse("ADDDEVICE", rid, BADREQUEST,
-            "only spare device can be added", GetPosInfo());
+        int event = EID(CLI_ADD_DEVICE_FAILURE_NO_SPARE);
+        POS_TRACE_WARN(event, "");
+        return jFormat.MakeResponse("ADDDEVICE", rid, event,
+            "failed to add spare device", GetPosInfo());
     }
 }
 

@@ -63,11 +63,11 @@ ListArrayCommand::Execute(json& doc, string rid)
 
     if (result != 0)
     {
-        if (result == (int)POS_EVENT_ID::MBR_DATA_NOT_FOUND)
+        if (result == EID(MBR_DATA_NOT_FOUND))
         {
-            result = (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
+            result = EID(ARRAY_NOT_FOUND);
             return jFormat.MakeResponse("LISTARRAY", rid, result,
-                "There is no array, All array data has been reset", data, GetPosInfo());
+                "there is no array, all array data has been reset", data, GetPosInfo());
         }
         else
         {
