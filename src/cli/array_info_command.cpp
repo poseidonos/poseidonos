@@ -61,14 +61,18 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     JsonFormat jFormat;
     if (arrayName == "")
     {   JsonFormat jFormat;
-        return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
-            "Please type array name", GetPosInfo());
+        int event = EID(CLI_ARRAY_INFO_NO_ARRAY_NAME);
+        POS_TRACE_WARN(event, "");
+        return jFormat.MakeResponse("ARRAYINFO", rid, event,
+            "please type array name", GetPosInfo());
     }
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
-        return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+        int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        return jFormat.MakeResponse("ARRAYINFO", rid, event,
             arrayName + " does not exist", GetPosInfo());
     }
     IArrayInfo* array = info->arrayInfo;
@@ -144,19 +148,19 @@ ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
     int isEnabled = gc->IsEnabled();
     if (0 != isEnabled)
     {
-        return "N/A";
+        
     }
 
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
 
-    JsonFormat jFormat;
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
-        return jFormat.MakeResponse("ARRAYINFO", " ", (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
-            arrayName + " does not exist", GetPosInfo());
+        int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        return "N/A";
     }
 
     uint32_t arrayId = iContextManager->GetArrayId();

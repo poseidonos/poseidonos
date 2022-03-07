@@ -78,6 +78,8 @@ enum class POS_EVENT_ID
     CLI_ADD_LISTENER_SUCCESS,
     CLI_APPLY_FILTER_FAILURE,
     CLI_APPLY_FILTER_SUCCESS,
+    CLI_ARRAY_INFO_NO_ARRAY_NAME,
+    CLI_ARRAY_INFO_ARRAY_NOT_EXIST,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1167,4 +1169,10 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL,
             new PosEventInfoEntry("LOGGER_FILTER_POLICY_DECODE_FAIL",
                 "failed to decode logger filter policy", "", "")},
+        {(int)POS_EVENT_ID::CLI_ARRAY_INFO_NO_ARRAY_NAME,
+            new PosEventInfoEntry("CLI_ARRAY_INFO_NO_ARRAY_NAME",
+                "failed to retrieve array info", "array name is not typed", "type an arry name")},
+        {(int)POS_EVENT_ID::CLI_ARRAY_INFO_ARRAY_NOT_EXIST,
+            new PosEventInfoEntry("CLI_ARRAY_INFO_ARRAY_NOT_EXIST",
+                "failed to retrieve array info", "array does not exist", "")},
     };
