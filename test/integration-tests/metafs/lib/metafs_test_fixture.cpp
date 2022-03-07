@@ -94,11 +94,14 @@ MetaFsTestFixture::_SetArrayInfo(ArrayComponents* component, const int index)
     component->ptnSize[PartitionType::META_NVM].blksPerStripe = 32;
     component->ptnSize[PartitionType::META_SSD].totalStripes = 2048;
     component->ptnSize[PartitionType::META_SSD].blksPerStripe = 32;
+    component->ptnSize[PartitionType::JOURNAL_SSD].totalStripes = 1024;
+    component->ptnSize[PartitionType::JOURNAL_SSD].blksPerStripe = 32;
 
     component->arrayInfo = new NiceMock<MockIArrayInfo>();
 
     EXPECT_CALL(*component->arrayInfo, GetSizeInfo(PartitionType::META_NVM)).WillRepeatedly(Return(&component->ptnSize[PartitionType::META_NVM]));
     EXPECT_CALL(*component->arrayInfo, GetSizeInfo(PartitionType::META_SSD)).WillRepeatedly(Return(&component->ptnSize[PartitionType::META_SSD]));
+    EXPECT_CALL(*component->arrayInfo, GetSizeInfo(PartitionType::JOURNAL_SSD)).WillRepeatedly(Return(&component->ptnSize[PartitionType::JOURNAL_SSD]));
     EXPECT_CALL(*component->arrayInfo, GetIndex).WillRepeatedly(Return(component->arrayId));
     EXPECT_CALL(*component->arrayInfo, GetName).WillRepeatedly(Return(component->arrayName));
 }

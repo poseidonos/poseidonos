@@ -38,6 +38,7 @@ enum class MetaStorageType
 {
     SSD,
     NVRAM,
+    JOURNAL_SSD,
 
     Max,
 

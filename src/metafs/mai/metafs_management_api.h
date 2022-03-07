@@ -39,6 +39,7 @@
 
 #include <string>
 #include "src/metafs/msc/metafs_system_manager.h"
+#include "src/metafs/common/meta_file_util.h"
 
 namespace pos
 {
@@ -51,7 +52,7 @@ public:
     virtual ~MetaFsManagementApi(void);
 
     virtual POS_EVENT_ID InitializeSystem(int arrayId,
-                                MetaStorageMediaInfoList* mediaInfoList);
+                                MetaStorageInfoList* mediaInfoList);
     virtual POS_EVENT_ID CloseSystem(int arrayId);
 
     virtual uint64_t GetEpochSignature(void);
@@ -61,6 +62,17 @@ public:
     virtual bool CreateMbr(void);
     virtual bool IsMbrClean(void);
     virtual void SetStatus(bool isNormal);
+    virtual bool IsValidVolume(MetaVolumeType volumeType)
+    {
+        for (auto& item : GetAllStoragePartitionInfo())
+        {
+            if (false == item.valid)
+                continue;
+            if (item.mediaType == MetaFileUtil::ConvertToMediaType(volumeType))
+                return true;
+        }
+        return false;
+    }
 
 private:
     int arrayId = INT32_MAX;

@@ -43,7 +43,7 @@ class MockMetaFsSystemManager : public MetaFsSystemManager
 {
 public:
     using MetaFsSystemManager::MetaFsSystemManager;
-    MOCK_METHOD(bool, Init, (int arrayId, MetaStorageMediaInfoList & mediaInfoList));
+    MOCK_METHOD(bool, Init, (int arrayId, MetaStorageInfoList & mediaInfoList));
     MOCK_METHOD(bool, Bringup, (int arrayId));
     MOCK_METHOD(POS_EVENT_ID, ProcessNewReq, (MetaFsControlReqMsg & reqMsg));
     MOCK_METHOD(bool, IsMounted, (int arrayId));

@@ -44,25 +44,25 @@
 namespace pos
 {
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
-                                        StorageOpt storageOpt)
-: MetaFileIntf(fname, arrayId, storageOpt),
+                                        MetaVolumeType volumeType)
+: MetaFileIntf(fname, arrayId, volumeType),
   metaFs(nullptr),
   blksPerStripe(0),
   baseLpn(UINT64_MAX)
 {
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
-    _SetFileProperty(storageOpt);
+    _SetFileProperty(volumeType);
 }
 
 // only for test
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
-                                        StorageOpt storageOpt)
-: MetaFileIntf(fname, arrayId, storageOpt),
+                                        MetaVolumeType volumeType)
+: MetaFileIntf(fname, arrayId, volumeType),
   metaFs(metaFs),
   blksPerStripe(0),
   baseLpn(UINT64_MAX)
 {
-    _SetFileProperty(storageOpt);
+    _SetFileProperty(volumeType);
 }
 
 MetaFsFileIntf::~MetaFsFileIntf(void)
@@ -72,7 +72,7 @@ MetaFsFileIntf::~MetaFsFileIntf(void)
 int
 MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
     POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
@@ -84,7 +84,7 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
 int
 MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
     POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
@@ -145,7 +145,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 
 #if NVRAM_BYTE_ACCESS_DIRECT_EN
     if (ctx->opcode == MetaFsIoOpcode::Write &&
-        storage == StorageOpt::NVRAM &&
+        volumeType == MetaVolumeType::NvRamVolume &&
         ctx->length < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
     {
         MetaLpnType pageNumber = _GetBaseLpn(MetaVolumeType::NvRamVolume) +
@@ -178,7 +178,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         ctx->ioDoneCheckCallback =
             std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 
-        rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(storage));
+        rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
     }
 
     if (POS_EVENT_ID::SUCCESS != rc)
@@ -204,7 +204,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
@@ -218,7 +218,7 @@ MetaFsFileIntf::Create(uint64_t fileSize)
 int
 MetaFsFileIntf::Open(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -231,7 +231,7 @@ MetaFsFileIntf::Open(void)
 int
 MetaFsFileIntf::Close(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -244,7 +244,7 @@ MetaFsFileIntf::Close(void)
 bool
 MetaFsFileIntf::DoesFileExist(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, volumeType);
 
     return (POS_EVENT_ID::SUCCESS == rc);
 }
@@ -252,7 +252,7 @@ MetaFsFileIntf::DoesFileExist(void)
 int
 MetaFsFileIntf::Delete(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, volumeType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -265,13 +265,13 @@ MetaFsFileIntf::Delete(void)
 uint64_t
 MetaFsFileIntf::GetFileSize(void)
 {
-    return metaFs->ctrl->GetFileSize(fd, storage);
+    return metaFs->ctrl->GetFileSize(fd, volumeType);
 }
 
 void
-MetaFsFileIntf::_SetFileProperty(StorageOpt storageOpt)
+MetaFsFileIntf::_SetFileProperty(MetaVolumeType volumeType)
 {
-    if (storageOpt == StorageOpt::NVRAM)
+    if (MetaVolumeType::NvRamVolume == volumeType)
     {
         fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
         fileProperty.ioOpType = MetaFileDominant::WriteDominant;

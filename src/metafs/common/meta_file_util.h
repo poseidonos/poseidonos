@@ -57,46 +57,17 @@ public:
     MetaStorageType media;
 };
 
-class MetaFsStorageOptToVolume
-{
-public:
-    StorageOpt storageOpt;
-    MetaStorageType media;
-};
-
-class MetaFsStorageOptToMedia
-{
-public:
-    StorageOpt storageOpt;
-    MetaVolumeType volumeType;
-};
-
-class MetaFsVolumeToStorageOpt
-{
-public:
-    MetaVolumeType volumeType;
-    StorageOpt storageOpt;
-};
-
 class MetaFileUtil
 {
 public:
     static StringHashType GetHashKeyFromFileName(const std::string& fileName);
     static MetaStorageType ConvertToMediaType(MetaVolumeType volume);
-    static MetaStorageType ConvertToMediaType(StorageOpt storageOpt);
-    static StorageOpt ConvertToStorageOption(MetaVolumeType volume);
     static std::string ConvertToMediaTypeName(MetaVolumeType volume);
-
     static MetaVolumeType ConvertToVolumeType(MetaStorageType media);
-    static MetaVolumeType ConvertToVolumeType(StorageOpt storageOpt);
-
     static uint64_t GetEpochSignature(std::time_t t = std::time(0));
 
 private:
     static const MetaFsMediaToVolume MEDIA_TO_VOLUME[(uint32_t)MetaStorageType::Max];
     static const MetaFsVolumeToMedia VOLUME_TO_MEDIA[(uint32_t)MetaVolumeType::Max];
-    static const MetaFsStorageOptToMedia OPTION_TO_MEDIA[(uint32_t)StorageOpt::MAX];
-    static const MetaFsStorageOptToVolume OPTION_TO_VOLUME[(uint32_t)StorageOpt::MAX];
-    static const MetaFsVolumeToStorageOpt VOLUME_TO_OPTION[(uint32_t)StorageOpt::MAX];
 };
 } // namespace pos

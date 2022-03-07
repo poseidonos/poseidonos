@@ -55,7 +55,7 @@ public:
     MOCK_METHOD(uint64_t, GetEpochSignature, (), (override));
     MOCK_METHOD(bool, LoadMBR, ());
     MOCK_METHOD(bool, CreateMBR, ());
-    MOCK_METHOD(void, RegisterVolumeGeometry, (MetaStorageInfo& mediaInfo));
+    MOCK_METHOD(void, RegisterVolumeGeometry, (std::shared_ptr<MetaStorageInfo> mediaInfo));
     MOCK_METHOD(MetaFsStorageIoInfoList&, GetAllStoragePartitionInfo, ());
 
     MOCK_METHOD(void, SetPowerStatus, (bool isShutDownOff));

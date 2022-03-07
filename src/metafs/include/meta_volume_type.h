@@ -39,7 +39,8 @@ enum class MetaVolumeType
     First = 0,
     SsdVolume = First,
     NvRamVolume,
-    Last = NvRamVolume,
+    JournalVolume,
+    Last = JournalVolume,
 
     Max,
     Invalid = Max,

@@ -75,7 +75,7 @@ public:
                     (FileDescriptorType fd, MetaVolumeType volumeType,
                     MetaFileInodeInfo* inodeInfo /* output */));
 
-    MOCK_METHOD(VolumeAndResult, DetermineVolumeToCreateFile,
+    MOCK_METHOD(POS_EVENT_ID, DetermineVolumeToCreateFile,
                     (FileSizeType fileByteSize, MetaFilePropertySet& prop,
                         MetaVolumeType volumeType));
     MOCK_METHOD(POS_EVENT_ID, LookupMetaVolumeType,

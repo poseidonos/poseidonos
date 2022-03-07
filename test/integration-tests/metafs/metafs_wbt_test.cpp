@@ -31,6 +31,7 @@
  */
 
 #include "src/metafs/mai/metafs_wbt_api.h"
+#include "src/metafs/include/meta_volume_type.h"
 
 #include <string>
 
@@ -55,7 +56,7 @@ public:
       isNpor(true),
       fileName("TestFile"),
       fileSize(2048),
-      opt(StorageOpt::SSD)
+      volumeType(MetaVolumeType::SsdVolume)
     {
     }
 
@@ -74,7 +75,7 @@ public:
         MetaFilePropertySet prop;
         prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
         prop.ioOpType = MetaFileDominant::NoSpecific;
-        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, opt);
+        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, volumeType);
         EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     }
 
@@ -90,7 +91,7 @@ protected:
     bool isNpor;
     std::string fileName;
     uint64_t fileSize;
-    StorageOpt opt;
+    MetaVolumeType volumeType;
 };
 
 TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)

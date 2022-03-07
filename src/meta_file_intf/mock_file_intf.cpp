@@ -83,7 +83,7 @@ MockFileIntf::_MockAsyncIo(AsyncMetaFileIoCtx* ctx)
     }
     else if (ctx->opcode == MetaFsIoOpcode::Write)
     {
-        if (storage == StorageOpt::NVRAM)
+        if (volumeType == MetaVolumeType::NvRamVolume)
         {
             _MockAsyncWrite(ctx);
         }

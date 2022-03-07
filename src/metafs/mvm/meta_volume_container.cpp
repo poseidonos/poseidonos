@@ -82,17 +82,17 @@ MetaVolumeContainer::_InitVolume(MetaVolumeType volType, int arrayId,
 {
     MetaVolume* volume = vol;
 
-    if (MetaVolumeType::SsdVolume == volType)
+    if (vol == nullptr)
     {
-        if (vol == nullptr)
-            volume = new SsdMetaVolume(arrayId, maxLpnNum);
-    }
-    else
-    {
-        // MetaVolumeType::NvRamVolume
-        if (vol == nullptr)
+        if (MetaVolumeType::NvRamVolume == volType)
+        {
             volume = new NvRamMetaVolume(arrayId, maxLpnNum);
-        nvramMetaVolAvailable = true;
+            nvramMetaVolAvailable = true;
+        }
+        else
+        {
+            volume = new SsdMetaVolume(arrayId, volType, maxLpnNum);
+        }
     }
 
     volume->Init(metaStorage);
@@ -170,7 +170,6 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
     }
 
     MetaLpnType* Info = new MetaLpnType[(int)BackupInfo::Max]();
-    bool isSuccess;
     for (auto& item : volumeContainer)
     {
         MetaVolume* volume = item.second;
@@ -181,8 +180,7 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
             _SetBackupInfo(volume, Info);
         }
 
-        isSuccess = volume->CloseVolume(Info, resetContext /* output */);
-        if (false == isSuccess)
+        if (!volume->CloseVolume(Info, resetContext /* output */))
         {
             // due to both array stop state and active files.
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
@@ -240,76 +238,23 @@ MetaVolumeContainer::_RegisterVolumeInstance(MetaVolumeType volType, MetaVolume*
         "volType={}", (uint32_t)(volType));
 }
 
-VolumeAndResult
+POS_EVENT_ID
 MetaVolumeContainer::DetermineVolumeToCreateFile(FileSizeType fileByteSize,
                 MetaFilePropertySet& prop, MetaVolumeType volumeType)
 {
-    MetaVolumeType candidateVolType = MetaVolumeType::SsdVolume;
-    POS_EVENT_ID result = POS_EVENT_ID::SUCCESS;
-
-    if (MetaVolumeType::NvRamVolume == volumeType)
-    {
-        candidateVolType = volumeType;
-        bool isOkayToStoreNvRam = _CheckOkayToStore(volumeType, fileByteSize, prop);
-        if (true != isOkayToStoreNvRam)
-        {
-            result = POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
-        }
-    }
-    else
-    {
-        if (nvramMetaVolAvailable)
-        {
-            bool isOkayToStoreNvRam = false;
-            if (fileByteSize == 0)
-            {
-                auto nvramVolume = volumeContainer.find(MetaVolumeType::NvRamVolume);
-                isOkayToStoreNvRam = (nvramVolume->second)->IsOkayToStore(fileByteSize, prop);
-            }
-            else
-            {
-                isOkayToStoreNvRam = _CheckOkayToStore(MetaVolumeType::NvRamVolume, fileByteSize, prop);
-            }
-
-            if (isOkayToStoreNvRam)
-            {
-                candidateVolType = MetaVolumeType::NvRamVolume;
-            }
-            else
-            {
-                candidateVolType = MetaVolumeType::SsdVolume;
-            }
-        }
-        else
-        {
-            candidateVolType = MetaVolumeType::SsdVolume;
-        }
-
-        if (candidateVolType == MetaVolumeType::SsdVolume)
-        {
-            // Check free SSD space.
-            bool isOkayToStoreSSD = false;
-            auto ssdVolume = volumeContainer.find(MetaVolumeType::SsdVolume);
-            isOkayToStoreSSD = (ssdVolume->second)->IsOkayToStore(fileByteSize, prop);
-
-            if (isOkayToStoreSSD == false)
-            {
-                result = POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
-            }
-        }
-    }
-
-    return make_pair(candidateVolType, result);
-}
-
-bool
-MetaVolumeContainer::_CheckOkayToStore(MetaVolumeType volumeType, FileSizeType fileByteSize, MetaFilePropertySet& prop)
-{
     auto search = volumeContainer.find(volumeType);
-    assert(search != volumeContainer.end());
-    MetaVolume* volume = search->second;
 
-    return volume->IsOkayToStore(fileByteSize, prop);
+    if (search == volumeContainer.end())
+    {
+        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    }
+
+    if (!search->second->IsOkayToStore(fileByteSize, prop))
+    {
+        return POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
+    }
+
+    return POS_EVENT_ID::SUCCESS;
 }
 
 bool

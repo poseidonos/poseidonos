@@ -42,6 +42,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/metafs/include/meta_volume_type.h"
 #include "src/metafs/include/metafs_aiocb_cxt.h"
 #include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
 
@@ -90,10 +91,10 @@ public:
     {
         for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
         {
-            files[arrayId].insert({StorageOpt::SSD,
+            files[arrayId].insert({MetaVolumeType::SsdVolume,
                 {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0,
                     {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
-            files[arrayId].insert({StorageOpt::NVRAM,
+            files[arrayId].insert({MetaVolumeType::NvRamVolume,
                 {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0,
                     {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
         }
@@ -249,7 +250,7 @@ public:
     }
 
 protected:
-    std::unordered_map<int, std::unordered_map<StorageOpt, FileInformation>> files;
+    std::unordered_map<int, std::unordered_map<MetaVolumeType, FileInformation>> files;
     char* writeBuf;
     char* readBuf;
 
@@ -269,7 +270,7 @@ private:
     MetaFsAioCbCxt* _CreateRequests(const int arrayId, const FileSizeType startOffset, void* buffer)
     {
         MetaFsAioCbCxt* aiocb = new MetaFsAioCbCxt(
-            MetaFsIoOpcode::Write, files[arrayId][StorageOpt::NVRAM].fd, arrayId,
+            MetaFsIoOpcode::Write, files[arrayId][MetaVolumeType::NvRamVolume].fd, arrayId,
             startOffset, granularityByteSize, buffer,
             AsEntryPointParam1(&TestMetaFs::DoneCallback, this));
 
@@ -292,7 +293,7 @@ private:
             *(size_t*)buf = arrayId;
             *(size_t*)(buf + sizeof(size_t)) = granularityIndex++;
             FileSizeType startOffset = targetLpn * BYTE_4K + (i * granularityByteSize);
-            POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][StorageOpt::NVRAM].fd, startOffset, granularityByteSize, buf, MetaStorageType::NVRAM);
+            POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::NvRamVolume].fd, startOffset, granularityByteSize, buf, MetaStorageType::NVRAM);
             if (result != POS_EVENT_ID::SUCCESS)
             {
                 EXPECT_EQ(result, POS_EVENT_ID::SUCCESS) << "write fail code: " << (int)result;
@@ -315,7 +316,7 @@ private:
         }
 
         // read
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][StorageOpt::NVRAM].fd, targetLpn * BYTE_4K, BYTE_4K, readBuf, MetaStorageType::NVRAM);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::NvRamVolume].fd, targetLpn * BYTE_4K, BYTE_4K, readBuf, MetaStorageType::NVRAM);
         if (result != POS_EVENT_ID::SUCCESS)
         {
             EXPECT_EQ(result, POS_EVENT_ID::SUCCESS) << "read fail code: " << (int)result;

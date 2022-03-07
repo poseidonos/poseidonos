@@ -64,7 +64,7 @@ public:
         inodeMgr = new NiceMock<InodeManager>(arrayId);
         catalogMgr = new NiceMock<CatalogManager>(arrayId);
 
-        volume = new SsdMetaVolume(arrayId, maxLpn, inodeMgr, catalogMgr);
+        volume = new SsdMetaVolume(arrayId, MetaVolumeType::SsdVolume, maxLpn, inodeMgr, catalogMgr);
         volume->Init(metaStorage);
         volume->InitVolumeBaseLpn();
     }
@@ -110,7 +110,7 @@ TEST(SsdMetaVolume, IsOkayToStore_Negative)
 {
     NiceMock<MockInodeManager>* inodeMgr = new NiceMock<MockInodeManager>(0);
     NiceMock<MockCatalogManager>* catalogMgr = new NiceMock<MockCatalogManager>(0);
-    SsdMetaVolume* volume = new SsdMetaVolume(0, 8192, inodeMgr, catalogMgr);
+    SsdMetaVolume* volume = new SsdMetaVolume(0, MetaVolumeType::SsdVolume, 8192, inodeMgr, catalogMgr);
     uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaFilePropertySet prop;
 

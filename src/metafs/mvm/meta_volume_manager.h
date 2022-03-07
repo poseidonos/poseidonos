@@ -96,7 +96,7 @@ private:
     void _RegisterVolumeSpcfReqHandler(MetaFsFileControlType reqType, MetaVolSpcfReqHandler handler);
     void _RegisterGlobalMetaReqHandler(MetaFsFileControlType reqType, GlobalMetaReqHandler handler);
 
-    std::pair<MetaVolumeType, POS_EVENT_ID> _CheckRequest(MetaFsFileControlRequest& reqMsg);
+    POS_EVENT_ID _CheckRequest(MetaFsFileControlRequest& reqMsg);
     bool _IsValidVolumeType(MetaVolumeType volType);
     MetaVolSpcfReqHandler _DispatchVolumeSpcfReqHandler(MetaFsFileControlType reqType);
     GlobalMetaReqHandler _DispatchGlobalMetaReqHandler(MetaFsFileControlType reqType);

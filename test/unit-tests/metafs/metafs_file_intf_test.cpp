@@ -68,9 +68,9 @@ public:
         return _Write(fd, fileOffset, length, buffer);
     }
 
-    void SetFileProperty(StorageOpt storageOpt)
+    void SetFileProperty(MetaVolumeType volumeType)
     {
-        _SetFileProperty(storageOpt);
+        _SetFileProperty(volumeType);
     }
 
     MetaFilePropertySet& GetFileProperty(void)
@@ -190,19 +190,19 @@ TEST_F(MetaFsFileIntfFixture, CheckIoDoneStatus)
 
 TEST_F(MetaFsFileIntfFixture, CheckStorage)
 {
-    EXPECT_EQ(metaFile->GetStorage(), StorageOpt::SSD);
+    EXPECT_EQ(metaFile->GetVolumeType(), MetaVolumeType::SsdVolume);
 }
 
 TEST_F(MetaFsFileIntfFixture, CheckFileProperty)
 {
-    StorageOpt opt = StorageOpt::NVRAM;
+    MetaVolumeType type = MetaVolumeType::NvRamVolume;
     MetaFilePropertySet& property = metaFile->GetFileProperty();
 
     EXPECT_EQ(property.integrity, MetaFileIntegrityType::Default);
     EXPECT_EQ(property.ioAccPattern, MetaFileAccessPattern::Default);
     EXPECT_EQ(property.ioOpType, MetaFileDominant::Default);
 
-    metaFile->SetFileProperty(opt);
+    metaFile->SetFileProperty(type);
 
     EXPECT_EQ(property.integrity, MetaFileIntegrityType::Lvl0_Disable);
     EXPECT_EQ(property.ioAccPattern, MetaFileAccessPattern::ByteIntensive);

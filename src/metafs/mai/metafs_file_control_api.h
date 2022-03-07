@@ -62,23 +62,23 @@ public:
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
                 MetaFilePropertySet prop = MetaFilePropertySet(),
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Delete(std::string& fileName,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Open(std::string& fileName, int& fd,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Close(FileDescriptorType fd,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID CheckFileExist(std::string& fileName,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetFileSize(int fd,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetAlignedFileIOSize(int fd,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetAvailableSpace(MetaFilePropertySet& prop,
-                StorageOpt storage = StorageOpt::DEFAULT);
+                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
     virtual void SetStatus(bool isNormal);
     virtual MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);
@@ -103,7 +103,6 @@ protected:
     void _AddFileContext(std::string& fileName, FileDescriptorType fd,
                                     MetaVolumeType type);
     void _RemoveFileContext(FileDescriptorType fd, MetaVolumeType type);
-    MetaVolumeType _GetTranslateVolumeType(StorageOpt storageOpt);
 
 private:
     int arrayId = INT32_MAX;

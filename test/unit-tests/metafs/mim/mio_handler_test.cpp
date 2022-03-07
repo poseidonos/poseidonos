@@ -213,6 +213,7 @@ TEST_F(MioHandlerTestFixture, Repeat_AddAndRemoveArray)
 
     EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
+    EXPECT_CALL(*mgmt, IsValidVolume).WillRepeatedly(Return(true));
 
     result = handler->AddArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);

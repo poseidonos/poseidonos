@@ -115,8 +115,6 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
-
     fileProperty.integrity = static_cast<MetaFileIntegrityType>(integrityType);
     fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(ioAccPatternType);
     fileProperty.ioOpType = static_cast<MetaFileDominant>(ioOpType);
@@ -125,7 +123,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -151,13 +149,11 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
-
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -181,13 +177,11 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
-
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, storage);
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -322,13 +316,11 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
-
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetFileSize(fd, storage);
+    size_t fileSize = metaFs->ctrl->GetFileSize(fd, volumeType);
     if (fileSize == 0)
         return RESULT_FAILURE;
 
@@ -352,13 +344,11 @@ WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
-
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd, storage);
+    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd, volumeType);
     if (fileSize == 0)
         return RESULT_FAILURE;
 

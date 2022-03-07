@@ -221,8 +221,8 @@ JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
     prop.ioOpType = MetaFileDominant::WriteDominant;
     prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
 
-    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, StorageOpt::NVRAM);
-    maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, StorageOpt::NVRAM);
+    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, MetaVolumeType::NvRamVolume);
+    maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, MetaVolumeType::NvRamVolume);
 }
 
 int

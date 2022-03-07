@@ -66,7 +66,7 @@ MetaFsFileControlApi::~MetaFsFileControlApi(void)
 
 POS_EVENT_ID
 MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
-                                MetaFilePropertySet prop, StorageOpt storage)
+                                MetaFilePropertySet prop, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -79,7 +79,7 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
     reqMsg.arrayId = arrayId;
     reqMsg.fileByteSize = fileByteSize;
     reqMsg.fileProperty = prop;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check & MetaVolumeManager::HandleCreateFileReq()
 
@@ -87,7 +87,7 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
 }
 
 POS_EVENT_ID
-MetaFsFileControlApi::Delete(std::string& fileName, StorageOpt storage)
+MetaFsFileControlApi::Delete(std::string& fileName, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -98,7 +98,7 @@ MetaFsFileControlApi::Delete(std::string& fileName, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::FileDelete;
     reqMsg.fileName = &fileName;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg);
 
@@ -106,7 +106,7 @@ MetaFsFileControlApi::Delete(std::string& fileName, StorageOpt storage)
 }
 
 POS_EVENT_ID
-MetaFsFileControlApi::Open(std::string& fileName, int& fd, StorageOpt storage)
+MetaFsFileControlApi::Open(std::string& fileName, int& fd, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -117,7 +117,7 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::FileOpen;
     reqMsg.fileName = &fileName;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check & MetaVolumeManager::HandleOpenFileReq()
 
@@ -130,7 +130,7 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd, StorageOpt storage)
 }
 
 POS_EVENT_ID
-MetaFsFileControlApi::Close(uint32_t fd, StorageOpt storage)
+MetaFsFileControlApi::Close(uint32_t fd, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -141,7 +141,7 @@ MetaFsFileControlApi::Close(uint32_t fd, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::FileClose;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check &  MetaVolumeManager::HandleCloseFileReq()
 
@@ -151,7 +151,7 @@ MetaFsFileControlApi::Close(uint32_t fd, StorageOpt storage)
 }
 
 POS_EVENT_ID
-MetaFsFileControlApi::CheckFileExist(std::string& fileName, StorageOpt storage)
+MetaFsFileControlApi::CheckFileExist(std::string& fileName, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -162,7 +162,7 @@ MetaFsFileControlApi::CheckFileExist(std::string& fileName, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::CheckFileExist;
     reqMsg.fileName = &fileName;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg);
 
@@ -172,7 +172,7 @@ MetaFsFileControlApi::CheckFileExist(std::string& fileName, StorageOpt storage)
 // return file size of corresponding file mapped to 'fd'.
 // in fail case, return 0
 size_t
-MetaFsFileControlApi::GetFileSize(int fd, StorageOpt storage)
+MetaFsFileControlApi::GetFileSize(int fd, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return 0;
@@ -183,7 +183,7 @@ MetaFsFileControlApi::GetFileSize(int fd, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::GetFileSize;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetFileSizeReq()
 
@@ -200,7 +200,7 @@ MetaFsFileControlApi::GetFileSize(int fd, StorageOpt storage)
 // return data chunk size of corresponding file mapped to 'fd'.
 // in fail case, return 0
 size_t
-MetaFsFileControlApi::GetAlignedFileIOSize(int fd, StorageOpt storage)
+MetaFsFileControlApi::GetAlignedFileIOSize(int fd, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return 0;
@@ -211,7 +211,7 @@ MetaFsFileControlApi::GetAlignedFileIOSize(int fd, StorageOpt storage)
     reqMsg.reqType = MetaFsFileControlType::GetDataChunkSize;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetDataChunkSizeReq()
 
@@ -228,7 +228,7 @@ MetaFsFileControlApi::GetAlignedFileIOSize(int fd, StorageOpt storage)
 // return data chunk size according to the data integrity level
 size_t
 MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-                                StorageOpt storage)
+                                MetaVolumeType volumeType)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
@@ -236,7 +236,7 @@ MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
     reqMsg.reqType = MetaFsFileControlType::EstimateDataChunkSize;
     reqMsg.fileProperty = prop;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleEstimateDataChunkSizeReq()
@@ -253,7 +253,7 @@ MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
 
 size_t
 MetaFsFileControlApi::GetAvailableSpace(MetaFilePropertySet& prop,
-                                StorageOpt storage)
+                                MetaVolumeType volumeType)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
@@ -262,7 +262,7 @@ MetaFsFileControlApi::GetAvailableSpace(MetaFilePropertySet& prop,
     reqMsg.fileByteSize = 0;
     reqMsg.fileProperty = prop;
     reqMsg.arrayId = arrayId;
-    reqMsg.volType = _GetTranslateVolumeType(storage);
+    reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetFreeFileRegionSizeReq()
 
@@ -462,15 +462,6 @@ MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd,
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "FileContext is deallocated index={}, arrayId={}", index, arrayId);
     }
-}
-
-MetaVolumeType
-MetaFsFileControlApi::_GetTranslateVolumeType(StorageOpt storageOpt)
-{
-    if (StorageOpt::SSD == storageOpt)
-        return MetaVolumeType::SsdVolume;
-    else
-        return MetaVolumeType::NvRamVolume;
 }
 
 void

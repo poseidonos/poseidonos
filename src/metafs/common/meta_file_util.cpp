@@ -40,26 +40,14 @@ static_assert(((int)MetaStorageType::SSD) == 0, "error");
 const MetaFsMediaToVolume MetaFileUtil::MEDIA_TO_VOLUME[] =
     {
         {MetaStorageType::SSD, MetaVolumeType::SsdVolume},
-        {MetaStorageType::NVRAM, MetaVolumeType::NvRamVolume}};
+        {MetaStorageType::NVRAM, MetaVolumeType::NvRamVolume},
+        {MetaStorageType::JOURNAL_SSD, MetaVolumeType::JournalVolume}};
 static_assert(((int)MetaVolumeType::SsdVolume) == 0, "error");
 const MetaFsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
     {
         {MetaVolumeType::SsdVolume, MetaStorageType::SSD},
-        {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM}};
-static_assert(((int)StorageOpt::SSD) == 0, "error");
-const MetaFsStorageOptToMedia MetaFileUtil::OPTION_TO_MEDIA[] =
-    {
-        {StorageOpt::SSD, MetaVolumeType::SsdVolume},
-        {StorageOpt::NVRAM, MetaVolumeType::NvRamVolume}};
-static_assert(((int)StorageOpt::SSD) == 0, "error");
-const MetaFsStorageOptToVolume MetaFileUtil::OPTION_TO_VOLUME[] =
-    {
-        {StorageOpt::SSD, MetaStorageType::SSD},
-        {StorageOpt::NVRAM, MetaStorageType::NVRAM}};
-const MetaFsVolumeToStorageOpt MetaFileUtil::VOLUME_TO_OPTION[] =
-    {
-        {MetaVolumeType::SsdVolume, StorageOpt::SSD},
-        {MetaVolumeType::NvRamVolume, StorageOpt::NVRAM}};
+        {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM},
+        {MetaVolumeType::JournalVolume, MetaStorageType::JOURNAL_SSD}};
 
 StringHashType
 MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
@@ -71,24 +59,6 @@ MetaStorageType
 MetaFileUtil::ConvertToMediaType(MetaVolumeType volume)
 {
     return VOLUME_TO_MEDIA[(uint32_t)volume].media;
-}
-
-MetaStorageType
-MetaFileUtil::ConvertToMediaType(StorageOpt storageOpt)
-{
-    return OPTION_TO_VOLUME[(uint32_t)storageOpt].media;
-}
-
-StorageOpt
-MetaFileUtil::ConvertToStorageOption(MetaVolumeType volume)
-{
-    return VOLUME_TO_OPTION[(uint32_t)volume].storageOpt;
-}
-
-MetaVolumeType
-MetaFileUtil::ConvertToVolumeType(StorageOpt storageOpt)
-{
-    return OPTION_TO_MEDIA[(uint32_t)storageOpt].volumeType;
 }
 
 std::string

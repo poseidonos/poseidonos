@@ -54,7 +54,7 @@ MetaFsManagementApi::~MetaFsManagementApi(void)
 
 POS_EVENT_ID
 MetaFsManagementApi::InitializeSystem(int arrayId,
-                                MetaStorageMediaInfoList* mediaInfoList)
+                                MetaStorageInfoList* mediaInfoList)
 {
     POS_EVENT_ID rc;
     MetaFsControlReqMsg reqMsg;

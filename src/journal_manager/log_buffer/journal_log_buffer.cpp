@@ -57,7 +57,7 @@ JournalLogBuffer::JournalLogBuffer(void)
 JournalLogBuffer::JournalLogBuffer(int arrayId)
 : JournalLogBuffer()
 {
-    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, StorageOpt::NVRAM);
+    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaVolumeType::NvRamVolume);
 }
 
 JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)

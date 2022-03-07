@@ -52,7 +52,7 @@ public:
         MetaFsMBRManager* mbrMgr = nullptr);
     virtual ~MetaFsSystemManager(void);
 
-    virtual bool Init(MetaStorageMediaInfoList& mediaInfoList);
+    virtual bool Init(MetaStorageInfoList& mediaInfoList);
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 

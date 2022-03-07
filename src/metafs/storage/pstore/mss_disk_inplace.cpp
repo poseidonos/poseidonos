@@ -47,13 +47,17 @@ MssDiskInplace::MssDiskInplace(void)
 MssDiskInplace::MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t capacity)
 {
     this->mediaType = mediaType;
-    if (MetaStorageType::SSD == mediaType)
+    switch (mediaType)
     {
-        partitionType = pos::PartitionType::META_SSD;
-    }
-    else
-    {
-        partitionType = pos::PartitionType::META_NVM;
+        case MetaStorageType::NVRAM:
+            partitionType = PartitionType::META_NVM;
+            break;
+        case MetaStorageType::JOURNAL_SSD:
+            partitionType = PartitionType::JOURNAL_SSD;
+            break;
+        default:
+            partitionType = PartitionType::META_SSD;
+            break;
     }
 
     array = pos::ArrayMgr()->GetInfo(arrayId)->arrayInfo;

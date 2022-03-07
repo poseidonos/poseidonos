@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 #include "meta_storage_specific.h"
 
@@ -42,9 +43,13 @@ namespace pos
 class MetaStorageInfo
 {
 public:
+    MetaStorageInfo(void) : media(MetaStorageType::Max), mediaCapacity(0), valid(false)
+    {
+    }
     MetaStorageType media;
     uint64_t mediaCapacity;
+    bool valid;
 };
 
-using MetaStorageMediaInfoList = std::vector<MetaStorageInfo>;
+using MetaStorageInfoList = std::vector<std::shared_ptr<MetaStorageInfo>>;
 } // namespace pos

@@ -80,7 +80,7 @@ public:
         (FileDescriptorType fd));
     MOCK_METHOD(FileDescriptorType, LookupDescriptorByName,
         (std::string& fileName));
-    MOCK_METHOD(VolumeAndResult, DetermineVolumeToCreateFile,
+    MOCK_METHOD(POS_EVENT_ID, DetermineVolumeToCreateFile,
         (FileSizeType fileByteSize,
             MetaFilePropertySet& prop, MetaVolumeType volumeType));
 };

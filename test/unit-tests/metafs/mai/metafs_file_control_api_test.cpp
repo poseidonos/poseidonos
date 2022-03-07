@@ -84,7 +84,7 @@ TEST(MetaFsFileControlApi, Get_testIfFileIoSizeCanBeRetrieved)
 {
     int arrayId = 0;
     int fd = 0;
-    StorageOpt type = StorageOpt::SSD;
+    MetaVolumeType type = MetaVolumeType::SsdVolume;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 
@@ -103,7 +103,7 @@ TEST(MetaFsFileControlApi, Get_TheLastValidLpn)
 {
     int arrayId = 0;
     int fd = 0;
-    StorageOpt type = StorageOpt::SSD;
+    MetaVolumeType type = MetaVolumeType::SsdVolume;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
 

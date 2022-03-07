@@ -153,15 +153,15 @@ MetaFsMBRManager::CreateMBR(void)
 }
 
 void
-MetaFsMBRManager::RegisterVolumeGeometry(MetaStorageInfo& mediaInfo)
+MetaFsMBRManager::RegisterVolumeGeometry(std::shared_ptr<MetaStorageInfo> mediaInfo)
 {
-    assert(mediaInfo.media < MetaStorageType::Max);
+    assert(mediaInfo->media < MetaStorageType::Max);
 
     MetaFsMBRContent* content = mbr->GetContent();
     MetaFsStorageIoInfo info;
-    info.mediaType = mediaInfo.media;
-    info.totalCapacity = mediaInfo.mediaCapacity;
-    info.valid = true;
+    info.mediaType = mediaInfo->media;
+    info.totalCapacity = mediaInfo->mediaCapacity;
+    info.valid = mediaInfo->valid;
     memcpy(&content->geometry.mediaPartitionInfo[content->geometry.volumeInfo.totalFilesystemVolumeCnt], &info, sizeof(MetaFsStorageIoInfo));
     content->geometry.volumeInfo.totalFilesystemVolumeCnt++;
     assert(content->geometry.volumeInfo.totalFilesystemVolumeCnt <= MetaFsGeometryInfo::MAX_INFO_COUNT);

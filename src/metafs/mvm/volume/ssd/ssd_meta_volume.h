@@ -42,7 +42,7 @@ class SsdMetaVolume : public MetaVolume
 {
 public:
     SsdMetaVolume(void);
-    SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+    SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
         InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
     ~SsdMetaVolume(void);
     virtual void InitVolumeBaseLpn(void) override;

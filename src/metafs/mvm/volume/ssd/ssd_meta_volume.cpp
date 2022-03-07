@@ -42,9 +42,9 @@ SsdMetaVolume::SsdMetaVolume(void)
 {
 }
 
-SsdMetaVolume::SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
             InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum,
+: MetaVolume(arrayId, volType, maxVolumePageNum,
                 inodeMgr, catalogMgr)
 {
 }

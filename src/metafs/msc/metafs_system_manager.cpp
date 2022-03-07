@@ -78,7 +78,7 @@ MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 }
 
 bool
-MetaFsSystemManager::Init(MetaStorageMediaInfoList& mediaInfoList)
+MetaFsSystemManager::Init(MetaStorageInfoList& mediaInfoList)
 {
     mbrMgr->Init(MetaStorageType::SSD, MetaFsMBRManager::FILESYSTEM_MBR_BASE_LPN);
     mbrMgr->SetMss(metaStorage);

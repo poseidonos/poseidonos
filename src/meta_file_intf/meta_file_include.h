@@ -35,14 +35,6 @@
 namespace pos
 {
 
-enum class StorageOpt
-{
-    SSD,
-    DEFAULT = SSD,
-    NVRAM,
-    MAX
-};
-
 enum class MetaFsIoOpcode
 {
     Write = 0,

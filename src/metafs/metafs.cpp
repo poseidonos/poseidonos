@@ -30,22 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "metafs.h"
-#include "src/metafs/log/metafs_log.h"
-#include "src/metafs/include/metafs_service.h"
-#include "src/include/partition_type.h"
+
+#include <string>
+
 #include "src/include/array_config.h"
+#include "src/include/partition_type.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/log/metafs_log.h"
 #include "src/metafs/storage/pstore/mss_on_disk.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
 MetaFs::MetaFs(void)
+: isNpor(false),
+  isLoaded(false),
+  isNormal(false),
+  arrayInfo(nullptr),
+  arrayName(""),
+  arrayId(INT32_MAX),
+  metaStorage(nullptr),
+  telemetryPublisher(nullptr)
 {
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+: MetaFs()
 {
     this->isLoaded = isLoaded;
     this->arrayInfo = arrayInfo;
@@ -67,8 +78,9 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
-        MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
-        MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp)
+    MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
+    MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp)
+: MetaFs()
 {
     this->isLoaded = isLoaded;
     this->arrayInfo = arrayInfo;
@@ -228,11 +240,12 @@ MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop)
 bool
 MetaFs::_Initialize(void)
 {
-    MetaStorageMediaInfoList mediaInfoList;
-    _RegisterMediaInfoIfAvailable(META_NVM, mediaInfoList);
-    _RegisterMediaInfoIfAvailable(META_SSD, mediaInfoList);
+    MetaStorageInfoList infoList;
+    _RegisterMediaInfoIfAvailable(META_NVM, infoList);
+    _RegisterMediaInfoIfAvailable(META_SSD, infoList);
+    _RegisterMediaInfoIfAvailable(JOURNAL_SSD, infoList);
 
-    if (mediaInfoList.empty())
+    if (infoList.empty())
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_NO_MEDIA,
             "No registered media info detected.");
@@ -240,7 +253,7 @@ MetaFs::_Initialize(void)
         return false;
     }
 
-    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &mediaInfoList))
+    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &infoList))
         return false;
 
     return true;
@@ -384,32 +397,46 @@ MetaFs::_CloseMetaVolume(void)
 }
 
 void
-MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList)
+MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList)
 {
-    MetaStorageInfo media = _MakeMetaStorageMediaInfo(ptnType);
+    std::shared_ptr<MetaStorageInfo> media = _MakeMetaStorageMediaInfo(ptnType);
+    if (!media->valid)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "PartitionType {} is not available.", (int)ptnType);
+    }
     mediaList.push_back(media);
 }
 
-MetaStorageInfo
+std::shared_ptr<MetaStorageInfo>
 MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 {
-    MetaStorageInfo newInfo;
+    const PartitionLogicalSize* ptnSize = arrayInfo->GetSizeInfo(ptnType);
+
+    std::shared_ptr<MetaStorageInfo> newInfo = std::make_shared<MetaStorageInfo>();
     switch (ptnType)
     {
         case META_NVM:
-            newInfo.media = MetaStorageType::NVRAM;
+            newInfo->media = MetaStorageType::NVRAM;
             break;
 
-        case META_SSD:
-            newInfo.media = MetaStorageType::SSD;
+        case JOURNAL_SSD:
+            newInfo->media = MetaStorageType::JOURNAL_SSD;
             break;
 
         default:
-            assert(false);
+            newInfo->media = MetaStorageType::SSD;
+            break;
     }
 
-    const PartitionLogicalSize* ptnSize = arrayInfo->GetSizeInfo(ptnType);
-    newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
+    if (ptnSize)
+    {
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "ptnType: {}, totalStripes: {}", (int)ptnType, ptnSize->totalStripes);
+        newInfo->valid = true;
+        newInfo->mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) *
+            ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
+    }
 
     return newInfo;
 }

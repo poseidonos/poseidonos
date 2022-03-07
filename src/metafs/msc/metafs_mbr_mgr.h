@@ -33,12 +33,14 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <string>
-#include "metafs_mbr.h"
-#include "src/metafs/include/meta_storage_info.h"
-#include "msc_req.h"
+
 #include "meta_region_mgr.h"
+#include "metafs_mbr.h"
+#include "msc_req.h"
 #include "src/lib/bitmap.h"
+#include "src/metafs/include/meta_storage_info.h"
 
 namespace pos
 {
@@ -59,7 +61,7 @@ public:
     virtual uint64_t GetEpochSignature(void);
     virtual bool LoadMBR(void);
     virtual bool CreateMBR(void);
-    virtual void RegisterVolumeGeometry(MetaStorageInfo& mediaInfo);
+    virtual void RegisterVolumeGeometry(std::shared_ptr<MetaStorageInfo> mediaInfo);
     virtual MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
 
     static const uint32_t FILESYSTEM_MBR_BASE_LPN = 0;

@@ -62,6 +62,6 @@ public:
 
     MetaFsControlReqType reqType = MetaFsControlReqType::Max;
     int arrayId = INT32_MAX;
-    MetaStorageMediaInfoList* mediaList = nullptr;
+    MetaStorageInfoList* mediaList = nullptr;
 };
 } // namespace pos

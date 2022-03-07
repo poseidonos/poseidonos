@@ -44,31 +44,31 @@ public:
     using MetaFsFileControlApi::MetaFsFileControlApi;
     MOCK_METHOD(POS_EVENT_ID, Create,
         (std::string & fileName, uint64_t fileByteSize,
-            MetaFilePropertySet prop, StorageOpt storage),
+            MetaFilePropertySet prop, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(POS_EVENT_ID, Delete,
-        (std::string & fileName, StorageOpt storage),
+        (std::string & fileName, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(POS_EVENT_ID, Open,
-        (std::string & fileName, int& fd, StorageOpt storage),
+        (std::string & fileName, int& fd, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(POS_EVENT_ID, Close,
-        (FileDescriptorType fd, StorageOpt storage),
+        (FileDescriptorType fd, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(POS_EVENT_ID, CheckFileExist,
-        (std::string & fileName, StorageOpt storage),
+        (std::string & fileName, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(size_t, GetFileSize,
-        (int fd, StorageOpt storage),
+        (int fd, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(size_t, GetAlignedFileIOSize,
-        (int fd, StorageOpt storage),
+        (int fd, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(size_t, EstimateAlignedFileIOSize,
-        (MetaFilePropertySet & prop, StorageOpt storage),
+        (MetaFilePropertySet & prop, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(size_t, GetAvailableSpace,
-        (MetaFilePropertySet & prop, StorageOpt storage),
+        (MetaFilePropertySet & prop, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(size_t, GetMaxMetaLpn, (MetaVolumeType type), (override));
     MOCK_METHOD(void, SetStatus, (bool isNormal));

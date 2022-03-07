@@ -66,9 +66,9 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_InRot
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][StorageOpt::SSD].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
         ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "write fail code: " << (int)result;
-        result = GetMetaFs(arrayId)->io->Read(files[arrayId][StorageOpt::SSD].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
         ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "read fail code: " << (int)result;
 
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
@@ -82,7 +82,7 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][StorageOpt::SSD].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
         ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "write fail code: " << (int)result;
     }
 
@@ -91,7 +91,7 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][StorageOpt::SSD].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
         ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "read fail code: " << (int)result;
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
     }
@@ -99,10 +99,10 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
 
 TEST_F(MetaFsIoTest, testIfMetaFsCanRejectTheRequestsDueToOutOfRange)
 {
-    POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][StorageOpt::SSD].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
+    POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
     ASSERT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
 
-    result = GetMetaFs(arrayId)->io->Read(files[arrayId][StorageOpt::SSD].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
+    result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
     EXPECT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
 }
 } // namespace pos

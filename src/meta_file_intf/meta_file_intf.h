@@ -35,6 +35,7 @@
 #include "src/meta_file_intf/async_context.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_volume_type.h"
 
 #include <string>
 
@@ -54,7 +55,7 @@ class MetaFileIntf
 public:
     MetaFileIntf(void);
     explicit MetaFileIntf(std::string fname, int arrayId,
-                        StorageOpt storageOpt = StorageOpt::DEFAULT);
+                        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual ~MetaFileIntf(void);
 
     virtual int Create(uint64_t size) = 0;
@@ -77,9 +78,9 @@ public:
     {
         return fileName;
     }
-    virtual StorageOpt GetStorage(void)
+    virtual MetaVolumeType GetVolumeType(void)
     {
-        return storage;
+        return volumeType;
     }
     // SyncIO APIs
     virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer);
@@ -94,7 +95,7 @@ protected:
     uint64_t size;
     bool isOpened;
     int fd;
-    StorageOpt storage;
+    MetaVolumeType volumeType;
     MetaFilePropertySet fileProperty;
 };
 

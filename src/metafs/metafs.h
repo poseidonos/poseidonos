@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "src/metafs/include/meta_storage_info.h"
@@ -80,16 +81,16 @@ private:
     POS_EVENT_ID _OpenMetaVolume(void);
     POS_EVENT_ID _CloseMetaVolume(void);
 
-    void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList);
-    MetaStorageInfo _MakeMetaStorageMediaInfo(PartitionType ptnType);
+    void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList);
+    std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
 
-    bool isNpor = false;
-    bool isLoaded = false;
-    bool isNormal = false;
-    IArrayInfo* arrayInfo = nullptr;
-    std::string arrayName = "";
-    int arrayId = INT32_MAX;
-    MetaStorageSubsystem* metaStorage = nullptr;
-    TelemetryPublisher* telemetryPublisher = nullptr;
+    bool isNpor;
+    bool isLoaded;
+    bool isNormal;
+    IArrayInfo* arrayInfo;
+    std::string arrayName;
+    int arrayId;
+    MetaStorageSubsystem* metaStorage;
+    TelemetryPublisher* telemetryPublisher;
 };
 } // namespace pos

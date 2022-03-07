@@ -43,7 +43,7 @@ class MockMetaFsManagementApi : public MetaFsManagementApi
 {
 public:
     using MetaFsManagementApi::MetaFsManagementApi;
-    MOCK_METHOD(POS_EVENT_ID, InitializeSystem, (int arrayId, MetaStorageMediaInfoList* mediaInfoList));
+    MOCK_METHOD(POS_EVENT_ID, InitializeSystem, (int arrayId, MetaStorageInfoList* mediaInfoList));
     MOCK_METHOD(POS_EVENT_ID, CloseSystem, (int arrayId));
     MOCK_METHOD(uint64_t, GetEpochSignature, ());
     MOCK_METHOD(MetaFsStorageIoInfoList&, GetAllStoragePartitionInfo, ());
@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(POS_EVENT_ID, LoadMbr, (bool& isNPOR));
     MOCK_METHOD(bool, CreateMbr, ());
     MOCK_METHOD(void, SetStatus, (bool isNormal));
+    MOCK_METHOD(bool, IsValidVolume, (MetaVolumeType volumeType), (override));
 };
 
 } // namespace pos

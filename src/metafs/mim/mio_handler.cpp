@@ -461,12 +461,13 @@ MioHandler::ExecuteMio(Mio& mio)
 bool
 MioHandler::AddArrayInfo(int arrayId)
 {
-    assert(arrayId < (int)MetaFsConfig::MAX_ARRAY_CNT);
-
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
+        if (!metaFs->mgmt->IsValidVolume(static_cast<MetaVolumeType>(storage)))
+            continue;
+
         size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
 
         ioRangeOverlapChker[arrayId][storage] = new MetaFsIoRangeOverlapChker();
@@ -488,12 +489,14 @@ MioHandler::AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlap
 bool
 MioHandler::RemoveArrayInfo(int arrayId)
 {
-    assert(arrayId < (int)MetaFsConfig::MAX_ARRAY_CNT);
-
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
     bool result = true;
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
+        if (!metaFs->mgmt->IsValidVolume(static_cast<MetaVolumeType>(storage)))
+            continue;
+
         if (nullptr == ioRangeOverlapChker[arrayId][storage])
         {
             result = false;

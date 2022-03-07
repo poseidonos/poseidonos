@@ -220,10 +220,10 @@ MetaVolumeManager::CloseVolume(bool& resetCxt)
     }
 }
 
-std::pair<MetaVolumeType, POS_EVENT_ID>
+POS_EVENT_ID
 MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 {
-    pair<MetaVolumeType, POS_EVENT_ID> rc = make_pair(reqMsg.volType, POS_EVENT_ID::SUCCESS);
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
     // based on reqMsg, select metaVolMgr to assign proper instance to handle the request
     switch (reqMsg.reqType)
@@ -231,9 +231,9 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
         case MetaFsFileControlType::FileCreate:
             if (0 == reqMsg.fileByteSize)
             {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
                     "The file size cannot be zero, fileSize={}", reqMsg.fileByteSize);
-                rc.second = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+                rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
                 break;
             }
             // fall-through
@@ -242,7 +242,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             rc = volContainer->DetermineVolumeToCreateFile(reqMsg.fileByteSize,
                                 reqMsg.fileProperty, reqMsg.volType);
 
-            if (rc.second != POS_EVENT_ID::SUCCESS)
+            if (rc != POS_EVENT_ID::SUCCESS)
             {
                 MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
                     "There is no NVRAM and SSD free space");
@@ -250,10 +250,10 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             break;
 
         case MetaFsFileControlType::FileOpen:
-            rc.second = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
+            rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
                                         reqMsg.volType);
 
-            if (rc.second != POS_EVENT_ID::SUCCESS)
+            if (rc != POS_EVENT_ID::SUCCESS)
             {
                 reqMsg.completionData.openfd = -1;
 
@@ -264,10 +264,10 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             break;
 
         case MetaFsFileControlType::FileDelete:
-            rc.second = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
+            rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
                                         reqMsg.volType);
 
-            if (rc.second != POS_EVENT_ID::SUCCESS)
+            if (rc != POS_EVENT_ID::SUCCESS)
             {
                 MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED,
                     "Cannot find \'{}\' file", *reqMsg.fileName);
@@ -275,7 +275,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             break;
 
         case MetaFsFileControlType::CheckFileExist:
-            rc.second = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
+            rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
                                         reqMsg.volType);
             break;
 
@@ -283,9 +283,9 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             break;
 
         default:
-            rc.second = volContainer->LookupMetaVolumeType(reqMsg.fd, reqMsg.volType);
+            rc = volContainer->LookupMetaVolumeType(reqMsg.fd, reqMsg.volType);
 
-            if (rc.second != POS_EVENT_ID::SUCCESS)
+            if (rc != POS_EVENT_ID::SUCCESS)
             {
                 MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
                     "Cannot find the file, fd={}, request={}",
@@ -330,13 +330,13 @@ MetaVolumeManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
             return POS_EVENT_ID::MFS_INVALID_PARAMETER;
         }
 
-        std::pair<MetaVolumeType, POS_EVENT_ID> checkVol = _CheckRequest(*msg);
-        if (checkVol.second != POS_EVENT_ID::SUCCESS)
+        POS_EVENT_ID result = _CheckRequest(*msg);
+        if (result != POS_EVENT_ID::SUCCESS)
         {
-            return checkVol.second;
+            return result;
         }
 
-        rc = _ExecuteVolumeRequest(checkVol.first, *msg);
+        rc = _ExecuteVolumeRequest(msg->volType, *msg);
     }
     else
     {

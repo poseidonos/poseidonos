@@ -95,9 +95,8 @@ public:
     virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
                     MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
 
-    virtual VolumeAndResult DetermineVolumeToCreateFile(
-                    FileSizeType fileByteSize, MetaFilePropertySet& prop,
-                    MetaVolumeType volumeType);
+    virtual POS_EVENT_ID DetermineVolumeToCreateFile(FileSizeType fileByteSize,
+                    MetaFilePropertySet& prop, MetaVolumeType volumeType);
     virtual POS_EVENT_ID LookupMetaVolumeType(FileDescriptorType fd,
                     MetaVolumeType volumeType);
     virtual POS_EVENT_ID LookupMetaVolumeType(std::string& fileName,
@@ -109,7 +108,6 @@ private:
                     MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage,
                     MetaVolume* vol);
     void _RegisterVolumeInstance(MetaVolumeType volType, MetaVolume* metaVol);
-    bool _CheckOkayToStore(MetaVolumeType volumeType, FileSizeType fileByteSize, MetaFilePropertySet& prop);
     void _CleanUp(void);
 
     bool nvramMetaVolAvailable;

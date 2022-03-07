@@ -47,17 +47,17 @@ MetaFileIntf::MetaFileIntf(void)
   size(0),
   isOpened(false),
   fd(-1),
-  storage(StorageOpt::SSD),
+  volumeType(MetaVolumeType::SsdVolume),
   fileProperty(MetaFilePropertySet())
 {
 }
 
-MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, StorageOpt storageOpt)
+MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, MetaVolumeType volumeType)
 : MetaFileIntf()
 {
     fileName = fname;
     this->arrayId = arrayId;
-    storage = storageOpt;
+    this->volumeType = volumeType;
 }
 
 // LCOV_EXCL_START

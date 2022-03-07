@@ -86,8 +86,8 @@ protected:
 
 TEST_F(MetaFsSystemManagerFixture, Initialize)
 {
-    MetaStorageInfo info;
-    MetaStorageMediaInfoList mediaInfoList;
+    std::shared_ptr<MetaStorageInfo> info = std::make_shared<MetaStorageInfo>();
+    MetaStorageInfoList mediaInfoList;
     mediaInfoList.push_back(info);
 
     EXPECT_CALL(*mbr, Init);
@@ -198,8 +198,8 @@ TEST_F(MetaFsSystemManagerFixture, CreateMbr_Negative)
 
 TEST_F(MetaFsSystemManagerFixture, InitSystem_Positive)
 {
-    MetaStorageInfo info;
-    MetaStorageMediaInfoList mediaInfoList;
+    std::shared_ptr<MetaStorageInfo> info = std::make_shared<MetaStorageInfo>();
+    MetaStorageInfoList mediaInfoList;
     mediaInfoList.push_back(info);
 
     MetaFsControlReqMsg req;
