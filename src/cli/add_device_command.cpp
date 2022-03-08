@@ -74,10 +74,8 @@ AddDeviceCommand::Execute(json& doc, string rid)
         {
             int event = EID(CLI_ADD_DEVICE_FAILURE);
             POS_TRACE_WARN(event, "");
-            return jFormat.MakeResponse("ADDDEVICE", rid, event,
-                "failed to add " + devName + " to " + arrayName +
-                    "internal event:" + to_string(ret) + ")",
-                GetPosInfo());
+            return jFormat.MakeResponse("ADDDEVICE", rid, ret,
+                "failed to add " + devName + " to " + arrayName, GetPosInfo());
         }
     }
     else

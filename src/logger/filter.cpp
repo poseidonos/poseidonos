@@ -73,13 +73,9 @@ Filter::ApplyFilter(string filePath)
     }
     else
     {
-        int event = EID(LOGGER_FILTER_POLICY_FILE_NOT_FOUND);
-        POS_TRACE_WARN(event, "file_path:{}", filePath);
-        return event;
+        return EID(LOGGER_FILTER_POLICY_FILE_NOT_FOUND);
     }
 
-    int event = EID(LOGGER_FILTER_APPLY_SUCCESS);
-    POS_TRACE_INFO(event, "file_path:{}", filePath);
     return 0;
 }
 
@@ -147,9 +143,9 @@ Filter::_Decode(string policy)
                 }
                 else
                 {
-                            int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
-                            POS_TRACE_WARN(event, "policy:{}", policy);
-                            return event;
+                    int event = EID(LOGGER_FILTER_POLICY_DECODE_FAIL);
+                    POS_TRACE_WARN(event, "policy:{}", policy);
+                    return event;
                 }
             }
             else

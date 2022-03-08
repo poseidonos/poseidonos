@@ -117,7 +117,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
         POS_TRACE_WARN(event, "internal_event_code:{}", ret);
         return jFormat.MakeResponse(
             "AUTOCREATEARRAY", rid, res.code,
-                "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+                "failed to create " + arrayName, GetPosInfo());
     }
     else
     {

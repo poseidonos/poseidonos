@@ -26,8 +26,9 @@ TEST(ArrayInfoCommand, Execute_testWhenArrayNameBlank)
 
     // Then
     JsonFormat jFormat;
-    string expected = jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
-        "Please type array name", GetPosInfo());
+    int event = EID(CLI_ARRAY_INFO_NO_ARRAY_NAME);
+    string expected = jFormat.MakeResponse("ARRAYINFO", rid, event,
+            "please type array name", GetPosInfo());
 
     EXPECT_EQ(expected, actual);
 }
@@ -49,8 +50,9 @@ TEST(ArrayInfoCommand, Execute_testWhenNoArrayNameGiven)
 
     // Then
     JsonFormat jFormat;
-    string expected = jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
-        "Please type array name", GetPosInfo());
+    int event = EID(CLI_ARRAY_INFO_NO_ARRAY_NAME);
+    string expected = jFormat.MakeResponse("ARRAYINFO", rid, event,
+            "please type array name", GetPosInfo());
 
     EXPECT_EQ(expected, actual);
 }

@@ -28,8 +28,9 @@ TEST(AddDeviceCommand, Execute_testWhenNoSpareDeviceGiven)
 
     // Then
     JsonFormat jFormat;
-    string expected = jFormat.MakeResponse("ADDDEVICE", rid, BADREQUEST,
-        "only spare device can be added", GetPosInfo());
+    int event = EID(CLI_ADD_DEVICE_FAILURE_NO_SPARE);
+    string expected = jFormat.MakeResponse("ADDDEVICE", rid, event,
+        "failed to add spare device", GetPosInfo());
 
     EXPECT_EQ(expected, actual);
 }
