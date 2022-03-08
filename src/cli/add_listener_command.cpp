@@ -68,7 +68,7 @@ AddListenerCommand::Execute(json& doc, string rid)
     int event = EID(CLI_ADD_LISTENER_SUCCESS);
     POS_TRACE_INFO(event, "");
     return jFormat.MakeResponse(
-        "ADDLISTENER", rid, event,
+        "ADDLISTENER", rid, SUCCESS,
         "Address ( " + doc["param"]["target_address"].get<string>() + " ) added to Subsystem ( " + subnqn + " )", GetPosInfo());
 }
 

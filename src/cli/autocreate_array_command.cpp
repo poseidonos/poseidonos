@@ -103,7 +103,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
         int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
         POS_TRACE_WARN(event, "internal_event_code:{}", res.code);
         return jFormat.MakeResponse(
-            "AUTOCREATEARRAY", rid, event,
+            "AUTOCREATEARRAY", rid, res.code,
                 "failed to create " + arrayName + " (code:" + to_string(res.code) + ")", GetPosInfo());
     }
 
@@ -116,7 +116,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
         int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
         POS_TRACE_WARN(event, "internal_event_code:{}", ret);
         return jFormat.MakeResponse(
-            "AUTOCREATEARRAY", rid, event,
+            "AUTOCREATEARRAY", rid, res.code,
                 "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
     }
     else

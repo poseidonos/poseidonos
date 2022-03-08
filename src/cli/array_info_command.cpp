@@ -72,7 +72,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     {
         int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
         POS_TRACE_WARN(event, "array_name:{}", arrayName);
-        return jFormat.MakeResponse("ARRAYINFO", rid, event,
+        return jFormat.MakeResponse("ARRAYINFO", rid, SUCCESS,
             arrayName + " does not exist", GetPosInfo());
     }
     IArrayInfo* array = info->arrayInfo;
