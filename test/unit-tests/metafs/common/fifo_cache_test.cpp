@@ -47,7 +47,7 @@ GetMockMpio(std::pair<int, MetaLpnType> input)
     MpioIoInfo ioInfo;
     ioInfo.arrayId = input.first;
     ioInfo.metaLpn = input.second;
-    std::shared_ptr<MockMpio> mpio = std::make_shared<MockMpio>(nullptr);
+    std::shared_ptr<MockMpio> mpio = std::make_shared<MockMpio>(nullptr, false);
     EXPECT_CALL(*mpio, Setup);
     mpio->Setup(ioInfo, true, false, nullptr);
     return mpio;

@@ -36,17 +36,67 @@
 
 #include <unordered_set>
 
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+
+using ::testing::NiceMock;
+using ::testing::Return;
+
 namespace pos
 {
-TEST(MpioAllocator, AllocAndReleaseForSsd)
+class MpioAllocatorFixture : public ::testing::Test
 {
+public:
+    MpioAllocatorFixture(void)
+    {
+        config = new NiceMock<MockMetaFsConfigManager>(nullptr);
+        EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(COUNT));
+        EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(COUNT));
+        EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(false));
+
+        allocator = new MpioAllocator(config);
+    }
+
+    virtual ~MpioAllocatorFixture()
+    {
+        delete allocator;
+        delete config;
+    }
+
+    virtual void SetUp(void) override
+    {
+    }
+
+    virtual void TearDown(void) override
+    {
+    }
+
+    virtual void BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
+        const int arrayId, const MetaLpnType lpn) const
+    {
+        io.opcode = opcode;
+        io.arrayId = arrayId;
+        io.metaLpn = lpn;
+    }
+
+protected:
+    NiceMock<MockMetaFsConfigManager>* config;
+    MpioAllocator* allocator;
+
     const uint32_t COUNT = 10;
     const int arrayId = 0;
     Mpio* mpioList[10] = {
         0,
     };
-    MpioAllocator* allocator = new MpioAllocator(COUNT);
+    Mpio* mpioList_r[10] = {
+        0,
+    };
+    Mpio* mpioList_w[10] = {
+        0,
+    };
+};
 
+TEST_F(MpioAllocatorFixture, AllocAndReleaseForSsd)
+{
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
 
@@ -69,19 +119,10 @@ TEST(MpioAllocator, AllocAndReleaseForSsd)
             allocator->Release(mpioList[index]);
         }
     }
-
-    delete allocator;
 }
 
-TEST(MpioAllocator, AllocAndReleaseForNvRam)
+TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRam)
 {
-    const uint32_t COUNT = 10;
-    const int arrayId = 0;
-    Mpio* mpioList[10] = {
-        0,
-    };
-    MpioAllocator* allocator = new MpioAllocator(COUNT);
-
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
         for (uint32_t index = 0; index < COUNT; index++)
@@ -101,22 +142,10 @@ TEST(MpioAllocator, AllocAndReleaseForNvRam)
             allocator->Release(mpioList[index]);
         }
     }
-
-    delete allocator;
 }
 
-TEST(MpioAllocator, CheckCounter)
+TEST_F(MpioAllocatorFixture, CheckCounter)
 {
-    const uint32_t COUNT = 10;
-    const int arrayId = 0;
-    Mpio* mpioList_r[10] = {
-        0,
-    };
-    Mpio* mpioList_w[10] = {
-        0,
-    };
-    MpioAllocator* allocator = new MpioAllocator(COUNT);
-
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
@@ -153,25 +182,11 @@ TEST(MpioAllocator, CheckCounter)
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), 0);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
-
-    delete allocator;
 }
 
-void
-BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
-    const int arrayId, const MetaLpnType lpn)
+TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
 {
-    io.opcode = opcode;
-    io.arrayId = arrayId;
-    io.metaLpn = lpn;
-}
-
-TEST(MpioAllocator, AllocAndReleaseForNvRamCache)
-{
-    const uint32_t COUNT = 10;
-    const int arrayId = 0;
     std::unordered_set<Mpio*> mpioSet;
-    MpioAllocator* allocator = new MpioAllocator(COUNT);
 
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
@@ -202,8 +217,6 @@ TEST(MpioAllocator, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
-
-    delete allocator;
 }
 
 } // namespace pos

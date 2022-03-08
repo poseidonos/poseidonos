@@ -31,36 +31,40 @@
  */
 
 #include "metafs_file_intf.h"
-#include "src/metafs/include/metafs_service.h"
-#include "src/metafs/nvram_io_completion.h"
-#include "src/array_mgmt/array_manager.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
 
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/nvram_io_completion.h"
+
 namespace pos
 {
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
-                                        MetaVolumeType volumeType)
+                                    MetaVolumeType volumeType)
 : MetaFileIntf(fname, arrayId, volumeType),
-  metaFs(nullptr),
+  metaFs(MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)),
   blksPerStripe(0),
-  baseLpn(UINT64_MAX)
+  baseLpn(UINT64_MAX),
+  BYTE_ACCESS_ENABLED(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsDirectAccessEnabled())
 {
-    metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
     _SetFileProperty(volumeType);
 }
 
 // only for test
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
-                                        MetaVolumeType volumeType)
+                                    MetaFsConfigManager* configManager,
+                                    MetaVolumeType volumeType)
 : MetaFileIntf(fname, arrayId, volumeType),
   metaFs(metaFs),
   blksPerStripe(0),
-  baseLpn(UINT64_MAX)
+  baseLpn(UINT64_MAX),
+  BYTE_ACCESS_ENABLED(configManager->IsDirectAccessEnabled())
 {
     _SetFileProperty(volumeType);
 }
@@ -93,7 +97,6 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
-#if NVRAM_BYTE_ACCESS_DIRECT_EN
 uint32_t
 MetaFsFileIntf::_GetMaxLpnCntPerIOSubmit(PartitionType type)
 {
@@ -136,15 +139,14 @@ MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
 
     return logicalAddr;
 }
-#endif
 
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-#if NVRAM_BYTE_ACCESS_DIRECT_EN
-    if (ctx->opcode == MetaFsIoOpcode::Write &&
+    if (BYTE_ACCESS_ENABLED &&
+        ctx->opcode == MetaFsIoOpcode::Write &&
         volumeType == MetaVolumeType::NvRamVolume &&
         ctx->length < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
     {
@@ -173,7 +175,6 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         }
     }
     else
-#endif
     {
         ctx->ioDoneCheckCallback =
             std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);

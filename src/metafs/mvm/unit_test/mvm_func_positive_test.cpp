@@ -289,7 +289,7 @@ TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
         MetaFsMoMReqMsg req;
         req.reqType = MetaFsMoMReqType::FileCreate;
         req.fileName = &fileName;
-        req.fileByteSize = MetaFsConfig::TYPICAL_NVRAM_META_FILE_KB_SIZE * 1024;
+        // req.fileByteSize = MetaFsConfig::TYPICAL_NVRAM_META_FILE_KB_SIZE * 1024;
 
         ret = metaVolMgr.ProcessNewReq(req);
         EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);

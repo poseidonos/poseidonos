@@ -40,10 +40,14 @@
 
 namespace pos
 {
+class MetaFsConfigManager;
+
 class ScalableMetaIoWorker : public MetaFsIoHandlerBase
 {
 public:
-    explicit ScalableMetaIoWorker(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
+    explicit ScalableMetaIoWorker(const int threadId, const int coreId, 
+        const int coreCount, MetaFsConfigManager* configManager,
+        TelemetryPublisher* tp = nullptr);
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;

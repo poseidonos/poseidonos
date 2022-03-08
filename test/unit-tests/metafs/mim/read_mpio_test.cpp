@@ -45,7 +45,7 @@ class ReadMpioTester : public ReadMpio
 {
 public:
     explicit ReadMpioTester(void* mdPageBuf)
-    : ReadMpio(mdPageBuf)
+    : ReadMpio(mdPageBuf, false)
     {
         mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }

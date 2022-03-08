@@ -32,22 +32,24 @@
 
 #pragma once
 
-#include "mfs_io_handler_base.h"
-#include "src/metafs/mim/metafs_io_multilevel_q.h"
-#include "mpio_allocator.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
-#include <string>
 #include <chrono>
+#include <string>
+
+#include "mfs_io_handler_base.h"
+#include "mpio_allocator.h"
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
+class MetaFsConfigManager;
+
 class MpioHandler
 {
 public:
-    explicit MpioHandler(int threadId, int coreId,
-                    TelemetryPublisher* tp = nullptr,
-                    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = nullptr);
+    explicit MpioHandler(const int threadId, const int coreId,
+        MetaFsConfigManager* configManager, TelemetryPublisher* tp = nullptr,
+        MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
@@ -64,5 +66,6 @@ private:
     std::chrono::steady_clock::time_point lastTime;
     int64_t metricSumOfSpendTime;
     int64_t metricSumOfMpioCount;
+    const size_t TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC;
 };
 } // namespace pos

@@ -47,7 +47,7 @@ class MpioTester : public Mpio
 {
 public:
     explicit MpioTester(void* mdPageBuf)
-    : Mpio(mdPageBuf)
+    : Mpio(mdPageBuf, false)
     {
         mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }

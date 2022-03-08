@@ -40,26 +40,31 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <string>
 #include <unordered_map>
+
+#include "mk/ibof_config.h"
+#include "src/lib/singleton.h"
 #include "src/metafs/include/meta_storage_info.h"
 #include "src/metafs/include/metafs_return_code.h"
 #include "src/metafs/metafs.h"
-#include "mk/ibof_config.h"
-#include "src/lib/singleton.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 class ScalableMetaIoWorker;
 class MetaFsIoScheduler;
+class MetaFsConfigManager;
 
 class MetaFsService
 {
 public:
     MetaFsService(void);
+    explicit MetaFsService(MetaFsConfigManager* configManager);
     ~MetaFsService(void);
-    void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
+    void Initialize(const uint32_t totalCount, const cpu_set_t schedSet,
+        const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
     void Register(std::string& arrayName, int arrayId, MetaFs* fileSystem);
     void Deregister(std::string& arrayName);
     MetaFs* GetMetaFs(std::string& arrayName) const;
@@ -68,14 +73,21 @@ public:
     {
         return ioScheduler;
     }
+    MetaFsConfigManager* GetConfigManager(void) const
+    {
+        return configManager;
+    }
 
 private:
-    void _PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp);
-    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount, TelemetryPublisher* tp);
+    void _PrepareThreads(const uint32_t totalCount, const cpu_set_t schedSet,
+        const cpu_set_t workSet, TelemetryPublisher* tp);
+    ScalableMetaIoWorker* _InitiateMioHandler(const int handlerId, const int coreId,
+        const int coreCount, TelemetryPublisher* tp);
 
     std::unordered_map<std::string, int> arrayNameToId;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems;
     MetaFsIoScheduler* ioScheduler;
+    MetaFsConfigManager* configManager;
 };
 
 using MetaFsServiceSingleton = Singleton<MetaFsService>;

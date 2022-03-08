@@ -50,6 +50,14 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     _SetThreadModel();
 
     tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
+    config = new NiceMock<MockMetaFsConfigManager>(nullptr);
+
+    EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32*1024));
+    EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(32*1024));
+    EXPECT_CALL(*config, IsWriteMpioCacheEnabled).WillRepeatedly(Return(true));
+    EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(32));
+    EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(true));
+    EXPECT_CALL(*config, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(5000));
 
     for (size_t arrayId = 0; arrayId < ARRAY_COUNT; ++arrayId)
     {
@@ -78,6 +86,7 @@ MetaFsTestFixture::~MetaFsTestFixture(void)
         delete comp;
     }
     components.clear();
+    delete config;
     MetaFsServiceSingleton::ResetInstance();
 }
 

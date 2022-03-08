@@ -50,6 +50,7 @@ SUBDIRS = allocator \
         meta_service \
         metafs \
         metafs/common \
+        metafs/config \
         metafs/log \
         metafs/util \
         metafs/mai \

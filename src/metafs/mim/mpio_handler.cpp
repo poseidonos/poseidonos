@@ -31,19 +31,24 @@
  */
 
 #include "mpio_handler.h"
-#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #include <string>
 
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
+
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId, TelemetryPublisher* tp, MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
+MpioHandler::MpioHandler(const int threadId, const int coreId,
+    MetaFsConfigManager* configManager, TelemetryPublisher* tp,
+    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioAllocator(nullptr),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
-  metricSumOfMpioCount(0)
+  metricSumOfMpioCount(0),
+  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric())
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
@@ -105,9 +110,9 @@ void
 MpioHandler::_SendPeriodicMetrics()
 {
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+    size_t elapsedTime = (size_t)(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
 
-    if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
+    if (elapsedTime >= TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC)
     {
         std::string thread_name = to_string(coreId);
         POSMetric metricFreeMpioCnt(TEL40103_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);

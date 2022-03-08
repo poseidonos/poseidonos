@@ -40,7 +40,7 @@ class WriteMpioTester : public WriteMpio
 {
 public:
     explicit WriteMpioTester(void* mdPageBuf)
-    : WriteMpio(mdPageBuf)
+    : WriteMpio(mdPageBuf, false)
     {
     }
 

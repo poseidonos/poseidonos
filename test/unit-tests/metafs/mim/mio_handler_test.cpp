@@ -31,30 +31,33 @@
  */
 
 #include "src/metafs/mim/mio_handler.h"
+
+#include <gtest/gtest.h>
+
 #include "src/metafs/mim/mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-#include "test/unit-tests/metafs/lib/metafs_pool_mock.h"
-#include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
-#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
-#include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
+#include "test/unit-tests/metafs/lib/metafs_pool_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_wbt_api_mock.h"
-#include <gtest/gtest.h>
+#include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
+#include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::DoAll;
 using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::AtLeast;
 
 namespace pos
 {
@@ -68,6 +71,9 @@ public:
       bottomhalfHandler(nullptr),
       mioPool(nullptr),
       mpioAllocator(nullptr),
+      mss(nullptr),
+      tp(nullptr),
+      conf(nullptr),
       arrayInfo(nullptr),
       mgmt(nullptr),
       ctrl(nullptr),
@@ -85,14 +91,20 @@ public:
     SetUp(void)
     {
         const uint32_t POOL_SIZE = 1024;
+        const uint32_t CACHE_SIZE = 10;
 
         tp = new NiceMock<MockTelemetryPublisher>;
+        conf = new NiceMock<MockMetaFsConfigManager>(nullptr);
+        EXPECT_CALL(*conf, GetMioPoolCapacity).WillRepeatedly(Return(1024));
+        EXPECT_CALL(*conf, GetMpioPoolCapacity).WillRepeatedly(Return(1024));
+        EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(10));
+        EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
 
         ioSQ = new NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>>;
         ioCQ = new NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>;
         doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
-        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, nullptr, doneQ);
-        mpioAllocator = new NiceMock<MockMpioAllocator>(POOL_SIZE);
+        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, conf, nullptr, doneQ);
+        mpioAllocator = new NiceMock<MockMpioAllocator>(conf);
         mioPool = new NiceMock<MockMetaFsPool<Mio*>>(POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
@@ -107,7 +119,7 @@ public:
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
-        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioAllocator, mioPool, tp);
+        handler = new MioHandler(0, 0, conf, ioSQ, ioCQ, mpioAllocator, mioPool, tp);
     }
 
     virtual void
@@ -118,6 +130,7 @@ public:
         delete arrayInfo;
         delete bottomhalfHandler;
         delete tp;
+        delete conf;
     }
 
 protected:
@@ -131,6 +144,7 @@ protected:
     NiceMock<MockMpioAllocator>* mpioAllocator;
     NiceMock<MockMetaStorageSubsystem>* mss;
     NiceMock<MockTelemetryPublisher>* tp;
+    NiceMock<MockMetaFsConfigManager>* conf;
 
     MockIArrayInfo* arrayInfo;
     MockMetaFsManagementApi* mgmt;

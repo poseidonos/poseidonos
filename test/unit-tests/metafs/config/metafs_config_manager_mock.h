@@ -30,40 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include "src/meta_file_intf/async_context.h"
-#include "src/event_scheduler/callback.h"
-#include "src/include/backend_event.h"
+#include <list>
+#include <string>
+#include <vector>
+
+#include "src/metafs/config/metafs_config_manager.h"
 
 namespace pos
 {
-class NvramIoCompletion : public Callback
+class MockMetaFsConfigManager : public MetaFsConfigManager
 {
 public:
-    explicit NvramIoCompletion(AsyncMetaFileIoCtx* cb)
-    : Callback(true, CallbackType_NvramIoCompletion),
-      cbCxt(cb)
-    {
-        SetEventType(BackendEvent_MetaIO);
-    }
-
-    ~NvramIoCompletion(void) override
-    {
-    }
-
-private:
-    bool
-    _DoSpecificJob(void) override
-    {
-        if (cbCxt != nullptr)
-        {
-            cbCxt->callback(cbCxt);
-        }
-
-        return true;
-    }
-
-    AsyncMetaFileIoCtx* cbCxt;
+    using MetaFsConfigManager::MetaFsConfigManager;
+    MOCK_METHOD(void, Init, ());
+    MOCK_METHOD(size_t, GetMioPoolCapacity, (), (const));
+    MOCK_METHOD(size_t, GetMpioPoolCapacity, (), (const));
+    MOCK_METHOD(bool, IsWriteMpioCacheEnabled, (), (const));
+    MOCK_METHOD(size_t, GetWriteMpioCacheCapacity, (), (const));
+    MOCK_METHOD(bool, IsDirectAccessEnabled, (), (const));
+    MOCK_METHOD(size_t, GetTimeIntervalInMillisecondsForMetric, (), (const));
 };
 } // namespace pos

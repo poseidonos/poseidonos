@@ -41,6 +41,7 @@
 #include "test/integration-tests/metafs/lib/test_meta_storage_subsystem.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 
 using ::testing::NiceMock;
 
@@ -60,6 +61,7 @@ public:
 
 protected:
     NiceMock<MockTelemetryPublisher>* tpForMetaIo;
+    NiceMock<MockMetaFsConfigManager>* config;
 
     struct ArrayComponents
     {

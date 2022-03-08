@@ -35,13 +35,21 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
 #include "src/metafs/mim/metafs_io_scheduler.h"
+#include "src/metafs/config/metafs_config_manager.h"
 
 namespace pos
 {
 MetaFsService::MetaFsService(void)
-: ioScheduler(nullptr)
+: ioScheduler(nullptr),
+  configManager(new MetaFsConfigManager(ConfigManagerSingleton::Instance()))
 {
     fileSystems.fill(nullptr);
+}
+
+MetaFsService::MetaFsService(MetaFsConfigManager* configManager)
+: ioScheduler(nullptr),
+  configManager(configManager)
+{
 }
 
 MetaFsService::~MetaFsService(void)
@@ -60,8 +68,10 @@ MetaFsService::~MetaFsService(void)
 }
 
 void
-MetaFsService::Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp)
+MetaFsService::Initialize(const uint32_t totalCount, const cpu_set_t schedSet,
+    const cpu_set_t workSet, TelemetryPublisher* tp)
 {
+    configManager->Init();
     _PrepareThreads(totalCount, schedSet, workSet, tp);
 }
 
@@ -109,7 +119,8 @@ MetaFsService::GetMetaFs(int arrayId) const
 }
 
 void
-MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet, TelemetryPublisher* tp)
+MetaFsService::_PrepareThreads(const uint32_t totalCount, const cpu_set_t schedSet,
+    const cpu_set_t workSet, TelemetryPublisher* tp)
 {
     uint32_t availableMetaIoCoreCnt = CPU_COUNT(&workSet);
     uint32_t handlerId = 0;
@@ -142,10 +153,11 @@ MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_
 }
 
 ScalableMetaIoWorker*
-MetaFsService::_InitiateMioHandler(int handlerId, int coreId, int coreCount, TelemetryPublisher* tp)
+MetaFsService::_InitiateMioHandler(const int handlerId, const int coreId,
+    const int coreCount, TelemetryPublisher* tp)
 {
     ScalableMetaIoWorker* mioHandler =
-        new ScalableMetaIoWorker(handlerId, coreId, coreCount, tp);
+        new ScalableMetaIoWorker(handlerId, coreId, coreCount, configManager, tp);
     mioHandler->StartThread();
     ioScheduler->RegisterMioHandler(mioHandler);
 

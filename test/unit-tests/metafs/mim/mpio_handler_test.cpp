@@ -34,14 +34,15 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/write_mpio_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
+using ::testing::AtLeast;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::AtLeast;
 
 namespace pos
 {
@@ -50,19 +51,24 @@ TEST(MpioHandler, Normal)
     const int MAX_COUNT = 32 * 1024;
 
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>;
+    MockMetaFsConfigManager* conf = new MockMetaFsConfigManager(nullptr);
+    EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
+    EXPECT_CALL(*conf, IsDirectAccessEnabled).WillRepeatedly(Return(false));
+    EXPECT_CALL(*conf, GetMpioPoolCapacity).WillRepeatedly(Return(100));
+    EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(10));
 
-    MockMpioAllocator* allocator = new MockMpioAllocator(100);
+    MockMpioAllocator* allocator = new MockMpioAllocator(conf);
 
     EXPECT_CALL(*allocator, TryReleaseTheOldestCache).Times(AtLeast(1));
 
-    MockWriteMpio* mpio = new MockWriteMpio(this);
+    MockWriteMpio* mpio = new MockWriteMpio(this, conf->IsDirectAccessEnabled());
     EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
 
     MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
     EXPECT_CALL(*doneQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
 
-    MpioHandler* handler = new MpioHandler(0, 0, tp, doneQ);
+    MpioHandler* handler = new MpioHandler(0, 0, conf, tp, doneQ);
     handler->BindMpioAllocator(allocator);
 
     for (int i = 0; i < MAX_COUNT; i++)
@@ -79,6 +85,6 @@ TEST(MpioHandler, Normal)
     delete allocator;
     delete mpio;
     delete tp;
+    delete conf;
 }
-
 } // namespace pos

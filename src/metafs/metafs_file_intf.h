@@ -32,17 +32,18 @@
 
 #pragma once
 
-#include "src/metafs/metafs.h"
-#include "src/metafs/include/metafs_aiocb_cxt.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-
 #include <cassert>
 #include <cstdint>
 #include <string>
 
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/metafs/include/metafs_aiocb_cxt.h"
+#include "src/metafs/metafs.h"
+
 namespace pos
 {
+class MetaFsConfigManager;
 
 class MetaFsFileIntf : public MetaFileIntf
 {
@@ -51,6 +52,7 @@ public:
                 MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     // only for test
     explicit MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
+                MetaFsConfigManager* configManager,
                 MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual ~MetaFsFileIntf(void) override;
 
@@ -70,15 +72,14 @@ protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 
-#if NVRAM_BYTE_ACCESS_DIRECT_EN
     uint32_t _GetMaxLpnCntPerIOSubmit(PartitionType type);
     MetaLpnType _GetBaseLpn(MetaVolumeType type);
     pos::LogicalByteAddr _CalculateByteAddress(uint64_t pageNumber, uint64_t offset, uint64_t size);
-#endif
 
     MetaFs* metaFs;
     uint32_t blksPerStripe;
     MetaLpnType baseLpn;
+    const bool BYTE_ACCESS_ENABLED;
 };
 
 } // namespace pos

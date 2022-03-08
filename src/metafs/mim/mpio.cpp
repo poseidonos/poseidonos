@@ -42,7 +42,7 @@ namespace pos
 {
 std::atomic<uint64_t> Mpio::idAllocate_{0};
 
-Mpio::Mpio(void* mdPageBuf)
+Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
 : mdpage(mdPageBuf),
   partialIO(false),
   mssIntf(nullptr),
@@ -52,7 +52,8 @@ Mpio::Mpio(void* mdPageBuf)
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
   priority(RequestPriority::Normal),
-  UNIQUE_ID(idAllocate_++)
+  UNIQUE_ID(idAllocate_++),
+  DIRECT_ACCESS_ENABLED(directAccessEnabled)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -240,9 +241,7 @@ Mpio::DoE2ECheck(MpAioState expNextState)
     }
     else
     {
-#if NVRAM_BYTE_ACCESS_DIRECT_EN
-        if (MetaStorageType::NVRAM != io.targetMediaType)
-#endif
+        if (!DIRECT_ACCESS_ENABLED || MetaStorageType::NVRAM != io.targetMediaType)
         {
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[Mpio][DoE2ECheck ] Read data will be cleared due to invalid data, arrayId={}, mediaType={}, lpn={}, oldData={}",
@@ -292,13 +291,11 @@ Mpio::DoIO(MpAioState expNextState)
 
     if (aioModeEnabled && (!forceSyncIO))
     {
-#if RANGE_OVERLAP_CHECK_EN
         if (cacheState != MpioCacheState::Init)
         {
             mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, 0);
         }
         else
-#endif
         {
             mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
         }

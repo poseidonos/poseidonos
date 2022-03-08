@@ -31,10 +31,12 @@
  */
 
 #include "scalable_meta_io_worker.h"
+#include "src/metafs/include/metafs_service.h"
 
 namespace pos
 {
-ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCount, TelemetryPublisher* tp)
+ScalableMetaIoWorker::ScalableMetaIoWorker(const int threadId, const int coreId,
+    const int coreCount, MetaFsConfigManager* configManager, TelemetryPublisher* tp)
 : MetaFsIoHandlerBase(threadId, coreId)
 {
     telemetryPublisher = tp;
@@ -45,8 +47,10 @@ ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCou
     }
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
-    tophalfHandler = new MioHandler(threadId, coreId, coreCount, telemetryPublisher);
-    bottomhalfHandler = new MpioHandler(threadId, coreId, telemetryPublisher);
+    tophalfHandler = new MioHandler(threadId, coreId, coreCount, configManager,
+        telemetryPublisher);
+    bottomhalfHandler = new MpioHandler(threadId, coreId, configManager,
+        telemetryPublisher);
 
     tophalfHandler->BindPartialMpioHandler(bottomhalfHandler);
 }

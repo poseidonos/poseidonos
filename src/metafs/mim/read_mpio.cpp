@@ -36,8 +36,8 @@
 
 namespace pos
 {
-ReadMpio::ReadMpio(void* mdPageBuf)
-: Mpio(mdPageBuf)
+ReadMpio::ReadMpio(void* mdPageBuf, const bool directAccessEnabled)
+: Mpio(mdPageBuf, directAccessEnabled)
 {
     assert(mdPageBuf != nullptr);
     _InitStateHandler();

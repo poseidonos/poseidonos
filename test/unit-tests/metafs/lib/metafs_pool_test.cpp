@@ -52,9 +52,9 @@ namespace pos
 {
 template<typename T>
 T*
-GetMpio(void* buf)
+GetMpio(void* buf, const bool enabled)
 {
-    return new T(buf);
+    return new T(buf, enabled);
 }
 
 TEST(MetaFsPool, Construct_testIfThePoolHasCorrectNumbers)
@@ -75,7 +75,7 @@ TEST(MetaFsPool, AddToPool_testIfThePoolHasCorrectNumbers)
 
     for (size_t i = 0; i < POOL_SIZE; i++)
     {
-        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
         EXPECT_TRUE(pool.AddToPool(mpio));
     }
 
@@ -92,7 +92,7 @@ TEST(MetaFsPool, TryAlloc_testIfThePoolCanGiveFreeItem)
 
     for (size_t i = 0; i < POOL_SIZE; i++)
     {
-        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
         EXPECT_TRUE(pool.AddToPool(mpio));
     }
 
@@ -117,7 +117,7 @@ TEST(MetaFsPool, Release_testIfThePoolCanRecieveFreeItem)
 
     for (size_t i = 0; i < POOL_SIZE; i++)
     {
-        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
         EXPECT_TRUE(pool.AddToPool(mpio));
     }
 
@@ -151,12 +151,12 @@ TEST(MetaFsPool, Destructor_testIfThePoolWillBeDestructedWell)
 
     for (size_t i = 0; i < POOL_SIZE; i++)
     {
-        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
         mpioList.push_back(mpio);
         EXPECT_TRUE(pool->AddToPool(mpio));
     }
 
-    MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+    MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
     EXPECT_FALSE(pool->AddToPool(mpio));
     delete mpio;
 
@@ -177,7 +177,7 @@ TEST(MetaFsPool, Destructor_testIfDestructionWillBeDoneSuccessfully)
 
     for (size_t i = 0; i < POOL_SIZE - 1; i++)
     {
-        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf);
+        MockWriteMpio* mpio = GetMpio<MockWriteMpio>((void*)&testBuf, false);
         mpioList.push_back(mpio);
         EXPECT_TRUE(pool->AddToPool(mpio));
     }

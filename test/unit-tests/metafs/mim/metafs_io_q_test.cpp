@@ -32,13 +32,17 @@
 
 #include "src/metafs/mim/metafs_io_q.h"
 
-#include <unordered_set>
 #include <gtest/gtest.h>
 
+#include <unordered_set>
+
 #include "src/metafs/mim/metafs_io_request.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 #include "test/unit-tests/metafs/mim/mio_mock.h"
-#include "test/unit-tests/metafs/mim/mpio_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_mock.h"
+
+using ::testing::Return;
 
 namespace pos
 {
@@ -87,7 +91,11 @@ TEST(MetaFsIoQ_Mio, CheckEnqueueAndDequeue)
     const int SIZE = 200;
     MetaFsIoQ<Mio*> q;
     std::unordered_set<Mio*> requests;
-    MockMpioAllocator* allocator = new MockMpioAllocator(SIZE);
+    MockMetaFsConfigManager* conf = new MockMetaFsConfigManager(nullptr);
+    EXPECT_CALL(*conf, GetMpioPoolCapacity).WillRepeatedly(Return(SIZE));
+    EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(SIZE));
+
+    MockMpioAllocator* allocator = new MockMpioAllocator(conf);
 
     for (int i = 0; i < SIZE; i++)
     {
@@ -107,6 +115,8 @@ TEST(MetaFsIoQ_Mio, CheckEnqueueAndDequeue)
     }
 
     EXPECT_TRUE(q.IsEmpty());
+
+    delete conf;
 }
 
 /*** Mpio* ***/
@@ -124,7 +134,7 @@ TEST(MetaFsIoQ_Mpio, CheckEnqueueAndDequeue)
 
     for (int i = 0; i < SIZE; i++)
     {
-        MockMpio* msg = new MockMpio(nullptr);
+        MockMpio* msg = new MockMpio(nullptr, false);
         q.Enqueue(msg);
         requests.insert(msg);
     }

@@ -78,7 +78,7 @@ class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecu
 {
 public:
     Mpio(void) = delete;
-    explicit Mpio(void* mdPageBuf);
+    explicit Mpio(void* mdPageBuf, const bool directAccessEnabled);
     virtual ~Mpio(void);
     Mpio(const Mpio& mpio) = delete;
     Mpio& operator=(const Mpio& mio) = delete;
@@ -153,5 +153,6 @@ private:
 
     const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;
+    const bool DIRECT_ACCESS_ENABLED;
 };
 } // namespace pos

@@ -32,19 +32,22 @@
  */
 
 #include "mio_handler.h"
-#include <string>
-#include <utility>
+
 #include <chrono>
 #include <ctime>
+#include <string>
+#include <utility>
+
 #include "Air.h"
-#include "src/metafs/include/metafs_service.h"
+#include "meta_volume_manager.h"
 #include "metafs_aiocb_cxt.h"
-#include "mfs_async_runnable_template.h"
 #include "metafs_log.h"
 #include "metafs_mutex.h"
-#include "meta_volume_manager.h"
-#include "src/metafs/storage/mss.h"
+#include "mfs_async_runnable_template.h"
 #include "src/event_scheduler/event.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/storage/mss.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #if defined(IBOFOS_BACKEND_IO)
@@ -53,10 +56,15 @@
 
 namespace pos
 {
-MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp)
+MioHandler::MioHandler(const int threadId, const int coreId, const int coreCount,
+    MetaFsConfigManager* configManager, TelemetryPublisher* tp)
 : ioSQ(nullptr),
   ioCQ(nullptr),
   cpuStallCnt(0),
+  MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
+  MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
+  WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
+  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric()),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
@@ -65,7 +73,7 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
     ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
     ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
 
-    mpioAllocator = new MpioAllocator(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    mpioAllocator = new MpioAllocator(configManager);
     _CreateMioPool();
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
@@ -73,19 +81,25 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount, TelemetryPublish
     lastTime = std::chrono::steady_clock::now();
 
     this->bottomhalfHandler = nullptr;
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "mio handler constructed. threadId={}, coreId={}",
-        threadId, coreId);
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Mio handler constructed. threadId: {}, coreId: {}, mio pool size: {}",
+        threadId, coreId, MIO_POOL_SIZE);
 }
 
-MioHandler::MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
-    TelemetryPublisher* tp)
+MioHandler::MioHandler(const int threadId, const int coreId,
+    MetaFsConfigManager* configManager,
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
+    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator,
+    MetaFsPool<Mio*>* mioPool, TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
   mioPool(mioPool),
   mpioAllocator(mpioAllocator),
   cpuStallCnt(0),
+  MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
+  MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
+  WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
+  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric()),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
@@ -124,8 +138,8 @@ MioHandler::~MioHandler(void)
 void
 MioHandler::_CreateMioPool(void)
 {
-    mioPool = new MetaFsPool<Mio*>(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
-    for (uint32_t i = 0; i < MAX_CONCURRENT_MIO_PROC_THRESHOLD; ++i)
+    mioPool = new MetaFsPool<Mio*>(MIO_POOL_SIZE);
+    for (size_t i = 0; i < MIO_POOL_SIZE; ++i)
     {
         mioPool->AddToPool(new Mio(mpioAllocator));
     }
@@ -165,13 +179,11 @@ MioHandler::_HandleIoSQ(void)
     reqMsg->StoreTimestamp(IoRequestStage::Dequeue);
     cpuStallCnt = 0;
 
-#if RANGE_OVERLAP_CHECK_EN // range overlap enable
     if (_IsRangeOverlapConflicted(reqMsg) || _IsPendedRange(reqMsg))
     {
         _PushToRetry(reqMsg);
         return;
     }
-#endif
 
     Mio* mio = DispatchMio(*reqMsg);
     if (nullptr == mio)
@@ -180,9 +192,8 @@ MioHandler::_HandleIoSQ(void)
         return;
     }
 
-#if RANGE_OVERLAP_CHECK_EN // range overlap enable
     _RegisterRangeLockInfo(reqMsg);
-#endif
+
     ExecuteMio(*mio);
 }
 
@@ -190,9 +201,9 @@ void
 MioHandler::_SendPeriodicMetrics(void)
 {
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+    size_t elapsedTime = (size_t)(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
 
-    if (elapsedTime >= MetaFsConfig::INTERVAL_IN_MILLISECOND_FOR_SENDING_METRIC)
+    if (elapsedTime >= TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC)
     {
         std::string thread_name = to_string(coreId);
         POSMetric metricFreeMioCnt(TEL40102_METAFS_FREE_MIO_CNT, POSMetricTypes::MT_GAUGE);
@@ -232,10 +243,9 @@ MioHandler::_HandleIoCQ(void)
         {
         }
 
-#if RANGE_OVERLAP_CHECK_EN // range overlap enable
         _FreeLockContext(mio);
         _DiscoverIORangeOverlap(); // find other pending I/O
-#endif
+
         if (true == mio->IsSyncIO())
         {
             mio->NotifyCompletionToClient();

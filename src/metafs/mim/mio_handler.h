@@ -48,14 +48,19 @@
 
 namespace pos
 {
+class MetaFsConfigManager;
+
 class MioHandler
 {
 public:
-    MioHandler(int threadId, int coreId, int coreCount, TelemetryPublisher* tp = nullptr);
+    MioHandler(const int threadId, const int coreId, const int coreCount,
+        MetaFsConfigManager* configManager, TelemetryPublisher* tp = nullptr);
     // for test
-    MioHandler(int threadId, int coreId, MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator, MetaFsPool<Mio*>* mioPool,
-        TelemetryPublisher* tp);
+    MioHandler(const int threadId, const int coreId,
+        MetaFsConfigManager* configManager,
+        MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
+        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator,
+        MetaFsPool<Mio*>* mioPool, TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
     virtual void TophalfMioProcessing(void);
@@ -105,7 +110,10 @@ private:
 
     MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = { 0 };
 
-    static const uint32_t MAX_CONCURRENT_MIO_PROC_THRESHOLD = MetaFsConfig::MAX_CONCURRENT_IO_CNT;
+    const size_t MIO_POOL_SIZE;
+    const size_t MPIO_POOL_SIZE;
+    const size_t WRITE_CACHE_CAPACITY;
+    const size_t TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC;
     int coreId;
 
     TelemetryPublisher* telemetryPublisher = nullptr;

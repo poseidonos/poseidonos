@@ -46,10 +46,12 @@
 
 namespace pos
 {
+class MetaFsConfigManager;
+
 class MpioAllocator
 {
 public:
-    explicit MpioAllocator(const size_t eachPoolSize);
+    explicit MpioAllocator(MetaFsConfigManager* configManager);
     virtual ~MpioAllocator(void);
 
     virtual Mpio* TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
@@ -82,8 +84,8 @@ public:
     virtual void ReleaseAllCache(void);
 
 private:
-    Mpio* _CreateMpio(MpioType type);
-    Mpio* _TryAlloc(const MpioType mpioType);
+    Mpio* _CreateMpio(const MpioType type, const bool directAccessEnabled);
+    Mpio* _TryAlloc(const MpioType type);
     void _ReleaseCache(void);
 
     const size_t WRITE_CACHE_CAPACITY;

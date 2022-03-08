@@ -31,30 +31,34 @@
  */
 
 #include "src/metafs/metafs_file_intf.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
+
+#include <gtest/gtest.h>
+
+#include <string>
+
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_wbt_api_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include <gtest/gtest.h>
-#include <string>
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::Matcher;
+using ::testing::NiceMock;
 using ::testing::Return;
 
 using namespace std;
 
 namespace pos
 {
-class MetaFsFileIntfTester: public MetaFsFileIntf
+class MetaFsFileIntfTester : public MetaFsFileIntf
 {
 public:
-    MetaFsFileIntfTester(string fname, int arrayId, MetaFs* metaFs)
-    : MetaFsFileIntf(fname, arrayId, metaFs)
+    MetaFsFileIntfTester(string fname, int arrayId, MetaFs* metaFs, MetaFsConfigManager* configManager)
+    : MetaFsFileIntf(fname, arrayId, metaFs, configManager)
     {
     }
 
@@ -99,10 +103,11 @@ public:
         io = new NiceMock<MockMetaFsIoApi>;
         wbt = new NiceMock<MockMetaFsWBTApi>;
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+        config = new NiceMock<MockMetaFsConfigManager>(nullptr);
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
-        metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs);
+        metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs, config);
     }
 
     virtual void
@@ -120,6 +125,7 @@ protected:
     NiceMock<MockMetaFsIoApi>* io;
     NiceMock<MockMetaFsWBTApi>* wbt;
     NiceMock<MockMetaStorageSubsystem>* mss;
+    NiceMock<MockMetaFsConfigManager>* config;
 
     MetaFsFileIntfTester* metaFile;
 
@@ -183,7 +189,7 @@ TEST_F(MetaFsFileIntfFixture, IssueAsyncIO)
 TEST_F(MetaFsFileIntfFixture, CheckIoDoneStatus)
 {
     MetaFsAioCbCxt* ctx = new MetaFsAioCbCxt(MetaFsIoOpcode::Read, 0, 0,
-                                                nullptr, nullptr);
+        nullptr, nullptr);
 
     EXPECT_NE(metaFile->CheckIoDoneStatus(ctx), 0);
 }

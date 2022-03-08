@@ -36,8 +36,8 @@
 
 namespace pos
 {
-WriteMpio::WriteMpio(void* mdPageBuf)
-: Mpio(mdPageBuf),
+WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled)
+: Mpio(mdPageBuf, directAccessEnabled),
   prevLpn(0),
   currLpn(0),
   prevBuf(nullptr),
@@ -97,7 +97,6 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             "[Mpio][_MakeReady  ] type={}, req.tagId={}, mpio_id={}, curLpn={}, prevLpn={}, curBufA={}, prevBufA={}",
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
-#if RANGE_OVERLAP_CHECK_EN
         if (MetaStorageType::NVRAM == io.targetMediaType)
         {
             switch (cacheState)
@@ -126,9 +125,6 @@ WriteMpio::_MakeReady(MpAioState expNextState)
         {
             SetNextState(MpAioState::Read);
         }
-#else
-        SetNextState(MpAioState::Read);
-#endif
     }
     else
     {
@@ -163,7 +159,6 @@ WriteMpio::_MergeData(MpAioState expNextState)
 
     SetNextState(expNextState); // WriteMpio::_PrepareWrite()
 
-#if RANGE_OVERLAP_CHECK_EN
     if (MetaStorageType::NVRAM == io.targetMediaType)
     {
         if (MpioCacheState::Init != cacheState)
@@ -171,7 +166,6 @@ WriteMpio::_MergeData(MpAioState expNextState)
             cacheState = MpioCacheState::Mergeable;
         }
     }
-#endif
 
     return contd2NextRun;
 }

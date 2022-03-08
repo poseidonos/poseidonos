@@ -37,32 +37,41 @@
 #include "metafs_common.h"
 #include "read_mpio.h"
 #include "write_mpio.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/metafs_service.h"
 
 namespace pos
 {
-MpioAllocator::MpioAllocator(const size_t eachPoolSize)
-: WRITE_CACHE_CAPACITY(MetaFsConfig::DEFAULT_MAX_MPIO_CACHE_COUNT)
+MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
+: WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity())
 {
-    if (eachPoolSize == 0)
+    const size_t poolSize = configManager->GetMpioPoolCapacity();
+    const bool directAccessEnabled = configManager->IsDirectAccessEnabled();
+
+    if (poolSize == 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Pool size requested is {}", eachPoolSize);
+            "Pool size requested is {}", poolSize);
         assert(false);
     }
 
     // tuple of array id, meta lpn, and mpio
     writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(WRITE_CACHE_CAPACITY);
 
-    mdPageBufPool = std::make_shared<MDPageBufPool>(eachPoolSize * (uint32_t)MpioType::Max);
+    mdPageBufPool = std::make_shared<MDPageBufPool>(poolSize * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();
 
     for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
-        int numMpio = eachPoolSize;
-        pool_[idx] = std::make_shared<MetaFsPool<Mpio*>>(eachPoolSize);
+        int numMpio = poolSize;
+        pool_[idx] = std::make_shared<MetaFsPool<Mpio*>>(poolSize);
         while (numMpio-- != 0)
-            pool_[idx]->AddToPool(_CreateMpio((MpioType)idx));
+            pool_[idx]->AddToPool(_CreateMpio((MpioType)idx, directAccessEnabled));
     }
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Mpio allocator constructed. mpio pool size: {}, write cache size: {}",
+        poolSize, WRITE_CACHE_CAPACITY);
 }
 
 MpioAllocator::~MpioAllocator(void)
@@ -73,7 +82,6 @@ Mpio*
 MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
         const MetaLpnType lpn, const bool partialIO, const int arrayId)
 {
-#if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
 
     if (!((MetaStorageType::SSD != storageType) &&
@@ -108,9 +116,6 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
         }
         return mpio;
     }
-#else
-    Mpio* mpio = _TryAlloc(mpioType);
-#endif
 
     return mpio;
 }
@@ -142,23 +147,23 @@ MpioAllocator::Release(Mpio* mpio)
 }
 
 Mpio*
-MpioAllocator::_CreateMpio(MpioType type)
+MpioAllocator::_CreateMpio(const MpioType type, const bool directAccessEnabled)
 {
     auto mdPageBuf = mdPageBufPool->PopNewBuf();
     assert(nullptr != mdPageBuf);
     if (MpioType::Read == type)
-        return new ReadMpio(mdPageBuf);
-    return new WriteMpio(mdPageBuf);
+        return new ReadMpio(mdPageBuf, directAccessEnabled);
+    return new WriteMpio(mdPageBuf, directAccessEnabled);
 }
 
 Mpio*
-MpioAllocator::_TryAlloc(const MpioType mpioType)
+MpioAllocator::_TryAlloc(const MpioType type)
 {
-    const uint32_t type = (uint32_t)mpioType;
-    if (0 == pool_[type]->GetFreeCount())
+    const uint32_t mpioType = (uint32_t)type;
+    if (0 == pool_[mpioType]->GetFreeCount())
         return nullptr;
 
-    auto mpio = pool_[type]->TryAlloc();
+    auto mpio = pool_[mpioType]->TryAlloc();
     return mpio;
 }
 
