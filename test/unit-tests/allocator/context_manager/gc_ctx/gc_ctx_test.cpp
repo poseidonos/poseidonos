@@ -24,8 +24,8 @@ TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
 TEST(GcCtx, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
 {
     // given
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    GcCtx* gcCtx = new GcCtx(blockAllocStatus);
+    NiceMock<MockBlockAllocationStatus> blockAllocStatus;
+    GcCtx* gcCtx = new GcCtx(&blockAllocStatus);
 
     gcCtx->SetNormalGcThreshold(10);
     gcCtx->SetUrgentThreshold(5);
@@ -46,6 +46,7 @@ TEST(GcCtx, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
     // then 3.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
+    EXPECT_CALL(blockAllocStatus, ProhibitUserBlockAllocation);
     // when 4.
     ret = gcCtx->GetCurrentGcMode(5);
     // then 4.
@@ -55,6 +56,12 @@ TEST(GcCtx, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
     ret = gcCtx->GetCurrentGcMode(4);
     // then 5.
     EXPECT_EQ(MODE_URGENT_GC, ret);
+
+    EXPECT_CALL(blockAllocStatus, PermitUserBlockAllocation);
+    // when 6.
+    ret = gcCtx->GetCurrentGcMode(8);
+    // then 6.
+    EXPECT_EQ(MODE_NORMAL_GC, ret);
 }
 
 } // namespace pos
