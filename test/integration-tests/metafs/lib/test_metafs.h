@@ -237,7 +237,7 @@ public:
     void CreateBuffers(const size_t requestCount)
     {
         bufferList.clear();
-        for (size_t i = 0; i < requestCount; ++i)
+        for (size_t i = 0; i < requestCount * MetaFsTestFixture::ARRAY_COUNT; ++i)
         {
             bufferList.emplace_back(std::make_shared<BufferContext>(granularityByteSize));
         }
@@ -278,7 +278,7 @@ private:
 
     void* _PopBuffer(const int arrayId, const size_t index)
     {
-        std::shared_ptr<BufferContext> bufCxt = bufferList.at(index);
+        std::shared_ptr<BufferContext> bufCxt = bufferList.at(index + (arrayId * (bufferList.size() / MetaFsTestFixture::ARRAY_COUNT)));
         *(size_t*)((char*)bufCxt->GetBuffer()) = arrayId;
         *(size_t*)((char*)bufCxt->GetBuffer() + sizeof(size_t)) = index;
         return bufCxt->GetBuffer();
