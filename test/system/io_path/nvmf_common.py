@@ -28,9 +28,10 @@ class Nvmf:
         elif trtype is not 'rdma':
             return False
 
+        command += " --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "error" in out.decode("utf-8"):
+        if "0" not in out.decode("utf-8"):
             print("\tTransport Create Failed")
             return False
 
@@ -42,10 +43,11 @@ class Nvmf:
         if True is allow_any_host:
             command += " -o"
         command += " --serial-number " + serial_num + " --model-number " + model_num
+        command += " --json-res | jq '.Response.result.status.code' 2>/dev/null"
 
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "error" in out.decode("utf-8"):
+        if "0" not in out.decode("utf-8"):
             print("\tSubsystem Create Failed")
             return False
 
@@ -73,10 +75,10 @@ class Nvmf:
 
     def delete_subsystem(self, stdout_type, nqn):
         print("\tSubsystem Delete")
-        command = self.spdk_cmd_path + " subsystem delete -q " + nqn + " --force"
+        command = self.spdk_cmd_path + " subsystem delete -q " + nqn + " --force --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "error" in out.decode("utf-8"):
+        if "0" not in out.decode("utf-8"):
             print("\tSubsystem Delete Failed")
             return False
         exist = self.check_subsystem(nqn)
@@ -87,10 +89,10 @@ class Nvmf:
 
     def add_subsystem_listener(self, nqn, trtype, traddr, trsvid):
         command = self.spdk_cmd_path + " subsystem add-listener -q " + nqn +\
-            " -t " + trtype + " -i " + traddr + " -p " + trsvid
+            " -t " + trtype + " -i " + traddr + " -p " + trsvid + " --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "error" in out.decode("utf-8"):
+        if "0" not in out.decode("utf-8"):
             print("\tSubsystem Add Listener Failed")
             return False
 
