@@ -148,11 +148,9 @@ SubmitAsyncWrite::Execute(
     arrayUnlocking->SetWaitingCount(totalIoCount);
     arrayUnlocking->SetEventType(callback->GetEventType());
 
-    int index = 0;
     list<BufferEntry>::iterator iter = bufferList.begin();
     for (PhysicalEntry& physicalEntry : physicalEntries)
     {
-        advance(iter, index);
         BufferEntry& buffer = *iter;
         UbioSmartPtr ubio(new Ubio(buffer.GetBufferPtr(),
             buffer.GetBlkCnt() * Ubio::UNITS_PER_BLOCK, arrayId));
@@ -176,7 +174,7 @@ SubmitAsyncWrite::Execute(
             errorToReturn =
                 _CheckAsyncWriteError(arrayId);
         }
-        index++;
+        advance(iter, 1);
     }
 
     for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
