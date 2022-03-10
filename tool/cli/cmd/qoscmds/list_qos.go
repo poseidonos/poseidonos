@@ -41,16 +41,7 @@ Example:
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			socketmgr.Connect()
-
-			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			if err != nil {
-				log.Error("error:", err)
-				return
-			}
-
-			socketmgr.Close()
-
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},

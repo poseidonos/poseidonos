@@ -1,15 +1,31 @@
 package log
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.WarnLevel)
 	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+}
+
+func SetOutput(RootDir string) {
+	logrus.SetOutput(os.Stderr)
+
+	logDirPath := RootDir + "/log"
+	logFilePath := logDirPath + "/poseidonos-cli.log"
+
+	os.MkdirAll(logDirPath, os.FileMode(0755))
+	f, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		fmt.Printf("error while opening log file: %v\n", err)
+		return
+	}
+	logrus.SetOutput(f)
 }
 
 //set Warn as a default log level.

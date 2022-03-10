@@ -69,7 +69,6 @@ Example:
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
 			for _, request := range requestList {
-				socketmgr.Connect()
 				reqJSON, err := json.Marshal(request)
 				if err != nil {
 					log.Error("error:", err)
@@ -77,12 +76,7 @@ Example:
 
 				displaymgr.PrintRequest(string(reqJSON))
 
-				resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-				if err != nil {
-					log.Error("error:", err)
-					return
-				}
-				socketmgr.Close()
+				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 
 				displaymgr.PrintResponse(request.COMMAND, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 			}

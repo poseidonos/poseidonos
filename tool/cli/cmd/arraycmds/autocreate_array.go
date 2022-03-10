@@ -50,16 +50,7 @@ Example:
 		displaymgr.PrintRequest(string(reqJSON))
 
 		if !(globals.IsTestingReqBld) {
-			socketmgr.Connect()
-
-			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			if err != nil {
-				log.Error("error:", err)
-				return
-			}
-
-			socketmgr.Close()
-
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
