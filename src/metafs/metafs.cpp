@@ -177,7 +177,7 @@ MetaFs::Dispose(void)
     POS_EVENT_ID rc = _CloseMetaVolume();
     if (rc != POS_EVENT_ID::SUCCESS)
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "It's failed to close meta volume, arrayName={}", arrayName);
     }
 
@@ -185,7 +185,7 @@ MetaFs::Dispose(void)
     rc = mgmt->CloseSystem(arrayId);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
-        MFS_TRACE_WARN((int)rc,
+        POS_TRACE_WARN((int)rc,
             "It's failed to unmount system, arrayName={}", arrayName);
     }
 
@@ -195,7 +195,7 @@ MetaFs::Dispose(void)
 void
 MetaFs::Shutdown(void)
 {
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Shutdown metafs, arrayName={}", arrayName);
 
     io->RemoveArray(arrayId);
@@ -247,10 +247,15 @@ MetaFs::_Initialize(void)
 
     if (infoList.empty())
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_NO_MEDIA,
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_NO_MEDIA,
             "No registered media info detected.");
 
         return false;
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "{} entries have been registered to MediaInfo", infoList.size());
     }
 
     if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &infoList))
@@ -286,7 +291,7 @@ MetaFs::_PrepareMetaVolume(void)
         rc = metaStorage->CreateMetaStore(arrayId, item.mediaType, item.totalCapacity, !isLoaded);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
                 "Failed to create meta storage subsystem");
             return POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED;
         }
@@ -309,7 +314,7 @@ MetaFs::_CreateMetaVolume(void)
 
         if (false == ctrl->CreateVolume(volumeType))
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
                 "Error occurred to create volume (volume id={})",
                 (int)volumeType);
 
@@ -319,7 +324,7 @@ MetaFs::_CreateMetaVolume(void)
 
     if (true != mgmt->CreateMbr())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
             "Error occurred to create MetaFs MBR");
 
         return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
@@ -343,7 +348,7 @@ MetaFs::_OpenMetaVolume(void)
     {
         if (true == mgmt->IsMbrClean())
         {
-            MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
                 "Mbr is clean. This array is mounted for the first time");
 
             if (false == _Initialize())
@@ -390,7 +395,7 @@ MetaFs::_CloseMetaVolume(void)
             return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE;
     }
 
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Meta filesystem has been unmounted...");
 
     return POS_EVENT_ID::SUCCESS;
@@ -402,7 +407,7 @@ MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList
     std::shared_ptr<MetaStorageInfo> media = _MakeMetaStorageMediaInfo(ptnType);
     if (!media->valid)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
             "PartitionType {} is not available.", (int)ptnType);
     }
     mediaList.push_back(media);

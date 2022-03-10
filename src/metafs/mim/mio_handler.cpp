@@ -462,11 +462,15 @@ bool
 MioHandler::AddArrayInfo(int arrayId)
 {
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
+    bool result = true;
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
         if (!metaFs->mgmt->IsValidVolume(static_cast<MetaVolumeType>(storage)))
+        {
+            result = false;
             continue;
+        }
 
         size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
 
@@ -474,7 +478,7 @@ MioHandler::AddArrayInfo(int arrayId)
         ioRangeOverlapChker[arrayId][storage]->Init(maxLpn);
     }
 
-    return true;
+    return result;
 }
 
 // for test

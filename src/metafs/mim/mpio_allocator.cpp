@@ -76,7 +76,7 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
 #if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
 
-    if (!((MetaStorageType::NVRAM == storageType) &&
+    if (!((MetaStorageType::SSD != storageType) &&
             (true == partialIO) &&
             (MpioType::Write == mpioType)))
     {

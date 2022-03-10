@@ -153,6 +153,7 @@ TEST_F(MioHandlerTestFixture, Normal)
     EXPECT_CALL(*ioSQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*ioSQ, Dequeue).WillRepeatedly(Return(msg));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
+    EXPECT_CALL(*mgmt, IsValidVolume).WillRepeatedly(Return(true));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);
     result = handler->AddArrayInfo(arrayInfo->GetIndex());

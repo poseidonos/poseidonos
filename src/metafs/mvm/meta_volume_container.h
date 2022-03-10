@@ -112,6 +112,7 @@ private:
 
     bool nvramMetaVolAvailable;
     bool allVolumesOpened;
+    int arrayId;
 
     std::map<MetaVolumeType, MetaVolume*> volumeContainer;
 

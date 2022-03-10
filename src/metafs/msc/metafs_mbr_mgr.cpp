@@ -72,7 +72,7 @@ MetaFsMBRManager::IsValidMBRExist(void)
 {
     if (nullptr == mbr)
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
                 "Mbr is not initialized");
         return false;
     }
@@ -110,14 +110,14 @@ MetaFsMBRManager::SaveContent(void)
 {
     if (nullptr == mbr)
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
                 "Mbr is not initialized");
         return false;
     }
 
     if (true != mbr->Store())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Store I/O for MFS MBR content has failed...");
 
         return false;
@@ -155,7 +155,11 @@ MetaFsMBRManager::CreateMBR(void)
 void
 MetaFsMBRManager::RegisterVolumeGeometry(std::shared_ptr<MetaStorageInfo> mediaInfo)
 {
-    assert(mediaInfo->media < MetaStorageType::Max);
+    if (mediaInfo->media >= MetaStorageType::Max)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "Given media {} is not supported.", (int)mediaInfo->media);
+    }
 
     MetaFsMBRContent* content = mbr->GetContent();
     MetaFsStorageIoInfo info;
@@ -166,7 +170,7 @@ MetaFsMBRManager::RegisterVolumeGeometry(std::shared_ptr<MetaStorageInfo> mediaI
     content->geometry.volumeInfo.totalFilesystemVolumeCnt++;
     assert(content->geometry.volumeInfo.totalFilesystemVolumeCnt <= MetaFsGeometryInfo::MAX_INFO_COUNT);
 
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Volume Geometry information registered. <mediaType={}, total capacity={} MB>",
         (int)info.mediaType,
         (info.totalCapacity / 1024 / 1024));
@@ -184,7 +188,7 @@ MetaFsMBRManager::SetPowerStatus(bool isShutDownOff)
 {
     if (nullptr == mbr)
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
                 "Mbr is not initialized");
         return;
     }
@@ -197,7 +201,7 @@ MetaFsMBRManager::GetPowerStatus(void)
 {
     if (nullptr == mbr)
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
                 "Mbr is not initialized");
         return false;
     }
@@ -212,7 +216,7 @@ MetaFsMBRManager::InvalidMBR(void)
     {
         mbr->InvalidMBRSignature();
 
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "The signature of MFS MBR on DRAM is corrupted during shutdown");
     }
 }

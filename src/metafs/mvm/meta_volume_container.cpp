@@ -42,7 +42,8 @@ namespace pos
 {
 MetaVolumeContainer::MetaVolumeContainer(void)
 : nvramMetaVolAvailable(false),
-  allVolumesOpened(false)
+  allVolumesOpened(false),
+  arrayId(INT32_MAX)
 {
 }
 
@@ -70,9 +71,7 @@ MetaVolumeContainer::InitContext(MetaVolumeType volumeType, int arrayId,
     MetaVolume* volume = _InitVolume(volumeType, arrayId, maxVolPageNum,
                                 metaStorage, vol);
     _RegisterVolumeInstance(volumeType, volume);
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "volType={}", (uint32_t)(volumeType));
+    this->arrayId = arrayId;
 }
 
 MetaVolume*
@@ -81,6 +80,7 @@ MetaVolumeContainer::_InitVolume(MetaVolumeType volType, int arrayId,
                 MetaVolume* vol)
 {
     MetaVolume* volume = vol;
+    this->arrayId = arrayId;
 
     if (vol == nullptr)
     {
@@ -93,6 +93,10 @@ MetaVolumeContainer::_InitVolume(MetaVolumeType volType, int arrayId,
         {
             volume = new SsdMetaVolume(arrayId, volType, maxLpnNum);
         }
+
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "MetaVolume has been instantiated, arrayId: {}, volType: {}, maxLpnNum: {}",
+            arrayId, (int)volType, maxLpnNum);
     }
 
     volume->Init(metaStorage);
@@ -194,6 +198,10 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
             delete[] Info;
             return false;
         }
+
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "MetaVolume has been successfully closed, arrayId: {}, volType: {}",
+            arrayId, (int)volType);
 
         delete volume;
     }
