@@ -33,14 +33,15 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "meta_storage_specific.h"
-#include "src/metafs/mvm/volume/meta_volume.h"
 #include "meta_volume_type.h"
 #include "os_header.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
 
 namespace pos
 {
@@ -62,60 +63,59 @@ using VolumeAndResult = std::pair<MetaVolumeType, POS_EVENT_ID>;
 class MetaVolumeContainer
 {
 public:
-    MetaVolumeContainer(void);
+    MetaVolumeContainer(const int arrayId);
     virtual ~MetaVolumeContainer(void);
 
-    // MetaVolume* vol is for test
-    virtual void InitContext(MetaVolumeType volumeType, int arrayId,
-                MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage,
-                MetaVolume* vol = nullptr);
+    // std::shared_ptr<MetaVolume> vol is for test
+    virtual void InitContext(const MetaVolumeType volumeType, const int arrayId,
+        const MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage,
+        std::shared_ptr<MetaVolume> vol = nullptr);
 
-    virtual bool CreateVolume(MetaVolumeType volumeType);
+    virtual bool CreateVolume(const MetaVolumeType volumeType);
     virtual bool OpenAllVolumes(bool isNPOR);
     virtual bool CloseAllVolumes(bool& resetContext /*output*/);
-    virtual bool IsGivenVolumeExist(MetaVolumeType volType);
+    virtual bool IsGivenVolumeExist(const MetaVolumeType volumeType);
 
-    virtual bool TrimData(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual bool TrimData(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
 
-    virtual bool CreateFile(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual bool DeleteFile(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual bool CreateFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
+    virtual bool DeleteFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
 
-    virtual size_t GetAvailableSpace(MetaVolumeType volType);
-    virtual bool CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd);
-    virtual POS_EVENT_ID AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd);
+    virtual size_t GetAvailableSpace(const MetaVolumeType volumeType);
+    virtual bool CheckFileInActive(const MetaVolumeType volumeType, const FileDescriptorType fd);
+    virtual POS_EVENT_ID AddFileInActiveList(const MetaVolumeType volumeType, const FileDescriptorType fd);
     virtual bool IsGivenFileCreated(std::string& fileName);
-    virtual void RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd);
-    virtual FileSizeType GetFileSize(MetaVolumeType volType, FileDescriptorType fd);
-    virtual FileSizeType GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd);
-    virtual MetaLpnType GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd);
-    virtual MetaLpnType GetMaxLpn(MetaVolumeType volType);
+    virtual void RemoveFileFromActiveList(const MetaVolumeType volumeType, const FileDescriptorType fd);
+    virtual FileSizeType GetFileSize(const MetaVolumeType volumeType, const FileDescriptorType fd);
+    virtual FileSizeType GetDataChunkSize(const MetaVolumeType volumeType, const FileDescriptorType fd);
+    virtual MetaLpnType GetFileBaseLpn(const MetaVolumeType volumeType, const FileDescriptorType fd);
+    virtual MetaLpnType GetMaxLpn(const MetaVolumeType volumeType);
     virtual FileDescriptorType LookupFileDescByName(std::string& fileName);
-    virtual MetaFileInode& GetInode(FileDescriptorType fd, MetaVolumeType volumeType);
-    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList, MetaVolumeType volumeType);
+    virtual MetaFileInode& GetInode(const FileDescriptorType fd, const MetaVolumeType volumeType);
+    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList, const MetaVolumeType volumeType);
     virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
-                    MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
+        const MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
 
     virtual POS_EVENT_ID DetermineVolumeToCreateFile(FileSizeType fileByteSize,
-                    MetaFilePropertySet& prop, MetaVolumeType volumeType);
+        MetaFilePropertySet& prop, const MetaVolumeType volumeType);
     virtual POS_EVENT_ID LookupMetaVolumeType(FileDescriptorType fd,
-                    MetaVolumeType volumeType);
+        const MetaVolumeType volumeType);
     virtual POS_EVENT_ID LookupMetaVolumeType(std::string& fileName,
-                    MetaVolumeType volumeType);
-    virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType volumeType);
+        const MetaVolumeType volumeType);
+    virtual MetaLpnType GetTheLastValidLpn(const MetaVolumeType volumeType);
 
 private:
-    MetaVolume* _InitVolume(MetaVolumeType volType, int arrayId,
-                    MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage,
-                    MetaVolume* vol);
-    void _RegisterVolumeInstance(MetaVolumeType volType, MetaVolume* metaVol);
+    std::shared_ptr<MetaVolume> _CreateVolume(const MetaVolumeType volumeType,
+        const int arrayId, const MetaLpnType maxLpnNum,
+        MetaStorageSubsystem* metaStorage);
     void _CleanUp(void);
 
     bool nvramMetaVolAvailable;
     bool allVolumesOpened;
     int arrayId;
 
-    std::map<MetaVolumeType, MetaVolume*> volumeContainer;
+    std::map<MetaVolumeType, std::shared_ptr<MetaVolume>> volumeContainer;
 
-    void _SetBackupInfo(MetaVolume* volume, MetaLpnType* info);
+    void _SetBackupInfo(std::shared_ptr<MetaVolume> volume, MetaLpnType* info);
 };
 } // namespace pos

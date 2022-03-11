@@ -62,10 +62,10 @@ public:
     SetUp(void)
     {
         volHandler = new NiceMock<MockMetaVolumeHandler>;
-        volContainer = new NiceMock<MockMetaVolumeContainer>;
+        volContainer = new NiceMock<MockMetaVolumeContainer>(arrayId);
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
-        volumeMgr = new MetaVolumeManager(mss, volHandler, volContainer);
+        volumeMgr = new MetaVolumeManager(arrayId, mss, volHandler, volContainer);
     }
 
     virtual void
@@ -90,7 +90,7 @@ TEST(MetaVolumeManager, CreateObject)
 {
     NiceMock<MockMetaStorageSubsystem>* mss;
 
-    MetaVolumeManager mgr(mss);
+    MetaVolumeManager mgr(0, mss);
 }
 
 TEST_F(MetaVolumeManagerFixture, CheckReqSanity_Positive)

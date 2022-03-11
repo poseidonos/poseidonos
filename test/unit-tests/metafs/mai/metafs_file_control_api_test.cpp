@@ -50,7 +50,7 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInfoListCanBeReturned)
     int arrayId = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(arrayId, storage);
 
     MetaFsFileControlApi api(arrayId, storage, volMgr);
 
@@ -68,7 +68,7 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInodeCanBeReturned)
     MetaVolumeType type = MetaVolumeType::SsdVolume;
     std::string fileName = "TEST_FILE";
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(arrayId, storage);
 
     MetaFsFileControlApi api(arrayId, storage, volMgr);
 
@@ -86,7 +86,7 @@ TEST(MetaFsFileControlApi, Get_testIfFileIoSizeCanBeRetrieved)
     int fd = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(arrayId, storage);
 
     MetaFsFileControlApi api(arrayId, storage, volMgr);
     api.SetStatus(true);
@@ -105,7 +105,7 @@ TEST(MetaFsFileControlApi, Get_TheLastValidLpn)
     int fd = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(storage);
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>(arrayId, storage);
 
     MetaFsFileControlApi api(arrayId, storage, volMgr);
 

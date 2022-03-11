@@ -50,7 +50,7 @@ MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaStorageSubsystem* st
     nameMapByfd.clear();
     idxMapByName.clear();
 
-    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager(storage) : volMgr;
+    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager(arrayId, storage) : volMgr;
 }
 
 MetaFsFileControlApi::~MetaFsFileControlApi(void)

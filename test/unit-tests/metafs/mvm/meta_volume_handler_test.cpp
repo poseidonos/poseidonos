@@ -59,7 +59,7 @@ public:
     SetUp(void)
     {
         handler = new MetaVolumeHandler();
-        container = new NiceMock<MockMetaVolumeContainer>;
+        container = new NiceMock<MockMetaVolumeContainer>(arrayId);
 
         handler->InitHandler(container);
 
@@ -84,6 +84,7 @@ protected:
 
     std::string fileName = "TESTFILE";
     FileSizeType size = 100;
+    int arrayId = 0;
 };
 
 TEST_F(MetaVolumeHandlerFixture, CheckFileExist_Positive)

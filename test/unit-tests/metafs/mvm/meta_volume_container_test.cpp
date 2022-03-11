@@ -31,11 +31,14 @@
  */
 
 #include "src/metafs/mvm/meta_volume_container.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/meta_volume_mock.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <memory>
+
+#include "test/unit-tests/metafs/mvm/volume/meta_volume_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -56,11 +59,11 @@ public:
     {
     }
 
-    virtual void SetUp(void)
+    virtual void SetUp(void) override
     {
-        ssdVolume = new NiceMock<MockMetaVolume>;
-        nvramVolume = new NiceMock<MockMetaVolume>;
-        journalVolume = new NiceMock<MockMetaVolume>;
+        ssdVolume = std::make_shared<NiceMock<MockMetaVolume>>();
+        nvramVolume = std::make_shared<NiceMock<MockMetaVolume>>();
+        journalVolume = std::make_shared<NiceMock<MockMetaVolume>>();
 
         EXPECT_CALL(*ssdVolume, Init);
         EXPECT_CALL(*nvramVolume, Init);
@@ -70,7 +73,7 @@ public:
         EXPECT_CALL(*nvramVolume, GetVolumeType).WillRepeatedly(Return(MetaVolumeType::NvRamVolume));
         EXPECT_CALL(*journalVolume, GetVolumeType).WillRepeatedly(Return(MetaVolumeType::JournalVolume));
 
-        container = new MetaVolumeContainer();
+        container = new MetaVolumeContainer(arrayId);
         volumeList[0] = ssdVolume;
         volumeList[1] = nvramVolume;
         volumeList[2] = journalVolume;
@@ -81,7 +84,7 @@ public:
         }
     }
 
-    virtual void TearDown(void)
+    virtual void TearDown(void) override
     {
         delete container;
     }
@@ -92,17 +95,17 @@ protected:
         int index = (int)volumeType;
         mss[index] = new NiceMock<MockMetaStorageSubsystem>(arrayId);
         container->InitContext(volumeType, arrayId,
-                        maxVolPageNum[index], mss[index], volumeList[index]);
+            maxVolPageNum[index], mss[index], volumeList[index]);
     }
 
     MetaVolumeContainer* container;
 
-    NiceMock<MockMetaVolume>* ssdVolume;
-    NiceMock<MockMetaVolume>* nvramVolume;
-    NiceMock<MockMetaVolume>* journalVolume;
+    std::shared_ptr<NiceMock<MockMetaVolume>> ssdVolume;
+    std::shared_ptr<NiceMock<MockMetaVolume>> nvramVolume;
+    std::shared_ptr<NiceMock<MockMetaVolume>> journalVolume;
 
     NiceMock<MockMetaStorageSubsystem>* mss[(int)MetaVolumeType::Max];
-    MetaVolume* volumeList[(int)MetaVolumeType::Max];
+    std::shared_ptr<MetaVolume> volumeList[(int)MetaVolumeType::Max];
 
     int arrayId = 0;
     MetaLpnType maxVolPageNum[(int)MetaVolumeType::Max] = {100, 1000, 150};
@@ -112,9 +115,8 @@ TEST_F(MetaVolumeContainerTexture, CreateVolumes)
 {
     for (int i = 0; i < (int)MetaVolumeType::Max; ++i)
     {
-        EXPECT_CALL(*(NiceMock<MockMetaVolume>*)volumeList[i], CreateVolume).WillOnce(Return(true));
+        EXPECT_CALL(*(NiceMock<MockMetaVolume>*)volumeList[i].get(), CreateVolume).WillOnce(Return(true));
         EXPECT_EQ(container->CreateVolume((MetaVolumeType)i), true);
-        delete volumeList[i];
     }
 }
 
@@ -140,30 +142,24 @@ TEST_F(MetaVolumeContainerTexture, CloseAllVolumes)
 {
     EXPECT_CALL(*ssdVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*ssdVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
     EXPECT_CALL(*ssdVolume, GetBaseLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*ssdVolume, GetRegionSizeInLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*nvramVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*nvramVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
     EXPECT_CALL(*journalVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*journalVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
 
     for (int i = 0; i < (int)MetaVolumeType::Max; ++i)
     {
@@ -181,30 +177,24 @@ TEST_F(MetaVolumeContainerTexture, CloseVolumesWhichAreSsdAndNvramVolumes)
 {
     EXPECT_CALL(*ssdVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*ssdVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
     EXPECT_CALL(*ssdVolume, GetBaseLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*ssdVolume, GetRegionSizeInLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*nvramVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*nvramVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
     EXPECT_CALL(*journalVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*journalVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce(
-        [this](MetaLpnType* info, bool& reset)
-        {
-            reset = true;
-            return true;
-        });
+    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+        reset = true;
+        return true;
+    });
 
     for (int i = 0; i < (int)MetaVolumeType::Max; ++i)
     {
@@ -223,7 +213,6 @@ TEST_F(MetaVolumeContainerTexture, CheckExistVolume)
     for (int i = 0; i < (int)MetaVolumeType::Max; ++i)
     {
         EXPECT_EQ(container->IsGivenVolumeExist((MetaVolumeType)i), true);
-        delete volumeList[i];
     }
 }
 
@@ -234,10 +223,6 @@ TEST_F(MetaVolumeContainerTexture, Trim)
     EXPECT_CALL(*ssdVolume, TrimData).WillOnce(Return(true));
 
     EXPECT_EQ(container->TrimData(MetaVolumeType::SsdVolume, reqMsg), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, FileCreation)
@@ -248,10 +233,6 @@ TEST_F(MetaVolumeContainerTexture, FileCreation)
         .WillOnce(Return(std::make_pair(0, POS_EVENT_ID::SUCCESS)));
 
     EXPECT_EQ(container->CreateFile(MetaVolumeType::SsdVolume, reqMsg), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, FileDeletion)
@@ -262,10 +243,6 @@ TEST_F(MetaVolumeContainerTexture, FileDeletion)
         .WillOnce(Return(std::make_pair(0, POS_EVENT_ID::SUCCESS)));
 
     EXPECT_EQ(container->DeleteFile(MetaVolumeType::SsdVolume, reqMsg), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckExtent)
@@ -273,10 +250,6 @@ TEST_F(MetaVolumeContainerTexture, CheckExtent)
     EXPECT_CALL(*ssdVolume, GetAvailableSpace).WillOnce(Return(10));
 
     EXPECT_EQ(container->GetAvailableSpace(MetaVolumeType::SsdVolume), 10);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckActiveFile)
@@ -284,10 +257,6 @@ TEST_F(MetaVolumeContainerTexture, CheckActiveFile)
     EXPECT_CALL(*ssdVolume, CheckFileInActive).WillOnce(Return(true));
 
     EXPECT_EQ(container->CheckFileInActive(MetaVolumeType::SsdVolume, 10), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, AddActiveFile)
@@ -295,10 +264,6 @@ TEST_F(MetaVolumeContainerTexture, AddActiveFile)
     EXPECT_CALL(*ssdVolume, AddFileInActiveList).WillOnce(Return(POS_EVENT_ID::SUCCESS));
 
     EXPECT_EQ(container->AddFileInActiveList(MetaVolumeType::SsdVolume, 10), POS_EVENT_ID::SUCCESS);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, RemoveFileFromActiveList)
@@ -306,10 +271,6 @@ TEST_F(MetaVolumeContainerTexture, RemoveFileFromActiveList)
     EXPECT_CALL(*ssdVolume, RemoveFileFromActiveList);
 
     container->RemoveFileFromActiveList(MetaVolumeType::SsdVolume, 10);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckFileCreated0)
@@ -318,10 +279,6 @@ TEST_F(MetaVolumeContainerTexture, CheckFileCreated0)
 
     std::string fileName = "TESTFILE";
     EXPECT_EQ(container->IsGivenFileCreated(fileName), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckFileCreated1)
@@ -331,10 +288,6 @@ TEST_F(MetaVolumeContainerTexture, CheckFileCreated1)
 
     std::string fileName = "TESTFILE";
     EXPECT_EQ(container->IsGivenFileCreated(fileName), true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckFileSize)
@@ -342,10 +295,6 @@ TEST_F(MetaVolumeContainerTexture, CheckFileSize)
     EXPECT_CALL(*ssdVolume, GetFileSize).WillOnce(Return(0));
 
     EXPECT_EQ(container->GetFileSize(MetaVolumeType::SsdVolume, 10), 0);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckChunkSize)
@@ -353,10 +302,6 @@ TEST_F(MetaVolumeContainerTexture, CheckChunkSize)
     EXPECT_CALL(*ssdVolume, GetDataChunkSize).WillOnce(Return(0));
 
     EXPECT_EQ(container->GetDataChunkSize(MetaVolumeType::SsdVolume, 10), 0);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckBaseLpn)
@@ -364,10 +309,6 @@ TEST_F(MetaVolumeContainerTexture, CheckBaseLpn)
     EXPECT_CALL(*ssdVolume, GetFileBaseLpn).WillOnce(Return(0));
 
     EXPECT_EQ(container->GetFileBaseLpn(MetaVolumeType::SsdVolume, 10), 0);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckMaxLpn)
@@ -375,10 +316,6 @@ TEST_F(MetaVolumeContainerTexture, CheckMaxLpn)
     EXPECT_CALL(*ssdVolume, GetMaxLpn).WillOnce(Return(0));
 
     EXPECT_EQ(container->GetMaxLpn(MetaVolumeType::SsdVolume), 0);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, LookupFile0)
@@ -387,10 +324,6 @@ TEST_F(MetaVolumeContainerTexture, LookupFile0)
 
     std::string fileName = "TESTFILE";
     EXPECT_EQ(container->LookupFileDescByName(fileName), 1);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, LookupFile1)
@@ -404,10 +337,6 @@ TEST_F(MetaVolumeContainerTexture, LookupFile1)
 
     std::string fileName = "TESTFILE";
     EXPECT_EQ(container->LookupFileDescByName(fileName), 1);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, LookupFile_Negative)
@@ -423,10 +352,6 @@ TEST_F(MetaVolumeContainerTexture, LookupFile_Negative)
 
     std::string fileName = "TESTFILE";
     EXPECT_EQ(container->LookupFileDescByName(fileName), invalid);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckInodeList)
@@ -435,16 +360,14 @@ TEST_F(MetaVolumeContainerTexture, CheckInodeList)
         new std::vector<MetaFileInfoDumpCxt>;
 
     EXPECT_CALL(*ssdVolume, GetInodeList)
-        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
-        {
+        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList) {
             MetaFileInfoDumpCxt ctx;
             ctx.fileName = "111";
             ctx.fd = 0;
             fileInfoList->push_back(ctx);
         });
     EXPECT_CALL(*nvramVolume, GetInodeList)
-        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
-        {
+        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList) {
             MetaFileInfoDumpCxt ctx;
             ctx.fileName = "222";
             ctx.fd = 1;
@@ -464,10 +387,6 @@ TEST_F(MetaVolumeContainerTexture, CheckInodeList)
     EXPECT_EQ(fileInfoList->size(), 1);
     EXPECT_EQ(fileInfoList->at(0).fileName, "222");
     EXPECT_EQ(fileInfoList->at(0).fd, 1);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckInode)
@@ -482,10 +401,6 @@ TEST_F(MetaVolumeContainerTexture, CheckInode)
 
     MetaFileInode& inode0 = container->GetInode(0, MetaVolumeType::SsdVolume);
     EXPECT_TRUE(inode0.data.basic.field.fileName == fileName);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CopyInode_testIfTheInodeInfoIsNullptr)
@@ -497,10 +412,6 @@ TEST_F(MetaVolumeContainerTexture, CopyInode_testIfTheInodeInfoIsNullptr)
 
     bool result = container->CopyInodeToInodeInfo(0, MetaVolumeType::SsdVolume, inodeInfo);
     EXPECT_EQ(result, false);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CopyInode_testIfCopyMethodWillBeSuccess)
@@ -516,10 +427,6 @@ TEST_F(MetaVolumeContainerTexture, CopyInode_testIfCopyMethodWillBeSuccess)
     bool result = container->CopyInodeToInodeInfo(0, MetaVolumeType::SsdVolume, &inodeInfo);
 
     EXPECT_EQ(result, true);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckLookupFile0_Positive)
@@ -528,10 +435,6 @@ TEST_F(MetaVolumeContainerTexture, CheckLookupFile0_Positive)
 
     POS_EVENT_ID rc = container->LookupMetaVolumeType(0, MetaVolumeType::SsdVolume);
     EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckLookupFile0_Negative)
@@ -540,10 +443,6 @@ TEST_F(MetaVolumeContainerTexture, CheckLookupFile0_Negative)
 
     POS_EVENT_ID rc = container->LookupMetaVolumeType(0, MetaVolumeType::SsdVolume);
     EXPECT_EQ(rc, POS_EVENT_ID::MFS_INVALID_PARAMETER);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckLookupFile1_Positive)
@@ -554,10 +453,6 @@ TEST_F(MetaVolumeContainerTexture, CheckLookupFile1_Positive)
 
     POS_EVENT_ID rc = container->LookupMetaVolumeType(fileName, MetaVolumeType::SsdVolume);
     EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckLookupFile2_Negative)
@@ -569,10 +464,6 @@ TEST_F(MetaVolumeContainerTexture, CheckLookupFile2_Negative)
 
     POS_EVENT_ID rc = container->LookupMetaVolumeType(fileName, MetaVolumeType::SsdVolume);
     EXPECT_EQ(rc, POS_EVENT_ID::MFS_INVALID_PARAMETER);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, DetermineVolume_Positive0)
@@ -586,10 +477,6 @@ TEST_F(MetaVolumeContainerTexture, DetermineVolume_Positive0)
     POS_EVENT_ID result = container->DetermineVolumeToCreateFile(size, prop, type);
 
     EXPECT_EQ(result, POS_EVENT_ID::SUCCESS);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, DetermineVolume_Positive1)
@@ -603,10 +490,6 @@ TEST_F(MetaVolumeContainerTexture, DetermineVolume_Positive1)
     POS_EVENT_ID result = container->DetermineVolumeToCreateFile(size, prop, type);
 
     EXPECT_EQ(result, POS_EVENT_ID::SUCCESS);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, DetermineVolume_Negative)
@@ -620,10 +503,6 @@ TEST_F(MetaVolumeContainerTexture, DetermineVolume_Negative)
     POS_EVENT_ID result = container->DetermineVolumeToCreateFile(size, prop, type);
 
     EXPECT_EQ(result, POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckTheLastLpn)
@@ -633,9 +512,5 @@ TEST_F(MetaVolumeContainerTexture, CheckTheLastLpn)
     EXPECT_CALL(*ssdVolume, GetTheLastValidLpn).WillOnce(Return(100));
 
     EXPECT_EQ(container->GetTheLastValidLpn(type), 100);
-
-    delete ssdVolume;
-    delete nvramVolume;
-    delete journalVolume;
 }
 } // namespace pos

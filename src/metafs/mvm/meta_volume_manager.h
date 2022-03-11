@@ -61,7 +61,7 @@ using GlobalMetaReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaFsFileContr
 class MetaVolumeManager : public MetaFsManagerBase
 {
 public:
-    MetaVolumeManager(MetaStorageSubsystem* metaStorage,
+    MetaVolumeManager(const int arrayId, MetaStorageSubsystem* metaStorage,
         MetaVolumeHandler* _volHandler = nullptr,
         MetaVolumeContainer* _volContainer = nullptr);
     virtual ~MetaVolumeManager(void);
@@ -86,7 +86,6 @@ public:
                 MetaVolumeType volType, MetaStorageType& outTargetMediaType);
     virtual POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd,
                 MetaVolumeType volType, MetaLpnType& outFileBaseLpn);
-    virtual void SetMss(MetaStorageSubsystem* metaStorage);
     virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType volType);
 
 private:

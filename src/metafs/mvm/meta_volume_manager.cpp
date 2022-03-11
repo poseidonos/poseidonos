@@ -36,7 +36,8 @@
 
 namespace pos
 {
-MetaVolumeManager::MetaVolumeManager(MetaStorageSubsystem* metaStorage,
+MetaVolumeManager::MetaVolumeManager(const int arrayId, 
+        MetaStorageSubsystem* metaStorage,
         MetaVolumeHandler* _volHandler,
         MetaVolumeContainer* _volContainer)
 : volumeSpcfReqHandler{},
@@ -50,7 +51,7 @@ MetaVolumeManager::MetaVolumeManager(MetaStorageSubsystem* metaStorage,
         volHandler = new MetaVolumeHandler();
 
     if (nullptr == volContainer)
-        volContainer = new MetaVolumeContainer();
+        volContainer = new MetaVolumeContainer(arrayId);
 
     _InitRequestHandler();
 }
@@ -463,12 +464,6 @@ MetaVolumeManager::GetFileBaseLpn(FileDescriptorType fd, MetaVolumeType volType,
         outFileBaseLpn = req.completionData.fileBaseLpn;
     }
     return ret;
-}
-
-void
-MetaVolumeManager::SetMss(MetaStorageSubsystem* metaStorage)
-{
-    this->metaStorage = metaStorage;
 }
 
 MetaLpnType
