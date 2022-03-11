@@ -9,8 +9,8 @@ all:
 	@cp -f ../config/telemetry_default.yaml src/etc/pos
 	
 	# Copy CLI man page files
-	gzip --force ../tool/cli/docs/manpage/*
-	mv ../tool/cli/docs/manpage/* src/etc/
+	gzip --keep ../tool/cli/docs/manpage/*
+	mv ../tool/cli/docs/manpage/*.gz src/etc/
 	
 	# Build Package 
 	@`[ -d debian ] || mkdir -p debian`

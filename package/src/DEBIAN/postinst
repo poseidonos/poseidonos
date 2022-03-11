@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# libtcmalloc linking
+ln -sf /usr/local/lib/libtcmalloc.so.4.5.3 /usr/local/lib/libtcmalloc.so.4
+ln -sf /usr/local/lib/libtcmalloc.so.4 /usr/local/lib/libtcmalloc.so
+
 # Register CLI man page
 mv /etc/poseidonos-cli* /usr/share/man/man3/
 makewhatis
@@ -8,4 +12,3 @@ makewhatis
 mv /etc/poseidonos.service /lib/systemd/system/poseidonos.service
 systemctl daemon-reload
 systemctl enable poseidonos.service
-systemctl start poseidonos.service
