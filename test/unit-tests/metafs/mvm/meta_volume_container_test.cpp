@@ -142,7 +142,8 @@ TEST_F(MetaVolumeContainerTexture, CloseAllVolumes)
 {
     EXPECT_CALL(*ssdVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*ssdVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
@@ -150,13 +151,15 @@ TEST_F(MetaVolumeContainerTexture, CloseAllVolumes)
     EXPECT_CALL(*ssdVolume, GetRegionSizeInLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*nvramVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*nvramVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
     EXPECT_CALL(*journalVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*journalVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
@@ -177,7 +180,8 @@ TEST_F(MetaVolumeContainerTexture, CloseVolumesWhichAreSsdAndNvramVolumes)
 {
     EXPECT_CALL(*ssdVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*ssdVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*ssdVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
@@ -185,13 +189,15 @@ TEST_F(MetaVolumeContainerTexture, CloseVolumesWhichAreSsdAndNvramVolumes)
     EXPECT_CALL(*ssdVolume, GetRegionSizeInLpn).WillRepeatedly(Return(0));
     EXPECT_CALL(*nvramVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*nvramVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*nvramVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
     EXPECT_CALL(*journalVolume, CreateVolume).WillOnce(Return(true));
     EXPECT_CALL(*journalVolume, OpenVolume).WillOnce(Return(true));
-    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset) {
+    EXPECT_CALL(*journalVolume, CloseVolume).WillOnce([this](MetaLpnType* info, bool& reset)
+    {
         reset = true;
         return true;
     });
@@ -360,14 +366,16 @@ TEST_F(MetaVolumeContainerTexture, CheckInodeList)
         new std::vector<MetaFileInfoDumpCxt>;
 
     EXPECT_CALL(*ssdVolume, GetInodeList)
-        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList) {
+        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
+        {
             MetaFileInfoDumpCxt ctx;
             ctx.fileName = "111";
             ctx.fd = 0;
             fileInfoList->push_back(ctx);
         });
     EXPECT_CALL(*nvramVolume, GetInodeList)
-        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList) {
+        .WillOnce([this](std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
+        {
             MetaFileInfoDumpCxt ctx;
             ctx.fileName = "222";
             ctx.fd = 1;

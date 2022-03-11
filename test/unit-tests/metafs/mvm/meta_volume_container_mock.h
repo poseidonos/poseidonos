@@ -33,6 +33,7 @@
 #include <gmock/gmock.h>
 
 #include <list>
+#include <memory>
 #include <string>
 #include <vector>
 

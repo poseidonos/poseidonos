@@ -36,7 +36,7 @@
 
 namespace pos
 {
-MetaVolumeManager::MetaVolumeManager(const int arrayId, 
+MetaVolumeManager::MetaVolumeManager(const int arrayId,
         MetaStorageSubsystem* metaStorage,
         MetaVolumeHandler* _volHandler,
         MetaVolumeContainer* _volContainer)
