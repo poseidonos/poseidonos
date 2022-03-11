@@ -36,7 +36,7 @@
 #include <iostream>
 #include <string>
 
-#include "mk/ibof_config.h"
+#include "src/metafs/config/metafs_config.h"
 
 namespace pos
 {
@@ -46,7 +46,7 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   mpioPoolCapacity_(0),
   writeMpioEnabled_(false),
   writeMpioCapacity_(0),
-  DIRECT_ACCESS_ENABLED(false),
+  directAccessEnabled_(false),
   timeIntervalInMillisecondsForMetric_(0)
 {
     _BuildConfigMap();
@@ -56,15 +56,24 @@ MetaFsConfigManager::~MetaFsConfigManager(void)
 {
 }
 
-void
+bool
 MetaFsConfigManager::Init(void)
 {
     mioPoolCapacity_ = _GetMioPoolCapacity();
     mpioPoolCapacity_ = _GetMpioPoolCapacity();
     writeMpioEnabled_ = _IsWriteMpioCacheEnabled();
     writeMpioCapacity_ = _GetWriteMpioCacheCapacity();
-    DIRECT_ACCESS_ENABLED = _IsDirectAccessEnabled();
+    directAccessEnabled_ = _IsDirectAccessEnabled();
     timeIntervalInMillisecondsForMetric_ = _GetTimeIntervalInMillisecondsForMetric();
+
+    if (!_ValidateConfig())
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+            "The config values are invalid.");
+        return false;
+    }
+
+    return true;
 }
 
 void
@@ -84,10 +93,25 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"time_interval_in_milliseconds_for_metric", CONFIG_TYPE_UINT64}});
 }
 
+bool
+MetaFsConfigManager::_ValidateConfig(void) const
+{
+    // add more constraint here
+    if (timeIntervalInMillisecondsForMetric_ < MetaFsConfig::MIN_TIME_INTERVAL)
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+            "The time interval ({}) is not valid.",
+            timeIntervalInMillisecondsForMetric_);
+        return false;
+    }
+
+    return true;
+}
+
 size_t
 MetaFsConfigManager::_GetMioPoolCapacity(void)
 {
-    size_t count;
+    size_t count = 0;
     if (_ReadConfiguration<size_t>(MetaFsConfigType::MioPoolCapacity, &count))
         return 0;
 
@@ -100,7 +124,7 @@ MetaFsConfigManager::_GetMioPoolCapacity(void)
 size_t
 MetaFsConfigManager::_GetMpioPoolCapacity(void)
 {
-    size_t count;
+    size_t count = 0;
     if (_ReadConfiguration<size_t>(MetaFsConfigType::MpioPoolCapacity, &count))
         return 0;
 
@@ -113,7 +137,7 @@ MetaFsConfigManager::_GetMpioPoolCapacity(void)
 bool
 MetaFsConfigManager::_IsWriteMpioCacheEnabled(void)
 {
-    bool enabled;
+    bool enabled = false;
     if (_ReadConfiguration<bool>(MetaFsConfigType::WriteMpioCacheEnabled, &enabled))
         return false;
 
@@ -126,7 +150,7 @@ MetaFsConfigManager::_IsWriteMpioCacheEnabled(void)
 size_t
 MetaFsConfigManager::_GetWriteMpioCacheCapacity(void)
 {
-    size_t count;
+    size_t count = 0;
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WriteMpioCacheCapacity, &count))
         return 0;
 
@@ -139,7 +163,7 @@ MetaFsConfigManager::_GetWriteMpioCacheCapacity(void)
 bool
 MetaFsConfigManager::_IsDirectAccessEnabled(void)
 {
-    bool enabled;
+    bool enabled = false;
     if (_ReadConfiguration<bool>(MetaFsConfigType::DirectAccessForJournalEnabled, &enabled))
         return false;
 
@@ -152,7 +176,7 @@ MetaFsConfigManager::_IsDirectAccessEnabled(void)
 size_t
 MetaFsConfigManager::_GetTimeIntervalInMillisecondsForMetric(void)
 {
-    size_t count;
+    size_t count = 0;
     if (_ReadConfiguration<size_t>(MetaFsConfigType::TimeIntervalInMillisecondsForMetric, &count))
         return 0;
 

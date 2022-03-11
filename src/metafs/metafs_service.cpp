@@ -71,7 +71,12 @@ void
 MetaFsService::Initialize(const uint32_t totalCount, const cpu_set_t schedSet,
     const cpu_set_t workSet, TelemetryPublisher* tp)
 {
-    configManager->Init();
+    if (!configManager->Init())
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+            "The config values are invalid.");
+        assert(false);
+    }
     _PrepareThreads(totalCount, schedSet, workSet, tp);
 }
 

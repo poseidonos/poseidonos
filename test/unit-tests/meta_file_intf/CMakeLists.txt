@@ -1,5 +1,4 @@
 POS_ADD_UNIT_TEST(mock_file_intf_ut mock_file_intf_test.cpp)
 POS_ADD_UNIT_TEST(meta_file_intf_ut meta_file_intf_test.cpp)
 POS_ADD_UNIT_TEST(async_context_ut async_context_test.cpp)
-POS_ADD_UNIT_TEST(meta_file_intf_test_ut meta_file_intf_test_test.cpp)
 POS_ADD_UNIT_TEST(meta_file_include_ut meta_file_include_test.cpp)

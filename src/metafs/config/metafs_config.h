@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstdint>
+
 #include "src/include/array_mgmt_policy.h"
 
 namespace pos
@@ -53,6 +54,7 @@ public:
     // char: A55A
     static const uint16_t SIGNATURE_INODE_VERSION = 42330;
     static const uint16_t CURRENT_INODE_VERSION = 1;
+    static const size_t MIN_TIME_INTERVAL = 100;
 };
 
 class MetaFsIoConfig

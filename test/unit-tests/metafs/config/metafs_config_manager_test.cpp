@@ -57,60 +57,105 @@ ACTION_P(SetArg2ToLongAndReturn0, longValue)
     return 0;
 }
 
-NiceMock<MockConfigManager>*
-CreateMockConfigManager(size_t mioPoolCapacity, size_t mpioPoolCapacity,
-    bool writeMpioCacheEnabled, size_t writeMpioCacheCapacity,
-    bool directAccessEnabled, size_t timeIntervalInMillisecondsForMetric)
+class MetaFsConfigManagerTest : public MetaFsConfigManager
 {
-    NiceMock<MockConfigManager>* configManager = new NiceMock<MockConfigManager>;
+public:
+    MetaFsConfigManagerTest(void) = delete;
+    MetaFsConfigManagerTest(ConfigManager* configManager)
+    : MetaFsConfigManager(configManager)
+    {
+    }
+    ~MetaFsConfigManagerTest(void)
+    {
+    }
+    bool ValidateConfig(void) const
+    {
+        return MetaFsConfigManager::_ValidateConfig();
+    }
+};
 
-    ON_CALL(*configManager, GetValue("metafs", "mio_pool_capacity", _, _))
-        .WillByDefault(SetArg2ToLongAndReturn0(mioPoolCapacity));
-    ON_CALL(*configManager, GetValue("metafs", "mpio_pool_capacity", _, _))
-        .WillByDefault(SetArg2ToLongAndReturn0(mpioPoolCapacity));
-    ON_CALL(*configManager, GetValue("metafs", "write_mpio_cache_enable", _, _))
-        .WillByDefault(SetArg2ToBoolAndReturn0(writeMpioCacheEnabled));
-    ON_CALL(*configManager, GetValue("metafs", "write_mpio_cache_capacity", _, _))
-        .WillByDefault(SetArg2ToLongAndReturn0(writeMpioCacheCapacity));
-    ON_CALL(*configManager, GetValue("metafs", "direct_access_for_journal_enable", _, _))
-        .WillByDefault(SetArg2ToBoolAndReturn0(directAccessEnabled));
-    ON_CALL(*configManager, GetValue("metafs", "time_interval_in_milliseconds_for_metric", _, _))
-        .WillByDefault(SetArg2ToLongAndReturn0(timeIntervalInMillisecondsForMetric));
-
-    return configManager;
-}
-
-TEST(MetaFsConfigManager, testIfTheMethodsReturnsExpectedValues)
+class MetaFsConfigManagerFixture : public ::testing::Test
 {
-    const size_t CAPACITY = 32;
-    NiceMock<MockConfigManager>* config = CreateMockConfigManager(CAPACITY, CAPACITY, true, CAPACITY, true, CAPACITY);
-    MetaFsConfigManager manager(config);
-    manager.Init();
+public:
+    MetaFsConfigManagerFixture(void)
+    : config(nullptr)
+    {
+    }
+    ~MetaFsConfigManagerFixture(void)
+    {
+    }
+    virtual void SetUp(void) override
+    {
+    }
+    virtual void TearDown(void) override
+    {
+        delete manager;
+        if (config != nullptr)
+            delete config;
+    }
 
-    EXPECT_EQ(manager.GetMioPoolCapacity(), CAPACITY);
-    EXPECT_EQ(manager.GetMpioPoolCapacity(), CAPACITY);
-    EXPECT_TRUE(manager.IsWriteMpioCacheEnabled());
-    EXPECT_EQ(manager.GetWriteMpioCacheCapacity(), CAPACITY);
-    EXPECT_TRUE(manager.IsDirectAccessEnabled());
-    EXPECT_EQ(manager.GetTimeIntervalInMillisecondsForMetric(), CAPACITY);
+protected:
+    void _CreateConfigManager(const size_t mioPoolCapacity,
+        const size_t mpioPoolCapacity, const bool writeMpioCacheEnabled,
+        const size_t writeMpioCacheCapacity, const bool directAccessEnabled,
+        const size_t timeIntervalInMillisecondsForMetric)
+    {
+        config = new NiceMock<MockConfigManager>;
 
-    delete config;
-}
+        ON_CALL(*config, GetValue("metafs", "mio_pool_capacity", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(mioPoolCapacity));
+        ON_CALL(*config, GetValue("metafs", "mpio_pool_capacity", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(mpioPoolCapacity));
+        ON_CALL(*config, GetValue("metafs", "write_mpio_cache_enable", _, _))
+            .WillByDefault(SetArg2ToBoolAndReturn0(writeMpioCacheEnabled));
+        ON_CALL(*config, GetValue("metafs", "write_mpio_cache_capacity", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(writeMpioCacheCapacity));
+        ON_CALL(*config, GetValue("metafs", "direct_access_for_journal_enable", _, _))
+            .WillByDefault(SetArg2ToBoolAndReturn0(directAccessEnabled));
+        ON_CALL(*config, GetValue("metafs", "time_interval_in_milliseconds_for_metric", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(timeIntervalInMillisecondsForMetric));
 
-TEST(MetaFsConfigManager, testIfTheMethodsReturnsExpectedValues_Inverse)
+        manager = new MetaFsConfigManagerTest(config);
+    }
+
+    NiceMock<MockConfigManager>* config;
+    MetaFsConfigManagerTest* manager;
+};
+
+TEST_F(MetaFsConfigManagerFixture, _ValidateConfig_testIfTheConfigIsInvalid)
 {
     const size_t CAPACITY = 0;
-    NiceMock<MockConfigManager>* config = CreateMockConfigManager(CAPACITY, CAPACITY, false, CAPACITY, false, CAPACITY);
-    MetaFsConfigManager manager(config);
-    manager.Init();
+    _CreateConfigManager(CAPACITY, CAPACITY, false, CAPACITY, false, 50);
+    EXPECT_FALSE(manager->ValidateConfig());
+}
 
-    EXPECT_EQ(manager.GetMioPoolCapacity(), CAPACITY);
-    EXPECT_EQ(manager.GetMpioPoolCapacity(), CAPACITY);
-    EXPECT_FALSE(manager.IsWriteMpioCacheEnabled());
-    EXPECT_EQ(manager.GetWriteMpioCacheCapacity(), CAPACITY);
-    EXPECT_FALSE(manager.IsDirectAccessEnabled());
-    EXPECT_EQ(manager.GetTimeIntervalInMillisecondsForMetric(), CAPACITY);
+TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
+{
+    const size_t CAPACITY = 32;
+    _CreateConfigManager(CAPACITY, CAPACITY + 1, true, CAPACITY + 2,
+        true, CAPACITY + 3);
+    manager->Init();
 
-    delete config;
+    EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
+    EXPECT_EQ(manager->GetMpioPoolCapacity(), CAPACITY + 1);
+    EXPECT_TRUE(manager->IsWriteMpioCacheEnabled());
+    EXPECT_EQ(manager->GetWriteMpioCacheCapacity(), CAPACITY + 2);
+    EXPECT_TRUE(manager->IsDirectAccessEnabled());
+    EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY + 3);
+}
+
+TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse)
+{
+    const size_t CAPACITY = 0;
+    _CreateConfigManager(CAPACITY, CAPACITY, false, CAPACITY,
+        false, CAPACITY);
+    manager->Init();
+
+    EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
+    EXPECT_EQ(manager->GetMpioPoolCapacity(), CAPACITY);
+    EXPECT_FALSE(manager->IsWriteMpioCacheEnabled());
+    EXPECT_EQ(manager->GetWriteMpioCacheCapacity(), CAPACITY);
+    EXPECT_FALSE(manager->IsDirectAccessEnabled());
+    EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY);
 }
 } // namespace pos

@@ -37,8 +37,8 @@
 #include <utility>
 
 #include "src/include/pos_event_id.h"
-#include "src/metafs/log/metafs_log.h"
 #include "src/master_context/config_manager.h"
+#include "src/metafs/log/metafs_log.h"
 
 namespace pos
 {
@@ -58,7 +58,7 @@ public:
     MetaFsConfigManager(void) = delete;
     MetaFsConfigManager(ConfigManager* configManager);
     virtual ~MetaFsConfigManager(void);
-    virtual void Init(void);
+    virtual bool Init(void);
     virtual size_t GetMioPoolCapacity(void) const
     {
         return mioPoolCapacity_;
@@ -77,12 +77,15 @@ public:
     }
     virtual bool IsDirectAccessEnabled(void) const
     {
-        return DIRECT_ACCESS_ENABLED;
+        return directAccessEnabled_;
     }
     virtual size_t GetTimeIntervalInMillisecondsForMetric(void) const
     {
         return timeIntervalInMillisecondsForMetric_;
     }
+
+protected:
+    virtual bool _ValidateConfig(void) const;
 
 private:
     template<typename T>
@@ -111,7 +114,7 @@ private:
     size_t mpioPoolCapacity_;
     bool writeMpioEnabled_;
     size_t writeMpioCapacity_;
-    bool DIRECT_ACCESS_ENABLED;
+    bool directAccessEnabled_;
     size_t timeIntervalInMillisecondsForMetric_;
 };
 

@@ -1,2 +1,1 @@
-POS_ADD_UNIT_TEST(metafs_config_ut metafs_config_test.cpp)
 POS_ADD_UNIT_TEST(metafs_config_manager_ut metafs_config_manager_test.cpp)
