@@ -41,13 +41,6 @@ PosEventId::PosEventIdEntry
     PosEventId::RESERVED_EVENT_ENTRY = {POS_EVENT_ID::RESERVED, "Reserved, Not defined, yet!!"};
 
 PosEventId::PosEventIdEntry
-    PosEventId::ARRAY_EVENT_ENTRY[(uint32_t)POS_EVENT_ID::ARRAY_COUNT] =
-        {
-            {POS_EVENT_ID::ARRAY_METAFS_DELETION_SUCCESS,
-                "Message", "Cause"},
-};
-
-PosEventId::PosEventIdEntry
     PosEventId::SYSTEM_EVENT_ENTRY[(uint32_t)POS_EVENT_ID::SYSTEM_COUNT] =
         {
             {POS_EVENT_ID::SYSTEM_SPACE_INFO,

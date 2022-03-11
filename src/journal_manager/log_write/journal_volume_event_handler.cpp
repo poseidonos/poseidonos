@@ -104,7 +104,7 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
         "Write volume deleted log, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
     int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
-    if ((int)POS_EVENT_ID::SUCCESS > ret)
+    if (EID(SUCCESS) > ret)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
             "Writing volume deleted log failed (volume id {})", volumeId);
@@ -134,7 +134,7 @@ JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxV
     logWriteInProgress = true;
     int ret = logWriteHandler->AddLog(logWriteContext);
 
-    if ((int)POS_EVENT_ID::SUCCESS < ret)
+    if (EID(SUCCESS) < ret)
     {
         EventSmartPtr volumeDeleteLogWriteRequest(new VolumeDeletedLogWriteRequestCallback(this, volumeId, segCtxVersion));
         eventScheduler->EnqueueEvent(volumeDeleteLogWriteRequest);

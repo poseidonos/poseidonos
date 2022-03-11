@@ -59,7 +59,7 @@ IOTranslator::Register(unsigned int arrayIndex, ArrayTranslator trans)
 {
     if (translators[arrayIndex].empty())
     {
-        int eventId = (int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG;
+        int eventId = EID(ADDRESS_TRANSLATE_DEBUG_MSG);
         if (trans.empty())
         {
             POS_TRACE_WARN(eventId,
@@ -91,7 +91,7 @@ IOTranslator::Translate(unsigned int arrayIndex, PartitionType part,
         return it->second->Translate(pel, le);
     }
 
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    int event = EID(IO_TRANSLATOR_NOT_FOUND);
     POS_TRACE_ERROR(event,
         "IOTranslator::Translate ERROR, array:{} part:{}", arrayIndex, part);
     return event;
@@ -111,14 +111,14 @@ IOTranslator::ByteTranslate(unsigned int arrayIndex, PartitionType part,
         }
         else
         {
-            event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
+            event = EID(ADDRESS_BYTE_TRANSLATION_IS_NOT_SUPPORTED);
             POS_TRACE_ERROR(event,
                 "IOTranslator::ByteTranslate not supported, array:{} part:{}", arrayIndex, part);
             return event;
         }
     }
 
-    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    event = EID(ADDRESS_TRANSLATE_DEBUG_MSG);
     POS_TRACE_ERROR(event,
         "IOTranslator::Translate ERROR, array:{} part:{}", arrayIndex, part);
     return event;
@@ -134,7 +134,7 @@ IOTranslator::GetParityList(unsigned int arrayIndex, PartitionType part,
         return it->second->GetParityList(parity, src);
     }
 
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    int event = EID(ADDRESS_TRANSLATE_DEBUG_MSG);
     POS_TRACE_ERROR(event,
         "IOTranslator::Convert ERROR, array:{} part:{}", arrayIndex, part);
     return event;
@@ -154,14 +154,14 @@ IOTranslator::ByteConvert(unsigned int arrayIndex, PartitionType part,
         }
         else
         {
-            event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
+            event = EID(ADDRESS_BYTE_TRANSLATION_IS_NOT_SUPPORTED);
             POS_TRACE_ERROR(event,
                 "IOTranslator::ByteTranslate not supported, array:{} part:{}", arrayIndex, part);
             return event;
         }
     }
 
-    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    event = EID(ADDRESS_TRANSLATE_DEBUG_MSG);
     POS_TRACE_ERROR(event,
         "IOTranslator::Convert ERROR, array:{} part:{}", arrayIndex, part);
     return event;

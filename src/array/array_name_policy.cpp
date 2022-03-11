@@ -40,36 +40,40 @@ namespace pos
 int
 ArrayNamePolicy::CheckArrayName(string name)
 {
+    int ret = EID(SUCCESS);
     StringChecker checker(name);
     size_t len = checker.Length();
     if (len < MIN_LEN)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NAME_TOO_SHORT,
-            "Array name must be at least {} characters", MIN_LEN);
-        return (int)POS_EVENT_ID::ARRAY_NAME_TOO_SHORT;
+        ret = EID(CREATE_ARRAY_NAME_TOO_SHORT);
+        POS_TRACE_WARN(ret,
+            "Array name must be at least {} letters long", MIN_LEN);
+        return ret;
     }
     else if (len > MAX_LEN)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NAME_TOO_LONG,
+        ret = EID(CREATE_ARRAY_NAME_TOO_LONG);
+        POS_TRACE_WARN(ret,
             "Array name must be less or equal than {} characters", MAX_LEN);
-        return (int)POS_EVENT_ID::ARRAY_NAME_TOO_LONG;
+        return ret;
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NAME_NOT_ALLOWED,
+        ret = EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE);
+        POS_TRACE_WARN(ret,
             "Blank cannot be placed at the beginning or end of a array name");
-        return (int)POS_EVENT_ID::ARRAY_NAME_NOT_ALLOWED;
+        return ret;
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NAME_NOT_ALLOWED,
-            "Special characters cannot be used as array names");
-        return (int)POS_EVENT_ID::ARRAY_NAME_NOT_ALLOWED;
+        ret = EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
+        POS_TRACE_WARN(ret, "Special characters cannot be used as array names");
+        return ret;
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return ret;
 }
 
 } // namespace pos

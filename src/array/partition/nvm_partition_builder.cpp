@@ -44,7 +44,7 @@ NvmPartitionBuilder::Build(uint64_t startLba, Partitions& out)
 {
     vector<ArrayDevice*> nvm {option.nvm};
     NvmPartition* impl = new NvmPartition(option.partitionType, nvm);
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "NvmPartitionBuilder::Build, part:{} blksPerChunk:{}",
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartitionBuilder::Build, part:{} blksPerChunk:{}",
         PARTITION_TYPE_STR[option.partitionType], option.blksPerChunk);
     int ret = impl->Create(startLba, option.blksPerChunk);
     if (ret != 0)

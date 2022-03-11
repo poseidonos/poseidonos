@@ -65,19 +65,16 @@ ListArrayCommand::Execute(json& doc, string rid)
     {
         if (result == EID(MBR_DATA_NOT_FOUND))
         {
-            result = EID(ARRAY_NOT_FOUND);
+            result = EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS);
             return jFormat.MakeResponse("LISTARRAY", rid, result,
                 "there is no array, all array data has been reset", data, GetPosInfo());
         }
         else
         {
-            if (result == EID(DEVICEMGR_DEVICE_NOT_FOUND))
-            {
-                int event = EID(CLI_LIST_ARRAY_FAILURE_NO_DEVICE);
-                POS_TRACE_WARN(event, "");
-                return jFormat.MakeResponse("LISTARRAY", rid, event,
-                    "failed to retrieve array list", data, GetPosInfo());
-            }
+            int event = EID(CLI_LIST_ARRAY_FAILURE);
+            POS_TRACE_WARN(event, "");
+            return jFormat.MakeResponse("LISTARRAY", rid, event,
+                "failed to retrieve array list", data, GetPosInfo());
         }
     }
 
@@ -99,14 +96,11 @@ ListArrayCommand::Execute(json& doc, string rid)
             ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
             if (CompInfo == nullptr)
             {
-                POS_TRACE_ERROR(EID(ARRAY_GET_COMPONENTS_FAILURE),
+                POS_TRACE_ERROR(EID(ARRAY_MGR_DEBUG_MSG),
                     "Failed to list array"
                     " because of failing to get componentsInfo"
                     " with given array name. ArrayName: {}", arrayName);
-
-                return jFormat.MakeResponse("LISTARRAY", rid,
-                    EID(ARRAY_GET_COMPONENTS_FAILURE),
-                    "Failed to list array", data, GetPosInfo());
+                continue;
             }
             IArrayInfo* info = CompInfo->arrayInfo;
             if (info == nullptr)

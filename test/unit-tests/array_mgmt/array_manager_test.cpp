@@ -90,7 +90,7 @@ TEST(ArrayManager, Create_testIfFailsToCreateArrayWithExistingName)
     int actual = arrayMgr->Create(existingArray, DeviceSet<string>(), "RAID10", "RAID5");
 
     // Then
-    ASSERT_EQ(EID(ARRAY_ALREADY_EXIST), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS), actual);
 }
 
 TEST(ArrayManager, Create_testIfFailsToCreateArrayWhenMaxArrayCntIsReached)
@@ -111,7 +111,7 @@ TEST(ArrayManager, Create_testIfFailsToCreateArrayWhenMaxArrayCntIsReached)
     int actual = arrayMgr->Create("new-array", DeviceSet<string>(), "RAID10", "RAID5");
 
     // Then
-    ASSERT_EQ(EID(ARRAY_CNT_EXCEEDED), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS), actual);
 }
 
 TEST(ArrayManager, Create_testIfArrayObjectIsFreedAndArrayMapNotUpdatedWhenCreationFails)
@@ -206,7 +206,7 @@ TEST(ArrayManager, Delete_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
     int actual = arrayMgr->Delete(arrayName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_WRONG_NAME), actual);
+    ASSERT_EQ(EID(DELETE_ARRAY_ARRAY_NAME_DOES_NOT_EXIST), actual);
 }
 
 TEST(ArrayManager, Delete_testIfArrayComponentMapIsUpdatedWhenDeleteSucceeds)
@@ -267,19 +267,11 @@ TEST(ArrayManager, Mount_testIfLoadFailureIsReturnedWhenTargetArrayHasArrayBootR
     };
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), mockArrayComponentFactory);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
-
-    EXPECT_CALL(*mockAbrMgr, GetAbrList).WillOnce([&arrayName](std::vector<ArrayBootRecord>& abrList)
-    {
-        ArrayBootRecord abr1;
-        snprintf(abr1.arrayName, arrayName.length() + 1, "%s", arrayName.c_str());
-        abrList.push_back(abr1);
-        return EID(SUCCESS);
-    });
     // When
     int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_LOAD_FAIL), actual);
+    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
 }
 
 TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
@@ -292,20 +284,11 @@ TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
-    EXPECT_CALL(*mockAbrMgr, GetAbrList).WillOnce([&arrayName](std::vector<ArrayBootRecord>& abrList)
-    {
-        ArrayBootRecord abr1;
-        string wrongArrayName = "array2";
-        snprintf(abr1.arrayName, wrongArrayName.length() + 1, "%s", wrongArrayName.c_str());
-        abrList.push_back(abr1);
-        return EID(SUCCESS);
-    });
-
     // When
     int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_WRONG_NAME), actual);
+    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
 }
 
 TEST(ArrayManager, Unmount_testIfTargetArrayCallsUnmount)
@@ -447,7 +430,7 @@ TEST(ArrayManager, PrepareRebuild_testIfFailToPrepareRebuildWhenWrongNameIsGiven
     int actual = arrayMgr->PrepareRebuild("array2" /* != array1 */, boolOutParam /* don't care */);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_WRONG_NAME), actual);
+    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
 }
 
 TEST(ArrayManager, RebuildDone_testIfTargetArrayCallsRebuildDone)
@@ -627,47 +610,21 @@ TEST(ArrayManager, GetInfo_testIfReturnsNullWhenGivenArrayDoesntExist)
     ASSERT_EQ(nullptr, actual);
 }
 
-TEST(ArrayManager, ResetMbr_testIfTheOperationIsRejectedWhenThereIsAtLeastOneArrayNotDeletableSomehow)
+TEST(ArrayManager, ResetMbr_testIfResetSuccessWhenThereIsNoArray)
 {
     // Given
-    int DELETABLE = 0, NOT_DELETABLE = 1;
-    auto mockArrayExist = BuildMockArray("array1");
-    EXPECT_CALL(*mockArrayExist, CheckDeletable).WillOnce(Return(DELETABLE));
-    auto mockArrayNotDeletable = BuildMockArray("array2");
-    EXPECT_CALL(*mockArrayNotDeletable, CheckDeletable).WillOnce(Return(NOT_DELETABLE));
-
-    auto mockArrayCompExist = BuildMockArrayComponents("array1");
-    auto mockArrayCompNotDeletable = BuildMockArrayComponents("array2");
-    auto arrayMap = BuildArrayComponentsMap();
-    arrayMap.emplace("array1", mockArrayCompExist.get());
-    arrayMap.emplace("array2", mockArrayCompNotDeletable.get());
-    EXPECT_CALL(*mockArrayCompExist, GetArray).WillOnce(Return(mockArrayExist.get()));
-    EXPECT_CALL(*mockArrayCompNotDeletable, GetArray).WillOnce(Return(mockArrayNotDeletable.get()));
-
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
-    arrayMgr->SetArrayComponentMap(arrayMap);
-
-    // When
-    int actual = arrayMgr->ResetMbr();
-
-    // Then
-    ASSERT_EQ(NOT_DELETABLE, actual);
-}
-
-TEST(ArrayManager, ResetMbr_testIfTheOperationIsRejectedWhenThereIsAtLeastOneArrayWhoseArrayComponentsDontExist)
-{
-    // Given
-    string arrayName = "array1";
     auto emptyArrayMap = BuildArrayComponentsMap();
-    emptyArrayMap.emplace(arrayName, nullptr);
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
+    auto mockAbrMgr = BuildMockAbrManager();
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
+    int RESET_SUCCESS = 0;
+    EXPECT_CALL(*mockAbrMgr, ResetMbr).WillOnce(Return(RESET_SUCCESS));
 
     // When
     int actual = arrayMgr->ResetMbr();
 
     // Then
-    ASSERT_EQ(EID(ARRAY_STATE_NOT_EXIST), actual);
+    ASSERT_EQ(RESET_SUCCESS, actual);
 }
 
 TEST(ArrayManager, ResetMbr_testIfEveryArrayCallsDeleteSuccessfullyAndAbrManagerCallsResetMbr)
@@ -681,8 +638,6 @@ TEST(ArrayManager, ResetMbr_testIfEveryArrayCallsDeleteSuccessfullyAndAbrManager
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
-    EXPECT_CALL(*mockArray, CheckDeletable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrayComp, GetArray).WillOnce(Return(mockArray.get()));
     int DELETE_SUCCESS = 0;
     EXPECT_CALL(*mockArrayComp, Delete).WillOnce(Return(DELETE_SUCCESS));
     int RESET_SUCCESS = 1212;
@@ -710,10 +665,6 @@ TEST(ArrayManager, ResetMbr_testIfSomeArrayDeletionsFailAndAbrManagerDoesntReset
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
-    EXPECT_CALL(*mockArray1Deletable, CheckDeletable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArray2Deletable, CheckDeletable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrayComp1Deletable, GetArray).WillOnce(Return(mockArray1Deletable.get()));
-    EXPECT_CALL(*mockArrayComp2NotDeletable, GetArray).WillOnce(Return(mockArray2Deletable.get()));
     EXPECT_CALL(*mockArrayComp1Deletable, Delete).WillOnce(Return(0));
     int DELETE_FAILURE = 1234;
     EXPECT_CALL(*mockArrayComp2NotDeletable, Delete).WillOnce(Return(DELETE_FAILURE));

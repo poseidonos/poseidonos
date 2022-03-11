@@ -43,7 +43,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                         ArrayDevice* dev, RebuildComplete cb,
                         list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
         arrayName, tgt.size());
 
@@ -56,7 +56,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dev);
         if (ctx && factory != nullptr)
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "Try to create PartitionRebuild for {}", ctx->part);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
@@ -85,7 +85,7 @@ void
 ArrayRebuild::Init(string array, ArrayDevice* dev, RebuildComplete cb,
     list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* rLogger)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::Init() array {} with total {} tasks", array, tgt.size());
 
     arrayName = array;
@@ -107,7 +107,7 @@ ArrayRebuild::~ArrayRebuild(void)
 void
 ArrayRebuild::Start(void)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::Start() array {} with total {} tasks", arrayName, tasks.size());
 
     if (tasks.empty())
@@ -166,7 +166,7 @@ ArrayRebuild::GetProgress(void)
 void
 ArrayRebuild::_RebuildNext(void)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::_RebuildNext() array {} has remaining {} tasks", arrayName, tasks.size());
     if (tasks.empty() == false)
     {
@@ -179,7 +179,7 @@ ArrayRebuild::_RebuildNext(void)
 void
 ArrayRebuild::_RebuildDone(RebuildResult res)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, res.result);
     RebuildState taskResult = res.result;
     state = taskResult;
@@ -214,7 +214,7 @@ void
 ArrayRebuild::_RebuildCompleted(RebuildResult res)
 {
     state = res.result;
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::_RebuildCompleted array {} rebuild completed with result {} ", arrayName, state);
     switch (state)
     {

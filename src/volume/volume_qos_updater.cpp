@@ -82,7 +82,7 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
     }
 
     int ret = _SaveVolumes();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != EID(SUCCESS))
     {
         vol->SetMaxIOPS(originalMaxIops);
         vol->SetMaxBW(originalMaxBw);

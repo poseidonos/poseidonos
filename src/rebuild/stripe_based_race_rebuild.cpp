@@ -96,7 +96,7 @@ StripeBasedRaceRebuild::Read(void)
     {
         if (locker->ResetBusyLock(ctx->faultDev) == false)
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
                 "Partition {} rebuild done, but waiting lock release",
                 ctx->part);
             return false;
@@ -115,7 +115,7 @@ StripeBasedRaceRebuild::Read(void)
         }
         else
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
                 "Partition {} (RAID1) rebuilding done",
                 ctx->part);
             ctx->SetResult(RebuildState::PASS);
@@ -144,7 +144,7 @@ StripeBasedRaceRebuild::Read(void)
     }
 
     ctx->taskCnt = currWorkload;
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
         "StripeBasedRaceRebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {

@@ -30,7 +30,6 @@ MockUblockDevice(const char* devName, DeviceType type, size_t devSize)
     MockUBlockDevice* rawPtr = new MockUBlockDevice(devName, 1024, nullptr);
     EXPECT_CALL(*rawPtr, GetType).WillRepeatedly(Return(type));
     EXPECT_CALL(*rawPtr, GetName).WillRepeatedly(Return(devName));
-    EXPECT_CALL(*rawPtr, IsAlive).WillRepeatedly(Return(true));
     EXPECT_CALL(*rawPtr, GetSize).WillRepeatedly(Return(devSize));
     return shared_ptr<MockUBlockDevice>(rawPtr);
 }
@@ -124,7 +123,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    int expected = (int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -156,7 +155,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsActuallySSDDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    int expected = (int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -191,7 +190,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -226,7 +225,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -267,7 +266,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -308,7 +307,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -349,7 +348,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
+    int expected = (int)POS_EVENT_ID::UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -450,7 +449,7 @@ TEST(ArrayDeviceManager, Import_testIfNVMDeviceHasNoUblockWithMetaSetInformation
     int actual = arrDevMgr.Import(arrayMeta.devs);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND;
+    int expected = EID(ARRAY_NVM_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -664,7 +663,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongDevnameIsHandled)
     int actual = arrDevMgr.AddSpare(devName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_DEVICE_WRONG_NAME), actual);
+    ASSERT_EQ(EID(ADD_SPARE_SSD_NAME_NOT_FOUND), actual);
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
@@ -683,26 +682,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
     int actual = arrDevMgr.AddSpare(devName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_DEVICE_ALREADY_ADDED), actual);
-}
-
-TEST(ArrayDeviceManager, AddSpare_testIfNotAliveSpareIsHandled)
-{
-    // Given
-    MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
-    string devName = "spare1";
-
-    auto spare1 = MockUblockDevice(devName.c_str());
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
-    EXPECT_CALL(*spare1.get(), GetClass).WillOnce(Return(DeviceClass::SYSTEM));
-    EXPECT_CALL(*spare1.get(), IsAlive).WillOnce(Return(false));
-
-    // When
-    int actual = arrDevMgr.AddSpare(devName);
-
-    // Then
-    ASSERT_EQ(-2, actual);
+    ASSERT_EQ(EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED), actual);
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
@@ -729,7 +709,6 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     EXPECT_CALL(mockSysDevMgr, GetDev).WillRepeatedly(Return(ptrMockSpare));
     EXPECT_CALL(*ptrMockSpare, GetClass).WillOnce(Return(DeviceClass::SYSTEM));
-    EXPECT_CALL(*ptrMockSpare, IsAlive).WillOnce(Return(true));
     EXPECT_CALL(*ptrMockSpare, GetSize).WillRepeatedly(Return(SMALLER_DEV_SIZE)); // intentionally passing in smaller capacity
     EXPECT_CALL(*ptrMockUblockDev1, GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*ptrMockUblockDev2, GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
@@ -745,7 +724,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
     int actual = arrDevMgr.AddSpare(spareName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_SSD_CAPACITY_ERROR), actual);
+    ASSERT_EQ(EID(ADD_SPARE_CAPACITY_IS_TOO_SMALL), actual);
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
@@ -766,7 +745,6 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
 
     EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
     EXPECT_CALL(*spare1.get(), GetClass).WillOnce(Return(DeviceClass::SYSTEM));
-    EXPECT_CALL(*spare1.get(), IsAlive).WillOnce(Return(true));
     EXPECT_CALL(*spare1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*data1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
@@ -799,7 +777,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
     int actual = arrDevMgr.RemoveSpare("spare-that-doesn't-exist");
 
     // Then
-    ASSERT_EQ(EID(ARRAY_DEVICE_REMOVE_FAIL), actual);
+    ASSERT_EQ(EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND), actual);
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)

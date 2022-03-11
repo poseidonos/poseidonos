@@ -86,7 +86,7 @@ SegmentBasedRebuild::_NextSegment(void)
 {
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "SegmentBasedRebuild::_NextSegment is {}",
                 segId);
     if (segId == UINT32_MAX)
@@ -131,7 +131,7 @@ SegmentBasedRebuild::Read(void)
         }
         else
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
                 "Partition {} (RAID5) rebuilding done",
                 ctx->part);
             ctx->SetResult(RebuildState::PASS);
@@ -147,7 +147,7 @@ SegmentBasedRebuild::Read(void)
 
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
         "SegmentBasedRebuild - segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {

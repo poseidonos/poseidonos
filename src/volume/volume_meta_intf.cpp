@@ -107,7 +107,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
     }
 
     free(rBuf);
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 int
@@ -190,8 +190,8 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
     }
 
     free(wBuf);
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "SaveVolumes succeed");
-    return (int)POS_EVENT_ID::SUCCESS;
+    POS_TRACE_DEBUG(EID(SUCCESS), "SaveVolumes succeed");
+    return EID(SUCCESS);
 }
 
 } // namespace pos

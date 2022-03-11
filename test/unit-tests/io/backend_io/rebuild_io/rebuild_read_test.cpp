@@ -30,7 +30,7 @@ TEST(RebuildRead, RebuildRead_Recover_IsRetry)
     auto actual = rebuildRead.Recover(ubio, nullptr);
 
     // Then : Check return value
-    EXPECT_EQ(actual, (int)POS_EVENT_ID::RECOVER_IS_RETRY);
+    EXPECT_EQ(actual, 9999);
 }
 
 } // namespace pos

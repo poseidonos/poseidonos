@@ -303,7 +303,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughNumaDevices
     int actual = result.code;
 
     // Then
-    ASSERT_EQ(EID(ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
 }
 
 TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughHomoSizeDevices)
@@ -357,7 +357,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughHomoSizeDev
     int actual = result.code;
 
     // Then
-    ASSERT_EQ(EID(ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
 }
 
 TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughSystemDevices)
@@ -411,6 +411,6 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughSystemDevic
     int actual = result.code;
 
     // Then
-    ASSERT_EQ(EID(ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS), actual);
 }
 }  // namespace pos

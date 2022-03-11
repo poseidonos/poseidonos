@@ -197,7 +197,7 @@ TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
     int actual = nvmPart.Translate(ignored, invalidAddr);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_INVALID_ADDRESS_ERROR), actual);
+    ASSERT_EQ(EID(ADDRESS_TRANSLATION_INVALID_LBA), actual);
 }
 
 TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
@@ -261,7 +261,7 @@ TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
     int actual = nvmPart.ByteTranslate(ignored, invalidAddr);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_INVALID_ADDRESS_ERROR), actual);
+    ASSERT_EQ(EID(ADDRESS_BYTE_TRANSLATION_INVALID_LBA), actual);
 }
 
 TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)

@@ -74,7 +74,7 @@ int
 PartitionManager::CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
     RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "PartitionManager::CreatePartition, MetaRaid:{}, DataRaid:{}",
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "PartitionManager::CreatePartition, MetaRaid:{}, DataRaid:{}",
         RaidType(metaRaid).ToString(), RaidType(dataRaid).ToString());
     Partitions out;
     out.fill(nullptr);
@@ -123,7 +123,7 @@ PartitionManager::FormatPartition(PartitionType type, uint32_t arrayId, IODispat
     }
     else
     {
-        POS_TRACE_ERROR(EID(ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
+        POS_TRACE_ERROR(EID(CREATE_ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
     }
 }
 

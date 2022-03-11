@@ -77,7 +77,7 @@ Preferences::SetLogLevel(shared_ptr<spdlog::logger> logger, string value)
 
     if (value == LogLevelToString(logLevel))
     {
-        return (int)POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
     }
     else
     {
@@ -141,7 +141,7 @@ Preferences::SetStrLogging(bool input)
 {
     EnableStructuredLogging = input;
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 } // namespace pos_logger

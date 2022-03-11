@@ -40,7 +40,7 @@ namespace pos
 {
 NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dataCnt, int spareCnt, DeviceManager* devMgr)
 {
-    result.code = EID(ARRAY_INSUFFICIENT_NUMA_DEVS);
+    result.code = EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS);
     int requiredDevCnt = dataCnt + spareCnt;
     auto&& systemDevs = Enumerable::Where(devMgr->GetDevs(),
         [](auto d) { return d->GetClass() == DeviceClass::SYSTEM; });

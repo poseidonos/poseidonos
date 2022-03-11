@@ -51,7 +51,7 @@ PartitionRebuild::~PartitionRebuild(void)
 
 void PartitionRebuild::Start(RebuildComplete cb)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "PartitionRebuild::Start");
     completeCb = cb;
     if (bhvr != nullptr)
@@ -65,7 +65,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
             "not a rebuild target partition");
         RebuildResult res;
         res.result = RebuildState::PASS;
@@ -101,7 +101,7 @@ RebuildState PartitionRebuild::GetResult(void)
 
 void PartitionRebuild::_Complete(RebuildResult res)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "PartitionRebuild::_Complete, res {}", res.result);
     if (bhvr != nullptr)
     {

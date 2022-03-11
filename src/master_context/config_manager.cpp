@@ -130,7 +130,7 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsString() == true)
             {
                 *(string*)value = doc[module.c_str()][key.c_str()].GetString();
-                return (int)POS_EVENT_ID::SUCCESS;
+                return EID(SUCCESS);
             }
             return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
@@ -138,7 +138,7 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsInt() == true)
             {
                 *(int*)value = doc[module.c_str()][key.c_str()].GetInt();
-                return (int)POS_EVENT_ID::SUCCESS;
+                return EID(SUCCESS);
             }
             return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
@@ -146,7 +146,7 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsUint() == true)
             {
                 *(uint32_t*)value = doc[module.c_str()][key.c_str()].GetUint();
-                return (int)POS_EVENT_ID::SUCCESS;
+                return EID(SUCCESS);
             }
             return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
@@ -154,7 +154,7 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsUint64() == true)
             {
                 *(uint64_t*)value = doc[module.c_str()][key.c_str()].GetUint64();
-                return (int)POS_EVENT_ID::SUCCESS;
+                return EID(SUCCESS);
             }
             return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
@@ -162,7 +162,7 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsBool() == true)
             {
                 *(bool*)value = doc[module.c_str()][key.c_str()].GetBool();
-                return (int)POS_EVENT_ID::SUCCESS;
+                return EID(SUCCESS);
             }
             return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 

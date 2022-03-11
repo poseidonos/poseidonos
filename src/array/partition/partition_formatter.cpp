@@ -82,13 +82,13 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
             ubio->SetPba(pba);
             ubio->SetUblock(devs[i]->GetUblock());
             result = io->Submit(ubio, true);
-            POS_TRACE_DEBUG(EID(ARRAY_PARTITION_TRIM),
+            POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG_MSG),
                 "Try to trim from {} for {} on {}",
                 pba.lba, unitCount, devs[i]->GetUblock()->GetName());
 
             if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
             {
-                POS_TRACE_ERROR(EID(ARRAY_PARTITION_TRIM),
+                POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
                     "Trim Failed on {}", devs[i]->GetUblock()->GetName());
                 trimResult = 1;
             }
@@ -104,12 +104,12 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
 
         if (result == 0)
         {
-            POS_TRACE_INFO(EID(ARRAY_PARTITION_TRIM),
+            POS_TRACE_INFO(EID(FORMAT_PARTITION_DEBUG_MSG),
                 "Trim Succeeded from {} ", startLba);
         }
         else
         {
-            POS_TRACE_ERROR(EID(ARRAY_PARTITION_TRIM),
+            POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
                 "Trim Succeeded with wrong value from {}", startLba);
             return result;
             // To Do : Write All Zeroes
@@ -118,7 +118,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
     }
     else
     {
-        POS_TRACE_ERROR(EID(ARRAY_PARTITION_TRIM), "Trim Failed on some devices");
+        POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG), "Trim Failed on some devices");
         // To Do : Write All Zeroes
         return trimResult;
     }
@@ -147,7 +147,7 @@ PartitionFormatter::_CheckTrimValue(uint64_t startLba, uint32_t arrayId,
 
         if (result != 0)
         {
-            POS_TRACE_ERROR(EID(ARRAY_PARTITION_TRIM),
+            POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
                 "Trim Value is not Zero on {}", devs[i]->GetUblock()->GetName());
             nonZeroResult = 1;
         }

@@ -317,7 +317,7 @@ Poseidonos::_SetPerfImpact(void)
     std::string impact = "";
     int ret = ConfigManagerSingleton::Instance()->GetValue("perf_impact", "rebuild",
         &impact, ConfigType::CONFIG_TYPE_STRING);
-    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    if (ret == EID(SUCCESS))
     {
         qos_rebuild_policy newRebuildPolicy;
         if (impact.compare("highest") == 0)

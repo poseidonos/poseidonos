@@ -56,7 +56,7 @@ SmartLogMgr::Init(void)
     bool enabled = false;
     smartLogEnable = false;
     int ret = configManager->GetValue("admin", "smart_log_page", &enabled, CONFIG_TYPE_BOOL);
-    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    if (ret == EID(SUCCESS))
     {
         smartLogEnable = enabled;
     }

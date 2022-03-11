@@ -115,7 +115,7 @@ Partition::_UpdateLastLba(void)
         physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
         physicalSize.totalSegments;
 
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", lastLba);
 }
 
 } // namespace pos

@@ -108,7 +108,7 @@ MbrManager::GetMbr(void)
 int
 MbrManager::LoadMbr(void)
 {
-    int ret = (int)POS_EVENT_ID::SUCCESS;
+    int ret = EID(SUCCESS);
     pthread_rwlock_wrlock(&mbrLock);
     ret = _ReadFromDevices();
     if (ret != 0)
@@ -143,7 +143,7 @@ MbrManager::SaveMbr(void)
     int result = _WriteToDevices();
     if (result != 0)
     {
-        int eventid = (int)POS_EVENT_ID::ARRAY_MBR_WRITE_ERROR;
+        int eventid = (int)POS_EVENT_ID::MBR_WRITE_ERROR;
         POS_TRACE_ERROR(eventid, "MBR Write Error");
         result = eventid;
     }
@@ -350,7 +350,7 @@ MbrManager::_VerifyParity(void* mem)
         &mbrParity, MBR_PARITY_SIZE);
     if (ret == 0)
     {
-        return (int)POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
     }
     else
     {
@@ -384,7 +384,7 @@ MbrManager::_VerifySystemUuid(void* mem)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::MBR_SYSTEM_UUID_CHECK,
             "mbr system uuid check ");
-        ret = (int)POS_EVENT_ID::SUCCESS;
+        ret = EID(SUCCESS);
     }
     else
     {
@@ -435,7 +435,7 @@ MbrManager::_GetLatestDataList(list<void*> mems, list<void*>* latestMems)
         }
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 string
@@ -463,7 +463,7 @@ MbrManager::CreateAbr(ArrayMeta& meta)
     int ret = 0;
     ArrayNamePolicy arrayNamePolicy;
     ret = arrayNamePolicy.CheckArrayName(meta.arrayName);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != EID(SUCCESS))
     {
         POS_TRACE_ERROR(ret, "Array name double check failed");
         return ret;
@@ -555,7 +555,7 @@ MbrManager::DeleteAbr(string arrayName)
             delete backup;
             systeminfo.arrayValidFlag[arrayIndex] = 1;
             systeminfo.arrayNum++;
-            int eventid = (int)POS_EVENT_ID::ARRAY_MBR_WRITE_ERROR;
+            int eventid = (int)POS_EVENT_ID::MBR_WRITE_ERROR;
             POS_TRACE_ERROR(eventid, "MBR Write Error");
             result = eventid;
             pthread_rwlock_unlock(&mbrLock);

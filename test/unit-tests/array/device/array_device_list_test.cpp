@@ -5,6 +5,7 @@
 #include "src/device/unvme/unvme_ssd.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/utils/spdk_util.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::Return;
 namespace pos
@@ -94,7 +95,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingNvmTwice)
     // When
     int result = arrayDeviceList.SetNvm(mockDev);
     // Then
-    int ADD_FAIL = EID(ARRAY_DEVICE_ADD_FAIL);
+    int ADD_FAIL = EID(UNABLE_TO_SET_NVM_MORE_THAN_ONE);
     EXPECT_EQ(ADD_FAIL, result);
     delete mockDev;
 }
@@ -109,7 +110,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingWrongNvm)
     // When
     int result = arrayDeviceList.SetNvm(mockDev);
     // Then
-    int ADD_FAIL = EID(ARRAY_DEVICE_ADD_FAIL);
+    int ADD_FAIL = EID(UNABLE_TO_SET_NULL_NVM);
     EXPECT_EQ(ADD_FAIL, result);
     delete mockDev;
 }
@@ -127,7 +128,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingNvmWithDataDevice)
     // When
     int result = arrayDeviceList.SetNvm(mockDev);
     // Then
-    int ADD_FAIL = EID(ARRAY_DEVICE_ADD_FAIL);
+    int ADD_FAIL = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
     EXPECT_EQ(ADD_FAIL, result);
     delete mockDev;
 }
@@ -179,7 +180,7 @@ TEST(ArrayDeviceList, AddSpare_testWhenAddTwice)
     // When
     int result = arrayDeviceList.AddSpare(mockDev);
     // Then
-    int ADD_FAIL = EID(ARRAY_DEVICE_ADD_FAIL);
+    int ADD_FAIL = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
     EXPECT_EQ(ADD_FAIL, result);
     delete mockDev;
 }
@@ -213,7 +214,7 @@ TEST(ArrayDeviceList, RemoveSpare_testWhenNoSpare)
     // When
     int result = arrayDeviceList.RemoveSpare(mockDev);
     // Then
-    int REMOVE_FAIL = EID(ARRAY_DEVICE_REMOVE_FAIL);
+    int REMOVE_FAIL = EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND);
     EXPECT_EQ(REMOVE_FAIL, result);
     delete mockDev;
 }
@@ -254,7 +255,7 @@ TEST(ArrayDeviceList, SpareToData_testIfThereIsNoSpare)
     // When
     int result = arrayDeviceList.SpareToData(brokenDataDev);
     // Then
-    int NOSPARE = EID(ARRAY_NO_REMAINING_SPARE);
+    int NOSPARE = EID(NO_SPARE_SSD_TO_REPLACE);
     EXPECT_EQ(NOSPARE, result);
     delete brokenDataDev;
 }

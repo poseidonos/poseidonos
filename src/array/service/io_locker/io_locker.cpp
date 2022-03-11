@@ -58,7 +58,7 @@ IOLocker::Register(vector<ArrayDevice*> devList)
         }
     }
     size_t newSize = lockers.size();
-    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Register, {} devs added, size: {} -> {}",
+    POS_TRACE_INFO(EID(LOCKER_DEBUG_MSG), "IOLocker::Register, {} devs added, size: {} -> {}",
         devList.size(), prevSize, newSize);
     return true;
 }
@@ -84,7 +84,7 @@ IOLocker::Unregister(vector<ArrayDevice*> devList)
     }
     group.RemoveDevice(devList);
     size_t newSize = lockers.size();
-    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unregister, size: {} -> {}",
+    POS_TRACE_INFO(EID(LOCKER_DEBUG_MSG), "IOLocker::Unregister, size: {} -> {}",
         prevSize, newSize);
 }
 

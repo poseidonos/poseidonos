@@ -121,7 +121,7 @@ ArrayState::CanAddSpare(void)
     int eventId = 0;
     if (!IsMounted())
     {
-        eventId = (int)POS_EVENT_ID::ARRAY_NEED_MOUNT;
+        eventId = EID(ADD_SPARE_CAN_ONLY_BE_WHILE_ONLINE);
         POS_TRACE_WARN(eventId, "Failed to add spare. Spare cannot be added without Array mounted");
     }
     return eventId;
@@ -133,7 +133,7 @@ ArrayState::CanRemoveSpare(void)
     int eventId = 0;
     if (!IsMounted())
     {
-        eventId = (int)POS_EVENT_ID::ARRAY_NEED_MOUNT;
+        eventId = EID(REMOVE_SPARE_CAN_ONLY_BE_WHILE_ONLINE);
         POS_TRACE_WARN(eventId, "Failed to remove spare. Spare cannot be removed without Array mounted");
     }
     return eventId;
@@ -145,15 +145,9 @@ ArrayState::IsMountable(void)
     int ret = 0;
     switch (state)
     {
-        case ArrayStateEnum::NOT_EXIST:
-        {
-            ret = EID(ARRAY_STATE_NOT_EXIST);
-            POS_TRACE_ERROR(ret, "Failed to mount array. Array is not existed");
-            break;
-        }
         case ArrayStateEnum::BROKEN:
         {
-            ret = EID(ARRAY_STATE_BROKEN);
+            ret = EID(MOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_MOUNTED);
             POS_TRACE_ERROR(ret, "Failed to mount array. Array is broken");
             break;
         }
@@ -165,42 +159,11 @@ ArrayState::IsMountable(void)
         }
         default:
         {
-            ret = EID(ARRAY_ALD_MOUNTED);
+            ret = EID(MOUNT_ARRAY_ALREADY_MOUNTED);
             break;
         }
     }
     return ret;
-}
-
-int
-ArrayState::IsLoadable(void)
-{
-    int eventId = 0;
-    if (IsMounted())
-    {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_ONLINE;
-        POS_TRACE_ERROR(eventId, "Failed to load array, already mounted");
-    }
-    else if (state == ArrayStateEnum::BROKEN)
-    {
-        eventId = (int)POS_EVENT_ID::ARRAY_BROKEN_ERROR;
-        POS_TRACE_ERROR(eventId, "Failed to load array, broken error");
-    }
-
-    return eventId;
-}
-
-int
-ArrayState::IsCreatable(void)
-{
-    int eventId = 0;
-    if (Exists())
-    {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_EXIST;
-        POS_TRACE_ERROR(eventId, "Failed to create array, already existed");
-    }
-
-    return eventId;
 }
 
 int
@@ -209,12 +172,12 @@ ArrayState::IsUnmountable(void)
     int eventId = 0;
     if (IsMounted() == false)
     {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_OFFLINE;
+        eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
         POS_TRACE_ERROR(eventId, "Failed to unmount array, not mounted");
     }
     else if (state == ArrayStateEnum::REBUILD)
     {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_REBUILDING;
+        eventId = EID(UNMOUNT_ARRAY_REJECTED_DUE_TO_REBUILD_INPROGRESS);
         POS_TRACE_ERROR(eventId, "Failed to unmount array, array is being rebuilt");
     }
 
@@ -227,12 +190,7 @@ ArrayState::IsDeletable(void)
     int eventId = 0;
     if (IsMounted())
     {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_ONLINE;
-        POS_TRACE_ERROR(eventId, "Failed to delete array, already mounted");
-    }
-    else if (Exists() == false)
-    {
-        eventId = (int)POS_EVENT_ID::ARRAY_STATE_NOT_EXIST;
+        eventId = EID(DELETE_ARRAY_CAN_ONLY_BE_WHILE_OFFLINE);
         POS_TRACE_ERROR(eventId, "Failed to delete array, already mounted");
     }
     return eventId;
@@ -252,7 +210,7 @@ ArrayState::IsMounted(void)
     return isMounted;
 }
 
-int
+void
 ArrayState::SetMount(void)
 {
     switch (state)
@@ -269,17 +227,14 @@ ArrayState::SetMount(void)
         }
         default:
         {
-            POS_EVENT_ID id = POS_EVENT_ID::ARRAY_STATE_CHANGE_ERROR;
-            POS_TRACE_WARN(id,
-                "Failed to change array state, curret state is {}",
+            POS_TRACE_WARN(EID(ARRAY_EVENT_UNHANDLED_STATE_TRANSITION),
+                "Failed to change array state, current state is {}",
                 state.ToString());
-            return (int)id;
         }
     }
-    return 0;
 }
 
-int
+void
 ArrayState::SetUnmount(void)
 {
     iStateControl->Remove(degradedState);
@@ -298,14 +253,11 @@ ArrayState::SetUnmount(void)
         }
         default:
         {
-            POS_EVENT_ID id = POS_EVENT_ID::ARRAY_STATE_CHANGE_ERROR;
-            POS_TRACE_WARN(id,
+            POS_TRACE_WARN(EID(ARRAY_EVENT_UNHANDLED_STATE_TRANSITION),
                 "Failed to change array state, curret state is {}",
                 state.ToString());
-            return (int)id;
         }
     }
-    return 0;
 }
 
 void
@@ -364,7 +316,7 @@ ArrayState::IsBroken(void)
 bool
 ArrayState::SetRebuild(void)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "SetRebuild, CurrState:{}", state.ToString());
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuild, CurrState:{}", state.ToString());
     if (IsRebuildable() == false)
     {
         return false;
@@ -433,7 +385,7 @@ ArrayState::StateChanged(StateContext* prev, StateContext* next)
 void
 ArrayState::_SetState(ArrayStateEnum newState)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "_SetState, CurrState:{}, NewState:{}", state.ToString(), newState);
+    POS_TRACE_DEBUG(EID(ARRAY_EVENT_STATE_CHANGED), "_SetState, CurrState:{}, NewState:{}", state.ToString(), newState);
     if (state != newState)
     {
         if (newState == ArrayStateEnum::DEGRADED)
@@ -450,7 +402,7 @@ ArrayState::_SetState(ArrayStateEnum newState)
         }
 
         state = newState;
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_STATE_CHANGED,
+        POS_TRACE_INFO(EID(ARRAY_EVENT_STATE_CHANGED),
             "Array state is changed to {}",
             state.ToString());
     }
@@ -477,7 +429,7 @@ ArrayState::EnableStatePublisher(id_t arrayUniqueId)
 {
     if (publisherEnabled == true)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::ARRAY_STATE_PUBLISHER_ERROR,
+        POS_TRACE_WARN(EID(ARRAY_TELEMETRY_DEBUG_MSG),
             "Failed to enable array state publisher. Already enabled");
         return;
     }

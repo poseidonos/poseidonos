@@ -101,7 +101,7 @@ Allocator::Init(void)
 void
 Allocator::Dispose(void)
 {
-    POS_TRACE_INFO(EID(ARRAY_UNMOUNTING), "[Allocator] Dispose, init:{}", isInitialized);
+    POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "[Allocator] Dispose, init:{}", isInitialized);
     if (isInitialized == true)
     {
         wbStripeManager->FlushAllActiveStripes();
@@ -122,7 +122,7 @@ Allocator::Dispose(void)
 void
 Allocator::Shutdown(void)
 {
-    POS_TRACE_INFO(EID(ARRAY_UNMOUNTING), "[Allocator] Shutdown, init:{}", isInitialized);
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "[Allocator] Shutdown, init:{}", isInitialized);
     if (isInitialized == true)
     {
         wbStripeManager->FlushAllActiveStripes();

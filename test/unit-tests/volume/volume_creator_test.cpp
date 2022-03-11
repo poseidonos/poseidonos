@@ -37,7 +37,7 @@ TEST(VolumeCreator, Do_wrongName)
     uint64_t minBw = 0;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::SUCCESS;
+    int expected = EID(SUCCESS);
 
     // When
     VolumeList volumes;

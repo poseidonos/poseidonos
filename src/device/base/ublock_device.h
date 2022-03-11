@@ -74,7 +74,6 @@ public:
     virtual int GetNuma(void);
     virtual DeviceProperty GetProperty(void);
     virtual void SetClass(DeviceClass cls);
-    virtual bool IsAlive(void);
     virtual void ProfilePendingIoCount(uint32_t pendingIOCount);
 
     virtual void AddPendingErrorCount(uint32_t errorsToAdd = 1);

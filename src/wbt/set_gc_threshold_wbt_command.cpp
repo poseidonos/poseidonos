@@ -110,7 +110,7 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
         if (info == nullptr)
         {
-            POS_TRACE_ERROR(EID(ARRAY_NOT_FOUND), "failed to get array info.!");
+            POS_TRACE_ERROR(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), "failed to get array info.!");
             return returnValue;
         }
 

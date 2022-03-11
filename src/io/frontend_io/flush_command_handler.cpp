@@ -251,7 +251,7 @@ FlushCmdHandler::Execute(void)
 
             flushCmdManager->ResetFlushInProgress(volumeId, flushIo->IsInternalFlush());
 
-            POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS, "NVMe Flush Command Complete");
+            POS_TRACE_INFO(EID(SUCCESS), "NVMe Flush Command Complete");
         default:
             break;
     }

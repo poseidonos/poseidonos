@@ -168,7 +168,7 @@ MetaFs::Init(void)
     ctrl->SetStatus(isNormal);
     wbt->SetStatus(isNormal);
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 void

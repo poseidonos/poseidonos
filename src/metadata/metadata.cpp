@@ -133,7 +133,7 @@ Metadata::~Metadata(void)
 int
 Metadata::Init(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_MOUNTING);
+    int eventId = static_cast<int>(POS_EVENT_ID::MOUNT_ARRAY_DEBUG_MSG);
     int result = 0;
 
     std::string arrayName = arrayInfo->GetName();
@@ -196,7 +196,7 @@ Metadata::Init(void)
 void
 Metadata::Dispose(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
+    int eventId = static_cast<int>(POS_EVENT_ID::UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start disposing allocator of array {}", arrayName);
@@ -214,7 +214,7 @@ Metadata::Dispose(void)
 void
 Metadata::Shutdown(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
+    int eventId = static_cast<int>(POS_EVENT_ID::UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start shutdown allocator of array {}", arrayName);

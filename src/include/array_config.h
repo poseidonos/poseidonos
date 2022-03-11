@@ -42,7 +42,6 @@ class ArrayConfig
 public:
     static const uint32_t NVM_DEVICE_COUNT = 1;
     static const uint64_t MINIMUM_SSD_SIZE_BYTE = 20UL * SIZE_GB;
-    static const uint64_t MAXIMUM_SSD_SIZE_BYTE = 32UL * SIZE_TB;
     static const uint64_t MINIMUM_NVM_SIZE_BYTE = 2UL * SIZE_GB;
     static const uint32_t SECTOR_SIZE_BYTE = 512;
     static const uint32_t BLOCK_SIZE_BYTE = 4096;

@@ -90,7 +90,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 
     int result = bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
 
-    if ((int)POS_EVENT_ID::SUCCESS == result)
+    if (EID(SUCCESS) == result)
     {
         int groupId = bufferAllocator->GetLogGroupId(allocatedOffset);
         uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
@@ -99,7 +99,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
 
         result = logBuffer->WriteLog(context);
-        if ((int)POS_EVENT_ID::SUCCESS == result)
+        if (EID(SUCCESS) == result)
         {
             numIosRequested++;
         }

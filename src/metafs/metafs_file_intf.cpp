@@ -82,7 +82,7 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_READ_FAILED;
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 int
@@ -94,7 +94,7 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_WRITE_FAILED;
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 uint32_t
@@ -191,7 +191,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 int
 MetaFsFileIntf::CheckIoDoneStatus(void* data)
 {
-    int error = (int)POS_EVENT_ID::SUCCESS;
+    int error = EID(SUCCESS);
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (asyncCtx->CheckIOError())
     {
@@ -213,7 +213,7 @@ MetaFsFileIntf::Create(uint64_t fileSize)
 
     size = fileSize;
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 int
@@ -260,7 +260,7 @@ MetaFsFileIntf::Delete(void)
         return -(int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 uint64_t

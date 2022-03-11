@@ -42,7 +42,7 @@ TEST_F(VolumeTest, CreateNormalTest)
     std::string vol_name = "mytestvol";
 
     int res = volMgr->Create(vol_name, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
     // cleanup for next test
     volMgr->Delete(vol_name);
 }
@@ -121,7 +121,7 @@ TEST_F(VolumeTest, DeleteNormalTest)
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE,  0, 0);
     int res = volMgr->Delete(vol_name);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
 }
 
 TEST_F(VolumeTest, TryToDeleteInvalidVolumeTest)
@@ -148,7 +148,7 @@ TEST_F(VolumeTest, UpdateVolumeQoSNormalTest)
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0);
     int res = volMgr->UpdateQoS(vol_name, 100, 200, 10, 20);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
 
     // cleanup for next test
     volMgr->Delete(vol_name);
@@ -173,7 +173,7 @@ TEST_F(VolumeTest, RenameNormalTest)
     std::string new_vol_name = "new_testvol";
     volMgr->Create(old_vol_name, SIZE, 0, 0);
     int res = volMgr->Rename(old_vol_name, new_vol_name);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
     res = volMgr->VolumeID(new_vol_name);
     EXPECT_TRUE(res == 0);
 
@@ -237,7 +237,7 @@ TEST_F(VolumeTest, MountVolumeNormalTest)
     std::string volName = "testvol";
     volMgr->Create(volName, SIZE, 0, 0);
     int res = volMgr->Mount(volName, NQN);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
     // cleanup for next test
     volMgr->Unmount(volName);
     volMgr->Delete(volName);
@@ -269,7 +269,7 @@ TEST_F(VolumeTest, UnmountVolumeNormalTest)
     volMgr->Create(volName, SIZE, 0, 0);
     volMgr->Mount(volName, NQN);
     int res = volMgr->Unmount(volName);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_TRUE(res == EID(SUCCESS));
     // cleanup for next test
     volMgr->Delete(volName);
 }

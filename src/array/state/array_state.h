@@ -58,14 +58,12 @@ public:
     virtual void SetDelete(void);
     virtual bool SetRebuild(void);
     virtual void SetRebuildDone(bool isSuccess);
-    virtual int SetMount(void);
-    virtual int SetUnmount(void);
+    virtual void SetMount(void);
+    virtual void SetUnmount(void);
     virtual void SetDegraded(void);
 
     virtual int CanAddSpare(void);
     virtual int CanRemoveSpare(void);
-    virtual int IsLoadable(void);
-    virtual int IsCreatable(void);
     virtual int IsMountable(void);
     virtual int IsUnmountable(void);
     virtual int IsDeletable(void);

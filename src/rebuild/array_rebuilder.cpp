@@ -47,23 +47,23 @@ void
 ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
                         RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuilder::Rebuild {}, {} target partitions", array, tgt.size());
 
     if (_Find(array) != nullptr)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
             "The rebuild of the same Array is not completed and a new rebuild is submitted");
         return;
     }
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuilder::Rebuild, start job");
 
     mtxStart.lock();
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuilder::Rebuild, PrepareRebuild, isResume: {}, ret:{}", resume, ret);
 
     if (ret == EID(REBUILD_INVALIDATED))
@@ -101,13 +101,13 @@ void
 ArrayRebuilder::StopRebuild(string array)
 {
     mtxStart.lock();
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuilder::StopRebuild, Try");
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
     {
         jobInProg->Stop();
-        POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
             "ArrayRebuilder::StopRebuild, {}", array);
     }
     mtxStart.unlock();
@@ -125,7 +125,7 @@ ArrayRebuilder::RebuildDone(RebuildResult result)
         delete job;
         jobsInProgress.erase(array);
     }
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuilder::RebuildDone {}, inProgressCnt:{}",
         array, jobsInProgress.size());
     cv.notify_all();

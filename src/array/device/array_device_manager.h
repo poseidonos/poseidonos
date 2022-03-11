@@ -76,7 +76,6 @@ public:
     void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
 
 private:
-    int _CheckDevs(const ArrayDeviceSet& devSet);
     int _CheckConstraints(ArrayDeviceList* devs);
     int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
     int _CheckNvmCapacity(const ArrayDeviceSet& devSet);

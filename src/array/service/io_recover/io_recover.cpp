@@ -61,7 +61,7 @@ IORecover::Register(unsigned int arrayIndex, ArrayRecover recov)
 {
     if (recoveries[arrayIndex].empty())
     {
-        int eventId = (int)POS_EVENT_ID::RECOVER_DEBUG_MSG;
+        int eventId = (int)POS_EVENT_ID::IO_RECOVER_DEBUG_MSG;
         if (recov.empty())
         {
             POS_TRACE_WARN(eventId,
@@ -79,7 +79,7 @@ IORecover::Register(unsigned int arrayIndex, ArrayRecover recov)
 void
 IORecover::Unregister(unsigned int arrayIndex)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
+    POS_TRACE_INFO((int)POS_EVENT_ID::IO_RECOVER_DEBUG_MSG,
         "IORecover::Unregister, array:{}", arrayIndex);
     recoveries[arrayIndex].clear();
 }
@@ -90,7 +90,7 @@ IORecover::GetRecoverMethod(unsigned int arrayIndex, UbioSmartPtr ubio, RecoverM
     ArrayRecover* recover = &recoveries[arrayIndex];
     if (recover->empty())
     {
-        return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+        return EID(IO_RECOVER_NOT_FOUND);
     }
 
     int ret = 0;

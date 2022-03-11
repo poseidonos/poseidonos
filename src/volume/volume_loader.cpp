@@ -58,7 +58,7 @@ VolumeLoader::Do(void)
     volumeList.Clear();
 
     int ret = VolumeMetaIntf::LoadVolumes(volumeList, arrayName, arrayID);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != EID(SUCCESS))
     {
         return ret;
     }
@@ -92,6 +92,6 @@ VolumeLoader::Do(void)
         }
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 } // namespace pos

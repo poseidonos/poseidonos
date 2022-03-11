@@ -39,7 +39,7 @@
 namespace pos_cli
 {
 static const int FAIL = -1;
-static const int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
+static const int SUCCESS = EID(SUCCESS);
 static const int BADREQUEST = 400000;
 static const int INTERNAL_ERROR = 500000;
 }; // namespace pos_cli

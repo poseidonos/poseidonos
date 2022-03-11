@@ -66,7 +66,6 @@ private:
 
     static PosEventIdEntry RESERVED_EVENT_ENTRY;
     static PosEventIdEntry SYSTEM_EVENT_ENTRY[(int)POS_EVENT_ID::SYSTEM_COUNT];
-    static PosEventIdEntry ARRAY_EVENT_ENTRY[(int)POS_EVENT_ID::ARRAY_COUNT];
     static PosEventIdEntry QOS_EVENT_ENTRY[(int)POS_EVENT_ID::QOS_COUNT];
     static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[(int)POS_EVENT_ID::IONVMF_COUNT];
     static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOFRONTEND_COUNT];

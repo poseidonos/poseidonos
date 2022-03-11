@@ -86,23 +86,24 @@ Array::~Array(void)
 int
 Array::Load(void)
 {
+    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Trying to load Array({})", name_);
     pthread_rwlock_wrlock(&stateLock);
     int ret = _LoadImpl();
     pthread_rwlock_unlock(&stateLock);
     if (ret != 0)
     {
-        if (ret == (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND)
+        if (ret == EID(LOAD_ARRAY_NVM_DOES_NOT_EXIST))
         {
-            POS_TRACE_ERROR(ret, "Failed to load array {}, check uram creation or pmem state", name_);
+            POS_TRACE_ERROR(ret, "Unable to load array({}), check uram creation or pmem state", name_);
         }
         else
         {
-            POS_TRACE_ERROR(ret, "Failed to load array {}", name_);
+            POS_TRACE_ERROR(ret, "Unable to load array({})", name_);
         }
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} loaded successfully", name_);
+        POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Array({}) loaded successfully", name_);
     }
     return ret;
 }
@@ -110,16 +111,10 @@ Array::Load(void)
 int
 Array::_LoadImpl(void)
 {
-    int ret = state->IsLoadable();
-    if (ret != 0)
-    {
-        return ret;
-    }
-
     devMgr_->Clear();
     ArrayMeta meta;
     meta.arrayName = name_;
-    ret = abrControl->LoadAbr(meta);
+    int ret = abrControl->LoadAbr(meta);
     if (ret != 0)
     {
         return ret;
@@ -128,11 +123,6 @@ Array::_LoadImpl(void)
     {
         index_ = meta.id;
         uniqueId = meta.unique_id;
-        if (!_CheckIndexIsValid())
-        {
-            ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
-            return ret;
-        }
     }
 
     ret = devMgr_->Import(meta.devs);
@@ -142,7 +132,7 @@ Array::_LoadImpl(void)
         return ret;
     }
 
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "MetaRaid:{}, DataRaid:{}", meta.metaRaidType, meta.dataRaidType);
+    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Array({}) is loaded from ABR, metaRaid:{}, dataRaid:{}", name_, meta.metaRaidType, meta.dataRaidType);
     ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
     if (ret != 0)
     {
@@ -158,6 +148,7 @@ Array::_LoadImpl(void)
 int
 Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({})", name_);
     int ret = 0;
     bool needSpare = true;
     ArrayMeta meta;
@@ -165,16 +156,10 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
-    ret = state->IsCreatable();
-    if (ret != 0)
-    {
-        goto error;
-    }
-
     needSpare = RaidType(dataFt) != RaidTypeEnum::NONE && RaidType(dataFt) != RaidTypeEnum::RAID0;
     if (needSpare == false && nameSet.spares.size() > 0)
     {
-        ret = EID(ARRAY_NO_NEED_SPARE);
+        ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
         POS_TRACE_INFO(ret, "Unnecessary spare device requested. RaidType {} does not require spare device", dataFt);
         goto error;
     }
@@ -186,7 +171,7 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     }
 
     ret = namePolicy.CheckArrayName(name_);
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != EID(SUCCESS))
     {
         goto error;
     }
@@ -207,12 +192,6 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     else
     {
         index_ = meta.id;
-        if (!_CheckIndexIsValid())
-        {
-            ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
-            pthread_rwlock_unlock(&stateLock);
-            return ret;
-        }
     }
 
     ret = _Flush(meta);
@@ -231,13 +210,13 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} is successfully created", name_);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Array({}) is created successfully", name_);
     return 0;
 
 error:
     devMgr_->Clear();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_ERROR(ret, "failed to create array {}", name_);
+    POS_TRACE_ERROR(ret, "Unable to create array({})", name_);
     return ret;
 }
 
@@ -246,7 +225,7 @@ Array::Init(void)
 {
     // TODO(hsung.yang) MOUNTSEQUENCE: rollback sequence for array mount
     // pthread_rwlock_wrlock(&stateLock);
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Array {} Init", name_);
+    POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Trying to mount array({})", name_);
 
     int ret = state->IsMountable();
     if (ret != 0)
@@ -262,13 +241,13 @@ Array::Init(void)
 
     state->SetMount();
     // pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully mounted with index {}", name_, index_);
+    POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Array({}) is mounted successfully (id:{})", name_, index_);
     return ret;
 
 error:
     _UnregisterService();
     // pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_ERROR(ret, "Failed to mount array {}", name_);
+    POS_TRACE_ERROR(ret, "Unable to mount array({})", name_);
     return ret;
 }
 
@@ -276,39 +255,42 @@ void
 Array::Dispose(void)
 {
     // pthread_rwlock_wrlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Dispose array {}", name_);
+    POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Trying to unmount array({})", name_);
     _UnregisterService();
     state->SetUnmount();
     isWTEnabled = false;
+    POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Array({}) is unmounted successfully", name_);
     // pthread_rwlock_unlock(&stateLock);
 }
 
 void
 Array::Shutdown(void)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Shutdown array {}", name_);
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Trying to shut down broken array({})", name_);
     _UnregisterService();
     shutdownFlag = 1;
     isWTEnabled = false;
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Broken array({}) shuts down successfully", name_);
 }
 
 void
 Array::Flush(void)
 {
+    POS_TRACE_INFO(EID(UPDATE_ABR_DEBUG_MSG), "Flush: trying to update array({}) configuration", name_);
     int ret = _Flush();
     if (0 != ret)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array Flush Failed");
+        POS_TRACE_ERROR(ret, "Flush: unable to update array({}) configuration", name_);
+        return;
     }
-    else
-    {
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array Flush Succeeded");
-    }
+
+    POS_TRACE_INFO(EID(UPDATE_ABR_DEBUG_MSG), "Flush: array({}) configuration is updated successfully", name_);
 }
 
 int
 Array::Delete(void)
 {
+    POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Trying to delete array({})", name_);
     pthread_rwlock_wrlock(&stateLock);
     int ret = state->IsDeletable();
     if (ret != 0)
@@ -319,7 +301,7 @@ Array::Delete(void)
     // Rebuild would not be finished when rebuild io have an error on broken array
     if (rebuilder->IsRebuilding(name_))
     {
-        ret = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
+        ret = EID(DELETE_ARRAY_DEBUG_MSG);
         goto error;
     }
 
@@ -328,13 +310,13 @@ Array::Delete(void)
         int waitcount = 0;
         while (shutdownFlag == 0) // Broken State automatically triggers Shutdown to all array components
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Wait for shutdown done");
+            POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Wait for shutdown done");
             usleep(100000);
             waitcount++;
 
             if (waitcount > 50)
             {
-                ret = (int)POS_EVENT_ID::ARRAY_SHUTDOWN_TAKES_TOO_LONG;
+                ret = EID(DELETE_ARRAY_TIMED_OUT);
                 goto error;
             }
         }
@@ -347,12 +329,12 @@ Array::Delete(void)
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully deleted", name_);
+    POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Array({}) is deleted successfully", name_);
     return 0;
 
 error:
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_ERROR(ret, "Failed to delete array {}", name_);
+    POS_TRACE_ERROR(ret, "Unable to delete array({})", name_);
     return ret;
 }
 
@@ -365,8 +347,8 @@ Array::AddSpare(string devName)
     bool needSpare = RaidType(raidType) != RaidTypeEnum::NONE && RaidType(raidType) != RaidTypeEnum::RAID0;
     if (needSpare == false)
     {
-        ret = EID(ARRAY_NO_NEED_SPARE);
-        POS_TRACE_WARN(ret, "The Array {} does not support spare devices, RAIDTYPE:{}", name_, raidType);
+        ret = EID(ADD_SPARE_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
+        POS_TRACE_WARN(ret, "Array({}) does not support spare devices, RAIDTYPE:{}", name_, raidType);
         return ret;
     }
 
@@ -374,7 +356,7 @@ Array::AddSpare(string devName)
     if (ret != 0)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}", name_);
+        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
         return ret;
     }
 
@@ -383,7 +365,7 @@ Array::AddSpare(string devName)
     if (dev == nullptr)
     {
         pthread_rwlock_unlock(&stateLock);
-        int eid = (int)POS_EVENT_ID::ARRAY_DEVICE_WRONG_NAME;
+        int eid = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
         POS_TRACE_ERROR(eid, "Cannot find the requested device named {}", devName);
         return eid;
     }
@@ -393,8 +375,8 @@ Array::AddSpare(string devName)
     if (involvedArray != "")
     {
         pthread_rwlock_unlock(&stateLock);
-        ret = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
-        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}, it's already in other array {}", name_, involvedArray);
+        ret = EID(MBR_DEVICE_ALREADY_IN_ARRAY);
+        POS_TRACE_ERROR(ret, "Unable to add spare device to array({}), it's already in other array({})", name_, involvedArray);
         return ret;
     }
 
@@ -402,14 +384,14 @@ Array::AddSpare(string devName)
     if (0 != ret)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}", name_);
+        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
         return ret;
     }
     ret = _Flush();
     if (0 != ret)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}", name_);
+        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
         return ret;
     }
 
@@ -419,7 +401,7 @@ Array::AddSpare(string devName)
         eventScheduler->EnqueueEvent(event);
     }
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_ADDED, "Spare device was successfully added to array {}", name_);
+    POS_TRACE_INFO(EID(ADD_SPARE_DEBUG_MSG), "Spare device was successfully added to array({})", name_);
 
     return 0;
 }
@@ -447,13 +429,13 @@ Array::RemoveSpare(string devName)
 
     pthread_rwlock_unlock(&stateLock);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_REMOVED,
-        "The spare device {} removed from array {}", devName, name_);
+    POS_TRACE_INFO(EID(REMOVE_SPARE_DEBUG_MSG),
+        "The spare device {} removed from array({})", devName, name_);
     return 0;
 
 error:
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_ERROR(ret, "Failed to remove spare device {} from array {}", devName, name_);
+    POS_TRACE_ERROR(ret, "Unable to remove spare device {} from array({})", devName, name_);
     return ret;
 }
 
@@ -557,7 +539,7 @@ Array::_Flush(void)
 int
 Array::_Flush(ArrayMeta& meta)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Trying to save Array to MBR, name:{}, metaRaid:{}, dataRaid:{}",
+    POS_TRACE_INFO(EID(UPDATE_ABR_DEBUG_MSG), "Trying to save Array to MBR, name:{}, metaRaid:{}, dataRaid:{}",
         meta.arrayName, meta.metaRaidType, meta.dataRaidType);
     return abrControl->SaveAbr(meta);
 }
@@ -627,10 +609,10 @@ Array::DetachDevice(UblockSharedPtr uBlock)
     {
         case ArrayDeviceType::SPARE:
         {
+            POS_TRACE_INFO(EID(ARRAY_EVENT_SPARE_SSD_DETACHED),
+                    "Spare-device {} is detached from array({})", devName, name_);
             if (pthread_rwlock_trywrlock(&stateLock) == 0)
             {
-                POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
-                    "Spare-device {} is detached from array {}", devName, name_);
                 _DetachSpare(dev);
                 pthread_rwlock_unlock(&stateLock);
             }
@@ -643,6 +625,8 @@ Array::DetachDevice(UblockSharedPtr uBlock)
         }
         case ArrayDeviceType::DATA:
         {
+            POS_TRACE_INFO(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
+                    "Data-device {} is detached from array({})", devName, name_);
             if (pthread_rwlock_trywrlock(&stateLock) == 0)
             {
                 if (dev->GetState() != ArrayDeviceState::FAULT)
@@ -659,9 +643,9 @@ Array::DetachDevice(UblockSharedPtr uBlock)
         }
         default:
         {
-            eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED;
+            eventId = EID(ARRAY_EVENT_NVM_DETACHED);
             POS_TRACE_ERROR(eventId,
-                "Not allowed device {} is detached from array {}", devName, name_);
+                "Not allowed device {} is detached from array({})", devName, name_);
             break;
         }
     }
@@ -684,12 +668,6 @@ Array::CheckUnmountable(void)
     return state->IsUnmountable();
 }
 
-int
-Array::CheckDeletable(void)
-{
-    return state->IsDeletable();
-}
-
 void
 Array::_CheckRebuildNecessity(void)
 {
@@ -700,13 +678,13 @@ Array::_CheckRebuildNecessity(void)
         if (rebuildDevice->GetUblock() != nullptr)
         {
             devName = rebuildDevice->GetUblock()->GetSN();
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Resume Rebuild with rebuildDevice {}", devName);
+            POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild with rebuildDevice {}", devName);
             EventSmartPtr event(new RebuildHandler(this, rebuildDevice));
             eventScheduler->EnqueueEvent(event);
         }
         else
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Resume Rebuild without rebuildDevice");
+            POS_TRACE_ERROR(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild without rebuildDevice");
         }
     }
     else
@@ -746,8 +724,8 @@ Array::_DetachSpare(ArrayDevice* target)
 void
 Array::_DetachData(ArrayDevice* target)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
-        "Data device {} is detached from array {}", target->GetUblock()->GetName(), name_);
+    POS_TRACE_INFO(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
+        "Data device {} is detached from array({})", target->GetUblock()->GetName(), name_);
 
     ArrayDeviceState devState = target->GetState();
     if (devState == ArrayDeviceState::FAULT)
@@ -773,7 +751,7 @@ Array::_DetachData(ArrayDevice* target)
 
     if (needStopRebuild || state->IsBroken())
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
+        POS_TRACE_INFO(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
             "Stop the rebuild due to detachment of the rebuild target device or Array broken");
         rebuilder->StopRebuild(name_);
     }
@@ -787,23 +765,23 @@ Array::_DetachData(ArrayDevice* target)
 void
 Array::_RebuildDone(RebuildResult result)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Array {} rebuild done. result:{}", name_, result.result);
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
+        "Array({}) rebuild done. result:{}", name_, result.result);
     rebuilder->RebuildDone(result);
     pthread_rwlock_wrlock(&stateLock);
     if (result.result != RebuildState::PASS)
     {
         state->SetRebuildDone(false);
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "Array {} rebuild done. but result:{} . Retry ", name_, result.result);
+        POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
+            "Array({}) rebuild done. but result:{} . Retry ", name_, result.result);
         EventSmartPtr event(new RebuildHandler(this, nullptr));
         eventScheduler->EnqueueEvent(event);
         return;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Array {} rebuild done. as success.", name_, result.result);
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
+        "Array({}) rebuild done. as success.", name_, result.result);
 
     bool needRebuildAgain = false;
     if (result.target->GetState() != ArrayDeviceState::FAULT)
@@ -813,7 +791,7 @@ Array::_RebuildDone(RebuildResult result)
     else
     {
         needRebuildAgain = true;
-        POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        POS_TRACE_WARN(EID(REBUILD_ARRAY_DEBUG_MSG),
             "The rebuild {} is done, but it needs to rebuild again since the target device was detached during a rebuilding.",
             name_);
     }
@@ -822,7 +800,7 @@ Array::_RebuildDone(RebuildResult result)
     int ret = _Flush();
     if (0 != ret)
     {
-        POS_TRACE_ERROR(ret, "Array {} failed to update the device state", name_);
+        POS_TRACE_ERROR(ret, "Unable to update the device state of array({})", name_);
     }
     if (needRebuildAgain)
     {
@@ -835,7 +813,7 @@ Array::_RebuildDone(RebuildResult result)
 bool
 Array::TriggerRebuild(ArrayDevice* target)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Trigger Rebuild Start");
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Trigger Rebuild Start");
     bool retry = false;
 
     pthread_rwlock_wrlock(&stateLock);
@@ -888,7 +866,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     }
     pthread_rwlock_unlock(&stateLock);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
     uint32_t arrId = index_;
@@ -901,14 +879,14 @@ Array::TriggerRebuild(ArrayDevice* target)
     });
 
     t.detach();
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Trigger Rebuild End");
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Trigger Rebuild End");
     return retry;
 }
 
 bool
 Array::ResumeRebuild(ArrayDevice* target)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Resume Rebuild Start");
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild Start");
 
     pthread_rwlock_wrlock(&stateLock);
     assert(target != nullptr);
@@ -916,14 +894,14 @@ Array::ResumeRebuild(ArrayDevice* target)
     if (state->SetRebuild() == false)
     {
         POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
-            "Failed to resume rebuild. Array {}'s state is not rebuildable", name_);
+            "Failed to resume rebuild. Array({})'s state is not rebuildable", name_);
         pthread_rwlock_unlock(&stateLock);
         return false;
     }
 
     pthread_rwlock_unlock(&stateLock);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::ARRAY_DEBUG_MSG, "Preparing Rebuild");
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_ARRAY_DEBUG_MSG, "Preparing Rebuild");
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
     uint32_t arrId = index_;
@@ -936,7 +914,7 @@ Array::ResumeRebuild(ArrayDevice* target)
     });
 
     t.detach();
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Resume Rebuild End");
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild End");
     return true;
 }
 
@@ -958,7 +936,7 @@ Array::_RegisterService(void)
         }
     }
 
-    return (int)POS_EVENT_ID::ARRAY_SERVICE_REGISTRATION_FAIL;
+    return EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_ARRAY_SERVICE);
 }
 
 void
@@ -970,15 +948,4 @@ Array::_UnregisterService(void)
         IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
     }
 }
-
-bool
-Array::_CheckIndexIsValid(void)
-{
-    if (index_ < ArrayMgmtPolicy::MAX_ARRAY_CNT)
-    {
-        return true;
-    }
-    return false;
-}
-
 } // namespace pos

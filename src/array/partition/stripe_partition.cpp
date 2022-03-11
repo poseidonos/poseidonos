@@ -70,7 +70,7 @@ StripePartition::~StripePartition(void)
 int
 StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "StripePartition::Create, RaidType:{}", RaidType(raidType).ToString());
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "StripePartition::Create, RaidType:{}", RaidType(raidType).ToString());
 
     if (raidType == RaidTypeEnum::RAID10 && 0 != devs.size() % 2)
     {
@@ -94,7 +94,7 @@ StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlk
 void
 StripePartition::RegisterService(IPartitionServices* svc)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
     svc->AddTranslator(type, this);
     if (method->IsRecoverable() == true)
     {
@@ -103,7 +103,7 @@ StripePartition::RegisterService(IPartitionServices* svc)
     }
     else
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target", 
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target",
             PARTITION_TYPE_STR[type], RaidType(raidType).ToString());
     }
 }
@@ -113,7 +113,7 @@ StripePartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
 {
     if (false == _IsValidEntry(le.addr.stripeId, le.addr.offset, le.blkCnt))
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
             PARTITION_TYPE_STR[type], raidType, le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
@@ -130,14 +130,14 @@ StripePartition::GetParityList(list<PhysicalWriteEntry>& parityList, const Logic
 {
     if (false == _IsValidEntry(src.addr.stripeId, src.addr.offset, src.blkCnt))
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
             PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
     if (src.blkCnt < logicalSize.minWriteBlkCnt)
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_TRANSLATION_INVALID_BLK_CNT);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity 2. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
             PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
@@ -171,7 +171,7 @@ StripePartition::_SetPhysicalAddress(uint64_t startLba, uint32_t segCnt)
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
     physicalSize.totalSegments = segCnt;
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}",
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}",
         startLba, RaidType(raidType).ToString(), physicalSize.totalSegments);
 
     return 0;
@@ -212,11 +212,11 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
         uint64_t maxGcStripes = 2048;
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
         if (raid5->AllocParityPools(totalNvmStripes + maxGcStripes) == false)
         {
             delete raid5;
-            int eventId = EID(ARRAY_PARTITION_CREATION_ERROR);
+            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
             POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\". Buffer pool allocation failed.");
             return eventId;
         }
@@ -229,7 +229,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     }
     else
     {
-        int eventId = EID(ARRAY_WRONG_FT_METHOD);
+        int eventId = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
         POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
         return eventId;
     }
@@ -237,7 +237,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     size_t numofDevs = devs.size();
     if (method->CheckNumofDevsToConfigure(numofDevs) == false)
     {
-        int eventId = EID(ARRAY_DEVICE_COUNT_ERROR);
+        int eventId = EID(CREATE_ARRAY_RAID_INVALID_SSD_CNT);
         POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, actual:{}",
             numofDevs);
         delete method;
@@ -424,20 +424,29 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 {
     uint64_t lba = ubio->GetLba();
     ArrayDevice* dev = static_cast<ArrayDevice*>(ubio->GetArrayDev());
-    if (IsValidLba(lba) && (FindDevice(dev) >= 0))
+    if (IsValidLba(lba))
     {
-        // Chunk Aliging check
-        const uint32_t sectorSize = ArrayConfig::SECTOR_SIZE_BYTE;
-        const uint32_t sectorsPerBlock = ArrayConfig::SECTORS_PER_BLOCK;
+        if (FindDevice(dev) >= 0)
+        {
+            // Chunk Aliging check
+            const uint32_t sectorSize = ArrayConfig::SECTOR_SIZE_BYTE;
+            const uint32_t sectorsPerBlock = ArrayConfig::SECTORS_PER_BLOCK;
 
-        PhysicalBlkAddr originPba = ubio->GetPba();
-        BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
-        originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
-        FtBlkAddr fba = _Pba2Fba(originPba);
-        out.srcAddr = _GetRebuildGroup(fba);
-        out.recoverFunc = method->GetRecoverFunc();
+            PhysicalBlkAddr originPba = ubio->GetPba();
+            BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
+            originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
+            FtBlkAddr fba = _Pba2Fba(originPba);
+            out.srcAddr = _GetRebuildGroup(fba);
+            out.recoverFunc = method->GetRecoverFunc();
 
-        return (int)POS_EVENT_ID::SUCCESS;
+            return EID(SUCCESS);
+        }
+        else
+        {
+            int error = EID(RECOVER_REQ_DEV_NOT_FOUND);
+            POS_TRACE_ERROR(error, "Failed to get recover method for {} partition, lba:{}", PARTITION_TYPE_STR[type], lba);
+            return error;
+        }
     }
     else
     {

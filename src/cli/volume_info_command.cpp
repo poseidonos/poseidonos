@@ -71,12 +71,12 @@ VolumeInfoCommand::Execute(json& doc, string rid)
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+        POS_TRACE_WARN(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME),
             "Failed to get a ComponentsInfo instance."
                 " array name: " + arrayName);
 
         return jFormat.MakeResponse(
-            "VOLUMEINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+            "VOLUMEINFO", rid, EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME),
                 "Array does not exist. array name: " + arrayName,
                 GetPosInfo());
     }

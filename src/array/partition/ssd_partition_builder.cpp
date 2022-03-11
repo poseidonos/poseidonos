@@ -45,9 +45,8 @@ namespace pos
 int
 SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {}", option.devices.size());
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Create StripePartition ({})", PARTITION_TYPE_STR[option.partitionType]);
-    int ret = EID(ARRAY_PARTITION_CREATION_ERROR);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {}", option.devices.size());
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Create StripePartition ({})", PARTITION_TYPE_STR[option.partitionType]);
     Partition* base = nullptr;
     StripePartition* impl = new StripePartition(option.partitionType, option.devices, option.raidType);
     uint64_t totalNvmBlks = 0;
@@ -55,7 +54,7 @@ SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
     {
         totalNvmBlks = option.nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
     }
-    ret = impl->Create(startLba, _GetSegmentCount(), totalNvmBlks);
+    int ret = impl->Create(startLba, _GetSegmentCount(), totalNvmBlks);
     base = impl;
     if (ret != 0)
     {
@@ -86,7 +85,7 @@ SsdPartitionBuilder::_GetSegmentCount(void)
     uint64_t maxCapa = _GetMaxCapacity(option.devices);
     if (baseCapa != maxCapa)
     {
-        POS_TRACE_WARN(EID(ARRAY_DEBUG_MSG), "Partitions are constructed with hetero device sizes, resulting in truncation. max:{}, min:{}",
+        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "Partitions are constructed with hetero device sizes, resulting in truncation. max:{}, min:{}",
             maxCapa, baseCapa);
     }
 

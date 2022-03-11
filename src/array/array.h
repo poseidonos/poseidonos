@@ -86,7 +86,6 @@ public:
     virtual int DetachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(bool isWT);
     virtual int CheckUnmountable(void);
-    virtual int CheckDeletable(void);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
@@ -120,7 +119,6 @@ private:
     int _RegisterService(void);
     void _UnregisterService(void);
     void _CheckRebuildNecessity(void);
-    bool _CheckIndexIsValid(void);
 
     ArrayState* state = nullptr;
     PartitionServices* svc = nullptr;

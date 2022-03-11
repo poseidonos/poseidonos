@@ -112,44 +112,44 @@ ArrayComponents::ArrayComponents(string arrayName,
 
 ArrayComponents::~ArrayComponents(void)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Deleting array component for {}", arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Deleting array component for {}", arrayName);
 
     if (info != nullptr)
     {
         delete info;
         info = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "ComponentsInfo for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "ComponentsInfo for {} has been deleted.", arrayName);
     }
     _DestructMetaComponentsInOrder();
     if (arrayMountSequence != nullptr)
     {
         delete arrayMountSequence;
         arrayMountSequence = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "ArrayMountSequence for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "ArrayMountSequence for {} has been deleted.", arrayName);
     }
 
     if (array != nullptr)
     {
         delete array;
         array = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Array for {} has been deleted.", arrayName);
     }
 
     if (state != nullptr)
     {
         state = nullptr; // we don't do "delete state" since it should be done by StateManager
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateControl for {} has been nullified.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "StateControl for {} has been nullified.", arrayName);
     }
 
     if (telPublisher != nullptr)
     {
         delete telPublisher;
         telPublisher = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "telemetryPublisher for {} has been nullified.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "telemetryPublisher for {} has been nullified.", arrayName);
     }
 
     stateMgr->RemoveStateControl(arrayName);
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
 }
 
 ComponentsInfo*
@@ -161,7 +161,7 @@ ArrayComponents::GetInfo(void)
 int
 ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Creating array component for {}", arrayName);
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Creating array component for {}", arrayName);
     int ret = array->Create(nameSet, metaFt, dataFt);
     if (ret != 0)
     {
@@ -171,14 +171,14 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
     _SetMountSequence();
 
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been created.", arrayName);
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Array components for {} have been created.", arrayName);
     return 0;
 }
 
 int
 ArrayComponents::Load(void)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Loading array components for " + arrayName);
+    POS_TRACE_DEBUG(EID(LOAD_ARRAY_DEBUG_MSG), "Loading array components for " + arrayName);
     int ret = array->Load();
     if (ret != 0)
     {
@@ -188,7 +188,7 @@ ArrayComponents::Load(void)
     _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
     _SetMountSequence();
 
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
+    POS_TRACE_DEBUG(EID(LOAD_ARRAY_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
     return 0;
 }
 
@@ -266,7 +266,7 @@ ArrayComponents::_SetMountSequence(void)
     IStateControl* state = stateMgr->GetStateControl(arrayName);
     if (arrayMountSequence != nullptr)
     {
-        POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Memory leakage found for ArrayMountSequence for " + arrayName);
+        POS_TRACE_WARN(EID(ARRAY_COMPO_DEBUG_MSG), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
     arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayRebuilder);
 }
@@ -284,7 +284,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || info != nullptr
         || smartLogMetaIo != nullptr)
     {
-        POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
+        POS_TRACE_WARN(EID(ARRAY_COMPO_DEBUG_MSG), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
     }
 
@@ -308,49 +308,49 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
     {
         delete gc;
         gc = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "GarbageCollector for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "GarbageCollector for {} has been deleted.", arrayName);
     }
 
     if (flowControl != nullptr)
     {
         delete flowControl;
         flowControl = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "FlowControl for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "FlowControl for {} has been deleted.", arrayName);
     }
 
     if (rbaStateMgr != nullptr)
     {
         delete rbaStateMgr;
         rbaStateMgr = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "RbaStateManager for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "RbaStateManager for {} has been deleted.", arrayName);
     }
 
     if (meta != nullptr)
     {
         delete meta;
         meta = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Metadata for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Metadata for {} has been deleted.", arrayName);
     }
 
     if (nvmf != nullptr)
     {
         delete nvmf;
         nvmf = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
     }
 
     if (volMgr != nullptr)
     {
         delete volMgr;
         volMgr = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "VolumeManager for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "VolumeManager for {} has been deleted.", arrayName);
     }
 
     if (metafs != nullptr)
     {
         delete metafs;
         metafs = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "MetaFs for {} has been deleted.", arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "MetaFs for {} has been deleted.", arrayName);
     }
 }
 

@@ -42,7 +42,7 @@ namespace pos_logger
 uint32_t
 Configuration::LogSizePerFileInMB()
 {
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
+    int SUCCESS = EID(SUCCESS);
     uint32_t size_mb = SIZE_MB;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "logfile_size_in_mb",
         &size_mb, ConfigType::CONFIG_TYPE_UINT32);
@@ -59,7 +59,7 @@ Configuration::LogSizePerFileInMB()
 uint32_t
 Configuration::NumOfLogFilesForRotation()
 {
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
+    int SUCCESS = EID(SUCCESS);
     uint32_t rotation = ROTATION;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "logfile_rotation_count",
         &rotation, ConfigType::CONFIG_TYPE_UINT32);
@@ -76,7 +76,7 @@ Configuration::NumOfLogFilesForRotation()
 string
 Configuration::LogLevel()
 {
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
+    int SUCCESS = EID(SUCCESS);
     string loglvl = "";
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "min_allowable_log_level",
         &loglvl, ConfigType::CONFIG_TYPE_STRING);
@@ -90,7 +90,7 @@ Configuration::LogLevel()
 bool
 Configuration::IsStrLoggingEnabled()
 {
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
+    int SUCCESS = EID(SUCCESS);
     bool enable_structured_logging = false;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "enable_structured_logging",
         &enable_structured_logging, ConfigType::CONFIG_TYPE_BOOL);

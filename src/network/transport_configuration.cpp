@@ -69,16 +69,16 @@ void
 TransportConfiguration::ReadConfig(void)
 {
     int ret = configManager->GetValue("transport", "type", &trtype, ConfigType::CONFIG_TYPE_STRING);
-    if ((int)POS_EVENT_ID::SUCCESS == ret)
+    if (EID(SUCCESS) == ret)
     {
         ret = configManager->GetValue("transport", "buf_cache_size", &bufCacheSize, ConfigType::CONFIG_TYPE_UINT32);
-        if ((int)POS_EVENT_ID::SUCCESS != ret)
+        if (EID(SUCCESS) != ret)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
             POS_TRACE_WARN(static_cast<uint32_t>(eventId), "Fail to read transport config. Default buf_cache_size: {}", bufCacheSize);
         }
         ret = configManager->GetValue("transport", "num_shared_buffer", &numSharedBuf, ConfigType::CONFIG_TYPE_UINT32);
-        if ((int)POS_EVENT_ID::SUCCESS != ret)
+        if (EID(SUCCESS) != ret)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
             POS_TRACE_WARN(static_cast<uint32_t>(eventId),
@@ -116,7 +116,7 @@ TransportConfiguration::_IsEnabled(void)
 {
     bool enabled = false;
     int ret = configManager->GetValue("transport", "enable", &enabled, ConfigType::CONFIG_TYPE_BOOL);
-    if ((int)POS_EVENT_ID::SUCCESS != ret)
+    if (EID(SUCCESS) != ret)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
         POS_TRACE_WARN(static_cast<uint32_t>(eventId), "Fail to read transport config. Need to create tranport manually.");

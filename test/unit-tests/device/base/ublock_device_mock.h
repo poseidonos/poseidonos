@@ -31,7 +31,6 @@ public:
     MOCK_METHOD(int, GetNuma, (), (override));
     MOCK_METHOD(DeviceProperty, GetProperty, (), (override));
     MOCK_METHOD(void, SetClass, (DeviceClass cls), (override));
-    MOCK_METHOD(bool, IsAlive, (), (override));
     MOCK_METHOD(void, ProfilePendingIoCount, (uint32_t pendingIOCount), (override));
     MOCK_METHOD(void, AddPendingErrorCount, (uint32_t errorsToAdd), (override));
     MOCK_METHOD(void, SubtractPendingErrorCount, (uint32_t errorsToSubtract), (override));

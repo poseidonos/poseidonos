@@ -149,13 +149,6 @@ UBlockDevice::Close(void)
     return completionCount;
 }
 
-bool
-UBlockDevice::IsAlive(void)
-{
-    // TODO check device is online or not
-    return true;
-}
-
 DeviceContext*
 UBlockDevice::_GetDeviceContext(void)
 {

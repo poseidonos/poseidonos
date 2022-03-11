@@ -84,14 +84,14 @@ ArrayMountSequence::~ArrayMountSequence(void)
 int
 ArrayMountSequence::Mount(void)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Entering ArrayMountSequence.Mount for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Entering ArrayMountSequence.Mount for {}", arrayName);
     auto it = sequence.begin();
-    int ret = (int)POS_EVENT_ID::SUCCESS;
+    int ret = EID(SUCCESS);
 
     StateContext* currState = state->GetState();
     if (currState->ToStateType() >= StateEnum::NORMAL)
     {
-        ret = (int)POS_EVENT_ID::ARRAY_ALD_MOUNTED;
+        ret = EID(MOUNT_ARRAY_ALREADY_MOUNTED);
         return ret;
     }
 
@@ -99,39 +99,39 @@ ArrayMountSequence::Mount(void)
     bool res = _WaitState(mountState);
     if (res == false)
     {
-        ret = (int)POS_EVENT_ID::ARRAY_MOUNT_PRIORITY_ERROR;
+        ret = EID(MOUNT_ARRAY_UNABLE_TO_INVOKE_MOUNT_STATE);
         goto error;
     }
 
     // mount array
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Initializing the first mount sequence for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initializing the first mount sequence for {}", arrayName);
     ret = (*it)->Init();
     if (ret != 0)
     {
         goto error;
     }
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Initialized the first mount sequence for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initialized the first mount sequence for {}", arrayName);
 
     // mount meta, gc
     it++;
     for (; it != sequence.end(); ++it)
     {
-        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Initializing one of the remaining sequences for {}", arrayName);
+        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initializing one of the remaining sequences for {}", arrayName);
         ret = (*it)->Init();
-        if (ret != (int)POS_EVENT_ID::SUCCESS)
+        if (ret != EID(SUCCESS))
         {
             break;
         }
-        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Initialized the sequence for {}", arrayName);
+        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initialized the sequence for {}", arrayName);
     }
 
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
+    if (ret != EID(SUCCESS))
     {
         goto error;
     }
     state->Invoke(normalState);
     state->Remove(mountState);
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Returning from ArrayMountSequence.Mount for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Returning from ArrayMountSequence.Mount for {}", arrayName);
     return ret;
 
 error:
@@ -152,11 +152,11 @@ error:
 int
 ArrayMountSequence::Unmount(void)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Entering ArrayMountSequence.Unmount for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Entering ArrayMountSequence.Unmount for {}", arrayName);
     StateContext* currState = state->GetState();
     if (currState->ToStateType() < StateEnum::NORMAL)
     {
-        int eventId = (int)POS_EVENT_ID::ARRAY_ALD_UNMOUNTED;
+        int eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
         POS_TRACE_ERROR(eventId, "Failed to unmount system. Curr. state:{}",
             currState->ToStateType().ToString());
         return eventId;
@@ -167,10 +167,10 @@ ArrayMountSequence::Unmount(void)
     if (res == false)
     {
         state->Remove(unmountState);
-        return (int)POS_EVENT_ID::ARRAY_UNMOUNT_PRIORITY_ERROR;
+        return EID(UNMOUNT_ARRAY_UNABLE_TO_INVOKE_UNMOUNT_STATE);
     }
 
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Detaching volumes for {}", arrayName);
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Detaching volumes for {}", arrayName);
     volMgr->DetachVolumes();
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
     {
@@ -180,9 +180,9 @@ ArrayMountSequence::Unmount(void)
             break;
         }
 
-        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Disposing one of IMountSequence for {}", arrayName);
+        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Disposing one of IMountSequence for {}", arrayName);
         (*it)->Dispose();
-        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Disposed the IMountSequence for {}", arrayName);
+        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Disposed the IMountSequence for {}", arrayName);
     }
     // do array-dispose finally.
     sequence.front()->Flush();
@@ -190,19 +190,19 @@ ArrayMountSequence::Unmount(void)
     state->Remove(normalState);
     state->Remove(unmountState);
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 void
 ArrayMountSequence::Shutdown(void)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down {} ...", arrayName);
-    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - wait for rebuilding");
+    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down {} ...", arrayName);
+    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - wait for rebuilding");
     rebuilder->StopRebuild(arrayName);
     rebuilder->WaitRebuildDone(arrayName);
-    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - rebuild done");
+    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - rebuild done");
     volMgr->DetachVolumes();
-    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - volumes detached");
+    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - volumes detached");
 
     // unmount meta, gc
     auto it = sequence.rbegin();
@@ -213,7 +213,7 @@ ArrayMountSequence::Shutdown(void)
 
     // unmount array
     (*it)->Shutdown();
-    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - array shutdowned");
+    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - array shutdowned");
 }
 
 void
@@ -235,7 +235,7 @@ ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
     if (next->ToStateType() == StateEnum::STOP)
     {
         // Regardless of the prev state, we'd like to invoke Shutdown() of the array when the next state is STOP.
-        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Shutdown for {}", arrayName);
+        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Shutdown for {}", arrayName);
         Shutdown();
         if (prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
         {

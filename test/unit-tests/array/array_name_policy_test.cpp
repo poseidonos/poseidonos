@@ -16,7 +16,7 @@ TEST(ArrayNamePolicy, CheckArrayName_testIfWhiteSpaceIsDisallowed)
     int actual = p.CheckArrayName(badName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_NAME_NOT_ALLOWED), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE), actual);
 }
 
 TEST(ArrayNamePolicy, CheckArrayName_testIfTrailingWhitespaceIsDisallowed)
@@ -29,7 +29,7 @@ TEST(ArrayNamePolicy, CheckArrayName_testIfTrailingWhitespaceIsDisallowed)
     int actual = p.CheckArrayName(badName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_NAME_NOT_ALLOWED), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE), actual);
 }
 
 TEST(ArrayNamePolicy, CheckArrayName_testIfNonAlphanumericIsDisallowed)
@@ -42,7 +42,7 @@ TEST(ArrayNamePolicy, CheckArrayName_testIfNonAlphanumericIsDisallowed)
     int actual = p.CheckArrayName(badName);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_NAME_NOT_ALLOWED), actual);
+    ASSERT_EQ(EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR), actual);
 }
 
 } // namespace pos

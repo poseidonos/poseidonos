@@ -94,7 +94,7 @@ GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
         return ret;
     }
 
-    return (int)POS_EVENT_ID::ARRAY_STATE_OFFLINE;
+    return EID(WBT_CMD_NEED_ARRAY_MOUNT);
 }
 
 } // namespace pos

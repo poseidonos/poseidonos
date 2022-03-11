@@ -89,7 +89,7 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
     }
     bool enabled = false;
     int ret = configManager->GetValue("fe_qos", "enable", &enabled, CONFIG_TYPE_BOOL);
-    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    if (ret == EID(SUCCESS))
     {
         feQosEnabled = enabled;
     }

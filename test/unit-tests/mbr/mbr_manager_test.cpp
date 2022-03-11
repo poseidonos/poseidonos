@@ -180,7 +180,7 @@ TEST_P(MbrManagerFailedParameterizedCreateAbrTestFixture, CreateAbr_testIfInvali
     // Then: the manager shouldn't update the metadata. It shouldn't copy array name either.
     // FIXME: I'd like to change the expected state after CreateAbr(). If the length of array name is invalid, we shouldn't even update any metadata.
     // I have commented out the following to respect the current implementation, but ideally want to uncomment and change the prod code instead.
-    /*ASSERT_EQ(EID(ARRAY_WRONG_NAME), res); 
+    /*ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), res); 
     const int defaultArrayIndex = 0;
     ASSERT_EQ(0, m.GetMbr().arrayFlag[defaultArrayIndex]);
     ASSERT_EQ(0, m.GetMbr().arrayNum);*/
@@ -345,7 +345,7 @@ TEST(MbrManager, DeleteAbr_testIfDeviceIoFailureHandledProperly)
     int actual = m.DeleteAbr(mockArrayName);
 
     // Then: the manager should return an expected error code and should not update version
-    const int expected = EID(ARRAY_MBR_WRITE_ERROR);
+    const int expected = EID(MBR_WRITE_ERROR);
     ASSERT_EQ(expected, actual);
     ASSERT_EQ(currMbrVersion, m.GetMbrVersionInMemory());
 

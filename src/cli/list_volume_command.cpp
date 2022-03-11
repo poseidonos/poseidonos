@@ -65,7 +65,7 @@ ListVolumeCommand::Execute(json& doc, string rid)
     if (info == nullptr)
     {
         return jFormat.MakeResponse(
-            "LISTVOLUME", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+            "LISTVOLUME", rid, (int)POS_EVENT_ID::ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME,
             "array does not exist named: " + arrayName,
             GetPosInfo());
     }

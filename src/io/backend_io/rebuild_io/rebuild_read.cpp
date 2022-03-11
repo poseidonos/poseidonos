@@ -51,7 +51,7 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 {
     if (true == ubio->IsRetry())
     {
-        int event = (int)POS_EVENT_ID::RECOVER_IS_RETRY;
+        int event = 9999; // TODO(iopath) temporal event id
         POS_TRACE_ERROR(event, "RebuildRead::GetRecoverMethod IsRetry");
         return event;
     }
@@ -121,6 +121,6 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
         ioDispatcher->Submit(split);
     }
 
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 } // namespace pos

@@ -64,7 +64,7 @@ RBAStateManager::~RBAStateManager()
 int
 RBAStateManager::Init(void)
 {
-    return (int)POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 void

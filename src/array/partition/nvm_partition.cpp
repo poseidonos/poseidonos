@@ -69,7 +69,7 @@ NvmPartition::Create(uint64_t startLba, uint32_t blksPerChunk)
 void
 NvmPartition::RegisterService(IPartitionServices* svc)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::RegisterService");
+    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "NvmPartition::RegisterService");
     svc->AddTranslator(type, this);
 }
 
@@ -78,7 +78,7 @@ NvmPartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
 {
     if (false == _IsValidEntry(le.addr.stripeId, le.addr.offset, le.blkCnt))
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
@@ -105,7 +105,7 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
 {
     if (false == _IsValidByteAddress(src))
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_BYTE_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
@@ -126,7 +126,7 @@ NvmPartition::ByteConvert(list<PhysicalByteWriteEntry>& dst,
 {
     if (false == _IsValidByteEntry(src))
     {
-        int error = EID(ARRAY_INVALID_ADDRESS_ERROR);
+        int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
@@ -152,7 +152,7 @@ NvmPartition::IsByteAccessSupported(void)
 int
 NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
         startLba, blksPerChunk, devs.size(), devs.front()->GetUblock()->GetName());
     physicalSize.startLba = startLba;
     physicalSize.blksPerChunk = blksPerChunk;
@@ -162,14 +162,14 @@ NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
     {
         physicalSize.stripesPerSegment = (devs.front()->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE -
             DIV_ROUND_UP(physicalSize.startLba, (uint64_t)ArrayConfig::SECTORS_PER_BLOCK)) / blksPerChunk;
-        POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, WRITE_BUFFER, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+        POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, WRITE_BUFFER, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
             startLba, blksPerChunk, physicalSize.stripesPerSegment);
     }
     else if (type == PartitionType::META_NVM)
     {
         physicalSize.stripesPerSegment = ArrayConfig::META_NVM_SIZE /
             (ArrayConfig::BLOCK_SIZE_BYTE * physicalSize.blksPerChunk * physicalSize.chunksPerStripe);
-        POS_TRACE_DEBUG(EID(ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, META_NVM, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+        POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, META_NVM, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
             startLba, blksPerChunk, physicalSize.stripesPerSegment);
     }
 
@@ -216,7 +216,7 @@ NvmPartition::_IsValidByteAddress(const LogicalByteAddr& lsa)
                 }
                 else
                 {
-                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRANSLATED_OVER_STRIPE,
+                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ADDRESS_TRANSLATE_DEBUG_MSG,
                         "Translated Stripe ID is different from original");
                 }
             }
@@ -248,7 +248,7 @@ NvmPartition::_IsValidByteEntry(const LogicalByteWriteEntry& entry)
                 }
                 else
                 {
-                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRANSLATED_OVER_STRIPE,
+                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ADDRESS_TRANSLATE_DEBUG_MSG,
                         "Translated Stripe ID is different from original");
                 }
             }

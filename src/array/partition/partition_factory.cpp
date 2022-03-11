@@ -66,21 +66,21 @@ int
 PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nvm,
     RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Try to split SSD partitions");
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Try to split SSD partitions");
     vector<SsdPartitionBuilder*> builders;
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
         RaidTypeEnum journalRaid = metaRaid;
         SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nvm);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for META_SSD");
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for META_SSD");
         SsdPartitionOptions option(PartitionType::META_SSD, metaRaid, devs, nvm);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Prepare Partition Builder for USER_DATA");
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for USER_DATA");
         SsdPartitionOptions option(PartitionType::USER_DATA, dataRaid, devs, nvm);
         builders.push_back(new SsdPartitionBuilder(option));
     }
@@ -109,7 +109,7 @@ PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nv
         delete builder;
     }
 
-    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "SSD partitions are created");
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SSD partitions are created");
     return ret;
 }
 
@@ -135,7 +135,7 @@ PartitionFactory::_SplitNvmPartitions(ArrayDevice* nvm, Partitions& partitions)
     int ret = builders.front()->Build(ArrayConfig::NVM_MBR_SIZE_BYTE / ArrayConfig::SECTOR_SIZE_BYTE, partitions);
     if (ret == 0)
     {
-        POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "NVM partitions are created");
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NVM partitions are created");
     }
 
     for (auto builder : builders)

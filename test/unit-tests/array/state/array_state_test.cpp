@@ -219,22 +219,6 @@ TEST(ArrayState, SetMount_testIfStateChangeIsSuccessfulForExistNormalAndDegraded
 
     // Then 2
     ASSERT_EQ(ArrayStateEnum::DEGRADED, arrayState.GetState());
-
-    for (auto arrayStateEnum : ARRAYS_STATES)
-    {
-        if (ArrayStateEnum::EXIST_NORMAL == arrayStateEnum || ArrayStateEnum::EXIST_DEGRADED == arrayStateEnum)
-        {
-            continue;
-        }
-
-        arrayState.SetState(arrayStateEnum);
-
-        // When
-        int actual = arrayState.SetMount();
-
-        // Then
-        ASSERT_EQ(EID(ARRAY_STATE_CHANGE_ERROR), actual);
-    }
 }
 
 TEST(ArrayState, SetUnmount_testIfNormalBecomesExistNormal)
@@ -256,22 +240,6 @@ TEST(ArrayState, SetUnmount_testIfNormalBecomesExistNormal)
 
     // Then 2
     ASSERT_EQ(ArrayStateEnum::EXIST_DEGRADED, arrayState.GetState());
-
-    for (auto arrayStateEnum : ARRAYS_STATES)
-    {
-        if (ArrayStateEnum::NORMAL == arrayStateEnum || ArrayStateEnum::DEGRADED == arrayStateEnum)
-        {
-            continue;
-        }
-
-        // When 3
-        arrayState.SetState(arrayStateEnum);
-        int actual = arrayState.SetUnmount();
-
-        // Then 3
-        ASSERT_EQ(EID(ARRAY_STATE_CHANGE_ERROR), actual);
-        ASSERT_EQ(arrayStateEnum, arrayState.GetState());
-    }
 }
 
 TEST(ArrayState, SetDegraded_testIfAnyStateCanBecomeDegraded)
@@ -306,7 +274,7 @@ TEST(ArrayState, CanAddSpare_testIfWeCannotAddSpareWhenArrayIsNotMounted)
         int actual = arrayState.CanAddSpare();
 
         // Then
-        ASSERT_EQ(EID(ARRAY_NEED_MOUNT), actual);
+        ASSERT_EQ(EID(ADD_SPARE_CAN_ONLY_BE_WHILE_ONLINE), actual);
     }
 }
 
@@ -324,69 +292,7 @@ TEST(ArrayState, CanRemoveSpare_testIfWeCannotRemoveSpareWhenArrayIsNotMounted)
         int actual = arrayState.CanRemoveSpare();
 
         // Then
-        ASSERT_EQ(EID(ARRAY_NEED_MOUNT), actual);
-    }
-}
-
-TEST(ArrayState, IsLoadable_testIfNotMountedArrayIsNotLoadable)
-{
-    // Given
-    NiceMock<MockIStateControl> mockIStateControl;
-    ArrayState arrayState(&mockIStateControl);
-
-    for (auto arrayStateEnum : ARRAY_STATES_NOT_MOUNTED)
-    {
-        arrayState.SetState(arrayStateEnum);
-
-        // When
-        int actual = arrayState.IsLoadable();
-
-        // Then
-        if (arrayStateEnum == ArrayStateEnum::BROKEN)
-        {
-            ASSERT_EQ(EID(ARRAY_BROKEN_ERROR), actual);
-        }
-        else
-        {
-            ASSERT_EQ(0, actual);
-        }
-    }
-}
-
-TEST(ArrayState, IsCreatable_testIfErrorEventIsReturnedWhenArrayExistsButNotIsNotMounted)
-{
-    // Given
-    NiceMock<MockIStateControl> mockIStateControl;
-    ArrayState arrayState(&mockIStateControl);
-
-    // When
-    for (auto arrayStateEnum : ARRAYS_STATES_EXISTS_BUT_NOT_MOUNTED)
-    {
-        arrayState.SetState(arrayStateEnum);
-
-        // When
-        int actual = arrayState.IsCreatable();
-
-        // Then
-        ASSERT_EQ(EID(ARRAY_STATE_EXIST), actual);
-    }
-}
-
-TEST(ArrayState, IsCreatable_testIfErrorEventIsReturnedWhenArrayIsMountedAlready)
-{
-    // Given
-    NiceMock<MockIStateControl> mockIStateControl;
-    ArrayState arrayState(&mockIStateControl);
-
-    for (auto arrayStateEnum : ARRAYS_STATES_MOUNTED)
-    {
-        arrayState.SetState(arrayStateEnum);
-
-        // When
-        int actual = arrayState.IsCreatable();
-
-        // Then
-        ASSERT_EQ(EID(ARRAY_STATE_EXIST), actual);
+        ASSERT_EQ(EID(REMOVE_SPARE_CAN_ONLY_BE_WHILE_ONLINE), actual);
     }
 }
 
@@ -400,26 +306,19 @@ TEST(ArrayState, IsMountable_testIfEventIdIsReturnedProperly)
     NiceMock<MockIStateControl> mockIStateControl;
     ArrayState arrayState(&mockIStateControl);
 
-    // When 1: in NOT_EXIST state
-    arrayState.SetState(ArrayStateEnum::NOT_EXIST);
+    // When 1
+    arrayState.SetState(ArrayStateEnum::EXIST_DEGRADED);
     int actual = arrayState.IsMountable();
 
     // Then 1
-    ASSERT_EQ(EID(ARRAY_STATE_NOT_EXIST), actual);
-
-    // When 2
-    arrayState.SetState(ArrayStateEnum::EXIST_DEGRADED);
-    actual = arrayState.IsMountable();
-
-    // Then 2
     ASSERT_EQ(0, actual);
 
-    // When 3
+    // When 2
     arrayState.SetState(ArrayStateEnum::BROKEN);
     actual = arrayState.IsMountable();
 
-    // Then 3
-    ASSERT_EQ(EID(ARRAY_STATE_BROKEN), actual);
+    // Then 2
+    ASSERT_EQ(EID(MOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_MOUNTED), actual);
 }
 
 TEST(ArrayState, IsUnmountable_testIfErrorEventIsReturnedWhenArrayIsNotMountedYet)
@@ -436,7 +335,7 @@ TEST(ArrayState, IsUnmountable_testIfErrorEventIsReturnedWhenArrayIsNotMountedYe
         int actual = arrayState.IsUnmountable();
 
         // Then
-        ASSERT_EQ(EID(ARRAY_STATE_OFFLINE), actual);
+        ASSERT_EQ(EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED), actual);
     }
 }
 
@@ -457,7 +356,7 @@ TEST(ArrayState, IsUnmountable_testIfErrorEventIsReturnedWhenArrayIsMountedButIn
         ArrayStateType rebuildState(ArrayStateEnum::REBUILD);
         if (ArrayStateEnum::REBUILD == arrayStateEnum)
         {
-            ASSERT_EQ(EID(ARRAY_STATE_REBUILDING), actual);
+            ASSERT_EQ(EID(UNMOUNT_ARRAY_REJECTED_DUE_TO_REBUILD_INPROGRESS), actual);
         }
         else
         {
@@ -480,22 +379,8 @@ TEST(ArrayState, IsDeletable_testIfErrorEventIsReturnedWhenArrayIsMounted)
         int actual = arrayState.IsDeletable();
 
         // Then
-        ASSERT_EQ(EID(ARRAY_STATE_ONLINE), actual);
+        ASSERT_EQ(EID(DELETE_ARRAY_CAN_ONLY_BE_WHILE_OFFLINE), actual);
     }
-}
-
-TEST(ArrayState, IsDeletable_testIfErrorEventIsReturnedWhenArrayExistsButNotIsMounted)
-{
-    // Given
-    NiceMock<MockIStateControl> mockIStateControl;
-    ArrayState arrayState(&mockIStateControl);
-    arrayState.SetState(ArrayStateEnum::NOT_EXIST); // the only state that's neither mounted nor existent
-
-    // When
-    int actual = arrayState.IsDeletable();
-
-    // Then
-    ASSERT_EQ(EID(ARRAY_STATE_NOT_EXIST), actual);
 }
 
 TEST(ArrayState, IsRebuildable_testIfDegradedStateIsRebuildable)

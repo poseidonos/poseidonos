@@ -198,14 +198,14 @@ UnvmeCmd::_RequestDeallocate(UnvmeDeviceContext* deviceContext,
     uint64_t startingLBA = ioCtx->GetStartSectorOffset();
     if ((startingLBA % Ubio::UNITS_PER_BLOCK) != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
+        POS_TRACE_ERROR(EID(DEVICE_DEBUG_MSG),
             "LBA is not 4K aligned : {} ", startingLBA);
         return -EFAULT;
     }
     uint32_t NumberOfLogicalBlocks = ioCtx->GetSectorCount();
     if (NumberOfLogicalBlocks % (Ubio::UNITS_PER_BLOCK))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
+        POS_TRACE_ERROR(EID(DEVICE_DEBUG_MSG),
             "Block Address is not 4K aligned : {} ", NumberOfLogicalBlocks);
         return -EFAULT;
     }
@@ -223,7 +223,7 @@ UnvmeCmd::_RequestDeallocate(UnvmeDeviceContext* deviceContext,
     int returnValue = spdkNvmeCaller->SpdkNvmeNsCmdDatasetManagement(
         ns, ioqpair, SPDK_NVME_DSM_ATTR_DEALLOCATE,
         rangeDefinition, num_range, callbackFunc, static_cast<void*>(ioCtx));
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
+    POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
         "Requesting Trimming from {} with block number : {}", startingLBA, NumberOfLogicalBlocks);
     return returnValue;
 }

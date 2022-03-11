@@ -23,7 +23,6 @@ public:
     MOCK_METHOD(int, DetachDevice, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD(void, MountDone, (bool isWT), (override));
     MOCK_METHOD(int, CheckUnmountable, (), (override));
-    MOCK_METHOD(int, CheckDeletable, (), (override));
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
     MOCK_METHOD(DeviceSet<string>, GetDevNames, (), (override));
     MOCK_METHOD(string, GetName, (), (override));
