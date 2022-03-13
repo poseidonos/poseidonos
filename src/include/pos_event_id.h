@@ -657,6 +657,7 @@ enum class POS_EVENT_ID
     QOS_MINIMUM_NOT_MET,
     QOS_MAX_ARRAYS_EXCEEDED,
     QOS_ARRAY_DOES_NOT_EXIST,
+    QOS_NOT_GUARANTEED,
     QOS_END,
     QOS_COUNT = QOS_END - QOS_START,
     // --------------IO Path nvmf (5000)----------------

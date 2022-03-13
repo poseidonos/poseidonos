@@ -104,6 +104,7 @@ public:
     static std::atomic<int64_t> globalIopsThrottling;
     static std::atomic<int64_t> globalRemainingVolumeBw;
     static std::atomic<int64_t> globalRemainingVolumeIops;
+
     void EnqueueVolumeIo(uint32_t volId, VolumeIoSmartPtr io);
     VolumeIoSmartPtr DequeueVolumeIo(uint32_t volId);
     void SubmitVolumeIoToAio(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo);
@@ -128,6 +129,8 @@ private:
     bool _PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId);
     static int64_t _GetThrottlingChange(int64_t remainingValue, int64_t plusUpdateUnit, uint64_t minusUpdateUnit);
     static int64_t _ResetThrottlingCommon(int64_t remainingValue, uint64_t currentThrottlingValue);
+    void _PrintWarningLogIfNotGuaranteed(uint32_t volId);
+    void _CalculateMovingAverage(int volId);
 
     std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
@@ -146,12 +149,23 @@ private:
 
     int64_t remainingVolumeBw[MAX_VOLUME_COUNT];
     int64_t remainingVolumeIops[MAX_VOLUME_COUNT];
+    std::string volumeName[MAX_VOLUME_COUNT];
     std::atomic<uint64_t> minVolumeBw[MAX_VOLUME_COUNT];
     std::atomic<uint64_t> minVolumeIops[MAX_VOLUME_COUNT];
     static std::atomic<int64_t> notThrottledVolumesThrottlingBw;
     static std::atomic<int64_t> remainingNotThrottledVolumesBw;
     static std::atomic<int64_t> notThrottledVolumesThrottlingIops;
     static std::atomic<int64_t> remainingNotThrottledVolumesIops;
+
+    int64_t previousRemainingVolumeBw[MAX_VOLUME_COUNT];
+    int64_t previousRemainingVolumeIops[MAX_VOLUME_COUNT];
+    uint64_t avgBw[MAX_VOLUME_COUNT];
+    uint64_t avgIops[MAX_VOLUME_COUNT];
+    static const uint64_t AVG_PERF_PERIOD = PARAMETER_COLLECTION_INTERVAL;
+    uint64_t minimumCheckCounter[MAX_VOLUME_COUNT];
+    bool isLogPrinted[MAX_VOLUME_COUNT];
+    uint64_t logPrintedCounter[MAX_VOLUME_COUNT];
+    static const uint64_t LOG_PRINT_PERIOD = 60; // 60 sec
 
     bool feQosEnabled;
     BwIopsRateLimit* bwIopsRateLimit;

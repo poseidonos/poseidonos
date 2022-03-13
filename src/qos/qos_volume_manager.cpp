@@ -101,6 +101,12 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
         remainingVolumeIops[volId] = 0;
         dynamicBwThrottling[volId] = 0;
         dynamicIopsThrottling[volId] = 0;
+        previousRemainingVolumeBw[volId] = 0;
+        previousRemainingVolumeIops[volId] = 0;
+        avgBw[volId] = 0;
+        avgIops[volId] = 0;
+        minimumCheckCounter[volId] = 0;
+        logPrintedCounter[volId] = 0;
     }
     pthread_rwlock_init(&nqnLock, nullptr);
 }
@@ -349,6 +355,7 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeMountHandler, vInfo, this);
     volumeMap[vInfo->id] = true;
+    volumeName[vInfo->id] = volEventBase->volName;
     while (qosContext->GetVolumeOperationDone() == false)
     {
         if (qosContext->GetVolumeOperationDone() == true)
@@ -518,6 +525,85 @@ QosVolumeManager::SetRemainingThrottling(uint64_t total, uint64_t minVolTotal, b
 }
 
 void
+QosVolumeManager::_PrintWarningLogIfNotGuaranteed(uint32_t volId)
+{
+    if (minVolumeBw[volId] != 0 || minVolumeIops[volId] != 0)
+    {
+        bool iops = false;
+        bool notGuaranteed = false;
+        uint64_t expected = 0;
+        uint64_t actual = 0;
+        if (minVolumeBw[volId] * AVG_PERF_PERIOD > avgBw[volId])
+        {
+            iops = false;
+            notGuaranteed = true;
+            expected = minVolumeBw[volId] * AVG_PERF_PERIOD;
+            actual = avgBw[volId];
+        }
+        if (minVolumeIops[volId] * AVG_PERF_PERIOD > avgIops[volId])
+        {
+            iops = true;
+            notGuaranteed = true;
+            expected = minVolumeIops[volId] * AVG_PERF_PERIOD;
+            actual = avgIops[volId];
+        }
+        string errorStringUnit = "";
+        if (iops)
+        {
+            errorStringUnit = "kiops";
+            expected = (expected + M_KBYTES - 1) / M_KBYTES;
+            actual = (actual + M_KBYTES - 1) / M_KBYTES;
+        }
+        else if (!iops)
+        {
+            errorStringUnit = "MiB/s";
+            expected = (expected + M_KBYTES - 1) / M_KBYTES;
+            expected = (expected + M_KBYTES - 1) / M_KBYTES;
+            actual = (actual + M_KBYTES - 1) / M_KBYTES;
+            actual = (actual + M_KBYTES - 1) / M_KBYTES;
+        }
+        if (notGuaranteed)
+        {
+            if (logPrintedCounter[volId] > 0 && logPrintedCounter[volId] <= LOG_PRINT_PERIOD)
+            {
+                logPrintedCounter[volId]++;
+                // do not print any log
+                return;
+            }
+            else
+            {
+                logPrintedCounter[volId] = 1;
+                if (volumeMap[volId] == true)
+                {
+                    POS_TRACE_WARN((int)POS_EVENT_ID::QOS_NOT_GUARANTEED,
+                        "Not guaranteed performance for vol {}, Expected {} {}, Actual {} {}",
+                        volumeName[volId], expected, errorStringUnit, actual, errorStringUnit);
+                }
+            }
+        }
+        else
+        {
+            logPrintedCounter[volId] = 0;
+        }
+    }
+}
+
+void
+QosVolumeManager::_CalculateMovingAverage(int volId)
+{
+    minimumCheckCounter[volId]++;
+    avgBw[volId] += previousRemainingVolumeBw[volId] - remainingDynamicVolumeBw[volId];
+    avgIops[volId] += previousRemainingVolumeIops[volId] - remainingDynamicVolumeIops[volId];
+    if (minimumCheckCounter[volId] >= AVG_PERF_PERIOD)
+    {
+        _PrintWarningLogIfNotGuaranteed(volId);
+        minimumCheckCounter[volId] = 0;
+        avgBw[volId] = 0;
+        avgIops[volId] = 0;
+    }
+}
+
+void
 QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
 {
     uint64_t userSetBwWeight = bwThrottling[volId];
@@ -526,7 +612,6 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
     int64_t iopsUnit = BASIC_IOPS_UNIT;
     bwUnit = std::max(bwUnit, static_cast<int64_t>(dynamicBwThrottling[volId] * UNIT_VOLUME_RATE));
     iopsUnit = std::max(iopsUnit, static_cast<int64_t>(dynamicIopsThrottling[volId] * UNIT_VOLUME_RATE));
-
     dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - 0.05 * dynamicBwThrottling[volId], MIN_GUARANTEED_INCREASE_COEFFICIENT * bwUnit, bwUnit);
     dynamicIopsThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeIops[volId] - 0.05 * dynamicIopsThrottling[volId] , MIN_GUARANTEED_INCREASE_COEFFICIENT * iopsUnit, iopsUnit);
 
@@ -540,9 +625,11 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
         dynamicIopsThrottling[volId] = minVolumeIops[volId] * MIN_GUARANTEED_THROTTLING_RATE;
         remainingDynamicVolumeIops[volId] = 0;
     }
-
+    _CalculateMovingAverage(volId);
     remainingDynamicVolumeBw[volId] = _ResetThrottlingCommon(remainingDynamicVolumeBw[volId], dynamicBwThrottling[volId]);
     remainingDynamicVolumeIops[volId] = _ResetThrottlingCommon(remainingDynamicVolumeIops[volId], dynamicIopsThrottling[volId]);
+    previousRemainingVolumeBw[volId] = remainingDynamicVolumeBw[volId];
+    previousRemainingVolumeIops[volId] = remainingDynamicVolumeIops[volId];
 
     remainingVolumeBw[volId] = _ResetThrottlingCommon(remainingVolumeBw[volId], userSetBwWeight * MAX_THROTTLING_RATE);
     remainingVolumeIops[volId] = _ResetThrottlingCommon(remainingVolumeIops[volId], userSetIops * MAX_THROTTLING_RATE);
