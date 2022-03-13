@@ -82,6 +82,7 @@ def ParseVolumeDict(volume_dict):
             volume_list[int(key)] = limit_value
     return volume_list
 
+
 def SetQos(test_target, qos_cmd):
     limit_type = "reset"
     min_flag = False
@@ -118,6 +119,7 @@ def SetQos(test_target, qos_cmd):
                 lib.printer.red(f"Fail to setting qos array : {array} vol : {vol_name}")
                 return False
     return True
+
 
 def SetQosToAllVolumes(test_target, limit):
     limit_type = limit["type"]
@@ -179,6 +181,7 @@ def SetQosToEachVolumes(test_target, limit):
                 lib.printer.red(" set qos failed")
     return volume_list
 
+
 def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_name):
     # Return value: [ throttled or not, actual_result(bw, iops) ]
     result_dict = {}
@@ -213,6 +216,7 @@ def GetResultQos(test_vdbench, init_name, vd_disk_names, limit_type, workload_na
             result_array.append(actual_value)
         result_dict[disk_name] = result_array
     return result_dict
+
 
 def CheckQos(json_result_file, limit_type, expected_value, prev_expected_value, base_perf, min_flag=False):
     # Return value: [ throttled or not, actual_result(bw, iops) ]

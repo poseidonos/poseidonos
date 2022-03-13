@@ -205,11 +205,8 @@ ThrottlingPolicyDeficit::GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeTh
     uint64_t currentBwWeight = 0;
     uint64_t currentIopsWeight = 0;
 
-    for (map<uint32_t, uint32_t>::iterator it = volReactorMap[globalVolId].begin(); it != volReactorMap[globalVolId].end(); it++)
-    {
-        currentBwWeight += qosManager->GetVolumeLimit(it->first, volId, false, arrayId);
-        currentIopsWeight += qosManager->GetVolumeLimit(it->first, volId, true, arrayId);
-    }
+    currentBwWeight += qosManager->GetVolumeLimit(volId, false, arrayId);
+    currentIopsWeight += qosManager->GetVolumeLimit(volId, true, arrayId);
 
     int64_t bwCorrection = 0;
     int64_t iopsCorrection = 0;
@@ -305,7 +302,7 @@ ThrottlingPolicyDeficit::_MinimumVolumeCorrection(VolumeThrottle* volumeThrottle
     }
 }
 
-    uint64_t
+uint64_t
 ThrottlingPolicyDeficit::_InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy)
 {
     uint64_t userSetMaxBw = volUserPolicy.GetMaxBandwidth();

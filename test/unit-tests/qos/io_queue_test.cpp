@@ -1,4 +1,5 @@
 #include "src/qos/io_queue.h"
+#include "src/bio/volume_io.h"
 
 #include <gtest/gtest.h>
 
@@ -18,24 +19,6 @@ TEST(IoQueue, IoQueue_Constructor_One_Heap_Ubio)
     delete ioQueue;
 }
 
-TEST(IoQueue, IoQueue_Constructor_One_Stack_pos_io)
-{
-    IoQueue<pos_io*> ioQueue();
-}
-
-TEST(IoQueue, IoQueue_Constructor_One_Heap_pos_io)
-{
-    IoQueue<pos_io*>* ioQueue = new IoQueue<pos_io*>;
-    delete ioQueue;
-}
-
-TEST(IoQueue, Check_Dequeue_Empty)
-{
-    IoQueue<pos_io*> ioQueue;
-    pos_io* io = ioQueue.DequeueIo(0, 0);
-    ASSERT_EQ(io, nullptr);
-}
-
 TEST(IoQueue, Check_EnqueueDequeue_Ubio)
 {
     IoQueue<UbioSmartPtr> ioQueue;
@@ -49,20 +32,4 @@ TEST(IoQueue, Check_EnqueueDequeue_Ubio)
     int arrayId = ubioReturned->GetArrayId();
     ASSERT_EQ(arrayId, 1);
 }
-
-TEST(IoQueue, Check_EnqueueDequeue_pos_io)
-{
-    IoQueue<pos_io*> ioQueue;
-    // struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
-    struct pos_io io;
-    io.ioType = 4;
-    uint32_t id1 = 0;
-    uint32_t id2 = 0;
-    ioQueue.EnqueueIo(id1, id2, &io);
-
-    struct pos_io* ioReturned = ioQueue.DequeueIo(id1, id2);
-    int ioType = ioReturned->ioType;
-    ASSERT_EQ(ioType, 4);
-}
-
 } // namespace pos

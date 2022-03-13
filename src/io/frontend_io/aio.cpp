@@ -128,6 +128,10 @@ AioCompletion::_DoSpecificJob(void)
     else
     {
         originCore = volumeIo->GetOriginCore();
+        if (volumeIo->IsPollingNecessary())
+        {
+            ioContext.needPollingCount--;
+        }
     }
 
     bool keepCurrentReactor = eventFrameworkApi->IsSameReactorNow(originCore);
@@ -149,15 +153,8 @@ void
 AioCompletion::_SendUserCompletion(void)
 {
     int dir = posIo.ioType;
-    if (dir != IO_TYPE::FLUSH)
-    {
-        if (volumeIo->IsPollingNecessary())
-        {
-            ioContext.needPollingCount--;
-        }
-    }
     ioContext.cnt--;
-
+    uint32_t volumeId = posIo.volume_id;
     if (posIo.complete_cb)
     {
         int status = POS_IO_STATUS_SUCCESS;
@@ -174,7 +171,7 @@ AioCompletion::_SendUserCompletion(void)
         POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_END;
         POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
             eventId, "Flush End in Aio, volume id : {}",
-            posIo.volume_id);
+            volumeId);
     }
     else
     {
@@ -264,20 +261,15 @@ AIO::_CreateFlushIo(pos_io& posIo)
 void
 AIO::SubmitFlush(pos_io& posIo)
 {
-    if (posIo.ioType == IO_TYPE::FLUSH)
-    {
-        FlushIoSmartPtr flushIo = _CreateFlushIo(posIo);
+    FlushIoSmartPtr flushIo = _CreateFlushIo(posIo);
 
-        SpdkEventScheduler::ExecuteOrScheduleEvent(flushIo->GetOriginCore(), std::make_shared<FlushCmdHandler>(flushIo));
-        return;
-    }
+    SpdkEventScheduler::ExecuteOrScheduleEvent(flushIo->GetOriginCore(), std::make_shared<FlushCmdHandler>(flushIo));
+    return;
 }
 
 void
 AIO::SubmitAsyncIO(VolumeIoSmartPtr volumeIo)
 {
-  //  VolumeIoSmartPtr volumeIo = CreateVolumeIo(posIo);
-
     uint32_t core = volumeIo->GetOriginCore();
     uint32_t arr_vol_id = volumeIo->GetVolumeId() + (volumeIo->GetArrayId() << 8);
     switch (volumeIo->dir)

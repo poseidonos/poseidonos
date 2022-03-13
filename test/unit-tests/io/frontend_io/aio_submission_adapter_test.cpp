@@ -29,14 +29,17 @@ TEST(AioSubmissionAdapter, Constructor_Heap)
 
 TEST(AioSubmissionAdapter, Do_SubmitAsyncIO)
 {
-    // Given
-    pos_io posIo;
-    posIo.array_id = 0;
-    posIo.ioType = IO_TYPE::FLUSH;
-
     // When
-    AioSubmissionAdapter* aioSubmissionAdapter = new AioSubmissionAdapter();
-    aioSubmissionAdapter->Do(&posIo);
+    AioSubmissionAdapter* aioSubmissionAdapter = new AioSubmissionAdapter;
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Read;
+    try
+    {
+        aioSubmissionAdapter->Do(volIo);
+    }
+    catch (...)
+    {
+    }
 
     // Then
     delete aioSubmissionAdapter;

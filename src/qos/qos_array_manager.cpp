@@ -89,7 +89,7 @@ QosArrayManager::GetVolumePolicy(uint32_t volId)
 void
 QosArrayManager::GetMountedVolumes(std::list<uint32_t>& volumeList)
 {
-   qosVolumeManager->GetMountedVolumes(volumeList);
+    qosVolumeManager->GetMountedVolumes(volumeList);
 }
 
 uint64_t
@@ -222,11 +222,7 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
             policy.maxBw = 1;
         }
     }
-    for (uint32_t i = 0; i < M_MAX_REACTORS; i++)
-    {
-        qosVolumeManager->SetVolumeLimit(i, volId, policy.maxBw, false);
-        qosVolumeManager->ResetRateLimit(i, volId, 1);
-    }
+    qosVolumeManager->SetVolumeLimit(volId, policy.maxBw, false);
 
     if (0 == policy.maxIops)
     {
@@ -241,11 +237,7 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
             policy.maxIops = 1;
         }
     }
-    for (uint32_t i = 0; i < M_MAX_REACTORS; i++)
-    {
-        qosVolumeManager->SetVolumeLimit(i, volId, policy.maxIops, true);
-        qosVolumeManager->ResetRateLimit(i, volId, 1);
-    }
+    qosVolumeManager->SetVolumeLimit(volId, policy.maxIops, true);
 
     if (0 == policy.minBw)
     {
@@ -328,18 +320,7 @@ QosArrayManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, V
 {
     qosVolumeManager->HandlePosIoSubmission(aioSubmission, volIo);
 }
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-bw_iops_parameter
-QosArrayManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId)
-{
-    return qosVolumeManager->DequeueParams(reactor, volId);
-}
+
 /* --------------------------------------------------------------------------*/
 /**
   * @Synopsis
@@ -409,9 +390,9 @@ QosArrayManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
   */
 /* --------------------------------------------------------------------------*/
 void
-QosArrayManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops)
+QosArrayManager::SetVolumeLimit(uint32_t volId, int64_t weight, bool iops)
 {
-    qosVolumeManager->SetVolumeLimit(reactor, volId, weight, iops);
+    qosVolumeManager->SetVolumeLimit(volId, weight, iops);
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -421,9 +402,9 @@ QosArrayManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight
   */
 /* --------------------------------------------------------------------------*/
 int64_t
-QosArrayManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
+QosArrayManager::GetVolumeLimit(uint32_t volId, bool iops)
 {
-    return qosVolumeManager->GetVolumeLimit(reactor, volId, iops);
+    return qosVolumeManager->GetVolumeLimit(volId, iops);
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -493,9 +474,9 @@ QosArrayManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId)
   */
 /* --------------------------------------------------------------------------*/
 void
-QosArrayManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset)
+QosArrayManager::VolumeQosPoller(IbofIoSubmissionAdapter* aioSubmission, double offset)
 {
-    qosVolumeManager->VolumeQosPoller(reactor, aioSubmission, offset);
+    qosVolumeManager->VolumeQosPoller(aioSubmission, offset);
 }
 /* --------------------------------------------------------------------------*/
 /**

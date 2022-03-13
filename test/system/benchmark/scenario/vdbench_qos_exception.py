@@ -15,66 +15,66 @@ workload_list = [
     "seq_w"
 ]
 vdbench_list = [
-    
-    #{"title" : "Write Sequential 128k",
+
+    # {"title" : "Write Sequential 128k",
     # "workload" : "seq_w",
     # "event" : r"seq_w,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
-     #"start" : 0, "duration" : 80},
-    #{"title" : "Read Sequential 128k",
-    #"workload" : "seq_r",
-    #"event" : r"seq_r,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
-    #"start" : 0, "duration" : 80},
-    #{"title" : "Write Random 4k",
+    # "start" : 0, "duration" : 80},
+    # {"title" : "Read Sequential 128k",
+    # "workload" : "seq_r",
+    # "event" : r"seq_r,wd=seq,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(128k\),forrdpct=\(0\),forthreads=\(128\)",
+    # "start" : 0, "duration" : 80},
+    # {"title" : "Write Random 4k",
     # "workload" : "rand_w",
     # "event" : r"rand_w,wd=rand,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
     # "start" : 0, "duration" : 80},
-    {"title" : "Read Random 4k",
-    "workload" : "rand_r",
-    "event" : r"rand_r,wd=rand,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
-    "start" : 0, "duration" : 80}
+    {"title": "Read Random 4k",
+     "workload": "rand_r",
+     "event": r"rand_r,wd=rand,iorate=max,elapsed=80,interval=1,warmup=3,pause=5,forxfersize=\(4k\),forrdpct=\(0\),forthreads=\(128\)",
+     "start": 0, "duration": 80}
 ]
 
 qos_list = [
     {
         "title": "Reset Throttling",
         "reset": True,
-        "vol" : "ALL",
-        "start" : 5
+        "vol": "ALL",
+        "start": 5
     },
     {
         "title": "Min Throttling",
-        "minbw" : 900,
-        "array" : "0",
-        "vol" : "3",
-        "start" : 20
+        "minbw": 2900,
+        "array": "0",
+        "vol": "3",
+        "start": 20
     },
     {
         "title": "Min Throttling",
-        "minbw" : 800,
-        "array" : "0",
-        "vol" : "4",
-        "start" : 25
+        "minbw": 800,
+        "array": "0",
+        "vol": "4",
+        "start": 25
     },
     {
         "title": "Min Throttling",
-        "minbw" : 1200,
-        "array" : "0",
-        "vol" : "5",
-        "start" : 25
+        "minbw": 1200,
+        "array": "0",
+        "vol": "5",
+        "start": 25
     },
     {
         "title": "Min Throttling",
-        "minbw" : 0,
-        "array" : "0",
-        "vol" : "3",
-        "start" : 50
+        "minbw": 0,
+        "array": "0",
+        "vol": "3",
+        "start": 50
     },
     {
         "title": "Min Throttling",
-        "minbw" : 0,
-        "array" : "0",
-        "vol" : "4",
-        "start" : 60
+        "minbw": 0,
+        "array": "0",
+        "vol": "4",
+        "start": 60
     },
 ]
 
@@ -101,7 +101,7 @@ def execute_qos_cli_event(test_target, current_time):
             print("")
             result = pos.qos.SetQos(test_target, qos_cmd)
             qos_cmd["done"] = True
-            if (result == False):
+            if (result is False):
                 # test done
                 return True
 
@@ -129,12 +129,12 @@ def wait_vdbench_event(test_vdbench, initiators, current_time):
                 result[key] = result_array
             vdbench_elem["done"] = True
             vdbench_elem["result_array"] = result
-    if (test_done == len(vdbench_list)):
+    if (test_done is len(vdbench_list)):
         result["done"] = "True"
         return result
     else:
         return result
-    
+
 
 def play(json_targets, json_inits, json_scenario):
     lib.printer.green(f"\n -- '{__name__}' has began --")
@@ -205,7 +205,7 @@ def play(json_targets, json_inits, json_scenario):
             result = wait_vdbench_event(first_init_vdbench, initiators, current_time)
             if ("done" in result):
                 break
-            if (execute_qos_cli_event(test_target, current_time) == True):
+            if (execute_qos_cli_event(test_target, current_time) is True):
                 break
         lib.printer.green(f" Qos Test With Vdbench End")
     # init wrapup
@@ -217,12 +217,12 @@ def play(json_targets, json_inits, json_scenario):
         max_value = 0
         for index in range(0, vdbench_elem["start"] + vdbench_elem["duration"]):
             for key in vdbench_elem["result_array"]['Initiator01']:
-                    if (index < len(vdbench_elem["result_array"]['Initiator01'][key])):
-                        if (max_value < vdbench_elem["result_array"]['Initiator01'][key][index]):
-                            max_value = vdbench_elem["result_array"]['Initiator01'][key][index]
-                        total_list[index] = total_list[index] + vdbench_elem["result_array"]['Initiator01'][key][index]
-                        if (max_value < total_list[index]):
-                            max_value = total_list[index]
+                if (index < len(vdbench_elem["result_array"]['Initiator01'][key])):
+                    if (max_value < vdbench_elem["result_array"]['Initiator01'][key][index]):
+                        max_value = vdbench_elem["result_array"]['Initiator01'][key][index]
+                    total_list[index] = total_list[index] + vdbench_elem["result_array"]['Initiator01'][key][index]
+                    if (max_value < total_list[index]):
+                        max_value = total_list[index]
         if ("result_array" in vdbench_elem):
             print(vdbench_elem["title"])
             print(vdbench_elem["result_array"])

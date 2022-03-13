@@ -212,17 +212,7 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
 bool
 QosMonitoringManagerArray::VolParamActivities(uint32_t volId, uint32_t reactor)
 {
-    volParams[volId] = qosManager->DequeueVolumeParams(reactor, volId, arrayId);
-    if (volParams[volId].valid == M_VALID_ENTRY)
-    {
-        _UpdateContextActiveVolumes(volId);
-        _UpdateContextActiveReactorVolumes(reactor, volId);
-        volParams[volId].valid = M_INVALID_ENTRY;
-        _UpdateVolumeReactorParameter(volId, reactor);
-        _UpdateVolumeBlockSize(volId, volParams[volId].blockSize);
-        return true;
-    }
-    return false;
+    return true;
 }
 
 /* --------------------------------------------------------------------------*/

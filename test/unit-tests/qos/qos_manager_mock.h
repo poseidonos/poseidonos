@@ -22,7 +22,6 @@ public:
     MOCK_METHOD(int, IOWorkerPoller, (uint32_t id, SubmissionAdapter* ioSubmission), (override));
     MOCK_METHOD(void, HandleEventUbioSubmission, (SubmissionAdapter* ioSubmission,
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio), (override));
-    MOCK_METHOD(bw_iops_parameter, DequeueVolumeParams, (uint32_t reactorId, uint32_t volId, uint32_t arrayId), (override));
     MOCK_METHOD(bw_iops_parameter, DequeueEventParams, (uint32_t workerId, BackendEvent eventId), (override));
     MOCK_METHOD(bool, IsMinimumPolicyInEffectInSystem, (), (override));
 };

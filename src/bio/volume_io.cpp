@@ -103,7 +103,25 @@ VolumeIo::GetOriginVolumeIo(void)
 bool
 VolumeIo::IsPollingNecessary(void)
 {
-    return true;
+    if (dir == UbioDir::Read)
+    {
+        return true;
+    }
+    else
+    {
+        if (GetSectorOffsetInBlock(GetSectorRba()) != 0)
+        {
+            return true;
+        }
+        uint64_t endAddress = GetSectorRba() + ChangeByteToSector(GetSize());
+
+        if (GetSectorOffsetInBlock(endAddress) != 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 uint32_t

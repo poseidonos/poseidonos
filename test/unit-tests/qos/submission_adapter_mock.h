@@ -19,7 +19,7 @@ class MockIbofIoSubmissionAdapter : public IbofIoSubmissionAdapter
 {
 public:
     using IbofIoSubmissionAdapter::IbofIoSubmissionAdapter;
-    MOCK_METHOD(void, Do, (pos_io * volIo), (override));
+    MOCK_METHOD(void, Do, (VolumeIoSmartPtr volIo), (override));
 };
 
 } // namespace pos

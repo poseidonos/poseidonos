@@ -80,22 +80,18 @@ public:
     void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock = true);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
-    bw_iops_parameter DequeueParams(uint32_t reactor, uint32_t volId);
-    int VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset);
-    void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
-    int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
+    int VolumeQosPoller(IbofIoSubmissionAdapter* aioSubmission, double offset);
+    void SetVolumeLimit(uint32_t volId, int64_t weight, bool iops);
+    int64_t GetVolumeLimit(uint32_t volId, bool iops);
     void DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap);
     void ResetRateLimit(uint32_t reactor, int volId, double offset);
     std::string GetArrayName(void);
     void SetArrayName(std::string arrayName);
-    void EnqueueVolumeParamsUt(uint32_t reactor, uint32_t volId);
     void ResetVolumeThrottling(int volId, uint32_t arrayId);
     static void _VolumeMountHandler(void* arg1, void* arg2);
     static void _VolumeUnmountHandler(void* arg1, void* arg2);
     static void _VolumeDetachHandler(void* arg1, void* arg2);
-    static uint64_t GetTotalVolumeBandwidth(void);
-    static uint64_t GetTotalVolumeIops(void);
     void GetMountedVolumes(std::list<uint32_t>& volumeList);
     void SetMinimumVolume(uint32_t volId, uint64_t value, bool iops);
     uint64_t GetDynamicVolumeThrottling(uint32_t volId, bool iops);
@@ -108,21 +104,20 @@ public:
     static std::atomic<int64_t> globalIopsThrottling;
     static std::atomic<int64_t> globalRemainingVolumeBw;
     static std::atomic<int64_t> globalRemainingVolumeIops;
+    void EnqueueVolumeIo(uint32_t volId, VolumeIoSmartPtr io);
+    VolumeIoSmartPtr DequeueVolumeIo(uint32_t volId);
+    void SubmitVolumeIoToAio(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo);
 
 protected:
     EventFrameworkApi* eventFrameworkApi;
 
 private:
-    void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
-    bool _RateLimit(uint32_t reactor, int volId);
+    bool _RateLimit(int volId);
     bool _GlobalRateLimit(void);
-    void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
     bool _SpecialRateLimit(uint32_t volId);
     bool _MinimumRateLimit(int volId);
 
-    void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, VolumeIoSmartPtr io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
-    VolumeIoSmartPtr _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
     void _ClearVolumeParameters(uint32_t volId);
 
@@ -131,7 +126,6 @@ private:
     void _InternalVolDetachHandlerQos(struct pos_volume_info* volDetachInfo);
     void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
     bool _PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId);
-    void _SubmitVolumeIo(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo);
     static int64_t _GetThrottlingChange(int64_t remainingValue, int64_t plusUpdateUnit, uint64_t minusUpdateUnit);
     static int64_t _ResetThrottlingCommon(int64_t remainingValue, uint64_t currentThrottlingValue);
 

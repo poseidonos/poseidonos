@@ -104,7 +104,6 @@ TEST(VolumeIo, IsPollingNecessary)
     // Then : Check if polling necessary is false
     EXPECT_EQ(newVolumeIo2->IsPollingNecessary(), false);
 
-
     // When : Create new Volume Io with Write direction,
     // but its rba start is NOT aligned as block size (4K)
     unitCount = 1;

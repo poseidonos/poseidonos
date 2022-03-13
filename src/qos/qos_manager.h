@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <iostream>
+#include <list>
 #include <map>
 #include <mutex>
 #include <queue>
@@ -55,7 +56,6 @@
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
-#include "src/bio/volume_io.h"
 #include "submission_adapter.h"
 #include "submission_notifier.h"
 
@@ -95,7 +95,6 @@ public:
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
     int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId);
     qos_vol_policy GetVolumePolicy(uint32_t volId, std::string arrayName);
-    virtual bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
     virtual bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
     void SetQoSThrottling(BackendEvent event, int64_t weight);
@@ -117,8 +116,8 @@ public:
     virtual bool IsFeQosEnabled(void);
     qos_rebuild_policy GetRebuildPolicy(std::string arrayName);
     int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
-    void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
-    int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops, uint32_t arrayId);
+    void SetVolumeLimit(uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
+    int64_t GetVolumeLimit(uint32_t volId, bool iops, uint32_t arrayId);
     bool IsVolumePolicyUpdated(uint32_t arrayId);
     void SetGcFreeSegment(uint32_t count, uint32_t arrayId);
     uint32_t GetGcFreeSegment(uint32_t arrayId);
@@ -137,15 +136,14 @@ public:
     void GetMountedVolumes(std::list<std::pair<uint32_t, uint32_t>>& volumeList);
     void ResetGlobalThrottling(void);
     void SetMinimumVolume(uint32_t arrayId, uint32_t volId, uint64_t value, bool iops);
-    void ControlThrottling(void);
+    void PeriodicalJob(uint64_t* nextTick);
 
 private:
     virtual void _Finalize(void);
     void _QosWorker(void);
-    void _PeriodicalJob(uint64_t* nextTick);
+    void _ControlThrottling(void);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
     std::thread* qosThread;
-    std::thread* qosTimeThrottling;
     cpu_set_t cpuSet;
     volatile uint64_t eventWeight[BackendEvent_Count];
     uint32_t oldLog[BackendEvent_Count];

@@ -98,42 +98,12 @@ QosMonitoringManager::Execute(void)
     if (qosManager->IsFeQosEnabled() == true)
     {
         _UpdateContextUserVolumePolicy();
-        if (true == _GatherActiveVolumeParameters())
-        {
-            _ComputeTotalActiveConnection();
-        }
         _UpdateAllVolumeParameter();
     }
     _UpdateContextUserRebuildPolicy();
     _GatherActiveEventParameters();
     _UpdateContextResourceDetails();
     _SetNextManagerType();
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
-QosMonitoringManager::_ComputeTotalActiveConnection(void)
-{
-    uint32_t totalConntection = 0;
-    std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
-    std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
-
-    for (map<uint32_t, uint32_t>::iterator it = activeVolumeMap.begin(); it != activeVolumeMap.end(); it++)
-    {
-        uint32_t volId = it->first;
-        for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
-        {
-            totalConntection += it->second;
-        }
-        qosContext->SetTotalConnection(volId, totalConntection);
-        totalConntection = 0;
-    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -204,20 +174,6 @@ QosMonitoringManager::_UpdateContextResourceDetails(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosMonitoringManager::_UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map, std::map<uint32_t, std::vector<uint32_t>> &inactiveReactors)
-{
-    qosContext->InsertActiveVolumeReactor(map);
-    qosContext->InsertInactiveReactors(inactiveReactors);
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
 QosMonitoringManager::_UpdateAllVolumeParameter(void)
 {
     std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
@@ -243,55 +199,6 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     return false;
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-bool
-QosMonitoringManager::_CheckChangeInActiveVolumes(void)
-{
-    static int stabilityCycleCheck = 0;
-    std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
-    bool ret = false;
-    if (stabilityCycleCheck == 0)
-    {
-        if (prevActiveVolumeMap == activeVolumeMap)
-        {
-            ret = false;
-        }
-        else
-        {
-            stabilityCycleCheck++;
-            ret = false;
-        }
-    }
-    else
-    {
-        if (prevActiveVolumeMap == activeVolumeMap)
-        {
-            stabilityCycleCheck++;
-            if (stabilityCycleCheck == 10)
-            {
-                stabilityCycleCheck = 0;
-                ret = true;
-            }
-            else
-            {
-                ret = false;
-            }
-        }
-        else
-        {
-            stabilityCycleCheck = 0;
-            ret = false;
-        }
-    }
-    prevActiveVolumeMap = activeVolumeMap;
-    return ret;
-}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

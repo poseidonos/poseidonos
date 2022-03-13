@@ -64,18 +64,12 @@ public:
 
 private:
     void _SetNextManagerType(void);
-    void ControlVolumeThrottling(void);
     void _HandleVolumeCorrection(void);
     void _HandleMaxThrottling(bool minPolicy);
     void _HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> volId);
     void _HandleWrrCorrection(void);
-    void _DetermineWeight(std::vector<std::pair<uint32_t, uint32_t>>& minVolId,
-        std::list<std::pair<uint32_t, uint32_t>> allMountedVolumeList, bool iops,
-        uint64_t globalMaxWeight, uint64_t (*maxDeterminedWeight)[MAX_VOLUME_COUNT]);
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
-    void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
     uint64_t _GetUserMaxWeight(uint32_t arrayId, uint32_t volId, bool iops);
-    uint64_t _GetUserMinWeight(uint32_t arrayId, uint32_t volId, bool iops);
 
     QosContext* qosContext;
     QosManager* qosManager;
@@ -84,6 +78,5 @@ private:
     uint64_t INVALID_WEIGHT = 0xffffffff;
     uint64_t volumeBwThrottling[MAX_ARRAY_COUNT][MAX_VOLUME_COUNT];
     uint64_t volumeIopsThrottling[MAX_ARRAY_COUNT][MAX_VOLUME_COUNT];
-    
 };
 } // namespace pos

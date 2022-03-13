@@ -97,6 +97,7 @@ def DrawEta(data, pic_name, graph_list):
         lib.printer.red(f"{__name__} [Error] {e}")
         plt.close(fig)
 
+
 def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
     fig = plt.figure(figsize=(12, 12))
     try:
@@ -110,7 +111,7 @@ def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
             x_axis = []
             for index in range(0, len(dict_data[key])):
                 x_axis.append(index)
-            plt.plot(x_axis, dict_data[key], label = key)
+            plt.plot(x_axis, dict_data[key], label=key)
 
         plt.legend()
         plt.savefig(f"output/{pic_name}_result.png", dpi=200)
@@ -118,6 +119,7 @@ def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
         plt.close(fig)
+
 
 def DrawResult(data, pic_name):
     try:

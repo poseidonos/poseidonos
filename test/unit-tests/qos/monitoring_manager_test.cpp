@@ -95,16 +95,6 @@ TEST(QosMonitoringManager, Check_Execute_Getter_Setter_Internal_Manager_fe_qos_t
     std::vector<uint32_t>& reactorCoreList = mockQoscontext.GetReactorCoreList();
     reactorCoreList.push_back(1);
     ON_CALL(*mockSpdkPosNvmfCaller, SpdkNvmfGetReactorSubsystemMapping(_, _)).WillByDefault(Return(1));
-    bw_iops_parameter bwVolParam;
-    bwVolParam.valid = M_VALID_ENTRY;
-    bw_iops_parameter bwVolParam2;
-    bwVolParam2.valid = M_INVALID_ENTRY;
-    EXPECT_CALL(mockQosManager, DequeueVolumeParams(_, _, _)).WillOnce(Return(bwVolParam)).WillOnce(Return(bwVolParam2));
-    bw_iops_parameter bwEventParam;
-    bwEventParam.valid = M_VALID_ENTRY;
-    bw_iops_parameter bwEventParam2;
-    bwEventParam2.valid = M_INVALID_ENTRY;
-    ON_CALL(mockQosManager, DequeueEventParams(_, _)).WillByDefault(Return(bwEventParam2));
     QosMonitoringManager qosMonitoringManager(&mockQoscontext, &mockQosManager, mockSpdkPosNvmfCaller);
     qosMonitoringManager.Execute();
     QosInternalManagerType expectedManager = QosInternalManager_Processing;

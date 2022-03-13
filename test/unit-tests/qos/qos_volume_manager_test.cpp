@@ -248,21 +248,9 @@ TEST(QosVolumeManager, HandlePosIoSubmission_Test_feQosDisable)
     AioSubmissionAdapter aioSubmission;
     pos_io io;
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
-    qosVolumeManager.HandlePosIoSubmission(&aioSubmission, &io);
-}
-
-TEST(QosVolumeManager, DequeueParams_Test)
-{
-    uint32_t reactorId = 1;
-    uint32_t volId = 1;
-    NiceMock<MockQosContext> mockQoscontext;
-    NiceMock<MockQosManager> mockQosManager;
-    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
-    uint32_t arrayIndex = 0;
-    bool feQosEnabled = false;
-    NiceMock<MockQosArrayManager> mockQosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
-    QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
-    qosVolumeManager.DequeueParams(reactorId, volId);
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Write;
+    qosVolumeManager.HandlePosIoSubmission(&aioSubmission, volIo);
 }
 
 TEST(QosVolumeManager, VolumeQosPoller_Test)
@@ -277,10 +265,9 @@ TEST(QosVolumeManager, VolumeQosPoller_Test)
     uint32_t volId = 1;
     QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
     qosVolumeManager.UpdateSubsystemToVolumeMap(nqnId, volId);
-    uint32_t reactorId = 0;
     AioSubmissionAdapter aioSubmission;
     double offset = 1.0;
-    int actualRetVal = qosVolumeManager.VolumeQosPoller(reactorId, &aioSubmission, offset);
+    int actualRetVal = qosVolumeManager.VolumeQosPoller(&aioSubmission, offset);
     ASSERT_EQ(actualRetVal, 0);
 }
 
@@ -293,12 +280,11 @@ TEST(QosVolumeManager, Check_Getter_And_Setter_VolumeLimit)
     bool feQosEnabled = true;
     NiceMock<MockQosArrayManager> mockQosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
-    uint32_t reactor = 0;
     uint32_t volId = 0;
     int64_t value = 100;
     bool iops = true;
-    qosVolumeManager.SetVolumeLimit(reactor, volId, value, iops);
-    int64_t retVal = qosVolumeManager.GetVolumeLimit(reactor, volId, iops);
+    qosVolumeManager.SetVolumeLimit(volId, value, iops);
+    int64_t retVal = qosVolumeManager.GetVolumeLimit(volId, iops);
     ASSERT_EQ(value, retVal);
 }
 
@@ -433,17 +419,21 @@ TEST(QosVolumeManager, HandlePosIoSubmission_Test_feQosEnable)
     QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
 
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
-    uint32_t reactorId = 1;
+
     uint32_t volId = 1;
 
-    qosVolumeManager.SetVolumeLimit(reactorId, volId, 10, false);
+    qosVolumeManager.SetVolumeLimit(volId, 10, false);
     AioSubmissionAdapter aioSubmission;
-    pos_io io;
-    io.volume_id = 1;
-    io.length = 10;
-    io.ioType = IO_TYPE::READ;
-    io.array_id = 0;
-    qosVolumeManager.HandlePosIoSubmission(&aioSubmission, &io);
+
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Deallocate;
+    try
+    {
+        qosVolumeManager.HandlePosIoSubmission(&aioSubmission, volIo);
+    }
+    catch (...)
+    {
+    }
 }
 
 TEST(QosVolumeManager, EnqueueVolumeParamsUt_Test)
@@ -456,19 +446,56 @@ TEST(QosVolumeManager, EnqueueVolumeParamsUt_Test)
     NiceMock<MockQosArrayManager> mockQosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
-    uint32_t reactorId = 1;
+
     uint32_t volId = 1;
-    qosVolumeManager.SetVolumeLimit(reactorId, volId, 10, false);
+    qosVolumeManager.SetVolumeLimit(volId, 10, false);
     AioSubmissionAdapter aioSubmission;
-    pos_io io;
-    io.volume_id = 1;
-    io.length = 10;
-    io.ioType = IO_TYPE::READ;
-    io.array_id = 0;
-    qosVolumeManager.HandlePosIoSubmission(&aioSubmission, &io);
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Deallocate;
+    try
+    {
+        qosVolumeManager.HandlePosIoSubmission(&aioSubmission, volIo);
+    }
+    catch (...)
+    {
+    }
 
     ON_CALL(mockQosManager, IsMinimumPolicyInEffectInSystem()).WillByDefault(Return(true));
-    qosVolumeManager.EnqueueVolumeParamsUt(reactorId, volId);
+}
+
+TEST(QosVolumeManager, EnqueueDequeueVolumeIo)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 0;
+    bool feQosEnabled = true;
+    NiceMock<MockQosArrayManager> mockQosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
+    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 8, 0));
+    qosVolumeManager.EnqueueVolumeIo(1, volumeIo);
+    VolumeIoSmartPtr retVolIo = qosVolumeManager.DequeueVolumeIo(1);
+    ASSERT_EQ(retVolIo.get(), volumeIo.get());
+}
+
+TEST(QosVolumeManager, SubmitAio)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 0;
+    bool feQosEnabled = true;
+    NiceMock<MockQosArrayManager> mockQosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    QosVolumeManager qosVolumeManager(&mockQoscontext, feQosEnabled, arrayIndex, &mockQosArrayManager, &mockEventFrameworkApi, &mockQosManager);
+    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 8, 0));
+    AioSubmissionAdapter aioSubmission;
+    try
+    {
+        qosVolumeManager.SubmitVolumeIoToAio(&aioSubmission, 1, volumeIo);
+    }
+    catch(...)
+    {
+    }
 }
 
 } // namespace pos

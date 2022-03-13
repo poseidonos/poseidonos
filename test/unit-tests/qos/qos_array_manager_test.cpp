@@ -106,12 +106,11 @@ TEST(QosArrayManager, Check_Set_And_Get_VolumeLimit)
     uint32_t arrayIndex = 1;
     bool feQosEnabled = true;
     QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
-    uint32_t reactor = 1;
     uint32_t volId = 1;
     int64_t weight = 100;
     bool iops = true;
-    qosArrayManager.SetVolumeLimit(reactor, volId, weight, iops);
-    int64_t retWeight = qosArrayManager.GetVolumeLimit(reactor, volId, iops);
+    qosArrayManager.SetVolumeLimit(volId, weight, iops);
+    int64_t retWeight = qosArrayManager.GetVolumeLimit(volId, iops);
     ASSERT_EQ(weight, retWeight);
 }
 
@@ -187,9 +186,46 @@ TEST(QosArrayManager, HandlePosIoSubmissionTest)
     bool feQosEnabled = false;
     QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
     AioSubmissionAdapter aioSubmission;
-    pos_io io;
-    qosArrayManager.HandlePosIoSubmission(&aioSubmission, &io);
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Write;
+    qosArrayManager.HandlePosIoSubmission(&aioSubmission, volIo);
 }
 
+TEST(QosArrayManager, GetDynamicVolumeThrottling)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 1;
+    bool feQosEnabled = false;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    uint64_t iops = qosArrayManager.GetDynamicVolumeThrottling(1, true);
+    uint64_t bw = qosArrayManager.GetDynamicVolumeThrottling(1, false);
+    ASSERT_EQ(bw, iops);
+    ASSERT_EQ(bw, 0);
+}
+
+TEST(QosArrayManager, ResetVolumeThrottling)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 1;
+    bool feQosEnabled = false;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    qosArrayManager.ResetVolumeThrottling();
+}
+
+TEST(QosArrayManager, SetMinimumVolume)
+{
+    NiceMock<MockQosContext> mockQoscontext;
+    NiceMock<MockQosManager> mockQosManager;
+    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    uint32_t arrayIndex = 1;
+    bool feQosEnabled = false;
+    QosArrayManager qosArrayManager(arrayIndex, &mockQoscontext, feQosEnabled, &mockEventFrameworkApi, &mockQosManager);
+    qosArrayManager.SetMinimumVolume(1, 100, true);
+    qosArrayManager.SetMinimumVolume(1, 100, false);
+}
 
 } // namespace pos

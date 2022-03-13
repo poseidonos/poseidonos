@@ -189,98 +189,6 @@ QosCorrectionManager::_GetUserMaxWeight(uint32_t arrayId, uint32_t volId, bool i
     return volumeUserPolicy->GetMaxIops();
 }
 
-uint64_t
-QosCorrectionManager::_GetUserMinWeight(uint32_t arrayId, uint32_t volId, bool iops)
-{
-    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
-    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, volId);
-    if (volumeUserPolicy == nullptr)
-    {
-        return INVALID_WEIGHT;
-    }
-    if (iops == false)
-    {
-        return volumeUserPolicy->GetMinBandwidth();
-    }
-    return volumeUserPolicy->GetMinIops();
-}
-
-void
-QosCorrectionManager::_DetermineWeight(std::vector<std::pair<uint32_t, uint32_t>>& minVolId,
-    std::list<std::pair<uint32_t, uint32_t>> allMountedVolumeList, bool iops,
-    uint64_t globalMaxWeight, uint64_t (*maxDeterminedWeight)[MAX_VOLUME_COUNT])
-{
-
-    uint64_t determinedMaxBwFront = 10;
-    uint64_t determinedMaxBwRear = INVALID_WEIGHT;
-    while (determinedMaxBwFront < determinedMaxBwRear)
-    {
-        uint64_t totalBw = 0;
-        for (auto volPair : allMountedVolumeList)
-        {
-            uint32_t arrayId = volPair.first;
-            uint32_t volId = volPair.second;
-            maxDeterminedWeight[arrayId][volId] = 0;
-        }
-        for (auto volPair : minVolId)
-        {
-            uint32_t arrayId = volPair.first;
-            uint32_t volId = volPair.second;
-            uint64_t userMinWeight = _GetUserMinWeight(arrayId, volId, iops);
-            maxDeterminedWeight[arrayId][volId] = userMinWeight;
-        }
-        uint64_t middle = (determinedMaxBwFront + determinedMaxBwRear) / 2;
-        for (auto volPair : allMountedVolumeList)
-        {
-            uint32_t arrayId = volPair.first;
-            uint32_t volId = volPair.second;
-            uint64_t userMaxWeight = _GetUserMaxWeight(arrayId, volId, iops);
-
-            if (userMaxWeight < middle) // max throttling is lower than determined?
-            {
-                maxDeterminedWeight[arrayId][volId] = userMaxWeight;
-            }
-            else if (volumeBwThrottling[arrayId][volId] < middle) // normal case
-            {
-                maxDeterminedWeight[arrayId][volId] = middle;
-            }
-            totalBw += maxDeterminedWeight[arrayId][volId];
-        }
-        if (totalBw > globalMaxWeight) // unsatisfied
-        {
-            determinedMaxBwRear = middle - 1;
-        }
-        else
-        {
-            determinedMaxBwFront = middle;
-        }
-    }
-}
-
-void
-QosCorrectionManager::_HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> minVolId)
-{
-    /*std::list<std::pair<uint32_t, uint32_t>> allMountedVolumeList;
-    uint64_t globalMaxBw = 0, globalMaxIops = 0;
-    std::tie(globalMaxBw, globalMaxIops) = qosManager->GetTotalPerformance();
-    qosManager->GetMountedVolumes(allMountedVolumeList);
-    _DetermineWeight(minVolId, allMountedVolumeList, false, globalMaxBw, volumeBwThrottling);
-    _DetermineWeight(minVolId, allMountedVolumeList, true, globalMaxIops, volumeIopsThrottling);*/
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
-QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t globalVolId, uint64_t reactor, uint64_t count, uint64_t totalConnection)
-{
-
-}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -299,8 +207,8 @@ QosCorrectionManager::_HandleMaxThrottling(bool minPolicy)
         uint32_t volId = volPair.second;
         uint64_t userSetBwWeight = _GetUserMaxWeight(arrayId, volId, false);
         uint64_t userSetIops = _GetUserMaxWeight(arrayId, volId, true);
-        qosManager->SetVolumeLimit(0, volId, userSetBwWeight, false, arrayId);
-        qosManager->SetVolumeLimit(0, volId, userSetIops, true, arrayId);
+        qosManager->SetVolumeLimit(volId, userSetBwWeight, false, arrayId);
+        qosManager->SetVolumeLimit(volId, userSetIops, true, arrayId);
     }
 }
 
@@ -313,25 +221,12 @@ QosCorrectionManager::_HandleMaxThrottling(bool minPolicy)
 /* --------------------------------------------------------------------------*/
 
 void
-QosCorrectionManager::ControlVolumeThrottling(void)
-{
-}
-
-void
 QosCorrectionManager::_HandleVolumeCorrection(void)
 {
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
     std::vector<std::pair<uint32_t, uint32_t>> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
-    if (minVolId.size() != 0)
-    {
-      //  _HandleMinThrottling(minVolId);
-        _HandleMaxThrottling(true);
-    }
-    else
-    {
-        _HandleMaxThrottling(false);
-    }
+    _HandleMaxThrottling(true);
 }
 /* --------------------------------------------------------------------------*/
 /**

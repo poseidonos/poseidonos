@@ -43,6 +43,7 @@
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_driver.h"
+#include "src/include/branch_prediction.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "unvme/unvme_drv.h"
@@ -526,7 +527,10 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
 void
 DeviceManager::HandleCompletedCommand(void)
 {
-    ioDispatcher->CompleteForThreadLocalDeviceList();
+    if (unlikely(ioDispatcher != nullptr))
+    {
+        ioDispatcher->CompleteForThreadLocalDeviceList();
+    }
 }
 
 } // namespace pos

@@ -93,7 +93,6 @@ TEST(QosMonitoringManagerArray, VolParamActivities_TestRun)
     ON_CALL(mockQoscontext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
     bw_iops_parameter volParam;
     volParam.valid = M_VALID_ENTRY;
-    ON_CALL(mockQosManager, DequeueVolumeParams(_, _, _)).WillByDefault(Return(volParam));
     QosMonitoringManagerArray qosMonitoringManagerArray(arrayIndex, &mockQoscontext, &mockQosManager);
     bool expected = true, actual;
     actual = qosMonitoringManagerArray.VolParamActivities(volId, reactor);

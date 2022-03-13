@@ -74,7 +74,6 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
   detachTrigger(detachTriggerArg),
   qosManager(qosManagerArg)
 {
-    thread = new std::thread(&IOWorker::Run, this);
     if (nullptr == detachTrigger)
     {
         detachTrigger = new DeviceDetachTrigger();
@@ -84,6 +83,7 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
     {
         qosManager = QosManagerSingleton::Instance();
     }
+    thread = new std::thread(&IOWorker::Run, this);
 }
 
 /* --------------------------------------------------------------------------*/

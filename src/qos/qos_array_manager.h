@@ -31,6 +31,7 @@
  */
 #pragma once
 
+#include <list>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -59,18 +60,17 @@ public:
     void Initalize(void);
     int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy);
     qos_vol_policy GetVolumePolicy(uint32_t volId);
-    bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId);
     uint32_t GetUsedStripeCnt(void);
     void IncreaseUsedStripeCnt(void);
     void DecreaseUsedStripeCnt(void);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
-    void VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset);
+    void VolumeQosPoller(IbofIoSubmissionAdapter* aioSubmission, double offset);
     bool IsFeQosEnabled(void);
     qos_rebuild_policy GetRebuildPolicy(void);
     int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
-    void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
+    void SetVolumeLimit(uint32_t volId, int64_t weight, bool iops);
     void GetMountedVolumes(std::list<uint32_t>& volumeList);
-    int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
+    int64_t GetVolumeLimit(uint32_t volId, bool iops);
     bool IsVolumePolicyUpdated(void);
     void SetGcFreeSegment(uint32_t count);
     uint32_t GetGcFreeSegment(void);

@@ -43,7 +43,6 @@
 #include "src/event_scheduler/callback.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_service.h"
-#include "src/bio/volume_io.h"
 namespace pos
 {
 struct IOCtx

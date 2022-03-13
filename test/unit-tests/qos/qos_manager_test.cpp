@@ -59,15 +59,6 @@ TEST(QosManager, IsFeQosEnabled_stack)
     qosManager.IsFeQosEnabled();
 }
 
-TEST(QosManager, DequeueVolumeParams_Run)
-{
-    QosManager qosManager;
-    uint32_t reactor = 1;
-    uint32_t volId = 0;
-    uint32_t arrayId = 0;
-    qosManager.DequeueVolumeParams(reactor, volId, arrayId);
-}
-
 TEST(QosManager, DequeueEventParams_Run)
 {
     QosManager qosManager;
@@ -181,13 +172,12 @@ TEST(QosManager, Test_Getter_Setter_Pending_BackendEvent_fe_qos_false)
 TEST(QosManager, Test_Getter_Setter_VolumeLimit)
 {
     QosManager qosManager;
-    uint32_t reactorId = 0;
     uint32_t volId = 0;
     int64_t weight = 10;
     bool iops = true;
     uint32_t arrayId = 1;
-    qosManager.SetVolumeLimit(reactorId, volId, weight, iops, arrayId);
-    int64_t retWeight = qosManager.GetVolumeLimit(reactorId, volId, iops, arrayId);
+    qosManager.SetVolumeLimit(volId, weight, iops, arrayId);
+    int64_t retWeight = qosManager.GetVolumeLimit(volId, iops, arrayId);
     ASSERT_EQ(retWeight, weight);
 }
 TEST(QosManager, Test_Getter_Setter_GcFreeSegment)
@@ -277,7 +267,9 @@ TEST(QosManager, Test_HandlePosIoSubmission)
     io.array_id = 0;
     io.arrayName = new char[9] {"POSArray"};
     AioSubmissionAdapter aioSubmission;
-    qosManager.HandlePosIoSubmission(&aioSubmission, &io);
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Write;
+    qosManager.HandlePosIoSubmission(&aioSubmission, volIo);
     delete mockConfigManager;
 }
 
@@ -316,6 +308,35 @@ TEST(QosManager, Initialize_FinalizeSpdkManager_Test)
     QosManager qosManager(mockSpdkEnvCaller, mockSpdkPosNvmfCaller, mockConfigManager, &mockEventFrameworkApi);
     qosManager.InitializeSpdkManager();
     qosManager.FinalizeSpdkManager();
+    delete mockConfigManager;
+}
+
+TEST(QosManager, PeriodicalJob)
+{
+    NiceMock<MockConfigManager>* mockConfigManager = CreateQosMockConfigManager(false);
+    NiceMock<MockSpdkPosNvmfCaller>* mockSpdkPosNvmfCaller =
+        new NiceMock<MockSpdkPosNvmfCaller>;
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
+     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    QosManager qosManager(mockSpdkEnvCaller, mockSpdkPosNvmfCaller, mockConfigManager, &mockEventFrameworkApi);
+    uint64_t next_tick;
+    qosManager.PeriodicalJob(&next_tick);
+    delete mockConfigManager;
+}
+
+TEST(QosManager, SetMinimumVolume)
+{
+    NiceMock<MockConfigManager>* mockConfigManager = CreateQosMockConfigManager(false);
+    NiceMock<MockSpdkPosNvmfCaller>* mockSpdkPosNvmfCaller =
+        new NiceMock<MockSpdkPosNvmfCaller>;
+    NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller =
+        new NiceMock<MockSpdkEnvCaller>();
+     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
+    QosManager qosManager(mockSpdkEnvCaller, mockSpdkPosNvmfCaller, mockConfigManager, &mockEventFrameworkApi);
+    uint64_t next_tick;
+    qosManager.SetMinimumVolume(0, 1, 10, false);
+    qosManager.SetMinimumVolume(0, 1, 10, true);
     delete mockConfigManager;
 }
 

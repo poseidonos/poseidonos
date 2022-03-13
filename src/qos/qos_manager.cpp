@@ -76,7 +76,6 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
       affinityManager(affinityManager)
 {
     qosThread = nullptr;
-    qosTimeThrottling = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
     arrayNameMap.clear();
@@ -136,7 +135,6 @@ QosManager::~QosManager(void)
         delete qosArrayManager[i];
     }
     delete qosThread;
-    delete qosTimeThrottling;
     delete qosEventManager;
     delete monitoringManager;
     delete policyManager;
@@ -184,7 +182,6 @@ QosManager::Initialize(void)
     }
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
     qosThread = new std::thread(&QosManager::_QosWorker, this);
-    qosTimeThrottling = nullptr;
     initialized = true;
 }
 
@@ -240,7 +237,6 @@ QosManager::_Finalize(void)
     if (nullptr != qosThread)
     {
         qosThread->join();
-        qosTimeThrottling->join();
     }
     POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
 }
@@ -256,7 +252,6 @@ void
 QosManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr volIo)
 {
     qosArrayManager[volIo->GetArrayId()]->HandlePosIoSubmission(aioSubmission, volIo);
-
 }
 
 /* --------------------------------------------------------------------------*/
@@ -285,10 +280,9 @@ QosManager::HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
 /* --------------------------------------------------------------------------*/
 
 void
-QosManager::_PeriodicalJob(uint64_t* nextTick)
+QosManager::PeriodicalJob(uint64_t* nextTick)
 {
     uint64_t now = spdkEnvCaller->SpdkGetTicks();
-    //static uint64_t cnt = 0;
     // We can check overlap case.
     uint64_t tickDiff = (now - *nextTick);
     if ((int64_t)tickDiff > 0)
@@ -302,12 +296,12 @@ QosManager::_PeriodicalJob(uint64_t* nextTick)
             *nextTick = now;
         }
         *nextTick = *nextTick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
-        ControlThrottling();
+        _ControlThrottling();
     }
 }
 
 void
-QosManager::ControlThrottling(void)
+QosManager::_ControlThrottling(void)
 {
     ResetGlobalThrottling();
 
@@ -337,7 +331,6 @@ QosManager::ControlThrottling(void)
             totalMinVolumeBw += qosArrayManager[arrayId]->GetDynamicVolumeThrottling(minVolId, flag);
             SetMinimumVolume(arrayId, minVolId, volumeUserPolicy->GetMinBandwidth(), flag);
         }
-        
     }
     uint64_t globalBw = QosVolumeManager::GetGlobalThrottling(false);
     uint64_t globalIops = QosVolumeManager::GetGlobalThrottling(true);
@@ -366,7 +359,7 @@ QosManager::_QosWorker(void)
         nextManager = _GetNextInternalManager(nextManagerType);
         currentManager = nextManager;
 
-        _PeriodicalJob(&nextTick);
+        PeriodicalJob(&nextTick);
     }
 }
 
@@ -403,19 +396,6 @@ QosManager::_GetNextInternalManager(QosInternalManagerType internalManagerType)
             break;
     }
     return internalManager;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-bw_iops_parameter
-QosManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId)
-{
-    return qosArrayManager[arrayId]->DequeueVolumeParams(reactor, volId);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -601,7 +581,7 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
         offset = offset + 1.0;
         for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
         {
-            qosArrayManager[i]->VolumeQosPoller(reactor, aioSubmission, offset);
+            qosArrayManager[i]->VolumeQosPoller(aioSubmission, offset);
         }
         qosContext->SetReactorProcessed(reactor, true);
         uint64_t after = spdkEnvCaller->SpdkGetTicks();
@@ -823,9 +803,9 @@ QosManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId)
+QosManager::SetVolumeLimit(uint32_t volId, int64_t weight, bool iops, uint32_t arrayId)
 {
-    qosArrayManager[arrayId]->SetVolumeLimit(reactor, volId, weight, iops);
+    qosArrayManager[arrayId]->SetVolumeLimit(volId, weight, iops);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -836,9 +816,9 @@ QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, boo
  */
 /* --------------------------------------------------------------------------*/
 int64_t
-QosManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops, uint32_t arrayId)
+QosManager::GetVolumeLimit(uint32_t volId, bool iops, uint32_t arrayId)
 {
-    return qosArrayManager[arrayId]->GetVolumeLimit(reactor, volId, iops);
+    return qosArrayManager[arrayId]->GetVolumeLimit(volId, iops);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -893,7 +873,7 @@ QosManager::GetMountedVolumes(std::list<std::pair<uint32_t, uint32_t>>& volumeLi
     for (uint32_t arrayId = 0; arrayId < MAX_ARRAY_COUNT; arrayId++)
     {
         std::list<uint32_t> tempVolumeList;
-        tempVolumeList.clear();       
+        tempVolumeList.clear();
         qosArrayManager[arrayId]->GetMountedVolumes(tempVolumeList);
         for (auto iter : tempVolumeList)
         {
@@ -1059,4 +1039,5 @@ QosManager::GetNoContentionCycles(void)
 {
     return NO_CONTENTION_CYCLES;
 }
+
 } // namespace pos

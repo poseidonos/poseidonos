@@ -184,11 +184,10 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeInvalidThrow)
     posIo.array_id = 0;
     AIO aio;
 
-    // When : ioType is not write or read or flush
-    posIo.ioType = IO_TYPE::FLUSH + 1;
-
+    VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
+    volIo->dir = UbioDir::Deallocate;
     // Then : Expect throw exception
-    EXPECT_THROW(aio.SubmitAsyncIO(posIo), POS_EVENT_ID);
+    EXPECT_THROW(aio.SubmitAsyncIO(volIo), POS_EVENT_ID);
 }
 
 TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
@@ -202,7 +201,7 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
     AIO aio;
 
     // Then : SubmitAsyncIo done
-    aio.SubmitAsyncIO(posIo);
+    aio.SubmitFlush(posIo);
 }
 
 TEST(AIO, AIO_CompleteIOs_CompleteIOs)
