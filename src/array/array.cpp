@@ -142,6 +142,10 @@ Array::_LoadImpl(void)
     RaidState rs = ptnMgr->GetRaidState();
     state->EnableStatePublisher(uniqueId);
     state->SetLoad(rs);
+    if (state->GetState() == ArrayStateEnum::BROKEN)
+    {
+        shutdownFlag = 1;
+    }
     return ret;
 }
 
