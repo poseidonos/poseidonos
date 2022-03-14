@@ -186,11 +186,35 @@ Allocator::PrepareRebuild(void)
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
     blockManager->TurnOffBlkAllocation();
 
-    std::set<SegmentId> rebuildSegments;
-    int ret = contextManager->MakeRebuildTargetSegmentList(rebuildSegments);
-    if (ret < 0 || rebuildSegments.size() == 0)
+    int ret = 0;
+
+    std::set<SegmentId> nvramSegments;
+    nvramSegments = contextManager->GetNvramSegmentList();
+
+    ret = wbStripeManager->FlushOnlineStripesInSegment(nvramSegments);
+    if (ret != 0)
     {
-        // Error occured or there's no segments to rebuild
+        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes flush failed, ret {}", ret);
+        blockManager->TurnOnBlkAllocation();
+        return ret;   
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
+
+    ret = contextManager->MakeRebuildTargetSegmentList();
+    if (ret != 0)
+    {
+        if (ret == (int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY)
+        {
+            // No segments to rebuild, complete rebuild
+            POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "No segments to rebuild");
+            ret = 0;
+        }
+        else
+        {
+            // Error occured or there's no segments to rebuild
+            POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Failed to flush rebuild target list");
+        }
+
         blockManager->TurnOnBlkAllocation();
         return ret;
     }
@@ -199,13 +223,11 @@ Allocator::PrepareRebuild(void)
     ret = contextManager->SetNextSsdLsid();
     if (ret < 0)
     {
+        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Failed to get next segment");
         blockManager->TurnOnBlkAllocation();
         return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
-
-    ret = wbStripeManager->FlushOnlineStripesInSegment(rebuildSegments);
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
 
     blockManager->TurnOnBlkAllocation();
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild() with return {}", ret);

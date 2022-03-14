@@ -592,15 +592,28 @@ SegmentCtx::SetRebuildCompleted(SegmentId segId)
 }
 
 int
-SegmentCtx::MakeRebuildTarget(std::set<SegmentId>& segmentList)
+SegmentCtx::MakeRebuildTarget(void)
 {
     _BuildRebuildSegmentList();
-    segmentList = rebuildList->GetList();
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET),
-        "MakeRebuildTarget: rebuild target segment is built, num:{}", segmentList.size());
+        "MakeRebuildTarget: rebuild target segment is built, num:{}", rebuildList->GetNumSegments());
 
-    return _FlushRebuildSegmentList();
+    int flushResult = _FlushRebuildSegmentList();
+    if (rebuildList->GetNumSegments() == 0)
+    {
+        return int(POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
+    }
+    else
+    {
+        return flushResult;
+    }
+}
+
+std::set<SegmentId>
+SegmentCtx::GetNvramSegmentList(void)
+{
+    return segmentList[SegmentState::NVRAM]->GetList();
 }
 
 void

@@ -82,7 +82,8 @@ public:
     virtual bool NeedRebuildAgain(void);
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
-    virtual int MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList);
+    virtual int MakeRebuildTargetSegmentList(void);
+    virtual std::set<SegmentId> GetNvramSegmentList(void);
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 

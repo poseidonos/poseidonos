@@ -600,31 +600,45 @@ TEST(ContextManager, MakeRebuildTargetSegmentList_TestwithFlushOrwithoutFlush)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
-    std::set<SegmentId> segmentList;
-
     // given 1.
     EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(-1));
     // when 1.
-    int ret = ctxManager.MakeRebuildTargetSegmentList(segmentList);
+    int ret = ctxManager.MakeRebuildTargetSegmentList();
     // then 1.
     EXPECT_EQ(-1, ret);
 
     // given 2.
-    segmentList.clear();
-    EXPECT_CALL(*segCtx, MakeRebuildTarget)
-        .WillOnce([&](std::set<SegmentId>& segmentList)
-        {
-            segmentList.emplace(0);
-            segmentList.emplace(1);
-            return 0;
-        });
+    EXPECT_CALL(*segCtx, MakeRebuildTarget).WillOnce(Return(0));
     // when 1.
-    ret = ctxManager.MakeRebuildTargetSegmentList(segmentList);
+    ret = ctxManager.MakeRebuildTargetSegmentList();
     // then 1.
     EXPECT_EQ(0, ret);
+}
 
-    std::set<SegmentId> expected = {0, 1};
-    EXPECT_EQ(segmentList, expected);
+TEST(ContextManager, GetNvramSegmentList_testIfListIsReturnedAsSegmentContextReturned)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
+    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
+    NiceMock<MockTelemetryPublisher> tc;
+    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
+
+    // given
+    EXPECT_CALL(*segCtx, GetNvramSegmentList)
+        .WillOnce([]()
+        {
+            std::set<SegmentId> sets = {0, 1, 2};
+            return sets;
+        });
+    // when
+    auto actual = ctxManager.GetNvramSegmentList();
+    std::set<SegmentId> expected = {0, 1, 2};
+    // then
+    EXPECT_TRUE(actual == expected);
 }
 
 TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)

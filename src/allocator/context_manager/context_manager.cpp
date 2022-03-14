@@ -222,9 +222,15 @@ ContextManager::ReleaseRebuildSegment(SegmentId segId)
 }
 
 int
-ContextManager::MakeRebuildTargetSegmentList(std::set<SegmentId>& segmentList)
+ContextManager::MakeRebuildTargetSegmentList(void)
 {
-    return segmentCtx->MakeRebuildTarget(segmentList);
+    return segmentCtx->MakeRebuildTarget();
+}
+
+std::set<SegmentId>
+ContextManager::GetNvramSegmentList(void)
+{
+    return segmentCtx->GetNvramSegmentList();
 }
 
 int

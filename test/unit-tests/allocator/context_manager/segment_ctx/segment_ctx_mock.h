@@ -38,7 +38,8 @@ public:
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
     MOCK_METHOD(int, SetRebuildCompleted, (SegmentId segId), (override));
-    MOCK_METHOD(int, MakeRebuildTarget, (std::set<SegmentId>& segmentList), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetNvramSegmentList, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetRebuildSegmentList, (), (override));

@@ -97,7 +97,8 @@ public:
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int SetRebuildCompleted(SegmentId segId);
-    virtual int MakeRebuildTarget(std::set<SegmentId>& segmentList);
+    virtual int MakeRebuildTarget(void);
+    virtual std::set<SegmentId> GetNvramSegmentList(void);
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual std::set<SegmentId> GetRebuildSegmentList(void);

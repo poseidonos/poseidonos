@@ -714,7 +714,38 @@ TEST_F(SegmentCtxTestFixture, GetRebuildTargetSegment_TestRebuildTargetFindSucce
     EXPECT_EQ(ret, 0);
 }
 
-TEST(SegmentCtx, MakeRebuildTarget_TestMakeRebuildTarget)
+TEST(SegmentCtx, MakeRebuildTarget_testWhenRebuildTargetListIsEmpty)
+{
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    NiceMock<MockRebuildCtx> rebuildCtx;
+    NiceMock<MockSegmentList> ssdSegmentList, victimSegmentList, nvramSegmentList, rebuildSegmentList;
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
+
+    NiceMock<MockGcCtx> gcCtx;
+    SegmentCtx segmentCtx(tp, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo, &gcCtx);
+    segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::NVRAM, &nvramSegmentList);
+
+    EXPECT_CALL(ssdSegmentList, GetNumSegments).WillRepeatedly(Return(0));
+    EXPECT_CALL(ssdSegmentList, PopSegment).WillRepeatedly(Return(UNMAP_SEGMENT));
+
+    EXPECT_CALL(victimSegmentList, GetNumSegments).WillRepeatedly(Return(0));
+    EXPECT_CALL(victimSegmentList, PopSegment).WillRepeatedly(Return(UNMAP_SEGMENT));
+
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(4));
+
+    EXPECT_CALL(rebuildSegmentList, GetNumSegments).WillRepeatedly(Return(0));
+    int ret = segmentCtx.MakeRebuildTarget();
+
+    EXPECT_EQ(ret, (int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
+
+    delete[] segInfos;
+    delete tp;
+}
+
+TEST(SegmentCtx, MakeRebuildTarget_testWhenRebuildTargetListIsNotEmpty)
 {
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     NiceMock<MockRebuildCtx> rebuildCtx;
@@ -741,10 +772,10 @@ TEST(SegmentCtx, MakeRebuildTarget_TestMakeRebuildTarget)
         EXPECT_CALL(rebuildSegmentList, AddToList(i)).Times(1);
     }
 
+    EXPECT_CALL(rebuildSegmentList, GetNumSegments).WillRepeatedly(Return(4));
     EXPECT_CALL(rebuildCtx, FlushRebuildSegmentList).WillOnce(Return(0));
 
-    std::set<SegmentId> rebuildTargetSegments;
-    int ret = segmentCtx.MakeRebuildTarget(rebuildTargetSegments);
+    int ret = segmentCtx.MakeRebuildTarget();
 
     EXPECT_EQ(ret, 0);
 

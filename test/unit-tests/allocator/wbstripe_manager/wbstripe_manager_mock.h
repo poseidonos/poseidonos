@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 #include <string>
 #include <list>
-#include <set>
 #include <vector>
 #include "src/allocator/wbstripe_manager/wbstripe_manager.h"
 
@@ -24,6 +23,7 @@ public:
     MOCK_METHOD(Stripe*, FinishReconstructedStripe, (StripeId wbLsid, VirtualBlkAddr tail), (override));
     MOCK_METHOD(void, SetActiveStripeTail, (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(void, FlushAllActiveStripes, (), (override));
+    MOCK_METHOD(bool, FinalizeActiveStripes, (int volumeId), (override));
     MOCK_METHOD(int, FlushPendingActiveStripes, (), (override));
     MOCK_METHOD(int, FlushOnlineStripesInSegment, (std::set<SegmentId>& segments), (override));
     MOCK_METHOD(void, FinalizeWriteIO, (std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));

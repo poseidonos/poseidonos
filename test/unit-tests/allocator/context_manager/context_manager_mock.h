@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -20,7 +21,8 @@ public:
     MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
-    MOCK_METHOD(int, MakeRebuildTargetSegmentList, (std::set<SegmentId>& segmentList), (override));
+    MOCK_METHOD(int, MakeRebuildTargetSegmentList, (), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetNvramSegmentList, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
