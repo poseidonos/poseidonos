@@ -29,6 +29,7 @@ class Target:
         self.use_autogen = json["AUTO_GENERATE"]["USE"]
         self.subsystem_list = []
         self.array_volume_list = {}
+        self.volume_size = ""
 
     def Prepare(self):
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
@@ -134,6 +135,7 @@ class Target:
                         nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
                         volume_name = f"VOL{i+nqn_base+1}"
                         volume_list.append(volume_name)
+                        self.volume_size = vol["SIZE"]
                         if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
                                                        vol["SIZE"], vol["ARRAY"]):
                             return False

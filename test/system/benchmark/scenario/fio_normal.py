@@ -14,7 +14,7 @@ def play(json_targets, json_inits, json_scenario):
     now_date = raw_date.strftime("%y%m%d_%H%M%S")
     skip_workload = False
 
-    # lib.subproc.set_allow_stdout()
+    lib.subproc.set_allow_stdout()
 
     # validate arguments, 인자로 받은 json 정보가 있는지 확인
     if 0 == len(json_targets):
@@ -68,10 +68,14 @@ def play(json_targets, json_inits, json_scenario):
         graph_fio = graph.manager.Fio(f"{json_scenario['OUTPUT_DIR']}/{now_date}_normal")  # graph 객체 생성
 
         tc_list = [
-            {"name": "1_fill_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": "1t", "time_based": "0", "runtime": "0", "log_avg_msec": "1000"},
-            {"name": "2_clean_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "40t", "time_based": "1", "runtime": "600", "log_avg_msec": "10000"},
-            {"name": "3_fill_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "400t", "time_based": "1", "runtime": "28800", "log_avg_msec": "288000"},
-            {"name": "4_sust_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "40t", "time_based": "1", "runtime": "600", "log_avg_msec": "10000"}
+            {"name": "1_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": test_target.volume_size, "time_based": "0", "runtime": "0", "log_avg_msec": "30000"},
+            {"name": "2_sr", "rw": "read", "bs": "128k", "iodepth": "4", "io_size": "1t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
+            {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
+            # {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
+            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "1200", "log_avg_msec": "24000"},
+            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
+            {"name": "6_rr", "rw": "randread", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
+            {"name": "7_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"}
         ]
 
         for tc in tc_list:
@@ -90,6 +94,11 @@ def play(json_targets, json_inits, json_scenario):
                 test_fio.opt["direct"] = "1"
                 test_fio.opt["size"] = "100%"
                 test_fio.opt["readwrite"] = tc["rw"]
+                if "randrw" == tc["rw"]:
+                    test_fio.opt["rwmixread"] = tc["rwmixread"]
+                else:
+                    if test_fio.opt.get("rwmixread"):
+                        del test_fio.opt["rwmixread"]
                 test_fio.opt["bs"] = tc["bs"]
                 test_fio.opt["iodepth"] = tc["iodepth"]
                 test_fio.opt["io_size"] = tc["io_size"]
@@ -134,11 +143,11 @@ def play(json_targets, json_inits, json_scenario):
                     for key in initiators:
                         test_init = initiators[key]
                         # Eta
-                        if "3_fill_rw" != tc["name"]:
-                            graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}.eta", tc["name"])
-                            graph_fio.DrawEta(["bw_write", "iops_write"])
+                        if "1_sw" != tc["name"] and "4_sus" != tc["name"]:
+                            graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}.eta", f"{tc['name']}_{test_init.name}")
+                            graph_fio.DrawEta(["bw_read", "bw_write", "iops_read", "iops_write"])
                         # Result
-                        graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}", tc["name"])
+                        graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}", f"{tc['name']}_{test_init.name}")
                         graph_fio.DrawResult()
                         # Log
                         graph_fio.AddLogData(f"{json_scenario['OUTPUT_DIR']}/log", f"{now_date}_{tc['name']}_{test_init.name}")
@@ -146,7 +155,7 @@ def play(json_targets, json_inits, json_scenario):
                         graph_fio.ClearLogData()
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")
-                    skip_workload = True
+                    # skip_workload = True
 
         lib.printer.green(f" fio end")
 

@@ -92,7 +92,7 @@
                 "ARRAYs": [
                     {
                         "NAME": "ARR0",
-                        "RAID_TYPE": "RAID5",
+                        "RAID_TYPE": "RAID0",
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15",
                         "SPARE_DEVICE_LIST": "",
                         "BUFFER_DEVICE": {
@@ -106,7 +106,7 @@
                     },
                     {
                         "NAME": "ARR1",
-                        "RAID_TYPE": "RAID5",
+                        "RAID_TYPE": "RAID0",
                         "USER_DEVICE_LIST": "unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28,unvme-ns-29,unvme-ns-30,unvme-ns-31",
                         "SPARE_DEVICE_LIST": "",
                         "BUFFER_DEVICE": {
@@ -132,7 +132,7 @@
                             {
                                 "ARRAY": "ARR0",
                                 "NUM": 32,
-                                "SIZE": 1587598589952
+                                "SIZE": 1693437657088
                             }
                         ]
                     },
@@ -145,7 +145,7 @@
                             {
                                 "ARRAY": "ARR1",
                                 "NUM": 32,
-                                "SIZE": 1587598589952
+                                "SIZE": 1693437657088
                             }
                         ]
                     }
