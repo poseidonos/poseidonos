@@ -29,8 +29,6 @@ def create_array(buffer, data, spare, array, raid):
     param_str = ""
     if (buffer != ""):
         param_str += "-b " + buffer
-    else:
-        param_str += "--no-buffer"
     if (data != ""):
         param_str += " -d " + data
     if spare != "":
@@ -48,8 +46,6 @@ def auto_create_array(buffer, num_data, num_spare, array, raid):
     param_str = ""
     if (buffer != ""):
         param_str += "-b " + buffer
-    else:
-        param_str += "--no-buffer"
     param_str += " -d " + str(num_data)
     param_str += " -s " + str(num_spare)
     param_str += " --array-name " + array
@@ -266,7 +262,7 @@ def update_event_wrr_policy(policy_name, weight):
 
 def smart(device):
     param_str = "--device-name " + device
-    return send_request("device smart " + param_str)
+    return send_request("device smart-log " + param_str)
 
 
 def start_telemetry():

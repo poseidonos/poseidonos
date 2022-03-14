@@ -2,11 +2,11 @@
 import subprocess
 import os
 import sys
-import json
 sys.path.append("../")
 sys.path.append("../../system/lib/")
 sys.path.append("../system_overall/")
 
+import json_parser
 import pos
 import cli
 import api
@@ -16,9 +16,8 @@ POS_ROOT = '../../../'
 
 
 def check_result(out):
-    data = json.loads(out)
-    description = data['Response']['result']['status']['description']
-    if "There is no array" in description:
+    ret = json_parser.get_response_code(out)
+    if ret == 1224: #CLI_LIST_ARRAY_NO_ARRAY_EXISTS = 1224
         return "pass"
     return "fail"
 

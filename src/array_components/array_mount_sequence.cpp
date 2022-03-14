@@ -232,16 +232,12 @@ ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
 
-    if (next->ToStateType() == StateEnum::STOP)
+    if (next->ToStateType() == StateEnum::STOP && 
+        prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
     {
-        // Regardless of the prev state, we'd like to invoke Shutdown() of the array when the next state is STOP.
         POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Shutdown for {}", arrayName);
         Shutdown();
-        if (prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
-        {
-            // When the previous state was ONLINE, we should do the flush to update MBR
-            _FlushMountSequence();
-        }
+        _FlushMountSequence();
     }
 }
 
