@@ -45,7 +45,7 @@ init_monitoring()
 {
     # Kill instances related to monitoring if exists (w/ -k)
     # + Remove all pos logs (w/ -r)
-    texecc "echo ${POS_TARGET_PW} | sudo -S ${WORKING_DIR}/clean_monitoring.sh -k -r"
+    texecc "echo ${POS_TARGET_PW} | sudo -S ${WORKING_DIR}/clean_monitoring.sh -kr"
 }
 
 setup_filebeat()
@@ -127,9 +127,9 @@ setup_monitoring()
     run_pos-exporter
 }
 
-while getopts "i:u:p:r:d:n:b:" opt
+while getopts "i:u:p:r:d:n:b:" OPT
 do
-    case $opt in
+    case ${OPT} in
         i) POS_TARGET_IP="$OPTARG"
             ;;
         u) POS_TARGET_USER="$OPTARG"
@@ -145,7 +145,7 @@ do
         b) BAMBOO_BUILD_NUMBER=$(echo ${OPTARG} | sed 's/'\''//g')
             ;;
         *)
-            echo "Unimplemented option -- ${opt}" >&2
+            echo "Unimplemented option -- ${OPT}" >&2
             exit 1
     esac
 done
