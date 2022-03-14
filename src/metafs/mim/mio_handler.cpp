@@ -503,14 +503,10 @@ MioHandler::AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlap
 bool
 MioHandler::RemoveArrayInfo(int arrayId)
 {
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
     bool result = true;
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
-        if (!metaFs->mgmt->IsValidVolume(static_cast<MetaVolumeType>(storage)))
-            continue;
-
         if (nullptr == ioRangeOverlapChker[arrayId][storage])
         {
             result = false;
