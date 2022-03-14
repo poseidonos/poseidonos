@@ -1,3 +1,6 @@
+POS_VERSION := $(shell pwd | sed -n -e '/POS_VERSION =/p' ../Makefile | cut -d 'v' -f2)
+PKG_VERSION := $(shell pwd | git log | grep commit | head -1 | cut -d ' ' -f2)
+
 all:
 	# Copy library and config files
 	@cp -f ../bin/poseidonos src/usr/local/bin/
@@ -9,8 +12,11 @@ all:
 	@cp -f ../config/telemetry_default.yaml src/etc/pos
 	
 	# Copy CLI man page files
-	gzip --keep ../tool/cli/docs/manpage/*
-	mv ../tool/cli/docs/manpage/*.gz src/etc/
+	@gzip --keep ../tool/cli/docs/manpage/*
+	@mv ../tool/cli/docs/manpage/*.gz src/etc/
+	
+	# Package Version Control
+	@sed "2s/Version:.*/Version: ${POS_VERSION}-${PKG_VERSION}/g" src/DEBIAN/control -i
 	
 	# Build Package 
 	@`[ -d debian ] || mkdir -p debian`
