@@ -181,12 +181,12 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext offlineContext("sender", SituationEnum::DEFAULT);
-    EXPECT_CALL(mockRebuilder, StopRebuild).Times(1);
-    EXPECT_CALL(mockRebuilder, WaitRebuildDone).Times(1);
-    EXPECT_CALL(mockVolMgr, DetachVolumes).Times(1);
-    EXPECT_CALL(mockSeq3, Shutdown).Times(1);
-    EXPECT_CALL(mockSeq2, Shutdown).Times(1);
-    EXPECT_CALL(mockSeq1, Shutdown).Times(1);
+    EXPECT_CALL(mockRebuilder, StopRebuild).Times(0);
+    EXPECT_CALL(mockRebuilder, WaitRebuildDone).Times(0);
+    EXPECT_CALL(mockVolMgr, DetachVolumes).Times(0);
+    EXPECT_CALL(mockSeq3, Shutdown).Times(0);
+    EXPECT_CALL(mockSeq2, Shutdown).Times(0);
+    EXPECT_CALL(mockSeq1, Shutdown).Times(0);
 
     // flush shouldn't be invoked
     EXPECT_CALL(mockSeq3, Flush).Times(0);

@@ -61,6 +61,7 @@ public:
     virtual void SetMount(void);
     virtual void SetUnmount(void);
     virtual void SetDegraded(void);
+    virtual void SetShutdown(void);
 
     virtual int CanAddSpare(void);
     virtual int CanRemoveSpare(void);
@@ -73,6 +74,7 @@ public:
     virtual bool Exists(void);
     virtual bool IsMounted(void);
     virtual bool IsBroken(void);
+    virtual int WaitShutdownDone(void);
     virtual ArrayStateType GetState(void);
     virtual StateContext* GetSysState(void);
 
@@ -98,6 +100,7 @@ private:
     bool publisherEnabled = false;
     TelemetryPublisher* publisher = nullptr;
     TelemetryClient* telemetryClient = nullptr;
+    bool checkShutdown = false;
 };
 
 } // namespace pos

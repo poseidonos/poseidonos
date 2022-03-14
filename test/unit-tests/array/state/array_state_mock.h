@@ -21,6 +21,7 @@ public:
     MOCK_METHOD(void, SetMount, (), (override));
     MOCK_METHOD(void, SetUnmount, (), (override));
     MOCK_METHOD(void, SetDegraded, (), (override));
+    MOCK_METHOD(void, SetShutdown, (), (override));
     MOCK_METHOD(int, CanAddSpare, (), (override));
     MOCK_METHOD(int, CanRemoveSpare, (), (override));
     MOCK_METHOD(int, IsMountable, (), (override));
@@ -32,6 +33,7 @@ public:
     MOCK_METHOD(bool, Exists, (), (override));
     MOCK_METHOD(bool, IsMounted, (), (override));
     MOCK_METHOD(bool, IsBroken, (), (override));
+    MOCK_METHOD(int, WaitShutdownDone, (), (override));
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
     MOCK_METHOD(StateContext*, GetSysState, (), (override));
     MOCK_METHOD(void, StateChanged, (StateContext * prev, StateContext* next), (override));

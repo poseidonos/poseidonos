@@ -345,7 +345,7 @@ TEST(Array, Delete_testIfArrayDeletedSuccessfullyWhenInputsAreValid)
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockState, SetDelete).Times(1);
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
+    EXPECT_CALL(*mockState, WaitShutdownDone).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, DeletePartitions).Times(1);
 
     Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
@@ -433,11 +433,10 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     EXPECT_CALL(mockAbrControl, DeleteAbr).Times(0);
     EXPECT_CALL(*mockState, SetDelete).Times(0);
     EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(true));
+    EXPECT_CALL(*mockState, WaitShutdownDone).WillOnce(Return(EID(DELETE_ARRAY_TIMED_OUT)));
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
     Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);
-
     // When: array is broken but shutdown process is not finished
     int actual = array.Delete();
 

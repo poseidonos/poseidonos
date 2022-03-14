@@ -238,6 +238,7 @@ void
 ArrayState::SetUnmount(void)
 {
     iStateControl->Remove(degradedState);
+    checkShutdown = false;
 
     switch (state)
     {
@@ -313,6 +314,24 @@ ArrayState::IsBroken(void)
     return state == ArrayStateEnum::BROKEN;
 }
 
+int
+ArrayState::WaitShutdownDone(void)
+{
+    int waitcount = 0;
+    while (checkShutdown == true) // Broken State automatically triggers Shutdown to all array components
+    {
+        POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Wait for shutdown done");
+        usleep(100000);
+        waitcount++;
+
+        if (waitcount > 50)
+        {
+            return EID(DELETE_ARRAY_TIMED_OUT);
+        }
+    }
+    return 0;
+}
+
 bool
 ArrayState::SetRebuild(void)
 {
@@ -337,6 +356,12 @@ void
 ArrayState::SetDegraded(void)
 {
     _SetState(ArrayStateEnum::DEGRADED);
+}
+
+void
+ArrayState::SetShutdown(void)
+{
+    checkShutdown = false;
 }
 
 bool
@@ -398,6 +423,10 @@ ArrayState::_SetState(ArrayStateEnum newState)
         }
         else if (newState == ArrayStateEnum::BROKEN)
         {
+            if (state >= ArrayStateEnum::NORMAL)
+            {
+                checkShutdown = true;
+            }
             iStateControl->Invoke(stopState);
         }
 
