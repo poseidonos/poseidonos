@@ -27,10 +27,10 @@ def execute():
     SCAN_DEV_BASIC.execute()
     result_npor = cli.array_info(ARRAYNAME)
 
-    uniqueId = json.loads(result)['Response']['result']['data']['uniqueId']
-    print("uniqueId Before NPOR : " + uniqueId)
-    uniqueId_npor = json.loads(result_npor)['Response']['result']['data']['uniqueId']
-    print("uniqueId After NPOR : " + uniqueId_npor)
+    uniqueId = json.loads(result)['Response']['result']['data']['unique_id']
+    print("uniqueId Before NPOR : " + str(uniqueId))
+    uniqueId_npor = json.loads(result_npor)['Response']['result']['data']['unique_id']
+    print("uniqueId After NPOR : " + str(uniqueId_npor))
     if uniqueId == uniqueId_npor:
         out = json_parser.make_result_code(0)
     else:
