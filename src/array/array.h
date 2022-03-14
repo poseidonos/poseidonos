@@ -133,7 +133,7 @@ private:
     static const int LOCK_ACQUIRE_FAILED;
     IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
-    int shutdownFlag = 0;
+    bool checkShutdown = false;
     ArrayServiceLayer* arrayService = nullptr;
     id_t uniqueId = 0;
     bool isWTEnabled = false;

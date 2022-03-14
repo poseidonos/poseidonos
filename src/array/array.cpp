@@ -142,10 +142,6 @@ Array::_LoadImpl(void)
     RaidState rs = ptnMgr->GetRaidState();
     state->EnableStatePublisher(uniqueId);
     state->SetLoad(rs);
-    if (state->GetState() == ArrayStateEnum::BROKEN)
-    {
-        shutdownFlag = 1;
-    }
     return ret;
 }
 
@@ -262,6 +258,7 @@ Array::Dispose(void)
     POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Trying to unmount array({})", name_);
     _UnregisterService();
     state->SetUnmount();
+    checkShutdown = false;
     isWTEnabled = false;
     POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Array({}) is unmounted successfully", name_);
     // pthread_rwlock_unlock(&stateLock);
@@ -272,7 +269,7 @@ Array::Shutdown(void)
 {
     POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Trying to shut down broken array({})", name_);
     _UnregisterService();
-    shutdownFlag = 1;
+    checkShutdown = false;
     isWTEnabled = false;
     POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Broken array({}) shuts down successfully", name_);
 }
@@ -312,7 +309,7 @@ Array::Delete(void)
     if (state->IsBroken())
     {
         int waitcount = 0;
-        while (shutdownFlag == 0) // Broken State automatically triggers Shutdown to all array components
+        while (checkShutdown == true) // Broken State automatically triggers Shutdown to all array components
         {
             POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Wait for shutdown done");
             usleep(100000);
@@ -324,7 +321,6 @@ Array::Delete(void)
                 goto error;
             }
         }
-        shutdownFlag = 0;
     }
 
     _DeletePartitions();
@@ -661,6 +657,7 @@ void
 Array::MountDone(bool isWT)
 {
     isWTEnabled = isWT;
+    checkShutdown = true;
     _CheckRebuildNecessity();
     int ret = _Flush();
     assert(ret == 0);
