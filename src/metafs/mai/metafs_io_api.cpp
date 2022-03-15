@@ -30,8 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "metafs_io_api.h"
+
+#include <string>
+
 #include "instance_tagid_allocator.h"
 #include "metafs_aiocb_cxt.h"
 
@@ -40,16 +42,24 @@ namespace pos
 static InstanceTagIdAllocator aiocbTagIdAllocator;
 
 MetaFsIoApi::MetaFsIoApi(void)
+: arrayId(INT32_MAX),
+  isNormal(false),
+  ioMgr(nullptr),
+  ctrlMgr(nullptr),
+  telemetryPublisher(nullptr)
 {
 }
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
-            MetaStorageSubsystem* storage, TelemetryPublisher* tp, MetaIoManager* io)
+    MetaStorageSubsystem* storage, TelemetryPublisher* tp, MetaIoManager* io)
+: arrayId(arrayId),
+  isNormal(false),
+  ioMgr(io),
+  ctrlMgr(ctrl),
+  telemetryPublisher(tp)
 {
-    this->arrayId = arrayId;
-    ctrlMgr = ctrl;
-    telemetryPublisher = tp;
-    ioMgr = (nullptr == io) ? new MetaIoManager(storage) : io;
+    if (!ioMgr)
+        ioMgr = new MetaIoManager(storage);
 }
 
 MetaFsIoApi::~MetaFsIoApi(void)
@@ -63,9 +73,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
 
-    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
@@ -76,34 +84,17 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.targetMediaType = mediaType;
     reqMsg.priority = RequestPriority::Normal;
 
-    if (false == _AddFileInfo(reqMsg))
-    {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
-        return rc;
-    }
-
-    _AddExtraIoReqInfo(reqMsg);
-
-    rc = _CheckReqSanity(reqMsg);
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
-    }
-
-    return rc;
+    return _ProcessRequest(reqMsg);
 }
 
 POS_EVENT_ID
 MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
-                FileSizeType byteSize, void* buf, MetaStorageType mediaType)
+    FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
 
-    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
@@ -116,22 +107,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.targetMediaType = mediaType;
     reqMsg.priority = RequestPriority::Normal;
 
-    if (false == _AddFileInfo(reqMsg))
-    {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
-        return rc;
-    }
-
-    _AddExtraIoReqInfo(reqMsg);
-
-    rc = _CheckReqSanity(reqMsg);
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, fd, byteSize);
-    }
-
-    return rc;
+    return _ProcessRequest(reqMsg);
 }
 
 POS_EVENT_ID
@@ -140,9 +116,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
 
-    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
@@ -153,34 +127,17 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
     reqMsg.targetMediaType = mediaType;
     reqMsg.priority = RequestPriority::Normal;
 
-    if (false == _AddFileInfo(reqMsg))
-    {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
-        return rc;
-    }
-
-    _AddExtraIoReqInfo(reqMsg);
-
-    rc = _CheckReqSanity(reqMsg);
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, fd, reqMsg.fileCtx->sizeInByte);
-    }
-
-    return rc;
+    return _ProcessRequest(reqMsg);
 }
 
 POS_EVENT_ID
 MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
-                FileSizeType byteSize, void* buf, MetaStorageType mediaType)
+    FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
 
-    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
     reqMsg.arrayId = arrayId;
@@ -193,22 +150,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.targetMediaType = mediaType;
     reqMsg.priority = RequestPriority::Normal;
 
-    if (false == _AddFileInfo(reqMsg))
-    {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
-        return rc;
-    }
-
-    _AddExtraIoReqInfo(reqMsg);
-
-    rc = _CheckReqSanity(reqMsg);
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, fd, byteSize);
-    }
-
-    return rc;
+    return _ProcessRequest(reqMsg);
 }
 
 POS_EVENT_ID
@@ -217,11 +159,9 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
 
-    POS_EVENT_ID rc;
-    MetaFsIoRequest reqMsg;
-
     cxt->SetTagId(aiocbTagIdAllocator());
 
+    MetaFsIoRequest reqMsg;
     reqMsg.reqType = (MetaIoRequestType)cxt->opcode;
     reqMsg.fd = cxt->fd;
     reqMsg.arrayId = cxt->arrayId;
@@ -235,25 +175,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
     reqMsg.targetMediaType = mediaType;
     reqMsg.priority = cxt->GetPriority();
 
-    if (false == _AddFileInfo(reqMsg))
-    {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
-        return rc;
-    }
-
-    _AddExtraIoReqInfo(reqMsg);
-
-    rc = _CheckReqSanity(reqMsg);
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
-
-        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, reqMsg.fd, reqMsg.byteSize);
-    }
-
-    return rc;
+    return _ProcessRequest(reqMsg);
 }
 
 bool
@@ -278,7 +200,7 @@ bool
 MetaFsIoApi::_AddFileInfo(MetaFsIoRequest& reqMsg)
 {
     MetaFileContext* fileCtx = ctrlMgr->GetFileInfo(reqMsg.fd,
-                MetaFileUtil::ConvertToVolumeType(reqMsg.targetMediaType));
+        MetaFileUtil::ConvertToVolumeType(reqMsg.targetMediaType));
 
     // the file is not existed.
     if (fileCtx == nullptr)
@@ -292,7 +214,7 @@ MetaFsIoApi::_AddFileInfo(MetaFsIoRequest& reqMsg)
 void
 MetaFsIoApi::_AddExtraIoReqInfo(MetaFsIoRequest& reqMsg)
 {
-    if (true == reqMsg.isFullFileIo)
+    if (reqMsg.isFullFileIo)
     {
         reqMsg.byteOffsetInFile = 0;
         reqMsg.byteSize = reqMsg.fileCtx->sizeInByte;
@@ -333,7 +255,7 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-    if (false == reqMsg.IsValid())
+    if (!reqMsg.IsValid())
     {
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
@@ -341,36 +263,58 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
     rc = _CheckFileIoBoundary(reqMsg);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
-        MFS_TRACE_ERROR((int)rc, "File I/O boundary error. rc={}, offset={}, size={}",
-            (int)rc, reqMsg.byteOffsetInFile, reqMsg.byteSize);
+        MFS_TRACE_ERROR((int)rc,
+            "I/O boundary error. fd: {}, volumeType: {}, offset: {}, size: {}",
+            reqMsg.fd, (int)reqMsg.targetMediaType, reqMsg.byteOffsetInFile, reqMsg.byteSize);
         return rc;
     }
 
     if (!reqMsg.fileCtx->isActivated)
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
-            "File not found...(given fd={})", reqMsg.fd);
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        MFS_TRACE_ERROR((int)rc,
+            "The File not found. fd: {}, volumeType: {}",
+            reqMsg.fd, (int)reqMsg.targetMediaType);
+        return rc;
+    }
+
+    return rc;
+}
+
+POS_EVENT_ID
+MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
+{
+    if (!_AddFileInfo(reqMsg))
+    {
         return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
     }
 
-    switch (reqMsg.reqType)
+    _AddExtraIoReqInfo(reqMsg);
+
+    POS_EVENT_ID rc = _CheckReqSanity(reqMsg);
+
+    if (POS_EVENT_ID::SUCCESS == rc)
     {
-        case MetaIoRequestType::Read: // go thru
-        case MetaIoRequestType::Write:
+        size_t byteSize = 0;
+        if (reqMsg.ioMode == MetaIoMode::Async)
         {
-            if (MetaIoMode::Async == reqMsg.ioMode)
-            {
-                return rc;
-            }
+            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
+            byteSize = reqMsg.byteSize;
         }
-        break;
-        default:
+        else if (!reqMsg.isFullFileIo)
         {
-            MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-                "MetaIoManager::CheckReqSanity - Invalid OPcode");
-            assert(false);
+            byteSize = reqMsg.byteSize;
         }
+        else
+        {
+            byteSize = reqMsg.fileCtx->sizeInByte;
+        }
+
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+        _SendMetric(reqMsg.reqType, reqMsg.fd, byteSize);
     }
+
     return rc;
 }
 

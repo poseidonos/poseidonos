@@ -32,14 +32,14 @@
 
 #pragma once
 
+#include <array>
 #include <queue>
 #include <vector>
-#include <array>
 
 #include "file_descriptor_in_use_map.h"
-#include "src/metafs/include/meta_file_extent.h"
 #include "metafs_common.h"
 #include "on_volume_meta_region.h"
+#include "src/metafs/include/meta_file_extent.h"
 
 namespace pos
 {
@@ -92,6 +92,7 @@ public:
         uint32_t idx, MetaLpnType pageCNT);
 
 private:
+    void _PrintLog(void) const;
     std::queue<uint32_t>* freeInodeEntryIdxQ;
 };
 } // namespace pos

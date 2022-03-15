@@ -120,8 +120,7 @@ InodeTableHeader::GetInodeInUseBitmap(void)
 uint32_t
 InodeTableHeader::GetFreeInodeEntryIdx(void)
 {
-    uint32_t idx;
-    idx = freeInodeEntryIdxQ->front();
+    uint32_t idx = freeInodeEntryIdxQ->front();
     freeInodeEntryIdxQ->pop();
     return idx;
 }
@@ -165,20 +164,11 @@ InodeTableHeader::Load(void)
     bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load();
 
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Load InodeTableHeader contents");
+        "Load InodeTableHeader contents");
 
     if (true == rc)
     {
-        for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
-        {
-            if (0 != content->allocExtentsList[i].GetCount())
-            {
-                POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                    "Allocated extent[{}]: start={}, count={}",
-                    i, content->allocExtentsList[i].GetStartLpn(),
-                    content->allocExtentsList[i].GetCount());
-            }
-        }
+        _PrintLog();
 
         return true;
     }
@@ -189,28 +179,18 @@ InodeTableHeader::Load(void)
 }
 
 bool
-InodeTableHeader::
-Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
+InodeTableHeader::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     MetaLpnType pageCNT)
 {
     bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load(
-            media, baseLPN, idx, pageCNT);
+        media, baseLPN, idx, pageCNT);
 
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Load InodeTableHeader contents");
+        "Load InodeTableHeader contents");
 
     if (true == rc)
     {
-        for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
-        {
-            if (0 != content->allocExtentsList[i].GetCount())
-            {
-                POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                    "Allocated extent[{}]: start={}, count={}",
-                    i, content->allocExtentsList[i].GetStartLpn(),
-                    content->allocExtentsList[i].GetCount());
-            }
-        }
+        _PrintLog();
 
         return true;
     }
@@ -224,30 +204,29 @@ bool
 InodeTableHeader::Store(void)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Store InodeTableHeader contents");
+        "Store InodeTableHeader contents");
 
-    for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
-    {
-        if (0 != content->allocExtentsList[i].GetCount())
-        {
-            POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "Allocated extent[{}]: start={}, count={}",
-                i, content->allocExtentsList[i].GetStartLpn(),
-                content->allocExtentsList[i].GetCount());
-        }
-    }
+    _PrintLog();
 
     return OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Store();
 }
 
 bool
-InodeTableHeader::
-Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
+InodeTableHeader::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     MetaLpnType pageCNT)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Store InodeTableHeader contents");
+        "Store InodeTableHeader contents");
 
+    _PrintLog();
+
+    return OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Store(
+        media, baseLPN, idx, pageCNT);
+}
+
+void
+InodeTableHeader::_PrintLog(void) const
+{
     for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
     {
         if (0 != content->allocExtentsList[i].GetCount())
@@ -258,8 +237,5 @@ Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
                 content->allocExtentsList[i].GetCount());
         }
     }
-
-    return OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Store(
-            media, baseLPN, idx, pageCNT);
 }
 } // namespace pos

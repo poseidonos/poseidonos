@@ -30,8 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "metafs_io_request.h"
+
+#include <string>
+
 #include "instance_tagid_allocator.h"
 #include "metafs_common.h"
 #include "os_header.h"
@@ -61,9 +63,9 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   fileCtx(nullptr),
   priority(RequestPriority::Normal),
   retryFlag(false),
+  ioDone(false),
   error(0)
 {
-    ioDone = false;
     StoreTimestamp(IoRequestStage::Create);
 }
 
