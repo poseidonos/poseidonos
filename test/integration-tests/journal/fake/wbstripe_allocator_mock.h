@@ -19,6 +19,7 @@ public:
         (StripeId wbLsid, VirtualBlkAddr tail), (override));
 
     virtual Stripe* GetStripe(StripeAddr& lsa) override { return nullptr; }
+    virtual Stripe* GetStripe(StripeId wbLsid) override { return nullptr; }
     virtual void FreeWBStripeId(StripeId lsid) override {}
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override { return true; }

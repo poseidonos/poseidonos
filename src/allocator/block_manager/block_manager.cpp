@@ -49,7 +49,7 @@ namespace pos
 BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe)
 : addrInfo(info),
   contextManager(ctxMgr),
-  iWBStripeInternal(nullptr),
+  iWBStripeAllocator(nullptr),
   allocStatus(allocStatus),
   arrayId(arrayId),
   allocateBlocksFromSSDStripe(allocateBlocksFromSSDStripe),
@@ -68,9 +68,9 @@ BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, 
 }
 
 void
-BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
+BlockManager::Init(IWBStripeAllocator* iWBStripeAllocator_)
 {
-    iWBStripeInternal = iwbstripeInternal;
+    iWBStripeAllocator = iWBStripeAllocator_;
     if (iReverseMap == nullptr)
     {
         iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayId);
@@ -237,7 +237,7 @@ BlockManager::_AllocateWbStripe(void)
 void
 BlockManager::_AssignStripe(StripeId vsid, StripeId wbLsid, ASTailArrayIdx asTailArrayIdx)
 {
-    Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
+    Stripe* stripe = iWBStripeAllocator->GetStripe(wbLsid);
     stripe->Assign(vsid, wbLsid, asTailArrayIdx);
 }
 

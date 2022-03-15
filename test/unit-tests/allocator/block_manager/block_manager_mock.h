@@ -13,7 +13,7 @@ class MockBlockManager : public BlockManager
 {
 public:
     using BlockManager::BlockManager;
-    MOCK_METHOD(void, Init, (IWBStripeInternal* iwbstripeInternal), (override));
+    MOCK_METHOD(void, Init, (IWBStripeAllocator* iwbstripeAllocator), (override));
     MOCK_METHOD((std::pair<VirtualBlks, StripeId>), AllocateWriteBufferBlks, (uint32_t volumeId, uint32_t numBlks), (override));
     MOCK_METHOD(Stripe*, AllocateGcDestStripe, (uint32_t volumeId), (override));
     MOCK_METHOD(void, ProhibitUserBlkAlloc, (), (override));

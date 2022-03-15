@@ -38,7 +38,7 @@
 
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_wbstripe_internal.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 
 namespace pos
 {
@@ -54,7 +54,7 @@ public:
     BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe = false);
     BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe);
     virtual ~BlockManager(void) = default;
-    virtual void Init(IWBStripeInternal* iwbstripeInternal);
+    virtual void Init(IWBStripeAllocator* iwbstripeAllocator);
 
     virtual std::pair<VirtualBlks, StripeId> AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override;
     virtual Stripe* AllocateGcDestStripe(uint32_t volumeId);
@@ -94,7 +94,7 @@ protected:
     // DOCs
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
-    IWBStripeInternal* iWBStripeInternal;
+    IWBStripeAllocator* iWBStripeAllocator;
     BlockAllocationStatus* allocStatus;
 
     int arrayId;

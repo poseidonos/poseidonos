@@ -14,6 +14,7 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::A;
 
 namespace pos
 {
@@ -83,7 +84,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion with null stripe
-    ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(nullptr));
+    ON_CALL(mockIWBStripeAllocator, GetStripe(A<StripeAddr&>())).WillByDefault(Return(nullptr));
 
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
@@ -109,7 +110,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion with dummy stripe
-    ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&stripe));
+    ON_CALL(mockIWBStripeAllocator, GetStripe(A<StripeAddr&>())).WillByDefault(Return(&stripe));
 
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
@@ -136,7 +137,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     //When: Execute WriteCompletion causing flush returning success
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(0));
-    ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&mockStripe));
+    ON_CALL(mockIWBStripeAllocator, GetStripe(A<StripeAddr&>())).WillByDefault(Return(&mockStripe));
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 
@@ -163,7 +164,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     //When: Execute WriteCompletion causing flush returning failure
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(-1));
-    ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&mockStripe));
+    ON_CALL(mockIWBStripeAllocator, GetStripe(A<StripeAddr&>())).WillByDefault(Return(&mockStripe));
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 

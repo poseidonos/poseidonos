@@ -40,7 +40,6 @@
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/i_wbstripe_internal.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/resource_manager/memory_manager.h"
 
@@ -53,7 +52,7 @@ class BufferPool;
 class AllocatorCtx;
 class TelemetryPublisher;
 
-class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
+class WBStripeManager : public IWBStripeAllocator
 {
 public:
     WBStripeManager(void) = default;

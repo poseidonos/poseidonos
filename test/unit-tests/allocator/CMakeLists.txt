@@ -1,7 +1,6 @@
 POS_ADD_UNIT_TEST(i_wbstripe_allocator_ut i_wbstripe_allocator_test.cpp)
 POS_ADD_UNIT_TEST(i_context_manager_ut i_context_manager_test.cpp)
 POS_ADD_UNIT_TEST(allocator_ut allocator_test.cpp)
-POS_ADD_UNIT_TEST(i_wbstripe_internal_ut i_wbstripe_internal_test.cpp)
 POS_ADD_UNIT_TEST(i_allocator_wbt_ut i_allocator_wbt_test.cpp)
 POS_ADD_UNIT_TEST(i_block_allocator_ut i_block_allocator_test.cpp)
 POS_ADD_UNIT_TEST(i_context_replayer_ut i_context_replayer_test.cpp)
