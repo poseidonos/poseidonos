@@ -114,9 +114,15 @@ ContextReplayer::ReplayStripeFlushed(StripeId userLsid)
 }
 
 void
+ContextReplayer::SetActiveStripeTail(int index, VirtualBlkAddr tail, StripeId wbLsid)
+{
+    allocatorCtx->SetNewActiveStripeTail(index, tail, wbLsid);
+}
+
+void
 ContextReplayer::ResetActiveStripeTail(int index)
 {
-    allocatorCtx->SetActiveStripeTail(index, UNMAP_VSA);
+    allocatorCtx->SetNewActiveStripeTail(index, UNMAP_VSA, UNMAP_STRIPE);
 }
 
 std::vector<VirtualBlkAddr>

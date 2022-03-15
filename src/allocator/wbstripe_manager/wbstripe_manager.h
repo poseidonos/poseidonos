@@ -76,7 +76,6 @@ public:
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
-    virtual void SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
 
     virtual void FlushAllActiveStripes(void) override;
     virtual bool FinalizeActiveStripes(int volumeId) override;

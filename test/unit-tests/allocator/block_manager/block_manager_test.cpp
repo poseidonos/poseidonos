@@ -515,7 +515,8 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(newVsa));
 
     // Given: Success to allocate new write buffer stripe
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(5));
+    StripeId wbLsid = 5;
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(wbLsid));
 
     // Given: The current ssd lsid is the last stripe of a segment
     EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(9));
@@ -526,7 +527,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(0)).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
+    EXPECT_CALL(*allocCtx, SetNewActiveStripeTail(_, newVsa, wbLsid)).Times(1);
 
     EXPECT_CALL(*iStripeMap, SetLSA(0, _, IN_WRITE_BUFFER_AREA)).Times(1);
     VirtualBlkAddr updatedVsa = {
@@ -542,7 +543,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, 5);
+    EXPECT_EQ(ret.second, wbLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -585,8 +586,9 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     VirtualBlkAddr vsa = {
         .stripeId = 10,
         .offset = 0};
+    StripeId wbLsid = 5;
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillRepeatedly(Return(vsa));
-
+    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     VirtualBlkAddr updatedVsa = {
         .stripeId = 10,
         .offset = 1};
@@ -600,7 +602,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, UNMAP_STRIPE);
+    EXPECT_EQ(ret.second, wbLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -651,7 +653,8 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(newVsa));
 
     // Given: Success to allocate new write buffer stripe
-    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(5));
+    StripeId wbLsid = 5;
+    EXPECT_CALL(*allocCtx, AllocFreeWbStripe).WillOnce(Return(wbLsid));
 
     // Given: Success to allocate new user data stripe
     EXPECT_CALL(*allocCtx, GetCurrentSsdLsid).WillOnce(Return(newVsid - 1));
@@ -659,7 +662,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(newVsid)).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
+    EXPECT_CALL(*allocCtx, SetNewActiveStripeTail(_, newVsa, wbLsid)).Times(1);
 
     EXPECT_CALL(*iStripeMap, SetLSA(newVsid, newVsid, IN_USER_AREA)).Times(1);
     VirtualBlkAddr updatedVsa = {
@@ -675,7 +678,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, 5);
+    EXPECT_EQ(ret.second, wbLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -715,7 +718,8 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUnmapStripeIdWhenNe
         .stripeId = 10,
         .offset = 3};
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
-
+    StripeId wbLsid = 13;
+    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
 
     // when
@@ -725,7 +729,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUnmapStripeIdWhenNe
     EXPECT_EQ(ret.first.startVsa.stripeId, 10);
     EXPECT_EQ(ret.first.startVsa.offset, 3);
     EXPECT_EQ(ret.first.numBlks, 2);
-    EXPECT_EQ(ret.second, UNMAP_STRIPE);
+    EXPECT_EQ(ret.second, wbLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -763,7 +767,8 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsOnlyAllocatedBlockNumbaerWhenReque
         .stripeId = 10,
         .offset = 3};
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
-
+    StripeId wbLsid = 12;
+    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
 
     // when
@@ -772,7 +777,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsOnlyAllocatedBlockNumbaerWhenReque
     EXPECT_EQ(ret.first.startVsa.stripeId, 10);
     EXPECT_EQ(ret.first.startVsa.offset, 3);
     EXPECT_EQ(ret.first.numBlks, 2);
-    EXPECT_EQ(ret.second, UNMAP_STRIPE);
+    EXPECT_EQ(ret.second, wbLsid);
 
     delete iWbstripe;
     delete allocCtx;

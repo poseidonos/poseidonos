@@ -157,7 +157,7 @@ TEST(ContextReplayer, ResetActiveStripeTail_TestSimpleSetter)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, nullptr);
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail);
+    EXPECT_CALL(*allocCtx, SetNewActiveStripeTail);
 
     // when
     ctxReplayer.ResetActiveStripeTail(10);

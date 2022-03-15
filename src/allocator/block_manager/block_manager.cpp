@@ -177,6 +177,10 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
 
         allocatedWbLsid = allocatedStripes.first;
     }
+    else
+    {
+        allocatedWbLsid = allocCtx->GetActiveWbStripeId(asTailArrayIdx);
+    }
 
     VirtualBlks allocatedBlks = _AllocateBlocksFromActiveStripe(asTailArrayIdx, numBlks);
     return {allocatedBlks, allocatedWbLsid};
@@ -219,7 +223,7 @@ BlockManager::_AllocateStripesAndUpdateActiveStripeTail(ASTailArrayIdx asTailArr
     VirtualBlkAddr curVsa = {
         .stripeId = newVsid,
         .offset = 0};
-    allocCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
+    allocCtx->SetNewActiveStripeTail(asTailArrayIdx, curVsa, wbLsid);
 
     return {wbLsid, userLsid};
 }

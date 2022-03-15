@@ -34,7 +34,9 @@ public:
     MOCK_METHOD(uint64_t, GetNumTotalWbStripe, (), (override));
     MOCK_METHOD(std::vector<VirtualBlkAddr>, GetAllActiveStripeTail, (), (override));
     MOCK_METHOD(VirtualBlkAddr, GetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx), (override));
+    MOCK_METHOD(StripeId, GetActiveWbStripeId, (ASTailArrayIdx asTailArrayIdx), (override));
     MOCK_METHOD(void, SetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa), (override));
+    MOCK_METHOD(void, SetNewActiveStripeTail, (ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa, StripeId wbLsid), (override));
     MOCK_METHOD(std::mutex&, GetActiveStripeTailLock, (ASTailArrayIdx asTailArrayIdx), (override));
 };
 

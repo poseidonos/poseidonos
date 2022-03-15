@@ -268,12 +268,6 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
     return ret;
 }
 
-void
-WBStripeManager::SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid)
-{
-    allocCtx->SetActiveStripeTail(volumeId, tail);
-}
-
 int
 WBStripeManager::FlushPendingActiveStripes(void)
 {

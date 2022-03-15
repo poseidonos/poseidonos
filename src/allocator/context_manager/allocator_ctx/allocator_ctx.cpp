@@ -89,6 +89,7 @@ AllocatorCtx::Init(void)
     for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
     {
         activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
+        activeWbStripeId[asTailArrayIdx] = UNMAP_STRIPE;
     }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
 
@@ -296,10 +297,23 @@ AllocatorCtx::GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx)
     return activeStripeTail[asTailArrayIdx];
 }
 
+StripeId
+AllocatorCtx::GetActiveWbStripeId(ASTailArrayIdx asTailArrayIdx)
+{
+    return activeWbStripeId[asTailArrayIdx];
+}
+
 void
 AllocatorCtx::SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa)
 {
     activeStripeTail[asTailArrayIdx] = vsa;
+}
+
+void
+AllocatorCtx::SetNewActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa, StripeId wbLsid)
+{
+    activeStripeTail[asTailArrayIdx] = vsa;
+    activeWbStripeId[asTailArrayIdx] = wbLsid;
 }
 
 std::mutex&

@@ -361,33 +361,6 @@ TEST(WBStripeManager, FinishReconstructedStripe_TestwithAllConditions)
     delete iStripeMap;
 }
 
-TEST(WBStripeManager, RestoreActiveStripeTail_TestwithAllConditions)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(5);
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    WBStripeManager wbStripeManager(nullptr, nullptr, 1, nullptr, nullptr, iStripeMap, allocCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    for (int i = 0; i < 5; i++)
-    {
-        NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-        wbStripeManager.PushStripeToStripeArray(stripe);
-    }
-    EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    // when
-    std::map<uint64_t, BlkAddr> revMapInfos;
-    wbStripeManager.SetActiveStripeTail(0, vsa, 0);
-
-    delete blkManager;
-    delete ctxManager;
-    delete allocCtx;
-    delete iStripeMap;
-}
-
 TEST(WBStripeManager, FlushPendingActiveStripes_TestwithoutStripeVec)
 {
     // given

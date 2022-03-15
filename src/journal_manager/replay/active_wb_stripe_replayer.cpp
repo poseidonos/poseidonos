@@ -192,7 +192,7 @@ ActiveWBStripeReplayer::Replay(void)
         ActiveStripeAddr current = _FindTargetActiveStripeAndRestore(index);
         if (current.IsValid() == true)
         {
-            wbStripeAllocator->SetActiveStripeTail(index,
+            contextReplayer->SetActiveStripeTail(index,
                 current.GetTail(), current.GetWbLsid());
             std::ostringstream os;
             os << "[Replay] Restore active stripe (index " << index

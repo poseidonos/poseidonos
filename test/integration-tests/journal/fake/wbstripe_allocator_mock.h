@@ -13,8 +13,6 @@ public:
     WBStripeAllocatorMock(void) {}
     virtual ~WBStripeAllocatorMock(void) {}
 
-    MOCK_METHOD(void, SetActiveStripeTail,
-        (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(int, ReconstructActiveStripe,
         (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(Stripe*, FinishReconstructedStripe,

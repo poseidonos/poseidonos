@@ -368,6 +368,43 @@ TEST(AllocatorCtx, SetActiveStripeTail_TestSetDataAndCheckData)
     delete allocBitmap;
 }
 
+TEST(AllocatorCtx, SetNewActiveStripeTail_testIfNewActiveStripeIsUpdated)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, nullptr);
+
+    ASTailArrayIdx index = 2;
+
+    // when 1
+    VirtualBlkAddr vsa;
+    vsa.offset = 10;
+    vsa.stripeId = 2;
+    StripeId wbLsid = 13;
+    allocCtx.SetNewActiveStripeTail(index, vsa, wbLsid);
+
+    // then 1
+    VirtualBlkAddr actualVsa = allocCtx.GetActiveStripeTail(index);
+    EXPECT_EQ(actualVsa.stripeId, vsa.stripeId);
+    EXPECT_EQ(actualVsa.offset, vsa.offset);
+
+    StripeId actualWbLsid = allocCtx.GetActiveWbStripeId(index);
+    EXPECT_EQ(actualWbLsid, wbLsid);
+
+    // when 2
+    vsa.offset += 20;
+    allocCtx.SetActiveStripeTail(index, vsa);
+
+    // then 2
+    actualVsa = allocCtx.GetActiveStripeTail(index);
+    actualWbLsid = allocCtx.GetActiveWbStripeId(index);
+
+    EXPECT_EQ(actualVsa, vsa);
+    EXPECT_EQ(actualWbLsid, wbLsid);
+
+    delete allocBitmap;
+}
+
 TEST(AllocatorCtx, GetActiveStripeTailLock_TestSimpleGetter)
 {
     // given

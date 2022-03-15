@@ -162,7 +162,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
         VirtualBlkAddr tail = ReplayTestFixture::GetNextBlock(writtenLastBlock);
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
             ReconstructActiveStripe(testInfo->defaultTestVol, fullStripe.GetWbAddr().stripeId, tail, fullStripe.GetRevMap()));
-        EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
+        EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()),
             SetActiveStripeTail(testInfo->defaultTestVol, tail, fullStripe.GetWbAddr().stripeId))
             .Times(1);
     }

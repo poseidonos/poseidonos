@@ -56,6 +56,7 @@ public:
     virtual void ReplayStripeAllocation(StripeId wbLsid, StripeId userLsid);
     virtual void ReplayStripeRelease(StripeId wbLsid);
     virtual void ReplayStripeFlushed(StripeId userLsid);
+    virtual void SetActiveStripeTail(int index, VirtualBlkAddr tail, StripeId wbLsid);
     virtual void ResetActiveStripeTail(int index);
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
     virtual void ResetSegmentsStates(void);

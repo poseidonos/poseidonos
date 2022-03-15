@@ -18,6 +18,8 @@ public:
     MOCK_METHOD(void, ReplayStripeAllocation, (StripeId wbLsid, StripeId userLsid), (override));
     MOCK_METHOD(void, ReplayStripeRelease, (StripeId wbLsid), (override));
     MOCK_METHOD(void, ReplayStripeFlushed, (StripeId userLsid), (override));
+    MOCK_METHOD(void, SetActiveStripeTail,
+        (int index, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(void, ResetActiveStripeTail, (int index), (override));
     virtual void ResetSegmentsStates(void) {}
     virtual std::vector<VirtualBlkAddr>

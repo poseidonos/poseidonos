@@ -72,10 +72,10 @@ ExpectReconstructActiveStripe(MockIWBStripeAllocator* wbStripeAllocator, StripeI
 }
 
 void
-ExpectRestoreActiveStripeTail(MockIWBStripeAllocator* wbStripeAllocator, StripeInfo activeStripe)
+ExpectRestoreActiveStripeTail(MockIContextReplayer* contextReplayer, StripeInfo activeStripe)
 {
     VirtualBlkAddr tail = GetTail(activeStripe);
-    EXPECT_CALL(*(wbStripeAllocator),
+    EXPECT_CALL(*(contextReplayer),
         SetActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid()))
         .Times(1);
 }
@@ -104,7 +104,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
 
     // Then : Will restore the active stipre tail to this stripe
     ExpectReconstructActiveStripe(&wbStripeAllocator, activeStripe, 0);
-    ExpectRestoreActiveStripeTail(&wbStripeAllocator, activeStripe);
+    ExpectRestoreActiveStripeTail(&contextReplayer, activeStripe);
 
     wbStripeReplayer.Replay();
 }
@@ -167,7 +167,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleFullStripe)
 
     // Then : Will restore the active stripe tail to the lastActiveStripe
     ExpectReconstructActiveStripe(&wbStripeAllocator, lastActiveStripe, 0);
-    ExpectRestoreActiveStripeTail(&wbStripeAllocator, lastActiveStripe);
+    ExpectRestoreActiveStripeTail(&contextReplayer, lastActiveStripe);
 
     wbStripeReplayer.Replay();
 }
@@ -216,7 +216,7 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleFullStripe)
     for (auto lastActiveStripe : lastStripesPerVolume)
     {
         ExpectReconstructActiveStripe(&wbStripeAllocator, lastActiveStripe, 0);
-        ExpectRestoreActiveStripeTail(&wbStripeAllocator, lastActiveStripe);
+        ExpectRestoreActiveStripeTail(&contextReplayer, lastActiveStripe);
     }
     wbStripeReplayer.Replay();
 }
@@ -265,7 +265,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
     }
     StripeInfo lastActiveStripe = *orphanStripes.rbegin();
     orphanStripes.pop_back();
-    ExpectRestoreActiveStripeTail(&wbStripeAllocator, lastActiveStripe);
+    ExpectRestoreActiveStripeTail(&contextReplayer, lastActiveStripe);
 
     wbStripeReplayer.Replay();
 
@@ -332,7 +332,7 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
     for (auto lastActiveStripe : lastStripesPerVolume)
     {
         ExpectReconstructActiveStripe(&wbStripeAllocator, lastActiveStripe, 0);
-        ExpectRestoreActiveStripeTail(&wbStripeAllocator, lastActiveStripe);
+        ExpectRestoreActiveStripeTail(&contextReplayer, lastActiveStripe);
     }
     wbStripeReplayer.Replay();
 
