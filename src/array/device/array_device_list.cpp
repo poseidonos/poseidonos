@@ -177,7 +177,7 @@ ArrayDeviceList::RemoveSpare(ArrayDevice* target)
     auto it = FindSpare(target);
     if (it == devSet_.spares.end())
     {
-        return EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND);
+        return EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
     }
     (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
     devSet_.spares.erase(it);

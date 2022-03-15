@@ -777,7 +777,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
     int actual = arrDevMgr.RemoveSpare("spare-that-doesn't-exist");
 
     // Then
-    ASSERT_EQ(EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND), actual);
+    ASSERT_EQ(EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND), actual);
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)

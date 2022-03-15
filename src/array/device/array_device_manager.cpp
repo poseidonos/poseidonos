@@ -277,7 +277,7 @@ ArrayDeviceManager::RemoveSpare(string devName)
     tie(dev, devType) = this->GetDev(uBlock);
     if (dev == nullptr)
     {
-        return EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND);
+        return EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
     }
     return devs_->RemoveSpare(dev);
 }

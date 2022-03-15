@@ -206,7 +206,12 @@ ArrayComponents::Mount(bool isWTEnabled)
 int
 ArrayComponents::Unmount(void)
 {
-    return arrayMountSequence->Unmount();
+    int ret = array->CheckUnmountable();
+    if (ret == 0)
+    {
+        ret = arrayMountSequence->Unmount();
+    }
+    return ret;
 }
 
 int

@@ -214,7 +214,7 @@ TEST(ArrayDeviceList, RemoveSpare_testWhenNoSpare)
     // When
     int result = arrayDeviceList.RemoveSpare(mockDev);
     // Then
-    int REMOVE_FAIL = EID(REMOVE_SPARE_DEV_NAME_NOT_FOUND);
+    int REMOVE_FAIL = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
     EXPECT_EQ(REMOVE_FAIL, result);
     delete mockDev;
 }
