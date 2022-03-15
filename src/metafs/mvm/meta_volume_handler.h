@@ -37,36 +37,47 @@
 */
 #pragma once
 
-#include <string>
-#include <utility>
-#include "metafs_common.h"
-#include "src/metafs/mvm/volume/meta_volume.h"
 #include "meta_volume_container.h"
+#include "src/metafs/common/metafs_common.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
 
 namespace pos
 {
 class MetaVolumeHandler
 {
 public:
-    MetaVolumeHandler(void);
+    MetaVolumeHandler(void) = delete;
+    explicit MetaVolumeHandler(MetaVolumeContainer* volContainer);
     virtual ~MetaVolumeHandler(void);
 
-    virtual void InitHandler(MetaVolumeContainer* volContainer);
-
-    virtual POS_EVENT_ID HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleCreateFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleCreateArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    virtual POS_EVENT_ID HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleOpenFileReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCloseFileReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCreateFileReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleDeleteFileReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetDataChunkSizeReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCheckFileAccessibleReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFileSizeReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetTargetMediaTypeReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFileBaseLpnReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFreeFileRegionSizeReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCheckFileExist(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCreateArrayReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleDeleteArrayReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetMaxMetaLpnReq(const MetaVolumeType volType,
+        MetaFsFileControlRequest& reqMsg);
 
     // WBT
     virtual POS_EVENT_ID HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMsg);
@@ -75,7 +86,7 @@ public:
     virtual POS_EVENT_ID HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqMsg);
 
 private:
-    bool _CheckFileCreateReqSanity(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    bool _CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 
     MetaVolumeContainer* volContainer;
 };

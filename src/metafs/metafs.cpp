@@ -44,73 +44,73 @@
 namespace pos
 {
 MetaFs::MetaFs(void)
-: isNpor(false),
-  isLoaded(false),
-  isNormal(false),
-  arrayInfo(nullptr),
-  arrayName(""),
-  arrayId(INT32_MAX),
-  metaStorage(nullptr),
-  telemetryPublisher(nullptr)
+: mgmt(nullptr),
+  io(nullptr),
+  ctrl(nullptr),
+  wbt(nullptr),
+  isNpor_(false),
+  isLoaded_(false),
+  isNormal_(false),
+  arrayInfo_(nullptr),
+  arrayName_(""),
+  arrayId_(INT32_MAX),
+  metaStorage_(nullptr),
+  telemetryPublisher_(nullptr)
 {
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 : MetaFs()
 {
-    this->isLoaded = isLoaded;
-    this->arrayInfo = arrayInfo;
+    arrayInfo_ = arrayInfo;
+    isLoaded_ = isLoaded;
 
-    arrayName = arrayInfo->GetName();
-    arrayId = arrayInfo->GetIndex();
+    arrayName_ = arrayInfo->GetName();
+    arrayId_ = arrayInfo->GetIndex();
 
-    metaStorage = new MssOnDisk(arrayId);
+    metaStorage_ = new MssOnDisk(arrayId_);
 
-    telemetryPublisher = new TelemetryPublisher("metafs_" + to_string(arrayId));
-    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
+    telemetryPublisher_ = new TelemetryPublisher("metafs_" + to_string(arrayId_));
+    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
-    mgmt = new MetaFsManagementApi(arrayId, metaStorage);
-    ctrl = new MetaFsFileControlApi(arrayId, metaStorage);
-    io = new MetaFsIoApi(arrayId, ctrl, metaStorage, telemetryPublisher);
-    wbt = new MetaFsWBTApi(arrayId, ctrl);
+    mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
+    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_);
+    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_);
+    wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
-    MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
+    MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
     MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
-    MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp)
-: MetaFs()
+    MetaStorageSubsystem* metaStorage_, TelemetryPublisher* tp)
+: mgmt(mgmt),
+  io(io),
+  ctrl(ctrl),
+  wbt(wbt),
+  isNpor_(false),
+  isLoaded_(isLoaded),
+  isNormal_(false),
+  arrayInfo_(arrayInfo),
+  arrayName_(arrayInfo->GetName()),
+  arrayId_(arrayInfo->GetIndex()),
+  metaStorage_(metaStorage_),
+  telemetryPublisher_(tp)
 {
-    this->isLoaded = isLoaded;
-    this->arrayInfo = arrayInfo;
+    if (nullptr != telemetryPublisher_)
+        TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
-    arrayName = arrayInfo->GetName();
-    arrayId = arrayInfo->GetIndex();
-
-    this->mgmt = mgmt;
-    this->ctrl = ctrl;
-    this->io = io;
-    this->wbt = wbt;
-    this->metaStorage = metaStorage;
-
-    telemetryPublisher = tp;
-
-    if (nullptr != telemetryPublisher)
-        TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
-
-    MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
+    MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
 }
 
 MetaFs::~MetaFs(void)
 {
-    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+    MetaFsServiceSingleton::Instance()->Deregister(arrayName_);
 
-    if (nullptr != telemetryPublisher)
+    if (nullptr != telemetryPublisher_)
     {
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
-        delete telemetryPublisher;
-        telemetryPublisher = nullptr;
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher_->GetName());
+        delete telemetryPublisher_;
     }
 
     if (nullptr != mgmt)
@@ -125,11 +125,10 @@ MetaFs::~MetaFs(void)
     if (nullptr != wbt)
         delete wbt;
 
-    if (nullptr != metaStorage)
+    if (nullptr != metaStorage_)
     {
-        metaStorage->Close();
-        delete metaStorage;
-        metaStorage = nullptr;
+        metaStorage_->Close();
+        delete metaStorage_;
     }
 }
 
@@ -138,35 +137,37 @@ MetaFs::Init(void)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-    if (false == _Initialize())
+    if (!_Initialize())
         return (int)POS_EVENT_ID::MFS_MODULE_INIT_FAILED;
 
     rc = _PrepareMetaVolume();
     if (POS_EVENT_ID::SUCCESS != rc)
         return (int)rc;
 
-    // MetaFsSystemState::Create
-    if (!isLoaded)
+    if (!isLoaded_)
     {
         rc = _CreateMetaVolume();
         if (POS_EVENT_ID::SUCCESS != rc)
             return (int)rc;
 
-        isLoaded = true;
+        isLoaded_ = true;
     }
 
     rc = _OpenMetaVolume();
     if (POS_EVENT_ID::SUCCESS != rc)
         return (int)rc;
 
-    if (false == io->AddArray(arrayId))
+    if (!io->AddArray(arrayId_))
         return (int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
 
-    isNormal = true;
-    mgmt->SetStatus(isNormal);
-    io->SetStatus(isNormal);
-    ctrl->SetStatus(isNormal);
-    wbt->SetStatus(isNormal);
+    isNormal_ = true;
+    mgmt->SetStatus(isNormal_);
+    io->SetStatus(isNormal_);
+    ctrl->SetStatus(isNormal_);
+    wbt->SetStatus(isNormal_);
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Mount metafs, arrayId: {}", arrayId_);
 
     return EID(SUCCESS);
 }
@@ -178,27 +179,38 @@ MetaFs::Dispose(void)
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         POS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
-            "It's failed to close meta volume, arrayName={}", arrayName);
+            "It's failed to close meta volume, arrayId: {}", arrayId_);
     }
 
     // the storage will be close in mgmt mgr
-    rc = mgmt->CloseSystem(arrayId);
+    rc = mgmt->CloseSystem(arrayId_);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         POS_TRACE_WARN((int)rc,
-            "It's failed to unmount system, arrayName={}", arrayName);
+            "It's failed to unmount system, arrayId: {}", arrayId_);
     }
 
-    io->RemoveArray(arrayId);
+    if (!io->RemoveArray(arrayId_))
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "It's failed to remove array, arrayId: {}", arrayId_);
+    }
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Unmount metafs, arrayId: {}", arrayId_);
 }
 
 void
 MetaFs::Shutdown(void)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
-            "Shutdown metafs, arrayName={}", arrayName);
+    if (!io->RemoveArray(arrayId_))
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "It's failed to remove array, arrayId: {}", arrayId_);
+    }
 
-    io->RemoveArray(arrayId);
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Shutdown metafs, arrayId: {}", arrayId_);
 }
 
 void
@@ -216,11 +228,11 @@ MetaFs::GetEpochSignature(void)
 StripeId
 MetaFs::GetTheLastValidStripeId(void)
 {
-    if ((nullptr == metaStorage) || (nullptr == ctrl))
+    if ((nullptr == metaStorage_) || (nullptr == ctrl))
         return 0;
 
     MetaLpnType theLastLpn = ctrl->GetTheLastValidLpn(MetaVolumeType::SsdVolume);
-    LogicalBlkAddr addr = metaStorage->TranslateAddress(MetaStorageType::SSD, theLastLpn);
+    LogicalBlkAddr addr = metaStorage_->TranslateAddress(MetaStorageType::SSD, theLastLpn);
 
     return addr.stripeId;
 }
@@ -228,7 +240,7 @@ MetaFs::GetTheLastValidStripeId(void)
 MetaStorageSubsystem*
 MetaFs::GetMss(void)
 {
-    return metaStorage;
+    return metaStorage_;
 }
 
 int
@@ -258,7 +270,7 @@ MetaFs::_Initialize(void)
             "{} entries have been registered to MediaInfo", infoList.size());
     }
 
-    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &infoList))
+    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId_, &infoList))
         return false;
 
     return true;
@@ -267,10 +279,6 @@ MetaFs::_Initialize(void)
 POS_EVENT_ID
 MetaFs::_PrepareMetaVolume(void)
 {
-    // MetaFsSystemState::PowerOn
-    // nothing
-
-    // MetaFsSystemState::Init
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsStorageIoInfoList& mediaInfoList = mgmt->GetAllStoragePartitionInfo();
     for (auto& item : mediaInfoList)
@@ -286,9 +294,9 @@ MetaFs::_PrepareMetaVolume(void)
             maxVolumeLpn -= mgmt->GetRegionSizeInLpn(); // considered due to MBR placement for SSD volume
         }
 
-        ctrl->InitVolume(volumeType, arrayId, maxVolumeLpn);
+        ctrl->InitVolume(volumeType, arrayId_, maxVolumeLpn);
 
-        rc = metaStorage->CreateMetaStore(arrayId, item.mediaType, item.totalCapacity, !isLoaded);
+        rc = metaStorage_->CreateMetaStore(arrayId_, item.mediaType, item.totalCapacity, !isLoaded_);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
@@ -307,12 +315,12 @@ MetaFs::_CreateMetaVolume(void)
 
     for (auto& item : mediaInfoList)
     {
-        if (false == item.valid)
+        if (!item.valid)
             continue;
 
         MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.mediaType);
 
-        if (false == ctrl->CreateVolume(volumeType))
+        if (!ctrl->CreateVolume(volumeType))
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
                 "Error occurred to create volume (volume id={})",
@@ -322,7 +330,7 @@ MetaFs::_CreateMetaVolume(void)
         }
     }
 
-    if (true != mgmt->CreateMbr())
+    if (!mgmt->CreateMbr())
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
             "Error occurred to create MetaFs MBR");
@@ -336,17 +344,16 @@ MetaFs::_CreateMetaVolume(void)
 POS_EVENT_ID
 MetaFs::_OpenMetaVolume(void)
 {
-    // MetaFsSystemState::Open
-    POS_EVENT_ID rc = mgmt->LoadMbr(isNpor);
+    POS_EVENT_ID rc = mgmt->LoadMbr(isNpor_);
 
     POSMetric metric(TEL40000_METAFS_NORMAL_SHUTDOWN, POSMetricTypes::MT_GAUGE);
-    metric.AddLabel("array_id", to_string(arrayId));
-    metric.SetGaugeValue((int)isNpor);
-    telemetryPublisher->PublishMetric(metric);
+    metric.AddLabel("array_id", to_string(arrayId_));
+    metric.SetGaugeValue((int)isNpor_);
+    telemetryPublisher_->PublishMetric(metric);
 
     if (rc != POS_EVENT_ID::SUCCESS)
     {
-        if (true == mgmt->IsMbrClean())
+        if (mgmt->IsMbrClean())
         {
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
                 "Mbr is clean. This array is mounted for the first time");
@@ -367,13 +374,10 @@ MetaFs::_OpenMetaVolume(void)
         }
     }
 
-    if (false == ctrl->OpenVolume(isNpor))
+    if (!ctrl->OpenVolume(isNpor_))
     {
         return POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED;
     }
-
-    // MetaFsSystemState::Active
-    // nothing
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -381,10 +385,6 @@ MetaFs::_OpenMetaVolume(void)
 POS_EVENT_ID
 MetaFs::_CloseMetaVolume(void)
 {
-    // MetaFsSystemState::Quiesce
-    // nothing
-
-    // MetaFsSystemState::Shutdown
     bool resetCxt = false;
     if (!ctrl->CloseVolume(resetCxt))
     {
@@ -405,18 +405,27 @@ void
 MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList)
 {
     std::shared_ptr<MetaStorageInfo> media = _MakeMetaStorageMediaInfo(ptnType);
-    if (!media->valid)
+
+    if (media->valid)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "PartitionType {} is available, arrayId: {}",
+            (int)ptnType, arrayId_);
+    }
+    else
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
-            "PartitionType {} is not available.", (int)ptnType);
+            "PartitionType {} is not available, arrayId: {}",
+            (int)ptnType, arrayId_);
     }
+
     mediaList.push_back(media);
 }
 
 std::shared_ptr<MetaStorageInfo>
 MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 {
-    const PartitionLogicalSize* ptnSize = arrayInfo->GetSizeInfo(ptnType);
+    const PartitionLogicalSize* ptnSize = arrayInfo_->GetSizeInfo(ptnType);
 
     std::shared_ptr<MetaStorageInfo> newInfo = std::make_shared<MetaStorageInfo>();
     switch (ptnType)

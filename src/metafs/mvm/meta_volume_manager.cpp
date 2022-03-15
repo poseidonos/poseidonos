@@ -31,15 +31,16 @@
  */
 
 #include "meta_volume_manager.h"
+
 #include <string>
 #include <vector>
 
 namespace pos
 {
 MetaVolumeManager::MetaVolumeManager(const int arrayId,
-        MetaStorageSubsystem* metaStorage,
-        MetaVolumeHandler* _volHandler,
-        MetaVolumeContainer* _volContainer)
+    MetaStorageSubsystem* metaStorage,
+    MetaVolumeHandler* _volHandler,
+    MetaVolumeContainer* _volContainer)
 : volumeSpcfReqHandler{},
   globalRequestHandler{},
   metaStorage(metaStorage)
@@ -47,11 +48,11 @@ MetaVolumeManager::MetaVolumeManager(const int arrayId,
     volHandler = _volHandler;
     volContainer = _volContainer;
 
-    if (nullptr == volHandler)
-        volHandler = new MetaVolumeHandler();
-
     if (nullptr == volContainer)
         volContainer = new MetaVolumeContainer(arrayId);
+
+    if (nullptr == volHandler)
+        volHandler = new MetaVolumeHandler(volContainer);
 
     _InitRequestHandler();
 }
@@ -69,38 +70,38 @@ void
 MetaVolumeManager::_InitRequestHandler(void)
 {
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::FileOpen,
-                    &MetaVolumeHandler::HandleOpenFileReq);
+        &MetaVolumeHandler::HandleOpenFileReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::FileClose,
-                    &MetaVolumeHandler::HandleCloseFileReq);
+        &MetaVolumeHandler::HandleCloseFileReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::FileCreate,
-                    &MetaVolumeHandler::HandleCreateFileReq);
+        &MetaVolumeHandler::HandleCreateFileReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::FileDelete,
-                    &MetaVolumeHandler::HandleDeleteFileReq);
+        &MetaVolumeHandler::HandleDeleteFileReq);
 
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::CheckFileExist,
-                    &MetaVolumeHandler::HandleCheckFileExist);
+        &MetaVolumeHandler::HandleCheckFileExist);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetDataChunkSize,
-                    &MetaVolumeHandler::HandleGetDataChunkSizeReq);
+        &MetaVolumeHandler::HandleGetDataChunkSizeReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::CheckFileAccessible,
-                    &MetaVolumeHandler::HandleCheckFileAccessibleReq);
+        &MetaVolumeHandler::HandleCheckFileAccessibleReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetFileSize,
-                    &MetaVolumeHandler::HandleGetFileSizeReq);
+        &MetaVolumeHandler::HandleGetFileSizeReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetTargetMediaType,
-                    &MetaVolumeHandler::HandleGetTargetMediaTypeReq);
+        &MetaVolumeHandler::HandleGetTargetMediaTypeReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetFileBaseLpn,
-                    &MetaVolumeHandler::HandleGetFileBaseLpnReq);
+        &MetaVolumeHandler::HandleGetFileBaseLpnReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetAvailableSpace,
-                    &MetaVolumeHandler::HandleGetFreeFileRegionSizeReq);
+        &MetaVolumeHandler::HandleGetFreeFileRegionSizeReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetMaxMetaLpn,
-                    &MetaVolumeHandler::HandleGetMaxMetaLpnReq);
+        &MetaVolumeHandler::HandleGetMaxMetaLpnReq);
 
     _RegisterGlobalMetaReqHandler(MetaFsFileControlType::EstimateDataChunkSize,
-                    &MetaVolumeHandler::HandleEstimateDataChunkSizeReq);
+        &MetaVolumeHandler::HandleEstimateDataChunkSizeReq);
     // wbt
     _RegisterGlobalMetaReqHandler(MetaFsFileControlType::GetMetaFileInfoList,
-                    &MetaVolumeHandler::HandleGetMetaFileInodeListReq);
+        &MetaVolumeHandler::HandleGetMetaFileInodeListReq);
     _RegisterGlobalMetaReqHandler(MetaFsFileControlType::GetFileInode,
-                    &MetaVolumeHandler::HandleGetFileInodeReq);
+        &MetaVolumeHandler::HandleGetFileInodeReq);
 }
 
 int
@@ -164,7 +165,6 @@ MetaVolumeManager::InitVolume(MetaVolumeType volumeType, int arrayId, MetaLpnTyp
     }
 
     volContainer->InitContext(volumeType, arrayId, maxVolPageNum, metaStorage);
-    volHandler->InitHandler(volContainer);
 }
 
 bool
@@ -241,7 +241,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
         case MetaFsFileControlType::GetAvailableSpace:
             rc = volContainer->DetermineVolumeToCreateFile(reqMsg.fileByteSize,
-                                reqMsg.fileProperty, reqMsg.volType);
+                reqMsg.fileProperty, reqMsg.volType);
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
@@ -252,7 +252,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
         case MetaFsFileControlType::FileOpen:
             rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
-                                        reqMsg.volType);
+                reqMsg.volType);
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
@@ -266,7 +266,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
         case MetaFsFileControlType::FileDelete:
             rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
-                                        reqMsg.volType);
+                reqMsg.volType);
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
@@ -277,7 +277,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
         case MetaFsFileControlType::CheckFileExist:
             rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
-                                        reqMsg.volType);
+                reqMsg.volType);
             break;
 
         case MetaFsFileControlType::GetMaxMetaLpn:
@@ -326,8 +326,8 @@ MetaVolumeManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
         if (!_IsValidVolumeType(msg->volType))
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-                        "The volume type is invalid, fd={}, type={}",
-                        msg->fd, msg->volType);
+                "The volume type is invalid, fd={}, type={}",
+                msg->fd, msg->volType);
             return POS_EVENT_ID::MFS_INVALID_PARAMETER;
         }
 

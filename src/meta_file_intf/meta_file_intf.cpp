@@ -30,14 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
 #include "src/meta_file_intf/meta_file_intf.h"
-#include "src/metafs/include/metafs_service.h"
 
 #include <fcntl.h>
-#include <string>
 #include <unistd.h>
+
+#include <string>
+
+#include "src/metafs/include/metafs_service.h"
 
 namespace pos
 {
@@ -108,8 +108,6 @@ int
 MetaFileIntf::Open(void)
 {
     isOpened = true;
-    POS_TRACE_INFO(EID(MFS_CREATE_META_FILE), "File Opened, fileName:{}  fd:{}",
-                fileName, fd);
     return 0;
 }
 
@@ -117,8 +115,6 @@ int
 MetaFileIntf::Close(void)
 {
     isOpened = false;
-    POS_TRACE_INFO(EID(MFS_CREATE_META_FILE), "File Closed, fileName:{}  fd:{}",
-                fileName, fd);
     fd = -1;
 
     return 0;

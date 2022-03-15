@@ -31,14 +31,17 @@
  */
 
 #include "src/metafs/mvm/meta_volume_handler.h"
-#include "test/unit-tests/metafs/mvm/meta_volume_container_mock.h"
-#include <string>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <string>
+
+#include "test/unit-tests/metafs/mvm/meta_volume_container_mock.h"
+
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::Matcher;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -58,10 +61,8 @@ public:
     virtual void
     SetUp(void)
     {
-        handler = new MetaVolumeHandler();
         container = new NiceMock<MockMetaVolumeContainer>(arrayId);
-
-        handler->InitHandler(container);
+        handler = new MetaVolumeHandler(container);
 
         msg.fileName = &fileName;
         msg.fileByteSize = size;
@@ -90,7 +91,7 @@ protected:
 TEST_F(MetaVolumeHandlerFixture, CheckFileExist_Positive)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCheckFileExist(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -99,7 +100,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckFileExist_Positive)
 TEST_F(MetaVolumeHandlerFixture, CheckFileExist_Negative)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCheckFileExist(volType, msg),
         POS_EVENT_ID::MFS_FILE_NOT_FOUND);
@@ -108,10 +109,10 @@ TEST_F(MetaVolumeHandlerFixture, CheckFileExist_Negative)
 TEST_F(MetaVolumeHandlerFixture, HandleOpen_Positive)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName);
     EXPECT_CALL(*container, AddFileInActiveList)
-            .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -120,7 +121,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpen_Positive)
 TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative0)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_NOT_FOUND);
@@ -129,10 +130,10 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative0)
 TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative1)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName);
     EXPECT_CALL(*container, AddFileInActiveList)
-            .WillOnce(Return(POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY));
+        .WillOnce(Return(POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY);
@@ -141,11 +142,11 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative1)
 TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative2)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName)
-            .WillOnce(Return(MetaFsCommonConst::INVALID_FD));
+        .WillOnce(Return(MetaFsCommonConst::INVALID_FD));
     EXPECT_CALL(*container, AddFileInActiveList)
-            .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_OPEN_FAILED);
@@ -154,7 +155,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpen_Negative2)
 TEST_F(MetaVolumeHandlerFixture, HandleClose_Positive)
 {
     EXPECT_CALL(*container, CheckFileInActive)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, RemoveFileFromActiveList);
 
     EXPECT_EQ(handler->HandleCloseFileReq(volType, msg),
@@ -164,7 +165,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleClose_Positive)
 TEST_F(MetaVolumeHandlerFixture, HandleClose_Negative)
 {
     EXPECT_CALL(*container, CheckFileInActive)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCloseFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_NOT_OPENED);
@@ -173,11 +174,11 @@ TEST_F(MetaVolumeHandlerFixture, HandleClose_Negative)
 TEST_F(MetaVolumeHandlerFixture, HandleCreate_Positive)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace)
-            .WillOnce(Return(size + 1));
+        .WillOnce(Return(size + 1));
     EXPECT_CALL(*container, CreateFile)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -186,7 +187,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreate_Positive)
 TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative0)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
@@ -195,9 +196,9 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative0)
 TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative1)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace)
-            .WillOnce(Return(size));
+        .WillOnce(Return(size));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
@@ -206,11 +207,11 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative1)
 TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative2)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace)
-            .WillOnce(Return(size + 1));
+        .WillOnce(Return(size + 1));
     EXPECT_CALL(*container, CreateFile)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
@@ -219,11 +220,11 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreate_Negative2)
 TEST_F(MetaVolumeHandlerFixture, HandleDelete_Positive)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, TrimData)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, DeleteFile)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -232,7 +233,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDelete_Positive)
 TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative0)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_NOT_FOUND);
@@ -241,9 +242,9 @@ TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative0)
 TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative1)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, TrimData)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_TRIM_FAILED);
@@ -252,11 +253,11 @@ TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative1)
 TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative2)
 {
     EXPECT_CALL(*container, IsGivenFileCreated)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, TrimData)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
     EXPECT_CALL(*container, DeleteFile)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_DELETE_FAILED);
@@ -265,7 +266,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDelete_Negative2)
 TEST_F(MetaVolumeHandlerFixture, CheckAccessible_Positive)
 {
     EXPECT_CALL(*container, CheckFileInActive)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCheckFileAccessibleReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -276,7 +277,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckAccessible_Positive)
 TEST_F(MetaVolumeHandlerFixture, CheckAccessible_Negative)
 {
     EXPECT_CALL(*container, CheckFileInActive)
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCheckFileAccessibleReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -287,7 +288,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckAccessible_Negative)
 TEST_F(MetaVolumeHandlerFixture, CheckChunkSize)
 {
     EXPECT_CALL(*container, GetDataChunkSize)
-            .WillOnce(Return(4032));
+        .WillOnce(Return(4032));
 
     EXPECT_EQ(handler->HandleGetDataChunkSizeReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -298,7 +299,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckChunkSize)
 TEST_F(MetaVolumeHandlerFixture, CheckFileSize)
 {
     EXPECT_CALL(*container, GetFileSize)
-            .WillOnce(Return(4032));
+        .WillOnce(Return(4032));
 
     EXPECT_EQ(handler->HandleGetFileSizeReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -317,7 +318,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckMediaType)
 TEST_F(MetaVolumeHandlerFixture, CheckFileBaseLpn)
 {
     EXPECT_CALL(*container, GetFileBaseLpn)
-            .WillOnce(Return(1234));
+        .WillOnce(Return(1234));
 
     EXPECT_EQ(handler->HandleGetFileBaseLpnReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -328,7 +329,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckFileBaseLpn)
 TEST_F(MetaVolumeHandlerFixture, CheckExtentSize)
 {
     EXPECT_CALL(*container, GetAvailableSpace)
-            .WillOnce(Return(9999));
+        .WillOnce(Return(9999));
 
     EXPECT_EQ(handler->HandleGetFreeFileRegionSizeReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -351,7 +352,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckDeleteArray)
 TEST_F(MetaVolumeHandlerFixture, CheckMaxLpn)
 {
     EXPECT_CALL(*container, GetMaxLpn)
-            .WillOnce(Return(9999));
+        .WillOnce(Return(9999));
 
     EXPECT_EQ(handler->HandleGetMaxMetaLpnReq(volType, msg),
         POS_EVENT_ID::SUCCESS);
@@ -361,8 +362,7 @@ TEST_F(MetaVolumeHandlerFixture, CheckMaxLpn)
 
 TEST_F(MetaVolumeHandlerFixture, CheckInodeList_Positive)
 {
-    std::vector<MetaFileInfoDumpCxt>* fileInfoList
-                = new std::vector<MetaFileInfoDumpCxt>;
+    std::vector<MetaFileInfoDumpCxt>* fileInfoList = new std::vector<MetaFileInfoDumpCxt>;
     msg.completionData.fileInfoListPointer = fileInfoList;
 
     EXPECT_CALL(*container, GetInodeList);
@@ -389,13 +389,13 @@ TEST_F(MetaVolumeHandlerFixture, GetInode_Positive)
     MetaFileInode inode;
 
     EXPECT_CALL(*container, LookupMetaVolumeType(Matcher<std::string&>(_), _))
-            .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
     EXPECT_CALL(*container, LookupFileDescByName)
-            .WillRepeatedly(Return(0));
+        .WillRepeatedly(Return(0));
     EXPECT_CALL(*container, GetInode)
-            .WillRepeatedly(ReturnRef(inode));
+        .WillRepeatedly(ReturnRef(inode));
     EXPECT_CALL(*container, CopyInodeToInodeInfo)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleGetFileInodeReq(msg),
         POS_EVENT_ID::SUCCESS);
@@ -407,7 +407,7 @@ TEST_F(MetaVolumeHandlerFixture, GetInode_Positive)
 TEST_F(MetaVolumeHandlerFixture, GetInode_Negative)
 {
     EXPECT_CALL(*container, LookupMetaVolumeType(Matcher<std::string&>(_), _))
-            .WillRepeatedly(Return(POS_EVENT_ID::MFS_INVALID_PARAMETER));
+        .WillRepeatedly(Return(POS_EVENT_ID::MFS_INVALID_PARAMETER));
 
     EXPECT_EQ(handler->HandleGetFileInodeReq(msg),
         POS_EVENT_ID::MFS_FILE_NOT_FOUND);

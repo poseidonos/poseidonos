@@ -30,15 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <string>
 #include "meta_volume_handler.h"
+
+#include <string>
+#include <vector>
+
 #include "src/metafs/mvm/volume/inode_manager.h"
 
 namespace pos
 {
-MetaVolumeHandler::MetaVolumeHandler(void)
-: volContainer(nullptr)
+MetaVolumeHandler::MetaVolumeHandler(MetaVolumeContainer* volContainer)
+: volContainer(volContainer)
 {
 }
 
@@ -46,24 +48,16 @@ MetaVolumeHandler::~MetaVolumeHandler(void)
 {
 }
 
-void
-MetaVolumeHandler::InitHandler(MetaVolumeContainer* volContainer)
-{
-    this->volContainer = volContainer;
-}
-
 POS_EVENT_ID
-MetaVolumeHandler::HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
-
     if (POS_EVENT_ID::SUCCESS != HandleCheckFileExist(volType, reqMsg))
     {
         return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
     }
 
     FileDescriptorType fd = volContainer->LookupFileDescByName(*reqMsg.fileName);
-    rc = volContainer->AddFileInActiveList(volType, fd);
+    POS_EVENT_ID rc = volContainer->AddFileInActiveList(volType, fd);
 
     if (POS_EVENT_ID::SUCCESS == rc)
     {
@@ -71,28 +65,34 @@ MetaVolumeHandler::HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRe
         if (MetaFsCommonConst::INVALID_FD == fd)
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_OPEN_FAILED,
-                "Invalid FD retrieved due to unknown error.");
+                "Invalid FD retrieved due to unknown error. arrayId: {}, volumeType: {}",
+                reqMsg.arrayId, (int)volType);
 
             return POS_EVENT_ID::MFS_FILE_OPEN_FAILED;
         }
 
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "{} file open successs. File Descriptor is {}",
-            reqMsg.fileName->c_str(), fd);
+            "{} file has been open. fd: {}, arrayId: {}, volumeType: {}",
+            *reqMsg.fileName, fd, reqMsg.arrayId, (int)volType);
+    }
+    else
+    {
+        MFS_TRACE_ERROR((int)rc,
+            "{} file has been open twice. fd: {}, arrayId: {}, volumeType: {}",
+            *reqMsg.fileName, fd, reqMsg.arrayId, (int)volType);
     }
 
     return rc;
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleCheckFileExist(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     if (!volContainer->IsGivenFileCreated(*reqMsg.fileName))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
-            "Cannot find \'{}\' file, reqType={}, fd={}",
-            *reqMsg.fileName, reqMsg.reqType, reqMsg.fd);
-
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "{} file was not found. fd: {}, arrayId: {}, volumeType: {}",
+            *reqMsg.fileName, reqMsg.fd, reqMsg.arrayId, (int)volType);
         return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
     }
 
@@ -100,51 +100,53 @@ MetaVolumeHandler::HandleCheckFileExist(MetaVolumeType volType, MetaFsFileContro
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleCloseFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     if (!volContainer->CheckFileInActive(volType, reqMsg.fd))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPENED,
-            "The file is not opened, fd={}", reqMsg.fd);
-
+            "The file is not open, fd: {}, arrayId: {}, volumeType: {}",
+            reqMsg.fd, reqMsg.arrayId, (int)volType);
         return POS_EVENT_ID::MFS_FILE_NOT_OPENED;
     }
+
     volContainer->RemoveFileFromActiveList(volType, reqMsg.fd);
 
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-        "Given file has been closed successfully. (fd={})", reqMsg.fd);
+        "The file has been closed. fd: {}, arrayId: {}, volumeType: {}",
+        reqMsg.fd, reqMsg.arrayId, (int)volType);
 
     return POS_EVENT_ID::SUCCESS;
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleCreateFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleCreateFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     if (!_CheckFileCreateReqSanity(volType, reqMsg))
     {
         return POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
     }
 
-    if (true == volContainer->CreateFile(volType, reqMsg))
+    if (volContainer->CreateFile(volType, reqMsg))
     {
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "{} file has been created. File size={}KB.",
-            *reqMsg.fileName, reqMsg.fileByteSize / 1024);
+            "{} file has been created. byteSize: {}, arrayId: {}, volumeType: {}",
+            *reqMsg.fileName, reqMsg.fileByteSize, reqMsg.arrayId, (int)volType);
 
         return POS_EVENT_ID::SUCCESS;
     }
     else
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED,
-            "Cannot create file inode due to I/O fail : \'{}\', reqType={}, fd={}",
-            *reqMsg.fileName, reqMsg.reqType, reqMsg.fd);
+            "Cannot create file inode due to I/O fail : \'{}\', reqType: {}, fd: {}, volumeType: {}",
+            *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
 
         return POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
     }
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleDeleteFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     if (POS_EVENT_ID::SUCCESS != HandleCheckFileExist(volType, reqMsg))
     {
@@ -152,34 +154,35 @@ MetaVolumeHandler::HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControl
     }
 
     // delete fd in fileMgr
-    if (true != volContainer->TrimData(volType, reqMsg))
+    if (!volContainer->TrimData(volType, reqMsg))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_TRIM_FAILED,
-            "MFS FILE trim operation has been failed!!");
+            "Trim operation has been failed.");
 
         return POS_EVENT_ID::MFS_FILE_TRIM_FAILED;
     }
 
     // delete fd in inodeMgr
-    if (true == volContainer->DeleteFile(volType, reqMsg))
+    if (volContainer->DeleteFile(volType, reqMsg))
     {
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "{} file has been deleted.", *reqMsg.fileName);
+            "{} file has been deleted. fd: {}, arrayId: {}, volumeType: {}",
+            *reqMsg.fileName, reqMsg.fd, reqMsg.arrayId, (int)volType);
 
         return POS_EVENT_ID::SUCCESS;
     }
     else
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED,
-            "Cannot delete file inode due to I/O fail : \'{}\', reqType={}, fd={}",
-            *reqMsg.fileName, reqMsg.reqType, reqMsg.fd);
+            "Cannot delete file inode due to I/O fail : \'{}\', reqType: {}, fd: {}, volumeType: {}",
+            *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
 
         return POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
     }
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleCheckFileAccessibleReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.fileAccessible = volContainer->CheckFileInActive(volType, reqMsg.fd);
 
@@ -187,7 +190,7 @@ MetaVolumeHandler::HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFi
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetDataChunkSizeReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.dataChunkSize = volContainer->GetDataChunkSize(volType, reqMsg.fd);
 
@@ -195,7 +198,7 @@ MetaVolumeHandler::HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileC
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetFileSizeReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.fileSize = volContainer->GetFileSize(volType, reqMsg.fd);
 
@@ -203,7 +206,7 @@ MetaVolumeHandler::HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileContro
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetTargetMediaTypeReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.targetMediaType = MetaFileUtil::ConvertToMediaType(volType);
 
@@ -211,7 +214,7 @@ MetaVolumeHandler::HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFil
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetFileBaseLpnReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.fileBaseLpn = volContainer->GetFileBaseLpn(volType, reqMsg.fd);
 
@@ -219,7 +222,7 @@ MetaVolumeHandler::HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileCon
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetFreeFileRegionSizeReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.fileSize = volContainer->GetAvailableSpace(volType);
 
@@ -227,19 +230,19 @@ MetaVolumeHandler::HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFs
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleCreateArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleCreateArrayReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     return POS_EVENT_ID::SUCCESS;
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleDeleteArrayReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     return POS_EVENT_ID::SUCCESS;
 }
 
 POS_EVENT_ID
-MetaVolumeHandler::HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::HandleGetMaxMetaLpnReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     reqMsg.completionData.maxLpn = volContainer->GetMaxLpn(volType);
 
@@ -267,7 +270,7 @@ MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
 {
     MetaVolumeType volumeType = reqMsg.volType;
     POS_EVENT_ID rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
-                                        volumeType);
+        volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
@@ -279,7 +282,7 @@ MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
     MetaFileInodeInfo* inodeInfo = new MetaFileInodeInfo();
     FileDescriptorType fd = volContainer->LookupFileDescByName(*reqMsg.fileName);
 
-    if (true == volContainer->CopyInodeToInodeInfo(fd, volumeType, inodeInfo))
+    if (volContainer->CopyInodeToInodeInfo(fd, volumeType, inodeInfo))
     {
         reqMsg.completionData.inodeInfoPointer = inodeInfo;
     }
@@ -303,21 +306,22 @@ MetaVolumeHandler::HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqM
 }
 
 bool
-MetaVolumeHandler::_CheckFileCreateReqSanity(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+MetaVolumeHandler::_CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (true == volContainer->IsGivenFileCreated(*reqMsg.fileName))
+    if (volContainer->IsGivenFileCreated(*reqMsg.fileName))
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "The file name already exists. fileName={}", *reqMsg.fileName);
+            "{} file is already existed. arrayId: {}",
+            *reqMsg.fileName, reqMsg.arrayId);
 
         return false;
     }
 
-    FileSizeType availableSpaceInVolume = volContainer->GetAvailableSpace(volType);
+    const FileSizeType availableSpaceInVolume = volContainer->GetAvailableSpace(volType);
     if (availableSpaceInVolume < reqMsg.fileByteSize)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
-            "The volume has not enough space to create file!... fileSize={}, availableSpaceInVolume={}",
+            "The volume has not enough space to create file. request byteSize: {}, availableSpaceInVolume: {}",
             reqMsg.fileByteSize, availableSpaceInVolume);
 
         return false;

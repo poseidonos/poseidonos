@@ -69,10 +69,10 @@ public:
     MetaStorageSubsystem* GetMss(void);
     virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
 
-    MetaFsManagementApi* mgmt = nullptr;
-    MetaFsIoApi* io = nullptr;
-    MetaFsFileControlApi* ctrl = nullptr;
-    MetaFsWBTApi* wbt = nullptr;
+    MetaFsManagementApi* mgmt;
+    MetaFsIoApi* io;
+    MetaFsFileControlApi* ctrl;
+    MetaFsWBTApi* wbt;
 
 private:
     bool _Initialize(void);
@@ -84,13 +84,13 @@ private:
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList);
     std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
 
-    bool isNpor;
-    bool isLoaded;
-    bool isNormal;
-    IArrayInfo* arrayInfo;
-    std::string arrayName;
-    int arrayId;
-    MetaStorageSubsystem* metaStorage;
-    TelemetryPublisher* telemetryPublisher;
+    bool isNpor_;
+    bool isLoaded_;
+    bool isNormal_;
+    IArrayInfo* arrayInfo_;
+    std::string arrayName_;
+    int arrayId_;
+    MetaStorageSubsystem* metaStorage_;
+    TelemetryPublisher* telemetryPublisher_;
 };
 } // namespace pos

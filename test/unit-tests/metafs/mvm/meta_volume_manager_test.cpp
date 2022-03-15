@@ -61,8 +61,8 @@ public:
     virtual void
     SetUp(void)
     {
-        volHandler = new NiceMock<MockMetaVolumeHandler>;
         volContainer = new NiceMock<MockMetaVolumeContainer>(arrayId);
+        volHandler = new NiceMock<MockMetaVolumeHandler>(volContainer);
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
         volumeMgr = new MetaVolumeManager(arrayId, mss, volHandler, volContainer);
@@ -122,7 +122,6 @@ TEST_F(MetaVolumeManagerFixture, InitModule1)
 {
     EXPECT_CALL(*volContainer, IsGivenVolumeExist).WillOnce(Return(false));
     EXPECT_CALL(*volContainer, InitContext);
-    EXPECT_CALL(*volHandler, InitHandler);
 
     volumeMgr->InitVolume(MetaVolumeType::SsdVolume, arrayId, 0);
 }
