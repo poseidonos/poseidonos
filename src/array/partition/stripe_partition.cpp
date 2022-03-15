@@ -217,7 +217,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         {
             delete raid5;
             int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
-            POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\". Buffer pool allocation failed.");
+            POS_TRACE_WARN(eventId, "required number of buffers:{}", totalNvmStripes + maxGcStripes);
             return eventId;
         }
         method = raid5;
@@ -230,7 +230,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     else
     {
         int eventId = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
-        POS_TRACE_ERROR(eventId, "Failed to set FT method because {} isn't supported", RaidType(raidType).ToString());
+        POS_TRACE_WARN(eventId, "raidtype: {} ", RaidType(raidType).ToString());
         return eventId;
     }
 
@@ -238,8 +238,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     if (method->CheckNumofDevsToConfigure(numofDevs) == false)
     {
         int eventId = EID(CREATE_ARRAY_RAID_INVALID_SSD_CNT);
-        POS_TRACE_ERROR(eventId, "Failed to set FT method because there are not enough devices, actual:{}",
-            numofDevs);
+        POS_TRACE_WARN(eventId, "requested num of ssds: {}", numofDevs);
         delete method;
         return eventId;
     }

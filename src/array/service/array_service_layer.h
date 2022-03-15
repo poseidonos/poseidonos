@@ -54,7 +54,7 @@ public:
     IArrayServiceConsumer* Getter(void);
     IArrayServiceProducer* Setter(void);
 
-    bool Register(string array, unsigned int arrayIndex,
+    int Register(string array, unsigned int arrayIndex,
         ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker) override;
     void Unregister(string array, unsigned int arrayIndex) override;
     IIOTranslator* GetTranslator(void) override;

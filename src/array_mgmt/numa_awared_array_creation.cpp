@@ -48,10 +48,21 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
     auto&& devsByNuma = Enumerable::GroupBy(systemDevs,
         [](auto d) { return d->GetNuma(); });
 
+    DevName bufferName(buffers.front());
+    UblockSharedPtr buf = devMgr->GetDev(bufferName);
+    int targetNuma = buf->GetNuma();
+    size_t numofDevsInTargetNuma = 0;
+    size_t maxNumofDevsInTargetNumaWithSameCapacity = 0;
+
     for (auto numaGroup : devsByNuma)
     {
         int numaId = numaGroup.first;
+        if (numaId != targetNuma)
+        {
+            continue;
+        }
         auto sameNumaDevs = numaGroup.second;
+        numofDevsInTargetNuma = sameNumaDevs.size();
         auto&& devsBySize = Enumerable::GroupBy(sameNumaDevs,
             [](auto d) { return d->GetSize(); });
 
@@ -59,7 +70,12 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
         {
             uint64_t devSize = sizeGroup.first;
             auto sameSizeDevs = sizeGroup.second;
-            if ((int)sameSizeDevs.size() >= requiredDevCnt)
+            size_t numofDevsWithSameCapacity = sameSizeDevs.size();
+            if (maxNumofDevsInTargetNumaWithSameCapacity < numofDevsWithSameCapacity)
+            {
+                maxNumofDevsInTargetNumaWithSameCapacity = numofDevsWithSameCapacity;
+            }
+            if ((int)numofDevsWithSameCapacity >= requiredDevCnt)
             {
                 ArrayCreationOptions option;
                 option.numaId = numaId;
@@ -96,6 +112,11 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                 result.code = EID(SUCCESS);
             }
         }
+    }
+
+    if (result.code == EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS))
+    {
+        POS_TRACE_WARN(result.code, "required: {}, num of devs in same numa:{}, num of devs in same numa with same capacity: {}", requiredDevCnt, numofDevsInTargetNuma, maxNumofDevsInTargetNumaWithSameCapacity);
     }
 }
 } // namespace pos

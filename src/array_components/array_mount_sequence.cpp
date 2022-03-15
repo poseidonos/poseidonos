@@ -92,6 +92,7 @@ ArrayMountSequence::Mount(void)
     if (currState->ToStateType() >= StateEnum::NORMAL)
     {
         ret = EID(MOUNT_ARRAY_ALREADY_MOUNTED);
+        POS_TRACE_WARN(ret, "curr_state: {}", currState->ToStateType().ToString());
         return ret;
     }
 
@@ -100,6 +101,7 @@ ArrayMountSequence::Mount(void)
     if (res == false)
     {
         ret = EID(MOUNT_ARRAY_UNABLE_TO_INVOKE_MOUNT_STATE);
+        POS_TRACE_WARN(ret, "curr_state: {}", currState->ToStateType().ToString());
         goto error;
     }
 
@@ -135,7 +137,6 @@ ArrayMountSequence::Mount(void)
     return ret;
 
 error:
-    POS_TRACE_WARN(ret, "Ran into an error while executing array mount sequence for {}", arrayName);
     while (true)
     {
         (*it)->Dispose();
@@ -157,8 +158,7 @@ ArrayMountSequence::Unmount(void)
     if (currState->ToStateType() < StateEnum::NORMAL)
     {
         int eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
-        POS_TRACE_ERROR(eventId, "Failed to unmount system. Curr. state:{}",
-            currState->ToStateType().ToString());
+        POS_TRACE_WARN(eventId, "curr_state: {}", currState->ToStateType().ToString());
         return eventId;
     }
 
@@ -167,7 +167,9 @@ ArrayMountSequence::Unmount(void)
     if (res == false)
     {
         state->Remove(unmountState);
-        return EID(UNMOUNT_ARRAY_UNABLE_TO_INVOKE_UNMOUNT_STATE);
+        int eventId = EID(UNMOUNT_ARRAY_UNABLE_TO_INVOKE_UNMOUNT_STATE);
+        POS_TRACE_WARN(eventId, "curr_state: {}", currState->ToStateType().ToString());
+        return eventId;
     }
 
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Detaching volumes for {}", arrayName);

@@ -122,7 +122,7 @@ ArrayState::CanAddSpare(void)
     if (!IsMounted())
     {
         eventId = EID(ADD_SPARE_CAN_ONLY_BE_WHILE_ONLINE);
-        POS_TRACE_WARN(eventId, "Failed to add spare. Spare cannot be added without Array mounted");
+        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
     return eventId;
 }
@@ -134,7 +134,7 @@ ArrayState::CanRemoveSpare(void)
     if (!IsMounted())
     {
         eventId = EID(REMOVE_SPARE_CAN_ONLY_BE_WHILE_ONLINE);
-        POS_TRACE_WARN(eventId, "Failed to remove spare. Spare cannot be removed without Array mounted");
+        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
     return eventId;
 }
@@ -173,12 +173,12 @@ ArrayState::IsUnmountable(void)
     if (IsMounted() == false)
     {
         eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
-        POS_TRACE_ERROR(eventId, "Failed to unmount array, not mounted");
+        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
     else if (state == ArrayStateEnum::REBUILD)
     {
         eventId = EID(UNMOUNT_ARRAY_REJECTED_DUE_TO_REBUILD_INPROGRESS);
-        POS_TRACE_ERROR(eventId, "Failed to unmount array, array is being rebuilt");
+        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
 
     return eventId;
@@ -191,7 +191,7 @@ ArrayState::IsDeletable(void)
     if (IsMounted())
     {
         eventId = EID(DELETE_ARRAY_CAN_ONLY_BE_WHILE_OFFLINE);
-        POS_TRACE_ERROR(eventId, "Failed to delete array, already mounted");
+        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
     return eventId;
 }
@@ -326,7 +326,9 @@ ArrayState::WaitShutdownDone(void)
 
         if (waitcount > 50)
         {
-            return EID(DELETE_ARRAY_TIMED_OUT);
+            int ret = EID(DELETE_ARRAY_TIMED_OUT);
+            POS_TRACE_WARN(ret, "curr_state: {}", state.ToString());
+            return ret;
         }
     }
     return 0;

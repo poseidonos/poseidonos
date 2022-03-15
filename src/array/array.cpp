@@ -94,11 +94,11 @@ Array::Load(void)
     {
         if (ret == EID(LOAD_ARRAY_NVM_DOES_NOT_EXIST))
         {
-            POS_TRACE_ERROR(ret, "Unable to load array({}), check uram creation or pmem state", name_);
+            POS_TRACE_WARN(ret, "arrayname: {}", name_);
         }
         else
         {
-            POS_TRACE_ERROR(ret, "Unable to load array({})", name_);
+            POS_TRACE_WARN(ret, "arrayname: {}", name_);
         }
     }
     else
@@ -160,7 +160,7 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     if (needSpare == false && nameSet.spares.size() > 0)
     {
         ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
-        POS_TRACE_INFO(ret, "Unnecessary spare device requested. RaidType {} does not require spare device", dataFt);
+        POS_TRACE_INFO(ret, "RaidType: {}", dataFt);
         goto error;
     }
 
@@ -336,7 +336,7 @@ Array::AddSpare(string devName)
     if (needSpare == false)
     {
         ret = EID(ADD_SPARE_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
-        POS_TRACE_WARN(ret, "Array({}) does not support spare devices, RAIDTYPE:{}", name_, raidType);
+        POS_TRACE_WARN(ret, "arrayName:{}, RaidType:{}", name_, raidType);
         return ret;
     }
 
@@ -344,7 +344,6 @@ Array::AddSpare(string devName)
     if (ret != 0)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
         return ret;
     }
 
@@ -354,7 +353,7 @@ Array::AddSpare(string devName)
     {
         pthread_rwlock_unlock(&stateLock);
         int eid = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
-        POS_TRACE_ERROR(eid, "Cannot find the requested device named {}", devName);
+        POS_TRACE_WARN(eid, "devName: {}", devName);
         return eid;
     }
 
@@ -909,22 +908,28 @@ Array::ResumeRebuild(ArrayDevice* target)
 int
 Array::_RegisterService(void)
 {
-    auto ret = arrayService->Setter()->Register(name_, index_,
+    int ret = arrayService->Setter()->Register(name_, index_,
         svc->GetTranslator(), svc->GetRecover(), this);
-    if (ret)
+    if (ret == 0)
     {
-        if (devMgr_ != nullptr)
+        RaidTypeEnum metaRaid = ptnMgr->GetRaidType(PartitionType::META_SSD);
+        if (metaRaid == RaidTypeEnum::RAID10)
         {
-            RaidTypeEnum metaRaid = ptnMgr->GetRaidType(PartitionType::META_SSD);
-            if (metaRaid == RaidTypeEnum::RAID10)
+            if (devMgr_ != nullptr)
             {
                 IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
             }
-            return 0;
+            else
+            {
+                ret = EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_IOLOCKER);
+            }
         }
     }
-
-    return EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_ARRAY_SERVICE);
+    if (ret != 0)
+    {
+        POS_TRACE_WARN(ret, "array_name: {}", name_);
+    }
+    return ret;
 }
 
 void

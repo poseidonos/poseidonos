@@ -61,7 +61,7 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     vector<ArrayDevice*> mockDevs;
     EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillOnce(Return(mockDevs));
-    EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(false));
+    EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER)));
     EXPECT_CALL(*mockState, SetMount).Times(0);
     EXPECT_CALL(*mockArrayService, Unregister).Times(1);
 
@@ -71,7 +71,7 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
     int actual = array.Init();
 
     // Then
-    ASSERT_EQ(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_ARRAY_SERVICE), actual);
+    ASSERT_EQ(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER), actual);
 
     // Wrapup
     delete mockArrayService;
@@ -97,7 +97,7 @@ TEST(Array, Init_testIfInitIsDoneSuccessfully)
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     vector<ArrayDevice*> mockDevs;
     EXPECT_CALL(*mockState, SetMount).Times(1);
-    EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(true));
+    EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(0));
     EXPECT_CALL(*mockArrayService, Unregister).Times(0);
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPartMgr, mockState, mockSvc, NULL, mockArrayService);

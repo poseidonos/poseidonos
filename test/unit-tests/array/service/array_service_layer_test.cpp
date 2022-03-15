@@ -5,6 +5,7 @@
 #include "test/unit-tests/array/service/io_device_checker/i_device_checker_mock.h"
 #include "test/unit-tests/array/service/io_recover/i_recover_mock.h"
 #include "test/unit-tests/array/service/io_translator/i_translator_mock.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
@@ -24,7 +25,7 @@ TEST(ArrayServiceLayer, Setter_)
 {
 }
 
-TEST(ArrayServiceLayer, Register_testIfRegisterEmptyServices)
+TEST(ArrayServiceLayer, Register_testIfRegisterNullCheckerFailure)
 {
     // Given
     ArrayServiceLayer arrayServiceLayer;
@@ -34,9 +35,9 @@ TEST(ArrayServiceLayer, Register_testIfRegisterEmptyServices)
     ArrayRecover recover;
     MockIDeviceChecker* checker = nullptr;
     // When
-    bool actual = arrayServiceLayer.Register(mockArrayName, mockArrayIndex, trans, recover, checker);
+    int actual = arrayServiceLayer.Register(mockArrayName, mockArrayIndex, trans, recover, checker);
     // Then
-    EXPECT_FALSE(actual);
+    ASSERT_EQ(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_DEVICECHECKER), actual);
 }
 
 TEST(ArrayServiceLayer, Unregister_testIfUnregisterEmptyServices)

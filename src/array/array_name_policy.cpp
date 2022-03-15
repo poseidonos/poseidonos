@@ -46,30 +46,27 @@ ArrayNamePolicy::CheckArrayName(string name)
     if (len < MIN_LEN)
     {
         ret = EID(CREATE_ARRAY_NAME_TOO_SHORT);
-        POS_TRACE_WARN(ret,
-            "Array name must be at least {} letters long", MIN_LEN);
+        POS_TRACE_WARN(ret, "name len: {}", len);
         return ret;
     }
     else if (len > MAX_LEN)
     {
         ret = EID(CREATE_ARRAY_NAME_TOO_LONG);
-        POS_TRACE_WARN(ret,
-            "Array name must be less or equal than {} characters", MAX_LEN);
+        POS_TRACE_WARN(ret, "name len: {}", len);
         return ret;
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
         ret = EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE);
-        POS_TRACE_WARN(ret,
-            "Blank cannot be placed at the beginning or end of a array name");
+        POS_TRACE_WARN(ret, "name: {}", name);
         return ret;
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
         ret = EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
-        POS_TRACE_WARN(ret, "Special characters cannot be used as array names");
+        POS_TRACE_WARN(ret, "name allowed only: {}", ALLOWED_CHAR);
         return ret;
     }
 

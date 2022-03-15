@@ -105,14 +105,16 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
 {
     if (_FindArray(name) != nullptr)
     {
-        return EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
+        int event = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
+        POS_TRACE_WARN(event, "name duplicated: {}", name);
+        return event;
     }
 
     if (arrayList.size() >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
         int event = EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
-        POS_TRACE_DEBUG(event,
-            "ArrayManager cnt exceeded. current: {}", arrayList.size());
+        POS_TRACE_WARN(event,
+            "Current num of Arrays: {}", arrayList.size());
         return event;
     }
 
@@ -142,7 +144,9 @@ ArrayManager::Delete(string name)
             int result = _DeleteFaultArray(name);
             return result;
         }
-        return EID(DELETE_ARRAY_ARRAY_NAME_DOES_NOT_EXIST);
+        int ret = EID(DELETE_ARRAY_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(ret, "array_name: {}", name);
+        return ret;
     }
 
     int ret = array->Delete();
@@ -340,6 +344,7 @@ ArrayManager::_Load(string name)
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
+        POS_TRACE_WARN(EID(LOAD_ARRAY_ALREADY_LOADED), "arrayname: {}", name);
         return EID(LOAD_ARRAY_ALREADY_LOADED);
     }
 

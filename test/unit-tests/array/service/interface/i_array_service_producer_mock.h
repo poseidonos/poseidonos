@@ -12,8 +12,8 @@ class MockIArrayServiceProducer : public IArrayServiceProducer
 {
 public:
     using IArrayServiceProducer::IArrayServiceProducer;
-    MOCK_METHOD(void, Register, (string array, ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker), (override));
-    MOCK_METHOD(void, Unregister, (string array), (override));
+    MOCK_METHOD(int, Register, (string array, unsigned int arrayIndex, ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker), (override));
+    MOCK_METHOD(void, Unregister, (string array, unsigned int arrayIndex), (override));
 };
 
 } // namespace pos

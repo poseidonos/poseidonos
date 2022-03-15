@@ -70,7 +70,9 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::NVRAM)
         {
-            return EID(ARRAY_NVM_NOT_FOUND);
+            int eventId = EID(ARRAY_NVM_NOT_FOUND);
+            POS_TRACE_WARN(eventId, "devName: {}", devName);
+            return eventId;
         }
         ret = devs_->SetNvm(new ArrayDevice(uBlock));
         if (ret != 0)
@@ -85,7 +87,9 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::SSD)
         {
-            return EID(ARRAY_SSD_NOT_FOUND);
+            int eventId = EID(ARRAY_SSD_NOT_FOUND);
+            POS_TRACE_WARN(eventId, "devName: {}", devName);
+            return eventId;
         }
         ret = devs_->AddData((new ArrayDevice(uBlock)));
         if (ret != 0)
@@ -99,7 +103,9 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::SSD)
         {
-            return EID(ARRAY_SSD_NOT_FOUND);
+            int eventId = EID(ARRAY_SSD_NOT_FOUND);
+            POS_TRACE_WARN(eventId, "devName: {}", devName);
+            return eventId;
         }
         ret = devs_->AddSpare(new ArrayDevice(uBlock));
         if (ret != 0)
@@ -121,7 +127,9 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
         if (nullptr == uBlock)
         {
-            return EID(ARRAY_NVM_NOT_FOUND);
+            int eventId = EID(ARRAY_NVM_NOT_FOUND);
+            POS_TRACE_WARN(eventId, "devUid: {}", meta.uid);
+            return eventId;
         }
         devs_->SetNvm(new ArrayDevice(uBlock));
     }
@@ -180,22 +188,27 @@ ArrayDeviceManager::AddSpare(string devName)
 
     if (spare == nullptr)
     {
-        return EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
+        int eid = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(eid, "devName: {}", devName);
+        return eid;
     }
 
     if (spare->GetClass() != DeviceClass::SYSTEM)
     {
-        return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+        int eid = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+        POS_TRACE_WARN(eid, "devName: {}", devName);
+        return eid;
     }
 
     uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
     if (baseCapa > spare->GetSize())
     {
-        return EID(ADD_SPARE_CAPACITY_IS_TOO_SMALL);
+        int eid = EID(ADD_SPARE_CAPACITY_IS_TOO_SMALL);
+        POS_TRACE_WARN(eid, "devName: {}, minRequiredCapacity:{}, spareCapacity:{}", devName, baseCapa, spare->GetSize());
+        return eid;
     }
 
-    devs_->AddSpare(new ArrayDevice(spare));
-    return 0;
+    return devs_->AddSpare(new ArrayDevice(spare));
 }
 
 void
@@ -232,7 +245,7 @@ ArrayDeviceManager::ExportToMeta(void)
             }
             else
             {
-                POS_TRACE_WARN(EID(ARRAY_SSD_NOT_FOUND),
+                POS_TRACE_WARN(EID(UPDATE_ABR_DEBUG_MSG),
                     "Array device on array {} is not fault state and its state is {}. but there is no ublock.",
                     arrayName_, deviceMeta.state);
                 deviceMeta.uid = "";
@@ -277,7 +290,9 @@ ArrayDeviceManager::RemoveSpare(string devName)
     tie(dev, devType) = this->GetDev(uBlock);
     if (dev == nullptr)
     {
-        return EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+        int eventId = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(eventId, "devName: {}", devName);
+        return eventId;
     }
     return devs_->RemoveSpare(dev);
 }
@@ -367,7 +382,7 @@ ArrayDeviceManager::_CheckNvmCapacity(const DeviceSet<ArrayDevice*>& devSet)
     if (nvm->GetUblock()->GetSize() < minNvmSize)
     {
         int eventId = EID(UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN);
-        POS_TRACE_WARN(eventId, "NVM device size error");
+        POS_TRACE_WARN(eventId, "currCapa:{}, minCapa:{}", nvm->GetUblock()->GetSize(), minNvmSize);
         return eventId;
     }
 
@@ -387,7 +402,7 @@ ArrayDeviceManager::_CheckActiveSsdsCount(const vector<ArrayDevice*>& devs)
             return 0;
         }
     }
-    POS_TRACE_WARN(errorId, "Failed to load array: all devices in this array is in the fault state. At least one normal state device is required to configure Array");
+    POS_TRACE_WARN(errorId, "num of active SSDs: {}", devs.size());
     return errorId;
 }
 
@@ -426,11 +441,8 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
         uint64_t minSpareCapa = _GetBaseCapacity(devSet.spares);
         if (minSpareCapa < baseCapa)
         {
-            int eventId = EID(CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN);
-            POS_TRACE_ERROR(eventId,
-                "The capacity of all spare devices must be equal to or greater than the smallest of the data devices, minData:{}, minSpare:{}",
-                baseCapa,
-                minSpareCapa);
+            int eventId = EID(CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA);
+            POS_TRACE_ERROR(eventId, "minData:{}, minSpare:{}", baseCapa, minSpareCapa);
             return eventId;
         }
     }

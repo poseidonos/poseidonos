@@ -96,16 +96,20 @@ ArrayDeviceList::SetNvm(ArrayDevice* nvm)
     if (devSet_.nvm.size() > 0)
     {
         int eventId = EID(UNABLE_TO_SET_NVM_MORE_THAN_ONE);
-        POS_TRACE_WARN(eventId,
-            "set nvm device without reset previous nvm");
+        ArrayDevice* dev = devSet_.nvm.front();
+        string oriNvmName = "";
+        if (dev->GetUblock() != nullptr)
+        {
+            oriNvmName = dev->GetUblock()->GetName();
+        }
+        POS_TRACE_WARN(eventId, "currWriteBufferName: {}", oriNvmName);
         return eventId;
     }
 
     if (nvm == nullptr || nvm->GetUblock() == nullptr)
     {
         int eventId = EID(UNABLE_TO_SET_NULL_NVM);
-        POS_TRACE_WARN(eventId,
-            "failed to add buffer device to the Array");
+        POS_TRACE_WARN(eventId, "");
         return eventId;
     }
     else if (nvm->GetUblock() != nullptr)
@@ -113,9 +117,7 @@ ArrayDeviceList::SetNvm(ArrayDevice* nvm)
         if (Exists(nvm->GetUblock()->GetName()) != ArrayDeviceType::NONE)
         {
             int eventId = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
-            POS_TRACE_WARN(eventId,
-                "failed to add the device {} to the Array",
-                nvm->GetUblock()->GetName());
+            POS_TRACE_WARN(eventId, "devName: {}", nvm->GetUblock()->GetName());
             return eventId;
         }
         nvm->GetUblock()->SetClass(DeviceClass::ARRAY);
@@ -136,10 +138,8 @@ ArrayDeviceList::AddData(ArrayDevice* dev)
         if (Exists(dev->GetUblock()->GetName()) != ArrayDeviceType::NONE)
         {
             int eventId = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
-            POS_TRACE_WARN(eventId,
-                "failed to add the device {} to the Array, Duplicated",
-                dev->GetUblock()->GetName());
-            return eventId; // already exists
+            POS_TRACE_WARN(eventId, "devName: {}", dev->GetUblock()->GetName());
+            return eventId;
         }
         dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
@@ -157,10 +157,8 @@ ArrayDeviceList::AddSpare(ArrayDevice* dev)
     if (existType != ArrayDeviceType::NONE)
     {
         int eventId = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
-        POS_TRACE_WARN(eventId,
-            "failed to add the device {} to the Array, Duplicated",
-            dev->GetUblock()->GetName());
-        return eventId; // already exists
+        POS_TRACE_WARN(eventId, "devName: {}",dev->GetUblock()->GetName());
+        return eventId;
     }
     dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     devSet_.spares.push_back(dev);
@@ -177,7 +175,9 @@ ArrayDeviceList::RemoveSpare(ArrayDevice* target)
     auto it = FindSpare(target);
     if (it == devSet_.spares.end())
     {
-        return EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+        int eventId = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(eventId, "");
+        return eventId;
     }
     (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
     devSet_.spares.erase(it);

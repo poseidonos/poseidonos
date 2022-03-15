@@ -31,6 +31,7 @@
  */
 
 #include "array_service_layer.h"
+#include "src/include/pos_event_id.h"
 
 using namespace std;
 
@@ -62,24 +63,28 @@ ArrayServiceLayer::Setter(void)
     return this;
 }
 
-bool
+int
 ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
     ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker)
 {
     bool ret = true;
 
     ret = ioTranslator->Register(arrayIndex, trans);
-    if (!ret)
+    if (ret == false)
     {
-        return ret;
+        return EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_TRANSLATOR);
     }
     ret = ioRecover->Register(arrayIndex, recover);
-    if (!ret)
+    if (ret == false)
     {
-        return ret;
+        return EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER);
     }
     ret = deviceChecker->Register(arrayIndex, checker);
-    return ret;
+    if (ret == false)
+    {
+        return EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_DEVICECHECKER);
+    }
+    return 0;
 }
 
 void
