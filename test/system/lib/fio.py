@@ -28,7 +28,7 @@ import pos
 #     fio_proc.wait()
 
 
-def start_fio(vol_id, runtime_sec, testname = ""):
+def start_fio(vol_id, runtime_sec, testname = "", subsystem="subsystem1"):
     ip_addr = pos.TR_ADDR
     ns_id = str(vol_id + 1)
     if testname != "":
@@ -37,7 +37,7 @@ def start_fio(vol_id, runtime_sec, testname = ""):
         test_name = "fio_custom_test"
 
     file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-        " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
+        " trsvcid=1158 subnqn=nqn.2019-04.pos\:" + subsystem + " ns= " + ns_id
     ioengine_path = pos.POS_ROOT + "lib/spdk/examples/nvme/fio_plugin/fio_plugin"
     fio_proc = subprocess.Popen(["fio",
         "--ioengine=" + ioengine_path,\

@@ -17,8 +17,8 @@ import cli
 import api
 import START_POS_BASIC
 
-def execute():
-    START_POS_BASIC.execute()
+def execute(isSingleArray = True):
+    START_POS_BASIC.execute(isSingleArray)
     out = cli.scan_device()
     return out
 

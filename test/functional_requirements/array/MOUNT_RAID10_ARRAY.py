@@ -2,7 +2,6 @@
 import subprocess
 import os
 import sys
-import time
 sys.path.append("../")
 sys.path.append("../../system/lib/")
 
@@ -11,17 +10,12 @@ import pos
 import cli
 import api
 import json
-import MOUNT_ARRAY_TO_RAID_NONE
+import CREATE_RAID10_ARRAY
 
-ARRAYNAME = MOUNT_ARRAY_TO_RAID_NONE.ARRAYNAME
+ARRAYNAME = CREATE_RAID10_ARRAY.ARRAYNAME
 
 def execute():
-    MOUNT_ARRAY_TO_RAID_NONE.execute()
-    cli.unmount_array(ARRAYNAME)
-    pos.exit_pos()
-    time.sleep(5)
-    pos.start_pos()
-    cli.scan_device()
+    CREATE_RAID10_ARRAY.execute()
     out = cli.mount_array(ARRAYNAME)
     print (out)
     return out

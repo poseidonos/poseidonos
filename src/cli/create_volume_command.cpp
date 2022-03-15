@@ -98,7 +98,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         if (ret == SUCCESS)
         {
             return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
-                volName + "is created successfully." + qosMsg, GetPosInfo());
+                volName + " is created successfully." + qosMsg, GetPosInfo());
         }
         else
         {

@@ -11,12 +11,12 @@ import pos
 import cli
 import api
 import json
-import MOUNT_ARRAY_TO_RAID10
+import MOUNT_RAID10_ARRAY
 
-ARRAYNAME = MOUNT_ARRAY_TO_RAID10.ARRAYNAME
+ARRAYNAME = MOUNT_RAID10_ARRAY.ARRAYNAME
 
 def execute():
-    MOUNT_ARRAY_TO_RAID10.execute()
+    MOUNT_RAID10_ARRAY.execute()
     cli.unmount_array(ARRAYNAME)
     pos.exit_pos()
     time.sleep(5)

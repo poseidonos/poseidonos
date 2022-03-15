@@ -72,12 +72,12 @@ MountArrayCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse(
             "MOUNTARRAY", rid, ret,
-            "failed to mount array (code:" + to_string(ret) + ")",
+            "failed to mount " + arrayName + "(code:" + to_string(ret) + ")",
             GetPosInfo());
     }
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
     return jFormat.MakeResponse(
         "MOUNTARRAY", rid, SUCCESS,
-        "Array is mounted successfully", GetPosInfo());
+        arrayName + " is mounted successfully", GetPosInfo());
 }
 }; // namespace pos_cli

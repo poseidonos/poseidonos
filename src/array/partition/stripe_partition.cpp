@@ -443,6 +443,11 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         else
         {
             int error = EID(RECOVER_REQ_DEV_NOT_FOUND);
+            string devName = "";
+            if (dev->GetUblock() != nullptr)
+            {
+                devName = dev->GetUblock()->GetName();
+            }
             POS_TRACE_ERROR(error, "Failed to get recover method for {} partition, lba:{}", PARTITION_TYPE_STR[type], lba);
             return error;
         }

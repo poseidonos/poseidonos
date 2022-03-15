@@ -10,12 +10,12 @@ import pos
 import cli
 import api
 import json
-import CREATE_ARRAY_TO_RAID0
+import CREATE_RAID_NONE_ARRAY
 
-ARRAYNAME = CREATE_ARRAY_TO_RAID0.ARRAYNAME
+ARRAYNAME = CREATE_RAID_NONE_ARRAY.ARRAYNAME
 
 def execute():
-    CREATE_ARRAY_TO_RAID0.execute()
+    CREATE_RAID_NONE_ARRAY.execute()
     out = cli.mount_array(ARRAYNAME)
     print (out)
     return out

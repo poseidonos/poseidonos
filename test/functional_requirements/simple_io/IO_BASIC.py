@@ -13,19 +13,16 @@ import pos_util
 import cli
 import api
 import json
-import MOUNT_VOL_ON_RAID_NONE_ARRAY
+import MOUNT_VOL_BASIC_1
 import fio
 import time
-DETACH_TARGET_DEV = "unvme-ns-0"
-ARRAYNAME = MOUNT_VOL_ON_RAID_NONE_ARRAY.ARRAYNAME
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def execute():
-    MOUNT_VOL_ON_RAID_NONE_ARRAY.execute()
+    MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
-    api.detach_ssd(DETACH_TARGET_DEV)
-    timeout = 10000 #10secs
-    if api.wait_situation(ARRAYNAME, "FAULT", timeout) == True:
+    if api.wait_situation(ARRAYNAME, "NORMAL") == True:
         return "pass"
     return "fail"
 

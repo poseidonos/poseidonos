@@ -57,6 +57,14 @@ def start_pos():
     subprocess.call([pos_bringup, "-t", TR_TYPE, "-a", TR_ADDR])
     return True
 
+def start_pos_for_two_arrays():
+    ret = start_pos_without_bringup()
+    if ret is False:
+        return False
+    pos_bringup = POS_ROOT + "/test/system/lib/bring_up_for_two_arrays.sh"
+    subprocess.call([pos_bringup, "-t", TR_TYPE, "-a", TR_ADDR])
+    return True
+
 
 def exit_pos():
     out = cli.exit_pos()

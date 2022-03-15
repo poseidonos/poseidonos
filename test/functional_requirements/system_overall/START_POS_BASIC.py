@@ -11,10 +11,13 @@ import cli
 import api
 import pos_util
 
-def execute():
+def execute(isSingleArray = True):
     pos_util.kill_process("poseidonos")
     pos_util.pci_rescan()
-    return pos.start_pos()
+    if isSingleArray is True:
+        return pos.start_pos()
+    else:
+        return pos.start_pos_for_two_arrays()
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
