@@ -323,4 +323,27 @@ VolumeIo::_IsInvalidVsa(VirtualBlkAddr& inputVsa)
     return false;
 }
 
+void
+VolumeIo::SetWbLsid(StripeId inputStripeId)
+{
+    if (unlikely(inputStripeId == UNMAP_STRIPE))
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_LSID,
+            "Invalid LSID for Ubio");
+        return;
+    }
+    stripeId = inputStripeId;
+}
+
+StripeId
+VolumeIo::GetWbLsid(void)
+{
+    if (unlikely(stripeId == UNMAP_STRIPE))
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_LSID,
+            "Invalid LSID for Ubio");
+    }
+    return stripeId;
+}
+
 } // namespace pos

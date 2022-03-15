@@ -88,6 +88,8 @@ public:
     void SetVsa(VirtualBlkAddr&);
     void SetSectorRba(uint64_t inputSectorRba);
     virtual uint64_t GetSectorRba(void);
+    void SetWbLsid(StripeId stripeId);
+    virtual StripeId GetWbLsid(void);
 
 private:
     static const StripeAddr INVALID_LSID_ENTRY;
@@ -100,6 +102,7 @@ private:
     StripeAddr oldLsidEntry;
     VirtualBlkAddr vsa;
     uint64_t sectorRba;
+    StripeId stripeId;
 
     bool _IsInvalidVolumeId(uint32_t inputVolumeId);
     virtual bool _IsInvalidLsidEntry(StripeAddr& inputLsidEntry);

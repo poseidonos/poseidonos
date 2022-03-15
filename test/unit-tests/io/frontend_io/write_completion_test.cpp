@@ -79,8 +79,9 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     StripeAddr stripeAddr;
     Stripe stripe(nullptr, true, 1);
     VirtualBlkAddr startVsa;
+    StripeId stripeId = UNMAP_STRIPE;
 
-    ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
+    ON_CALL(*mockVolIo, GetWbLsid()).WillByDefault(Return(stripeId));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion with null stripe
@@ -105,8 +106,9 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     NiceMock<MockIReverseMap> rev;
     Stripe stripe(&rev, true, 1);
     VirtualBlkAddr startVsa;
+    StripeId stripeId = 1;
     ON_CALL(rev, Flush).WillByDefault(Return(0));
-    ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
+    ON_CALL(*mockVolIo, GetWbLsid()).WillByDefault(Return(stripeId));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion with dummy stripe
@@ -130,8 +132,9 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
+    StripeId stripeId = 1;
 
-    ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
+    ON_CALL(*mockVolIo, GetWbLsid()).WillByDefault(Return(stripeId));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion causing flush returning success
@@ -157,6 +160,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     StripeAddr stripeAddr;
     Stripe stripe(nullptr, true, 1);
     VirtualBlkAddr startVsa;
+    StripeId stripeId = 1;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));

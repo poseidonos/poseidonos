@@ -150,11 +150,12 @@ WriteSubmission::Execute(void)
     }
 }
 
-VirtualBlkAddr
+VirtualBlkAddrInfo
 WriteSubmission::_PopHeadVsa(void)
 {
-    VirtualBlks& firstVsaRange = allocatedVirtualBlks.front();
+    VirtualBlks& firstVsaRange = allocatedVirtualBlks.front().first;
     VirtualBlkAddr headVsa = firstVsaRange.startVsa;
+    StripeId stripeId = allocatedVirtualBlks.front().second;
     firstVsaRange.numBlks--;
     firstVsaRange.startVsa.offset++;
 
@@ -163,13 +164,15 @@ WriteSubmission::_PopHeadVsa(void)
         allocatedVirtualBlks.pop_front();
     }
 
-    return headVsa;
+    return {headVsa, stripeId};
 }
-VirtualBlkAddr
+
+VirtualBlkAddrInfo
 WriteSubmission::_PopTailVsa(void)
 {
-    VirtualBlks& lastVsaRange = allocatedVirtualBlks.back();
+    VirtualBlks& lastVsaRange = allocatedVirtualBlks.back().first;
     VirtualBlkAddr tailVsa = lastVsaRange.startVsa;
+    StripeId stripeId = allocatedVirtualBlks.back().second;
     tailVsa.offset += lastVsaRange.numBlks - 1;
     lastVsaRange.numBlks--;
     if (lastVsaRange.numBlks == 0)
@@ -177,7 +180,7 @@ WriteSubmission::_PopTailVsa(void)
         allocatedVirtualBlks.pop_back();
     }
 
-    return tailVsa;
+    return {tailVsa, stripeId};
 }
 
 bool
@@ -238,25 +241,25 @@ WriteSubmission::_SubmitVolumeIo(void)
 void
 WriteSubmission::_WriteSingleBlock(void)
 {
-    VirtualBlks& virtualBlks = allocatedVirtualBlks.front();
-    _PrepareSingleBlock(virtualBlks);
+    VirtualBlksInfo& virtualBlksInfo = allocatedVirtualBlks.front();
+    _PrepareSingleBlock(virtualBlksInfo);
     _SendVolumeIo(volumeIo);
 }
 
 void
 WriteSubmission::_WriteMultipleBlocks(void)
 {
-    for (auto& virtualBlks : allocatedVirtualBlks)
+    for (auto& virtualBlksInfo : allocatedVirtualBlks)
     {
-        _WriteDataAccordingToVsaRange(virtualBlks);
+        _WriteDataAccordingToVsaRange(virtualBlksInfo);
     }
     _SubmitVolumeIo();
 }
 
 void
-WriteSubmission::_WriteDataAccordingToVsaRange(VirtualBlks& vsaRange)
+WriteSubmission::_WriteDataAccordingToVsaRange(VirtualBlksInfo& virtualBlksInfo)
 {
-    VolumeIoSmartPtr newVolumeIo = _CreateVolumeIo(vsaRange);
+    VolumeIoSmartPtr newVolumeIo = _CreateVolumeIo(virtualBlksInfo);
 
     splitVolumeIoQueue.push(newVolumeIo);
 }
@@ -279,7 +282,7 @@ void
 WriteSubmission::_ReadOldHeadBlock(void)
 {
     BlkAddr headRba = blockAlignment.GetHeadBlock();
-    VirtualBlkAddr vsa = _PopHeadVsa();
+    VirtualBlkAddrInfo vsa = _PopHeadVsa();
 
     _ReadOldBlock(headRba, vsa, false);
 }
@@ -293,14 +296,16 @@ WriteSubmission::_ReadOldTailBlock(void)
     }
 
     BlkAddr tailRba = blockAlignment.GetTailBlock();
-    VirtualBlkAddr vsa = _PopTailVsa();
+    VirtualBlkAddrInfo vsa = _PopTailVsa();
 
     _ReadOldBlock(tailRba, vsa, true);
 }
 
 void
-WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail)
+WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool isTail)
 {
+    VirtualBlkAddr vsa = vsaInfo.first;
+    StripeId wbLsid = vsaInfo.second;
     uint32_t alignmentSize;
     uint32_t alignmentOffset;
 
@@ -319,6 +324,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail)
         volumeIo->Split(ChangeByteToSector(alignmentSize), isTail);
     split->SetOriginUbio(volumeIo);
     split->SetVsa(vsa);
+    split->SetWbLsid(wbLsid);
     CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
     split->SetCallback(callback);
 
@@ -385,33 +391,35 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             }
             break;
         }
-
-        _AddVirtualBlks(targetVsaRange);
+        _AddVirtualBlks(result);
         remainBlockCount -= targetVsaRange.numBlks;
     }
 }
 
 void
-WriteSubmission::_AddVirtualBlks(VirtualBlks& virtualBlks)
+WriteSubmission::_AddVirtualBlks(VirtualBlksInfo& virtualBlks)
 {
-    allocatedBlockCount += virtualBlks.numBlks;
+    allocatedBlockCount += virtualBlks.first.numBlks;
     allocatedVirtualBlks.push_back(virtualBlks);
 }
 
 VolumeIoSmartPtr
-WriteSubmission::_CreateVolumeIo(VirtualBlks& vsaRange)
+WriteSubmission::_CreateVolumeIo(VirtualBlksInfo& virtualBlksInfo)
 {
+    VirtualBlks vsaRange = virtualBlksInfo.first;
     VolumeIoSmartPtr split =
         volumeIo->Split(ChangeBlockToSector(vsaRange.numBlks), false);
-    _SetupVolumeIo(split, vsaRange, nullptr);
+    _SetupVolumeIo(split, virtualBlksInfo, nullptr);
 
     return split;
 }
 
 void
 WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
-    VirtualBlks& vsaRange, CallbackSmartPtr callback)
+    VirtualBlksInfo& virtualBlksInfo, CallbackSmartPtr callback)
 {
+    VirtualBlks vsaRange = virtualBlksInfo.first;
+    StripeId wbLsid = virtualBlksInfo.second;
     VirtualBlkAddr startVsa = vsaRange.startVsa;
     Translator translator(startVsa, volumeIo->GetArrayId());
     void* mem = newVolumeIo->GetBuffer();
@@ -429,6 +437,7 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     }
     newVolumeIo->SetVsa(startVsa);
     newVolumeIo->SetPba(pba);
+    newVolumeIo->SetWbLsid(wbLsid);
 
     CallbackSmartPtr blockMapUpdateRequest(
         new BlockMapUpdateRequest(newVolumeIo, callback));
@@ -441,9 +450,9 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
 }
 
 void
-WriteSubmission::_PrepareSingleBlock(VirtualBlks& vsaRange)
+WriteSubmission::_PrepareSingleBlock(VirtualBlksInfo& virtualBlksInfo)
 {
-    _SetupVolumeIo(volumeIo, vsaRange, volumeIo->GetCallback());
+    _SetupVolumeIo(volumeIo, virtualBlksInfo, volumeIo->GetCallback());
 }
 
 } // namespace pos

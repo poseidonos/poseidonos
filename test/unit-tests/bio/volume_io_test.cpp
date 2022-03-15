@@ -178,4 +178,20 @@ TEST(VolumeIo, SetVsa)
     EXPECT_EQ(virtualBlkAddr == virtualBlkAddr2, true);
 }
 
+
+TEST(VolumeIo, SetWbLsid)
+{
+    // Given : buffer, unitCount, arrayId is given
+    void* buffer = nullptr;
+    uint32_t unitCount = 20;
+    int arrayId = 0;
+    
+    // When : Create new Volume Io and Set WbLsid
+    VolumeIoSmartPtr newVolumeIo(new VolumeIo(buffer, unitCount, arrayId));
+    StripeId stripeId = 0;
+    newVolumeIo->SetWbLsid(stripeId);
+    StripeId stripeId2 = newVolumeIo->GetWbLsid();
+    EXPECT_EQ(stripeId == stripeId2, true);    
+}
+
 } // namespace pos

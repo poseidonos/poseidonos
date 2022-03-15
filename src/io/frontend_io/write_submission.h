@@ -48,6 +48,8 @@
 
 namespace pos
 {
+using VirtualBlksInfo = std::pair<VirtualBlks, StripeId>;
+using VirtualBlkAddrInfo = std::pair<VirtualBlkAddr, StripeId>;
 class EventArgument;
 class VolumeIo;
 class RBAStateManager;
@@ -70,7 +72,7 @@ private:
     BlockAlignment blockAlignment;
     uint32_t blockCount;
     uint32_t allocatedBlockCount;
-    std::list<VirtualBlks> allocatedVirtualBlks;
+    std::list<VirtualBlksInfo> allocatedVirtualBlks;
     uint32_t processedBlockCount;
     std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
     RBAStateManager* rbaStateManager;
@@ -80,20 +82,20 @@ private:
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
     void _AllocateFreeWriteBuffer(void);
-    void _ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail);
-    void _AddVirtualBlks(VirtualBlks& virtualBlks);
-    VolumeIoSmartPtr _CreateVolumeIo(VirtualBlks& vsaRange);
-    void _PrepareSingleBlock(VirtualBlks& vsaRange);
+    void _ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool isTail);
+    void _AddVirtualBlks(VirtualBlksInfo& virtualBlks);
+    VolumeIoSmartPtr _CreateVolumeIo(VirtualBlksInfo& virtualBlksInfo);
+    void _PrepareSingleBlock(VirtualBlksInfo& virtualBlksInfo);
     void _ReadOldHeadBlock(void);
     void _ReadOldTailBlock(void);
     void _PrepareBlockAlignment(void);
-    void _WriteDataAccordingToVsaRange(VirtualBlks& vsasRange);
+    void _WriteDataAccordingToVsaRange(VirtualBlksInfo& virtualBlksInfo);
     void _WriteSingleBlock(void);
     void _WriteMultipleBlocks(void);
     void _SubmitVolumeIo(void);
-    VirtualBlkAddr _PopHeadVsa(void);
-    VirtualBlkAddr _PopTailVsa(void);
-    void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlks& vsaRange,
+    VirtualBlkAddrInfo _PopHeadVsa(void);
+    VirtualBlkAddrInfo _PopTailVsa(void);
+    void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlksInfo& virtualBlksInfo,
         CallbackSmartPtr callback);
 };
 } // namespace pos

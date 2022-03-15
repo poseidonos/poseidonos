@@ -60,12 +60,12 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     ON_CALL(*mockVolumeIo, GetSectorRba).WillByDefault(Return(ChangeBlockToSector(rba)));
     ON_CALL(*mockVolumeIo, GetSize).WillByDefault(Return(ChangeBlockToByte(newVsas.numBlks)));
     ON_CALL(*mockVolumeIo, GetVsa).WillByDefault(ReturnRef(newVsas.startVsa));
-    ON_CALL(*mockVolumeIo, GetLsidEntry).WillByDefault(ReturnRef(lsid));
+    ON_CALL(*mockVolumeIo, GetWbLsid).WillByDefault(Return(lsid.stripeId));
 
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(1));
     ON_CALL(*vsaRangeMaker, GetVsaRange).WillByDefault(ReturnRef(oldVsas));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
@@ -112,11 +112,11 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     ON_CALL(*mockVolumeIo, GetSectorRba).WillByDefault(Return(ChangeBlockToSector(rba)));
     ON_CALL(*mockVolumeIo, GetSize).WillByDefault(Return(ChangeBlockToByte(newVsas.numBlks)));
     ON_CALL(*mockVolumeIo, GetVsa).WillByDefault(ReturnRef(newVsas.startVsa));
-    ON_CALL(*mockVolumeIo, GetLsidEntry).WillByDefault(ReturnRef(lsid));
+    ON_CALL(*mockVolumeIo, GetWbLsid).WillByDefault(Return(lsid.stripeId));
 
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(0));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
@@ -177,11 +177,11 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     ON_CALL(*mockVolumeIo, GetSectorRba).WillByDefault(Return(ChangeBlockToSector(rba)));
     ON_CALL(*mockVolumeIo, GetSize).WillByDefault(Return(ChangeBlockToByte(newVsas.numBlks)));
     ON_CALL(*mockVolumeIo, GetVsa).WillByDefault(ReturnRef(newVsas.startVsa));
-    ON_CALL(*mockVolumeIo, GetLsidEntry).WillByDefault(ReturnRef(lsid));
+    ON_CALL(*mockVolumeIo, GetWbLsid).WillByDefault(Return(lsid.stripeId));
 
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(numOldVsaRange));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));

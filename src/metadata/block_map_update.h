@@ -56,7 +56,7 @@ private:
     virtual bool _DoSpecificJob(void) override;
 
     void _UpdateReverseMap(Stripe& stripe);
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
+    Stripe& _GetStripe(StripeId& stripeId);
 
     VolumeIoSmartPtr volumeIo;
     IVSAMap* vsaMap;
