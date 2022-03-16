@@ -71,8 +71,7 @@ def play(json_targets, json_inits, json_scenario):
             {"name": "1_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": test_target.volume_size, "time_based": "0", "runtime": "0", "log_avg_msec": "30000"},
             {"name": "2_sr", "rw": "read", "bs": "128k", "iodepth": "4", "io_size": "1t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
             {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
-            # {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
-            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "1200", "log_avg_msec": "24000"},
+            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
             {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
             {"name": "6_rr", "rw": "randread", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
             {"name": "7_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"}
