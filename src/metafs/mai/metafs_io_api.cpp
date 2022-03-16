@@ -264,8 +264,7 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         MFS_TRACE_ERROR((int)rc,
-            "I/O boundary error. fd: {}, volumeType: {}, offset: {}, size: {}",
-            reqMsg.fd, (int)reqMsg.targetMediaType, reqMsg.byteOffsetInFile, reqMsg.byteSize);
+            "I/O boundary error. " + reqMsg.GetLogString());
         return rc;
     }
 
@@ -273,8 +272,7 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
     {
         rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
         MFS_TRACE_ERROR((int)rc,
-            "The File not found. fd: {}, volumeType: {}",
-            reqMsg.fd, (int)reqMsg.targetMediaType);
+            "The File not found. " + reqMsg.GetLogString());
         return rc;
     }
 
@@ -299,7 +297,7 @@ MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
         if (reqMsg.ioMode == MetaIoMode::Async)
         {
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
+                "[MSG ][SubmitIO   ] " + reqMsg.GetLogString());
             byteSize = reqMsg.byteSize;
         }
         else if (!reqMsg.isFullFileIo)

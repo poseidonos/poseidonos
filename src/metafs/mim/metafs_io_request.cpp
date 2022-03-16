@@ -190,4 +190,20 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[MIO ][NotifyIO   ] NotifyIOCompletionToClient tagId = {}", tagId);
 }
+
+std::string
+MetaFsIoRequest::GetLogString(void) const
+{
+    std::string log;
+    log.append("reqType: " + (int)reqType);
+    log.append(", ioMode: " + (int)ioMode);
+    log.append(", tagId: " + tagId);
+    log.append(", fd: " + std::to_string(fd));
+    log.append(", targetMediaType: " + (int)targetMediaType);
+    log.append(", arrayId: " + std::to_string(arrayId));
+    log.append(", byteOffsetInFile: " + std::to_string(byteOffsetInFile));
+    log.append(", byteSize: " + std::to_string(byteSize));
+    log.append(", priority: " + (int)priority);
+    return log;
+}
 } // namespace pos

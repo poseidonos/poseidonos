@@ -105,11 +105,11 @@ public:
     virtual void NotifyIoCompletionToClient(void);
     virtual void SetError(bool err);
     virtual void SetRetryFlag(void);
-    virtual bool
-    GetRetryFlag(void)
+    virtual bool GetRetryFlag(void)
     {
         return retryFlag;
     }
+    virtual std::string GetLogString(void) const;
 
     MetaIoRequestType reqType;
     MetaIoMode ioMode;
