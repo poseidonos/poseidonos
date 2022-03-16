@@ -76,11 +76,12 @@ FlushPendingStripes::Start(void)
     int result = 0;
     for (auto pStripe : pendingStripes)
     {
-        wbStripeAllocator->FinishReconstructedStripe(pStripe->wbLsid, pStripe->tailVsa);
+        // Finish the stripe
+        wbStripeAllocator->FinishStripe(pStripe->wbLsid, pStripe->tailVsa);
 
         int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
         std::ostringstream os;
-        os << "[Replay] Request to flush stripe, wb lsid " << pStripe->wbLsid
+        os << "[Replay] Request to finish stripe, wb lsid " << pStripe->wbLsid
            << ", tail offset " << pStripe->tailVsa.offset;
 
         POS_TRACE_DEBUG(eventId, os.str());
@@ -88,7 +89,8 @@ FlushPendingStripes::Start(void)
     }
     reporter->SubTaskCompleted(GetId(), 1);
 
-    wbStripeAllocator->FlushPendingActiveStripes();
+    // Trigger flush of stripe whose remaining count reaches zero during replay
+    wbStripeAllocator->FlushAllPendingStripes();
     reporter->SubTaskCompleted(GetId(), 1);
     return result;
 }

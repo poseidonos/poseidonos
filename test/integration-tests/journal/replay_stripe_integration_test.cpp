@@ -147,7 +147,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
             ReconstructActiveStripe(testInfo->defaultTestVol, partialStripe.GetWbAddr().stripeId, tailVsa, partialStripe.GetRevMap()));
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
-            FinishReconstructedStripe(partialStripe.GetWbAddr().stripeId, tailVsa));
+            FinishStripe(partialStripe.GetWbAddr().stripeId, tailVsa));
     }
 
     {

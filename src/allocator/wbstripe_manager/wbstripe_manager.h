@@ -40,12 +40,10 @@
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/mapper/i_stripemap.h"
 #include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
-using StripeVec = std::vector<Stripe*>;
 class IVolumeManager;
 class IReverseMap;
 class BufferPool;
@@ -56,57 +54,47 @@ class WBStripeManager : public IWBStripeAllocator
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(TelemetryPublisher* tp_, StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
     WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual Stripe* GetStripe(StripeAddr& lsidEntry) override;
     virtual Stripe* GetStripe(StripeId wbLsid) override;
     virtual void FreeWBStripeId(StripeId lsid) override;
-
-    virtual void FlushActiveStripes(uint32_t volumeId) override;
-    virtual void GetWbStripes(FlushIoSmartPtr flushIo) override;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override;
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override;
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
-    virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
+    virtual void FinishStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
 
-    virtual void FlushAllActiveStripes(void) override;
-    virtual bool FinalizeActiveStripes(int volumeId) override;
-    virtual int FlushPendingActiveStripes(void) override;
-    virtual int FlushOnlineStripesInSegment(std::set<SegmentId>& segments);
+    virtual int FlushAllPendingStripes(void) override;
+    virtual int FlushAllPendingStripesInVolume(int volumeId) override;
+    virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) override;
 
-    virtual void FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
-    virtual int CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
+    virtual int FlushAllWbStripes(void);
 
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
 
 protected:
-    void _PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
-    void _GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes);
+    Stripe* _GetStripe(StripeAddr& lsidEntry);
+
     Stripe* _FinishActiveStripe(ASTailArrayIdx index);
+    bool _FillBlocksToStripe(Stripe* stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);
-    VirtualBlks _AllocateRemainingBlocks(VirtualBlkAddr tail);
-    Stripe* _FinishRemainingBlocks(VirtualBlks remainingVsaRange);
+    VirtualBlks _GetRemainingBlocks(VirtualBlkAddr tail);
+    Stripe* _FinishRemainingBlocks(StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
     virtual int _RequestStripeFlush(Stripe* stripe);
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
+    void _WaitForStripeFlushComplete(Stripe* stripe);
 
     std::vector<Stripe*> wbStripeArray;
     BufferPool* stripeBufferPool;
 
-    std::vector<Stripe*> stripesToFlush4FlushCmd[MAX_VOLUME_COUNT];
-    std::vector<StripeId> vsidToCheckFlushDone4FlushCmd[MAX_VOLUME_COUNT];
-
-    StripeVec* pendingFullStripes;
-
     // DOCs
-    IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     AllocatorCtx* allocCtx;

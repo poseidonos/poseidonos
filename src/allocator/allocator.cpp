@@ -104,7 +104,10 @@ Allocator::Dispose(void)
     POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "[Allocator] Dispose, init:{}", isInitialized);
     if (isInitialized == true)
     {
-        wbStripeManager->FlushAllActiveStripes();
+        POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Start flushing all write buffer stripes");
+        wbStripeManager->FlushAllWbStripes();
+
+        POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Start disposing write buffer stripe manager");
         wbStripeManager->Dispose();
 
         contextManager->FlushContexts(nullptr, true);
@@ -125,7 +128,10 @@ Allocator::Shutdown(void)
     POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "[Allocator] Shutdown, init:{}", isInitialized);
     if (isInitialized == true)
     {
-        wbStripeManager->FlushAllActiveStripes();
+        POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Start flushing all write buffer stripes");
+        wbStripeManager->FlushAllWbStripes();
+
+        POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Start disposing write buffer stripe manager");
         wbStripeManager->Dispose();
 
         contextManager->Dispose();
@@ -188,10 +194,7 @@ Allocator::PrepareRebuild(void)
 
     int ret = 0;
 
-    std::set<SegmentId> nvramSegments;
-    nvramSegments = contextManager->GetNvramSegmentList();
-
-    ret = wbStripeManager->FlushOnlineStripesInSegment(nvramSegments);
+    ret = wbStripeManager->FlushAllWbStripes();
     if (ret != 0)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes flush failed, ret {}", ret);
@@ -199,6 +202,10 @@ Allocator::PrepareRebuild(void)
         return ret;   
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
+
+    // TODO (meta) Make sure all nvram segments are force changed to ssd state
+    // std::set<SegmentId> nvramSegments;
+    // nvramSegments = contextManager->GetNvramSegmentList();
 
     ret = contextManager->MakeRebuildTargetSegmentList();
     if (ret != 0)
@@ -446,9 +453,8 @@ Allocator::FlushAllUserdataWBT(void)
     std::vector<StripeId> vsidToCheckFlushDone;
 
     blockManager->TurnOffBlkAllocation();
-    wbStripeManager->CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
+    wbStripeManager->FlushAllWbStripes();
     blockManager->TurnOnBlkAllocation();
-    wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
 }
 
 void

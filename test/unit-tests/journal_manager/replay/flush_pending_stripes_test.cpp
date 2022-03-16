@@ -22,7 +22,7 @@ TEST(FlushPendingStripes, Start_testIfTaskCompletedSuccessfullyWhenThereIsOnlyOn
     FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
 
     // Then
-    EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(1);
+    EXPECT_CALL(wbStripeAllocator, FinishStripe).Times(1);
 
     // When
     int result = flushPendingStripesTask.Start();
@@ -46,7 +46,8 @@ TEST(FlushPendingStripes, Start_testIfTaskCompletedSuccessfullyWhenThereArePendi
     FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
 
     // Then
-    EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(numPendingStripes);
+    EXPECT_CALL(wbStripeAllocator, FinishStripe).Times(numPendingStripes);
+    EXPECT_CALL(wbStripeAllocator, FlushAllPendingStripes).Times(1);
 
     // When
     int result = flushPendingStripesTask.Start();

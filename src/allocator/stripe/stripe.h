@@ -57,7 +57,7 @@ public:
     virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 
-    virtual uint32_t GetAsTailArrayIdx(void);
+    virtual uint32_t GetVolumeId(void);
     virtual StripeId GetVsid(void);
     virtual void SetVsid(StripeId virtsid);
 
@@ -91,7 +91,7 @@ public:
     virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
 
 protected: // for UT
-    ASTailArrayIdx asTailArrayIdx;
+    ASTailArrayIdx volumeId;
     StripeId vsid; // SSD LSID, Actually User Area LSID
     StripeId wbLsid;
     StripeId userLsid;

@@ -49,52 +49,26 @@ class WBStripeManagerSpy : public WBStripeManager
 public:
     using WBStripeManager::WBStripeManager;
     virtual ~WBStripeManagerSpy(void) = default;
-    Stripe*
-    GetStripe(StripeId wbLsid)
-    {
-        if (wbLsid == 33)
-        {
-            return nullptr;
-        }
-        else
-        {
-            return WBStripeManager::GetStripe(wbLsid);
-        }
-    }
-    int
-    _RequestStripeFlush(Stripe* stripe)
-    {
-        if (stripe->GetWbLsid() == 77)
-        {
-            return -1;
-        }
-        return 0;
-    }
+
     int
     _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx tailarrayidx, Stripe*& stripe)
     {
-        WBStripeManager::_ReconstructAS(vsid, wbLsid, blockCount, tailarrayidx, stripe);
-        return 0;
-    }
-    int
-    _GetOnlineStripes(std::set<SegmentId>& segments, std::vector<StripeId>& stripes)
-    {
-        WBStripeManager::_GetOnlineStripes(segments, stripes);
-        return 0;
-    }
-    void
-    PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
-    {
-        if (volumeId == 77)
-        {
-            return;
-        }
-        WBStripeManager::_PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
+        return WBStripeManager::_ReconstructAS(vsid, wbLsid, blockCount, tailarrayidx, stripe);
     }
     VirtualBlks
-    _AllocateRemainingBlocks(VirtualBlkAddr tail)
+    _GetRemainingBlocks(VirtualBlkAddr tail)
     {
-        return WBStripeManager::_AllocateRemainingBlocks(tail);
+        return WBStripeManager::_GetRemainingBlocks(tail);
+    }
+    bool
+    _FillBlocksToStripe(Stripe* stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks)
+    {
+        return WBStripeManager::_FillBlocksToStripe(stripe, wbLsid, startOffset, numBlks);
+    }
+    Stripe*
+    _FinishActiveStripe(ASTailArrayIdx index)
+    {
+        return WBStripeManager::_FinishActiveStripe(index);
     }
 };
 

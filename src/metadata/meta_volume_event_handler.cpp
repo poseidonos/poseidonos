@@ -92,8 +92,10 @@ MetaVolumeEventHandler::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArr
 {
     int result;
     IWBStripeAllocator* wbStripeManager = allocator->GetIWBStripeAllocator();
-    bool preResult = wbStripeManager->FinalizeActiveStripes(volEventBase->volId);
-    if (preResult == true)
+    POS_TRACE_INFO(EID(VOL_EVENT_OK),
+        "Start flushign pending stripes of volume {}", volEventBase->volId);
+    result = wbStripeManager->FlushAllPendingStripesInVolume(volEventBase->volId);
+    if (result == 0)
     {
         bool flushMapRequired = (journal == nullptr);
         result = mapper->VolumeUnmounted(volEventBase->volId, flushMapRequired);

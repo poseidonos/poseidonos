@@ -41,22 +41,18 @@ namespace pos
 class IWBStripeAllocator
 {
 public:
-    virtual Stripe* GetStripe(StripeAddr& lsa) = 0;
     virtual Stripe* GetStripe(StripeId wbLsid) = 0;
     virtual void FreeWBStripeId(StripeId lsid) = 0;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) = 0;
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) = 0;
 
-    virtual void FlushActiveStripes(uint32_t volumeId) = 0;
-    virtual void GetWbStripes(FlushIoSmartPtr flushIo) = 0;
-
-    virtual void FlushAllActiveStripes(void) = 0;
-    virtual bool FinalizeActiveStripes(int volumeId) = 0;
-
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
-    virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) = 0;
-    virtual int FlushPendingActiveStripes(void) = 0;
+    virtual void FinishStripe(StripeId wbLsid, VirtualBlkAddr tail) = 0;
+
+    virtual int FlushAllPendingStripes(void) = 0;
+    virtual int FlushAllPendingStripesInVolume(int volumeId) = 0;
+    virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) = 0;
 };
 
 } // namespace pos

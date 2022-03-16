@@ -36,7 +36,7 @@ TEST(Stripe, GetAsTailArrayIdx_TestSimpleGetter)
     // given
     Stripe stripe(nullptr, false, 10);
     // when
-    stripe.GetAsTailArrayIdx();
+    stripe.GetVolumeId();
 }
 
 TEST(Stripe, GetVsid_TestSimpleGetter)

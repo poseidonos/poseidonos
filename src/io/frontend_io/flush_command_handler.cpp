@@ -96,11 +96,8 @@ FlushCmdHandler::Execute(void)
             POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "Flush command started on volume {}", volumeId);
 
-            // Get all active stripes for flush
-            iWBStripeAllocator->FlushActiveStripes(volumeId);
-
-            // Get all Wb stripes belonging to input volumeId
-            iWBStripeAllocator->GetWbStripes(flushIo);
+            // Trigger stripe flush of all active stripes, and get all wb stripes belonging to input volumeId
+            iWBStripeAllocator->FlushAllPendingStripesInVolume(volumeId, flushIo);
 
             // Unblock allocation
             iBlockAllocator->UnblockAllocating(volumeId);

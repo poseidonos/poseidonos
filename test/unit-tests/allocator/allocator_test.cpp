@@ -17,6 +17,7 @@
 
 using ::testing::_;
 using ::testing::AtLeast;
+using ::testing::InSequence;
 using testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -72,14 +73,14 @@ TEST(Allocator, Dispose_TestDisposeAfterInitOrNot)
 
     alloc.Init();
     // given 1.
-    EXPECT_CALL(*wbManager, FlushAllActiveStripes);
+    EXPECT_CALL(*wbManager, FlushAllWbStripes);
     EXPECT_CALL(*ctxManager, FlushContexts);
     EXPECT_CALL(*ctxManager, Dispose);
     // when 1.
     alloc.Dispose();
 
     // given 2.
-    EXPECT_CALL(*wbManager, FlushAllActiveStripes).Times(0);
+    EXPECT_CALL(*wbManager, FlushAllWbStripes).Times(0);
     EXPECT_CALL(*ctxManager, FlushContexts).Times(0);
     // when 2.
     alloc.Dispose();
@@ -99,7 +100,7 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     alloc.Init();
     // given 1. - Allocator initialized
     EXPECT_CALL(*ctxManager, Dispose).Times(1);
-    EXPECT_CALL(*wbManager, FlushAllActiveStripes);
+    EXPECT_CALL(*wbManager, FlushAllWbStripes);
     EXPECT_CALL(*wbManager, Dispose);
     // when 1.
     alloc.Shutdown();
@@ -357,10 +358,12 @@ TEST(Allocator, FlushAllUserdataWBT_TestSimpleCaller)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
-    EXPECT_CALL(*blkManager, TurnOffBlkAllocation);
-    EXPECT_CALL(*wbManager, CheckAllActiveStripes);
-    EXPECT_CALL(*blkManager, TurnOnBlkAllocation);
-    EXPECT_CALL(*wbManager, FinalizeWriteIO);
+    {
+        InSequence s;
+        EXPECT_CALL(*blkManager, TurnOffBlkAllocation);
+        EXPECT_CALL(*wbManager, FlushAllWbStripes);
+        EXPECT_CALL(*blkManager, TurnOnBlkAllocation);
+    }
 
     // when
     alloc.FlushAllUserdataWBT();
@@ -459,13 +462,7 @@ TEST(Allocator, PreppareRebuild_testSuccessfulPath)
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
-    EXPECT_CALL(*ctxManager, GetNvramSegmentList)
-        .WillOnce([]()
-        {
-            std::set<SegmentId> segmentList = {0, 1, 2};
-            return segmentList;
-        });
-    EXPECT_CALL(*wbManager, FlushOnlineStripesInSegment).WillOnce(Return(0));
+    EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(0));
     EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return(0));
     EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(0));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
@@ -485,13 +482,7 @@ TEST(Allocator, PreppareRebuild_testIfPrepareStoppedWhenTheresNoTargetSegmentsTo
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
-    EXPECT_CALL(*ctxManager, GetNvramSegmentList)
-        .WillOnce([]()
-        {
-            std::set<SegmentId> segmentList = {0, 1, 2};
-            return segmentList;
-        });
-    EXPECT_CALL(*wbManager, FlushOnlineStripesInSegment).WillOnce(Return(0));
+    EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(0));
     EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return((int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
 
@@ -510,8 +501,7 @@ TEST(Allocator, PreppareRebuild_testWhenFlushOnlineStripeFails)
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
-    EXPECT_CALL(*ctxManager, GetNvramSegmentList);
-    EXPECT_CALL(*wbManager, FlushOnlineStripesInSegment).WillOnce(Return(-1));
+    EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(-1));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
 
     int ret = alloc.PrepareRebuild();
@@ -529,12 +519,6 @@ TEST(Allocator, PreppareRebuild_testWhenSetNextSsdLsidFails)
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
-    EXPECT_CALL(*ctxManager, GetNvramSegmentList)
-        .WillOnce([]()
-        {
-            std::set<SegmentId> segmentList = {0, 1, 2};
-            return segmentList;
-        });
     EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return(0));
     EXPECT_CALL(*ctxManager, SetNextSsdLsid).WillOnce(Return(-1));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);

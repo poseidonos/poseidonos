@@ -116,8 +116,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnN
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
+    ON_CALL(mockIWBStripeAllocator, FlushAllPendingStripesInVolume(_)).WillByDefault(Return(0));
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(-EID(MAP_FLUSH_IN_PROGRESS)));
     ON_CALL(mockFlushCmdManager, ResetFlushInProgress(_, _)).WillByDefault(Return());
 
@@ -156,8 +155,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
+    ON_CALL(mockIWBStripeAllocator, FlushAllPendingStripesInVolume(_)).WillByDefault(Return(0));
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(false));
@@ -196,8 +194,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
+    ON_CALL(mockIWBStripeAllocator, FlushAllPendingStripesInVolume(_)).WillByDefault(Return(0));
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(true));

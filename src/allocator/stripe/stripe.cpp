@@ -46,7 +46,7 @@
 namespace pos
 {
 Stripe::Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe)
-: asTailArrayIdx(UINT32_MAX),
+: volumeId(UINT32_MAX),
   vsid(UINT32_MAX),
   wbLsid(UINT32_MAX),
   userLsid(UINT32_MAX),
@@ -95,7 +95,7 @@ Stripe::Assign(StripeId vsid_, StripeId lsid_, ASTailArrayIdx tailArrayIdx_)
 {
     vsid = vsid_;
     wbLsid = lsid_;
-    asTailArrayIdx = tailArrayIdx_;
+    volumeId = tailArrayIdx_;
     oldVsaList.assign(totalBlksPerUserStripe, UNMAP_VSA);
     remaining.store(totalBlksPerUserStripe, memory_order_release);
     finished = false;
@@ -174,9 +174,9 @@ Stripe::SetVsid(StripeId virtsid)
 }
 
 uint32_t
-Stripe::GetAsTailArrayIdx(void)
+Stripe::GetVolumeId(void)
 {
-    return asTailArrayIdx;
+    return volumeId;
 }
 
 void

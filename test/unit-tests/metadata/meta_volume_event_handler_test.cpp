@@ -197,7 +197,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountSuccess)
     {
         InSequence s;
         EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-        EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+        EXPECT_CALL(wbStripeManager, FlushAllPendingStripesInVolume(volumeEvent.volId)).WillOnce(Return(0));
         EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
     }
 
@@ -224,7 +224,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenActiveStripeF
         .subnqn = ""};
 
     EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(false));
+    EXPECT_CALL(wbStripeManager, FlushAllPendingStripesInVolume(volumeEvent.volId)).WillOnce(Return(-1));
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).Times(0);
     int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
@@ -250,7 +250,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenVolumeMapUnmo
         .subnqn = ""};
 
     EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+    EXPECT_CALL(wbStripeManager, FlushAllPendingStripesInVolume(volumeEvent.volId)).WillOnce(Return(0));
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
     int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
@@ -275,7 +275,7 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfMapFlushIsNotRequestedWhenJou
         .subnqn = ""};
 
     EXPECT_CALL(allocator, GetIWBStripeAllocator).WillOnce(Return(&wbStripeManager));
-    EXPECT_CALL(wbStripeManager, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
+    EXPECT_CALL(wbStripeManager, FlushAllPendingStripesInVolume(volumeEvent.volId)).WillOnce(Return(0));
 
     // flushMapRequired should be TRUE when journal disabled
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, true)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
