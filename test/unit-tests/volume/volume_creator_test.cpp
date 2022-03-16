@@ -64,7 +64,7 @@ TEST(VolumeCreator, Do_SameName)
     uint64_t minBw = 0;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::CREATE_VOL_NAME_DUPLICATED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_SAME_VOL_NAME_EXISTS;
 
     // When
     VolumeList volumes;

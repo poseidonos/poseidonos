@@ -59,16 +59,16 @@ VolumeNamePolicy::CheckVolumeName(string name)
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_NOT_ALLOWED),
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE),
             "vol_name: {}", name);
-        throw EID(CREATE_VOL_NAME_NOT_ALLOWED);
+        throw EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE);
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_NOT_ALLOWED),
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR),
             "vol_name: {}, allowed_char: {}", name, ALLOWED_CHAR);
-        throw EID(CREATE_VOL_NAME_NOT_ALLOWED);
+        throw EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR);
     }
 }
 

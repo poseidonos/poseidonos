@@ -125,7 +125,7 @@ VolumeList::Remove(int volId)
     VolumeBase* target = items[volId];
     if (target == nullptr)
     {
-        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "The requested volume does not exist");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "vol_id: {}", volId);
         throw EID(VOL_NOT_FOUND);
     }
 

@@ -91,8 +91,7 @@ VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
 {
     if (volume == nullptr)
     {
-        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
-                "The requested volume does not exist");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "null");
         throw EID(VOL_NOT_FOUND);
     }
 

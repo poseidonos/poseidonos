@@ -298,8 +298,7 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
     {
-        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
-            "The requested volume does not exist");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "vol_id: {}", volId);
         return EID(VOL_NOT_FOUND);
     }
     volumes.DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
@@ -324,8 +323,7 @@ VolumeManager::VolumeName(int volId, std::string& name)
         return EID(SUCCESS);
     }
 
-    POS_TRACE_WARN(EID(VOL_NOT_FOUND),
-            "The requested volume does not exist");
+    POS_TRACE_WARN(EID(VOL_NOT_FOUND), "vol_id: {}", volId);
     return EID(VOL_NOT_FOUND);
 }
 

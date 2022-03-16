@@ -142,7 +142,7 @@ VolumeMounter::_CheckIfExistVolume(VolumeBase* vol)
     if (vol == nullptr)
     {
         ret = EID(VOL_NOT_FOUND);
-        POS_TRACE_WARN(ret, "");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "null");
     }
 
     return ret;

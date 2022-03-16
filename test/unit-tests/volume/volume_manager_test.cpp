@@ -53,10 +53,9 @@ TEST(VolumeManager, BringIup_)
     delete volumeManager;
 }
 
-TEST(VolumeManager, Create_)
+TEST(VolumeManager, CreateVolume_testFailedToCreateVolIfArrayIsNotMounted)
 {
     // Given
-    std::string arrayName = "";
     int arrayID = 0;
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
@@ -69,7 +68,7 @@ TEST(VolumeManager, Create_)
     // When
     VolumeManager* volumeManager = new VolumeManager(iArrayInfo, iState);
 
-    int expected = (int)POS_EVENT_ID::ARRAY_NOT_MOUNTED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_CAN_ONLY_BE_WHILE_ONLINE;
     int actual = volumeManager->Create(name, size, maxIops, maxBw);
 
     ASSERT_EQ(actual, expected);

@@ -56,7 +56,7 @@ TEST(VolumeRenamer, Do_sameName)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::CREATE_VOL_NAME_DUPLICATED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_SAME_VOL_NAME_EXISTS;
 
     // When
     VolumeList volumes;

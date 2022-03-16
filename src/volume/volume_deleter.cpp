@@ -60,8 +60,7 @@ VolumeDeleter::_CheckRequestValidity(string name)
     vol = volumeList.GetVolume(name);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
-                "The requested volume does not exist");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "vol_name: {}", name);
         throw EID(VOL_NOT_FOUND);
     }
 

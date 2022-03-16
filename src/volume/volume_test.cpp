@@ -53,7 +53,7 @@ TEST_F(VolumeTest, TryToCreateDuplicatedVolumeTest)
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0);
     int res = volMgr->Create(vol_name, SIZE, 0, 0); // create again for same volume name
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_DUPLICATED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_SAME_VOL_NAME_EXISTS));
 
     // cleanup for next test
     volMgr->Delete(vol_name);
@@ -87,19 +87,19 @@ TEST_F(VolumeTest, TryToCreateInvalidVolumeNameTest)
 
     std::string blankvol = "        ";
     res = volMgr->Create(blankvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     std::string startWithBlank = " 44444";
     res = volMgr->Create(startWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     std::string endWithBlank = "44444 ";
     res = volMgr->Create(endWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     std::string specialChar = "mySpeci@lVolume";
     res = volMgr->Create(specialChar, SIZE, 0, 0);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR));
 }
 
 TEST_F(VolumeTest, TryToCreateInvalidSizeVolume)
@@ -189,11 +189,11 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
 
     std::string invalidCharVol = "fsdla?";
     int res = volMgr->Rename(oldVolName, invalidCharVol);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR));
 
     std::string blankVol = "    ";
     res = volMgr->Rename(oldVolName, blankVol);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     std::string shortVol = "a";
     res = volMgr->Rename(oldVolName, shortVol);
@@ -221,11 +221,11 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
 
     std::string beginSpace = " avolvol";
     res = volMgr->Rename(oldVolName, beginSpace);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     std::string endSpace = "bvolvol ";
     res = volMgr->Rename(oldVolName, endSpace);
-    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE));
 
     volMgr->Delete(oldVolName);
 }

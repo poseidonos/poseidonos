@@ -103,9 +103,9 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
         }
         catch (const std::exception& e)
         {
-            POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_BROKEN),
+            POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN),
                 "reason: {}, array_name: {}", e.what(), arrayName);
-            return EID(VOL_UNABLE_TO_SAVE_CONTENT_BROKEN);
+            return EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN);
         }
     }
 

@@ -59,8 +59,8 @@ VolumeCreator::_CheckRequestValidity(string name, uint64_t size)
 
     if (volumeList.GetID(name) >= 0)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_DUPLICATED), "vol_name: {}", name);
-        throw EID(CREATE_VOL_NAME_DUPLICATED);
+        POS_TRACE_WARN(EID(CREATE_VOL_SAME_VOL_NAME_EXISTS), "vol_name: {}", name);
+        throw EID(CREATE_VOL_SAME_VOL_NAME_EXISTS);
     }
 
     _CheckVolumeSize(size);
