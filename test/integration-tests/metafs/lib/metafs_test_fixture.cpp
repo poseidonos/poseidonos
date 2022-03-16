@@ -47,17 +47,18 @@ namespace pos
 MetaFsTestFixture::MetaFsTestFixture(void)
 : tpForMetaIo(new NiceMock<MockTelemetryPublisher>)
 {
-    _SetThreadModel();
-
     tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
     config = new NiceMock<MockMetaFsConfigManager>(nullptr);
 
+    EXPECT_CALL(*config, Init).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32*1024));
     EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(32*1024));
     EXPECT_CALL(*config, IsWriteMpioCacheEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(32));
     EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(5000));
+
+    _SetThreadModel();
 
     for (size_t arrayId = 0; arrayId < ARRAY_COUNT; ++arrayId)
     {
@@ -122,7 +123,7 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
     cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
-    MetaFsServiceSingleton::Instance()->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
+    MetaFsServiceSingleton::Instance(config)->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 
 cpu_set_t
