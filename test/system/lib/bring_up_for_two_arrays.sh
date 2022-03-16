@@ -38,7 +38,7 @@ pos_bringup(){
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072
     fi
     sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem1 -a -s POS00000000000001 -d POS_VOLUME_EXTENTION -m 256
-    sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem2 -a -s POS00000000000001 -d POS_VOLUME_EXTENTION -m 256
+    sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem2 -a -s POS00000000000002 -d POS_VOLUME_EXTENTION -m 256
     sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 1024 512
     sleep 5
     sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram1 1024 512
