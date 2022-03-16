@@ -123,7 +123,7 @@ CopierReadCompletion::_DoSpecificJob(void)
 
         if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
         {
-            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS)
+            if (unlikely(EID(SUCCESS)
                 != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted)))
             {
                 gcStripeManager->SetFlushed(volId);

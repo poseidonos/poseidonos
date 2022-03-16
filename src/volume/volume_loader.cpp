@@ -88,7 +88,9 @@ VolumeLoader::Do(void)
 
         if (res == false)
         {
-            return (int)POS_EVENT_ID::DONE_WITH_ERROR;
+            POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+                "array_name: {}", arrayName);
+            return EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
         }
     }
 

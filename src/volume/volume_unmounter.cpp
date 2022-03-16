@@ -64,11 +64,11 @@ VolumeUnmounter::~VolumeUnmounter(void)
 int
 VolumeUnmounter::Do(string name)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+    int ret = EID(VOL_NOT_FOUND);
     VolumeBase* vol = volumeList.GetVolume(name);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN(ret, "The requested volume does not exist");
+        POS_TRACE_WARN(ret, "vol_name: {}", name);
         return ret;
     }
 
@@ -85,14 +85,16 @@ VolumeUnmounter::Do(string name)
     }
     else
     {
-        ret = static_cast<int>(POS_EVENT_ID::VOL_ALD_UNMOUNTED);
-        POS_TRACE_WARN(ret, "The volume already unmounted: {}", name);
+        ret = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
+        POS_TRACE_WARN(ret, "vol_name: {}", name);
     }
     vol->UnlockStatus();
 
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS) && res == false)
+    if (ret == EID(SUCCESS) && res == false)
     {
-        return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+            "vol_name:{}, array_name: {}", name, arrayName);
+        return EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
     }
 
     string subnqn = vol->GetSubnqn();

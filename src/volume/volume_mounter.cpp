@@ -63,7 +63,7 @@ VolumeMounter::~VolumeMounter(void)
 int
 VolumeMounter::Do(string name, string subnqn)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::VOL_UNMOUNTED);
+    int ret = EID(UNMOUNT_VOL_DEBUG_MSG);
     VolumeBase* vol = volumeList.GetVolume(name);
 
     ret = _CheckIfExistVolume(vol);
@@ -85,8 +85,8 @@ VolumeMounter::Do(string name, string subnqn)
         subnqn = _GetSubsystemToMount(arrayName, arrayID);
         if ("" == subnqn)
         {
-            ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_NOT_CREATED);
-            POS_TRACE_WARN(ret, "No mataching subsystem exist for the volume in array:{}", arrayName);
+            ret = EID(MOUNT_VOL_SUBSYSTEM_NOT_FOUND);
+            POS_TRACE_WARN(ret, "subnqn: {}, array_name: {}", subnqn, arrayName);
         }
     }
 
@@ -126,7 +126,7 @@ VolumeMounter::_CheckFailStatus(int checkValue)
 {
     bool ret = true;
 
-    if (checkValue == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (checkValue == EID(SUCCESS))
     {
         ret = false;
     }
@@ -137,13 +137,12 @@ VolumeMounter::_CheckFailStatus(int checkValue)
 int
 VolumeMounter::_CheckIfExistVolume(VolumeBase* vol)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int ret = EID(SUCCESS);
 
     if (vol == nullptr)
     {
-        ret = static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
-
-        POS_TRACE_WARN(ret, "The requested volume does not exist");
+        ret = EID(VOL_NOT_FOUND);
+        POS_TRACE_WARN(ret, "");
     }
 
     return ret;
@@ -152,13 +151,13 @@ VolumeMounter::_CheckIfExistVolume(VolumeBase* vol)
 int
 VolumeMounter::_CheckIfExistSubsystem(string subnqn)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int ret = EID(SUCCESS);
 
     if ((subnqn.empty() && nvmfTarget->CheckSubsystemExistance() == false) ||
         (!subnqn.empty() && nvmfTarget->FindSubsystem(subnqn) == nullptr))
     {
-        ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_NOT_CREATED);
-        POS_TRACE_WARN(ret, "No subsystem:{} was created to attach the volume", subnqn);
+        ret = EID(MOUNT_VOL_SUBSYSTEM_NOT_FOUND);
+        POS_TRACE_WARN(ret, "subnqn: {}, array_name: {}", subnqn, arrayName);
     }
 
     return ret;
@@ -181,7 +180,7 @@ VolumeMounter::_GetSubsystemToMount(string arrayName, int arrayID)
 int
 VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int ret = EID(SUCCESS);
     bool done = false;
 
     vol->LockStatus();
@@ -201,13 +200,15 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
         }
         else
         {
-            ret = static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+            ret = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
+            POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+                "array_name: {}", arrayName);
         }
     }
     else
     {
-        ret = static_cast<int>(POS_EVENT_ID::VOL_ALD_MOUNTED);
-        POS_TRACE_WARN(ret, "The volume already mounted: {}", vol->GetName());
+        ret = EID(MOUNT_VOL_ALREADY_MOUNTED);
+        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetName());
     }
 
     vol->UnlockStatus();
@@ -218,7 +219,7 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
 int
 VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::RESERVED);
+    int ret = EID(RESERVED);
     bool done = false;
 
     vol->LockStatus();
@@ -230,20 +231,20 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
 
     if (done == false)
     {
-        ret = static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        ret = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
         POS_TRACE_WARN(ret, "Failed to unmount volume during rollback mount: {}", vol->GetName());
     }
 
     ret = vol->Unmount();
 
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
-        ret = static_cast<int>(POS_EVENT_ID::VOL_ALD_UNMOUNTED);
-        POS_TRACE_WARN(ret, "The volume already unmounted during rollback mount: {}", vol->GetName());
+        ret = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
+        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetName());
     }
 
-    ret = static_cast<int>(POS_EVENT_ID::CANNOT_EXTEND_NSID);
-    POS_TRACE_WARN(ret, "Can't extend more nsid to subsystem:{}", subnqn);
+    ret = EID(MOUNT_VOL_UNABLE_TO_ATTACH_TO_NVMF);
+    POS_TRACE_WARN(ret, "subnqn: {}", subnqn);
 
     vol->UnlockStatus();
 
@@ -253,26 +254,26 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
 int
 VolumeMounter::_CheckAndSetSubsystemToArray(string subnqn, string volumeArrayName)
 {
-    int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int ret = EID(SUCCESS);
     string subnqnArrayName = nvmfTarget->GetSubsystemArrayName(subnqn);
     if (subnqnArrayName == "")
     {
         bool result = nvmfTarget->SetSubsystemArrayName(subnqn, volumeArrayName);
         if (false == result)
         {
-            ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_ALREADY_SET_ARRAY);
-            POS_TRACE_ERROR(ret, "Fail to set array:{} to subsystem:{}. It already has configured an array", arrayName, subnqn);
+            ret = EID(MOUNT_VOL_SUBSYSTEM_ALREADY_OCCUPIED);
+            POS_TRACE_ERROR(ret, "array_name: {}, subnqn: {}", arrayName, subnqn);
         }
         else
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_SET_ARRAY_TO_SUBSYSTEM;
-            POS_TRACE_INFO(static_cast<int>(eventId), "Successfully mapped array:{} to subsystem:{}", volumeArrayName, subnqn);
+            int eventId = EID(IONVMF_SET_ARRAY_TO_SUBSYSTEM);
+            POS_TRACE_INFO(eventId, "Successfully mapped array:{} to subsystem:{}", volumeArrayName, subnqn);
         }
     }
     else if (subnqnArrayName != volumeArrayName)
     {
-        ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_ARRAY_DOES_NOT_MATCH_VOLUME_ARRAY);
-        POS_TRACE_ERROR(ret, "Subsystem's array:{} doesn't match volume's array:{}", subnqnArrayName, volumeArrayName);
+        ret = EID(MOUNT_VOL_SUBSYSTEM_MISMATCH);
+        POS_TRACE_ERROR(ret, "subsystem_array:{}, volume_array:{}", subnqnArrayName, volumeArrayName);
     }
 
     return ret;

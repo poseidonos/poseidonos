@@ -70,7 +70,7 @@ DeleteArrayCommand::Execute(json& doc, string rid)
     if (false == deleteDone)
     {
         return jFormat.MakeResponse(
-            "DELETEARRAY", rid, (int)POS_EVENT_ID::VOL_DELETE_FAILED,
+            "DELETEARRAY", rid, (int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
             "Some or every volumes in " + arrayName + " failed to delete.", GetPosInfo());
     }
     return jFormat.MakeResponse("DELETEARRAY", rid, SUCCESS,

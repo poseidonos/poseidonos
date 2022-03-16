@@ -65,7 +65,7 @@ ReplayVolumeDeletion::Start(void)
         if (vol.prevSegInfoVersion < storedContextVersion)
         {
             int result = volumeManager->CheckVolumeValidity(vol.volumeId);
-            if (result == static_cast<int>(POS_EVENT_ID::SUCCESS))
+            if (result == EID(SUCCESS))
             {
                 std::string volname;
                 volumeManager->VolumeName(vol.volumeId, volname);

@@ -103,7 +103,7 @@ FlushSubmission::Execute(void)
     {
         int ret = translator->Translate(
             arrayId, WRITE_BUFFER, physicalEntries, startWbLogicalEntry);
-        if (unlikely(ret != static_cast<int>(POS_EVENT_ID::SUCCESS)))
+        if (unlikely(ret != EID(SUCCESS)))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
             POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);

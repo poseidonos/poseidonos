@@ -57,14 +57,14 @@ VolumeRenamer::Do(string oldname, string newname)
     VolumeBase* vol = volumeList.GetVolume(oldname);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-        return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "The requested volume does not exist");
+        return EID(VOL_NOT_FOUND);
     }
 
     if (volumeList.GetID(newname) >= 0)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_DUPLICATED, "Volume name is duplicated");
-        return static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_DUPLICATED), "Volume name is duplicated");
+        return EID(CREATE_VOL_NAME_DUPLICATED);
     }
 
     int ret;
@@ -81,13 +81,13 @@ VolumeRenamer::Do(string oldname, string newname)
     vol->Rename(newname);
 
     ret = _SaveVolumes();
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret != EID(SUCCESS))
     {
         vol->Rename(oldname);
         return ret;
     }
 
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    return EID(SUCCESS);
 }
 
 } // namespace pos

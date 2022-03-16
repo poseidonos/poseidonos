@@ -35,7 +35,7 @@ TEST(VolumeDeleter, Do_nullvol)
     uint64_t maxBw = 100;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NOT_EXIST;
+    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
 
     // When
     VolumeList volumes;
@@ -60,7 +60,7 @@ TEST(VolumeDeleter, Do_mountedVol)
     uint64_t maxBw = 100;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::DEL_MOUNTED_VOL;
+    int expected = (int)POS_EVENT_ID::DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED;
 
     // When
     VolumeList volumes;

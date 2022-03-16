@@ -79,7 +79,7 @@ EventScheduler::EventScheduler(QosManager* qosManagerArg,
     // We fix the name of config as default
     int ret = configManager->GetValue("performance",
         "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         numaDedicatedSchedulingPolicy = enable;
     }

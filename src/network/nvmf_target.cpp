@@ -89,7 +89,7 @@ NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable,
     {
         int ret = configManager->GetValue("performance",
             "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
-        if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS) && enable == true)
+        if (ret == EID(SUCCESS) && enable == true)
         {
             spdkNvmfCaller->SpdkNvmfInitializeNumaAwarePollGroup();
         }

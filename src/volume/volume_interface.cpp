@@ -71,17 +71,17 @@ VolumeInterface::_CheckVolumeSize(uint64_t volumeSize)
 {
     if (volumeSize % SZ_1MB != 0 || volumeSize == 0)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+        POS_TRACE_WARN(EID(CREATE_VOL_SIZE_NOT_ALIGNED),
             "The requested size, {} is not aligned to MB", volumeSize);
-        throw static_cast<int>(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED);
+        throw EID(CREATE_VOL_SIZE_NOT_ALIGNED);
     }
 
     if (SpaceInfo::IsEnough(arrayName, volumeSize) == false)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_SIZE_EXCEEDED,
+        POS_TRACE_WARN(EID(CREATE_VOL_SIZE_EXCEEDED),
             "The requested volume size is larger than the remaining space");
 
-        throw static_cast<int>(POS_EVENT_ID::VOL_SIZE_EXCEEDED);
+        throw EID(CREATE_VOL_SIZE_EXCEEDED);
     }
 }
 
@@ -91,9 +91,9 @@ VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
 {
     if (volume == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
                 "The requested volume does not exist");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+        throw EID(VOL_NOT_FOUND);
     }
 
     volume->SetMaxIOPS(maxIops);
@@ -113,27 +113,27 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
 
     if (maxIops != originalMaxIops)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(EID(SUCCESS),
             "Max iops is set on volume {} ({}->{})", volume->GetName(),
             originalMaxIops, maxIops);
     }
 
     if (maxBw != originalMaxBw)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(EID(SUCCESS),
             "Max bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMaxBw, maxBw);
     }
     if (minIops != originalMinIops)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(EID(SUCCESS),
             "Min iops is set on volume {} ({}->{})", volume->GetName(),
             originalMinIops, minIops);
     }
 
     if (minBw != originalMinBw)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::SUCCESS,
+        POS_TRACE_INFO(EID(SUCCESS),
             "Min bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMinBw, minBw);
     }

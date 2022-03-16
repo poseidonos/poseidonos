@@ -309,7 +309,7 @@ NvmfVolumePos::VolumeUnmounted(struct pos_volume_info* vInfo, uint64_t time)
         bool volumeUnmounted = _WaitVolumeDetached(VOLUME_UNMOUNT_CNT, time);
         if (volumeUnmounted == false)
         {
-            int ret = (int)POS_EVENT_ID::VOL_UNMOUNT_FAIL;
+            int ret = (int)POS_EVENT_ID::UNMOUNT_VOL_UNABLE_TO_DETACH_FROM_NVMF;
             POS_TRACE_ERROR(ret, "Nvmf internal error/timeout occurred during volume(id: {}, array: {}) unmount",
                 volId, arrayName);
             return false;
@@ -389,7 +389,7 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName, uint64_t t
     bool res = _WaitVolumeDetached(volList.size(), time);
     if (res == false)
     {
-        int ret = (int)POS_EVENT_ID::VOL_DETACH_FAIL;
+        int ret = (int)POS_EVENT_ID::UNMOUNT_VOL_UNABLE_TO_DETACH_FROM_NVMF;
         POS_TRACE_ERROR(ret,
             "Detach volumes(array: {}) failed due to internal error or unmount timeout. Only some of them might be unmounted",
             arrayName);

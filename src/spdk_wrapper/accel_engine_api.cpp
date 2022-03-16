@@ -227,7 +227,7 @@ AccelEngineApi::_SetIoat(void)
     bool readVal = true;
     int ret = ConfigManagerSingleton::Instance()->GetValue("ioat", "enable",
         &readVal, CONFIG_TYPE_BOOL);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         enabled = readVal;
     }

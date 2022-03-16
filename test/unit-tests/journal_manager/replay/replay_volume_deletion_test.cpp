@@ -93,7 +93,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVolumeDoesNotExist)
     deletedVolumes.push_back(DeletedVolume{volId, 0, prevContextVersion});
     ON_CALL(logDeleteChecker, GetDeletedVolumes).WillByDefault(Return(deletedVolumes));
 
-    ON_CALL(volumeManager, GetVolumeStatus(volId)).WillByDefault(Return((int)(POS_EVENT_ID::VOL_NOT_EXIST)));
+    ON_CALL(volumeManager, GetVolumeStatus(volId)).WillByDefault(Return((int)(POS_EVENT_ID::VOL_NOT_FOUND)));
 
     // Then
     EXPECT_CALL(volumeManager, Delete(volname)).Times(0);

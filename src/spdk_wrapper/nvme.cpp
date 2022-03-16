@@ -108,7 +108,7 @@ Nvme::_Initialize(void)
     retryCount[static_cast<uint32_t>(RetryType::RETRY_TYPE_BACKEND)] = DEFAULT_RETRY;
     retryCount[static_cast<uint32_t>(RetryType::RETRY_TYPE_FRONTEND)] = DEFAULT_RETRY;
 
-    int eventIdSuccess = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int eventIdSuccess = EID(SUCCESS);
     if (ret != eventIdSuccess || enabled == false)
     {
         return;

@@ -77,7 +77,7 @@ ListVolumeCommand::Execute(json& doc, string rid)
 
     if (volMgr == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "The requested volume does not exist");
     }
     else
     {

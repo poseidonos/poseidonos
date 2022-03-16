@@ -50,17 +50,18 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
     POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != (int)rc)
     {
-        return (int)POS_EVENT_ID::META_OPEN_FAIL;
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED), "array_name: {}", arrayName);
+        return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
     int fd = 0;
     rc = metaFs->ctrl->Open(volFile, fd);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != (int)rc)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open volume meta");
-        return (int)POS_EVENT_ID::META_OPEN_FAIL;
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED), "array_name: {}", arrayName);
+        return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
     char* rBuf = (char*)malloc(fileSize);
@@ -70,11 +71,12 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
     rc = metaFs->io->Read(fd, rBuf);
     metaFs->ctrl->Close(fd);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != (int)rc)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::META_READ_FAIL, "Fail to read volume meta");
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
+            "array_name: {}", arrayName);
         free(rBuf);
-        return (int)POS_EVENT_ID::META_READ_FAIL;
+        return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
     }
 
     std::string contents = rBuf;
@@ -101,8 +103,9 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
         }
         catch (const std::exception& e)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::META_CONTENT_BROKEN, "Volume meta broken {}", e.what());
-            return (int)POS_EVENT_ID::META_CONTENT_BROKEN;
+            POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_BROKEN),
+                "reason: {}, array_name: {}", e.what(), arrayName);
+            return EID(VOL_UNABLE_TO_SAVE_CONTENT_BROKEN);
         }
     }
 
@@ -149,29 +152,32 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
     }
 
     POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != (int)rc)
     {
         rc = metaFs->ctrl->Create(volFile, fileSize);
-        if (POS_EVENT_ID::SUCCESS != rc)
+        if (EID(SUCCESS) != (int)rc)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::META_CREATE_FAIL, "Fail to create meta file");
-            return (int)POS_EVENT_ID::META_CREATE_FAIL;
+            POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED),
+                "array_name: {}", arrayName);
+            return EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED);
         }
     }
 
     int fd = 0;
     rc = metaFs->ctrl->Open(volFile, fd);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != (int)rc)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open meta file");
-        return (int)POS_EVENT_ID::META_OPEN_FAIL;
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED),
+            "array_name: {}", arrayName);
+        return EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED);
     }
 
     uint32_t contentsSize = contents.size();
     if (contentsSize >= fileSize)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::VOL_DATA_SIZE_TOO_BIG, "Volume meta write buffer overflows");
-        return (int)POS_EVENT_ID::VOL_DATA_SIZE_TOO_BIG;
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW),
+            "array_name: {}", arrayName);
+        return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
     char* wBuf = (char*)malloc(fileSize);
@@ -182,11 +188,12 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
 
     metaFs->ctrl->Close(fd);
 
-    if (POS_EVENT_ID::SUCCESS != ioRC)
+    if (EID(SUCCESS) != (int)ioRC)
     {
         free(wBuf);
-        POS_TRACE_ERROR((int)POS_EVENT_ID::META_WRITE_FAIL, "Fail to write volume meta");
-        return (int)POS_EVENT_ID::META_WRITE_FAIL;
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED),
+            "array_name: {}", arrayName);
+        return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
     }
 
     free(wBuf);

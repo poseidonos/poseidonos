@@ -45,30 +45,30 @@ VolumeNamePolicy::CheckVolumeName(string name)
 
     if (len < MIN_LEN)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_TOO_SHORT,
-            "Volume name must be at least {} characters", MIN_LEN);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_TOO_SHORT),
+            "len: {}, min: {}", len, MIN_LEN);
 
-        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_TOO_SHORT);
+        throw EID(CREATE_VOL_NAME_TOO_SHORT);
     }
     else if (len > MAX_LEN)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_TOO_LONG,
-            "Volume name must be less or equal than {} characters", MAX_LEN);
-        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_TOO_LONG);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_TOO_LONG),
+            "len: {}, max: {}", len, MAX_LEN);
+        throw EID(CREATE_VOL_NAME_TOO_LONG);
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
-            "Blank cannot be placed at the beginning or end of a volume name");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_NOT_ALLOWED),
+            "vol_name: {}", name);
+        throw EID(CREATE_VOL_NAME_NOT_ALLOWED);
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
-            "Special characters cannot be used as volume names");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_NOT_ALLOWED),
+            "vol_name: {}, allowed_char: {}", name, ALLOWED_CHAR);
+        throw EID(CREATE_VOL_NAME_NOT_ALLOWED);
     }
 }
 

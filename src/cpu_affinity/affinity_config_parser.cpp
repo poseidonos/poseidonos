@@ -82,7 +82,7 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
     int ret = configManager.GetValue(module, "use_config", &useConfig,
         CONFIG_TYPE_BOOL);
     bool configExist =
-        (ret == static_cast<int>(POS_EVENT_ID::SUCCESS));
+        (ret == EID(SUCCESS));
 
     if (configExist == false || (useConfig == false))
     {
@@ -104,7 +104,7 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
         std::string coreRange;
         int ret = configManager.GetValue(module, key, &coreRange,
             CONFIG_TYPE_STRING);
-        if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+        if (ret != EID(SUCCESS))
         {
             POS_TRACE_WARN(ret, "Core description from config is not valid. Use default description.");
             return;

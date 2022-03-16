@@ -148,7 +148,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 if (minBwFromCli < 0 || ((0 != minBwFromCli) && ((uint64_t)minBwFromCli > MAX_BW_LIMIT)))
                 {
                     errorMsg = "Min Bandwidth value outside allowed range";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                 }
                 newVolPolicy.minBwGuarantee = true;
                 newVolPolicy.minBw = minBwFromCli;
@@ -157,7 +157,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     if (prevVolPolicy.maxBw != 0 && prevVolPolicy.maxBw <= newVolPolicy.minBw)
                     {
                         errorMsg = "Min bw more than max bw";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                     }
                     if (prevVolPolicy.maxIops != 0)
                     {
@@ -165,7 +165,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.minBw >= prevMaxBw)
                         {
                             errorMsg = "Min bw more than corrosponding Max Iops. Io Size considered 4KB";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     newVolPolicy.policyChange = true;
@@ -183,7 +183,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 if ((0 != maxBw) && (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT))
                 {
                     errorMsg = "Max Bandwidth value outside allowed range";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                 }
                 newVolPolicy.maxBw = maxBw;
                 if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
@@ -191,7 +191,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     if ((prevVolPolicy.minBw != 0 && prevVolPolicy.minBw >= newVolPolicy.maxBw) || (newVolPolicy.minBw != 0 && newVolPolicy.minBw >= newVolPolicy.maxBw))
                     {
                         errorMsg = "Max bw less than min bw";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                     }
                     if (prevVolPolicy.minIops != 0)
                     {
@@ -199,7 +199,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.maxBw <= prevMinBw)
                         {
                             errorMsg = "Max bw less than corrosponding Min Iops. IO Size is considered 4KB";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     newVolPolicy.policyChange = true;
@@ -216,7 +216,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 if (minIopsFromCli < 0 || ((0 != minIopsFromCli) && ((uint64_t)minIopsFromCli > MAX_IOPS_LIMIT)))
                 {
                     errorMsg = "Min Iops value outside allowed range";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                 }
                 newVolPolicy.minIopsGuarantee = true;
                 newVolPolicy.minIops = minIopsFromCli;
@@ -225,7 +225,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     if (prevVolPolicy.maxIops != 0 && prevVolPolicy.maxIops <= newVolPolicy.minIops)
                     {
                         errorMsg = "Min iops more than max iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                     }
                     if (prevVolPolicy.maxBw != 0)
                     {
@@ -233,7 +233,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.minIops >= prevMaxIops)
                         {
                             errorMsg = "Min Iops more that corrosponding maxBw. IoSize considered 4KB.";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     if (newVolPolicy.maxBw != 0)
@@ -242,7 +242,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.minIops >= newMaxIops)
                         {
                             errorMsg = "Max Bw more than corrsoponding Min Iops.IO Size is considered 4KB.";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     newVolPolicy.policyChange = true;
@@ -260,7 +260,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 if ((0 != maxIops) && (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT))
                 {
                     errorMsg = "Max IOPS Value outside allowed range";
-                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                    return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                 }
                 newVolPolicy.maxIops = maxIops;
                 if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
@@ -268,7 +268,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     if ((prevVolPolicy.minIops != 0 && prevVolPolicy.minIops >= newVolPolicy.maxIops) || (newVolPolicy.minIops != 0 && newVolPolicy.minIops >= newVolPolicy.maxIops))
                     {
                         errorMsg = "Max iops less than min iops";
-                        return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                        return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                     }
                     if (prevVolPolicy.minBw != 0)
                     {
@@ -276,7 +276,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.maxIops <= prevMinIops)
                         {
                             errorMsg = "Max Iops less than corrsoponding min Bw. Io size considered 4KB.";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     if (newVolPolicy.minBw != 0)
@@ -285,7 +285,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         if (newVolPolicy.maxIops <= newMinIops)
                         {
                             errorMsg = "Max Iops less than corrosponding Min Bw , IO Size is considered 4KB.";
-                            return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                            return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
                     newVolPolicy.policyChange = true;

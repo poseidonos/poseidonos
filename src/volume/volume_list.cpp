@@ -76,22 +76,22 @@ VolumeList::Add(VolumeBase* volume)
 {
     if (volCnt == MAX_VOLUME_COUNT)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_CNT_EXCEEDED, "Excced maximum number of volumes");
-        return static_cast<int>(POS_EVENT_ID::VOL_CNT_EXCEEDED);
+        POS_TRACE_WARN(EID(CREATE_VOL_EXCEED_MAX_NUM_OF_VOLS), "curr: {}, max: {}", volCnt, MAX_VOLUME_COUNT);
+        return EID(CREATE_VOL_EXCEED_MAX_NUM_OF_VOLS);
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     int id = _NewID();
     if (id < 0)
     {
-        return static_cast<int>(POS_EVENT_ID::VOLID_ALLOC_FAIL);
+        return EID(VOL_INTERNAL_ID_ALLOC_FAILED);
     }
     volume->ID = id;
     items[id] = volume;
     volCnt++;
     InitializePendingIOCount(id, VolumeStatus::Unmounted);
-    POS_TRACE_DEBUG(POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    POS_TRACE_DEBUG(EID(SUCCESS), "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+    return EID(SUCCESS);
 }
 
 int
@@ -104,12 +104,12 @@ VolumeList::Add(VolumeBase* volume, int id)
         items[id] = volume;
         volCnt++;
         InitializePendingIOCount(id, VolumeStatus::Unmounted);
-        POS_TRACE_DEBUG(POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-        return static_cast<int>(POS_EVENT_ID::SUCCESS);
+        POS_TRACE_DEBUG(EID(VOL_DEBUG_MSG), "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+        return EID(SUCCESS);
     }
 
-    POS_TRACE_ERROR(POS_EVENT_ID::VOL_SAMEID_EXIST, "The same ID volume exists");
-    return static_cast<int>(POS_EVENT_ID::VOL_SAMEID_EXIST);
+    POS_TRACE_ERROR(EID(VOL_INTERNAL_ID_DUPLICATION), "The same ID volume exists");
+    return EID(VOL_INTERNAL_ID_DUPLICATION);
 }
 
 void
@@ -117,23 +117,23 @@ VolumeList::Remove(int volId)
 {
     if (volId < 0 || volId >= MAX_VOLUME_COUNT)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::INVALID_INDEX, "Invalid index error");
-        throw static_cast<int>(POS_EVENT_ID::INVALID_INDEX);
+        POS_TRACE_ERROR(EID(VOL_INTERNAL_INVALID_ID), "Invalid index error");
+        throw EID(VOL_INTERNAL_INVALID_ID);
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     VolumeBase* target = items[volId];
     if (target == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "The requested volume does not exist");
+        throw EID(VOL_NOT_FOUND);
     }
 
     delete target;
     items[volId] = nullptr;
     volCnt--;
 
-    POS_TRACE_INFO(POS_EVENT_ID::VOL_REMOVED, "Volume removed from the list VOL_CNT {}", volCnt);
+    POS_TRACE_INFO(EID(VOL_DEBUG_MSG), "Volume removed from the list VOL_CNT {}", volCnt);
 }
 
 int
@@ -143,7 +143,7 @@ VolumeList::_NewID()
     {
         if (items[i] == nullptr)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::SUCCESS, "Volume New ID: {}", i);
+            POS_TRACE_DEBUG(EID(SUCCESS), "Volume New ID: {}", i);
             return i;
         }
     }
@@ -234,7 +234,7 @@ VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus
 
     if (unlikely((UINT32_MAX - oldPendingIOCount) < ioSubmissionCount))
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+        POS_TRACE_ERROR(EID(VOL_INTERNAL_UNEXPECTED_PENDING_IO_COUNT),
             "PendingIOCount overflow!!: Current PendingIOCount: {}, "
             "Submission Count: {}",
             oldPendingIOCount,
@@ -252,7 +252,7 @@ VolumeList::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_
         memory_order_relaxed);
     if (unlikely(oldPendingIOCount < ioCompletionCount))
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+        POS_TRACE_ERROR(EID(VOL_INTERNAL_UNEXPECTED_PENDING_IO_COUNT),
             "PendingIOCount underflow!!: Current PendingIOCount: {}, "
             "Completion Count: {}",
             oldPendingIOCount,

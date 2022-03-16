@@ -221,7 +221,7 @@ Nvmf::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf,
         ret = volume->VolumeLoaded(vInfo);
         if (false == ret)
         {
-            int rid = (int)POS_EVENT_ID::VOL_NOT_EXIST;
+            int rid = EID(VOL_NOT_FOUND);
             POS_TRACE_WARN(rid, "Volume {} does not exist. Unable to load, start creating new volume.", vInfo->name);
             ret = volume->VolumeCreated(vInfo);
         }

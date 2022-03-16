@@ -86,13 +86,13 @@ VolumeInfoCommand::Execute(json& doc, string rid)
 
     if (volMgr == nullptr)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
             "Failed to get an IVolumeManager instance."
                 " array name: " + arrayName +
                 " volume name: "+ volumeName);
 
         return jFormat.MakeResponse(
-            "VOLUMEINFO", rid, (int)POS_EVENT_ID::VOL_NOT_EXIST,
+            "VOLUMEINFO", rid, EID(VOL_NOT_FOUND),
                 "Failed to find a volume because of an error."
                 " array name: " + arrayName +
                 " volume name: "+ volumeName,
@@ -104,7 +104,7 @@ VolumeInfoCommand::Execute(json& doc, string rid)
     if (vol == nullptr)
     {
         return jFormat.MakeResponse(
-            "VOLUMEINFO", rid, (int)POS_EVENT_ID::VOL_NOT_EXIST,
+            "VOLUMEINFO", rid, EID(VOL_NOT_FOUND),
                 "No such volume exists in array. array name: " + arrayName,
                 GetPosInfo());
     }

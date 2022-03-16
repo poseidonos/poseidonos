@@ -78,7 +78,9 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
 
     if (res == false)
     {
-        return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+            "vol_name:{}, array_name: {}", name, arrayName);
+        return EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
     }
 
     int ret = _SaveVolumes();
@@ -93,6 +95,6 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
 
     _PrintLogVolumeQos(vol, originalMaxIops, originalMaxBw, miniops, minbw);
 
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    return EID(SUCCESS);
 }
 } // namespace pos

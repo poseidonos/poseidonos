@@ -98,7 +98,7 @@ TEST(VolumeManager, Delete_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
+    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
     int actual = volumeManager->Delete(name);
 
     ASSERT_EQ(actual, expected);
@@ -127,7 +127,7 @@ TEST(VolumeManager, Mount_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
+    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
     int actual = volumeManager->Mount(name, subnqn);
 
     ASSERT_EQ(actual, expected);
@@ -156,7 +156,7 @@ TEST(VolumeManager, Unmount_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
+    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
     int actual = volumeManager->Unmount(name);
 
     ASSERT_EQ(actual, expected);
@@ -187,7 +187,7 @@ TEST(VolumeManager, UpdateQoS_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
+    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
     int actual = volumeManager->UpdateQoS(name, maxIops, maxBw, minIops, minBw);
 
     ASSERT_EQ(actual, expected);
@@ -216,7 +216,7 @@ TEST(VolumeManager, Rename_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::SYSTEM_FAULT;
+    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
     int actual = volumeManager->Rename(name, newName);
 
     ASSERT_EQ(actual, expected);
@@ -245,7 +245,7 @@ TEST(VolumeManager, GetVolumeStatus_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_NOT_EXIST;
+    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
     int actual = volumeManager->GetVolumeStatus(0);
 
     ASSERT_EQ(actual, expected);
@@ -274,7 +274,7 @@ TEST(VolumeManager, VolumeName_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_NOT_EXIST;
+    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
     int actual = volumeManager->VolumeName(0, name);
 
     ASSERT_EQ(actual, expected);

@@ -215,7 +215,7 @@ Poseidonos::_InitDebugInfo(void)
     uint64_t timeout = false;
     ret = configManager.GetValue(module, "callback_timeout_sec", &timeout,
         CONFIG_TYPE_UINT64);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         Callback::SetTimeout(timeout);
     }
@@ -233,7 +233,7 @@ Poseidonos::_InitSignalHandler(void)
     uint64_t timeout = false;
     int ret = configManager.GetValue(module, "user_signal_ignore_timeout_sec", &timeout,
         CONFIG_TYPE_UINT64);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         UserSignalInterface::SetTimeout(timeout);
     }
@@ -274,7 +274,7 @@ Poseidonos::_InitMemoryChecker(void)
     bool enabled = false;
     int ret = configManager.GetValue(module, "stack_trace_for_previous_owner", &enabled,
         CONFIG_TYPE_BOOL);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         MemoryChecker::EnableStackTrace(enabled);
     }
@@ -285,7 +285,7 @@ Poseidonos::_InitMemoryChecker(void)
     }
     ret = configManager.GetValue(module, "memory_checker", &enabled,
         CONFIG_TYPE_BOOL);
-    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    if (ret == EID(SUCCESS))
     {
         MemoryChecker::Enable(enabled);
     }

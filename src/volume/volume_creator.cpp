@@ -59,9 +59,8 @@ VolumeCreator::_CheckRequestValidity(string name, uint64_t size)
 
     if (volumeList.GetID(name) >= 0)
     {
-        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED),
-                "Volume name is duplicated");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NAME_DUPLICATED);
+        POS_TRACE_WARN(EID(CREATE_VOL_NAME_DUPLICATED), "vol_name: {}", name);
+        throw EID(CREATE_VOL_NAME_DUPLICATED);
     }
 
     _CheckVolumeSize(size);
@@ -72,13 +71,6 @@ VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     vol = new Volume(arrayName, arrayID, name, size);
-    if (vol == nullptr)
-    {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL),
-                "Fail to allocate memory");
-        throw static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL);
-    }
-
     _SetVolumeQos(vol, maxIops, maxBw, minIops, minBw);
 
     volumeList.Add(vol);
@@ -95,7 +87,9 @@ VolumeCreator::_NotificationVolumeEvent()
 
     if (res == false)
     {
-        throw static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+        POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+            "array_name: {}", arrayName);
+        throw EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
     }
 }
 
@@ -122,8 +116,7 @@ VolumeCreator::_RollbackCreatedVolume(int exceptionEvent)
     }
     catch(int& exceptionEvent)
     {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::VOL_EVENT_ROLLBACK_FAIL),
-            "Exception Fail POS EVENT ID : {}", exceptionEvent);
+        POS_TRACE_ERROR(EID(VOL_EVENT_ROLLBACK_FAIL), "event_id: {}", exceptionEvent);
     }
 }
 
@@ -141,7 +134,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         _SetUuid();
 
         int ret = _SaveVolumes();
-        if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+        if (ret != EID(SUCCESS))
         {
             throw ret;
         }
@@ -155,7 +148,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         return exceptionEvent;
     }
 
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    return EID(SUCCESS);
 }
 
 } // namespace pos

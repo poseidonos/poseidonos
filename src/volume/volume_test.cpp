@@ -53,7 +53,7 @@ TEST_F(VolumeTest, TryToCreateDuplicatedVolumeTest)
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0);
     int res = volMgr->Create(vol_name, SIZE, 0, 0); // create again for same volume name
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_DUPLICATED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_DUPLICATED));
 
     // cleanup for next test
     volMgr->Delete(vol_name);
@@ -64,7 +64,7 @@ TEST_F(VolumeTest, TryToCreateInvalidVolumeNameTest)
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     std::string shortvol = "1";
     int res = volMgr->Create(shortvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_TOO_SHORT));
 
     std::string longvol = "1111111111111111"
         "1111111111111111"
@@ -83,23 +83,23 @@ TEST_F(VolumeTest, TryToCreateInvalidVolumeNameTest)
         "1111111111111111"
         "1111111111111111";
     res = volMgr->Create(longvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_LONG);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_TOO_LONG));
 
     std::string blankvol = "        ";
     res = volMgr->Create(blankvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string startWithBlank = " 44444";
     res = volMgr->Create(startWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string endWithBlank = "44444 ";
     res = volMgr->Create(endWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string specialChar = "mySpeci@lVolume";
     res = volMgr->Create(specialChar, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 }
 
 TEST_F(VolumeTest, TryToCreateInvalidSizeVolume)
@@ -108,11 +108,11 @@ TEST_F(VolumeTest, TryToCreateInvalidSizeVolume)
     std::string vol_name = "invalidvol";
 
     int res = volMgr->Create(vol_name, NOT_ALIGNED_SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_SIZE_NOT_ALIGNED));
 
     vol_name = "oversizeVol";
     res = volMgr->Create(vol_name, BIG_SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_SIZE_EXCEEDED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_SIZE_EXCEEDED));
 }
 
 TEST_F(VolumeTest, DeleteNormalTest)
@@ -135,7 +135,7 @@ TEST_F(VolumeTest, TryToDeleteInvalidVolumeTest)
     {
         std::string wrong_vol_name = "wrongvol";
         int res = volMgr->Delete(wrong_vol_name);
-        EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NOT_EXIST);
+        EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
     }
 
     // cleanup for next test
@@ -160,7 +160,7 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeQoSTest)
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0);
     int res = volMgr->UpdateQoS("invalidvol", 100, 200, 10, 20);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NOT_EXIST);
+    EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
 
     // cleanup for next test
     volMgr->Delete(vol_name);
@@ -189,15 +189,15 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
 
     std::string invalidCharVol = "fsdla?";
     int res = volMgr->Rename(oldVolName, invalidCharVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string blankVol = "    ";
     res = volMgr->Rename(oldVolName, blankVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string shortVol = "a";
     res = volMgr->Rename(oldVolName, shortVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_TOO_SHORT));
 
     std::string longVol = "1111111111111111"
         "1111111111111111"
@@ -217,15 +217,15 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
         "1111111111111111";
 
     res = volMgr->Rename(oldVolName, longVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_LONG);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_TOO_LONG));
 
     std::string beginSpace = " avolvol";
     res = volMgr->Rename(oldVolName, beginSpace);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     std::string endSpace = "bvolvol ";
     res = volMgr->Rename(oldVolName, endSpace);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == EID(CREATE_VOL_NAME_NOT_ALLOWED));
 
     volMgr->Delete(oldVolName);
 }
@@ -251,14 +251,14 @@ TEST_F(VolumeTest, TryToDeleteMountedVolumeTest)
     volMgr->Create(volName, SIZE, 0, 0);
     volMgr->Mount(volName, NQN);
     int res = volMgr->Delete(volName);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::DEL_MOUNTED_VOL);
+    EXPECT_TRUE(res == EID(DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED));
 }
 
 TEST_F(VolumeTest, TryToMountInvalidVolumeTest)
 {
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     int res = volMgr->Mount("notexist", NQN);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NOT_EXIST);
+    EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
 }
 
 TEST_F(VolumeTest, UnmountVolumeNormalTest)
@@ -281,7 +281,7 @@ TEST_F(VolumeTest, TryToUnmountNotMountedVolumeTest)
     std::string volName = "testvol";
     volMgr->Create(volName, SIZE, 0, 0);
     int res = volMgr->Unmount(volName);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_ALD_UNMOUNTED);
+    EXPECT_TRUE(res == EID(UNMOUNT_VOL_ALREADY_UNMOUNTED));
     // cleanup for next test
     volMgr->Delete(volName);
 }
@@ -290,7 +290,7 @@ TEST_F(VolumeTest, TryToUnmountInvalidVolumeTest)
 {
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     int res = volMgr->Unmount("notexist");
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NOT_EXIST);
+    EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
 }
 
 TEST_F(VolumeTest, VolumeCountBasicTest)

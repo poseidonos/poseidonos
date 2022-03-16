@@ -64,7 +64,7 @@ TEST(VolumeCreator, Do_SameName)
     uint64_t minBw = 0;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NAME_DUPLICATED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_NAME_DUPLICATED;
 
     // When
     VolumeList volumes;
@@ -95,7 +95,7 @@ TEST(VolumeCreator, Do_SetSizeFail)
     uint64_t minBw = 0;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_SIZE_NOT_ALIGNED;
 
     // When
     VolumeList volumes;
@@ -122,7 +122,7 @@ TEST(VolumeCreator, Do_NotEnoughArraySize)
     uint64_t minBw = 0;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_SIZE_EXCEEDED;
+    int expected = (int)POS_EVENT_ID::CREATE_VOL_SIZE_EXCEEDED;
 
     // When
     VolumeList volumes;

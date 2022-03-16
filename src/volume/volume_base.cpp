@@ -51,7 +51,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
-    POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} created", name, totalSize);
+    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", name, totalSize);
 }
 
 VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
@@ -68,7 +68,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     miniops = 0;
     minbw = 0;
     ID = INVALID_VOL_ID;
-    POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} uuid:{} size:{} iops:{} bw:{} created",
+    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} uuid:{} size:{} iops:{} bw:{} created",
         name, uuid, totalSize, maxiops, maxbw);
 }
 
@@ -79,23 +79,23 @@ VolumeBase::~VolumeBase(void)
 int
 VolumeBase::Mount(void)
 {
-    int errorCode = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int errorCode = EID(SUCCESS);
     if (VolumeStatus::Mounted != status)
     {
         if (ID == INVALID_VOL_ID)
         {
-            errorCode = static_cast<int>(POS_EVENT_ID::INVALID_VOL_ID_ERROR);
+            errorCode = EID(VOL_INTERNAL_INVALID_ID);
             POS_TRACE_WARN(errorCode, "invalid vol id. vol name : {}", name);
             return errorCode;
         }
         status = VolumeStatus::Mounted;
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_MOUNTED,
+        POS_TRACE_INFO(EID(MOUNT_VOL_DEBUG_MSG),
             "Volume mounted name: {}", name);
     }
     else
     {
-        errorCode = static_cast<int>(POS_EVENT_ID::VOL_ALD_MOUNTED);
-        POS_TRACE_WARN(errorCode, "The volume already mounted: {}", name);
+        errorCode = EID(MOUNT_VOL_ALREADY_MOUNTED);
+        POS_TRACE_WARN(errorCode, "vol_name: {}", name);
     }
 
     return errorCode;
@@ -104,17 +104,17 @@ VolumeBase::Mount(void)
 int
 VolumeBase::Unmount(void)
 {
-    int errorCode = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int errorCode = EID(SUCCESS);
     if (VolumeStatus::Unmounted != status)
     {
         status = VolumeStatus::Unmounted;
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_UNMOUNTED,
+        POS_TRACE_INFO(EID(UNMOUNT_VOL_DEBUG_MSG),
             "Volume unmounted name: {}", name);
     }
     else
     {
-        errorCode = static_cast<int>(POS_EVENT_ID::VOL_ALD_UNMOUNTED);
-        POS_TRACE_WARN(errorCode, "The volume already unmounted: {}", name);
+        errorCode = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
+        POS_TRACE_WARN(errorCode, "vol_name: {}", name);
     }
 
     return errorCode;
@@ -137,7 +137,7 @@ VolumeBase::SetSubnqn(std::string inputSubNqn)
 {
     if (subNqn.empty() == false && inputSubNqn.empty() == false)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
+        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
             "The volume already has set subsystem {}, replace to {}",
             subNqn, inputSubNqn);
     }
@@ -149,13 +149,13 @@ VolumeBase::SetUuid(std::string inputUuid)
 {
     if (uuid.empty() == false)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
+        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
             "The volume already has set uuid {}", uuid);
     }
 
     if (inputUuid.empty() == false)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
+        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
             "The volume has set uuid {}", inputUuid);
     }
 
@@ -167,7 +167,7 @@ VolumeBase::SetMaxIOPS(uint64_t val)
 {
     if ((val != 0 && val < MIN_IOPS_LIMIT) || val > MAX_IOPS_LIMIT)
     {
-        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
     }
     maxiops = val;
 }
@@ -177,7 +177,7 @@ VolumeBase::SetMaxBW(uint64_t val)
 {
     if ((val != 0 && val < MIN_BW_LIMIT) || val > MAX_BW_LIMIT)
     {
-        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
     }
     maxbw = val;
 }
@@ -187,7 +187,7 @@ VolumeBase::SetMinIOPS(uint64_t val)
 {
     if (val != 0 && val > MAX_IOPS_LIMIT)
     {
-        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
     }
     miniops = val;
 }
@@ -197,7 +197,7 @@ VolumeBase::SetMinBW(uint64_t val)
 {
     if (val != 0 && val > MAX_BW_LIMIT)
     {
-        throw static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
     }
     minbw = val;
 }
@@ -222,14 +222,14 @@ VolumeBase::RemainingSize(void)
     uint64_t usedSize = UsedSize();
     if (usedSize > totalSize)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+        POS_TRACE_ERROR(EID(CREATE_VOL_SIZE_NOT_ALIGNED),
             "[NUSE ERROR] Volume:{}'s UsedSize:{} exceeds TotalSize:{}", ID, usedSize, totalSize);
         assert(false);
         return -1;
     }
     else
     {
-        POS_TRACE_INFO(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+        POS_TRACE_INFO(EID(CREATE_VOL_SIZE_NOT_ALIGNED),
             "[NUSE Volume:{}] UsedSize:{}, TotalSize:{}", ID, usedSize, totalSize);
         return (totalSize - usedSize);
     }

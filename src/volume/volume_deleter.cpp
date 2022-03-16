@@ -60,16 +60,16 @@ VolumeDeleter::_CheckRequestValidity(string name)
     vol = volumeList.GetVolume(name);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST),
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND),
                 "The requested volume does not exist");
-        throw static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
+        throw EID(VOL_NOT_FOUND);
     }
 
     if (vol->GetStatus() == VolumeStatus::Mounted)
     {
-        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::DEL_MOUNTED_VOL),
-                "Unable to delete mounted volume");
-        throw static_cast<int>(POS_EVENT_ID::DEL_MOUNTED_VOL);
+        POS_TRACE_WARN(EID(DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED),
+            "vol_name: {}, array_name: {}", name, arrayName);
+        throw EID(DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED);
     }
 }
 
@@ -88,14 +88,16 @@ VolumeDeleter::Do(string name)
         bool res = eventPublisher->NotifyVolumeDeleted(&volumeEventBase, &volumeArrayInfo);
         if (res == false)
         {
-            throw static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
+            POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+                "vol_name: {}, array_name: {}", name, arrayName);
+            throw EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
         }
 
         vol->SetValid(false); // remove tempo.
         vol->SetSubnqn("");
 
         int ret = _SaveVolumes();
-        if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+        if (ret == EID(SUCCESS))
         {
             volumeList.Remove(volumeEventBase.volId);
         }
@@ -111,7 +113,7 @@ VolumeDeleter::Do(string name)
         return exceptionEvent;
     }
 
-    return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    return EID(SUCCESS);
 }
 
 } // namespace pos
