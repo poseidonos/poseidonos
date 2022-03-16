@@ -114,21 +114,34 @@ MetaFs::~MetaFs(void)
     }
 
     if (nullptr != mgmt)
+    {
         delete mgmt;
+        mgmt = nullptr;
+    }
 
     if (nullptr != io)
+    {
         delete io;
+        io = nullptr;
+    }
 
     if (nullptr != ctrl)
+    {
         delete ctrl;
+        ctrl = nullptr;
+    }
 
     if (nullptr != wbt)
+    {
         delete wbt;
+        wbt = nullptr;
+    }
 
     if (nullptr != metaStorage_)
     {
         metaStorage_->Close();
         delete metaStorage_;
+        metaStorage_ = nullptr;
     }
 }
 
@@ -228,8 +241,18 @@ MetaFs::GetEpochSignature(void)
 StripeId
 MetaFs::GetTheLastValidStripeId(void)
 {
-    if ((nullptr == metaStorage_) || (nullptr == ctrl))
+    if (!metaStorage_)
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "Meta storage is not valid, arrayId: {}", arrayId_);
         return 0;
+    }
+    else if (!ctrl)
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "Meta control api is not valid, arrayId: {}", arrayId_);
+        return 0;
+    }
 
     MetaLpnType theLastLpn = ctrl->GetTheLastValidLpn(MetaVolumeType::SsdVolume);
     LogicalBlkAddr addr = metaStorage_->TranslateAddress(MetaStorageType::SSD, theLastLpn);
