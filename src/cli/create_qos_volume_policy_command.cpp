@@ -314,7 +314,24 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
             }
             if (retVal != SUCCESS)
             {
-                errorMsg = "Qos Volume Policy Updated in QosManager failed";
+                switch (retVal)
+                {
+                    case QosReturnCode::EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT:
+                    {
+                        errorMsg = "the count of min guaranteeed volume exceeds configured max value (default : 5)";
+                        break;
+                    }
+                    case QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE:
+                    {
+                        errorMsg = "Either Min IOPS or Min BW Allowed";
+                        break;
+                    }
+                    default:
+                    {
+                        errorMsg = "Qos Volume Policy Updated in QosManager failed";
+                        break;
+                    }
+                }
                 return retVal;
             }
         }

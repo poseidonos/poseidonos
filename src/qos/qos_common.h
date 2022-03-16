@@ -68,6 +68,7 @@
 #define MIN_GUARANTEED_THROTTLING_RATE (1.1)
 #define GLOBAL_INCREASE_COEFFICIENT (2)
 #define MIN_GUARANTEED_INCREASE_COEFFICIENT (32)
+#define MIN_GUARANTEED_VOLUME_MAX_COUNT (5)
 
 const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
@@ -347,6 +348,7 @@ public:
     static const int ONE_MINIMUM_GUARANTEE_SUPPORTED = 9008;
     static const int REACTOR_NOT_PRESENT = 9009;
     static const int MIN_IOPS_OR_MIN_BW_ONLY_ONE = 9010;
+    static const int EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT = 9011;
 };
 
 } // namespace pos

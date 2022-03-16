@@ -645,8 +645,7 @@ QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t a
     {
         systemMinPolicy = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
     }
-    qosArrayManager[arrayId]->UpdateVolumePolicy(volId, policy);
-    return QosReturnCode::SUCCESS;
+    return qosArrayManager[arrayId]->UpdateVolumePolicy(volId, policy);
 }
 
 /* --------------------------------------------------------------------------*/

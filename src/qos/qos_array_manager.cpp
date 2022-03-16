@@ -118,6 +118,14 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
 {
     bool minBwPolicy = minBwGuarantee;
     bool minPolicyInEffect = volMinPolicyInEffect;
+    if (0 == policy.minBw)
+    {
+        policy.minBwGuarantee = false;
+    }
+    if (0 == policy.minIops)
+    {
+        policy.minIopsGuarantee = false;
+    }
     qos_vol_policy cliPolicy = policy;
 
     bool minPolicyReceived = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
@@ -127,36 +135,15 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     {
         if (true == minPolicyReceived)
         {
-            if (true == minBwPolicy)
+            if (minGuaranteeVolume.size() >= MIN_GUARANTEED_VOLUME_MAX_COUNT)
             {
-                if (true == policy.minIopsGuarantee)
-                {
-                    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-                    auto it = minGuaranteeVolume.begin();
-                    for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
-                    {
-                        if (*it == volId)
-                        {
-                            return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                        }
-                    }
-                }
+                return QosReturnCode::EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT;
             }
-            else
+            if ((minBwPolicy == true && policy.minIopsGuarantee) || (minBwPolicy == false && policy.minBwGuarantee))
             {
-                if (true == policy.minBwGuarantee)
-                {
-                    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-                    auto it = minGuaranteeVolume.begin();
-                    for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
-                    {
-                        if (*it == volId)
-                        {
-                            return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                        }
-                    }
-                }
+                return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
             }
+
             // Check if change in min policy or new volume policy
             std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
             auto it = minGuaranteeVolume.begin();
@@ -167,7 +154,10 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
                     existingPolicyChange = true;
                 }
             }
-            minGuaranteeVolume.push_back(volId);
+            if (!existingPolicyChange)
+            {
+                minGuaranteeVolume.push_back(volId);
+            }
             minPolicyInEffect = true;
         }
         else
