@@ -46,7 +46,6 @@
 
 #include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
-#include "src/metafs/include/meta_storage_info.h"
 #include "src/metafs/include/metafs_return_code.h"
 #include "src/metafs/metafs.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -61,34 +60,32 @@ class MetaFsService
 {
 public:
     MetaFsService(void);
-    explicit MetaFsService(MetaFsConfigManager* configManager);
-    ~MetaFsService(void);
-    void Initialize(const uint32_t totalCount, const cpu_set_t schedSet,
+    MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager* configManager);
+    virtual ~MetaFsService(void);
+    virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
-    void Register(std::string& arrayName, int arrayId, MetaFs* fileSystem);
-    void Deregister(std::string& arrayName);
-    MetaFs* GetMetaFs(std::string& arrayName) const;
-    MetaFs* GetMetaFs(int arrayId) const;
-    MetaFsIoScheduler* GetScheduler(void) const
+    virtual void Register(const std::string& arrayName, const int arrayId, MetaFs* fileSystem);
+    virtual void Deregister(const std::string& arrayName);
+    virtual MetaFs* GetMetaFs(const std::string& arrayName) const;
+    virtual MetaFs* GetMetaFs(int arrayId) const;
+    virtual MetaFsIoScheduler* GetScheduler(void) const
     {
-        return ioScheduler;
+        return ioScheduler_;
     }
-    MetaFsConfigManager* GetConfigManager(void) const
+    virtual MetaFsConfigManager* GetConfigManager(void) const
     {
-        return configManager;
+        return configManager_;
     }
 
 private:
-    void _PrepareThreads(const uint32_t totalCount, const cpu_set_t schedSet,
+    void _CreateScheduler(const uint32_t totalCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp);
-    ScalableMetaIoWorker* _InitiateMioHandler(const int handlerId, const int coreId,
-        const int coreCount, TelemetryPublisher* tp);
 
-    std::unordered_map<std::string, int> arrayNameToId;
-    std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems;
-    MetaFsIoScheduler* ioScheduler;
-    MetaFsConfigManager* configManager;
-    bool needToRemoveConfig;
+    std::unordered_map<std::string, int> arrayNameToId_;
+    std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
+    MetaFsIoScheduler* ioScheduler_;
+    MetaFsConfigManager* configManager_;
+    bool needToRemoveConfig_;
 };
 
 using MetaFsServiceSingleton = Singleton<MetaFsService>;

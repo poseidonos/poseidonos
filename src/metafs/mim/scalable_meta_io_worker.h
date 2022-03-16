@@ -33,7 +33,8 @@
 #pragma once
 
 #include <string>
-#include "mfs_io_handler_base.h"
+
+#include "metafs_io_handler_base.h"
 #include "mio_handler.h"
 #include "mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
@@ -45,21 +46,22 @@ class MetaFsConfigManager;
 class ScalableMetaIoWorker : public MetaFsIoHandlerBase
 {
 public:
+    ScalableMetaIoWorker(void) = delete;
     explicit ScalableMetaIoWorker(const int threadId, const int coreId,
-        const int coreCount, MetaFsConfigManager* configManager,
+        const std::string& threadName, MetaFsConfigManager* configManager,
         TelemetryPublisher* tp = nullptr);
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;
-    virtual bool AddArrayInfo(int arrayId);
-    virtual bool RemoveArrayInfo(int arrayId);
+    virtual bool AddArrayInfo(const int arrayId) override;
+    virtual bool RemoveArrayInfo(const int arrayId) override;
     void Execute(void);
     void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
 private:
-    MioHandler* tophalfHandler = nullptr;
-    MpioHandler* bottomhalfHandler = nullptr;
-    TelemetryPublisher* telemetryPublisher = nullptr;
-    bool needToDeleteTelemetryPublisher = false;
+    MioHandler* topHalf_;
+    MpioHandler* bottomHalf_;
+    TelemetryPublisher* tp_;
+    bool needToDeleteTp_;
 };
 } // namespace pos

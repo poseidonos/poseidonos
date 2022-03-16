@@ -30,152 +30,129 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "metafs_service.h"
+
 #include <string>
 #include <unordered_map>
-#include "src/metafs/include/metafs_service.h"
-#include "src/metafs/mim/scalable_meta_io_worker.h"
-#include "src/metafs/mim/metafs_io_scheduler.h"
+
 #include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/mim/metafs_io_scheduler.h"
 
 namespace pos
 {
 MetaFsService::MetaFsService(void)
-: ioScheduler(nullptr),
-  configManager(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
-  needToRemoveConfig(true)
+: MetaFsService(nullptr, new MetaFsConfigManager(ConfigManagerSingleton::Instance()))
 {
-    fileSystems.fill(nullptr);
+    needToRemoveConfig_ = true;
 }
 
-MetaFsService::MetaFsService(MetaFsConfigManager* configManager)
-: ioScheduler(nullptr),
-  configManager(configManager),
-  needToRemoveConfig(false)
+MetaFsService::MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager* configManager)
+: ioScheduler_(ioScheduler),
+  configManager_(configManager),
+  needToRemoveConfig_(false)
 {
-    fileSystems.fill(nullptr);
+    fileSystems_.fill(nullptr);
 }
 
 MetaFsService::~MetaFsService(void)
 {
-    if (ioScheduler)
+    if (ioScheduler_)
     {
-        // exit mioHandler thread
-        ioScheduler->ClearHandlerThread();
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "MetaScheduler is suspended.");
 
-        // exit scheduler thread
-        ioScheduler->ExitThread();
+        ioScheduler_->ExitThread();
 
-        // delete the scheduler
-        delete ioScheduler;
-        ioScheduler = nullptr;
+        delete ioScheduler_;
+        ioScheduler_ = nullptr;
     }
 
-    if (needToRemoveConfig)
+    if (needToRemoveConfig_)
     {
-        delete configManager;
-        configManager = nullptr;
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "Delete MetaFsConfigManager");
+
+        delete configManager_;
+        configManager_ = nullptr;
     }
 }
 
 void
-MetaFsService::Initialize(const uint32_t totalCount, const cpu_set_t schedSet,
-    const cpu_set_t workSet, TelemetryPublisher* tp)
+MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
+    const cpu_set_t mioSet, TelemetryPublisher* tp)
 {
-    if (!configManager->Init())
+    if (!configManager_->Init())
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
             "The config values are invalid.");
         assert(false);
     }
-    _PrepareThreads(totalCount, schedSet, workSet, tp);
+
+    _CreateScheduler(totalCoreCount, schedSet, mioSet, tp);
 }
 
 void
-MetaFsService::Register(std::string& arrayName, int arrayId, MetaFs* fileSystem)
+MetaFsService::Register(const std::string& arrayName, const int arrayId, MetaFs* fileSystem)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "New metafs instance registered. arrayId={}, arrayName={}",
-            arrayId, arrayName);
+        "New metafs instance registered. arrayId: {}, arrayName: {}",
+        arrayId, arrayName);
 
-    arrayNameToId.insert(std::pair<std::string, int>(arrayName, arrayId));
-    fileSystems[arrayId] = fileSystem;
+    arrayNameToId_.insert(std::pair<std::string, int>(arrayName, arrayId));
+    fileSystems_[arrayId] = fileSystem;
 }
 
 void
-MetaFsService::Deregister(std::string& arrayName)
+MetaFsService::Deregister(const std::string& arrayName)
 {
-    int arrayId = arrayNameToId[arrayName];
-    arrayNameToId.erase(arrayName);
+    const int arrayId = arrayNameToId_[arrayName];
 
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "A metafs instance deregistered. arrayName={}", arrayName);
+        "A metafs instance deregistered. arrayName: {}",
+        arrayName);
 
-    fileSystems[arrayId] = nullptr;
+    arrayNameToId_.erase(arrayName);
+    fileSystems_[arrayId] = nullptr;
 }
 
 MetaFs*
-MetaFsService::GetMetaFs(std::string& arrayName) const
+MetaFsService::GetMetaFs(const std::string& arrayName) const
 {
-    auto iter = arrayNameToId.find(arrayName);
-    if (iter == arrayNameToId.end())
+    auto iter = arrayNameToId_.find(arrayName);
+    if (iter == arrayNameToId_.end())
     {
         return nullptr;
     }
     else
     {
-        return fileSystems[iter->second];
+        return fileSystems_[iter->second];
     }
 }
 
 MetaFs*
-MetaFsService::GetMetaFs(int arrayId) const
+MetaFsService::GetMetaFs(const int arrayId) const
 {
-    return fileSystems[arrayId];
+    return fileSystems_[arrayId];
 }
 
 void
-MetaFsService::_PrepareThreads(const uint32_t totalCount, const cpu_set_t schedSet,
-    const cpu_set_t workSet, TelemetryPublisher* tp)
+MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
+    const cpu_set_t schedSet, const cpu_set_t mioSet, TelemetryPublisher* tp)
 {
-    uint32_t availableMetaIoCoreCnt = CPU_COUNT(&workSet);
-    uint32_t handlerId = 0;
-
-    // meta io scheduler
-    for (uint32_t coreId = 0; coreId < totalCount; ++coreId)
+    const std::string threadName = "MetaScheduler";
+    for (uint32_t coreId = 0; coreId < totalCoreCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            ioScheduler = new MetaFsIoScheduler(0, coreId, totalCount);
-            ioScheduler->StartThread();
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "MetaScheduler is created. count: {}, coreId: {}",
+                CPU_COUNT(&schedSet), coreId);
+
+            ioScheduler_ = new MetaFsIoScheduler(0, coreId, totalCoreCount,
+                threadName, mioSet, configManager_, tp);
+            ioScheduler_->StartThread();
             break;
         }
     }
-
-    // meta io handler
-    for (uint32_t coreId = 0; coreId < totalCount; ++coreId)
-    {
-        if (CPU_ISSET(coreId, &workSet))
-        {
-            _InitiateMioHandler(handlerId++, coreId, totalCount, tp);
-            availableMetaIoCoreCnt--;
-
-            if (availableMetaIoCoreCnt == 0)
-            {
-                break;
-            }
-        }
-    }
-}
-
-ScalableMetaIoWorker*
-MetaFsService::_InitiateMioHandler(const int handlerId, const int coreId,
-    const int coreCount, TelemetryPublisher* tp)
-{
-    ScalableMetaIoWorker* mioHandler =
-        new ScalableMetaIoWorker(handlerId, coreId, coreCount, configManager, tp);
-    mioHandler->StartThread();
-    ioScheduler->RegisterMioHandler(mioHandler);
-
-    return mioHandler;
 }
 } // namespace pos

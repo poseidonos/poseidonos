@@ -31,88 +31,84 @@
  */
 
 #include "scalable_meta_io_worker.h"
+
 #include "src/metafs/include/metafs_service.h"
 
 namespace pos
 {
 ScalableMetaIoWorker::ScalableMetaIoWorker(const int threadId, const int coreId,
-    const int coreCount, MetaFsConfigManager* configManager, TelemetryPublisher* tp)
-: MetaFsIoHandlerBase(threadId, coreId)
+    const std::string& threadName, MetaFsConfigManager* config,
+    TelemetryPublisher* tp)
+: MetaFsIoHandlerBase(threadId, coreId, threadName),
+  topHalf_(nullptr),
+  bottomHalf_(nullptr),
+  tp_(tp),
+  needToDeleteTp_(false)
 {
-    telemetryPublisher = tp;
-    if (nullptr == telemetryPublisher)
+    if (!tp_)
     {
-        telemetryPublisher = new TelemetryPublisher("metafs_io_" + to_string(coreId));
-        needToDeleteTelemetryPublisher = true;
+        tp_ = new TelemetryPublisher("metafs_io_" + to_string(coreId_));
+        TelemetryClientSingleton::Instance()->RegisterPublisher(tp_);
+        needToDeleteTp_ = true;
     }
-    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 
-    tophalfHandler = new MioHandler(threadId, coreId, coreCount, configManager,
-        telemetryPublisher);
-    bottomhalfHandler = new MpioHandler(threadId, coreId, configManager,
-        telemetryPublisher);
+    topHalf_ = new MioHandler(threadId_, coreId_, config, tp_);
+    bottomHalf_ = new MpioHandler(threadId_, coreId_, config, tp_);
 
-    tophalfHandler->BindPartialMpioHandler(bottomhalfHandler);
+    topHalf_->BindPartialMpioHandler(bottomHalf_);
 }
 
 ScalableMetaIoWorker::~ScalableMetaIoWorker(void)
 {
-    if (nullptr != telemetryPublisher)
+    if (needToDeleteTp_)
     {
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(tp_->GetName());
 
-        if (true == needToDeleteTelemetryPublisher)
-        {
-            delete telemetryPublisher;
-            telemetryPublisher = nullptr;
-        }
+        delete tp_;
+        tp_ = nullptr;
     }
 
-    delete tophalfHandler;
-    delete bottomhalfHandler;
+    delete topHalf_;
+    delete bottomHalf_;
 }
 
 void
 ScalableMetaIoWorker::StartThread(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "mio_handler:: threadId={}, coreId={}",
-        threadId, coreId);
+    th_ = new std::thread(AsEntryPointNoParam(&ScalableMetaIoWorker::Execute, this));
 
-    th = new std::thread(AsEntryPointNoParam(&ScalableMetaIoWorker::Execute, this));
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Thread(metafs-mio-handler) joined. thread id={}",
-        std::hash<std::thread::id>{}(th->get_id()));
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Start MioHandler, " + GetLogString() + ", thread id: {}",
+        std::hash<std::thread::id>{}(th_->get_id()));
 }
 
 bool
-ScalableMetaIoWorker::AddArrayInfo(int arrayId)
+ScalableMetaIoWorker::AddArrayInfo(const int arrayId)
 {
-    return tophalfHandler->AddArrayInfo(arrayId);
+    return topHalf_->AddArrayInfo(arrayId);
 }
 
 bool
-ScalableMetaIoWorker::RemoveArrayInfo(int arrayId)
+ScalableMetaIoWorker::RemoveArrayInfo(const int arrayId)
 {
-    return tophalfHandler->RemoveArrayInfo(arrayId);
+    return topHalf_->RemoveArrayInfo(arrayId);
 }
 
 void
 ScalableMetaIoWorker::Execute(void)
 {
-    PrepareThread("MioHandler");
+    PrepareThread();
 
-    while (false == threadExit)
+    while (!threadExit_)
     {
-        tophalfHandler->TophalfMioProcessing();
-        bottomhalfHandler->BottomhalfMioProcessing();
+        topHalf_->TophalfMioProcessing();
+        bottomHalf_->BottomhalfMioProcessing();
     }
 }
 
 void
 ScalableMetaIoWorker::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    tophalfHandler->EnqueueNewReq(reqMsg);
+    topHalf_->EnqueueNewReq(reqMsg);
 }
 } // namespace pos

@@ -30,65 +30,40 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mfs_io_handler_base.h"
-#include "metafs_common.h"
+#pragma once
+
+#include <string>
+#include <thread>
 
 namespace pos
 {
-MetaFsIoHandlerBase::MetaFsIoHandlerBase(int threadId, int coreId)
-: threadId(threadId),
-  coreId(coreId),
-  th(nullptr),
-  threadExit(false),
-  threadName(nullptr)
+class MetaFsIoHandlerBase
 {
-}
+public:
+    MetaFsIoHandlerBase(void) = delete;
+    explicit MetaFsIoHandlerBase(const int threadId, const int coreId,
+        const std::string& threadName);
+    virtual ~MetaFsIoHandlerBase(void);
 
-// LCOV_EXCL_START
-MetaFsIoHandlerBase::~MetaFsIoHandlerBase(void)
-{
-    if (threadName)
-    {
-        delete threadName;
-    }
-    if (th)
-    {
-        delete th;
-    }
-}
-// LCOV_EXCL_STOP
+    virtual void StartThread(void) = 0;
+    virtual void ExitThread(void);
 
-void
-MetaFsIoHandlerBase::ExitThread(void)
-{
-    threadExit = true;
-    th->join();
-}
+    virtual bool AddArrayInfo(const int arrayId) = 0;
+    virtual bool RemoveArrayInfo(const int arrayId) = 0;
 
-void
-MetaFsIoHandlerBase::PrepareThread(const char* name)
-{
-    threadName = new std::string(name);
-    threadName->append(std::to_string(coreId));
-    threadName->append(":");
-    threadName->append(std::to_string(threadId));
+    virtual void PrepareThread(void) const;
 
-    _UpdateThreadName(threadName);
-    _UpdateThreadCPUAffinity(coreId);
-}
+    virtual std::string GetLogString(void) const;
 
-void
-MetaFsIoHandlerBase::_UpdateThreadName(std::string* name)
-{
-    pthread_setname_np(pthread_self(), name->c_str());
-}
+protected:
+    int threadId_;
+    int coreId_;
+    std::thread* th_;
+    bool threadExit_;
+    std::string threadName_;
 
-void
-MetaFsIoHandlerBase::_UpdateThreadCPUAffinity(uint32_t coreId)
-{
-    cpu_set_t cpus;
-    CPU_ZERO(&cpus);
-    CPU_SET(coreId, &cpus);
-    sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
-}
+private:
+    void _UpdateThreadName(void) const;
+    void _UpdateCpuPinning(void) const;
+};
 } // namespace pos

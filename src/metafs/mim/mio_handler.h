@@ -35,11 +35,10 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <unordered_map>
 #include <chrono>
 
 #include "metafs_io_multilevel_q.h"
-#include "mfs_io_handler_base.h"
+#include "metafs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
 #include "src/metafs/lib/metafs_pool.h"
 #include "src/metafs/mim/mio.h"
@@ -53,7 +52,7 @@ class MetaFsConfigManager;
 class MioHandler
 {
 public:
-    MioHandler(const int threadId, const int coreId, const int coreCount,
+    MioHandler(const int threadId, const int coreId,
         MetaFsConfigManager* configManager, TelemetryPublisher* tp = nullptr);
     // for test
     MioHandler(const int threadId, const int coreId,
@@ -70,11 +69,11 @@ public:
     virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     virtual void ExecuteMio(Mio& mio);
 
-    virtual bool AddArrayInfo(int arrayId);
-    virtual bool RemoveArrayInfo(int arrayId);
+    virtual bool AddArrayInfo(const int arrayId);
+    virtual bool RemoveArrayInfo(const int arrayId);
 
     // for test
-    virtual bool AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker);
+    virtual bool AddArrayInfo(const int arrayId, const MetaStorageType type, MetaFsIoRangeOverlapChker* checker);
 
 private:
     void _HandleIoSQ(void);

@@ -30,10 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
+
 #include <string>
 
 #include "src/metafs/include/metafs_service.h"
-#include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
 
 using ::testing::_;
 using ::testing::Matcher;
@@ -51,8 +52,8 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     config = new NiceMock<MockMetaFsConfigManager>(nullptr);
 
     EXPECT_CALL(*config, Init).WillRepeatedly(Return(true));
-    EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32*1024));
-    EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(32*1024));
+    EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32 * 1024));
+    EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(32 * 1024));
     EXPECT_CALL(*config, IsWriteMpioCacheEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(32));
     EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(true));
@@ -123,7 +124,8 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
     cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
-    MetaFsServiceSingleton::Instance(config)->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
+    MetaFsServiceSingleton::Instance(nullptr, config)
+        ->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 
 cpu_set_t

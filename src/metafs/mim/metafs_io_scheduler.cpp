@@ -30,45 +30,53 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "metafs_io_scheduler.h"
-#include "metafs_aiocb_cxt.h"
-#include "meta_volume_manager.h"
-#include "src/include/branch_prediction.h"
+
+#include <string>
+#include <thread>
+
+#include "src/metafs/include/metafs_aiocb_cxt.h"
+#include "src/metafs/mim/scalable_meta_io_worker.h"
+#include "src/metafs/mvm/meta_volume_manager.h"
 
 namespace pos
 {
-MetaFsIoScheduler::MetaFsIoScheduler(int threadId, int coreId, int coreCount)
-: MetaFsIoHandlerBase(threadId, coreId),
-  totalMioHandlerCnt(0)
+MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
+    const int totalCoreCount, const std::string& threadName,
+    const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
+    TelemetryPublisher* tp)
+: MetaFsIoHandlerBase(threadId, coreId, threadName),
+  TOTAL_CORE_COUNT(totalCoreCount),
+  MIO_CORE_COUNT(CPU_COUNT(&mioCoreSet)),
+  MIO_CORE_SET(mioCoreSet),
+  config_(config),
+  tp_(tp),
+  cpuStallCnt_(0)
 {
 }
 
 MetaFsIoScheduler::~MetaFsIoScheduler(void)
 {
-    threadExit = true;
-
-    ClearHandlerThread(); // exit mioHandler threads
+    threadExit_ = true;
 }
 
 void
-MetaFsIoScheduler::ClearHandlerThread(void)
+MetaFsIoScheduler::ExitThread(void)
 {
-    for (auto metaIoWorker : metaIoWorkerList)
+    for (auto metaIoWorker : metaIoWorkerList_)
     {
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "Exit MioHandler, " + metaIoWorker->GetLogString());
+
         metaIoWorker->ExitThread();
         delete metaIoWorker;
     }
-    metaIoWorkerList.clear();
+    metaIoWorkerList_.clear();
 
-    totalMioHandlerCnt = 0;
-}
+    MetaFsIoHandlerBase::ExitThread();
 
-void
-MetaFsIoScheduler::RegisterMioHandler(ScalableMetaIoWorker* metaIoWorker)
-{
-    metaIoWorkerList.push_back(metaIoWorker);
-    totalMioHandlerCnt++;
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Exit MetaIoScheduler, " + GetLogString());
 }
 
 void
@@ -129,7 +137,7 @@ MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
         byteOffset += cloneReqMsg->byteSize;
         cloneReqMsg->baseMetaLpn = idx;
 
-        metaIoWorkerList[idx % totalMioHandlerCnt]->EnqueueNewReq(cloneReqMsg);
+        metaIoWorkerList_[idx % MIO_CORE_COUNT]->EnqueueNewReq(cloneReqMsg);
     }
 
     // delete msg instance, this instance was only for meta scheduler
@@ -143,13 +151,13 @@ MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 }
 
 bool
-MetaFsIoScheduler::AddArrayInfo(int arrayId)
+MetaFsIoScheduler::AddArrayInfo(const int arrayId)
 {
     bool result = true;
 
-    for (auto metaIoWorker : metaIoWorkerList)
+    for (auto metaIoWorker : metaIoWorkerList_)
     {
-        if (false == metaIoWorker->AddArrayInfo(arrayId))
+        if (!metaIoWorker->AddArrayInfo(arrayId))
         {
             result = false;
             break;
@@ -160,13 +168,13 @@ MetaFsIoScheduler::AddArrayInfo(int arrayId)
 }
 
 bool
-MetaFsIoScheduler::RemoveArrayInfo(int arrayId)
+MetaFsIoScheduler::RemoveArrayInfo(const int arrayId)
 {
     bool result = true;
 
-    for (auto metaIoWorker : metaIoWorkerList)
+    for (auto metaIoWorker : metaIoWorkerList_)
     {
-        if (false == metaIoWorker->RemoveArrayInfo(arrayId))
+        if (!metaIoWorker->RemoveArrayInfo(arrayId))
         {
             result = false;
             break;
@@ -179,30 +187,69 @@ MetaFsIoScheduler::RemoveArrayInfo(int arrayId)
 void
 MetaFsIoScheduler::StartThread(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "mio_scheduler:: threadId={}, coreId={}",
-        threadId, coreId);
+    th_ = new std::thread(AsEntryPointNoParam(&MetaFsIoScheduler::Execute, this));
 
-    th = new std::thread(AsEntryPointNoParam(&MetaFsIoScheduler::Execute, this));
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Start MetaIoScheduler, " + GetLogString());
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Thread(metafs-mio-scheduler) joined. thread id={}",
-        std::hash<std::thread::id>{}(th->get_id()));
+    _CreateMioThread();
+}
+
+void
+MetaFsIoScheduler::_CreateMioThread(void)
+{
+    const std::string fileName = "MioHandler";
+    uint32_t handlerId = 0;
+    int availableMioCoreCnt = MIO_CORE_COUNT;
+    for (uint32_t coreId = 0; coreId < TOTAL_CORE_COUNT; ++coreId)
+    {
+        if (CPU_ISSET(coreId, &MIO_CORE_SET))
+        {
+            ScalableMetaIoWorker* mioHandler =
+                new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, tp_);
+            mioHandler->StartThread();
+            metaIoWorkerList_.emplace_back(mioHandler);
+            availableMioCoreCnt--;
+
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "Create MioHandler, " + mioHandler->GetLogString());
+
+            if (availableMioCoreCnt == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    if (availableMioCoreCnt)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The Count of created MioHandler: {}, expected count: {}",
+            MIO_CORE_COUNT - availableMioCoreCnt, MIO_CORE_COUNT);
+    }
 }
 
 void
 MetaFsIoScheduler::Execute(void)
 {
-    PrepareThread("MioScheduler");
+    PrepareThread();
 
-    while (false == threadExit)
+    while (!threadExit_)
     {
         MetaFsIoRequest* reqMsg = _FetchPendingNewReq();
 
-        if (nullptr != reqMsg)
+        if (!reqMsg)
         {
-            IssueRequest(reqMsg);
+            if (cpuStallCnt_++ > MAX_CPU_STALL_COUNT)
+            {
+                usleep(1);
+                cpuStallCnt_ = 0;
+            }
+            continue;
         }
+        cpuStallCnt_ = 0;
+
+        IssueRequest(reqMsg);
     }
 }
 

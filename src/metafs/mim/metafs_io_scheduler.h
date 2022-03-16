@@ -32,36 +32,47 @@
 
 #pragma once
 
-#include <thread>
-#include <vector>
+#include <sched.h>
+
 #include <string>
-#include "metafs_io_multilevel_q.h"
-#include "scalable_meta_io_worker.h"
+#include <vector>
+
+#include "src/metafs/mim/metafs_io_multilevel_q.h"
+#include "src/metafs/mim/scalable_meta_io_worker.h"
 
 namespace pos
 {
 class MetaFsIoScheduler : public MetaFsIoHandlerBase
 {
 public:
-    explicit MetaFsIoScheduler(int threadId, int coreId, int coreCount);
+    explicit MetaFsIoScheduler(const int threadId, const int coreId,
+        const int totalCoreCount, const std::string& threadName,
+        const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
+        TelemetryPublisher* tp);
     virtual ~MetaFsIoScheduler(void);
-    void ClearHandlerThread(void);
 
-    void RegisterMioHandler(ScalableMetaIoWorker* mioHandler);
     void IssueRequest(MetaFsIoRequest* reqMsg);
     virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
-    virtual bool AddArrayInfo(int arrayId);
-    virtual bool RemoveArrayInfo(int arrayId);
+    virtual bool AddArrayInfo(const int arrayId) override;
+    virtual bool RemoveArrayInfo(const int arrayId) override;
 
     virtual void StartThread(void) override;
+    virtual void ExitThread(void) override;
     void Execute(void);
 
 private:
     MetaFsIoRequest* _FetchPendingNewReq(void);
+    void _CreateMioThread(void);
 
-    std::vector<ScalableMetaIoWorker*> metaIoWorkerList;
-    uint32_t totalMioHandlerCnt;
+    std::vector<ScalableMetaIoWorker*> metaIoWorkerList_;
+    const size_t TOTAL_CORE_COUNT;
+    const size_t MIO_CORE_COUNT;
+    const cpu_set_t MIO_CORE_SET;
+    MetaFsConfigManager* config_;
+    TelemetryPublisher* tp_;
+    size_t cpuStallCnt_;
+    const size_t MAX_CPU_STALL_COUNT = 1000;
 
     MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ;
 };

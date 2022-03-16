@@ -56,7 +56,7 @@
 
 namespace pos
 {
-MioHandler::MioHandler(const int threadId, const int coreId, const int coreCount,
+MioHandler::MioHandler(const int threadId, const int coreId,
     MetaFsConfigManager* configManager, TelemetryPublisher* tp)
 : ioSQ(nullptr),
   ioCQ(nullptr),
@@ -114,25 +114,41 @@ MioHandler::MioHandler(const int threadId, const int coreId,
 
 MioHandler::~MioHandler(void)
 {
-    delete mpioAllocator;
-    delete mioPool;
+    if (mpioAllocator)
+    {
+        delete mpioAllocator;
+        mpioAllocator = nullptr;
+    }
+
+    if (mioPool)
+    {
+        delete mioPool;
+        mioPool = nullptr;
+    }
 
     for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
     {
         for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
         {
-            if (nullptr != ioRangeOverlapChker[index][storage])
+            if (ioRangeOverlapChker[index][storage])
             {
                 delete ioRangeOverlapChker[index][storage];
+                ioRangeOverlapChker[index][storage] = nullptr;
             }
         }
     }
 
-    if (nullptr != ioCQ)
+    if (ioCQ)
+    {
         delete ioCQ;
+        ioCQ = nullptr;
+    }
 
-    if (nullptr != ioSQ)
+    if (ioSQ)
+    {
         delete ioSQ;
+        ioSQ = nullptr;
+    }
 }
 
 void
@@ -167,7 +183,7 @@ MioHandler::_HandleIoSQ(void)
     }
 
     MetaFsIoRequest* reqMsg = ioSQ->Dequeue();
-    if (nullptr == reqMsg)
+    if (!reqMsg)
     {
         if (cpuStallCnt++ > 1000)
         {
@@ -186,7 +202,7 @@ MioHandler::_HandleIoSQ(void)
     }
 
     Mio* mio = DispatchMio(*reqMsg);
-    if (nullptr == mio)
+    if (!mio)
     {
         EnqueueNewReq(reqMsg);
         return;
@@ -246,7 +262,7 @@ MioHandler::_HandleIoCQ(void)
         _FreeLockContext(mio);
         _DiscoverIORangeOverlap(); // find other pending I/O
 
-        if (true == mio->IsSyncIO())
+        if (mio->IsSyncIO())
         {
             mio->NotifyCompletionToClient();
         }
@@ -271,7 +287,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
             else
             {
                 Mio* mio = DispatchMio(*pendingIoReq);
-                if (nullptr == mio)
+                if (!mio)
                     return;
 
                 pendingIoRetryQ.erase(it);
@@ -295,7 +311,7 @@ bool
 MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
 {
     Mio* mio = DispatchMio(*reqMsg);
-    if (nullptr == mio)
+    if (!mio)
         return false;
 
     _RegisterRangeLockInfo(reqMsg);
@@ -382,7 +398,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 {
     Mio* mio = mioPool->TryAlloc();
 
-    if (nullptr == mio)
+    if (!mio)
         return nullptr;
 
     MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
@@ -390,7 +406,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
     mio->StoreTimestamp(MioTimestampStage::Allocate);
     mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayId)->GetMss());
 
-    if (false == mio->IsSyncIO())
+    if (!mio->IsSyncIO())
     {
         mio->SetLocalAioCbCxt(mioCompletionCallback);
     }
@@ -436,7 +452,7 @@ MioHandler::_IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg)
     int storage = (int)reqMsg->targetMediaType;
     int arrayId = reqMsg->arrayId;
 
-    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+    if (ioRangeOverlapChker[arrayId][storage])
         return ioRangeOverlapChker[arrayId][storage]->IsRangeOverlapConflicted(reqMsg);
 
     return false;
@@ -448,7 +464,7 @@ MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
     int storage = (int)reqMsg->targetMediaType;
     int arrayId = reqMsg->arrayId;
 
-    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+    if (ioRangeOverlapChker[arrayId][storage])
         ioRangeOverlapChker[arrayId][storage]->PushReqToRangeLockMap(reqMsg);
 }
 
@@ -458,7 +474,7 @@ MioHandler::_FreeLockContext(Mio* mio)
     int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
     int arrayId = mio->GetArrayId();
 
-    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+    if (ioRangeOverlapChker[arrayId][storage])
         ioRangeOverlapChker[arrayId][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
 }
 
@@ -469,7 +485,7 @@ MioHandler::ExecuteMio(Mio& mio)
 }
 
 bool
-MioHandler::AddArrayInfo(int arrayId)
+MioHandler::AddArrayInfo(const int arrayId)
 {
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
     bool result = true;
@@ -493,7 +509,7 @@ MioHandler::AddArrayInfo(int arrayId)
 
 // for test
 bool
-MioHandler::AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker)
+MioHandler::AddArrayInfo(const int arrayId, const MetaStorageType type, MetaFsIoRangeOverlapChker* checker)
 {
     ioRangeOverlapChker[arrayId][(int)type] = checker;
 
@@ -501,13 +517,13 @@ MioHandler::AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlap
 }
 
 bool
-MioHandler::RemoveArrayInfo(int arrayId)
+MioHandler::RemoveArrayInfo(const int arrayId)
 {
     bool result = true;
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
-        if (nullptr == ioRangeOverlapChker[arrayId][storage])
+        if (!ioRangeOverlapChker[arrayId][storage])
         {
             result = false;
             continue;
@@ -528,7 +544,7 @@ MioHandler::_HandleMioCompletion(void* data)
     assert(mio->IsSyncIO() == false);
 
     std::vector<MetaFsIoRequest*>* reqList = mio->GetMergedRequestList();
-    if (nullptr != reqList)
+    if (reqList)
     {
         for (auto it : *reqList)
         {

@@ -35,7 +35,6 @@
 #include <chrono>
 #include <string>
 
-#include "mfs_io_handler_base.h"
 #include "mpio_allocator.h"
 #include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"

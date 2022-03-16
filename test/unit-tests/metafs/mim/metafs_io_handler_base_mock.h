@@ -33,21 +33,19 @@
 #include <gmock/gmock.h>
 
 #include <list>
+#include <string>
 #include <vector>
 
-#include "src/metafs/mim/metafs_io_scheduler.h"
+#include "src/metafs/mim/metafs_io_handler_base.h"
 
 namespace pos
 {
-class MockMetaFsIoScheduler : public MetaFsIoScheduler
+class MockMetaFsIoHandlerBase : public MetaFsIoHandlerBase
 {
 public:
-    using MetaFsIoScheduler::MetaFsIoScheduler;
+    using MetaFsIoHandlerBase::MetaFsIoHandlerBase;
     MOCK_METHOD(void, StartThread, (), (override));
     MOCK_METHOD(void, ExitThread, (), (override));
-    MOCK_METHOD(void, EnqueueNewReq, (MetaFsIoRequest* reqMsg), (override));
-    MOCK_METHOD(bool, AddArrayInfo, (const int arrayId), (override));
-    MOCK_METHOD(bool, RemoveArrayInfo, (const int arrayId), (override));
 };
 
 } // namespace pos

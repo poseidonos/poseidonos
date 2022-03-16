@@ -30,37 +30,75 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "metafs_io_handler_base.h"
 
-#include <condition_variable>
 #include <string>
-#include <thread>
+
+#include "src/metafs/common/metafs_common.h"
 
 namespace pos
 {
-class MetaFsIoHandlerBase
+MetaFsIoHandlerBase::MetaFsIoHandlerBase(const int threadId, const int coreId,
+    const std::string& threadName)
+: threadId_(threadId),
+  coreId_(coreId),
+  th_(nullptr),
+  threadExit_(false),
+  threadName_(threadName)
 {
-public:
-    explicit MetaFsIoHandlerBase(int threadId, int coreId);
-    virtual ~MetaFsIoHandlerBase(void);
+    threadName_.append(":");
+    threadName_.append(std::to_string(coreId_));
+    threadName_.append(":");
+    threadName_.append(std::to_string(threadId_));
+}
 
-    virtual void StartThread(void) = 0;
-    virtual void ExitThread(void);
+// LCOV_EXCL_START
+MetaFsIoHandlerBase::~MetaFsIoHandlerBase(void)
+{
+    if (th_)
+    {
+        delete th_;
+        th_ = nullptr;
+    }
+}
+// LCOV_EXCL_STOP
 
-    virtual bool AddArrayInfo(int arrayId) = 0;
-    virtual bool RemoveArrayInfo(int arrayId) = 0;
+void
+MetaFsIoHandlerBase::ExitThread(void)
+{
+    threadExit_ = true;
+    th_->join();
+}
 
-    void PrepareThread(const char* name);
+void
+MetaFsIoHandlerBase::PrepareThread(void) const
+{
+    _UpdateThreadName();
+    _UpdateCpuPinning();
+}
 
-protected:
-    int threadId;
-    int coreId;
-    std::thread* th;
-    bool threadExit;
-    std::string* threadName;
+void
+MetaFsIoHandlerBase::_UpdateThreadName(void) const
+{
+    pthread_setname_np(pthread_self(), threadName_.c_str());
+}
 
-private:
-    void _UpdateThreadName(std::string* name);
-    void _UpdateThreadCPUAffinity(uint32_t coreId);
-};
+void
+MetaFsIoHandlerBase::_UpdateCpuPinning(void) const
+{
+    cpu_set_t cpus;
+    CPU_ZERO(&cpus);
+    CPU_SET(coreId_, &cpus);
+    sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
+}
+
+std::string
+MetaFsIoHandlerBase::GetLogString(void) const
+{
+    std::string log("threadName: ");
+    log.append(threadName_);
+    log.append(", threadId: " + std::to_string(threadId_));
+    log.append(", coreId: " + std::to_string(coreId_));
+    return log;
+}
 } // namespace pos

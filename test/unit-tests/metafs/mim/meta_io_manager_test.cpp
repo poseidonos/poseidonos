@@ -31,15 +31,19 @@
  */
 
 #include "src/metafs/mim/meta_io_manager.h"
+
+#include <gtest/gtest.h>
+#include <sched.h>
+
+#include <string>
+
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_scheduler_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
-#include <gtest/gtest.h>
-#include <string>
 
-using ::testing::Return;
-using ::testing::NiceMock;
 using ::testing::AtLeast;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
@@ -69,10 +73,13 @@ TEST(MetaIoManager, CheckSanity)
     delete req;
 }
 
-TEST(MetaIoManager, CheckProcess_AsyncRequest)
+TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenSyncIoIsEnabledAndIoHasBeenCompletedWithoutError)
 {
     const int arrayId = 0;
-    MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
+    cpu_set_t cpuSet;
+    const std::string threadName = "testThread";
+    NiceMock<MockMetaFsIoScheduler>* scheduler =
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -97,10 +104,13 @@ TEST(MetaIoManager, CheckProcess_AsyncRequest)
     delete scheduler;
 }
 
-TEST(MetaIoManager, CheckProcess_SyncRequest)
+TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenReqTypeIsReadAndIoModeIsSync)
 {
     const int arrayId = 0;
-    MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
+    cpu_set_t cpuSet;
+    const std::string threadName = "testThread";
+    NiceMock<MockMetaFsIoScheduler>* scheduler =
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -128,7 +138,10 @@ TEST(MetaIoManager, CheckProcess_SyncRequest)
 TEST(MetaIoManager, CheckArray)
 {
     const int arrayId = 0;
-    MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
+    cpu_set_t cpuSet;
+    const std::string threadName = "testThread";
+    NiceMock<MockMetaFsIoScheduler>* scheduler =
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(true));
 
