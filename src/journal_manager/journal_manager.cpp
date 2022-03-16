@@ -140,7 +140,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       new LogWriteHandler(),
       new JournalVolumeEventHandler(),
       new JournalWriter(),
-      new JournalLogBuffer(info->GetIndex()),
+      new JournalLogBuffer(),
       new BufferOffsetAllocator(),
       new LogGroupReleaser(),
       new CheckpointManager(),
@@ -233,6 +233,10 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
 {
     int result = 0;
 
+    // TODO (meta) : Move init sequence to proper location
+    config->Init(arrayInfo->IsWriteThroughEnabled());
+    logBuffer->Init(config, logFactory, arrayInfo->GetIndex());
+
     bool logBufferExist = logBuffer->DoesLogFileExist();
     if (logBufferExist == true)
     {
@@ -243,13 +247,13 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
         {
             return result;
         }
-        config->Init(loadedLogBufferSize, metaFsCtrl);
+        config->SetLogBufferSize(loadedLogBufferSize, metaFsCtrl);
 
         journalingStatus.Set(WAITING_TO_BE_REPLAYED);
     }
     else
     {
-        result = config->Init(0, metaFsCtrl);
+        result = config->SetLogBufferSize(0, metaFsCtrl);
         if (result == 0)
         {
             result = logBuffer->Create(config->GetLogBufferSize());
@@ -385,7 +389,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 {
     telemetryClient = tc;
     telemetryClient->RegisterPublisher(telemetryPublisher);
-    logBuffer->Init(config, logFactory);
+    logBuffer->InitDataBuffer();
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);

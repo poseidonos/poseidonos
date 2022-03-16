@@ -176,6 +176,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
 
     // Then: All sub-modules should be initiailized
     EXPECT_CALL(*config, Init);
+    EXPECT_CALL(*logBuffer, Init);
     EXPECT_CALL(*bufferAllocator, Init);
     EXPECT_CALL(*dirtyMapManager, Init);
     EXPECT_CALL(*logWriteContextFactory, Init);
@@ -184,7 +185,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
     EXPECT_CALL(*volumeEventHandler, Init);
     EXPECT_CALL(*replayHandler, Init);
     EXPECT_CALL(*statusProvider, Init);
-    EXPECT_CALL(*logBuffer, Init);
+    EXPECT_CALL(*logBuffer, InitDataBuffer);
 
     // Then: Log buffer should be created
     EXPECT_CALL(*logBuffer, Create);
@@ -215,7 +216,8 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
     uint64_t expectedLogBufferSize = 16 * 1024;
     uint64_t loadedLogBufferSize = 0;
     EXPECT_CALL(*logBuffer, Open(_)).WillOnce(DoAll(SetArgReferee<0>(expectedLogBufferSize), Return(0)));
-    EXPECT_CALL(*config, Init(expectedLogBufferSize, _));
+    EXPECT_CALL(*config, Init);
+    EXPECT_CALL(*config, SetLogBufferSize(expectedLogBufferSize, _));
 
     // Then: All sub-modules should be initiailized
     EXPECT_CALL(*bufferAllocator, Init);

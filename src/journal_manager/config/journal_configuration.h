@@ -36,6 +36,7 @@
 #include <string>
 
 #include "src/journal_manager/config/log_buffer_layout.h"
+#include "src/metafs/include/meta_volume_type.h"
 
 namespace pos
 {
@@ -49,7 +50,8 @@ public:
     explicit JournalConfiguration(ConfigManager* configManager);
     virtual ~JournalConfiguration(void);
 
-    virtual int Init(uint64_t logBufferSize, MetaFsFileControlApi* metaFsCtrl);
+    virtual void Init(bool isWriteThroughEnabled);
+    virtual int SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl);
 
     // Can be called before initialized
     virtual bool IsEnabled(void);
@@ -59,6 +61,7 @@ public:
     virtual uint64_t GetLogBufferSize(void);
     virtual uint64_t GetLogGroupSize(void);
     virtual uint64_t GetMetaPageSize(void);
+    virtual MetaVolumeType GetMetaVolumeToUse(void);
 
     virtual LogGroupLayout GetLogBufferLayout(int groupId);
 
@@ -78,6 +81,7 @@ protected:
     uint64_t logBufferSizeInConfig;
     uint64_t metaPageSize;
     uint64_t maxPartitionSize;
+    MetaVolumeType metaVolumeToUse;
 
 private:
     void _ReadConfiguration(void);

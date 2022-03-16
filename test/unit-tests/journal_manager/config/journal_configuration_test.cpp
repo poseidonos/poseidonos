@@ -152,8 +152,20 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
     uint64_t expected = 0;
     EXPECT_EQ(config.GetLogBufferSizeInConfig(), expected);
 }
+TEST(JournalConfiguration, Init_testIfMetaVolumeToUseIsUpdatedProperly)
+{
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
+    JournalConfiguration config(configManager);
 
-TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZero)
+    config.Init(true);
+    EXPECT_EQ(config.GetMetaVolumeToUse(), MetaVolumeType::JournalVolume);
+
+    config.Init(false);
+    EXPECT_EQ(config.GetMetaVolumeToUse(), MetaVolumeType::NvRamVolume);
+    delete configManager;
+}
+
+TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZero)
 {
     // Given: Loaded log buffer is is not zero such like dirty bringup
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -168,7 +180,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
 
     // When
     uint64_t loadedLogBufferSize = 16 * 1024;
-    config.Init(loadedLogBufferSize, &metaFsCtrl);
+    config.SetLogBufferSize(loadedLogBufferSize, &metaFsCtrl);
 
     // Then
     int numLogGroups = config.GetNumLogGroups();
@@ -179,7 +191,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
     delete configManager;
 }
 
-TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
+TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
 {
     // Given: Loaded log buffer is is zero such like clean bringup
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -194,7 +206,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
     ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
-    config.Init(0, &metaFsCtrl);
+    config.SetLogBufferSize(0, &metaFsCtrl);
 
     // Then
     uint64_t expected = AlignDownWithMetaPage(logBufferSizeInMB * SIZE_MB, &config);
@@ -205,7 +217,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
     delete configManager;
 }
 
-TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsDefaultValue)
+TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLogBufferSizeIsDefaultValue)
 {
     // Given: Log buffer size is zero
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -220,7 +232,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsDefaultValu
     ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
-    config.Init(0, &metaFsCtrl);
+    config.SetLogBufferSize(0, &metaFsCtrl);
 
     // Then: Will Log buffer size be set to max partion size
     uint64_t expected = AlignDownWithMetaPage(maxPartitionSize, &config);
@@ -231,7 +243,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsDefaultValu
     delete configManager;
 }
 
-TEST(JournalConfiguration, Init_testIfLogBufferSettedSuccessfully)
+TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSettedSuccessfully)
 {
     // Given
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -245,7 +257,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSettedSuccessfully)
     ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
-    config.Init(0, &metaFsCtrl);
+    config.SetLogBufferSize(0, &metaFsCtrl);
 
     // Then: Will Log buffer size be set aligned to meta page size
     uint64_t expected = AlignDownWithMetaPage(logBufferSizeInMB * SIZE_MB, &config);
@@ -256,7 +268,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSettedSuccessfully)
     delete configManager;
 }
 
-TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsBiggerThanPartitionSize)
+TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLogBufferSizeIsBiggerThanPartitionSize)
 {
     // Given: Log buffer size is bigger than max partition size
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -271,7 +283,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsBiggerThanP
     ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
-    config.Init(0, &metaFsCtrl);
+    config.SetLogBufferSize(0, &metaFsCtrl);
 
     // Then: Will Log buffer size be set to max partion size
     uint64_t expected = AlignDownWithMetaPage(maxPartitionSize, &config);
@@ -282,7 +294,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsBiggerThanP
     delete configManager;
 }
 
-TEST(JournalConfiguration, Init_testIfNVRAMSpaceIsNotEnough)
+TEST(JournalConfiguration, SetLogBufferSize_testIfNVRAMSpaceIsNotEnough)
 {
     // Given: Max partition size is smaller than meta page size
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
@@ -297,7 +309,7 @@ TEST(JournalConfiguration, Init_testIfNVRAMSpaceIsNotEnough)
 
     // When, Then: Will journal configuration return the error code
     int errorReturnCode = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION) * -1;
-    EXPECT_EQ(config.Init(0, &metaFsCtrl), errorReturnCode);
+    EXPECT_EQ(config.SetLogBufferSize(0, &metaFsCtrl), errorReturnCode);
 
     delete configManager;
 }

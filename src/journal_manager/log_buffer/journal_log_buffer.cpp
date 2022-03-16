@@ -54,12 +54,6 @@ JournalLogBuffer::JournalLogBuffer(void)
 {
 }
 
-JournalLogBuffer::JournalLogBuffer(int arrayId)
-: JournalLogBuffer()
-{
-    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaVolumeType::NvRamVolume);
-}
-
 JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)
 : JournalLogBuffer()
 {
@@ -71,22 +65,39 @@ JournalLogBuffer::~JournalLogBuffer(void)
     if (initializedDataBuffer != nullptr)
     {
         delete[] initializedDataBuffer;
+        initializedDataBuffer = nullptr;
     }
-    delete logFile;
+
+    if (logFile != nullptr)
+    {
+        delete logFile;
+        logFile = nullptr;
+    }
 }
 
 int
-JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory)
+JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId)
 {
     config = journalConfiguration;
     logFactory = logWriteContextFactory;
 
+    if (logFile == nullptr)
+    {
+        logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, config->GetMetaVolumeToUse());
+        POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
+    }
+    return 0;
+}
+
+void
+JournalLogBuffer::InitDataBuffer(void)
+{
     assert(initializedDataBuffer == nullptr);
 
     uint64_t groupSize = config->GetLogGroupSize();
+
     initializedDataBuffer = new char[groupSize];
     memset(initializedDataBuffer, 0xFF, groupSize);
-    return 0;
 }
 
 void
@@ -106,6 +117,12 @@ JournalLogBuffer::Dispose(void)
     {
         delete[] initializedDataBuffer;
         initializedDataBuffer = nullptr;
+    }
+
+    if (logFile != nullptr)
+    {
+        delete logFile;
+        logFile = nullptr;
     }
 }
 

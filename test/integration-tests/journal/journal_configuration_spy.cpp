@@ -17,7 +17,7 @@ JournalConfigurationSpy::~JournalConfigurationSpy(void)
 }
 
 int
-JournalConfigurationSpy::Init(uint64_t loadedBufferSize, MetaFsFileControlApi* metaFsCtrl)
+JournalConfigurationSpy::SetLogBufferSize(uint64_t loadedBufferSize, MetaFsFileControlApi* metaFsCtrl)
 {
     if (loadedBufferSize == 0)
     {

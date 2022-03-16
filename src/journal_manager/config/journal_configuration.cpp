@@ -71,8 +71,15 @@ JournalConfiguration::~JournalConfiguration(void)
 {
 }
 
+void
+JournalConfiguration::Init(bool isWriteThroughEnabled)
+{
+    metaVolumeToUse = (isWriteThroughEnabled == true) ? (MetaVolumeType::JournalVolume) : (MetaVolumeType::NvRamVolume);
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION), "Journal will be stored on {}", metaVolumeToUse);
+}
+
 int
-JournalConfiguration::Init(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl)
+JournalConfiguration::SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl)
 {
     int result = 0;
     _ReadMetaFsConfiguration(metaFsCtrl);
@@ -133,6 +140,12 @@ LogGroupLayout
 JournalConfiguration::GetLogBufferLayout(int groupId)
 {
     return bufferLayout.GetLayout(groupId);
+}
+
+MetaVolumeType
+JournalConfiguration::GetMetaVolumeToUse(void)
+{
+    return metaVolumeToUse;
 }
 
 void
@@ -221,8 +234,8 @@ JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
     prop.ioOpType = MetaFileDominant::WriteDominant;
     prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
 
-    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, MetaVolumeType::NvRamVolume);
-    maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, MetaVolumeType::NvRamVolume);
+    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, metaVolumeToUse);
+    maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, metaVolumeToUse);
 }
 
 int

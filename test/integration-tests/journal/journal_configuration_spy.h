@@ -10,6 +10,6 @@ public:
     JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize);
     virtual ~JournalConfigurationSpy(void);
 
-    virtual int Init(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr) override;
+    virtual int SetLogBufferSize(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr) override;
 };
 } // namespace pos

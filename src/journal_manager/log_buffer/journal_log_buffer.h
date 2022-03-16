@@ -51,11 +51,11 @@ class JournalLogBuffer : public ILogGroupResetCompleted
 {
 public:
     JournalLogBuffer(void);
-    explicit JournalLogBuffer(int arrayId);
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
-    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory);
+    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId);
+    virtual void InitDataBuffer(void);
     virtual void Dispose(void);
 
     virtual int Create(uint64_t logBufferSize);
