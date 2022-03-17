@@ -108,17 +108,27 @@ public:
                 // A method is required to enforce to add event information to
                 // PoSEventInfo.(e.g., invoking a compile error if eventId does not
                 // match with PosEventInfo)
-                logger->iboflog_sink(loc, lvl, eventId,
-                    fmt::format(
-                        preferences.IsStrLoggingEnabled() ?
-                        "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
-                        "\tNONE - {}, cause: NONE, solution:NONE, vairables:NONE",
-                    fmt), args...);
+                try
+                {
+                    logger->iboflog_sink(loc, lvl, eventId,
+                        fmt::format(
+                            preferences.IsStrLoggingEnabled() ?
+                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
+                            "\tNONE - {}, cause: NONE, solution:NONE, vairables:NONE",
+                        fmt), args...);
+                }
+                catch(const std::exception& e)
+                {
+                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
+                        e.what(), fmt), args...);
+                }
             }
             else
             {
                 PosEventInfoEntry* entry = it->second;
-                logger->iboflog_sink(loc, lvl, eventId,
+                try
+                {
+                    logger->iboflog_sink(loc, lvl, eventId,
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
                             "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
@@ -126,6 +136,12 @@ public:
                         entry->GetEventName(), entry->GetMessage(),
                         entry->GetCause(), entry->GetSolution(),
                     fmt), args...);
+                }
+                catch(const std::exception& e)
+                {
+                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
+                        e.what(), fmt), args...);
+                }        
             }
         }
 #endif
