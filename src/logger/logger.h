@@ -141,7 +141,7 @@ public:
                 {
                     logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
                         e.what(), fmt), args...);
-                }        
+                }
             }
         }
 #endif
