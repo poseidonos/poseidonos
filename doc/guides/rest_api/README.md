@@ -1,5 +1,7 @@
 # REST API
-POS offers REST APIs to be on a par with CLI commands to ease integration efforts. d-agent is POS management process that translates HTTP requests into POS CLI commands and communicates directly witih POS CLI server. The REST endpoint is hosted on Nginx with the default configuration of (port=80, timeout = 30 seconds). The schema of expected HTTP requests is as follows.
+POS provides its commands via REST APIs for the integration of 3rd party services with POS. To access POS via REST APIs, you need to install [Management Stack (M9K)](https://github.com/poseidonos/poseidonos-gui) first. M9K provides three major functionalities: poseidonos-gui, M-Agent, and D-agent. poseidonos-gui provides a graphical user interface to control and monitor POS. M-Agent is the interface between poseidonos-gui and AIR, which enables the performance monitoring in posiedonos-gui.
+
+D-Agent is the interface between REST APIs and POS CLI server. The REST endpoint is hosted on Nginx with the default configuration of (port=80, timeout = 30 seconds). The RESTful request schema is as below. For the full information about the POS REST APIs, please refer to [PoseidonOS RESTful API List](https://github.com/poseidonos/poseidonos-gui/blob/main/src/dagent/doc/api.md).
 
 ## Request Header
 |      Key     |       Value      |                Sample                |
@@ -10,7 +12,7 @@ POS offers REST APIs to be on a par with CLI commands to ease integration effort
 
 
 ## Request Body
-All API has common request scheme except GET method.
+Every API has a common request scheme except for GET method.
 
 ### REST request schema
 ```
@@ -29,7 +31,7 @@ All API has common request scheme except GET method.
 
 
 ## Response Body
-All API has common response scheme.
+Every API has a common response scheme.
 
 ### REST response schema
 ```
