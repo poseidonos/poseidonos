@@ -641,9 +641,14 @@ Array::DetachDevice(UblockSharedPtr uBlock)
 }
 
 void
-Array::MountDone(bool isWT)
+Array::SetPreferences(bool isWT)
 {
     isWTEnabled = isWT;
+}
+
+void
+Array::MountDone(void)
+{
     _CheckRebuildNecessity();
     int ret = _Flush();
     assert(ret == 0);

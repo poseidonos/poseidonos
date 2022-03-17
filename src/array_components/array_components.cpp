@@ -195,10 +195,11 @@ ArrayComponents::Load(void)
 int
 ArrayComponents::Mount(bool isWTEnabled)
 {
+    array->SetPreferences(isWTEnabled);
     int ret = arrayMountSequence->Mount();
     if (ret == 0)
     {
-        array->MountDone(isWTEnabled);
+        array->MountDone();
     }
     return ret;
 }

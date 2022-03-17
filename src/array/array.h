@@ -84,7 +84,7 @@ public:
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
-    virtual void MountDone(bool isWT);
+    virtual void MountDone(void);
     virtual int CheckUnmountable(void);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
@@ -105,6 +105,7 @@ public:
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
     virtual bool ResumeRebuild(ArrayDevice* target);
+    virtual void SetPreferences(bool isWT);
 
 private:
     int _LoadImpl(void);

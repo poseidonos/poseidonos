@@ -142,16 +142,17 @@ TEST(ArrayComponents, Mount_testUsingArrayMountSequenceMock)
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
-    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, mntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
     EXPECT_CALL(*mockArrayMountSequence, Mount).WillOnce(Return(0));
 
     MockStateManager mockStateManager;
     MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_CALL(*mockArray, SetPreferences).Times(1);
     EXPECT_CALL(*mockArray, MountDone).Times(1);
     ArrayComponents arrayComponents("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
-        nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, mockArrayMountSequence);
+        nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr, mockArrayMountSequence);
     // When
-    int result = arrayComponents.Mount();
+    int result = arrayComponents.Mount(false);
 
     // Then
     int SUCCESS = 0;

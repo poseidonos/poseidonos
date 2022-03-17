@@ -853,7 +853,7 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, mockPtnMgr, NULL, NULL, &mockEventScheduler, NULL);
 
     // When: Mount is done
-    array.MountDone(false);
+    array.MountDone();
 
     // Then: EnqueueEvent should be called once
     delete mockArrayDevice;
