@@ -66,7 +66,6 @@ public:
 
 private:
     IStripeMap* stripeMap;
-    ISegmentCtx* segmentCtx;
     IJournalManager* journal;
     IJournalWriter* journalWriter;
     EventScheduler* eventScheduler;

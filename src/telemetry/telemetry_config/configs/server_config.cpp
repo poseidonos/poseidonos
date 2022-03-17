@@ -42,7 +42,6 @@ namespace pos
 {
 ServerConfig::ServerConfig(void)
 {
-    this->type = type;
     values.clear();
 }
 

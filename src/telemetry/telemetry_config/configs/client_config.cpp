@@ -42,7 +42,6 @@ namespace pos
 {
 ClientConfig::ClientConfig(void)
 {
-    this->type = type;
     values.clear();
 }
 

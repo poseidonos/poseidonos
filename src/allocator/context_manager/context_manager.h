@@ -118,7 +118,6 @@ private:
     SegmentCtx* segmentCtx;
     RebuildCtx* rebuildCtx;
 
-    AllocatorFileIo* fileIo[NUM_FILES];
     ContextReplayer* contextReplayer;
     GcCtx* gcCtx;
     BlockAllocationStatus* blockAllocStatus;

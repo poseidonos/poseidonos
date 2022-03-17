@@ -79,7 +79,7 @@ SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 std::pair<bool, SegmentState>
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
 {
-    uint32_t decreased = validBlockCount.fetch_sub(dec) - dec;
+    int32_t decreased = validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {

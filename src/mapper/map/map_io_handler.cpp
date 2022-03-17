@@ -569,7 +569,7 @@ MapIoHandler::_CompleteFlush(void)
     EventSchedulerSingleton::Instance()->EnqueueEvent(flushDoneCallBack);
     delete touchedPages;
     touchedPages = nullptr;
-    delete mapHeaderTempBuffer;
+    delete[] mapHeaderTempBuffer;
     mapHeaderTempBuffer = nullptr;
     flushInProgress = false;
 }

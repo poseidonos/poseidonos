@@ -43,6 +43,11 @@ namespace pos
 {
 VSAMapManager::VSAMapManager(TelemetryPublisher* tp_, EventScheduler* eventSched, VSAMapContent* vsaMap, MapperAddressInfo* info)
 : addrInfo(info),
+  vsaMaps(),
+  mapFlushState(),
+  mapLoadState(),
+  isVsaMapAccessable(),
+  isVsaMapInternalAccessable(),
   numWriteIssuedCount(0),
   numLoadIssuedCount(0),
   tp(tp_)
@@ -62,6 +67,11 @@ VSAMapManager::VSAMapManager(TelemetryPublisher* tp_, EventScheduler* eventSched
 
 VSAMapManager::VSAMapManager(TelemetryPublisher* tp_, MapperAddressInfo* info)
 : addrInfo(info),
+  vsaMaps(),
+  mapFlushState(),
+  mapLoadState(),
+  isVsaMapAccessable(),
+  isVsaMapInternalAccessable(),
   numWriteIssuedCount(0),
   numLoadIssuedCount(0),
   tp(tp_)

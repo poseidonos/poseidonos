@@ -67,8 +67,9 @@ RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, Alloca
         ctxHeader.numTargetSegments = 0;
     }
 }
+
 RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info)
-: RebuildCtx(tp, nullptr, info)
+: RebuildCtx(tp_, nullptr, info)
 {
 }
 

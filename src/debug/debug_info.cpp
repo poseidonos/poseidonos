@@ -90,6 +90,7 @@ DebugInfo::DebugInfo(void)
   qosManager(nullptr),
   rbaStateService(nullptr),
   reporter(nullptr),
+  signalHandler(nullptr),
   spdk(nullptr),
   unvmeDrv(nullptr),
   uramDrv(nullptr),

@@ -88,6 +88,7 @@ private:
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems;
     MetaFsIoScheduler* ioScheduler;
     MetaFsConfigManager* configManager;
+    bool needToRemoveConfig;
 };
 
 using MetaFsServiceSingleton = Singleton<MetaFsService>;

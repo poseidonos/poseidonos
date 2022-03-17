@@ -41,20 +41,23 @@ namespace pos
 {
 MetaFsService::MetaFsService(void)
 : ioScheduler(nullptr),
-  configManager(new MetaFsConfigManager(ConfigManagerSingleton::Instance()))
+  configManager(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
+  needToRemoveConfig(true)
 {
     fileSystems.fill(nullptr);
 }
 
 MetaFsService::MetaFsService(MetaFsConfigManager* configManager)
 : ioScheduler(nullptr),
-  configManager(configManager)
+  configManager(configManager),
+  needToRemoveConfig(false)
 {
+    fileSystems.fill(nullptr);
 }
 
 MetaFsService::~MetaFsService(void)
 {
-    if (nullptr != ioScheduler)
+    if (ioScheduler)
     {
         // exit mioHandler thread
         ioScheduler->ClearHandlerThread();
@@ -64,6 +67,13 @@ MetaFsService::~MetaFsService(void)
 
         // delete the scheduler
         delete ioScheduler;
+        ioScheduler = nullptr;
+    }
+
+    if (needToRemoveConfig)
+    {
+        delete configManager;
+        configManager = nullptr;
     }
 }
 
