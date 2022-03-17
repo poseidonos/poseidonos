@@ -180,5 +180,14 @@ private:
     SpdkPosVolumeCaller* spdkPosVolumeCaller;
     VolumeEventPublisher* volumeEventPublisher;
     pthread_rwlock_t nqnLock;
+
+    static int64_t basicBwUnit;
+    static int64_t basicIopsUnit;
+    static float globalThrottlingChangingRate;
+    float volumeThrottlingChangingRate;
+    float minGuaranteedThrottlingRate;
+    static int64_t globalThrottlingIncreaseCoefficient;
+    int64_t minGuaranteedIncreaseCoefficient;
+    float minThrottlingBiasedRate;
 };
 } // namespace pos

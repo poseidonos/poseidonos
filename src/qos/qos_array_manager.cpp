@@ -59,6 +59,16 @@ QosArrayManager::QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx,
     volumePolicyUpdated = false;
     qosVolumeManager = new QosVolumeManager(qosCtx, feQosEnabled,
         arrayId, this, eventFrameworkApiArg, qosManager);
+
+    minGuaranteedVolumeMaxCount = MIN_GUARANTEED_VOLUME_MAX_COUNT;
+    int ret = 0;
+    uint32_t value = 0;
+    ret = ConfigManagerSingleton::Instance()->GetValue("fe_qos", "min_guaranteed_volume_max_count",
+            static_cast<void*>(&value), CONFIG_TYPE_UINT32);
+    if (ret == EID(SUCCESS))
+    {
+        minGuaranteedVolumeMaxCount = value;
+    }
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -135,7 +145,7 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     {
         if (true == minPolicyReceived)
         {
-            if (minGuaranteeVolume.size() >= MIN_GUARANTEED_VOLUME_MAX_COUNT)
+            if (minGuaranteeVolume.size() >= minGuaranteedVolumeMaxCount)
             {
                 return QosReturnCode::EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT;
             }

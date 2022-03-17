@@ -39,6 +39,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
+#include "src/master_context/config_manager.h"
 #include "src/qos/io_queue.h"
 #include "src/qos/parameter_queue.h"
 #include "src/qos/qos_context.h"
@@ -64,6 +65,10 @@ std::atomic<int64_t> QosVolumeManager::remainingNotThrottledVolumesBw;
 std::atomic<int64_t> QosVolumeManager::notThrottledVolumesThrottlingIops;
 std::atomic<int64_t> QosVolumeManager::remainingNotThrottledVolumesIops;
 
+float QosVolumeManager::globalThrottlingChangingRate;
+int64_t QosVolumeManager::globalThrottlingIncreaseCoefficient;
+int64_t QosVolumeManager::basicBwUnit;
+int64_t QosVolumeManager::basicIopsUnit;
 thread_local uint32_t gvolId = 0;
 QosContext* qosContextGlobal = nullptr;
 /* --------------------------------------------------------------------------*/
@@ -107,6 +112,69 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
         avgIops[volId] = 0;
         minimumCheckCounter[volId] = 0;
         logPrintedCounter[volId] = 0;
+    }
+    basicBwUnit = BASIC_BW_UNIT;
+    basicIopsUnit = BASIC_IOPS_UNIT;
+    globalThrottlingChangingRate = GLOBAL_THROTTLING_CHANGING_RATE;
+    volumeThrottlingChangingRate = VOLUME_THROTTLING_CHANGING_RATE;
+    minGuaranteedThrottlingRate = MIN_GUARANTEED_THROTTLING_RATE;
+    globalThrottlingIncreaseCoefficient = GLOBAL_THROTTLING_INCREASE_COEFFICIENT;
+    minGuaranteedIncreaseCoefficient = MIN_GUARANTEED_INCREASE_COEFFICIENT;
+    minThrottlingBiasedRate = MIN_THROTTLING_BIASED;
+    ConfigManager* configManager = ConfigManagerSingleton::Instance();
+    if (configManager != nullptr)
+    {
+        int ret = EID(SUCCESS);
+        uint64_t valueInt = 0;
+        uint64_t valueFloat = 0;
+        ret = configManager->GetValue("fe_qos", "basic_bw_unit",
+            static_cast<void*>(&valueInt), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            basicBwUnit = valueInt;
+        }
+        ret = configManager->GetValue("fe_qos", "basic_iops_unit",
+            static_cast<void*>(&valueInt), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            basicIopsUnit = valueInt;
+        }
+        ret = configManager->GetValue("fe_qos", "global_throttling_changing_percent",
+            static_cast<void*>(&valueFloat), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            globalThrottlingChangingRate = (float)valueFloat / 100.0;
+        }
+        ret = configManager->GetValue("fe_qos", "volume_throttling_changing_percent",
+            static_cast<void*>(&valueFloat), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            volumeThrottlingChangingRate = (float)valueFloat / 100.0;
+        }
+        ret = configManager->GetValue("fe_qos", "min_guaranteed_throttling_percent",
+            static_cast<void*>(&valueFloat), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            minGuaranteedThrottlingRate = (float)valueFloat / 100.0;
+        }
+        ret = configManager->GetValue("fe_qos", "global_throttling_increase_coefficient",
+            static_cast<void*>(&valueInt), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            globalThrottlingIncreaseCoefficient = valueInt;
+        }
+        ret = configManager->GetValue("fe_qos", "min_guaranteed_increase_coefficient",
+            static_cast<void*>(&valueInt), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            minGuaranteedIncreaseCoefficient = valueInt;
+        }
+        ret = configManager->GetValue("fe_qos", "min_throttling_biased_percent",
+            static_cast<void*>(&valueFloat), CONFIG_TYPE_UINT64);
+        if (ret == EID(SUCCESS))
+        {
+            minThrottlingBiasedRate = (float)valueFloat / 100.0;
+        }
     }
     pthread_rwlock_init(&nqnLock, nullptr);
 }
@@ -405,7 +473,8 @@ bool
 QosVolumeManager::_SpecialRateLimit(uint32_t volId)
 {
     bool results = false;
-    if (minVolumeBw[volId] == 0 && minVolumeIops[volId] == 0 && remainingNotThrottledVolumesBw < 0)
+    if (minVolumeBw[volId] == 0 && minVolumeIops[volId] == 0 &&
+        (remainingNotThrottledVolumesBw < 0 || remainingNotThrottledVolumesIops < 0))
     {
         results = true;
     }
@@ -470,12 +539,12 @@ QosVolumeManager::_ResetThrottlingCommon(int64_t remainingValue, uint64_t curren
 void
 QosVolumeManager::ResetGlobalThrottling(void)
 {
-    int64_t bwUnit = BASIC_BW_UNIT;
-    int64_t iopsUnit = BASIC_IOPS_UNIT;
-    bwUnit = std::max(bwUnit, static_cast<int64_t>(UNIT_GLOBAL_RATE * globalBwThrottling));
-    iopsUnit = std::max(iopsUnit, static_cast<int64_t>(UNIT_GLOBAL_RATE * globalIopsThrottling));
-    globalBwThrottling += _GetThrottlingChange(globalRemainingVolumeBw, 4 * bwUnit, bwUnit);
-    globalIopsThrottling += _GetThrottlingChange(globalRemainingVolumeIops, 4 * iopsUnit, iopsUnit);
+    int64_t bwUnit = basicBwUnit;
+    int64_t iopsUnit = basicIopsUnit;
+    bwUnit = std::max(bwUnit, static_cast<int64_t>(globalThrottlingChangingRate * globalBwThrottling));
+    iopsUnit = std::max(iopsUnit, static_cast<int64_t>(globalThrottlingChangingRate * globalIopsThrottling));
+    globalBwThrottling += _GetThrottlingChange(globalRemainingVolumeBw, globalThrottlingIncreaseCoefficient * bwUnit, bwUnit);
+    globalIopsThrottling += _GetThrottlingChange(globalRemainingVolumeIops, globalThrottlingIncreaseCoefficient * iopsUnit, iopsUnit);
 
     globalBwThrottling = std::max(globalBwThrottling.load(), bwUnit);
     globalIopsThrottling = std::max(globalIopsThrottling.load(), iopsUnit);
@@ -507,8 +576,8 @@ QosVolumeManager::GetGlobalThrottling(bool iops)
 void
 QosVolumeManager::SetRemainingThrottling(uint64_t total, uint64_t minVolTotal, bool iops)
 {
-    int64_t bwUnit = BASIC_BW_UNIT;
-    int64_t iopsUnit = BASIC_IOPS_UNIT;
+    int64_t bwUnit = basicBwUnit;
+    int64_t iopsUnit = basicIopsUnit;
 
     if (iops)
     {
@@ -608,21 +677,23 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
 {
     uint64_t userSetBwWeight = bwThrottling[volId];
     uint64_t userSetIops = iopsThrottling[volId];
-    int64_t bwUnit = BASIC_BW_UNIT;
-    int64_t iopsUnit = BASIC_IOPS_UNIT;
-    bwUnit = std::max(bwUnit, static_cast<int64_t>(dynamicBwThrottling[volId] * UNIT_VOLUME_RATE));
-    iopsUnit = std::max(iopsUnit, static_cast<int64_t>(dynamicIopsThrottling[volId] * UNIT_VOLUME_RATE));
-    dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - 0.05 * dynamicBwThrottling[volId], MIN_GUARANTEED_INCREASE_COEFFICIENT * bwUnit, bwUnit);
-    dynamicIopsThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeIops[volId] - 0.05 * dynamicIopsThrottling[volId] , MIN_GUARANTEED_INCREASE_COEFFICIENT * iopsUnit, iopsUnit);
+    int64_t bwUnit = basicBwUnit;
+    int64_t iopsUnit = basicIopsUnit;
+    bwUnit = std::max(bwUnit, static_cast<int64_t>(dynamicBwThrottling[volId] * volumeThrottlingChangingRate));
+    iopsUnit = std::max(iopsUnit, static_cast<int64_t>(dynamicIopsThrottling[volId] * volumeThrottlingChangingRate));
+    dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - minThrottlingBiasedRate
+        * dynamicBwThrottling[volId], minGuaranteedIncreaseCoefficient * bwUnit, bwUnit);
+    dynamicIopsThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeIops[volId] - minThrottlingBiasedRate
+        * dynamicIopsThrottling[volId] , minGuaranteedIncreaseCoefficient * iopsUnit, iopsUnit);
 
-    if (minVolumeBw[volId] != 0 && dynamicBwThrottling[volId] > minVolumeBw[volId] * MIN_GUARANTEED_THROTTLING_RATE)
+    if (minVolumeBw[volId] != 0 && dynamicBwThrottling[volId] > minVolumeBw[volId] * minGuaranteedThrottlingRate)
     {
-        dynamicBwThrottling[volId] = minVolumeBw[volId] * MIN_GUARANTEED_THROTTLING_RATE;
+        dynamicBwThrottling[volId] = minVolumeBw[volId] * minGuaranteedThrottlingRate;
         remainingDynamicVolumeBw[volId] = 0;
     }
-    if (minVolumeIops[volId] != 0 &&  dynamicIopsThrottling[volId] > minVolumeIops[volId] * MIN_GUARANTEED_THROTTLING_RATE)
+    if (minVolumeIops[volId] != 0 &&  dynamicIopsThrottling[volId] > minVolumeIops[volId] * minGuaranteedThrottlingRate)
     {
-        dynamicIopsThrottling[volId] = minVolumeIops[volId] * MIN_GUARANTEED_THROTTLING_RATE;
+        dynamicIopsThrottling[volId] = minVolumeIops[volId] * minGuaranteedThrottlingRate;
         remainingDynamicVolumeIops[volId] = 0;
     }
     _CalculateMovingAverage(volId);

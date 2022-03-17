@@ -103,5 +103,6 @@ private:
     std::map<uint32_t, qos_vol_policy> volumePolicyMapCli;
     QosManager* qosManager;
     QosVolumeManager* qosVolumeManager;
+    uint32_t minGuaranteedVolumeMaxCount;
 };
 } // namespace pos
