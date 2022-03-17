@@ -13,14 +13,14 @@ import pos_util
 import cli
 import api
 import json
-import MOUNT_VOLS_ON_TWO_RAID0_ARRAYS
+import MOUNT_VOLS_ON_TWO_RAID10_ARRAYS
 import fio
 import time
-ARRAY1NAME = MOUNT_VOLS_ON_TWO_RAID0_ARRAYS.ARRAY1NAME
-ARRAY2NAME = MOUNT_VOLS_ON_TWO_RAID0_ARRAYS.ARRAY2NAME
+ARRAY1NAME = MOUNT_VOLS_ON_TWO_RAID10_ARRAYS.ARRAY1NAME
+ARRAY2NAME = MOUNT_VOLS_ON_TWO_RAID10_ARRAYS.ARRAY2NAME
 
 def execute():
-    MOUNT_VOLS_ON_TWO_RAID0_ARRAYS.execute()
+    MOUNT_VOLS_ON_TWO_RAID10_ARRAYS.execute()
     fio_proc1 = fio.start_fio(0, 30, ARRAY1NAME, "subsystem1")
     fio_proc2 = fio.start_fio(0, 30, ARRAY2NAME, "subsystem2")
     fio.wait_fio(fio_proc1)

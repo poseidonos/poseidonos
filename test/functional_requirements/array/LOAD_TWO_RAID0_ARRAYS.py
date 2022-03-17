@@ -2,6 +2,7 @@
 import subprocess
 import os
 import sys
+import time
 sys.path.append("../")
 sys.path.append("../../system/lib/")
 sys.path.append("../device_management/")
@@ -10,16 +11,24 @@ import json_parser
 import pos
 import cli
 import api
-import SCAN_DEV_BASIC
+import json_parser
+import UNMOUNT_TWO_RAID0_ARRAYS
 
-DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
-ARRAYNAME = "POSArray"
+ARRAY1NAME = UNMOUNT_TWO_RAID0_ARRAYS.ARRAY1NAME
+ARRAY2NAME = UNMOUNT_TWO_RAID0_ARRAYS.ARRAY2NAME
 
 def execute():
-    SCAN_DEV_BASIC.execute()
-    cli.mbr_reset()
-    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "RAID0")
-    print(out)
+    UNMOUNT_TWO_RAID0_ARRAYS.execute()
+    pos.exit_pos()
+    time.sleep(5)
+    pos.start_pos_for_two_arrays()
+    out = cli.scan_device()
+    print (out)
+    out = cli.mount_array(ARRAY1NAME)
+    print (out)
+    if json_parser.get_response_code(out) is 0:
+        out = cli.mount_array(ARRAY2NAME)
+        print (out)
     return out
 
 if __name__ == "__main__":

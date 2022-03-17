@@ -2,27 +2,22 @@
 import subprocess
 import os
 import sys
-import time
 sys.path.append("../")
 sys.path.append("../../system/lib/")
+sys.path.append("../array/")
 
 import json_parser
 import pos
 import cli
 import api
 import json
-import MOUNT_RAID_NONE_ARRAY
+import MOUNT_RAIDNONE_ARRAY
 
-ARRAYNAME = MOUNT_RAID_NONE_ARRAY.ARRAYNAME
+ARRAYNAME = MOUNT_RAIDNONE_ARRAY.ARRAYNAME
 
 def execute():
-    MOUNT_RAID_NONE_ARRAY.execute()
-    cli.unmount_array(ARRAYNAME)
-    pos.exit_pos()
-    time.sleep(5)
-    pos.start_pos()
-    cli.scan_device()
-    out = cli.mount_array(ARRAYNAME)
+    MOUNT_RAIDNONE_ARRAY.execute()
+    out = cli.add_device("unvme-ns-3", ARRAYNAME)
     print (out)
     return out
 
@@ -31,6 +26,6 @@ if __name__ == "__main__":
         pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
-    ret = api.set_result_by_code_eq(out, 0, __file__)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
     exit(ret)

@@ -9,15 +9,18 @@ import json_parser
 import pos
 import cli
 import api
-import json
-import CREATE_RAID_NONE_ARRAY
+import MOUNT_TWO_RAID10_ARRAYS
 
-ARRAYNAME = CREATE_RAID_NONE_ARRAY.ARRAYNAME
+ARRAY1NAME = MOUNT_TWO_RAID10_ARRAYS.ARRAY1NAME
+ARRAY2NAME = MOUNT_TWO_RAID10_ARRAYS.ARRAY2NAME
 
 def execute():
-    CREATE_RAID_NONE_ARRAY.execute()
-    out = cli.mount_array(ARRAYNAME)
+    MOUNT_TWO_RAID10_ARRAYS.execute()
+    out = cli.unmount_array(ARRAY1NAME)
     print (out)
+    if json_parser.get_response_code(out) is 0:
+        out = cli.unmount_array(ARRAY2NAME)
+        print (out)
     return out
 
 if __name__ == "__main__":

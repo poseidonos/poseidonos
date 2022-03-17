@@ -12,15 +12,16 @@ import cli
 import api
 import SCAN_DEV_BASIC
 
-DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
+DATA = "unvme-ns-0,unvme-ns-1"
 ARRAYNAME = "POSArray"
 
 def execute():
     SCAN_DEV_BASIC.execute()
     cli.mbr_reset()
-    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "RAID0")
+    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "RAID10")
     print(out)
     return out
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

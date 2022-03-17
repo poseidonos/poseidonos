@@ -12,7 +12,7 @@ import pos
 import cli
 import api
 import pos_constant
-import MOUNT_RAID_NONE_ARRAY
+import MOUNT_RAIDNONE_ARRAY
 import volume
 
 VOL_NAME = "vol1"
@@ -20,7 +20,7 @@ VOL_SIZE = pos_constant.SIZE_1GB
 VOL_IOPS = 0
 VOL_BW = 0
 
-ARRAYNAME = MOUNT_RAID_NONE_ARRAY.ARRAYNAME
+ARRAYNAME = MOUNT_RAIDNONE_ARRAY.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -58,7 +58,7 @@ def set_result(detail):
 
 def execute():
     clear_result()
-    MOUNT_RAID_NONE_ARRAY.execute()
+    MOUNT_RAIDNONE_ARRAY.execute()
     out = cli.create_volume(VOL_NAME, str(VOL_SIZE), "", "", ARRAYNAME)
     return out
 

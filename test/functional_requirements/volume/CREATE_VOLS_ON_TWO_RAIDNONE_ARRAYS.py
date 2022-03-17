@@ -12,7 +12,7 @@ import pos
 import cli
 import api
 import pos_constant
-import MOUNT_TWO_RAID0_ARRAYS
+import MOUNT_TWO_RAIDNONE_ARRAYS
 import volume
 
 VOL1_NAME = "vol1"
@@ -25,8 +25,8 @@ VOL2_SIZE = pos_constant.SIZE_1GB
 VOL2_IOPS = 0
 VOL2_BW = 0
 
-ARRAY1NAME = MOUNT_TWO_RAID0_ARRAYS.ARRAY1NAME
-ARRAY2NAME = MOUNT_TWO_RAID0_ARRAYS.ARRAY2NAME
+ARRAY1NAME = MOUNT_TWO_RAIDNONE_ARRAYS.ARRAY1NAME
+ARRAY2NAME = MOUNT_TWO_RAIDNONE_ARRAYS.ARRAY2NAME
 
 
 def clear_result():
@@ -36,7 +36,7 @@ def clear_result():
 
 def execute():
     clear_result()
-    MOUNT_TWO_RAID0_ARRAYS.execute()
+    MOUNT_TWO_RAIDNONE_ARRAYS.execute()
     out1 = cli.create_volume(VOL1_NAME, str(VOL1_SIZE), "", "", ARRAY1NAME)
     print(out1)
     code = json_parser.get_response_code(out1)

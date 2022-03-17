@@ -66,11 +66,11 @@ UnmountArrayCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse(
             "UNMOUNTARRAY", rid, ret,
-            "failed to unmount array (code:" + to_string(ret) + ")",
+            "failed to unmount " + arrayName + " (code:" + to_string(ret) + ")",
             GetPosInfo());
     }
     QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
     return jFormat.MakeResponse("UNMOUNTARRAY", rid, SUCCESS,
-        "Array is unmounted successfully", GetPosInfo());
+        arrayName + " is unmounted successfully", GetPosInfo());
 }
 }; // namespace pos_cli
