@@ -40,6 +40,7 @@
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/mapper/i_stripemap.h"
 #include "src/resource_manager/memory_manager.h"
 
 namespace pos
@@ -54,9 +55,12 @@ class WBStripeManager : public IWBStripeAllocator
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager,
+        IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr,
+        BlockManager* blkMgr, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
-    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
+        std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -74,8 +78,9 @@ public:
     virtual int FlushAllPendingStripesInVolume(int volumeId) override;
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) override;
 
-    virtual int FlushAllWbStripes(void);
+    virtual StripeId GetUserStripeId(StripeId vsid) override;
 
+    virtual int FlushAllWbStripes(void);
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
 
 protected:
@@ -95,6 +100,7 @@ protected:
     BufferPool* stripeBufferPool;
 
     // DOCs
+    IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     AllocatorCtx* allocCtx;

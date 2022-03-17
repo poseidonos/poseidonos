@@ -91,10 +91,11 @@ Stripe::GetVictimVsa(uint32_t offset)
 }
 
 void
-Stripe::Assign(StripeId vsid_, StripeId lsid_, ASTailArrayIdx tailArrayIdx_)
+Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArrayIdx tailArrayIdx_)
 {
     vsid = vsid_;
-    wbLsid = lsid_;
+    wbLsid = wbLsid_;
+    userLsid = userLsid_;
     volumeId = tailArrayIdx_;
     oldVsaList.assign(totalBlksPerUserStripe, UNMAP_VSA);
     remaining.store(totalBlksPerUserStripe, memory_order_release);
@@ -107,7 +108,6 @@ Stripe::Assign(StripeId vsid_, StripeId lsid_, ASTailArrayIdx tailArrayIdx_)
     {
         revMapPack = iReverseMap->Assign(wbLsid, vsid);
     }
-    userLsid = vsid; // Future work: Allocate userLsid in Flush submission
 }
 
 bool
@@ -153,12 +153,6 @@ StripeId
 Stripe::GetUserLsid(void)
 {
     return userLsid;
-}
-
-void
-Stripe::SetUserLsid(StripeId userAreaLsid)
-{
-    userLsid = userAreaLsid;
 }
 
 StripeId

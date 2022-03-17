@@ -53,6 +53,8 @@ public:
     virtual int FlushAllPendingStripes(void) = 0;
     virtual int FlushAllPendingStripesInVolume(int volumeId) = 0;
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) = 0;
+
+    virtual StripeId GetUserStripeId(StripeId vsid) = 0;
 };
 
 } // namespace pos

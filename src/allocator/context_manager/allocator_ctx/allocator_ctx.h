@@ -79,9 +79,7 @@ public:
 
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
     virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
-    virtual StripeId GetActiveWbStripeId(ASTailArrayIdx asTailArrayIdx);
     virtual void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
-    virtual void SetNewActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa, StripeId wbLsid);
 
     virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
 
@@ -93,7 +91,6 @@ private:
     std::atomic<uint64_t> ctxDirtyVersion;
 
     VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
-    StripeId activeWbStripeId[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     BitMapMutex* allocWbLsidBitmap = nullptr;
 

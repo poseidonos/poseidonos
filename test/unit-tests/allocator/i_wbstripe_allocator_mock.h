@@ -19,6 +19,7 @@ public:
     MOCK_METHOD(int, FlushAllPendingStripes, (), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId, FlushIoSmartPtr flushIo), (override));
+    MOCK_METHOD(StripeId, GetUserStripeId, (StripeId vsid), (override));
 };
 
 } // namespace pos

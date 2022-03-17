@@ -2,9 +2,13 @@
 
 #include "test/integration-tests/journal/fake/test_journal_write_completion.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
 namespace pos
 {
+using ::testing::NiceMock;
+using ::testing::Return;
+
 LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, ArrayInfoMock* _array,
     JournalManagerSpy* _journal, TestInfo* _testInfo)
 {
@@ -116,24 +120,24 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
 {
     assert(newAddr.stripeLoc == IN_USER_AREA);
 
-    Stripe* stripe = new Stripe(nullptr, true, 1);
-    stripe->SetVsid(vsid);
-    stripe->SetUserLsid(newAddr.stripeId);
+    NiceMock<MockStripe> stripe;
+
+    ON_CALL(stripe, GetVsid).WillByDefault(Return(vsid));
+    ON_CALL(stripe, GetWbLsid).WillByDefault(Return(oldAddr.stripeId));
+    ON_CALL(stripe, GetUserLsid).WillByDefault(Return(newAddr.stripeId));
 
     IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddStripeMapUpdatedLog(stripe, oldAddr, event);
+    int result = writer->AddStripeMapUpdatedLog(&stripe, oldAddr, event);
     if (result == 0)
     {
-        testingLogs.AddToWriteList(stripe, oldAddr);
+        testingLogs.AddToWriteList(&stripe, oldAddr);
         dirtyMaps.emplace(STRIPE_MAP_ID);
     }
     else
     {
         cout << "Log write failed " << endl;
     }
-
-    delete stripe;
 
     return (result >= 0);
 }

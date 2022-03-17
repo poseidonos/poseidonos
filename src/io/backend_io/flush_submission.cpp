@@ -132,7 +132,6 @@ FlushSubmission::Execute(void)
         .stripeId = logicalStripeId,
         .offset = 0};
 
-    stripe->SetUserLsid(logicalStripeId);
     CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayId));
 
     POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;

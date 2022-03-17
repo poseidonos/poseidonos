@@ -47,9 +47,10 @@
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
     MemoryManager* memoryManager)
 : stripeBufferPool(nullptr),
+  iStripeMap(istripeMap_),
   addrInfo(info),
   contextManager(ctxMgr),
   blockManager(blkMgr),
@@ -65,7 +66,7 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
 }
 
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
-: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
+: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
 {
     allocCtx = ctxMgr->GetAllocatorCtx();
 }
@@ -78,6 +79,10 @@ WBStripeManager::~WBStripeManager(void)
 void
 WBStripeManager::Init(void)
 {
+    if (iStripeMap == nullptr) // for UT
+    {
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayId);
+    }
     if (volumeManager == nullptr) // for UT
     {
         volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
@@ -132,7 +137,7 @@ WBStripeManager::Dispose(void)
 Stripe*
 WBStripeManager::_GetStripe(StripeAddr& lsa)
 {
-    if (lsa.stripeLoc == IN_USER_AREA)
+    if (iStripeMap->IsInUserDataArea(lsa))
     {
         return nullptr;
     }
@@ -348,7 +353,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     }
 
     stripe = GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, tailarrayidx);
+    stripe->Assign(vsid, wbLsid, tailarrayidx, GetUserStripeId(vsid));
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_RECONSTRUCT_STRIPE),
         "Stripe (vsid {}, wbLsid {}, blockCount {}) is reconstructed",
@@ -367,10 +372,25 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
 Stripe*
 WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 {
-    StripeId wbLsid = allocCtx->GetActiveWbStripeId(index);
-    VirtualBlks remainingVsaRange = _AllocateRemainingBlocks(index);
+    VirtualBlkAddr currentTail = allocCtx->GetActiveStripeTail(index);
+    if (IsUnMapVsa(currentTail) == true)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+            "No active stripe for index {}", index);
+        return nullptr;
+    }
 
-    if (wbLsid == UNMAP_STRIPE || IsUnMapVsa(remainingVsaRange.startVsa))
+    StripeAddr stripeAddr = iStripeMap->GetLSA(currentTail.stripeId);
+    if (stripeAddr.stripeLoc == IN_USER_AREA || stripeAddr.stripeId == UNMAP_STRIPE)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+            "No active stripe for index {}", index);
+        return nullptr;
+    }
+
+    StripeId wbLsid = stripeAddr.stripeId;
+    VirtualBlks remainingVsaRange = _AllocateRemainingBlocks(index);
+    if (IsUnMapVsa(remainingVsaRange.startVsa))
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
             "No active stripe for index {}", index);
@@ -392,7 +412,7 @@ WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
     std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr tail = allocCtx->GetActiveStripeTail(index);
     VirtualBlks remainingBlocks = _GetRemainingBlocks(tail);
-    allocCtx->SetNewActiveStripeTail(index, UNMAP_VSA, UNMAP_STRIPE);
+    allocCtx->SetActiveStripeTail(index, UNMAP_VSA);
 
     return remainingBlocks;
 }
@@ -476,4 +496,10 @@ WBStripeManager::_RequestStripeFlush(Stripe* stripe)
     return stripe->Flush(event);
 }
 
+StripeId
+WBStripeManager::GetUserStripeId(StripeId vsid)
+{
+    // Allcoate user lsid using vsid
+    return vsid;
+}
 } // namespace pos
