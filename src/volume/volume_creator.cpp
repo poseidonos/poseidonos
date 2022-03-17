@@ -62,7 +62,6 @@ VolumeCreator::_CheckRequestValidity(string name, uint64_t size)
         POS_TRACE_WARN(EID(CREATE_VOL_SAME_VOL_NAME_EXISTS), "vol_name: {}", name);
         throw EID(CREATE_VOL_SAME_VOL_NAME_EXISTS);
     }
-
     _CheckVolumeSize(size);
 }
 
@@ -71,9 +70,19 @@ VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     vol = new Volume(arrayName, arrayID, name, size);
+    if (vol == nullptr)
+    {
+        POS_TRACE_ERROR(EID(CREATE_VOL_MEM_ALLOC_FAIL), "Fail to allocate memory");
+        throw EID(CREATE_VOL_MEM_ALLOC_FAIL);
+    }
+
     _SetVolumeQos(vol, maxIops, maxBw, minIops, minBw);
 
-    volumeList.Add(vol);
+    int ret = volumeList.Add(vol);
+    if (ret != EID(SUCCESS))
+    {
+        throw ret;
+    }
 }
 
 void

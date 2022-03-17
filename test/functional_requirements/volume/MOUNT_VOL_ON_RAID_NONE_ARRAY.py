@@ -12,10 +12,13 @@ import pos
 import cli
 import api
 import test_result
-import CREATE_VOL_BASIC_1
-import CREATE_VOL_BASIC_2
+import CREATE_VOL_ON_RAID_NONE_ARRAY
 
-ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
+VOL_NAME = CREATE_VOL_ON_RAID_NONE_ARRAY.VOL_NAME
+VOL_SIZE = CREATE_VOL_ON_RAID_NONE_ARRAY.VOL_SIZE
+VOL_IOPS = CREATE_VOL_ON_RAID_NONE_ARRAY.VOL_IOPS
+VOL_BW = CREATE_VOL_ON_RAID_NONE_ARRAY.VOL_BW
+ARRAYNAME = CREATE_VOL_ON_RAID_NONE_ARRAY.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -23,15 +26,15 @@ def clear_result():
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
-    result = test_result.expect_false(code)
+    result = test_result.expect_true(code)
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
     clear_result()
-    CREATE_VOL_BASIC_1.execute()
-    cli.create_volume(CREATE_VOL_BASIC_2.VOL_NAME, str(CREATE_VOL_BASIC_2.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_2.VOL_BW), ARRAYNAME)
-    out = cli.rename_volume(CREATE_VOL_BASIC_1.VOL_NAME, CREATE_VOL_BASIC_2.VOL_NAME, ARRAYNAME)
+    CREATE_VOL_ON_RAID_NONE_ARRAY.execute()
+    out = cli.mount_volume(VOL_NAME, ARRAYNAME, "")
+    print (out)
     return out
 
 if __name__ == "__main__":

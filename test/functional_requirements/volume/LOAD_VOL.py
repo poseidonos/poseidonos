@@ -61,8 +61,8 @@ def set_result():
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    CREATE_VOL_BASIC_2.execute()
-    CREATE_VOL_BASIC_3.execute()
+    cli.create_volume(CREATE_VOL_BASIC_2.VOL_NAME, str(CREATE_VOL_BASIC_2.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_2.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_3.VOL_NAME, str(CREATE_VOL_BASIC_3.VOL_SIZE), str(CREATE_VOL_BASIC_3.VOL_IOPS), str(CREATE_VOL_BASIC_3.VOL_BW), ARRAYNAME)
     cli.unmount_array(ARRAYNAME)
     pos.exit_pos()
     pos.start_pos()

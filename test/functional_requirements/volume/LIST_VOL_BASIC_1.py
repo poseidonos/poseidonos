@@ -56,7 +56,7 @@ def check_result(detail):
     for actual in actual_list:
         checked = False
         for expected in expected_list:
-            if actual.name == expected.name and actual.total == expected.total and actual.maxiops == expected.maxiops and actual.maxbw == expected.maxbw:
+            if actual.name == expected.name and actual.total == expected.total:
                 checked = True
                 break
         if checked == False:
@@ -73,12 +73,12 @@ def set_result():
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    CREATE_VOL_BASIC_2.execute()
-    CREATE_VOL_BASIC_3.execute()
-    CREATE_VOL_BASIC_4.execute()
-    CREATE_VOL_BASIC_5.execute()
-    CREATE_VOL_BASIC_6.execute()
-    CREATE_VOL_BASIC_7.execute()
+    cli.create_volume(CREATE_VOL_BASIC_2.VOL_NAME, str(CREATE_VOL_BASIC_2.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_2.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_3.VOL_NAME, str(CREATE_VOL_BASIC_3.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_3.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_4.VOL_NAME, str(CREATE_VOL_BASIC_4.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_4.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_5.VOL_NAME, str(CREATE_VOL_BASIC_5.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_5.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_6.VOL_NAME, str(CREATE_VOL_BASIC_6.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_6.VOL_BW), ARRAYNAME)
+    cli.create_volume(CREATE_VOL_BASIC_7.VOL_NAME, str(CREATE_VOL_BASIC_7.VOL_SIZE), str(CREATE_VOL_BASIC_2.VOL_IOPS), str(CREATE_VOL_BASIC_7.VOL_BW), ARRAYNAME)
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

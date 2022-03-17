@@ -42,6 +42,6 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
     out = execute()
-    ret = api.set_result_by_code_ne(out, 0, __file__)
+    ret = api.set_result_by_code_eq(out, 0, __file__)
     pos.flush_and_kill_pos()
     exit(ret)
