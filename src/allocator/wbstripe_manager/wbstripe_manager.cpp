@@ -37,17 +37,25 @@
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/stripe/stripe.h"
+#include "src/allocator/wbstripe_manager/read_stripe.h"
+#include "src/allocator/wbstripe_manager/read_stripe_completion.h"
+#include "src/allocator/wbstripe_manager/stripe_load_status.h"
+#include "src/allocator/wbstripe_manager/write_stripe_completion.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
+#include "src/include/meta_const.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/resource_manager/buffer_pool.h"
-#include "src/include/meta_const.h"
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_,
+    IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_,
+    AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
+    StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
     MemoryManager* memoryManager)
 : stripeBufferPool(nullptr),
   iStripeMap(istripeMap_),
@@ -57,7 +65,8 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
   tp(tp_),
   arrayName(arrayName),
   arrayId(arrayId),
-  memoryManager(memoryManager)
+  memoryManager(memoryManager),
+  stripeLoadStatus(stripeLoadStatus)
 {
     allocCtx = allocCtx_;
     volumeManager = volManager;
@@ -66,7 +75,7 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
 }
 
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
-: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
+: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, new StripeLoadStatus(), arrayName, arrayId)
 {
     allocCtx = ctxMgr->GetAllocatorCtx();
 }
@@ -501,5 +510,72 @@ WBStripeManager::GetUserStripeId(StripeId vsid)
 {
     // Allcoate user lsid using vsid
     return vsid;
+}
+
+int
+WBStripeManager::LoadPendingStripesToWriteBuffer(void)
+{
+    stripeLoadStatus->Reset();
+
+    for (auto it = wbStripeArray.begin(); it != wbStripeArray.end(); ++it)
+    {
+        Stripe* stripe = *it;
+
+        StripeAddr addr = iStripeMap->GetLSA(stripe->GetVsid());
+        if (IsUnMapStripe(addr.stripeId))
+        {
+            POS_TRACE_DEBUG(9999, "Skip loading unmap stripe, vsid {}, wbLsid {}, userLsid {}",
+                stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetUserLsid());
+
+            continue;
+        }
+
+        if (addr.stripeLoc == IN_WRITE_BUFFER_AREA)
+        {
+            StripeAddr from = {
+                .stripeLoc = IN_USER_AREA,
+                .stripeId = (*it)->GetUserLsid()};
+            StripeAddr to = {
+                .stripeLoc = IN_WRITE_BUFFER_AREA,
+                .stripeId = (*it)->GetWbLsid()};
+
+            stripeLoadStatus->StripeLoadStarted();
+            _LoadStripe(from, to);
+
+            POS_TRACE_INFO(0000,
+                "Start loading stripe, vsid {}, wbLsid {}, userLsid {}",
+                stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetUserLsid());
+        }
+    }
+
+    while (stripeLoadStatus->IsDone() == false)
+    {
+        usleep(1);
+    }
+
+    return 0;
+}
+
+void
+WBStripeManager::_LoadStripe(StripeAddr from, StripeAddr to)
+{
+    std::vector<void*> bufferList;
+    for (uint32_t chunkCnt = 0; chunkCnt < addrInfo->GetchunksPerStripe(); ++chunkCnt)
+    {
+        void* buffer = stripeBufferPool->TryGetBuffer();
+        if (buffer == nullptr)
+        {
+            POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+                "Failed to allocate buffer for stripe load");
+            assert(false);
+        }
+        bufferList.push_back(buffer);
+    }
+
+    CallbackSmartPtr writeStripeCompletion(new WriteStripeCompletion(stripeBufferPool, bufferList, stripeLoadStatus));
+    CallbackSmartPtr readStripeCompletion(new ReadStripeCompletion(to, bufferList, writeStripeCompletion, arrayId));
+    CallbackSmartPtr readStripe(new ReadStripe(from, bufferList, readStripeCompletion, arrayId));
+
+    EventSchedulerSingleton::Instance()->EnqueueEvent(readStripe);
 }
 } // namespace pos

@@ -32,29 +32,31 @@
 
 #pragma once
 
-#include "pending_stripe.h"
-#include "replay_task.h"
+#include <vector>
 
-#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/wbstripe_manager/stripe_load_status.h"
+#include "src/event_scheduler/callback.h"
+#include "src/include/address_type.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
 
 namespace pos
 {
-class JournalConfiguration;
-class FlushPendingStripes : public ReplayTask
+class ReadStripe : public Callback
 {
 public:
-    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
-    virtual ~FlushPendingStripes(void);
-
-    virtual int Start(void) override;
-    virtual ReplayTaskId GetId(void) override;
-    virtual int GetWeight(void) override;
-    virtual int GetNumSubTasks(void) override;
+    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId);
+    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler);
+    virtual ~ReadStripe(void) = default;
 
 private:
-    JournalConfiguration* config;
-    PendingStripeList& pendingStripes;
-    IWBStripeAllocator* wbStripeAllocator;
+    virtual bool _DoSpecificJob(void);
+
+    LogicalBlkAddr readAddr;
+    std::vector<void*> buffers;
+    CallbackSmartPtr doneCallback;
+    int arrayId;
+
+    IIOSubmitHandler* ioSubmitHandler;
 };
 
 } // namespace pos

@@ -1,1 +1,5 @@
 POS_ADD_UNIT_TEST(wbstripe_manager_ut wbstripe_manager_test.cpp)
+POS_ADD_UNIT_TEST(stripe_load_status_ut stripe_load_status_test.cpp)
+POS_ADD_UNIT_TEST(read_stripe_ut read_stripe_test.cpp)
+POS_ADD_UNIT_TEST(write_stripe_completion_ut write_stripe_completion_test.cpp)
+POS_ADD_UNIT_TEST(read_stripe_completion_ut read_stripe_completion_test.cpp)

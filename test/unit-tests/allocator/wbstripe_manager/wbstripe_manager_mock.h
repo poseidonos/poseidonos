@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(void, DereferLsidCnt, (StripeAddr& lsa, uint32_t blockCount), (override));
     MOCK_METHOD(int, ReconstructActiveStripe, (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(void, FinishStripe, (StripeId wbLsid, VirtualBlkAddr tail), (override));
+    MOCK_METHOD(int, LoadPendingStripesToWriteBuffer, (), (override));
     MOCK_METHOD(int, FlushAllPendingStripes, (), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId, FlushIoSmartPtr flushIo), (override));

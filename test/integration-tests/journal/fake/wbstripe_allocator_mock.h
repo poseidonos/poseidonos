@@ -17,6 +17,7 @@ public:
         (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(void, FinishStripe, (StripeId wbLsid, VirtualBlkAddr tail), (override));
     MOCK_METHOD(StripeId, GetUserStripeId, (StripeId vsid), (override));
+    MOCK_METHOD(int, LoadPendingStripesToWriteBuffer, (), (override));
 
     virtual Stripe* GetStripe(StripeId wbLsid) override { return nullptr; }
     virtual void FreeWBStripeId(StripeId lsid) override {}

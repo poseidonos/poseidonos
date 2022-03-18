@@ -83,11 +83,17 @@ struct VirtualBlks
     }
 };
 
-typedef struct
+struct LogicalBlkAddr
 {
     StripeId stripeId : STRIPE_ID_BIT_LEN;
     BlkOffset offset : BLOCK_OFFSET_BIT_LEN;
-} LogicalBlkAddr;
+
+    inline bool
+    operator==(LogicalBlkAddr input) const
+    {
+        return (input.stripeId == stripeId && input.offset == offset);
+    }
+};
 
 struct LogicalByteAddr
 {

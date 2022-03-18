@@ -30,31 +30,49 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/allocator/wbstripe_manager/read_stripe.h"
 
-#include "pending_stripe.h"
-#include "replay_task.h"
-
-#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/array/ft/buffer_entry.h"
+#include "src/include/meta_const.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class JournalConfiguration;
-class FlushPendingStripes : public ReplayTask
+ReadStripe::ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId)
+: ReadStripe(readAddr, buffer, callback, arrayId, IIOSubmitHandler::GetInstance())
 {
-public:
-    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
-    virtual ~FlushPendingStripes(void);
+}
 
-    virtual int Start(void) override;
-    virtual ReplayTaskId GetId(void) override;
-    virtual int GetWeight(void) override;
-    virtual int GetNumSubTasks(void) override;
+ReadStripe::ReadStripe(StripeAddr stripeAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler)
+: Callback(false, CallbackType_WriteThroughStripeLoad),
+  buffers(buffer),
+  doneCallback(callback),
+  arrayId(arrayId),
+  ioSubmitHandler(ioSubmitHandler)
+{
+    assert(stripeAddr.stripeLoc == IN_USER_AREA);
 
-private:
-    JournalConfiguration* config;
-    PendingStripeList& pendingStripes;
-    IWBStripeAllocator* wbStripeAllocator;
-};
+    readAddr.stripeId = stripeAddr.stripeId;
+    readAddr.offset = 0;
+}
 
+bool
+ReadStripe::_DoSpecificJob(void)
+{
+    std::list<BufferEntry> bufferList;
+    for (auto b : buffers)
+    {
+        BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
+        bufferList.push_back(bufferEntry);
+    }
+
+    IOSubmitHandlerStatus result =
+        ioSubmitHandler->SubmitAsyncIO(IODirection::READ,
+            bufferList, readAddr, BLOCKS_IN_CHUNK,
+            PartitionType::USER_DATA, doneCallback, arrayId);
+
+    return (result == IOSubmitHandlerStatus::SUCCESS ||
+        result == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP);
+}
 } // namespace pos

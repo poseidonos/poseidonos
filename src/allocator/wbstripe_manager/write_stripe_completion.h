@@ -30,31 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <vector>
 
-#include "pending_stripe.h"
-#include "replay_task.h"
-
-#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/wbstripe_manager/stripe_load_status.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
-class JournalConfiguration;
-class FlushPendingStripes : public ReplayTask
+class BufferPool;
+
+class WriteStripeCompletion : public Callback
 {
 public:
-    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
-    virtual ~FlushPendingStripes(void);
-
-    virtual int Start(void) override;
-    virtual ReplayTaskId GetId(void) override;
-    virtual int GetWeight(void) override;
-    virtual int GetNumSubTasks(void) override;
+    WriteStripeCompletion(BufferPool* bufferPool, std::vector<void*> buffer, StripeLoadStatus* status);
+    virtual ~WriteStripeCompletion(void) = default;
 
 private:
-    JournalConfiguration* config;
-    PendingStripeList& pendingStripes;
-    IWBStripeAllocator* wbStripeAllocator;
+    virtual bool _DoSpecificJob(void) override;
+
+    BufferPool* bufferPool;
+    std::vector<void*> bufferList;
+    StripeLoadStatus* status;
 };
 
 } // namespace pos

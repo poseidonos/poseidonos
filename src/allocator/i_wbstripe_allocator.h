@@ -49,6 +49,7 @@ public:
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
     virtual void FinishStripe(StripeId wbLsid, VirtualBlkAddr tail) = 0;
+    virtual int LoadPendingStripesToWriteBuffer(void) = 0;
 
     virtual int FlushAllPendingStripes(void) = 0;
     virtual int FlushAllPendingStripesInVolume(int volumeId) = 0;

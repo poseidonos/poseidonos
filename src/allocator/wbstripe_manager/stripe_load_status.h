@@ -32,29 +32,60 @@
 
 #pragma once
 
-#include "pending_stripe.h"
-#include "replay_task.h"
-
-#include "src/allocator/i_wbstripe_allocator.h"
+#include <atomic>
 
 namespace pos
 {
-class JournalConfiguration;
-class FlushPendingStripes : public ReplayTask
+class StripeLoadStatus
 {
 public:
-    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
-    virtual ~FlushPendingStripes(void);
+    StripeLoadStatus(void) = default;
+    virtual ~StripeLoadStatus(void) = default;
 
-    virtual int Start(void) override;
-    virtual ReplayTaskId GetId(void) override;
-    virtual int GetWeight(void) override;
-    virtual int GetNumSubTasks(void) override;
+    virtual void Reset(void)
+    {
+        numStripesToload = 0;
+        numStripesLoaded = 0;
+        numStripesFailed = 0;
+    }
+
+    virtual void StripeLoadStarted(void)
+    {
+        numStripesToload++;
+    }
+
+    virtual void StripeLoaded(void)
+    {
+        numStripesLoaded++;
+    }
+
+    virtual void StripeLoadFailed(void)
+    {
+        numStripesFailed++;
+    }
+
+    virtual bool IsDone(void)
+    {
+        return (numStripesToload == (numStripesLoaded + numStripesFailed));
+    }
+
+    int GetNumStripesToLoad(void)
+    {
+        return numStripesToload;
+    }
+    int GetNumStripesLoaded(void)
+    {
+        return numStripesLoaded;
+    }
+    int GetNumStripesFailed(void)
+    {
+        return numStripesFailed;
+    }
 
 private:
-    JournalConfiguration* config;
-    PendingStripeList& pendingStripes;
-    IWBStripeAllocator* wbStripeAllocator;
+    std::atomic<int> numStripesToload;
+    std::atomic<int> numStripesLoaded;
+    std::atomic<int> numStripesFailed;
 };
 
 } // namespace pos

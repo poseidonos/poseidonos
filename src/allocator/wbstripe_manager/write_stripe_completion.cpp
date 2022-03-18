@@ -30,31 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/allocator/wbstripe_manager/write_stripe_completion.h"
 
-#include "pending_stripe.h"
-#include "replay_task.h"
-
-#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
-class JournalConfiguration;
-class FlushPendingStripes : public ReplayTask
+WriteStripeCompletion::WriteStripeCompletion(BufferPool* bufferPool, std::vector<void*> buffer, StripeLoadStatus* status)
+: Callback(false, CallbackType_WriteThroughStripeLoad),
+  bufferPool(bufferPool),
+  bufferList(buffer),
+  status(status)
 {
-public:
-    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
-    virtual ~FlushPendingStripes(void);
+}
 
-    virtual int Start(void) override;
-    virtual ReplayTaskId GetId(void) override;
-    virtual int GetWeight(void) override;
-    virtual int GetNumSubTasks(void) override;
+bool
+WriteStripeCompletion::_DoSpecificJob(void)
+{
+    // TODO (meta) check fail case (reference: writecompletion)
 
-private:
-    JournalConfiguration* config;
-    PendingStripeList& pendingStripes;
-    IWBStripeAllocator* wbStripeAllocator;
-};
+    status->StripeLoaded();
+
+    for (auto b : bufferList)
+    {
+        bufferPool->ReturnBuffer(b);
+    }
+
+    return true;
+}
 
 } // namespace pos

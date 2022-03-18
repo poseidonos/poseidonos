@@ -50,6 +50,7 @@ class IReverseMap;
 class BufferPool;
 class AllocatorCtx;
 class TelemetryPublisher;
+class StripeLoadStatus;
 
 class WBStripeManager : public IWBStripeAllocator
 {
@@ -57,7 +58,7 @@ public:
     WBStripeManager(void) = default;
     WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager,
         IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr,
-        BlockManager* blkMgr, std::string arrayName, int arrayId,
+        BlockManager* blkMgr, StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
     WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
         std::string arrayName, int arrayId);
@@ -73,6 +74,7 @@ public:
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual void FinishStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
+    virtual int LoadPendingStripesToWriteBuffer(void) override;
 
     virtual int FlushAllPendingStripes(void) override;
     virtual int FlushAllPendingStripesInVolume(int volumeId) override;
@@ -95,6 +97,7 @@ protected:
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
     void _WaitForStripeFlushComplete(Stripe* stripe);
+    void _LoadStripe(StripeAddr from, StripeAddr to);
 
     std::vector<Stripe*> wbStripeArray;
     BufferPool* stripeBufferPool;
@@ -112,6 +115,7 @@ protected:
     IReverseMap* iReverseMap;
     uint32_t numVolumes;
     MemoryManager* memoryManager;
+    StripeLoadStatus* stripeLoadStatus;
 };
 
 } // namespace pos
