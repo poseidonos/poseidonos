@@ -163,7 +163,7 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
 {
     while (type == IOTYPE_ALL)
     {
-        if ((_GetNumFilesReading() + _GetNumFilesFlushing() == 0) || (addrInfo->IsUT() == true))
+        if ((_GetNumFilesReading() + _GetNumFilesFlushing() + _GetNumRebuildFlush() == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
