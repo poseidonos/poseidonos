@@ -324,7 +324,7 @@ VolumeIo::_IsInvalidVsa(VirtualBlkAddr& inputVsa)
 }
 
 void
-VolumeIo::SetWbLsid(StripeId inputStripeId)
+VolumeIo::SetUserLsid(StripeId inputStripeId)
 {
     if (unlikely(inputStripeId == UNMAP_STRIPE))
     {
@@ -336,7 +336,7 @@ VolumeIo::SetWbLsid(StripeId inputStripeId)
 }
 
 StripeId
-VolumeIo::GetWbLsid(void)
+VolumeIo::GetUserLsid(void)
 {
     if (unlikely(stripeId == UNMAP_STRIPE))
     {

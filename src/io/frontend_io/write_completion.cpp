@@ -100,8 +100,8 @@ bool
 WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
 {
     bool stripeUpdateSuccessful = true;
-    StripeId wbLsid = volumeIo->GetWbLsid();
-    Stripe* stripe = iWBStripeAllocator->GetStripe(wbLsid);
+    StripeAddr lsidEntry = volumeIo->GetLsidEntry();
+    Stripe* stripe = iWBStripeAllocator->GetStripe(lsidEntry.stripeId);
     if (likely(nullptr != stripe))
     {
         uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);

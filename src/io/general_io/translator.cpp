@@ -36,6 +36,7 @@
 
 #include "src/allocator_service/allocator_service.h"
 #include "src/array/service/array_service_layer.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/branch_prediction.h"
@@ -105,8 +106,7 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         }
     }
 }
-
-Translator::Translator(const VirtualBlkAddr& vsa, int arrayId)
+Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid)
 : iTranslator(ArrayService::Instance()->Getter()->GetTranslator()),
   startRba(0),
   blockCount(ONLY_ONE),
@@ -114,7 +114,8 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId)
   lastLsidEntry{IN_USER_AREA, UNMAP_STRIPE},
   isRead(false),
   volumeId(UINT32_MAX),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  userLsid(userLsid)
 {
     if (nullptr == iVSAMap)
     {
@@ -199,8 +200,6 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
             }
             else
             {
-                lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
-
                 if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid || recentArrayId != arrayId)
                 {
                     lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
@@ -284,7 +283,6 @@ Translator::_GetLsa(uint32_t blockIndex)
         vsa = iVSAMap->GetRandomVSA(startRba + blockIndex);
     }
     LogicalBlkAddr lsa = {.stripeId = lsidEntry.stripeId, .offset = vsa.offset};
-
     return lsa;
 }
 

@@ -179,7 +179,7 @@ TEST(VolumeIo, SetVsa)
 }
 
 
-TEST(VolumeIo, SetWbLsid)
+TEST(VolumeIo, SetUserLsid)
 {
     // Given : buffer, unitCount, arrayId is given
     void* buffer = nullptr;
@@ -189,8 +189,8 @@ TEST(VolumeIo, SetWbLsid)
     // When : Create new Volume Io and Set WbLsid
     VolumeIoSmartPtr newVolumeIo(new VolumeIo(buffer, unitCount, arrayId));
     StripeId stripeId = 0;
-    newVolumeIo->SetWbLsid(stripeId);
-    StripeId stripeId2 = newVolumeIo->GetWbLsid();
+    newVolumeIo->SetUserLsid(stripeId);
+    StripeId stripeId2 = newVolumeIo->GetUserLsid();
     EXPECT_EQ(stripeId == stripeId2, true);    
 }
 

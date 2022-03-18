@@ -52,7 +52,7 @@ public:
         IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr,
         IIOTranslator* iTranslator = nullptr);
     Translator(uint32_t volumeId, BlkAddr rba, int arrayId, bool isRead);
-    Translator(const VirtualBlkAddr& vsa, int arrayId);
+    Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid = UNMAP_STRIPE);
     virtual ~Translator(void)
     {
     }
@@ -89,6 +89,7 @@ private:
     void _CheckSingleBlock(void);
     PartitionType _GetPartitionType(uint32_t blockIndex);
     int arrayId;
+    StripeId userLsid;
 };
 
 } // namespace pos

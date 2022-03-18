@@ -305,7 +305,7 @@ void
 WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool isTail)
 {
     VirtualBlkAddr vsa = vsaInfo.first;
-    StripeId wbLsid = vsaInfo.second;
+    StripeId userLsid = vsaInfo.second;
     uint32_t alignmentSize;
     uint32_t alignmentOffset;
 
@@ -324,7 +324,6 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
         volumeIo->Split(ChangeByteToSector(alignmentSize), isTail);
     split->SetOriginUbio(volumeIo);
     split->SetVsa(vsa);
-    split->SetWbLsid(wbLsid);
     CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
     split->SetCallback(callback);
 
@@ -332,6 +331,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 
     newVolumeIo->SetVolumeId(volumeId);
     newVolumeIo->SetOriginUbio(split);
+    newVolumeIo->SetUserLsid(userLsid);
     CallbackSmartPtr event(new ReadCompletionForPartialWrite(newVolumeIo,
         alignmentSize, alignmentOffset));
     newVolumeIo->SetCallback(event);
@@ -419,9 +419,9 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlksInfo& virtualBlksInfo, CallbackSmartPtr callback)
 {
     VirtualBlks vsaRange = virtualBlksInfo.first;
-    StripeId wbLsid = virtualBlksInfo.second;
+    StripeId userLsid = virtualBlksInfo.second;
     VirtualBlkAddr startVsa = vsaRange.startVsa;
-    Translator translator(startVsa, volumeIo->GetArrayId());
+    Translator translator(startVsa, volumeIo->GetArrayId(), userLsid);
     void* mem = newVolumeIo->GetBuffer();
     list<PhysicalEntry> physicalEntries =
         translator.GetPhysicalEntries(mem, vsaRange.numBlks);
@@ -437,7 +437,7 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     }
     newVolumeIo->SetVsa(startVsa);
     newVolumeIo->SetPba(pba);
-    newVolumeIo->SetWbLsid(wbLsid);
+    newVolumeIo->SetUserLsid(userLsid);
 
     CallbackSmartPtr blockMapUpdateRequest(
         new BlockMapUpdateRequest(newVolumeIo, callback));

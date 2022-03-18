@@ -81,8 +81,8 @@ BlockMapUpdate::_DoSpecificJob(void)
     BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
     vsaMap->SetVSAs(volumeIo->GetVolumeId(), rba, targetVsaRange);
 
-    StripeId wbLsid = volumeIo->GetWbLsid();
-    Stripe& stripe = _GetStripe(wbLsid);
+    StripeAddr lsidEntry = volumeIo->GetLsidEntry();
+    Stripe& stripe = _GetStripe(lsidEntry);
     _UpdateReverseMap(stripe);
 
     uint32_t vsaRangeCount = oldVsaRangeMaker->GetCount();
@@ -119,9 +119,9 @@ BlockMapUpdate::_UpdateReverseMap(Stripe& stripe)
 }
 
 Stripe&
-BlockMapUpdate::_GetStripe(StripeId& wbLsid)
+BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
 {
-    Stripe* foundStripe = wbStripeAllocator->GetStripe(wbLsid);
+    Stripe* foundStripe = wbStripeAllocator->GetStripe(lsidEntry.stripeId);
 
     if (unlikely(nullptr == foundStripe))
     {

@@ -27,7 +27,7 @@ public:
     MOCK_METHOD(uint64_t, GetSize, (), (override));
     MOCK_METHOD(void, SetLsidEntry, (StripeAddr& lsidEntry), (override));
     MOCK_METHOD(const StripeAddr&, GetLsidEntry, (), (override));
-    MOCK_METHOD(StripeId, GetWbLsid, (), (override));
+    MOCK_METHOD(StripeId, GetUserLsid, (), (override));
     MOCK_METHOD(const StripeAddr&, GetOldLsidEntry, (), (override));
     MOCK_METHOD(const VirtualBlkAddr&, GetVsa, (), (override));
     MOCK_METHOD(uint64_t, GetSectorRba, (), (override));

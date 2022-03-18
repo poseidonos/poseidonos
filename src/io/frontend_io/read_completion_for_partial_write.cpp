@@ -83,7 +83,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
 
         // If UT is executed, translator will be input.
         // otherwise, translator will be nullptr
-        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId());
+        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId(), volumeIo->GetUserLsid());
         if (likely(translator == nullptr))
         {
             translator = &translatorLocal;
