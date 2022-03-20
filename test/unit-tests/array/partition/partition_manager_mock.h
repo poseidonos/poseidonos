@@ -13,6 +13,7 @@ class MockPartitionManager : public PartitionManager
 public:
     using PartitionManager::PartitionManager;
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
+    MOCK_METHOD(const PartitionPhysicalSize*, GetPhysicalSize, (PartitionType type), (override));
     MOCK_METHOD(int, CreatePartitions, (ArrayDevice* nvm, vector<ArrayDevice*> data,
         RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc), (override));
     MOCK_METHOD(void, DeletePartitions, (), (override));

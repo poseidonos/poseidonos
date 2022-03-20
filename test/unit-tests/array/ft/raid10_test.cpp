@@ -14,6 +14,7 @@ TEST(Raid10, Raid10_testWithHeapAllocation)
     // Given a set of constructor params
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 5,
         .stripesPerSegment = 20,
@@ -32,6 +33,7 @@ TEST(Raid10, Translate_ifDestinationIsFilledWithStripeIdAndOffset)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 5,
         .stripesPerSegment = 20,
@@ -60,6 +62,7 @@ TEST(Raid10, MakeParity_testIfDestinationIsFilledWithTwoItems)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
@@ -96,6 +99,7 @@ TEST(Raid10, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerT
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
@@ -123,6 +127,7 @@ TEST(Raid10, GetRaidState_testIfRaid10IsFailure)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
@@ -146,6 +151,7 @@ TEST(Raid10, GetRaidState_testIfRaid10IsDegraded)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,
@@ -170,6 +176,7 @@ TEST(Raid10, GetRaidState_testIfRaid10IsNormal)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,

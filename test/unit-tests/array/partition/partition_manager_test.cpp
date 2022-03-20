@@ -112,26 +112,45 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
     // Then 1: validate against expected number of segments of each partition type.
     ASSERT_EQ(0, actual);
-    int expectedNvmTotalSegments = DIV_ROUND_UP(
+    uint32_t expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+
+    uint32_t expectedJournalPartSegments = ArrayConfig::JOURNAL_PART_SEGMENT_SIZE;
+    ASSERT_EQ(expectedJournalPartSegments, pm.GetSizeInfo(PartitionType::JOURNAL_SSD)->totalSegments);
+
+    uint32_t expectedMetaPartTotalSegments = DIV_ROUND_UP(
         DATA_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE * ArrayConfig::META_SSD_SIZE_RATIO,
         (uint64_t)(100));
-    ASSERT_EQ(expectedNvmTotalSegments, pm.GetSizeInfo(PartitionType::META_SSD)->totalSegments);
+    ASSERT_EQ(expectedMetaPartTotalSegments, pm.GetSizeInfo(PartitionType::META_SSD)->totalSegments);
 
-    int expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    int expectedDataTotalSegments =
-        DATA_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedNvmTotalSegments;
+    uint32_t expectedDataTotalSegments =
+        DATA_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedJournalPartSegments - expectedMetaPartTotalSegments;
     ASSERT_EQ(expectedDataTotalSegments, pm.GetSizeInfo(PartitionType::USER_DATA)->totalSegments);
 
-    int expectedMetaNvmTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
+    uint32_t expectedMetaNvmTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
     ASSERT_EQ(expectedMetaNvmTotalSegments, pm.GetSizeInfo(PartitionType::META_NVM)->totalSegments);
 
-    int expectedWriteBufferTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
+    uint32_t expectedWriteBufferTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
     ASSERT_EQ(expectedWriteBufferTotalSegments, pm.GetSizeInfo(PartitionType::WRITE_BUFFER)->totalSegments);
+
+    uint64_t ssdPartStartLba = ArrayConfig::SSD_PARTITION_START_LBA;
+    const PartitionPhysicalSize* jourPs = pm.GetPhysicalSize(PartitionType::JOURNAL_SSD);
+    const PartitionPhysicalSize* metaPs = pm.GetPhysicalSize(PartitionType::META_SSD);
+    const PartitionPhysicalSize* dataPs = pm.GetPhysicalSize(PartitionType::USER_DATA);
+    uint64_t expectedDataLastLba = dataPs->startLba + 
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        dataPs->blksPerChunk * dataPs->stripesPerSegment *
+        expectedDataTotalSegments -1;
+
+    ASSERT_EQ(ssdPartStartLba, jourPs->startLba);
+    ASSERT_EQ(jourPs->lastLba + 1, metaPs->startLba);
+    ASSERT_EQ(metaPs->lastLba + 1, dataPs->startLba);
+    ASSERT_EQ(expectedDataLastLba, pm.GetPhysicalSize(PartitionType::USER_DATA)->lastLba);
 
     // When 2: PartitionManager deletes all partitions
     pm.DeletePartitions();
 
     // Then 2
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::JOURNAL_SSD));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::USER_DATA));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_NVM));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_SSD));
@@ -203,14 +222,18 @@ TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
     int actual = pm.CreatePartitions(buf.front(), data, RaidTypeEnum::RAID10, RaidTypeEnum::RAID5, &svc);
     // Then 1: validate against expected number of segments of each partition type.
     ASSERT_EQ(0, actual);
-    int expectedNvmTotalSegments = DIV_ROUND_UP(
+    uint32_t expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+
+    uint32_t expectedJournalPartSegments = ArrayConfig::JOURNAL_PART_SEGMENT_SIZE;
+    ASSERT_EQ(expectedJournalPartSegments, pm.GetSizeInfo(PartitionType::JOURNAL_SSD)->totalSegments);
+
+    uint32_t expectedMetaPartTotalSegments = DIV_ROUND_UP(
         HETERO_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE * ArrayConfig::META_SSD_SIZE_RATIO,
         (uint64_t)(100));
-    ASSERT_EQ(expectedNvmTotalSegments, pm.GetSizeInfo(PartitionType::META_SSD)->totalSegments);
+    ASSERT_EQ(expectedMetaPartTotalSegments, pm.GetSizeInfo(PartitionType::META_SSD)->totalSegments);
 
-    int expectedMbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    int expectedDataTotalSegments =
-        HETERO_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedNvmTotalSegments;
+    uint32_t expectedDataTotalSegments =
+        HETERO_DEV_SIZE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE - expectedMbrSegments - expectedJournalPartSegments - expectedMetaPartTotalSegments;
     ASSERT_EQ(expectedDataTotalSegments, pm.GetSizeInfo(PartitionType::USER_DATA)->totalSegments);
 
     int expectedMetaNvmTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
@@ -219,10 +242,25 @@ TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
     int expectedWriteBufferTotalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
     ASSERT_EQ(expectedWriteBufferTotalSegments, pm.GetSizeInfo(PartitionType::WRITE_BUFFER)->totalSegments);
 
+    uint64_t ssdPartStartLba = ArrayConfig::SSD_PARTITION_START_LBA;
+    const PartitionPhysicalSize* jourPs = pm.GetPhysicalSize(PartitionType::JOURNAL_SSD);
+    const PartitionPhysicalSize* metaPs = pm.GetPhysicalSize(PartitionType::META_SSD);
+    const PartitionPhysicalSize* dataPs = pm.GetPhysicalSize(PartitionType::USER_DATA);
+    uint64_t expectedDataLastLba = dataPs->startLba + 
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        dataPs->blksPerChunk * dataPs->stripesPerSegment *
+        expectedDataTotalSegments -1;
+
+    ASSERT_EQ(ssdPartStartLba, jourPs->startLba);
+    ASSERT_EQ(jourPs->lastLba + 1, metaPs->startLba);
+    ASSERT_EQ(metaPs->lastLba + 1, dataPs->startLba);
+    ASSERT_EQ(expectedDataLastLba, pm.GetPhysicalSize(PartitionType::USER_DATA)->lastLba);
+
     // When 2: PartitionManager deletes all partitions
     pm.DeletePartitions();
 
     // Then 2
+    ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::JOURNAL_SSD));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::USER_DATA));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_NVM));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_SSD));

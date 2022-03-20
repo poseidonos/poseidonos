@@ -41,6 +41,7 @@ class PartitionPhysicalSize
 {
 public:
     uint64_t startLba = 0;
+    uint64_t lastLba = 0;
     uint32_t blksPerChunk = 0;
     uint32_t chunksPerStripe = 0;
     uint32_t stripesPerSegment = 0;

@@ -65,7 +65,7 @@ SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
         out[option.partitionType] = base;
         if (next != nullptr)
         {
-            uint64_t nextLba = base->GetLastLba();
+            uint64_t nextLba = base->GetLastLba() + 1;
             return next->Build(nextLba, out);
         }
     }
@@ -99,7 +99,7 @@ SsdPartitionBuilder::_GetSegmentCount(void)
     else if (option.partitionType == PartitionType::USER_DATA)
     {
         uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-        return ssdTotalSegments - mbrSegments - metaSegCnt;
+        return ssdTotalSegments - mbrSegments - metaSegCnt - ArrayConfig::JOURNAL_PART_SEGMENT_SIZE;
     }
     return 0;
 }
