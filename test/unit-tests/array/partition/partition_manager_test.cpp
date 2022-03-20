@@ -136,7 +136,7 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     const PartitionPhysicalSize* jourPs = pm.GetPhysicalSize(PartitionType::JOURNAL_SSD);
     const PartitionPhysicalSize* metaPs = pm.GetPhysicalSize(PartitionType::META_SSD);
     const PartitionPhysicalSize* dataPs = pm.GetPhysicalSize(PartitionType::USER_DATA);
-    uint64_t expectedDataLastLba = dataPs->startLba + 
+    uint64_t expectedDataLastLba = dataPs->startLba +
         static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
         dataPs->blksPerChunk * dataPs->stripesPerSegment *
         expectedDataTotalSegments -1;
@@ -246,7 +246,7 @@ TEST(PartitionManager, Create_testIfBetweenHeterogeneousDevicesSuccessfully)
     const PartitionPhysicalSize* jourPs = pm.GetPhysicalSize(PartitionType::JOURNAL_SSD);
     const PartitionPhysicalSize* metaPs = pm.GetPhysicalSize(PartitionType::META_SSD);
     const PartitionPhysicalSize* dataPs = pm.GetPhysicalSize(PartitionType::USER_DATA);
-    uint64_t expectedDataLastLba = dataPs->startLba + 
+    uint64_t expectedDataLastLba = dataPs->startLba +
         static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
         dataPs->blksPerChunk * dataPs->stripesPerSegment *
         expectedDataTotalSegments -1;
