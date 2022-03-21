@@ -454,9 +454,9 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
     }
     else
     {
-        int error = EID(RECOVER_INVALID_LBA);
-        POS_TRACE_ERROR(error, "part:{}, req_lba:{}", PARTITION_TYPE_STR[type], lba);
-        return error;
+        int eid = EID(RECOVER_INVALID_LBA);
+        POS_TRACE_INFO(eid, "part:{}, req_lba:{}", PARTITION_TYPE_STR[type], lba);
+        return eid;
     }
 }
 
