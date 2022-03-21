@@ -35,9 +35,6 @@
 #include "src/metafs/config/metafs_config.h"
 #include "src/metafs/log/metafs_log.h"
 #include "src/include/array_config.h"
-#ifdef LEGACY_IOPATH
-#include "mss_disk_handler.h"
-#endif
 
 #include <list>
 #include <utility>

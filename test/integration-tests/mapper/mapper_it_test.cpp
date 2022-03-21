@@ -35,7 +35,6 @@
 
 namespace pos
 {
-#define IBOF_CONFIG_USE_MOCK_FS
 void
 MapperTest::SetUp(void)
 {

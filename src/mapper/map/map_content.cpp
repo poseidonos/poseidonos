@@ -34,6 +34,7 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/mapper/map/map_content.h"
 #include "src/mapper/map/map_io_handler.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 
 #include <string>
 

@@ -35,9 +35,7 @@
 #include "src/mapper/reversemap/reversemap_manager.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/include/meta_const.h"
-#ifndef IBOF_CONFIG_USE_MOCK_FS
 #include "src/metafs/metafs_file_intf.h"
-#endif
 
 #include <string>
 
@@ -88,7 +86,7 @@ ReverseMapManager::Init(void)
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
     {
-        revMapWholefile = new FILESTORE("RevMapWhole", addrInfo->GetArrayId());
+        revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId());
     }
     else
     {

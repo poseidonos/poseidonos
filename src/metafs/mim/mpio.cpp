@@ -213,14 +213,7 @@ Mpio::CheckDataIntegrity(void)
     {
         integrityOk = false;
     }
-#if 0 // MDI implementation
 
-    if (false == mdpage.CheckMetaParity())
-    {
-        integrityOk = false;
-        assert(false);
-    }
-#endif
     return integrityOk;
 }
 

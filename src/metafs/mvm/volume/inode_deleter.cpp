@@ -33,8 +33,6 @@
 #include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/metafs/mvm/volume/inode_deleter.h"
 
-#define PRINT_INFO 0
-
 namespace pos
 {
 InodeDeleter::InodeDeleter(InodeManager* _inodeMgr)
@@ -55,17 +53,16 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
     MetaLpnType count = inodeMgr->GetExtent(fd, extents);
     assert(count > 0);
 
-#if (PRINT_INFO == 1)
-    std::cout << "========= DeleteFileInode: " << *reqMsg.fileName << std::endl;
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "DeleteFileInode, fd: {}, fileName: {}",
+        reqMsg.fd, *reqMsg.fileName);
+
     for (auto& extent : extents)
     {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
-        totalLpnCount += extent.GetCount();
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "target extent, startLpn: {}, lpnCount: {}",
+            extent.GetStartLpn(), extent.GetCount());
     }
-    std::cout << "lpn count: " << totalLpnCount << std::endl;
-#endif
 
     MetaFileInode& inode = inodeMgr->GetFileInode(fd);
     uint32_t entryIdx = inode.GetIndexInInodeTable();
@@ -81,9 +78,9 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
         inodeMgr->extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
 
         POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Release an extent, startLpn={}, count={}",
-        extent.GetStartLpn(), extent.GetCount());
-        totalLpnCount += extent.GetCount();
+            "[Metadata File] Release an extent, startLpn={}, count={}",
+            extent.GetStartLpn(), extent.GetCount());
+            totalLpnCount += extent.GetCount();
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,

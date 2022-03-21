@@ -30,11 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/mapper/map/map_io_handler.h"
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
 #include "src/mapper/i_map_flush.h"
 #include "src/mapper/map/event_mpage_async_io.h"
-#include "src/mapper/map/map_io_handler.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "src/metafs/metafs_file_intf.h"
 
 namespace pos
 {
@@ -70,7 +73,7 @@ MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize)
     if (addrInfo->IsUT() == false)
     {
         assert(file == nullptr);
-        file = new FILESTORE(fileName, addrInfo->GetArrayId());
+        file = new MetaFsFileIntf(fileName, addrInfo->GetArrayId());
     }
     else
     {

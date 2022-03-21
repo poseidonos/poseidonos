@@ -50,10 +50,6 @@
 #include "src/metafs/storage/mss.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
-#if defined(IBOFOS_BACKEND_IO)
-#include "metafs_aio_completer.h"
-#endif
-
 namespace pos
 {
 MioHandler::MioHandler(const int threadId, const int coreId,
@@ -572,13 +568,6 @@ MioHandler::_HandleMioCompletion(void* data)
 void
 MioHandler::_SendAioDoneEvent(void* aiocb)
 {
-    // create event for callback by event worker
-#if defined(IBOFOS_BACKEND_IO)
-    MetaFsAioCompleter* event =
-        new MetaFsAioCompleter(static_cast<MetaFsAioCbCxt*>(aiocb));
-    pos::EventSchedulerSingleton::Instance()->EnqueueEvent(event);
-#else
     (reinterpret_cast<MetaFsAioCbCxt*>(aiocb))->InvokeCallback();
-#endif
 }
 } // namespace pos

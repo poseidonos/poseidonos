@@ -17,7 +17,6 @@ SRCS += \
 	mss.cpp \
 	mss_utils.cpp \
 	mss_status_callback.cpp \
-    mss_disk_handler.cpp \
     mss_disk_inplace.cpp \
     mss_disk_place.cpp \
     mss_on_disk.cpp

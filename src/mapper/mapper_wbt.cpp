@@ -30,13 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/mapper/mapper_wbt.h"
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 
-#include "src/mapper/mapper_wbt.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 
 namespace pos
 {

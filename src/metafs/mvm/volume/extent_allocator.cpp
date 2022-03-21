@@ -35,8 +35,6 @@
 
 #include <algorithm>
 
-#define PRINT_INFO 0
-
 namespace pos
 {
 ExtentAllocator::ExtentAllocator(void)
@@ -102,24 +100,26 @@ ExtentAllocator::AllocExtents(MetaLpnType lpnCnt)
         _SortAndCalcAvailable(false, newLpnCnt);
     }
 
-#if (PRINT_INFO == 1)
-    std::cout << "[ExtentAllocator] base=" << fileRegionBaseLpnInVolume;
-    std::cout << ", last=" << maxFileRegionLpn;
-    std::cout << ", available=" << availableLpnCount << std::endl;
-    std::cout << "[ExtentAllocator] requested count="
-        << lpnCnt << std::endl;
-    std::cout << "[ExtentAllocator] allocated extent count="
-        << result.size() << std::endl;
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "[ExtentAllocator] base: {}, last: {}, available: {}",
+        fileRegionBaseLpnInVolume, maxFileRegionLpn, availableLpnCount);
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "[ExtentAllocator] requested lpn count: {}, allocated extent count: {}",
+        lpnCnt, result.size());
 
     for (auto& extent : result)
     {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "allocated extent, startLpn: {}, lpnCount: {}",
+            extent.GetStartLpn(), extent.GetCount());
     }
-#endif
 
-    assert(result.size() <= MetaFsConfig::MAX_PAGE_MAP_CNT);
+    if (result.size() > MetaFsConfig::MAX_PAGE_MAP_CNT)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "It has exceeded the maximum extent count that can be allocated.");
+        assert(0);
+    }
 
     return result;
 }

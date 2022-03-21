@@ -41,14 +41,6 @@
 
 namespace pos
 {
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-class MockFileIntf;
-#define FILESTORE MockFileIntf
-#else
-class MetaFsFileIntf;
-#define FILESTORE MetaFsFileIntf
-#endif
-
 class MetaFileIntf
 {
 public:

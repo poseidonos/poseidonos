@@ -40,7 +40,6 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/msc/metafs_mbr_mgr.h"
 #include "meta_io_manager.h"
-#include "metafs_aio_completer.h"
 #include "metafs_log.h"
 #include "metafs_mem_lib.h"
 #include "metafs_control_request.h"

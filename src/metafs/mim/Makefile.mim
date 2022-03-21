@@ -39,14 +39,12 @@ MIM_SRCS += \
 	mpio_allocator.cpp \
 	read_mpio.cpp \
 	write_mpio.cpp \
-	mpio_list_context.cpp \
 	mdpage.cpp \
 	metafs_io_handler_base.cpp \
 	mio_handler.cpp \
 	scalable_meta_io_worker.cpp \
 	mpio_handler.cpp \
 	mfs_io_range_overlap_chker.cpp \
-	metafs_aio_completer.cpp \
 	mdpage_buf_pool.cpp
 
 endif

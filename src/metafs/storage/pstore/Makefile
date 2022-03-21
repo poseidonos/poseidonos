@@ -20,7 +20,6 @@ OBJECT_FILES = $(filter-out $(wildcard $(IBOF_SRC_DIR)/bin/obj/main.o) \
 			   , $(wildcard $(IBOF_SRC_DIR)/bin/obj/*.o))
 
 OBJECT_FILES += $(OBJ_DIR)/mss_disk_inplace.o
-OBJECT_FILES += $(OBJ_DIR)/mss_disk_handler.o
 OBJECT_FILES += $(OBJ_DIR)/mss_status_callback.o
 OBJECT_FILES += $(OBJ_DIR)/mss_disk_place.o
 OBJECT_FILES += $(OBJ_DIR)/start_ibof.o
@@ -95,9 +94,6 @@ else
 $(MSS_TARGET) : $(OBJECT_FILES)
 	g++ -o $@ $^ $(PSTORE_LDFLAGS)
 endif
-
-$(OBJ_DIR)/mss_disk_handler.o : $(SRC_DIR)/mss_disk_handler.cpp
-	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/mss_disk_place.o : $(SRC_DIR)/mss_disk_place.cpp
 	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<

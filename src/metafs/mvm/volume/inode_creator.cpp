@@ -33,8 +33,6 @@
 #include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/metafs/mvm/volume/inode_creator.h"
 
-#define PRINT_INFO 0
-
 namespace pos
 {
 InodeCreator::InodeCreator(InodeManager* _inodeMgr)
@@ -57,17 +55,16 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
     MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
     std::vector<MetaFileExtent> extents = inodeMgr->extentAllocator->AllocExtents(requestLpnCnt);
 
-#if (PRINT_INFO == 1)
-    std::cout << "========= CreateFileInode: " << *reqMsg.fileName << std::endl;
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "CreateFileInode, extent count: {}",
+        extents.size());
+
     for (auto& extent : extents)
     {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
-        totalLpnCount += extent.GetCount();
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "target extent, startLpn: {}, lpnCount: {}",
+            extent.GetStartLpn(), extent.GetCount());
     }
-    std::cout << "lpn count: " << totalLpnCount << std::endl;
-#endif
 
     MetaFileInodeCreateReq inodeReq;
     inodeReq.Setup(reqMsg, fd, inodeMgr->mediaType, &extents);
@@ -82,7 +79,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
         POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "[Metadata File] Allocate an extent, startLpn={}, count={}",
             extent.GetStartLpn(), extent.GetCount());
-            totalLpnCount += extent.GetCount();
+        totalLpnCount += extent.GetCount();
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -90,7 +87,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
         (int)inodeMgr->mediaType, fd, *reqMsg.fileName, totalLpnCount);
 
     std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-                            inodeMgr->extentAllocator->GetAllocatedExtentList();
+        inodeMgr->extentAllocator->GetAllocatedExtentList();
     inodeMgr->inodeHdr->SetFileExtentContent(usedExtentsInVolume);
 
     if (true != inodeMgr->SaveContent())

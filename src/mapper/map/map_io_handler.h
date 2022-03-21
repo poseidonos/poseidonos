@@ -36,6 +36,7 @@
 #include "src/mapper/map/map_content.h"
 #include "src/mapper/map/sequential_page_finder.h"
 #include "src/meta_file_intf/async_context.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 #include <string>
 

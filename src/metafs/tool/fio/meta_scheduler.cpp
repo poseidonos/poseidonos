@@ -114,7 +114,7 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
 
     POS_EVENT_ID rc_io;
     assert(fd != INT_MAX);
-#if 1
+
     MetaFsIoOpcode opcode = (io->ioType == IO_TYPE::READ) ? MetaFsIoOpcode::Read : MetaFsIoOpcode::Write;
     uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
@@ -137,23 +137,6 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
         rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->io->SubmitIO(aiocb);
     }
     g_meta_outstandingCmd++;
-
-#else // testing for sync io
-    switch (io->ioType)
-    {
-        case IO_TYPE::READ:
-        {
-            rc_io = metaFsMgr.io.Read(fd, (uint64_t)io->offset, (uint64_t)io->length, io->iov->iov_base);
-        }
-        break;
-        case IO_TYPE::WRITE:
-        {
-            rc_io = metaFsMgr.io.Write(fd, (uint64_t)io->offset, (uint64_t)io->length, io->iov->iov_base);
-        }
-        break;
-    }
-    io->complete_cb(io, 0);
-#endif
 
     return (POS_EVENT_ID::SUCCESS == rc_io) ? 0 : 1;
 }

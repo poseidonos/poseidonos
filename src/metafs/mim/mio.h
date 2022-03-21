@@ -40,7 +40,6 @@
 #include "metafs_io_request.h"
 #include "mim_state.h"
 #include "mpio.h"
-#include "mpio_list_context.h"
 #include "mpio_allocator.h"
 #include "metafs_aiocb_cxt.h"
 #include "src/metafs/common/metafs_stopwatch.h"
@@ -135,7 +134,6 @@ protected:
     void _PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
         MetaLpnType lpn, FileSizeType byteOffset, FileSizeType byteSize, FileBufType buf,
         MetaLpnType lpnCnt, uint32_t mpio_id);
-    void _MarkMpioComplete(Mpio& mpio);
     void _FinalizeMpio(Mpio& mpio);
     void _NotifyIoCompletionToClient(void);
     Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
@@ -145,7 +143,6 @@ protected:
 
     MetaFsIoRequest* originReq;
     MetaIoOpcode opCode;
-    MpioListContext mpioListCxt;
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
     MfsError error;

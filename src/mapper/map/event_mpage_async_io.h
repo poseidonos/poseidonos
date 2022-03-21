@@ -36,6 +36,7 @@
 #include "src/mapper/map/map.h"
 #include "src/mapper/map/map_header.h"
 #include "src/meta_file_intf/async_context.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {

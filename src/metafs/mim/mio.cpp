@@ -40,7 +40,6 @@
 #include "write_mpio.h"
 
 #include <string>
-// #include <cstdio>
 
 namespace pos
 {
@@ -125,7 +124,7 @@ Mio::Reset(void)
         delete originReq;
         originReq = nullptr;
     }
-    mpioListCxt.Reset();
+
     ResetTimestamp();
 }
 
@@ -172,11 +171,8 @@ Mio::_HandleMpioDone(void* data)
 
     _FinalizeMpio(*mpio);
 
-    if (mpioListCxt.IsAllMpioDone())
-    {
-        SetNextState(MioState::Complete);
-        ExecuteAsyncState();
-    }
+    SetNextState(MioState::Complete);
+    ExecuteAsyncState();
 }
 
 bool
@@ -282,7 +278,7 @@ The host I/O issued as Mio data structure, and the Mio is consisted with several
 void
 Mio::_BuildMpioMap(void)
 {
-    uint32_t totalMpioCnt, curLpn, remainingBytes, byteOffsetInChunk, byteSize;
+    uint32_t curLpn, remainingBytes, byteOffsetInChunk, byteSize;
     FileBufType curUserBuf;
 
     remainingBytes = originReq->byteSize;
@@ -293,21 +289,11 @@ Mio::_BuildMpioMap(void)
     if (byteOffsetInChunk + originReq->byteSize < fileDataChunkSize)
     {
         byteSize = originReq->byteSize;
-        totalMpioCnt = 1;
     }
     else
     {
         byteSize = fileDataChunkSize - byteOffsetInChunk;
-        if (0 == byteOffsetInChunk)
-        {
-            totalMpioCnt = (remainingBytes + fileDataChunkSize - 1) / fileDataChunkSize;
-        }
-        else
-        {
-            totalMpioCnt = (((remainingBytes - byteSize) + fileDataChunkSize - 1) / fileDataChunkSize) + 1;
-        }
     }
-    mpioListCxt.SetTotalMpioCntForExecution(totalMpioCnt);
 
     MpioType ioType = _LookupMpioType(originReq->reqType);
 
@@ -330,7 +316,6 @@ Mio::_BuildMpioMap(void)
         Mpio* mpio = _AllocMpio(mpioIoInfo, byteSize != fileDataChunkSize /* partialIO */);
         mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
         mpio->SetPriority(originReq->priority);
-        mpioListCxt.PushMpio(*mpio);
 
         if (MpioCacheState::FirstRead == mpio->GetCacheState())
         {
@@ -402,13 +387,6 @@ Mio::IsSyncIO(void)
     return originReq->ioMode == MetaIoMode::Sync;
 }
 
-void
-Mio::_MarkMpioComplete(Mpio& mpio)
-{
-    SPIN_LOCK_GUARD_IN_SCOPE(mpioListCxtLock);
-    mpioListCxt.MarkMpioCompletion(mpio);
-}
-
 bool
 Mio::Init(MioState expNextState)
 {
@@ -444,8 +422,6 @@ Mio::_FinalizeMpio(Mpio& mpio)
     {
         this->error = mpio.GetErrorStatus();
     }
-
-    _MarkMpioComplete(mpio);
 }
 
 bool

@@ -33,7 +33,6 @@
 #pragma once
 
 #include "enum_iterator.h"
-#include "metafs_assert.h"
 #include "metafs_common_const.h"
 #include "metafs_config.h"
 #include "metafs_log.h"

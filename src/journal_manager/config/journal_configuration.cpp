@@ -42,9 +42,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
-#ifndef IBOF_CONFIG_USE_MOCK_FS
 #include "src/metafs/metafs_file_intf.h"
-#endif
 
 namespace pos
 {

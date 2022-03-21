@@ -34,9 +34,8 @@
 #include "src/admin/meta_direction.h"
 #include "src/admin/smart_log_mgr.h"
 #include "src/meta_file_intf/mock_file_intf.h"
-#ifndef IBOF_CONFIG_USE_MOCK_FS
 #include "src/metafs/metafs_file_intf.h"
-#endif
+
 namespace pos
 {
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
@@ -46,7 +45,7 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
   smartLogMgr(smartLogMgr)
 {
     fileName = "SmartLogPage.bin";
-    smartLogFile = new FILESTORE(fileName, arrayId);
+    smartLogFile = new MetaFsFileIntf(fileName, arrayId);
 }
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile)
 : loaded(false),

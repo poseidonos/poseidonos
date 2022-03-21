@@ -31,9 +31,9 @@
  */
 
 #include "mf_inode.h"
-#include "metafs_common_const.h"
 
-#define PRINT_INFO 0
+#include "src/metafs/include/metafs_common_const.h"
+#include "src/metafs/log/metafs_log.h"
 
 namespace pos
 {
@@ -90,23 +90,18 @@ MetaFileInode::BuildNewEntry(MetaFileInodeCreateReq& req, FileSizeType dataChunk
     data.basic.field.versionSignature = MetaFsConfig::SIGNATURE_INODE_VERSION;
     data.basic.field.inUse = true;
 
-#if (PRINT_INFO == 1)
-    std::cout << "New Inode" << std::endl;
-    std::cout << "fd=" << req.fd<< std::endl;
-    std::cout << "fileName=" << *req.fileName << std::endl;
-    std::cout << "fileByteSize=" << req.fileByteSize << std::endl;
-    std::cout << "pagemapCnt=" << data.basic.field.pagemapCnt << std::endl;
-#endif
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "New Inode, fd: {}, fileName: {}, fileByteSize: {}, pagemapCnt: {}",
+        req.fd, *req.fileName, req.fileByteSize, data.basic.field.pagemapCnt);
 
-    for (int i = 0; i < (int)req.extentList->size(); ++i)
+        for (int i = 0; i < (int)req.extentList->size(); ++i)
     {
         data.basic.field.pagemap[i] = req.extentList->at(i);
 
-#if (PRINT_INFO == 1)
-        std::cout << "pagemap[" << i << "]=";
-        std::cout << data.basic.field.pagemap[i].GetStartLpn();
-        std::cout << ", " << data.basic.field.pagemap[i].GetCount() << std::endl;
-#endif
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "pagemap[{}] {}, {}",
+            i, data.basic.field.pagemap[i].GetStartLpn(),
+            data.basic.field.pagemap[i].GetCount());
     }
 }
 
