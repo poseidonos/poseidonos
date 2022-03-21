@@ -35,7 +35,7 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
         IODirection::WRITE,
         _, expectedAddr, BLOCKS_IN_CHUNK,
         PartitionType::WRITE_BUFFER, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
-    
+
     bool success = readStripeCompletion.Execute();
     EXPECT_EQ(success, true);
 
@@ -69,7 +69,7 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
         IODirection::WRITE,
         _, expectedAddr, BLOCKS_IN_CHUNK,
         PartitionType::WRITE_BUFFER, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
-    
+
     bool success = readStripeCompletion.Execute();
     EXPECT_EQ(success, false);
 
