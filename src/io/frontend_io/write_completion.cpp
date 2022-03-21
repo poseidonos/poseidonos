@@ -44,7 +44,6 @@
 #include "src/io/frontend_io/write_for_parity.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/event_scheduler/event_scheduler.h"
 #include "src/allocator/event/stripe_put_event.h"
 #include "src/io/backend_io/flush_completion.h"
 
@@ -54,19 +53,18 @@ WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayId()),
       EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-      EventSchedulerSingleton::Instance())
+      ArrayMgr())
 {
 }
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
     IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow,
-    EventScheduler* inputEventScheduler)
+    IArrayMgmt* arrayMgr)
 : Callback(isReactorNow, CallbackType_WriteCompletion),
   volumeIo(input),
   iWBStripeAllocator(iWBStripeAllocator),
-  eventScheduler(inputEventScheduler)
+  arrayMgr(arrayMgr)
 {
-    arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
 }
 
 WriteCompletion::~WriteCompletion()
@@ -139,7 +137,8 @@ WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
 bool
 WriteCompletion::_RequestFlush(Stripe* stripe)
 {
-    bool requestFlushSuccessful = true; 
+    bool requestFlushSuccessful = true;
+    IArrayInfo* arrayInfo = arrayMgr->GetInfo(volumeIo->GetArrayId())->arrayInfo;
     EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId(),
         arrayInfo->IsWriteThroughEnabled()));
 

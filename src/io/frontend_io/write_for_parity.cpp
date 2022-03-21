@@ -42,7 +42,6 @@ WriteForParity::WriteForParity(VolumeIoSmartPtr inputVolumeIo, bool isFrontEnd)
 : Callback(isFrontEnd),
   volumeIo(inputVolumeIo)
 {
-
 }
 
 bool
@@ -54,7 +53,7 @@ WriteForParity::_DoSpecificJob(void)
     };
     uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
     LogicalByteAddr byteAddr = {
-        .blkAddr = blkAddr, 
+        .blkAddr = blkAddr,
         .byteOffset = 0,
         .byteSize =(uint32_t)ChangeBlockToByte(blockCount)
     };
@@ -64,11 +63,11 @@ WriteForParity::_DoSpecificJob(void)
             IODirection::WRITE, volumeIo->GetBuffer(), byteAddr,
             PartitionType::WRITE_BUFFER, nullptr, volumeIo->GetArrayId());
 
-    if ( IOSubmitHandlerStatus::SUCCESS != ioStatus)
+    if (IOSubmitHandlerStatus::SUCCESS != ioStatus)
     {
         return false;
     }
     return true;
 }
 
-} //namespace pos
+} // namespace pos

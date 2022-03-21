@@ -59,7 +59,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
 
     // When : constructor is called
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr, false);
 
     // Then : Do nothing
 }
@@ -69,7 +69,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr, false);
     const uint32_t BUFFER_SIZE = 4;
     uint32_t testBuffer[BUFFER_SIZE];
     uint32_t actualBufferSize;
@@ -82,7 +82,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
     {
         dataBuffer.push_back(static_cast<void*>(&testBuffer[i]));
     }
-    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::SUCCESS));
+    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId, _)).WillByDefault(Return(IOSubmitHandlerStatus::SUCCESS));
     ON_CALL(mockStripe, DataBufferBegin()).WillByDefault(Return(static_cast<std::vector<void*>::iterator>(dataBuffer.begin())));
     ON_CALL(mockStripe, DataBufferEnd()).WillByDefault(Return(static_cast<std::vector<void*>::iterator>(dataBuffer.end())));
     flushSubmission.Execute();
@@ -97,33 +97,33 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr, false);
     bool actualReturn;
     int arrayId = 0;
 
     // When 1: Add SubmitAsumcIO return SUCCESS
-    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::SUCCESS));
+    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId, _)).WillByDefault(Return(IOSubmitHandlerStatus::SUCCESS));
     actualReturn = flushSubmission.Execute();
 
     // Then 1: Return true
     ASSERT_EQ(actualReturn, true);
 
     // When 2: Add SubmitAsumcIO return FAIL_IN_SYSTEM_STOP
-    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP));
+    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId, _)).WillByDefault(Return(IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP));
     actualReturn = flushSubmission.Execute();
 
     // Then 2: Return true
     ASSERT_EQ(actualReturn, true);
 
     // When 3: Add SubmitAsumcIO return FAIL
-    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::FAIL));
+    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId, _)).WillByDefault(Return(IOSubmitHandlerStatus::FAIL));
     actualReturn = flushSubmission.Execute();
 
     // Then 3: Return false
     ASSERT_EQ(actualReturn, false);
 
     // When 4: Add SubmitAsumcIO return TRYLOCK_FAIL
-    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId)).WillByDefault(Return(IOSubmitHandlerStatus::TRYLOCK_FAIL));
+    ON_CALL(mockIIOSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayId, _)).WillByDefault(Return(IOSubmitHandlerStatus::TRYLOCK_FAIL));
     actualReturn = flushSubmission.Execute();
 
     // Then 4: Return false
@@ -136,7 +136,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     NiceMock<MockIIOTranslator> mockIIOTranslator;
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, &mockIIOTranslator);
+    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, &mockIIOTranslator, false);
     bool actualReturn;
 
     // When : Translate returns value except SUCCESS(0)

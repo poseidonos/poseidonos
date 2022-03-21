@@ -116,6 +116,7 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
         (src.blkAddr.stripeId * logicalSize.blksPerStripe + src.blkAddr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
         src.byteOffset;
+
     return 0;
 }
 

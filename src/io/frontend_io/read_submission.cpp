@@ -36,7 +36,6 @@
 
 #include "spdk/event.h"
 #include "src/array/array.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/array/device/array_device.h"
 #include "src/device/base/ublock_device.h"
 #include "src/dump/dump_module.h"

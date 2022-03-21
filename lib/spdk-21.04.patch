@@ -750,6 +750,19 @@ index 29d76f333..dcd28d5b7 100644
  	} else {
  		ctrlr->outstanding_aborts++;
  		return nvme_ctrlr_submit_admin_request(ctrlr, req);
+diff --git lib/nvme/nvme_pcie_common.c lib/nvme/nvme_pcie_common.c
+index 5bf8a841f..f6d836927 100644
+--- lib/nvme/nvme_pcie_common.c
++++ lib/nvme/nvme_pcie_common.c
+@@ -812,7 +812,7 @@ nvme_pcie_qpair_process_completions(struct spdk_nvme_qpair *qpair, uint32_t max_
+ 	while (1) {
+ 		cpl = &pqpair->cpl[pqpair->cq_head];
+ 
+-		if (!next_is_valid && cpl->status.p != pqpair->flags.phase) {
++		if (cpl->status.p != pqpair->flags.phase) {
+ 			break;
+ 		}
+ 
 diff --git lib/nvmf/Makefile lib/nvmf/Makefile
 index e7eab45b9..b5d7bd790 100644
 --- lib/nvmf/Makefile

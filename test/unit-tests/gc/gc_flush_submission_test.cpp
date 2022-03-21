@@ -172,7 +172,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
     EXPECT_CALL(*flowControl, GetToken(_, _)).WillOnce(Return(partitionLogicalSize.blksPerStripe));
     EXPECT_CALL(*blockAllocator, AllocateGcDestStripe(testVolumeId)).WillOnce(Return(stripe));
 
-    EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayIndex)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
+    EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayIndex, _)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
     // when execute
     // then submit async io for gc stripe flush

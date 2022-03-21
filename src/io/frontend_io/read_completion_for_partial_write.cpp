@@ -85,9 +85,9 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
 
         // If UT is executed, translator will be input.
         // otherwise, translator will be nullptr
-        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId(), volumeIo->GetUserLsid());
         if (likely(translator == nullptr))
         {
+            Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId(), volumeIo->GetUserLsid());
             translator = &translatorLocal;
         }
         void* mem = volumeIo->GetBuffer();
@@ -121,7 +121,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
                         bool ret  = writeForParity.Execute();
                         if (ret == false)
                         {
-                            POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_WRITE_FOR_PARITY_FAILED;
+                            POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
                             POS_TRACE_ERROR(static_cast<int>(eventId),
                                 "Failed to copy user data to dram for parity");
                         }

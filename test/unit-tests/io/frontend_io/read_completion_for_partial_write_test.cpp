@@ -2,6 +2,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
@@ -89,7 +90,8 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_HandleCopyDone
     VolumeIoSmartPtr volumeIoOrigin(mockVolumeIoOrigin);
     StripeAddr stripeAddr = {.stripeLoc = IN_USER_AREA, .stripeId = 0};
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    MockTranslator* translator = new NiceMock<MockTranslator>(vsa, volumeIo->GetArrayId());
+    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
+    MockTranslator* translator = new NiceMock<MockTranslator>(vsa, volumeIo->GetArrayId(), iArrayInfo, UNMAP_STRIPE);
     CopyParameter* copyParameter = new CopyParameter(volumeIo, translator, true);
     BufferEntry bufferEntry((void *)0xff00, 1);
     PhysicalEntry physicalEntry;

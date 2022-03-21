@@ -119,7 +119,6 @@ SubmitAsyncWrite::Execute(
     {
         if (parityOnly == true)
         {
-            
             IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
             POS_EVENT_ID eventId = POS_EVENT_ID::PARITY_ONLY_NOT_SUPPORTED;

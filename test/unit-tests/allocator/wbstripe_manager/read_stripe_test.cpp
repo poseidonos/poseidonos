@@ -35,7 +35,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
         IODirection::READ,
         _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
-        PartitionType::USER_DATA, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
+        PartitionType::USER_DATA, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
     bool success = readStripe.Execute();
     EXPECT_EQ(success, true);
@@ -70,7 +70,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
         IODirection::READ,
         _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
-        PartitionType::USER_DATA, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
+        PartitionType::USER_DATA, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
 
     bool success = readStripe.Execute();
     EXPECT_EQ(success, false);

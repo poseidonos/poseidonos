@@ -52,7 +52,7 @@ namespace pos
 {
 FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled)
 : FlushSubmission(inputStripe,
-      IIOSubmitHandler::GetInstance(), arrayId, 
+      IIOSubmitHandler::GetInstance(), arrayId,
       ArrayService::Instance()->Getter()->GetTranslator(), isWTEnabled)
 {
 }

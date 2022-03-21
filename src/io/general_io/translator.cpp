@@ -54,7 +54,7 @@ thread_local int Translator::recentArrayId = ArrayMgmtPolicy::MAX_ARRAY_CNT;
 
 Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
     int arrayId, bool isRead, IVSAMap* iVSAMap_, IStripeMap* iStripeMap_, IWBStripeAllocator* iWBStripeAllocator_,
-    IIOTranslator* iTranslator_)
+    IIOTranslator* iTranslator_, IArrayInfo* arrayInfo_)
 : iVSAMap(iVSAMap_),
   iStripeMap(iStripeMap_),
   iWBStripeAllocator(iWBStripeAllocator_),
@@ -65,7 +65,8 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
   lastLsidEntry{IN_USER_AREA, UNMAP_STRIPE},
   isRead(isRead),
   volumeId(volumeId),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  arrayInfo(arrayInfo_)
 {
     if (nullptr == iVSAMap)
     {
@@ -106,8 +107,13 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
             lsidRefResults[blockIndex] = _GetLsidRefResult(rba, vsa);
         }
     }
+    if (nullptr == arrayInfo)
+    {
+        arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
+    }
 }
-Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid)
+
+Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid, IArrayInfo* arrayInfo_)
 : iTranslator(ArrayService::Instance()->Getter()->GetTranslator()),
   startRba(0),
   blockCount(ONLY_ONE),
@@ -116,7 +122,8 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
   isRead(false),
   volumeId(UINT32_MAX),
   arrayId(arrayId),
-  userLsid(userLsid)
+  userLsid(userLsid),
+  arrayInfo(arrayInfo_)
 {
     if (nullptr == iVSAMap)
     {
@@ -134,6 +141,10 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
     if (likely(iStripeMap != nullptr))
     {
         lsidRefResults[0] = _GetLsidRefResult(startRba, vsaArray[0]);
+    }
+    if (nullptr == arrayInfo)
+    {
+        arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
     }
 }
 
@@ -283,9 +294,7 @@ Translator::_GetLsa(uint32_t blockIndex)
     {
         vsa = iVSAMap->GetRandomVSA(startRba + blockIndex);
     }
-    
     StripeId stripeId;
-    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
     if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
     {
         stripeId = userLsid;
@@ -331,7 +340,6 @@ Translator::GetPba(void)
 PartitionType
 Translator::_GetPartitionType(uint32_t blockIndex)
 {
-    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
     if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
     {
         return USER_DATA;

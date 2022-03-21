@@ -32,7 +32,6 @@
 
 #include "src/bio/volume_io.h"
 
-#include "src/array_models/interface/i_array_info.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/pos_event_id.hpp"
@@ -50,24 +49,36 @@ const VirtualBlkAddr VolumeIo::INVALID_VSA = {.stripeId = UNMAP_STRIPE,
 const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
+: VolumeIo(buffer, unitCount, arrayId, ArrayMgr())
+{
+}
+
+VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt)
 : Ubio(buffer, unitCount, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  sectorRba(INVALID_RBA)
+  sectorRba(INVALID_RBA),
+  arrayMgmt(arrayMgmt)
 {
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
+: VolumeIo(volumeIo, ArrayMgr())
+{
+}
+
+VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
 : Ubio(volumeIo),
   volumeId(volumeIo.volumeId),
   originCore(volumeIo.originCore),
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  sectorRba(volumeIo.sectorRba)
+  sectorRba(volumeIo.sectorRba),
+  arrayMgmt(arrayMgmt)
 {
 }
 
@@ -105,7 +116,7 @@ VolumeIo::GetOriginVolumeIo(void)
 bool
 VolumeIo::IsPollingNecessary(void)
 {
-    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(this->GetArrayId())->arrayInfo;
+    IArrayInfo* arrayInfo = arrayMgmt->GetInfo(this->GetArrayId())->arrayInfo;
     if (arrayInfo->IsWriteThroughEnabled())
     {
         return true;

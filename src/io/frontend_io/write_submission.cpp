@@ -53,6 +53,7 @@
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/block_map_update_request.h"
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
+#include "src/io/frontend_io/write_for_parity.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
@@ -61,8 +62,6 @@
 
 /*To do Remove after adding array Idx by Array*/
 #include "src/array_mgmt/array_manager.h"
-
-#include "src/io/frontend_io/write_for_parity.h"
 
 namespace pos
 {
@@ -210,21 +209,31 @@ WriteSubmission::_ProcessOwnedWrite(void)
 
 void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
-{ 
+{
+    bool isRead = (volumeIo->dir == UbioDir::Read);
     IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-    if (volumeIo->dir == UbioDir::Write && true == arrayInfo->IsWriteThroughEnabled())
+    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
+
+    if (false == isWTEnabled)
     {
-        WriteForParity writeForParity(volumeIo);
-        bool ret  = writeForParity.Execute();
-        if (ret == false)
-        {
-            POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_WRITE_FOR_PARITY_FAILED;
-            POS_TRACE_ERROR(static_cast<int>(eventId),
-                "Failed to copy user data to dram for parity");
-        }
+        // If Read for partial write case, handling device failure is necessary.
+        ioDispatcher->Submit(volumeIo, false, isRead);
     }
-    // If Read for partial write case, handling device failure is necessary. 
-    ioDispatcher->Submit(volumeIo, false, true);
+    else
+    {
+        if (false == isRead)
+        {
+            WriteForParity writeForParity(volumeIo);
+            bool ret  = writeForParity.Execute();
+            if (ret == false)
+            {
+                POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
+                POS_TRACE_ERROR(static_cast<int>(eventId),
+                    "Failed to copy user data to dram for parity");
+            }
+        }
+        ioDispatcher->Submit(volumeIo, false, true);
+    }
 }
 
 void

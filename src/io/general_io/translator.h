@@ -51,9 +51,9 @@ public:
     Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         int arrayId, bool isRead = false, IVSAMap* iVSAMap = nullptr,
         IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr,
-        IIOTranslator* iTranslator = nullptr);
+        IIOTranslator* iTranslator = nullptr, IArrayInfo* arrayInfo = nullptr);
     Translator(uint32_t volumeId, BlkAddr rba, int arrayId, bool isRead);
-    Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid = UNMAP_STRIPE);
+    Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid = UNMAP_STRIPE, IArrayInfo* arrayInfo = nullptr);
     virtual ~Translator(void)
     {
     }
@@ -91,6 +91,7 @@ private:
     PartitionType _GetPartitionType(uint32_t blockIndex);
     int arrayId;
     StripeId userLsid;
+    IArrayInfo* arrayInfo;
 };
 
 } // namespace pos

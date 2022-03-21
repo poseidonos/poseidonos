@@ -7,6 +7,8 @@
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/array_mgmt/interface/i_array_mgmt_mock.h"
 #include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
@@ -64,6 +66,7 @@ public:
             dst = tmpPWEs;
             return 0;
         });
+        mockIArrayInfo = new NiceMock<MockIArrayInfo>();
     }
 
     virtual void
@@ -73,6 +76,7 @@ public:
         delete mockIStripeMap;
         delete mockWBAllocator;
         delete mockITranslator;
+        delete mockIArrayInfo;
     }
 
 protected:
@@ -84,21 +88,22 @@ protected:
     NiceMock<MockIStripeMap>* mockIStripeMap;
     NiceMock<MockIWBStripeAllocator>* mockWBAllocator;
     NiceMock<MockIIOTranslator>* mockITranslator;
+    NiceMock<MockIArrayInfo>* mockIArrayInfo;
 };
 
 TEST_F(TranslatorTestFixture, Translator_Constructor_EightArguments)
 {
     //When: create translator for single block (stack)
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
 
     //Then: do nothing
 
     //When: create translator for mulitple blocks
-    Translator translator2(0, 0, 2, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator2(0, 0, 2, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     //Then: do nothing
 
     //When: create translator (heap)
-    Translator* pTranslator = new Translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator* pTranslator = new Translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     delete pTranslator;
     //Then: do nothing
 }
@@ -106,7 +111,7 @@ TEST_F(TranslatorTestFixture, Translator_Constructor_EightArguments)
 TEST_F(TranslatorTestFixture, Translator_Constructor_TwoArguments)
 {
     //When: create translator (stack)
-    Translator translator(vsa, 0);
+    Translator translator(vsa, 0, UNMAP_STRIPE, mockIArrayInfo);
 
     //Then: do nothing
 
@@ -114,7 +119,7 @@ TEST_F(TranslatorTestFixture, Translator_Constructor_TwoArguments)
     MapperServiceSingleton::Instance()->RegisterMapper(arrayName, arrayId, nullptr, mockIStripeMap, nullptr, nullptr, nullptr);
 
     //When: create translator (heap)
-    Translator* pTranslator = new Translator(vsa, 0);
+    Translator* pTranslator = new Translator(vsa, 0, UNMAP_STRIPE, mockIArrayInfo);
     delete pTranslator;
 
     //Then: do nothing
@@ -123,27 +128,17 @@ TEST_F(TranslatorTestFixture, Translator_Constructor_TwoArguments)
     MapperServiceSingleton::Instance()->UnregisterMapper(arrayName);
 }
 
-TEST_F(TranslatorTestFixture, Translator_Constructor_FourArguments)
-{
-    //When: create translator
-    Translator translator(0, 0, 0, true);
-
-    Translator* pTranslator = new Translator(0, 0, 0, true);
-    delete pTranslator;
-    //Then: do nothing
-}
-
 TEST_F(TranslatorTestFixture, Translator_Constructor_InvalidVolumeIdException)
 {
     //When: create translator with invalid volumeId
     //Then: exception is thrown
-    EXPECT_THROW(Translator translator(MAX_VOLUME_COUNT, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator), POS_EVENT_ID);
+    EXPECT_THROW(Translator translator(MAX_VOLUME_COUNT, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo), POS_EVENT_ID);
 }
 
 TEST_F(TranslatorTestFixture, GetVsa)
 {
     //When: translate to a mapped VSA
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     VirtualBlkAddr actual = translator.GetVsa(0);
 
     //Then: return a valid vsa
@@ -156,7 +151,7 @@ TEST_F(TranslatorTestFixture, GetVsa)
     EXPECT_EQ(actual, UNMAP_VSA);
 
     //When: translate to an unmapped VSA
-    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     actual = translator2.GetVsa(0);
 
     //Then: return an unmapped VSA
@@ -166,7 +161,7 @@ TEST_F(TranslatorTestFixture, GetVsa)
 TEST_F(TranslatorTestFixture, GetLsidEntry)
 {
     //When: translate to a mapped VSA and get lsid entry
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
 
     StripeAddr actual = translator.GetLsidEntry(0);
 
@@ -185,7 +180,8 @@ TEST_F(TranslatorTestFixture, GetLsidEntry)
 TEST_F(TranslatorTestFixture, GetPba)
 {
     //When: get a pba of valid range
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    ON_CALL(*mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     PhysicalBlkAddr pba = translator.GetPba();
     PhysicalBlkAddr pba0 = translator.GetPba(0);
 
@@ -194,7 +190,7 @@ TEST_F(TranslatorTestFixture, GetPba)
     EXPECT_EQ(pba.arrayDev, pba0.arrayDev);
 
     //When: get a pba of unmapped LSA
-    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     pba = translator2.GetPba();
 
     //Then: return a default pba
@@ -226,7 +222,8 @@ TEST_F(TranslatorTestFixture, GetPba)
 TEST_F(TranslatorTestFixture, GetPhysicalEntries)
 {
     //When: get physical entries
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    ON_CALL(*mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
     list<PhysicalEntry> actual = translator.GetPhysicalEntries(nullptr, 0);
 
     //Then: return a phyiscal entry
@@ -243,19 +240,19 @@ TEST_F(TranslatorTestFixture, GetPhysicalEntries)
 TEST_F(TranslatorTestFixture, IsMapped)
 {
     //When: translate to a mapped VSA
-    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator(0, 0, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
 
     //Then: IsMapped returns true
     EXPECT_TRUE(translator.IsMapped());
 
     //When: translate to an unmapped VSA
-    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator2(0, 2, 1, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
 
     //Then: IsMapped returns false
     EXPECT_FALSE(translator2.IsMapped());
 
     //When: translate muliple blocks
-    Translator translator3(0, 0, 2, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator);
+    Translator translator3(0, 0, 2, 0, true, mockIVSAMap, mockIStripeMap, mockWBAllocator, mockITranslator, mockIArrayInfo);
 
     //Then: IsMapped throws an exception
     EXPECT_THROW(translator3.IsMapped(), POS_EVENT_ID);

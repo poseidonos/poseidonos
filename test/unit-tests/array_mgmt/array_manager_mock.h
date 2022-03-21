@@ -19,6 +19,7 @@ public:
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (string name), (override));
+    MOCK_METHOD(ComponentsInfo*, GetInfo, (uint32_t arrayIdx), (override));
     MOCK_METHOD(int, DeviceDetached, (UblockSharedPtr dev), (override));
     MOCK_METHOD(void, DeviceAttached, (UblockSharedPtr dev), (override));
     MOCK_METHOD(int, PrepareRebuild, (string name, bool& resume), (override));
