@@ -16,7 +16,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
     StripeAddr readAddr = {
         .stripeLoc = IN_USER_AREA,
         .stripeId = 10 };
-    
+
     std::vector<void*> buffers;
     for (int i = 0; i < 5; i++) // assume we have only 5 chunks per stripe
     {
@@ -50,7 +50,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
     StripeAddr readAddr = {
         .stripeLoc = IN_USER_AREA,
         .stripeId = 10 };
-    
+
     std::vector<void*> buffers;
     for (int i = 0; i < 5; i++) // assume we have only 5 chunks per stripe
     {

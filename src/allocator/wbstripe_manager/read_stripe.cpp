@@ -61,15 +61,18 @@ bool
 ReadStripe::_DoSpecificJob(void)
 {
     std::list<BufferEntry> bufferList;
+    uint32_t blockCount = 0;
+
     for (auto b : buffers)
     {
         BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
         bufferList.push_back(bufferEntry);
+        blockCount += BLOCKS_IN_CHUNK;
     }
 
     IOSubmitHandlerStatus result =
         ioSubmitHandler->SubmitAsyncIO(IODirection::READ,
-            bufferList, readAddr, BLOCKS_IN_CHUNK,
+            bufferList, readAddr, blockCount,
             PartitionType::USER_DATA, doneCallback, arrayId);
 
     return (result == IOSubmitHandlerStatus::SUCCESS ||
