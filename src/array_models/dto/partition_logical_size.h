@@ -40,13 +40,13 @@ namespace pos
 class PartitionLogicalSize
 {
 public:
-    uint32_t minWriteBlkCnt;
-    uint32_t blksPerChunk;
-    uint32_t blksPerStripe;
-    uint32_t chunksPerStripe;
-    uint32_t stripesPerSegment;
-    uint32_t totalStripes;
-    uint32_t totalSegments;
+    uint32_t minWriteBlkCnt = 0;
+    uint32_t blksPerChunk = 0;
+    uint32_t blksPerStripe = 0;
+    uint32_t chunksPerStripe = 0;
+    uint32_t stripesPerSegment = 0;
+    uint32_t totalStripes = 0;
+    uint32_t totalSegments = 0;
 };
 
 } // namespace pos

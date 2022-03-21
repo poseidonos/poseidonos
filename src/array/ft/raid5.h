@@ -72,8 +72,8 @@ private:
     void _XorBlocks(void* dst, const void* src, uint32_t memSize);
     void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
     vector<BufferPool*> parityPools;
-    AffinityManager* affinityManager;
-    MemoryManager* memoryManager;
+    AffinityManager* affinityManager = nullptr;
+    MemoryManager* memoryManager = nullptr;
 };
 
 } // namespace pos
