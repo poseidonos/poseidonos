@@ -132,8 +132,15 @@ public:
             }
             catch(const std::exception& e)
             {
-                logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
-                    e.what(), fmt), args...);
+                try
+                {
+                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
+                    e.what(), fmt), args...);   
+                }
+                catch(const std::exception& e)
+                {
+                    logger->iboflog_sink(loc, lvl, eventId, "expection has occured while parsing the event log: " + std::string(e.what()));
+                }
             }
         }
 #endif
