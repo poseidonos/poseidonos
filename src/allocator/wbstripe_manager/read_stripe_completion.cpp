@@ -64,7 +64,7 @@ ReadStripeCompletion::_DoSpecificJob(void)
 
     for (auto b : buffers)
     {
-        BufferEntry bufferEntry(b, blockCount);
+        BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
         bufferList.push_back(bufferEntry);
         blockCount += BLOCKS_IN_CHUNK;
     }
