@@ -30,20 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "file_descriptor_allocator.h"
+
 #include <set>
 #include <unordered_map>
 
-#include "file_descriptor_allocator.h"
-#include "mf_inode.h"
 #include "metafs_common_const.h"
+#include "mf_inode.h"
 #include "src/logger/logger.h"
 #include "src/metafs/common/meta_file_util.h"
 
 namespace pos
 {
 FileDescriptorAllocator::FileDescriptorAllocator(
-        std::unordered_map<StringHashType, FileDescriptorType>* lookupMap,
-        std::set<FileDescriptorType>* freeMap)
+    std::unordered_map<StringHashType, FileDescriptorType>* lookupMap,
+    std::set<FileDescriptorType>* freeMap)
 : fileKey2FdLookupMap(lookupMap),
   freeFdMap(freeMap)
 {
@@ -78,12 +79,12 @@ FileDescriptorAllocator::~FileDescriptorAllocator(void)
     }
 }
 FileDescriptorType
-FileDescriptorAllocator::Alloc(StringHashType fileKey)
+FileDescriptorAllocator::Alloc(const StringHashType fileKey)
 {
     FileDescriptorType fd = *(freeFdMap->begin());
 
     freeFdMap->erase(fd);
-    fileKey2FdLookupMap->insert({ fileKey, fd });
+    fileKey2FdLookupMap->insert({fileKey, fd});
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "alloc new fd={} by fileKey={}", fd, fileKey);
@@ -92,7 +93,7 @@ FileDescriptorAllocator::Alloc(StringHashType fileKey)
 }
 
 FileDescriptorType
-FileDescriptorAllocator::Alloc(std::string& fileName)
+FileDescriptorAllocator::Alloc(const std::string& fileName)
 {
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
     FileDescriptorType fd = Alloc(fileKey);
@@ -104,7 +105,7 @@ FileDescriptorAllocator::Alloc(std::string& fileName)
 }
 
 void
-FileDescriptorAllocator::Free(std::string& fileName, FileDescriptorType fd)
+FileDescriptorAllocator::Free(const std::string& fileName, const FileDescriptorType fd)
 {
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
 
@@ -115,7 +116,7 @@ FileDescriptorAllocator::Free(std::string& fileName, FileDescriptorType fd)
 }
 
 void
-FileDescriptorAllocator::Free(StringHashType fileKey, FileDescriptorType fd)
+FileDescriptorAllocator::Free(const StringHashType fileKey, const FileDescriptorType fd)
 {
     if (fd == fileKey2FdLookupMap->at(fileKey))
     {
@@ -133,14 +134,14 @@ FileDescriptorAllocator::Free(StringHashType fileKey, FileDescriptorType fd)
 }
 
 FileDescriptorType
-FileDescriptorAllocator::FindFdByName(std::string& fileName)
+FileDescriptorAllocator::FindFdByName(const std::string& fileName) const
 {
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
     return FindFdByHashKey(fileKey);
 }
 
 FileDescriptorType
-FileDescriptorAllocator::FindFdByHashKey(StringHashType fileKey)
+FileDescriptorAllocator::FindFdByHashKey(const StringHashType fileKey) const
 {
     auto item = fileKey2FdLookupMap->find(fileKey);
 
@@ -153,21 +154,21 @@ FileDescriptorAllocator::FindFdByHashKey(StringHashType fileKey)
 }
 
 bool
-FileDescriptorAllocator::IsGivenFileCreated(std::string& fileName)
+FileDescriptorAllocator::IsGivenFileCreated(const std::string& fileName) const
 {
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
     return IsGivenFileCreated(fileKey);
 }
 
 bool
-FileDescriptorAllocator::IsGivenFileCreated(StringHashType fileKey)
+FileDescriptorAllocator::IsGivenFileCreated(const StringHashType fileKey) const
 {
     FileDescriptorType fd = FindFdByHashKey(fileKey);
     return _IsFdValid(fd);
 }
 
 bool
-FileDescriptorAllocator::_IsFdValid(FileDescriptorType fd)
+FileDescriptorAllocator::_IsFdValid(const FileDescriptorType fd) const
 {
     return (fd != MetaFsCommonConst::INVALID_FD && fd < MetaFsConfig::MAX_META_FILE_NUM_SUPPORT) ? true : false;
 }
@@ -186,21 +187,21 @@ FileDescriptorAllocator::Reset(void)
 }
 
 void
-FileDescriptorAllocator::UpdateFreeMap(FileDescriptorType fd)
+FileDescriptorAllocator::UpdateFreeMap(const FileDescriptorType fd)
 {
     assert(freeFdMap->find(fd) != freeFdMap->end());
     freeFdMap->erase(fd);
 }
 
 void
-FileDescriptorAllocator::UpdateLookupMap(StringHashType fileKey,
-                            FileDescriptorType fd)
+FileDescriptorAllocator::UpdateLookupMap(const StringHashType fileKey,
+    const FileDescriptorType fd)
 {
-    fileKey2FdLookupMap->insert({ fileKey, fd });
+    fileKey2FdLookupMap->insert({fileKey, fd});
 }
 
 uint32_t
-FileDescriptorAllocator::GetMaxFileCount(void)
+FileDescriptorAllocator::GetMaxFileCount(void) const
 {
     return MetaFsConfig::MAX_META_FILE_NUM_SUPPORT;
 }

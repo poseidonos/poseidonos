@@ -298,7 +298,7 @@ MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoLis
 }
 
 bool
-MetaVolumeContainer::CopyInodeToInodeInfo(FileDescriptorType fd,
+MetaVolumeContainer::CopyInodeToInodeInfo(const FileDescriptorType fd,
     const MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */)
 {
     return volumeContainer[volumeType]->CopyInodeToInodeInfo(fd, inodeInfo);

@@ -49,9 +49,9 @@ public:
         (FileSizeType fileByteSize, MetaFilePropertySet& prop), (override));
     MOCK_METHOD(void, Init, (MetaStorageSubsystem* metaStorage));
     MOCK_METHOD(bool, CreateVolume, ());
-    MOCK_METHOD(MetaVolumeType, GetVolumeType, ());
-    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, ());
-    MOCK_METHOD(MetaLpnType, GetBaseLpn, ());
+    MOCK_METHOD(MetaVolumeType, GetVolumeType, (), (const));
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, (), (const));
+    MOCK_METHOD(MetaLpnType, GetBaseLpn, (), (const));
     MOCK_METHOD(MetaLpnType, GetRegionSizeInLpn, (MetaRegionType regionType));
     MOCK_METHOD(bool, OpenVolume, (MetaLpnType* info, bool isNPOR));
     MOCK_METHOD(bool, CloseVolume, (MetaLpnType* info, bool& resetContext));
@@ -60,32 +60,29 @@ public:
         (MetaFsFileControlRequest& reqMsg));
     MOCK_METHOD(FileControlResult, DeleteFile,
         (MetaFsFileControlRequest& reqMsg));
-    MOCK_METHOD(size_t, GetAvailableSpace, ());
-    MOCK_METHOD(bool, CheckFileInActive, (FileDescriptorType fd));
-    MOCK_METHOD(POS_EVENT_ID, AddFileInActiveList, (FileDescriptorType fd));
-    MOCK_METHOD(void, RemoveFileFromActiveList, (FileDescriptorType fd));
-    MOCK_METHOD(bool, IsGivenFileCreated, (StringHashType fileKey));
+    MOCK_METHOD(size_t, GetAvailableSpace, (), (const));
+    MOCK_METHOD(bool, CheckFileInActive, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(POS_EVENT_ID, AddFileInActiveList, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(void, RemoveFileFromActiveList, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(bool, IsGivenFileCreated, (const StringHashType fileKey), (const));
     MOCK_METHOD(FileSizeType, GetFileSize,
-        (FileDescriptorType fd));
+        (const FileDescriptorType fd), (const));
     MOCK_METHOD(FileSizeType, GetDataChunkSize,
-        (FileDescriptorType fd));
+        (const FileDescriptorType fd), (const));
     MOCK_METHOD(MetaLpnType, GetFileBaseLpn,
-        (FileDescriptorType fd));
+        (const FileDescriptorType fd), (const));
     MOCK_METHOD(MetaLpnType, GetMaxLpn,
-        ());
+        (), (const));
     MOCK_METHOD(void, GetInodeList,
-        (std::vector<MetaFileInfoDumpCxt>*& fileInfoList));
+        (std::vector<MetaFileInfoDumpCxt>*& fileInfoList), (const));
     MOCK_METHOD(MetaFileInode&, GetInode,
-        (FileDescriptorType fd));
+        (const FileDescriptorType fd), (const));
     MOCK_METHOD(bool, CopyInodeToInodeInfo,
-        (FileDescriptorType fd, MetaFileInodeInfo* inodeInfo /* output */));
+        (const FileDescriptorType fd, MetaFileInodeInfo* inodeInfo));
     MOCK_METHOD(std::string, LookupNameByDescriptor,
-        (FileDescriptorType fd));
+        (const FileDescriptorType fd), (const));
     MOCK_METHOD(FileDescriptorType, LookupDescriptorByName,
-        (std::string& fileName));
-    MOCK_METHOD(POS_EVENT_ID, DetermineVolumeToCreateFile,
-        (FileSizeType fileByteSize,
-            MetaFilePropertySet& prop, MetaVolumeType volumeType));
+        (const std::string& fileName), (const));
 };
 
 } // namespace pos

@@ -31,12 +31,15 @@
  */
 
 #include "src/metafs/mvm/volume/nvram/nvram_meta_volume.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
-#include <string>
-#include <gtest/gtest.h>
+
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include <string>
+
+#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -89,7 +92,7 @@ protected:
 
 TEST(NvRamMetaVolume, CreateDefault)
 {
-    NvRamMetaVolume* metaVolume = new NvRamMetaVolume();
+    NvRamMetaVolume* metaVolume = new NvRamMetaVolume(0, 0);
     delete metaVolume;
 }
 

@@ -30,8 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/metafs/mvm/volume/inode_deleter.h"
+
+#include "src/metafs/mvm/volume/inode_manager.h"
 
 namespace pos
 {
@@ -50,8 +51,13 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
     MetaLpnType totalLpnCount = 0;
     std::vector<MetaFileExtent> extents;
     FileDescriptorType fd = inodeMgr->LookupDescriptorByName(*reqMsg.fileName);
-    MetaLpnType count = inodeMgr->GetExtent(fd, extents);
-    assert(count > 0);
+    if (!inodeMgr->GetExtent(fd, extents))
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The extent count of the file is zero, fileName: {}",
+            *reqMsg.fileName);
+        assert(0);
+    }
 
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "DeleteFileInode, fd: {}, fileName: {}",
@@ -68,38 +74,36 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
     uint32_t entryIdx = inode.GetIndexInInodeTable();
 
     inode.SetInUse(false);
-    inodeMgr->inodeHdr->ClearInodeInUse(entryIdx);
+    inodeMgr->inodeHdr_->ClearInodeInUse(entryIdx);
+    inodeMgr->fd2InodeMap_.erase(fd);
 
-    inodeMgr->fd2InodeMap.erase(fd);
-
-    totalLpnCount = 0;
     for (auto& extent : extents)
     {
-        inodeMgr->extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
+        inodeMgr->extentAllocator_->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
 
         POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "[Metadata File] Release an extent, startLpn={}, count={}",
             extent.GetStartLpn(), extent.GetCount());
-            totalLpnCount += extent.GetCount();
+        totalLpnCount += extent.GetCount();
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Metadata File] Delete volType={}, fd={}, fileName={}, totalLpnCnt={}",
         (int)inodeMgr->volumeType, fd, *reqMsg.fileName, totalLpnCount);
 
-    inodeMgr->fdAllocator->Free(*reqMsg.fileName, fd);
+    inodeMgr->fdAllocator_->Free(*reqMsg.fileName, fd);
 
-    inodeMgr->extentAllocator->PrintFreeExtentsList();
+    inodeMgr->extentAllocator_->PrintFreeExtentsList();
 
     std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-                            inodeMgr->extentAllocator->GetAllocatedExtentList();
-    inodeMgr->inodeHdr->SetFileExtentContent(usedExtentsInVolume);
+        inodeMgr->extentAllocator_->GetAllocatedExtentList();
+    inodeMgr->inodeHdr_->SetFileExtentContent(usedExtentsInVolume);
 
-    if (true != inodeMgr->SaveContent())
+    if (!inodeMgr->SaveContent())
     {
-        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+        return {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
     }
 
-    return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
+    return {fd, POS_EVENT_ID::SUCCESS};
 }
 } // namespace pos

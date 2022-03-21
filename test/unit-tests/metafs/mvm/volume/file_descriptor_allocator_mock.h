@@ -45,22 +45,22 @@ class MockFileDescriptorAllocator : public FileDescriptorAllocator
 public:
     using FileDescriptorAllocator::FileDescriptorAllocator;
 
-    MOCK_METHOD(FileDescriptorType, Alloc, (std::string& fileName));
-    MOCK_METHOD(FileDescriptorType, Alloc, (StringHashType fileKey));
+    MOCK_METHOD(FileDescriptorType, Alloc, (const std::string& fileName));
+    MOCK_METHOD(FileDescriptorType, Alloc, (const StringHashType fileKey));
 
-    MOCK_METHOD(void, Free, (std::string& fileName, FileDescriptorType fd));
-    MOCK_METHOD(void, Free, (StringHashType fileKey, FileDescriptorType fd));
+    MOCK_METHOD(void, Free, (const std::string& fileName, const FileDescriptorType fd));
+    MOCK_METHOD(void, Free, (const StringHashType fileKey, const FileDescriptorType fd));
 
-    MOCK_METHOD(FileDescriptorType, FindFdByName, (std::string& fileName));
-    MOCK_METHOD(FileDescriptorType, FindFdByHashKey, (StringHashType fileKey));
+    MOCK_METHOD(FileDescriptorType, FindFdByName, (const std::string& fileName), (const));
+    MOCK_METHOD(FileDescriptorType, FindFdByHashKey, (const StringHashType fileKey), (const));
 
-    MOCK_METHOD(bool, IsGivenFileCreated, (std::string& fileName));
-    MOCK_METHOD(bool, IsGivenFileCreated, (StringHashType fileKey));
+    MOCK_METHOD(bool, IsGivenFileCreated, (const std::string& fileName), (const));
+    MOCK_METHOD(bool, IsGivenFileCreated, (const StringHashType fileKey), (const));
 
     MOCK_METHOD(void, Reset, ());
-    MOCK_METHOD(void, UpdateFreeMap, (FileDescriptorType fd));
-    MOCK_METHOD(void, UpdateLookupMap, (StringHashType fileKey, FileDescriptorType fd));
-    MOCK_METHOD(uint32_t, GetMaxFileCount, ());
+    MOCK_METHOD(void, UpdateFreeMap, (const FileDescriptorType fd));
+    MOCK_METHOD(void, UpdateLookupMap, (const StringHashType fileKey, const FileDescriptorType fd));
+    MOCK_METHOD(uint32_t, GetMaxFileCount, (), (const));
 
     // only for test
     MOCK_METHOD(StringHashMap*, GetLookupMap, ());

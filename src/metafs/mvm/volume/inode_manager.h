@@ -34,21 +34,21 @@
 
 #include <map>
 #include <string>
-#include <vector>
-#include <utility>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
-#include "mf_inode.h"
-#include "inode_table_header.h"
-#include "mf_inode_req.h"
+#include "extent_allocator.h"
+#include "file_descriptor_allocator.h"
 #include "inode_table.h"
-#include "mf_property.h"
+#include "inode_table_header.h"
 #include "metafs_control_request.h"
+#include "mf_inode.h"
+#include "mf_inode_req.h"
+#include "mf_property.h"
 #include "on_volume_meta_region_mgr.h"
 #include "os_header.h"
-#include "file_descriptor_allocator.h"
-#include "extent_allocator.h"
 #include "src/metafs/mvm/volume/inode_creator.h"
 #include "src/metafs/mvm/volume/inode_deleter.h"
 
@@ -61,10 +61,10 @@ using FileHashInVolume = std::unordered_map<StringHashType, MetaVolumeType>;
 class InodeManager : public OnVolumeMetaRegionManager
 {
 public:
-    explicit InodeManager(int arrayId);
-    InodeManager(InodeTableHeader* inodeHdr, InodeTable* inodeTable,
-        FileDescriptorAllocator* fdAllocator, ExtentAllocator* extentAllocator,
-        int arrayId);
+    InodeManager(void) = delete;
+    InodeManager(const int arrayId, InodeTableHeader* inodeHdr_ = nullptr,
+        InodeTable* inodeTable_ = nullptr, FileDescriptorAllocator* fdAllocator_ = nullptr,
+        ExtentAllocator* extentAllocator_ = nullptr);
     virtual ~InodeManager(void);
 
     virtual void Init(MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn) override;
@@ -72,69 +72,84 @@ public:
     virtual void Bringup(void) override;
     virtual bool SaveContent(void) override;
     virtual void Finalize(void) override;
-    virtual void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual void SetMss(MetaStorageSubsystem* metaStorage) override;
 
-    virtual FileSizeType GetFileSize(const FileDescriptorType fd);
-    virtual FileSizeType GetDataChunkSize(const FileDescriptorType fd);
-    virtual MetaLpnType GetFileBaseLpn(const FileDescriptorType fd);
+    virtual FileSizeType GetFileSize(const FileDescriptorType fd) const;
+    virtual FileSizeType GetDataChunkSize(const FileDescriptorType fd) const;
+    virtual MetaLpnType GetFileBaseLpn(const FileDescriptorType fd) const;
     virtual uint32_t GetExtent(const FileDescriptorType fd,
-                std::vector<MetaFileExtent>& extents /* output */);
+        std::vector<MetaFileExtent>& extents /* output */) const;
 
-    virtual void CreateInitialInodeContent(uint32_t maxInodeNum);
+    virtual void CreateInitialInodeContent(const uint32_t maxInodeNum) const;
     virtual bool LoadContent(void);
-    virtual MetaLpnType GetRegionBaseLpn(MetaRegionType regionType);
-    virtual MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
-    virtual void PopulateFDMapWithVolumeType(FileDescriptorInVolume& dest);
-    virtual void PopulateFileNameWithVolumeType(FileHashInVolume& dest);
+    virtual MetaLpnType GetRegionBaseLpn(const MetaRegionType regionType) const;
+    virtual MetaLpnType GetRegionSizeInLpn(const MetaRegionType regionType) const;
+    virtual void PopulateFDMapWithVolumeType(FileDescriptorInVolume& dest) const;
+    virtual void PopulateFileNameWithVolumeType(FileHashInVolume& dest) const;
 
-    virtual MetaLpnType GetAvailableLpnCount(void);
-    virtual size_t GetAvailableSpace(void);
+    virtual MetaLpnType GetAvailableLpnCount(void) const;
+    virtual size_t GetAvailableSpace(void) const;
 
-    virtual bool CheckFileInActive(FileDescriptorType fd);
-    virtual POS_EVENT_ID AddFileInActiveList(FileDescriptorType fd);
-    virtual void RemoveFileFromActiveList(FileDescriptorType fd);
-    virtual size_t GetFileCountInActive(void);
+    virtual bool CheckFileInActive(const FileDescriptorType fd) const;
+    virtual POS_EVENT_ID AddFileInActiveList(const FileDescriptorType fd);
+    virtual void RemoveFileFromActiveList(const FileDescriptorType fd);
+    virtual size_t GetFileCountInActive(void) const;
 
-    virtual void SetMetaFileBaseLpn(MetaLpnType lpn);
-    virtual MetaLpnType GetMetaFileBaseLpn(void);
-
-    virtual bool IsGivenFileCreated(StringHashType fileKey);
-    virtual FileDescriptorType LookupDescriptorByName(std::string& fileName);
-    virtual std::string LookupNameByDescriptor(FileDescriptorType fd);
-
-    virtual MetaFileInode& GetFileInode(const FileDescriptorType fd);
-    virtual MetaFileInode& GetInodeEntry(const uint32_t entryIdx);
-    virtual bool IsFileInodeInUse(const FileDescriptorType fd);
-    virtual MetaLpnType GetTheLastValidLpn(void);
+    virtual std::string LookupNameByDescriptor(const FileDescriptorType fd) const;
+    virtual MetaFileInode& GetFileInode(const FileDescriptorType fd) const;
+    virtual MetaLpnType GetTheLastValidLpn(void) const;
+    virtual void SetMetaFileBaseLpn(const MetaLpnType lpn) const
+    {
+        extentAllocator_->SetFileBaseLpn(lpn);
+    }
+    virtual MetaLpnType GetMetaFileBaseLpn(void) const
+    {
+        return extentAllocator_->GetFileBaseLpn();
+    }
+    virtual bool IsGivenFileCreated(const StringHashType fileKey) const
+    {
+        return fdAllocator_->IsGivenFileCreated(fileKey);
+    }
+    virtual FileDescriptorType LookupDescriptorByName(const std::string& fileName) const
+    {
+        return fdAllocator_->FindFdByName(fileName);
+    }
+    virtual MetaFileInode& GetInodeEntry(const uint32_t entryIdx) const
+    {
+        return inodeTable_->GetInode(entryIdx);
+    }
+    virtual bool IsFileInodeInUse(const FileDescriptorType fd) const
+    {
+        return inodeHdr_->IsFileInodeInUse(fd);
+    }
 
     virtual bool BackupContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
     virtual bool RestoreContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
 
-    // only for test
+    /* only for test */
     std::unordered_map<FileDescriptorType, MetaFileInode*>& GetInodeMap(void)
     {
-        return fd2InodeMap;
+        return fd2InodeMap_;
     }
-
-    // only for test
     std::unordered_set<FileDescriptorType>& GetActiveFiles(void)
     {
-        return activeFiles;
+        return activeFiles_;
     }
+    /* only for test */
 
 private:
     void _BuildF2InodeMap(void);
-    bool _LoadInodeFromMedia(MetaStorageType media, MetaLpnType baseLpn);
-    bool _StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn);
+    bool _LoadInodeFromMedia(const MetaStorageType media, const MetaLpnType baseLpn);
+    bool _StoreInodeToMedia(const MetaStorageType media, const MetaLpnType baseLpn);
     void _UpdateFdAllocator(void);
 
-    InodeTableHeader* inodeHdr = nullptr;
-    InodeTable* inodeTable = nullptr;
-    std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap;
-    std::unordered_set<FileDescriptorType> activeFiles;
-    MetaStorageSubsystem* metaStorage = nullptr;
-    FileDescriptorAllocator* fdAllocator = nullptr;
-    ExtentAllocator* extentAllocator = nullptr;
+    InodeTableHeader* inodeHdr_;
+    InodeTable* inodeTable_;
+    std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap_;
+    std::unordered_set<FileDescriptorType> activeFiles_;
+    MetaStorageSubsystem* metaStorage_;
+    FileDescriptorAllocator* fdAllocator_;
+    ExtentAllocator* extentAllocator_;
 
     friend InodeCreator;
     friend InodeDeleter;

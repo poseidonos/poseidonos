@@ -82,8 +82,8 @@ public:
 
         EXPECT_CALL(*extentAllocator, Init);
 
-        inodeMgr = new InodeManager(inodeHdr, inodeTable, fdAllocator,
-            extentAllocator, arrayId);
+        inodeMgr = new InodeManager(arrayId, inodeHdr, inodeTable, fdAllocator,
+            extentAllocator);
 
         inodeMgr->Init(type, baseLpn, maxLpn);
     }

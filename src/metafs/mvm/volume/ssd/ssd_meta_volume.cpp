@@ -32,20 +32,14 @@
 
 #include "ssd_meta_volume.h"
 
-#include "src/logger/logger.h"
-
 #include <string>
+
+#include "src/logger/logger.h"
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(void)
-: MetaVolume()
-{
-}
-
 SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
-            InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, volType, maxVolumePageNum,
-                inodeMgr, catalogMgr)
+    InodeManager* inodeMgr, CatalogManager* catalogMgr)
+: MetaVolume(arrayId, volType, maxVolumePageNum, inodeMgr, catalogMgr)
 {
 }
 
@@ -58,7 +52,7 @@ SsdMetaVolume::~SsdMetaVolume(void)
 void
 SsdMetaVolume::InitVolumeBaseLpn(void)
 {
-    volumeBaseLpn = SSD_VOLUME_BASE_LPN;
+    volumeBaseLpn_ = SSD_VOLUME_BASE_LPN;
 }
 
 bool

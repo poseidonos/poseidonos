@@ -77,8 +77,8 @@ public:
         fdAllocator = new NiceMock<MockFileDescriptorAllocator>;
         extentAllocator = new NiceMock<MockExtentAllocator>;
 
-        inodeManager = new InodeManager(inodeHdr, inodeTable, fdAllocator,
-            extentAllocator, arrayId);
+        inodeManager = new InodeManager(arrayId, inodeHdr, inodeTable,
+            fdAllocator, extentAllocator);
 
         inodeDeleter = new InodeDeleter(inodeManager);
     }
@@ -109,7 +109,6 @@ TEST_F(InodeDeleterFixture, CheckFileDeletion_Positive)
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
 
     std::vector<MetaFileExtent> extents;
-    // extents.push_back({0, 16});
 
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
@@ -135,7 +134,7 @@ TEST_F(InodeDeleterFixture, CheckFileDeletion_Positive)
     EXPECT_CALL(*inodeHdr, ClearInodeInUse);
 
     EXPECT_CALL(*extentAllocator, AddToFreeList);
-    EXPECT_CALL(*fdAllocator, Free(Matcher<std::string&>(_), _));
+    EXPECT_CALL(*fdAllocator, Free(fileName, 0));
     EXPECT_CALL(*extentAllocator, PrintFreeExtentsList);
     EXPECT_CALL(*extentAllocator, GetAllocatedExtentList);
 

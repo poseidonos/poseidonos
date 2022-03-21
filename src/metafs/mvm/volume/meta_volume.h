@@ -33,13 +33,14 @@
 #pragma once
 
 #include <map>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
+
 #include "catalog_manager.h"
-#include "meta_volume_state.h"
 #include "inode_manager.h"
+#include "meta_volume_state.h"
 #include "src/metafs/mvm/volume/inode_creator.h"
 #include "src/metafs/mvm/volume/inode_deleter.h"
 
@@ -60,9 +61,9 @@ using FileControlResult = std::pair<FileDescriptorType, POS_EVENT_ID>;
 class MetaVolume
 {
 public:
-    MetaVolume(void);
-    MetaVolume(int arrayId, MetaVolumeType volumeType,
-        MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
+    MetaVolume(void) = delete;
+    MetaVolume(const int arrayId, const MetaVolumeType volumeType,
+        const MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
         CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
         InodeDeleter* inodeDeleter = nullptr);
     virtual ~MetaVolume(void);
@@ -80,53 +81,81 @@ public:
     // control files
     virtual FileControlResult CreateFile(MetaFsFileControlRequest& reqMsg);
     virtual FileControlResult DeleteFile(MetaFsFileControlRequest& reqMsg);
-    virtual bool CheckFileInActive(FileDescriptorType fd);
-    virtual POS_EVENT_ID AddFileInActiveList(FileDescriptorType fd);
-    virtual void RemoveFileFromActiveList(FileDescriptorType fd);
-
-    // trim or dsm
     virtual bool TrimData(MetaFsFileControlRequest& reqMsg);
 
     // interfaces
-    virtual MetaFileInode& GetInode(FileDescriptorType fd);
-    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList);
-    virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
-        MetaFileInodeInfo* inodeInfo /* output */);
-
-    virtual uint32_t GetUtilizationInPercent(void);
-    virtual size_t GetAvailableSpace(void);
-
-    virtual bool IsGivenFileCreated(StringHashType fileKey);
-    virtual FileSizeType GetFileSize(FileDescriptorType fd);
-    virtual FileSizeType GetDataChunkSize(FileDescriptorType fd);
-    virtual MetaLpnType GetFileBaseLpn(FileDescriptorType fd);
-
-    virtual FileDescriptorType LookupDescriptorByName(std::string& fileName);
-    virtual std::string LookupNameByDescriptor(FileDescriptorType fd);
-
     virtual MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
-    virtual MetaVolumeType GetVolumeType(void);
-
-    virtual MetaLpnType GetTheLastValidLpn(void);
-
-    virtual MetaLpnType
-    GetBaseLpn(void)
+    virtual uint32_t GetUtilizationInPercent(void);
+    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList) const;
+    virtual bool CopyInodeToInodeInfo(const FileDescriptorType fd,
+        MetaFileInodeInfo* inodeInfo /* output */);
+    virtual bool CheckFileInActive(const FileDescriptorType fd) const
     {
-        return sumOfRegionBaseLpns;
+        return inodeMgr_->CheckFileInActive(fd);
     }
-
-    virtual MetaLpnType
-    GetMaxLpn(void)
+    virtual POS_EVENT_ID AddFileInActiveList(const FileDescriptorType fd) const
     {
-        return maxVolumeLpn;
+        return inodeMgr_->AddFileInActiveList(fd);
+    }
+    virtual void RemoveFileFromActiveList(const FileDescriptorType fd) const
+    {
+        inodeMgr_->RemoveFileFromActiveList(fd);
+    }
+    virtual MetaFileInode& GetInode(const FileDescriptorType fd) const
+    {
+        return inodeMgr_->GetFileInode(fd);
+    }
+    virtual size_t GetAvailableSpace(void) const
+    {
+        return inodeMgr_->GetAvailableSpace();
+    }
+    virtual bool IsGivenFileCreated(const StringHashType fileKey) const
+    {
+        return inodeMgr_->IsGivenFileCreated(fileKey);
+    }
+    virtual FileSizeType GetFileSize(const FileDescriptorType fd) const
+    {
+        return inodeMgr_->GetFileSize(fd);
+    }
+    virtual FileSizeType GetDataChunkSize(const FileDescriptorType fd) const
+    {
+        return inodeMgr_->GetDataChunkSize(fd);
+    }
+    virtual MetaLpnType GetFileBaseLpn(const FileDescriptorType fd) const
+    {
+        return inodeMgr_->GetFileBaseLpn(fd);
+    }
+    virtual FileDescriptorType LookupDescriptorByName(const std::string& fileName) const
+    {
+        return inodeMgr_->LookupDescriptorByName(fileName);
+    }
+    virtual std::string LookupNameByDescriptor(const FileDescriptorType fd) const
+    {
+        return inodeMgr_->LookupNameByDescriptor(fd);
+    }
+    virtual MetaLpnType GetTheLastValidLpn(void) const
+    {
+        return inodeMgr_->GetTheLastValidLpn();
+    }
+    virtual MetaVolumeType GetVolumeType(void) const
+    {
+        return volumeType_;
+    }
+    virtual MetaLpnType GetBaseLpn(void) const
+    {
+        return sumOfRegionBaseLpns_;
+    }
+    virtual MetaLpnType GetMaxLpn(void) const
+    {
+        return maxVolumeLpn_;
     }
 
 protected:
-    MetaLpnType volumeBaseLpn = 0;
-    MetaLpnType maxVolumeLpn = 0;
-    MetaVolumeType volumeType = MetaVolumeType::Max;
-    MetaVolumeState volumeState = MetaVolumeState::Default;
     static const uint32_t META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT = 99;
+    MetaLpnType volumeBaseLpn_ = 0;
+    MetaLpnType maxVolumeLpn_ = 0;
+    MetaVolumeType volumeType_ = MetaVolumeType::Max;
+    MetaVolumeState volumeState_ = MetaVolumeState::Default;
 
 private:
     OnVolumeMetaRegionManager& _GetRegionMgr(MetaRegionManagerType region);
@@ -138,21 +167,20 @@ private:
     bool _BackupContents(MetaLpnType* info);
     bool _RestoreContents(MetaLpnType* info);
 
-    std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap;
-    InodeManager* inodeMgr = nullptr;
-    CatalogManager* catalogMgr = nullptr;
-    bool inUse = false;
+    std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap_;
+    InodeManager* inodeMgr_;
+    CatalogManager* catalogMgr_;
 
-    MetaLpnType sumOfRegionBaseLpns = 0;
-    MetaStorageSubsystem* metaStorage = nullptr;
+    MetaLpnType sumOfRegionBaseLpns_;
+    MetaStorageSubsystem* metaStorage_;
 
-    std::unordered_map<FileDescriptorType, MetaVolumeType> fd2VolTypehMap;
-    std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap;
+    std::unordered_map<FileDescriptorType, MetaVolumeType> fd2VolTypehMap_;
+    std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap_;
 
-    int arrayId = INT32_MAX;
-    void* trimBuffer = nullptr;
+    int arrayId_;
+    void* trimBuffer_;
 
-    InodeCreator* inodeCreator = nullptr;
-    InodeDeleter* inodeDeleter = nullptr;
+    InodeCreator* inodeCreator_;
+    InodeDeleter* inodeDeleter_;
 };
 } // namespace pos

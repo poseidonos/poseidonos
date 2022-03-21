@@ -30,86 +30,111 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "inode_manager.h"
+
 #include <string>
 #include <vector>
-#include "inode_manager.h"
-#include "meta_file_util.h"
-#include "metafs_log.h"
 
-#define PRINT_INFO 0
+#include "src/metafs/common/meta_file_util.h"
+#include "src/metafs/log/metafs_log.h"
 
 namespace pos
 {
-InodeManager::InodeManager(int arrayId)
-: OnVolumeMetaRegionManager(arrayId)
+InodeManager::InodeManager(const int arrayId, InodeTableHeader* inodeHdr,
+    InodeTable* inodeTable, FileDescriptorAllocator* fdAllocator,
+    ExtentAllocator* extentAllocator)
+: OnVolumeMetaRegionManager(arrayId),
+  inodeHdr_(inodeHdr),
+  inodeTable_(inodeTable),
+  metaStorage_(nullptr),
+  fdAllocator_(fdAllocator),
+  extentAllocator_(extentAllocator)
 {
-}
-
-InodeManager::InodeManager(InodeTableHeader* inodeHdr, InodeTable* inodeTable,
-        FileDescriptorAllocator* fdAllocator, ExtentAllocator* extentAllocator, int arrayId)
-: InodeManager(arrayId)
-{
-    this->inodeHdr = inodeHdr;
-    this->inodeTable = inodeTable;
-    this->fdAllocator = fdAllocator;
-    this->extentAllocator = extentAllocator;
 }
 
 InodeManager::~InodeManager(void)
 {
-    delete inodeHdr;
-    delete inodeTable;
-    delete fdAllocator;
-    delete extentAllocator;
+    if (inodeHdr_)
+    {
+        delete inodeHdr_;
+        inodeHdr_ = nullptr;
+    }
+
+    if (inodeTable_)
+    {
+        delete inodeTable_;
+        inodeTable_ = nullptr;
+    }
+
+    if (fdAllocator_)
+    {
+        delete fdAllocator_;
+        fdAllocator_ = nullptr;
+    }
+
+    if (extentAllocator_)
+    {
+        delete extentAllocator_;
+        extentAllocator_ = nullptr;
+    }
 }
 
 void
 InodeManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxLpn);
-
     MetaLpnType targetBaseLpn = baseLpn;
 
-    inodeHdr = (nullptr == inodeHdr) ? new InodeTableHeader(volumeType, targetBaseLpn) : inodeHdr;
-    targetBaseLpn += inodeHdr->GetLpnCntOfRegion();
+    if (!inodeHdr_)
+        inodeHdr_ = new InodeTableHeader(volumeType, targetBaseLpn);
+    targetBaseLpn += inodeHdr_->GetLpnCntOfRegion();
 
-    inodeTable = (nullptr == inodeTable) ? new InodeTable(volumeType, targetBaseLpn) : inodeTable;
-    targetBaseLpn += inodeTable->GetLpnCntOfRegion();
+    if (!inodeTable_)
+        inodeTable_ = new InodeTable(volumeType, targetBaseLpn);
+    targetBaseLpn += inodeTable_->GetLpnCntOfRegion();
 
-    fdAllocator = (nullptr == fdAllocator) ? new FileDescriptorAllocator() : fdAllocator;
+    if (!fdAllocator_)
+        fdAllocator_ = new FileDescriptorAllocator();
 
-    extentAllocator = (nullptr == extentAllocator) ? new ExtentAllocator() : extentAllocator;
-    extentAllocator->Init(targetBaseLpn, maxLpn);
+    if (!extentAllocator_)
+        extentAllocator_ = new ExtentAllocator();
+    extentAllocator_->Init(targetBaseLpn, maxLpn);
 }
 
 MetaLpnType
-InodeManager::GetRegionBaseLpn(MetaRegionType regionType)
+InodeManager::GetRegionBaseLpn(const MetaRegionType regionType) const
 {
     switch (regionType)
     {
         case MetaRegionType::FileInodeHdr:
-            return inodeHdr->GetBaseLpn();
+            return inodeHdr_->GetBaseLpn();
 
         case MetaRegionType::FileInodeTable:
-            return inodeTable->GetBaseLpn();
+            return inodeTable_->GetBaseLpn();
 
         default:
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "The region type is not valid, regionType: {}",
+                (int)regionType);
             assert(false);
     }
 }
 
 MetaLpnType
-InodeManager::GetRegionSizeInLpn(MetaRegionType regionType)
+InodeManager::GetRegionSizeInLpn(MetaRegionType regionType) const
 {
     switch (regionType)
     {
         case MetaRegionType::FileInodeHdr:
-            return inodeHdr->GetLpnCntOfRegion();
+            return inodeHdr_->GetLpnCntOfRegion();
 
         case MetaRegionType::FileInodeTable:
-            return inodeTable->GetLpnCntOfRegion();
+            return inodeTable_->GetLpnCntOfRegion();
 
         default:
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "The region type is not valid, regionType: {}",
+                (int)regionType);
             assert(false);
     }
 }
@@ -117,17 +142,13 @@ InodeManager::GetRegionSizeInLpn(MetaRegionType regionType)
 MetaLpnType
 InodeManager::GetRegionSizeInLpn(void)
 {
-    MetaLpnType inodeContentSum = 0;
-    inodeContentSum += inodeHdr->GetLpnCntOfRegion();
-    inodeContentSum += inodeTable->GetLpnCntOfRegion();
-
-    return inodeContentSum;
+    return inodeHdr_->GetLpnCntOfRegion() + inodeTable_->GetLpnCntOfRegion();
 }
 
 void
 InodeManager::Bringup(void)
 {
-    inodeHdr->BuildFreeInodeEntryMap();
+    inodeHdr_->BuildFreeInodeEntryMap();
     _BuildF2InodeMap();
     _UpdateFdAllocator();
 }
@@ -136,55 +157,53 @@ void
 InodeManager::_BuildF2InodeMap(void)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
-                            inodeHdr->GetInodeInUseBitmap();
+        inodeHdr_->GetInodeInUseBitmap();
 
     for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
         if (inodeInUseBitmap.test(idx))
         {
-            MetaFileInode& inode = inodeTable->GetInode(idx);
-            fd2InodeMap.insert(std::make_pair(inode.data.basic.field.fd, &inode));
+            MetaFileInode& inode = inodeTable_->GetInode(idx);
+            fd2InodeMap_.insert({inode.data.basic.field.fd, &inode});
         }
     }
 }
 
 void
-InodeManager::CreateInitialInodeContent(uint32_t maxInodeNum)
+InodeManager::CreateInitialInodeContent(const uint32_t maxInodeNum) const
 {
-    inodeHdr->Create(maxInodeNum);
-    inodeTable->Create(maxInodeNum);
+    inodeHdr_->Create(maxInodeNum);
+    inodeTable_->Create(maxInodeNum);
 
-    std::vector<pos::MetaFileExtent> extentList = extentAllocator->GetAllocatedExtentList();
-    inodeHdr->SetFileExtentContent(extentList);
+    std::vector<pos::MetaFileExtent> extentList = extentAllocator_->GetAllocatedExtentList();
+    inodeHdr_->SetFileExtentContent(extentList);
 }
 
 bool
 InodeManager::LoadContent(void)
 {
-    if (true != inodeHdr->Load())
+    if (!inodeHdr_->Load())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
             "Load I/O for MFS inode header has failed...");
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Total allocated FD count = {}",
-        inodeHdr->GetTotalAllocatedInodeCnt());
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Total allocated file descriptor count: {}",
+        inodeHdr_->GetTotalAllocatedInodeCnt());
 
-    MetaStorageType media = MetaFileUtil::ConvertToMediaType(volumeType);
     MetaLpnType startBaseLpn = GetRegionBaseLpn(MetaRegionType::FileInodeTable);
 
-    if (false == _LoadInodeFromMedia(media, startBaseLpn))
+    if (!_LoadInodeFromMedia(MetaFileUtil::ConvertToMediaType(volumeType), startBaseLpn))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
             "Load I/O for MFS inode content has failed...");
-
         return false;
     }
 
-    std::vector<pos::MetaFileExtent> extentList = inodeHdr->GetFileExtentContent();
-    extentAllocator->SetAllocatedExtentList(extentList);
+    std::vector<pos::MetaFileExtent> extentList = inodeHdr_->GetFileExtentContent();
+    extentAllocator_->SetAllocatedExtentList(extentList);
 
     return true;
 }
@@ -200,22 +219,20 @@ InodeManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
 
-    if (false == inodeHdr->Load(media, baseLpn, 0 /*idx */, iNodeHdrLpnCnts))
+    if (!inodeHdr_->Load(media, baseLpn, 0 /*idx */, iNodeHdrLpnCnts))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
             "Restore I/O for MFS inode header of NVRAM meta vol. has failed...");
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "[Restore the valid inode table content] from baseLpn={}, LpnCnts={}...",
         baseLpn + iNodeHdrLpnCnts, iNodeTableCnts);
 
-    MetaLpnType startBaseLpn = baseLpn + iNodeHdrLpnCnts;
-
-    if (false == _LoadInodeFromMedia(media, startBaseLpn))
+    if (!_LoadInodeFromMedia(media, baseLpn + iNodeHdrLpnCnts))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
             "Restore I/O for MFS inode table of NVRAM meta vol. has failed...");
 
         return false;
@@ -225,20 +242,18 @@ InodeManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 }
 
 bool
-InodeManager::_LoadInodeFromMedia(MetaStorageType media, MetaLpnType baseLpn)
+InodeManager::_LoadInodeFromMedia(const MetaStorageType media, const MetaLpnType baseLpn)
 {
     std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
-                                    inodeHdr->GetInodeInUseBitmap();
+        inodeHdr_->GetInodeInUseBitmap();
 
     for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
-        if (inodeInUseBitmap.test(idx))
+        if (inodeInUseBitmap.test(idx) &&
+            !inodeTable_->Load(media, baseLpn,
+                idx * MetaFsConfig::LPN_COUNT_PER_INODE, MetaFsConfig::LPN_COUNT_PER_INODE))
         {
-            if (false == inodeTable->Load(media, baseLpn, idx * MetaFsConfig::LPN_COUNT_PER_INODE,
-                                MetaFsConfig::LPN_COUNT_PER_INODE /*LpnCnts*/))
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -251,23 +266,19 @@ InodeManager::SaveContent(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Save inode header content...");
 
-    if (true != inodeHdr->Store())
+    if (!inodeHdr_->Store())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Store I/O for MFS inode header has failed...");
 
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Save the valid inode table content...");
-
-    MetaStorageType media = MetaFileUtil::ConvertToMediaType(volumeType);
     MetaLpnType startBaseLpn = GetRegionBaseLpn(MetaRegionType::FileInodeTable);
 
-    if (false == _StoreInodeToMedia(media, startBaseLpn))
+    if (!_StoreInodeToMedia(MetaFileUtil::ConvertToMediaType(volumeType), startBaseLpn))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Store I/O for MFS inode table has failed...");
 
         return false;
@@ -287,9 +298,9 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
 
-    if (false == inodeHdr->Store(media, baseLpn, 0 /*buf idx */, iNodeHdrLpnCnts))
+    if (!inodeHdr_->Store(media, baseLpn, 0 /*buf idx */, iNodeHdrLpnCnts))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Backup I/O for MFS inode header of NVRAM meta vol. has failed...");
         return false;
     }
@@ -300,9 +311,9 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     MetaLpnType startBaseLpn = baseLpn + iNodeHdrLpnCnts;
 
-    if (false == _StoreInodeToMedia(media, startBaseLpn))
+    if (!_StoreInodeToMedia(media, startBaseLpn))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Backup I/O for MFS inode table of NVRAM meta vol. has failed...");
 
         return false;
@@ -312,21 +323,15 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 }
 
 bool
-InodeManager::_StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn)
+InodeManager::_StoreInodeToMedia(const MetaStorageType media, const MetaLpnType baseLpn)
 {
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap =
-                                    inodeHdr->GetInodeInUseBitmap();
+    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& inodeInUseBitmap = inodeHdr_->GetInodeInUseBitmap();
 
     for (uint32_t idx = 0; idx < inodeInUseBitmap.size(); idx++)
     {
-        if (inodeInUseBitmap.test(idx))
+        if (inodeInUseBitmap.test(idx) && !inodeTable_->Store(media, baseLpn, idx * MetaFsConfig::LPN_COUNT_PER_INODE, MetaFsConfig::LPN_COUNT_PER_INODE))
         {
-            if (false == inodeTable->Store(media, baseLpn,
-                                idx * MetaFsConfig::LPN_COUNT_PER_INODE,
-                                MetaFsConfig::LPN_COUNT_PER_INODE /*LpnCnts*/))
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -336,28 +341,28 @@ InodeManager::_StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn)
 void
 InodeManager::Finalize(void)
 {
-    fd2InodeMap.clear();
-    fdAllocator->Reset();
+    fd2InodeMap_.clear();
+    fdAllocator_->Reset();
 }
 
 void
 InodeManager::SetMss(MetaStorageSubsystem* metaStorage)
 {
-    this->metaStorage = metaStorage;
-    inodeHdr->SetMss(metaStorage);
-    inodeTable->SetMss(metaStorage);
+    metaStorage_ = metaStorage;
+    inodeHdr_->SetMss(metaStorage);
+    inodeTable_->SetMss(metaStorage);
 }
 
 MetaLpnType
-InodeManager::GetAvailableLpnCount(void)
+InodeManager::GetAvailableLpnCount(void) const
 {
-    return extentAllocator->GetAvailableLpnCount();
+    return extentAllocator_->GetAvailableLpnCount();
 }
 
 size_t
-InodeManager::GetAvailableSpace(void)
+InodeManager::GetAvailableSpace(void) const
 {
-    MetaLpnType maxSize = extentAllocator->GetAvailableLpnCount();
+    MetaLpnType maxSize = extentAllocator_->GetAvailableLpnCount();
 
     maxSize -= maxSize % MetaFsConfig::LPN_COUNT_PER_EXTENT;
 
@@ -365,85 +370,90 @@ InodeManager::GetAvailableSpace(void)
 }
 
 bool
-InodeManager::CheckFileInActive(FileDescriptorType fd)
+InodeManager::CheckFileInActive(const FileDescriptorType fd) const
 {
-    if (activeFiles.find(fd) == activeFiles.end())
+    if (activeFiles_.find(fd) == activeFiles_.end())
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "File descriptor={} is not found in active fd list", fd);
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "File descriptor {} is not found in active fd list", fd);
         return false;
     }
     return true;
 }
 
 POS_EVENT_ID
-InodeManager::AddFileInActiveList(FileDescriptorType fd)
+InodeManager::AddFileInActiveList(const FileDescriptorType fd)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-    if (activeFiles.find(fd) != activeFiles.end())
+    if (activeFiles_.find(fd) != activeFiles_.end())
     {
         rc = POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY;
         POS_TRACE_ERROR((int)rc,
-            "You attempt to open fd={} file twice. It is not allowed", fd);
+            "You attempt to open fd {} file twice. It is not allowed", fd);
     }
     else
     {
-        activeFiles.insert(fd);
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "File descriptor={} is added in active fd list", fd);
+        activeFiles_.insert(fd);
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "File descriptor {} is added in active fd list", fd);
     }
 
     return rc;
 }
 
 void
-InodeManager::RemoveFileFromActiveList(FileDescriptorType fd)
+InodeManager::RemoveFileFromActiveList(const FileDescriptorType fd)
 {
-    assert(activeFiles.find(fd) != activeFiles.end());
-    activeFiles.erase(fd);
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "File descriptor={} is removed from active fd list, remained activeFiles={}",
-        fd, activeFiles.size());
+    if (activeFiles_.find(fd) == activeFiles_.end())
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "File descriptor {} is not active file.", fd);
+        assert(false);
+    }
+
+    activeFiles_.erase(fd);
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "File descriptor {} is removed from active fd list, remained active file count: {}",
+        fd, activeFiles_.size());
 }
 
 size_t
-InodeManager::GetFileCountInActive(void)
+InodeManager::GetFileCountInActive(void) const
 {
-    return activeFiles.size();
+    return activeFiles_.size();
 }
 
 std::string
-InodeManager::LookupNameByDescriptor(FileDescriptorType fd)
+InodeManager::LookupNameByDescriptor(const FileDescriptorType fd) const
 {
-    auto item = fd2InodeMap.find(fd);
-    if (item == fd2InodeMap.end())
+    auto item = fd2InodeMap_.find(fd);
+    if (item == fd2InodeMap_.end())
         return "";
 
     return item->second->data.basic.field.fileName.ToString();
 }
 
 FileSizeType
-InodeManager::GetFileSize(const FileDescriptorType fd)
+InodeManager::GetFileSize(const FileDescriptorType fd) const
 {
     return GetFileInode(fd).data.basic.field.fileByteSize;
 }
 
 FileSizeType
-InodeManager::GetDataChunkSize(const FileDescriptorType fd)
+InodeManager::GetDataChunkSize(const FileDescriptorType fd) const
 {
     return GetFileInode(fd).data.basic.field.dataChunkSize;
 }
 
 MetaLpnType
-InodeManager::GetFileBaseLpn(const FileDescriptorType fd)
+InodeManager::GetFileBaseLpn(const FileDescriptorType fd) const
 {
     return GetFileInode(fd).data.basic.field.pagemap[0].GetStartLpn();
 }
 
 uint32_t
-InodeManager::GetExtent(const FileDescriptorType fd,
-                        std::vector<MetaFileExtent>& extents /* output */)
+InodeManager::GetExtent(const FileDescriptorType fd, std::vector<MetaFileExtent>& extents /* output */) const
 {
     MetaFileInode& inode = GetFileInode(fd);
     uint32_t extentCnt = inode.data.basic.field.pagemapCnt;
@@ -457,10 +467,15 @@ InodeManager::GetExtent(const FileDescriptorType fd,
 }
 
 MetaFileInode&
-InodeManager::GetFileInode(const FileDescriptorType fd)
+InodeManager::GetFileInode(const FileDescriptorType fd) const
 {
-    auto item = fd2InodeMap.find(fd);
-    assert(item != fd2InodeMap.end());
+    auto item = fd2InodeMap_.find(fd);
+    if (item == fd2InodeMap_.end())
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "File descriptor {} is not existed.", fd);
+        assert(false);
+    }
     return *item->second;
 }
 
@@ -468,29 +483,25 @@ void
 InodeManager::_UpdateFdAllocator(void)
 {
     // update freeFdMap
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src =
-                                        inodeHdr->GetInodeInUseBitmap();
+    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src = inodeHdr_->GetInodeInUseBitmap();
 
-    int inodeEntryNum = src.size();
-    for (int idx = 0; idx < inodeEntryNum; idx++)
+    for (size_t idx = 0; idx < src.size(); idx++)
     {
         if (src.test(idx))
         {
-            FileDescriptorType fd = inodeTable->GetFileDescriptor(idx);
-            fdAllocator->UpdateFreeMap(fd);
+            fdAllocator_->UpdateFreeMap(inodeTable_->GetFileDescriptor(idx));
         }
     }
 
     // update fileKey2FdLookupMap
-    MetaFileInodeArray& inodes = inodeTable->GetInodeArray();
-    for (auto& inode : inodes) // FIXME: need to improve
+    for (auto& inode : inodeTable_->GetInodeArray())
     {
         if (inode.IsInUse())
         {
             std::string fileName = inode.data.basic.field.fileName.ToString();
             StringHashType hashKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
 
-            fdAllocator->UpdateLookupMap(hashKey, inode.data.basic.field.fd);
+            fdAllocator_->UpdateLookupMap(hashKey, inode.data.basic.field.fd);
 
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "fileName={}, hashKey={}, fd={}",
@@ -500,17 +511,17 @@ InodeManager::_UpdateFdAllocator(void)
 }
 
 void
-InodeManager::PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType, MetaVolumeType>& dest)
+InodeManager::PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType, MetaVolumeType>& dest) const
 {
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src = inodeHdr->GetInodeInUseBitmap();
-
+    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& src = inodeHdr_->GetInodeInUseBitmap();
     int inodeEntryNum = src.size();
+
     for (int idx = inodeEntryNum - 1; idx >= 0; idx--)
     {
         if (src.test(idx))
         {
-            FileDescriptorType fd = inodeTable->GetFileDescriptor(idx);
-            dest.insert(std::make_pair(fd, volumeType));
+            FileDescriptorType fd = inodeTable_->GetFileDescriptor(idx);
+            dest.insert({fd, volumeType});
 
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[PopulateFDMapWithVolumeType] fd2VolTypehMap] fd={} volumeType={}",
@@ -520,17 +531,14 @@ InodeManager::PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType,
 }
 
 void
-InodeManager::PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, MetaVolumeType>& dest)
+InodeManager::PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, MetaVolumeType>& dest) const
 {
-    // FIXME: need to polish
-    MetaFileInodeArray& inodes = inodeTable->GetInodeArray();
-
-    for (auto& inode : inodes) // FIXME: need to improve
+    for (auto& inode : inodeTable_->GetInodeArray())
     {
         if (inode.IsInUse())
         {
             StringHashType hashKey = MetaFileUtil::GetHashKeyFromFileName(inode.data.basic.field.fileName.ToString());
-            dest.insert(std::make_pair(hashKey, volumeType));
+            dest.insert({hashKey, volumeType});
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "fileKey2VolumeType populated: {}, {}", hashKey, (int)volumeType);
         }
@@ -538,52 +546,16 @@ InodeManager::PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, 
 }
 
 MetaLpnType
-InodeManager::GetTheLastValidLpn(void)
+InodeManager::GetTheLastValidLpn(void) const
 {
-    std::vector<MetaFileExtent> extents = inodeHdr->GetFileExtentContent();
+    std::vector<MetaFileExtent> extents = inodeHdr_->GetFileExtentContent();
 
-    if (extents.size() == 0)
+    if (!extents.size())
         return 0;
 
     MetaLpnType lpn = extents[extents.size() - 1].GetStartLpn();
     lpn += extents[extents.size() - 1].GetCount() - 1;
 
     return lpn;
-}
-
-MetaLpnType
-InodeManager::GetMetaFileBaseLpn(void)
-{
-    return extentAllocator->GetFileBaseLpn();
-}
-
-void
-InodeManager::SetMetaFileBaseLpn(MetaLpnType lpn)
-{
-    extentAllocator->SetFileBaseLpn(lpn);
-}
-
-bool
-InodeManager::IsGivenFileCreated(StringHashType fileKey)
-{
-    return fdAllocator->IsGivenFileCreated(fileKey);
-}
-
-FileDescriptorType
-InodeManager::LookupDescriptorByName(std::string& fileName)
-{
-    return fdAllocator->FindFdByName(fileName);
-}
-
-MetaFileInode&
-InodeManager::GetInodeEntry(const uint32_t entryIdx)
-{
-    return inodeTable->GetInode(entryIdx);
-}
-
-bool
-InodeManager::IsFileInodeInUse(const FileDescriptorType fd)
-{
-    return inodeHdr->IsFileInodeInUse(fd);
 }
 } // namespace pos

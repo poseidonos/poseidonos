@@ -30,8 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "meta_volume.h"
+
+#include <string>
+
 #include "meta_volume_container.h"
 #include "metafs_common.h"
 #include "metafs_log.h"
@@ -40,102 +42,134 @@
 
 namespace pos
 {
-MetaVolume::MetaVolume(void)
+MetaVolume::MetaVolume(const int arrayId, const MetaVolumeType metaVolumeType,
+    const MetaLpnType maxVolumePageNum, InodeManager* inodeMgr,
+    CatalogManager* catalogMgr, InodeCreator* inodeCreator,
+    InodeDeleter* inodeDeleter)
+: volumeBaseLpn_(0),
+  maxVolumeLpn_(maxVolumePageNum),
+  volumeType_(metaVolumeType),
+  volumeState_(MetaVolumeState::Default),
+  inodeMgr_(inodeMgr),
+  catalogMgr_(catalogMgr),
+  sumOfRegionBaseLpns_(0),
+  metaStorage_(nullptr),
+  arrayId_(arrayId),
+  trimBuffer_(nullptr),
+  inodeCreator_(inodeCreator),
+  inodeDeleter_(inodeDeleter)
 {
-}
+    if (!inodeMgr_)
+        inodeMgr_ = new InodeManager(arrayId_);
 
-MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType,
-            MetaLpnType maxVolumePageNum, InodeManager* inodeMgr,
-            CatalogManager* catalogMgr, InodeCreator* inodeCreator,
-            InodeDeleter* inodeDeleter)
-: MetaVolume()
-{
-    this->inodeMgr = (nullptr == inodeMgr) ? new InodeManager(arrayId) : inodeMgr;
-    this->catalogMgr = (nullptr == catalogMgr) ? new CatalogManager(arrayId) : catalogMgr;
+    if (!catalogMgr_)
+        catalogMgr_ = new CatalogManager(arrayId_);
 
-    maxVolumeLpn = maxVolumePageNum;
-    volumeType = metaVolumeType;
-    this->arrayId = arrayId;
+    if (!inodeCreator_)
+        inodeCreator_ = new InodeCreator(inodeMgr_);
 
-    trimBuffer = Memory<MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES>::Alloc();
-    assert(trimBuffer != nullptr);
+    if (!inodeDeleter_)
+        inodeDeleter_ = new InodeDeleter(inodeMgr_);
 
-    this->inodeCreator = (nullptr == inodeCreator) ? new InodeCreator(this->inodeMgr) : inodeCreator;
-    this->inodeDeleter = (nullptr == inodeDeleter) ? new InodeDeleter(this->inodeMgr) : inodeDeleter;
+    trimBuffer_ = Memory<MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES>::Alloc();
+    if (!trimBuffer_)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The trim buffer cannot be allocated by Memory.");
+        assert(false);
+    }
 }
 
 // LCOV_EXCL_START
 MetaVolume::~MetaVolume(void)
 {
-    regionMgrMap.clear();
-    fd2VolTypehMap.clear();
-    fileKey2VolTypeMap.clear();
+    regionMgrMap_.clear();
+    fd2VolTypehMap_.clear();
+    fileKey2VolTypeMap_.clear();
 
-    delete inodeMgr;
-    delete catalogMgr;
+    if (inodeMgr_)
+    {
+        delete inodeMgr_;
+        inodeMgr_ = nullptr;
+    }
 
-    if (nullptr != trimBuffer)
-        Memory<>::Free(trimBuffer);
+    if (catalogMgr_)
+    {
+        delete catalogMgr_;
+        catalogMgr_ = nullptr;
+    }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MetaVolume: {}: destructed", (uint32_t)volumeType);
+    if (inodeCreator_)
+    {
+        delete inodeCreator_;
+        inodeCreator_ = nullptr;
+    }
 
-    delete inodeCreator;
-    delete inodeDeleter;
+    if (inodeDeleter_)
+    {
+        delete inodeDeleter_;
+        inodeDeleter_ = nullptr;
+    }
+
+    if (trimBuffer_)
+    {
+        Memory<>::Free(trimBuffer_);
+        trimBuffer_ = nullptr;
+    }
 }
 // LCOV_EXCL_STOP
 
 void
 MetaVolume::Init(MetaStorageSubsystem* metaStorage)
 {
-    regionMgrMap.insert({ MetaRegionManagerType::VolCatalogMgr, catalogMgr });
-    regionMgrMap.insert({ MetaRegionManagerType::InodeMgr, inodeMgr });
+    regionMgrMap_.insert({MetaRegionManagerType::VolCatalogMgr, catalogMgr_});
+    regionMgrMap_.insert({MetaRegionManagerType::InodeMgr, inodeMgr_});
 
     InitVolumeBaseLpn();
     _SetupRegionInfoToRegionMgrs(metaStorage);
 
-    this->metaStorage = metaStorage;
-    volumeState = MetaVolumeState::Init;
+    this->metaStorage_ = metaStorage;
+    volumeState_ = MetaVolumeState::Init;
 }
 
 void
 MetaVolume::_SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage)
 {
-    MetaLpnType targetBaseLpn = volumeBaseLpn;
+    MetaLpnType targetBaseLpn = volumeBaseLpn_;
     MetaLpnType newTargetBaseLpn = 0;
 
-    sumOfRegionBaseLpns = 0;
+    sumOfRegionBaseLpns_ = 0;
     /*************************************************************
-        catalogMgr | inodeMgr->Header | inodeMgr->table
+        catalogMgr_ | inodeMgr->Header | inodeMgr_->table
         fileMgr starts from here! => sumOfRegionBaseLpn
      ************************************************************/
-    // catalogMgr/inodeMgr/fileMgr
+    // catalogMgr_/inodeMgr_/fileMgr
     for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
         OnVolumeMetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
-        regionMgr.Init(volumeType, targetBaseLpn, maxVolumeLpn);
+        regionMgr.Init(volumeType_, targetBaseLpn, maxVolumeLpn_);
         regionMgr.SetMss(metaStorage);
 
         targetBaseLpn += regionMgr.GetRegionSizeInLpn();
     }
 
     // The NVRAM meta saves after SSD volume meta on shutdown process.
-    if (GetVolumeType() == MetaVolumeType::SsdVolume)
+    if (volumeType_ == MetaVolumeType::SsdVolume)
     {
-        sumOfRegionBaseLpns = inodeMgr->GetMetaFileBaseLpn();
+        sumOfRegionBaseLpns_ = inodeMgr_->GetMetaFileBaseLpn();
 
-        newTargetBaseLpn += catalogMgr->GetRegionSizeInLpn() +
-            inodeMgr->GetRegionSizeInLpn() +
-            inodeMgr->GetMetaFileBaseLpn();
+        newTargetBaseLpn += catalogMgr_->GetRegionSizeInLpn() +
+            inodeMgr_->GetRegionSizeInLpn() +
+            inodeMgr_->GetMetaFileBaseLpn();
 
-        inodeMgr->SetMetaFileBaseLpn(newTargetBaseLpn);
+        inodeMgr_->SetMetaFileBaseLpn(newTargetBaseLpn);
     }
 }
 
 OnVolumeMetaRegionManager&
 MetaVolume::_GetRegionMgr(MetaRegionManagerType region)
 {
-    auto item = regionMgrMap.find(region);
+    auto item = regionMgrMap_.find(region);
 
     return *item->second;
 }
@@ -143,44 +177,36 @@ MetaVolume::_GetRegionMgr(MetaRegionManagerType region)
 bool
 MetaVolume::CreateVolume(void)
 {
-    bool isSuccess = catalogMgr->CreateCatalog(maxVolumeLpn, MetaFsConfig::MAX_META_FILE_NUM_SUPPORT, false);
-
-    if (true == isSuccess)
+    if (!catalogMgr_->CreateCatalog(maxVolumeLpn_, MetaFsConfig::MAX_META_FILE_NUM_SUPPORT, false))
     {
-        inodeMgr->CreateInitialInodeContent(MetaFsConfig::MAX_META_FILE_NUM_SUPPORT);
-
-        catalogMgr->RegisterRegionInfo(MetaRegionType::FileInodeHdr,
-            inodeMgr->GetRegionBaseLpn(MetaRegionType::FileInodeHdr),
-            inodeMgr->GetRegionSizeInLpn(MetaRegionType::FileInodeHdr));
-
-        catalogMgr->RegisterRegionInfo(MetaRegionType::FileInodeTable,
-            inodeMgr->GetRegionBaseLpn(MetaRegionType::FileInodeTable),
-            inodeMgr->GetRegionSizeInLpn(MetaRegionType::FileInodeTable));
-
-        do
-        {
-            if (true != catalogMgr->SaveContent())
-            {
-                break;
-            }
-            if (true != inodeMgr->SaveContent())
-            {
-                break;
-            }
-
-            volumeState = MetaVolumeState::Created;
-            return true;
-        } while (false);
+        return false;
     }
 
-    return false;
+    inodeMgr_->CreateInitialInodeContent(MetaFsConfig::MAX_META_FILE_NUM_SUPPORT);
+
+    catalogMgr_->RegisterRegionInfo(MetaRegionType::FileInodeHdr,
+        inodeMgr_->GetRegionBaseLpn(MetaRegionType::FileInodeHdr),
+        inodeMgr_->GetRegionSizeInLpn(MetaRegionType::FileInodeHdr));
+
+    catalogMgr_->RegisterRegionInfo(MetaRegionType::FileInodeTable,
+        inodeMgr_->GetRegionBaseLpn(MetaRegionType::FileInodeTable),
+        inodeMgr_->GetRegionSizeInLpn(MetaRegionType::FileInodeTable));
+
+    if (!catalogMgr_->SaveContent())
+        return false;
+
+    if (!inodeMgr_->SaveContent())
+        return false;
+
+    volumeState_ = MetaVolumeState::Created;
+    return true;
 }
 
 bool
 MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Trying to open meta volume(type: {})", (int)volumeType);
+        "Trying to open meta volume(type: {})", (int)volumeType_);
 
     if (false == _LoadVolumeMeta(info, isNPOR))
     {
@@ -190,17 +216,16 @@ MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 
     for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
-        MetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
-        regionMgr.Bringup();
+        _GetRegionMgr((MetaRegionManagerType)idx).Bringup();
     }
 
-    inodeMgr->PopulateFDMapWithVolumeType(fd2VolTypehMap);
-    inodeMgr->PopulateFileNameWithVolumeType(fileKey2VolTypeMap);
+    inodeMgr_->PopulateFDMapWithVolumeType(fd2VolTypehMap_);
+    inodeMgr_->PopulateFileNameWithVolumeType(fileKey2VolTypeMap_);
 
-    volumeState = MetaVolumeState::Open;
+    volumeState_ = MetaVolumeState::Open;
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Finished opening meta volume(type: {})", (int)volumeType);
+        "Finished opening meta volume(type: {})", (int)volumeType_);
 
     return true;
 }
@@ -208,28 +233,28 @@ MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 bool
 MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
 {
-    if (isNPOR == false || GetVolumeType() == MetaVolumeType::SsdVolume)
+    if (!isNPOR || volumeType_ == MetaVolumeType::SsdVolume)
     {
-        if (false == catalogMgr->LoadVolCatalog())
+        if (!catalogMgr_->LoadVolCatalog())
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
-                "Failed to load volume catalog(volume type: {})", (int)volumeType);
-            volumeState = MetaVolumeState::Error;
+                "Failed to load volume catalog(volume type: {})", (int)volumeType_);
+            volumeState_ = MetaVolumeState::Error;
             return false;
         }
 
-        if (false == inodeMgr->LoadContent())
+        if (!inodeMgr_->LoadContent())
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
-                "Failed to load volume inode contents(volume type: {})", (int)volumeType);
-            volumeState = MetaVolumeState::Error;
+                "Failed to load volume inode contents(volume type: {})", (int)volumeType_);
+            volumeState_ = MetaVolumeState::Error;
             return false;
         }
     }
     else
     {
         // The NVRAM volume meta loads from the backuped meta in SSD volume area.
-        if (true != _RestoreContents(info))
+        if (!_RestoreContents(info))
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
                 "Failed to store NVRAM meta volume");
@@ -238,8 +263,8 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Successfully loaded the contents of meta volume(type: {}). isNPOR={}",
-        (int)volumeType, isNPOR);
+        "Successfully loaded the contents of meta volume(type: {}). isNPOR: {}",
+        (int)volumeType_, isNPOR);
 
     return true;
 }
@@ -248,60 +273,56 @@ bool
 MetaVolume::CloseVolume(MetaLpnType* info, bool& resetContext)
 {
     bool ret = true;
-    if (volumeState != MetaVolumeState::Open)
+    if (volumeState_ != MetaVolumeState::Open)
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_ALREADY_CLOSED,
             "Volume state is not 'Open'. Current state is '{}'. Skip volume close procedure...",
-            (int)volumeState);
+            (int)volumeState_);
         return true; // just return true;
     }
 
-    size_t size = inodeMgr->GetFileCountInActive();
-    if (size != 0)
+    if (inodeMgr_->GetFileCountInActive())
     {
         resetContext = false; // do not clear any mfs context
 
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
-            "Need to close the {} opened files!!. Then, unmount the meta file mgmt", size);
+            "Need to close the {} opened files!!. Then, unmount the meta file mgmt",
+            inodeMgr_->GetFileCountInActive());
         return false;
     }
 
     do
     {
-        if (true != catalogMgr->SaveContent())
+        if (!catalogMgr_->SaveContent())
         {
             ret = false;
             break;
         }
 
-        if (true != inodeMgr->SaveContent())
+        if (!inodeMgr_->SaveContent())
         {
             ret = false;
             break;
         }
 
         // The NVRAM volume meta backups to the SSD volume area.
-        if (GetVolumeType() == MetaVolumeType::NvRamVolume)
+        if (volumeType_ == MetaVolumeType::NvRamVolume)
         {
-            if (true != _BackupContents(info))
+            if (!_BackupContents(info))
             {
                 ret = false;
                 break;
             }
         }
-    } while (false);
 
-    if (true == ret)
-    {
-        volumeState = MetaVolumeState::Close;
+        volumeState_ = MetaVolumeState::Close;
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "CloseVolume Done : MetaVolType={}", (int)volumeType);
-    }
+            "CloseVolume Done : volumeType_: {}", (int)volumeType_);
+    } while (false);
 
     for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
-        MetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
-        regionMgr.Finalize();
+        _GetRegionMgr((MetaRegionManagerType)idx).Finalize();
     }
 
     resetContext = true;
@@ -310,14 +331,13 @@ MetaVolume::CloseVolume(MetaLpnType* info, bool& resetContext)
 }
 
 bool
-MetaVolume::CopyInodeToInodeInfo(FileDescriptorType fd,
+MetaVolume::CopyInodeToInodeInfo(const FileDescriptorType fd,
     MetaFileInodeInfo* inodeInfo /* output */)
 {
-    if (nullptr == inodeInfo)
+    if (!inodeInfo)
         return false;
 
-    MetaFileInode& inode = GetInode(fd);
-    inode.SetMetaFileInfo(MetaFileUtil::ConvertToMediaType(volumeType), *inodeInfo);
+    GetInode(fd).SetMetaFileInfo(MetaFileUtil::ConvertToMediaType(volumeType_), *inodeInfo);
 
     return true;
 }
@@ -327,35 +347,29 @@ MetaVolume::GetRegionSizeInLpn(MetaRegionType regionType)
 {
     switch (regionType)
     {
-    case MetaRegionType::VolCatalog:
-        return catalogMgr->GetRegionSizeInLpn();
+        case MetaRegionType::VolCatalog:
+            return catalogMgr_->GetRegionSizeInLpn();
 
-    case MetaRegionType::FileInodeHdr:
-        return inodeMgr->GetRegionSizeInLpn(regionType);
+        case MetaRegionType::FileInodeHdr:
+            return inodeMgr_->GetRegionSizeInLpn(regionType);
 
-    case MetaRegionType::FileInodeTable:
-        return inodeMgr->GetRegionSizeInLpn(regionType);
+        case MetaRegionType::FileInodeTable:
+            return inodeMgr_->GetRegionSizeInLpn(regionType);
 
-    default:
-        assert(false);
+        default:
+            assert(false);
     }
 }
 
-MetaVolumeType
-MetaVolume::GetVolumeType(void)
-{
-    return volumeType;
-}
-
 void
-MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
+MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList) const
 {
-    for (int entryIdx = 0; entryIdx < (int)MetaFsConfig::MAX_META_FILE_NUM_SUPPORT; entryIdx++)
+    for (uint32_t entryIdx = 0; entryIdx < MetaFsConfig::MAX_META_FILE_NUM_SUPPORT; entryIdx++)
     {
-        if (inodeMgr->IsFileInodeInUse(entryIdx))
+        if (inodeMgr_->IsFileInodeInUse(entryIdx))
         {
             MetaFileInfoDumpCxt fileInfoData;
-            MetaFileInode& inode = inodeMgr->GetInodeEntry(entryIdx);
+            MetaFileInode& inode = inodeMgr_->GetInodeEntry(entryIdx);
 
             fileInfoData.fd = inode.data.basic.field.fd;
             fileInfoData.ctime = inode.data.basic.field.ctime;
@@ -363,9 +377,9 @@ MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
             fileInfoData.size = inode.data.basic.field.fileByteSize;
             fileInfoData.lpnBase = inode.data.basic.field.pagemap[0].GetStartLpn();
             fileInfoData.lpnCount = inode.data.basic.field.pagemap[0].GetCount();
-            fileInfoData.location = MetaFileUtil::ConvertToMediaTypeName(volumeType);
+            fileInfoData.location = MetaFileUtil::ConvertToMediaTypeName(volumeType_);
 
-            fileInfoList->push_back(fileInfoData);
+            fileInfoList->emplace_back(fileInfoData);
         }
     }
 }
@@ -373,22 +387,31 @@ MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
 FileControlResult
 MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 {
-    auto result = inodeCreator->Create(reqMsg);
+    auto result = inodeCreator_->Create(reqMsg);
 
     if (POS_EVENT_ID::SUCCESS != result.second)
         return result;
 
-    FileDescriptorType fd = result.first;
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "fileHashKey: {}, fd: {}", fileKey, fd);
+    if (fileKey2VolTypeMap_.end() != fileKey2VolTypeMap_.find(fileKey))
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The fileKey {} is already existed, fd: {}, fileName: {}",
+            fileKey, result.first, *reqMsg.fileName);
+        assert(false);
+    }
 
-    assert(fileKey2VolTypeMap.end() == fileKey2VolTypeMap.find(fileKey));
-    fileKey2VolTypeMap.insert(std::make_pair(fileKey, volumeType));
+    if (fd2VolTypehMap_.end() != fd2VolTypehMap_.find(result.first))
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The fd {} is already existed, fileName: {}",
+            result.first, *reqMsg.fileName);
+        assert(false);
+    }
 
-    assert(fd2VolTypehMap.end() == fd2VolTypehMap.find(fd));
-    fd2VolTypehMap.insert(std::make_pair(fd, volumeType));
+    fileKey2VolTypeMap_.insert({fileKey, volumeType_});
+    fd2VolTypehMap_.insert({result.first, volumeType_});
 
     return result;
 }
@@ -396,16 +419,13 @@ MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 FileControlResult
 MetaVolume::DeleteFile(MetaFsFileControlRequest& reqMsg)
 {
-    auto result = inodeDeleter->Delete(reqMsg);
+    auto result = inodeDeleter_->Delete(reqMsg);
 
     if (POS_EVENT_ID::SUCCESS != result.second)
         return result;
 
-    FileDescriptorType fd = result.first;
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName);
-
-    fileKey2VolTypeMap.erase(fileKey);
-    fd2VolTypehMap.erase(fd);
+    fileKey2VolTypeMap_.erase(MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName));
+    fd2VolTypehMap_.erase(result.first);
 
     return result;
 }
@@ -413,16 +433,15 @@ MetaVolume::DeleteFile(MetaFsFileControlRequest& reqMsg)
 bool
 MetaVolume::TrimData(MetaFsFileControlRequest& reqMsg)
 {
-    FileDescriptorType fd = inodeMgr->LookupDescriptorByName(*reqMsg.fileName);
-    MetaFileInode& inode = inodeMgr->GetFileInode(fd);
-    std::vector<MetaFileExtent> pageMap = inode.GetInodePageMap();
+    FileDescriptorType fd = inodeMgr_->LookupDescriptorByName(*reqMsg.fileName);
 
-    for (auto& it : pageMap)
+    for (auto& it : inodeMgr_->GetFileInode(fd).GetInodePageMap())
     {
-        if (false == _TrimData(inode.GetStorageType(), it.GetStartLpn(), it.GetCount()))
+        if (!_TrimData(inodeMgr_->GetFileInode(fd).GetStorageType(), it.GetStartLpn(), it.GetCount()))
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "DSM of start={}, count={} is failed", it.GetStartLpn(), it.GetCount());
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "Trim (startLpn: {}, lpnCount: {}) has been failed.",
+                it.GetStartLpn(), it.GetCount());
             return false;
         }
     }
@@ -432,35 +451,27 @@ MetaVolume::TrimData(MetaFsFileControlRequest& reqMsg)
 bool
 MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count)
 {
-    void* buf = nullptr;
-    POS_EVENT_ID ret = POS_EVENT_ID::SUCCESS;
-
-    if (nullptr == metaStorage)
+    if (!metaStorage_)
     {
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "MetaStorageSubsystem is not ready");
         return false;
     }
 
-    ret = metaStorage->TrimFileData(type, start, buf, count);
-
-    if (ret != POS_EVENT_ID::SUCCESS)
+    if (POS_EVENT_ID::SUCCESS != metaStorage_->TrimFileData(type, start, nullptr, count))
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "MFS file trim has been failed with NVMe Admin TRIM CMD.");
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "Meta file trim has been failed with NVMe DSM.");
 
-        // write all zeros
-        ret = metaStorage->WritePage(type, start, trimBuffer, count); // should be async.
-
-        if (ret != POS_EVENT_ID::SUCCESS)
+        if (POS_EVENT_ID::SUCCESS != metaStorage_->WritePage(type, start, trimBuffer_, count))
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "MFS file trim has been failed with zero writing.");
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "Meta file trim has been failed with zero writing.");
 
             return false;
         }
     }
 
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "MFS file trim has been deleted!!!");
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "Meta file trim is done");
 
     return true;
 }
@@ -470,7 +481,7 @@ MetaVolume::_BackupContents(MetaLpnType* info)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "NVRAM volume meta '{}' backups to SSD volume region '{}'. Start...",
-        (int)GetVolumeType(), (int)MetaVolumeType::SsdVolume);
+        (int)volumeType_, (int)MetaVolumeType::SsdVolume);
 
     MetaLpnType baseLpnInVol = info[(uint32_t)BackupInfo::BaseLpn];
     MetaLpnType lpnCnts = info[(uint32_t)BackupInfo::CatalogSize]; // catalog
@@ -479,13 +490,13 @@ MetaVolume::_BackupContents(MetaLpnType* info)
     MetaLpnType iNodeTableLpnCnts = info[(uint32_t)BackupInfo::InodeTableSize]; // inode table
 
     // The data is catalog contents on the NVRAM. (NVMe volume instance + SSDVolume file interface)
-    if (false == catalogMgr->BackupContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts))
+    if (!catalogMgr_->BackupContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts))
         return false;
 
     baseLpnInVol += lpnCnts;
 
     // The data is inode contents on the NVRAM.
-    if (false == inodeMgr->BackupContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
+    if (!inodeMgr_->BackupContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
         return false;
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -498,7 +509,7 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "NVRAM volume meta '{}' is restored from SSD volume region '{}'. Start...",
-        (int)GetVolumeType(), (int)MetaVolumeType::SsdVolume);
+        (int)volumeType_, (int)MetaVolumeType::SsdVolume);
 
     MetaLpnType baseLpnInVol = info[(uint32_t)BackupInfo::BaseLpn];
     MetaLpnType lpnCnts = info[(uint32_t)BackupInfo::CatalogSize]; // catalog
@@ -506,7 +517,7 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
     MetaLpnType iNodeHdrLpnCnts = info[(uint32_t)BackupInfo::InodeHdrSize];     // inode header
     MetaLpnType iNodeTableLpnCnts = info[(uint32_t)BackupInfo::InodeTableSize]; // inode table
 
-    if (false == catalogMgr->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts))
+    if (!catalogMgr_->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Failed to restore NVRAM catalog from SSD meta volume");
@@ -515,7 +526,7 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
 
     baseLpnInVol += lpnCnts;
 
-    if (false == inodeMgr->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
+    if (!inodeMgr_->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Failed to restore NVRAM inode contents from SSD meta volume");
@@ -528,81 +539,9 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
     return true;
 }
 
-bool
-MetaVolume::CheckFileInActive(FileDescriptorType fd)
-{
-    return inodeMgr->CheckFileInActive(fd);
-}
-
-POS_EVENT_ID
-MetaVolume::AddFileInActiveList(FileDescriptorType fd)
-{
-    return inodeMgr->AddFileInActiveList(fd);
-}
-
-bool
-MetaVolume::IsGivenFileCreated(StringHashType fileKey)
-{
-    return inodeMgr->IsGivenFileCreated(fileKey);
-}
-
-void
-MetaVolume::RemoveFileFromActiveList(FileDescriptorType fd)
-{
-    inodeMgr->RemoveFileFromActiveList(fd);
-}
-
-FileSizeType
-MetaVolume::GetFileSize(FileDescriptorType fd)
-{
-    return inodeMgr->GetFileSize(fd);
-}
-
-FileSizeType
-MetaVolume::GetDataChunkSize(FileDescriptorType fd)
-{
-    return inodeMgr->GetDataChunkSize(fd);
-}
-
-MetaLpnType
-MetaVolume::GetFileBaseLpn(FileDescriptorType fd)
-{
-    return inodeMgr->GetFileBaseLpn(fd);
-}
-
-MetaFileInode&
-MetaVolume::GetInode(FileDescriptorType fd)
-{
-    return inodeMgr->GetFileInode(fd);
-}
-
 uint32_t
 MetaVolume::GetUtilizationInPercent(void)
 {
-    return ((maxVolumeLpn - inodeMgr->GetAvailableLpnCount()) * 100) / maxVolumeLpn;
-}
-
-size_t
-MetaVolume::GetAvailableSpace(void)
-{
-    return inodeMgr->GetAvailableSpace();
-}
-
-MetaLpnType
-MetaVolume::GetTheLastValidLpn(void)
-{
-    return inodeMgr->GetTheLastValidLpn();
-}
-
-FileDescriptorType
-MetaVolume::LookupDescriptorByName(std::string& fileName)
-{
-    return inodeMgr->LookupDescriptorByName(fileName);
-}
-
-std::string
-MetaVolume::LookupNameByDescriptor(FileDescriptorType fd)
-{
-    return inodeMgr->LookupNameByDescriptor(fd);
+    return ((maxVolumeLpn_ - inodeMgr_->GetAvailableLpnCount()) * 100) / maxVolumeLpn_;
 }
 } // namespace pos

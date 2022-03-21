@@ -31,25 +31,26 @@
  */
 
 #include "src/metafs/mvm/volume/meta_volume.h"
-#include "src/metafs/mvm/volume/meta_volume_state.h"
-
-#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/catalog_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_creator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_deleter_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
 #include <map>
 #include <string>
 
+#include "src/metafs/mvm/volume/meta_volume_state.h"
+#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/catalog_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_creator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_deleter_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
+
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::Matcher;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -60,10 +61,10 @@ namespace pos
 class MetaVolumeTester : public MetaVolume
 {
 public:
-    MetaVolumeTester(int arrayId, MetaVolumeType volumeType,
-            MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
-            CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
-            InodeDeleter* inodeDeleter = nullptr)
+    MetaVolumeTester(const int arrayId, const MetaVolumeType volumeType,
+        const MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
+        CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
+        InodeDeleter* inodeDeleter = nullptr)
     : MetaVolume(arrayId, volumeType, maxVolumePageNum, inodeMgr, catalogMgr, inodeCreator, inodeDeleter)
     {
     }
@@ -72,7 +73,7 @@ public:
     }
     void InitVolumeBaseLpn(void)
     {
-        volumeBaseLpn = 2000;
+        volumeBaseLpn_ = 2000;
     }
     bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop)
     {
@@ -80,11 +81,11 @@ public:
     }
     void SetVolumeType(MetaVolumeType volumeType)
     {
-        this->volumeType = volumeType;
+        volumeType_ = volumeType;
     }
     void SetVolumeState(MetaVolumeState state)
     {
-        this->volumeState = state;
+        volumeState_ = state;
     }
     MetaLpnType
     GetBaseLpn(void)
@@ -119,7 +120,7 @@ public:
         inodeDeleter = new NiceMock<MockInodeDeleter>(inodeMgr);
 
         metaVolume = new MetaVolumeTester(arrayId, volumeType, maxVolumePageNum,
-                                    inodeMgr, catalogMgr, inodeCreator, inodeDeleter);
+            inodeMgr, catalogMgr, inodeCreator, inodeDeleter);
 
         EXPECT_CALL(*inodeMgr, Init);
         EXPECT_CALL(*inodeMgr, SetMss);
@@ -594,7 +595,7 @@ TEST_F(MetaVolumeFixture, CheckTrim_Positive)
 
     // Trim
     EXPECT_CALL(*inodeMgr, LookupDescriptorByName).WillOnce(Return(0));
-    EXPECT_CALL(*inodeMgr, GetFileInode).WillOnce(ReturnRef(inode));
+    EXPECT_CALL(*inodeMgr, GetFileInode).WillRepeatedly(ReturnRef(inode));
 
     // _Trim
     EXPECT_CALL(*metaStorage, TrimFileData)

@@ -79,8 +79,8 @@ public:
         fdAllocator = new NiceMock<MockFileDescriptorAllocator>;
         extentAllocator = new NiceMock<MockExtentAllocator>;
 
-        inodeManager = new NiceMock<MockInodeManager>(inodeHdr, inodeTable, fdAllocator,
-            extentAllocator, arrayId);
+        inodeManager = new NiceMock<MockInodeManager>(arrayId, inodeHdr, inodeTable,
+            fdAllocator, extentAllocator);
 
         inodeCreator = new InodeCreator(inodeManager);
     }
@@ -118,7 +118,7 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Positive)
     reqMsg.fileName = &fileName;
     reqMsg.fileByteSize = 4097;
 
-    EXPECT_CALL(*fdAllocator, Alloc(Matcher<std::string&>(_))).WillOnce(Return(0));
+    EXPECT_CALL(*fdAllocator, Alloc(fileName)).WillOnce(Return(0));
 
     // _AllocNewInodeEntry()
     EXPECT_CALL(*inodeHdr, GetFreeInodeEntryIdx);
@@ -150,7 +150,7 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Negative)
     reqMsg.fileName = &fileName;
     reqMsg.fileByteSize = 4097;
 
-    EXPECT_CALL(*fdAllocator, Alloc(Matcher<std::string&>(_))).WillOnce(Return(0));
+    EXPECT_CALL(*fdAllocator, Alloc(fileName)).WillOnce(Return(0));
 
     // _AllocNewInodeEntry()
     EXPECT_CALL(*inodeHdr, GetFreeInodeEntryIdx);

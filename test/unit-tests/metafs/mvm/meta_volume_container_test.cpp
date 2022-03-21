@@ -61,9 +61,9 @@ public:
 
     virtual void SetUp(void) override
     {
-        ssdVolume = std::make_shared<NiceMock<MockMetaVolume>>();
-        nvramVolume = std::make_shared<NiceMock<MockMetaVolume>>();
-        journalVolume = std::make_shared<NiceMock<MockMetaVolume>>();
+        ssdVolume = std::make_shared<NiceMock<MockMetaVolume>>(arrayId, MetaVolumeType::SsdVolume, 0);
+        nvramVolume = std::make_shared<NiceMock<MockMetaVolume>>(arrayId, MetaVolumeType::NvRamVolume, 0);
+        journalVolume = std::make_shared<NiceMock<MockMetaVolume>>(arrayId, MetaVolumeType::JournalVolume, 0);
 
         EXPECT_CALL(*ssdVolume, Init);
         EXPECT_CALL(*nvramVolume, Init);

@@ -36,15 +36,9 @@
 
 namespace pos
 {
-NvRamMetaVolume::NvRamMetaVolume(void)
-: MetaVolume()
-{
-}
-
-NvRamMetaVolume::NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
-            InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum,
-                inodeMgr, catalogMgr)
+NvRamMetaVolume::NvRamMetaVolume(const int arrayId, const MetaLpnType maxVolumePageNum,
+    InodeManager* inodeMgr, CatalogManager* catalogMgr)
+: MetaVolume(arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum, inodeMgr, catalogMgr)
 {
 }
 
@@ -75,7 +69,7 @@ NvRamMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
 void
 NvRamMetaVolume::InitVolumeBaseLpn(void)
 {
-    volumeBaseLpn = NVRAM_VOLUME_BASE_LPN;
+    volumeBaseLpn_ = NVRAM_VOLUME_BASE_LPN;
 }
 
 bool

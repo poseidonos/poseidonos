@@ -1,2 +1,1 @@
 POS_ADD_UNIT_TEST(nvram_meta_volume_ut nvram_meta_volume_test.cpp)
-POS_ADD_UNIT_TEST(nvram_media_type_ut nvram_media_type_test.cpp)

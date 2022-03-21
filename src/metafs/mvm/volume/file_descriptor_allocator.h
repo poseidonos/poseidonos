@@ -51,22 +51,22 @@ public:
         std::set<FileDescriptorType>* freeMap = nullptr);
     virtual ~FileDescriptorAllocator(void);
 
-    virtual FileDescriptorType Alloc(std::string& fileName);
-    virtual FileDescriptorType Alloc(StringHashType fileKey);
+    virtual FileDescriptorType Alloc(const std::string& fileName);
+    virtual FileDescriptorType Alloc(const StringHashType fileKey);
 
-    virtual void Free(std::string& fileName, FileDescriptorType fd);
-    virtual void Free(StringHashType fileKey, FileDescriptorType fd);
+    virtual void Free(const std::string& fileName, const FileDescriptorType fd);
+    virtual void Free(const StringHashType fileKey, const FileDescriptorType fd);
 
-    virtual FileDescriptorType FindFdByName(std::string& fileName);
-    virtual FileDescriptorType FindFdByHashKey(StringHashType fileKey);
+    virtual FileDescriptorType FindFdByName(const std::string& fileName) const;
+    virtual FileDescriptorType FindFdByHashKey(const StringHashType fileKey) const;
 
-    virtual bool IsGivenFileCreated(std::string& fileName);
-    virtual bool IsGivenFileCreated(StringHashType fileKey);
+    virtual bool IsGivenFileCreated(const std::string& fileName) const;
+    virtual bool IsGivenFileCreated(const StringHashType fileKey) const;
 
     virtual void Reset(void);
-    virtual void UpdateFreeMap(FileDescriptorType fd);
-    virtual void UpdateLookupMap(StringHashType fileKey, FileDescriptorType fd);
-    virtual uint32_t GetMaxFileCount(void);
+    virtual void UpdateFreeMap(const FileDescriptorType fd);
+    virtual void UpdateLookupMap(const StringHashType fileKey, const FileDescriptorType fd);
+    virtual uint32_t GetMaxFileCount(void) const;
 
     // only for test
     virtual std::unordered_map<StringHashType, FileDescriptorType>* GetLookupMap(void);
@@ -74,7 +74,7 @@ public:
     virtual std::set<FileDescriptorType>* GetFreeMap(void);
 
 private:
-    bool _IsFdValid(FileDescriptorType fd);
+    bool _IsFdValid(const FileDescriptorType fd) const;
 
     std::unordered_map<StringHashType, FileDescriptorType>* fileKey2FdLookupMap;
     std::set<FileDescriptorType>* freeFdMap;

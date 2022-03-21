@@ -93,7 +93,7 @@ public:
     virtual FileDescriptorType LookupFileDescByName(std::string& fileName);
     virtual MetaFileInode& GetInode(const FileDescriptorType fd, const MetaVolumeType volumeType);
     virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList, const MetaVolumeType volumeType);
-    virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
+    virtual bool CopyInodeToInodeInfo(const FileDescriptorType fd,
         const MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
 
     virtual POS_EVENT_ID DetermineVolumeToCreateFile(FileSizeType fileByteSize,

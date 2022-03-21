@@ -32,17 +32,17 @@
 
 #pragma once
 
-#include "src/metafs/mvm/volume/meta_volume.h"
-
 #include <string>
+
+#include "src/metafs/mvm/volume/meta_volume.h"
 
 namespace pos
 {
 class SsdMetaVolume : public MetaVolume
 {
 public:
-    SsdMetaVolume(void);
-    SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
+    SsdMetaVolume(void) = delete;
+    SsdMetaVolume(int arrayId, const MetaVolumeType volType, const MetaLpnType maxVolumePageNum,
         InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
     ~SsdMetaVolume(void);
     virtual void InitVolumeBaseLpn(void) override;

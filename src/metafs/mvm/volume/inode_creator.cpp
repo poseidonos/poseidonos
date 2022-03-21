@@ -30,8 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/metafs/mvm/volume/inode_creator.h"
+
+#include "src/metafs/mvm/volume/inode_manager.h"
 
 namespace pos
 {
@@ -48,12 +49,12 @@ std::pair<FileDescriptorType, POS_EVENT_ID>
 InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
 {
     MetaLpnType totalLpnCount = 0;
-    FileDescriptorType fd = inodeMgr->fdAllocator->Alloc(*reqMsg.fileName);
+    FileDescriptorType fd = inodeMgr->fdAllocator_->Alloc(*reqMsg.fileName);
     MetaFileInode& newInode = _AllocNewInodeEntry(fd);
 
     FileSizeType userDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
-    std::vector<MetaFileExtent> extents = inodeMgr->extentAllocator->AllocExtents(requestLpnCnt);
+    std::vector<MetaFileExtent> extents = inodeMgr->extentAllocator_->AllocExtents(requestLpnCnt);
 
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "CreateFileInode, extent count: {}",
@@ -71,7 +72,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
 
     newInode.BuildNewEntry(inodeReq, MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
 
-    inodeMgr->fd2InodeMap.insert(std::make_pair(fd, &newInode));
+    inodeMgr->fd2InodeMap_.insert(std::make_pair(fd, &newInode));
 
     totalLpnCount = 0;
     for (auto& extent : extents)
@@ -87,32 +88,32 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
         (int)inodeMgr->mediaType, fd, *reqMsg.fileName, totalLpnCount);
 
     std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-        inodeMgr->extentAllocator->GetAllocatedExtentList();
-    inodeMgr->inodeHdr->SetFileExtentContent(usedExtentsInVolume);
+        inodeMgr->extentAllocator_->GetAllocatedExtentList();
+    inodeMgr->inodeHdr_->SetFileExtentContent(usedExtentsInVolume);
 
-    if (true != inodeMgr->SaveContent())
+    if (!inodeMgr->SaveContent())
     {
         for (auto& extent : extents)
         {
-            inodeMgr->extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
+            inodeMgr->extentAllocator_->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[Metadata File] Release an extent, startLpn={}, count={}",
                 extent.GetStartLpn(), extent.GetCount());
         }
 
-        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+        return {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
     }
 
-    return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
+    return {fd, POS_EVENT_ID::SUCCESS};
 }
 
 MetaFileInode&
 InodeCreator::_AllocNewInodeEntry(FileDescriptorType& newFd)
 {
-    uint32_t entryIdx = inodeMgr->inodeHdr->GetFreeInodeEntryIdx();
-    inodeMgr->inodeHdr->SetInodeInUse(entryIdx);
-    MetaFileInode& freeInode = inodeMgr->inodeTable->GetInode(entryIdx);
+    const uint32_t entryIdx = inodeMgr->inodeHdr_->GetFreeInodeEntryIdx();
+    inodeMgr->inodeHdr_->SetInodeInUse(entryIdx);
+    MetaFileInode& freeInode = inodeMgr->inodeTable_->GetInode(entryIdx);
     freeInode.CleanupEntry();
     freeInode.SetIndexInInodeTable(entryIdx);
 

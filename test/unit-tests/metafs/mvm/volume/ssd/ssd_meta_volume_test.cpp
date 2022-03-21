@@ -31,12 +31,15 @@
  */
 
 #include "src/metafs/mvm/volume/ssd/ssd_meta_volume.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
-#include <string>
-#include <gtest/gtest.h>
+
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include <string>
+
+#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -102,7 +105,7 @@ TEST_F(SsdMetaVolumeTestFixture, SSD_Meta_Volume_Normal)
 
 TEST(SsdMetaVolume, CreateDefault)
 {
-    SsdMetaVolume* metaVolume = new SsdMetaVolume();
+    SsdMetaVolume* metaVolume = new SsdMetaVolume(0, MetaVolumeType::SsdVolume, 0);
     delete metaVolume;
 }
 
