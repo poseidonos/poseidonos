@@ -13,12 +13,13 @@ namespace pos
 {
 TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
 {
+    const uint32_t CHUNK_CNT = 5;
     StripeAddr readAddr = {
         .stripeLoc = IN_USER_AREA,
         .stripeId = 10 };
 
     std::vector<void*> buffers;
-    for (int i = 0; i < 5; i++) // assume we have only 5 chunks per stripe
+    for (int i = 0; i < CHUNK_CNT; i++) // assume we have only 5 chunks per stripe
     {
         buffers.push_back(malloc(BLOCKS_IN_CHUNK * CHUNK_SIZE));
     }
@@ -33,7 +34,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
         .offset = 0 };
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
         IODirection::READ,
-        _, expectedAddr, BLOCKS_IN_CHUNK,
+        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
         PartitionType::USER_DATA, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
     bool success = readStripe.Execute();
@@ -47,12 +48,13 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
 
 TEST(ReadStripe, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
 {
+    const uint32_t CHUNK_CNT = 5;
     StripeAddr readAddr = {
         .stripeLoc = IN_USER_AREA,
         .stripeId = 10 };
 
     std::vector<void*> buffers;
-    for (int i = 0; i < 5; i++) // assume we have only 5 chunks per stripe
+    for (int i = 0; i < CHUNK_CNT; i++) // assume we have only 5 chunks per stripe
     {
         buffers.push_back(malloc(BLOCKS_IN_CHUNK * CHUNK_SIZE));
     }
@@ -67,7 +69,7 @@ TEST(ReadStripe, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
         .offset = 0 };
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
         IODirection::READ,
-        _, expectedAddr, BLOCKS_IN_CHUNK,
+        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
         PartitionType::USER_DATA, _, 0)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
 
     bool success = readStripe.Execute();
