@@ -1,1358 +1,2343 @@
 {
-    "__inputs": [
+  "annotations": {
+    "list": [
       {
-        "name": "DS_PROMETHEUS-POS-METRIC",
-        "label": "Prometheus-POS-metric",
-        "description": "",
-        "type": "datasource",
-        "pluginId": "prometheus",
-        "pluginName": "Prometheus"
-      },
-      {
-        "name": "DS_ELASTICSEARCH-POS-LOG",
-        "label": "Elasticsearch-POS-Log",
-        "description": "",
-        "type": "datasource",
-        "pluginId": "elasticsearch",
-        "pluginName": "Elasticsearch"
-      }
-    ],
-    "__elements": [],
-    "__requires": [
-      {
-        "type": "datasource",
-        "id": "elasticsearch",
-        "name": "Elasticsearch",
-        "version": "1.0.0"
-      },
-      {
-        "type": "grafana",
-        "id": "grafana",
-        "name": "Grafana",
-        "version": "8.4.3"
-      },
-      {
-        "type": "datasource",
-        "id": "prometheus",
-        "name": "Prometheus",
-        "version": "1.0.0"
-      },
-      {
-        "type": "panel",
-        "id": "stat",
-        "name": "Stat",
-        "version": ""
-      },
-      {
-        "type": "panel",
-        "id": "table",
-        "name": "Table",
-        "version": ""
-      },
-      {
-        "type": "panel",
-        "id": "timeseries",
-        "name": "Time series",
-        "version": ""
-      }
-    ],
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": "-- Grafana --",
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "target": {
-            "limit": 100,
-            "matchAny": false,
-            "tags": [],
-            "type": "dashboard"
-          },
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
           "type": "dashboard"
-        }
-      ]
-    },
-    "description": "You can monitor Metrics/Logs of POS CI processes",
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": null,
-    "iteration": 1647231773197,
-    "links": [],
-    "liveNow": true,
-    "panels": [
-      {
-        "collapsed": false,
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 0
         },
-        "id": 2,
-        "panels": [],
-        "title": "Metric",
-        "type": "row"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "super-light-green",
-                  "value": null
-                }
-              ]
-            }
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byRegexp",
-                "options": ".*IOPS"
-              },
-              "properties": [
-                {
-                  "id": "unit",
-                  "value": "iops"
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byRegexp",
-                "options": ".*BW"
-              },
-              "properties": [
-                {
-                  "id": "unit",
-                  "value": "binBps"
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 16,
-          "w": 4,
-          "x": 0,
-          "y": 1
-        },
-        "id": 13,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.4.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "sum(read_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
-            "format": "time_series",
-            "instant": false,
-            "interval": "",
-            "legendFormat": "Read IOPS",
-            "refId": "A"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "sum(read_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "Read BW",
-            "refId": "B"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "sum(write_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "Write IOPS",
-            "refId": "C"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "sum(write_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "Write BW",
-            "refId": "D"
-          }
-        ],
-        "title": "Summary",
-        "type": "stat"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 50,
-              "gradientMode": "opacity",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "smooth",
-              "lineStyle": {
-                "fill": "solid"
-              },
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                }
-              ]
-            },
-            "unit": "iops"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 4,
-          "y": 1
-        },
-        "id": 4,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "asc"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "read_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
-            "refId": "A"
-          }
-        ],
-        "title": "Read IOPS (Stacked)",
-        "transparent": true,
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 50,
-              "gradientMode": "opacity",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "binBps"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 10,
-          "y": 1
-        },
-        "id": 5,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "read_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
-            "refId": "A"
-          }
-        ],
-        "title": "Read BW (Stacked)",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "ns"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 16,
-          "y": 1
-        },
-        "id": 6,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "read_latency_mean_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
-            "refId": "A"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "read_latency_max_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"} * (-1)",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
-            "refId": "B"
-          }
-        ],
-        "title": "Read Latency - Mean(+)/Max(-)",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 50,
-              "gradientMode": "opacity",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineStyle": {
-                "fill": "solid"
-              },
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "iops"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 4,
-          "y": 9
-        },
-        "id": 8,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "write_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
-            "refId": "A"
-          }
-        ],
-        "title": "Write IOPS (Stacked)",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 50,
-              "gradientMode": "opacity",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "binBps"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 10,
-          "y": 9
-        },
-        "id": 9,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "write_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
-            "refId": "A"
-          }
-        ],
-        "title": "Write BW (Stacked)",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-POS-METRIC}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "ns"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 16,
-          "y": 9
-        },
-        "id": 10,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom"
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "write_latency_mean_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
-            "refId": "A"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS-POS-METRIC}"
-            },
-            "exemplar": true,
-            "expr": "write_latency_max_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"} * (-1)",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
-            "refId": "B"
-          }
-        ],
-        "title": "Write Latency - Mean(+)/Max(-)",
-        "type": "timeseries"
-      },
-      {
-        "collapsed": true,
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 17
-        },
-        "id": 15,
-        "panels": [],
-        "title": "Logs",
-        "type": "row"
-      },
-      {
-        "datasource": {
-          "type": "elasticsearch",
-          "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                }
-              ]
-            }
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Debug"
-              },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": {
-                    "fixedColor": "blue",
-                    "mode": "fixed"
-                  }
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Warning"
-              },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": {
-                    "fixedColor": "super-light-orange",
-                    "mode": "fixed"
-                  }
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Error"
-              },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": {
-                    "fixedColor": "red",
-                    "mode": "fixed"
-                  }
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Total"
-              },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": {
-                    "mode": "fixed"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 5,
-          "x": 0,
-          "y": 18
-        },
-        "id": 18,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.4.3",
-        "targets": [
-          {
-            "alias": "Info",
-            "bucketAggs": [
-              {
-                "field": "instance_id.keyword",
-                "id": "2",
-                "settings": {
-                  "min_doc_count": "0",
-                  "order": "desc",
-                  "orderBy": "1",
-                  "size": "1"
-                },
-                "type": "terms"
-              }
-            ],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "hide": false,
-            "metrics": [
-              {
-                "id": "1",
-                "type": "count"
-              }
-            ],
-            "query": "ci:${CI:raw} AND level:Info AND instance_id.keyword:${run_id:raw}",
-            "refId": "A",
-            "timeField": "@timestamp"
-          },
-          {
-            "alias": "Debug",
-            "bucketAggs": [
-              {
-                "field": "instance_id.keyword",
-                "id": "2",
-                "settings": {
-                  "min_doc_count": "0",
-                  "order": "desc",
-                  "orderBy": "1",
-                  "size": "1"
-                },
-                "type": "terms"
-              }
-            ],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "hide": false,
-            "metrics": [
-              {
-                "id": "1",
-                "type": "count"
-              }
-            ],
-            "query": "ci:${CI:raw} AND level:Debug AND instance_id.keyword:${run_id:raw}",
-            "refId": "B",
-            "timeField": "@timestamp"
-          },
-          {
-            "alias": "Warning",
-            "bucketAggs": [
-              {
-                "field": "instance_id.keyword",
-                "id": "2",
-                "settings": {
-                  "min_doc_count": "0",
-                  "order": "desc",
-                  "orderBy": "1",
-                  "size": "1"
-                },
-                "type": "terms"
-              }
-            ],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "hide": false,
-            "metrics": [
-              {
-                "id": "1",
-                "type": "count"
-              }
-            ],
-            "query": "ci:${CI:raw} AND level:Warning AND instance_id.keyword:${run_id:raw}",
-            "refId": "C",
-            "timeField": "@timestamp"
-          },
-          {
-            "alias": "Error",
-            "bucketAggs": [
-              {
-                "field": "instance_id.keyword",
-                "id": "2",
-                "settings": {
-                  "min_doc_count": "0",
-                  "order": "desc",
-                  "orderBy": "1",
-                  "size": "1"
-                },
-                "type": "terms"
-              }
-            ],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "hide": false,
-            "metrics": [
-              {
-                "id": "1",
-                "type": "count"
-              }
-            ],
-            "query": "ci:${CI:raw} AND level:Error AND instance_id.keyword:${run_id:raw}",
-            "refId": "D",
-            "timeField": "@timestamp"
-          },
-          {
-            "alias": "Total",
-            "bucketAggs": [
-              {
-                "field": "instance_id.keyword",
-                "id": "2",
-                "settings": {
-                  "min_doc_count": "0",
-                  "order": "desc",
-                  "orderBy": "1",
-                  "size": "1"
-                },
-                "type": "terms"
-              }
-            ],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "hide": false,
-            "metrics": [
-              {
-                "id": "1",
-                "type": "count"
-              }
-            ],
-            "query": "ci:${CI:raw} AND instance_id.keyword:${run_id:raw}",
-            "refId": "E",
-            "timeField": "@timestamp"
-          }
-        ],
-        "title": "Log Level Statistics",
-        "transformations": [
-          {
-            "id": "seriesToColumns",
-            "options": {
-              "byField": "instance_id.keyword"
-            }
-          },
-          {
-            "id": "filterFieldsByName",
-            "options": {
-              "include": {
-                "names": [
-                  "Count 2",
-                  "Count 3",
-                  "Count 4",
-                  "Count 5",
-                  "Count 1"
-                ]
-              }
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {},
-              "indexByName": {},
-              "renameByName": {
-                "Count 1": "Info",
-                "Count 2": "Debug",
-                "Count 3": "Warning",
-                "Count 4": "Error",
-                "Count 5": "Total"
-              }
-            }
-          }
-        ],
-        "type": "stat"
-      },
-      {
-        "datasource": {
-          "type": "elasticsearch",
-          "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "custom": {
-              "align": "auto",
-              "displayMode": "auto",
-              "filterable": true
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "@timestamp"
-              },
-              "properties": [
-                {
-                  "id": "custom.width",
-                  "value": 202
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "level"
-              },
-              "properties": [
-                {
-                  "id": "custom.width",
-                  "value": 77
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "host.name"
-              },
-              "properties": [
-                {
-                  "id": "custom.width",
-                  "value": 148
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 17,
-          "x": 5,
-          "y": 18
-        },
-        "id": 20,
-        "links": [
-          {
-            "targetBlank": true,
-            "title": "Go to Kibana(Log viewer)",
-            "url": "http://12.36.192.145:5601/app/logs/stream?flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logPosition=(end:now,position:(tiebreaker:82844151,time:1646632421333),start:now-1d,streamLive:!f)&logFilter=(language:kuery,query:%27ci:${CI:raw}﻿%27AND%27instance_id.keyword:${run_id:raw}%27)"
-          }
-        ],
-        "options": {
-          "footer": {
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true,
-          "sortBy": []
-        },
-        "pluginVersion": "8.4.3",
-        "targets": [
-          {
-            "alias": "",
-            "bucketAggs": [],
-            "datasource": {
-              "type": "elasticsearch",
-              "uid": "${DS_ELASTICSEARCH-POS-LOG}"
-            },
-            "metrics": [
-              {
-                "id": "1",
-                "settings": {
-                  "size": "10000"
-                },
-                "type": "raw_data"
-              }
-            ],
-            "query": "ci:${CI:raw} AND instance_id.keyword:${run_id:raw}",
-            "refId": "A",
-            "timeField": "@timestamp"
-          }
-        ],
-        "title": "List of Recent 10000 Logs",
-        "transformations": [
-          {
-            "id": "filterFieldsByName",
-            "options": {
-              "include": {
-                "names": [
-                  "@timestamp",
-                  "host.name",
-                  "inner_message",
-                  "level"
-                ]
-              }
-            }
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {},
-              "indexByName": {
-                "@timestamp": 0,
-                "host.name": 1,
-                "inner_message": 3,
-                "level": 2,
-                "process_id": 4,
-                "thread_id": 5
-              },
-              "renameByName": {
-                "@timestamp": "Timestamp",
-                "host.name": "Hostname",
-                "inner_message": "Message",
-                "level": "Level"
-              }
-            }
-          }
-        ],
-        "type": "table"
+        "type": "dashboard"
       }
-    ],
-    "refresh": "5s",
-    "schemaVersion": 35,
-    "style": "dark",
-    "tags": [],
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "selected": false,
-            "text": "Prometheus-POS-metric",
-            "value": "Prometheus-POS-metric"
+    ]
+  },
+  "description": "You can monitor Metrics/Logs of POS CI processes",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "iteration": 1647323244247,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 32,
+      "panels": [],
+      "title": "Metric (Array)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "hide": 2,
-          "includeAll": false,
-          "multi": false,
-          "name": "pos_metric_data_source",
-          "options": [],
-          "query": "prometheus",
-          "queryValue": "",
-          "refresh": 1,
-          "regex": "/^Prometheus-POS-metric/",
-          "skipUrlSync": false,
-          "type": "datasource"
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Not Exist"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Exist Normal"
+                },
+                "2": {
+                  "color": "orange",
+                  "index": 2,
+                  "text": "Exist Degraded"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "Broken"
+                },
+                "4": {
+                  "color": "blue",
+                  "index": 4,
+                  "text": "Try Mount"
+                },
+                "5": {
+                  "color": "purple",
+                  "index": 5,
+                  "text": "Try Unmount"
+                },
+                "6": {
+                  "color": "green",
+                  "index": 6,
+                  "text": "Normal"
+                },
+                "7": {
+                  "color": "orange",
+                  "index": 7,
+                  "text": "Degraded"
+                },
+                "8": {
+                  "color": "red",
+                  "index": 8,
+                  "text": "Rebuild"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 18,
+        "x": 0,
+        "y": 1
+      },
+      "id": 25,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
         {
-          "current": {},
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-POS-METRIC}"
+            "uid": "${pos_metric_data_source}"
           },
-          "definition": "label_values(scrape_samples_scraped, job)",
-          "description": "Select CI you want to inspect",
-          "hide": 0,
-          "includeAll": false,
-          "label": "",
-          "multi": false,
-          "name": "CI",
-          "options": [],
-          "query": {
-            "query": "label_values(scrape_samples_scraped, job)",
-            "refId": "StandardVariableQuery"
-          },
-          "refresh": 2,
-          "regex": "/^SystemSW/",
-          "skipUrlSync": false,
-          "sort": 0,
-          "type": "query"
-        },
-        {
-          "current": {},
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-POS-METRIC}"
-          },
-          "definition": "label_values(write_iops{job=\"${CI:raw}\"},run_id)",
-          "description": "Select run id",
-          "hide": 0,
-          "includeAll": false,
-          "label": "",
-          "multi": false,
-          "name": "run_id",
-          "options": [],
-          "query": {
-            "query": "label_values(write_iops{job=\"${CI:raw}\"},run_id)",
-            "refId": "StandardVariableQuery"
-          },
-          "refresh": 2,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 0,
-          "type": "query"
-        },
-        {
-          "current": {
-            "selected": false,
-            "text": "Elasticsearch-POS-Log",
-            "value": "Elasticsearch-POS-Log"
-          },
-          "hide": 2,
-          "includeAll": false,
-          "multi": false,
-          "name": "pos_log_data_source",
-          "options": [],
-          "query": "elasticsearch",
-          "queryValue": "",
-          "refresh": 1,
-          "regex": "/^Elasticsearch-POS-Log/",
-          "skipUrlSync": false,
-          "type": "datasource"
+          "exemplar": true,
+          "expr": "array_status{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "format": "time_series",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Array ID: {{array_unique_id}}",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Status",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
     },
-    "time": {
-      "from": "now-7d",
-      "to": "now"
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "panels": [],
+      "title": "Metric (Volume)",
+      "type": "row"
     },
-    "timepicker": {},
-    "timezone": "",
-    "title": "POS CI Monitoring",
-    "uid": "WvuvMOY7z",
-    "version": 34,
-    "weekStart": ""
-  }
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*IOPS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "iops"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*BW"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "binBps"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 4,
+        "x": 0,
+        "y": 5
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum(read_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
+          "format": "time_series",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Read IOPS",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum(read_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Read BW",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum(write_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Write IOPS",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum(write_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Write BW",
+          "refId": "D"
+        }
+      ],
+      "title": "Summary",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "iops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 4,
+        "y": 5
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "asc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "read_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Read IOPS (Stacked)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 10,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "read_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Read BW (Stacked)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ns"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 16,
+        "y": 5
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "read_latency_mean_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "read_latency_max_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"} * (-1)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+          "refId": "B"
+        }
+      ],
+      "title": "Read Latency - Mean(+)/Max(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "iops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 4,
+        "y": 13
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "write_iops{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Write IOPS (Stacked)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 10,
+        "y": 13
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "write_rate_bytes_per_second{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Write BW (Stacked)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ns"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 16,
+        "y": 13
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "write_latency_mean_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "write_latency_max_ns{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"} * (-1)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+          "refId": "B"
+        }
+      ],
+      "title": "Write Latency - Mean(+)/Max(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 34,
+      "panels": [],
+      "title": "Metric (Meta)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ns"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 22
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum_of_all_the_time_spent_by_mio{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mio)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "(-1) * sum_of_all_the_time_spent_by_mpio{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mpio)",
+          "refId": "B"
+        }
+      ],
+      "title": "Time - mio(+)/mpio(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 22
+      },
+      "id": 29,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "sum_of_mio_count{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mio)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "(-1) * sum_of_mpio_count{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mpio)",
+          "refId": "B"
+        }
+      ],
+      "title": "Count - mio(+)/mpio(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 22
+      },
+      "id": 30,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "free_mio_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mio)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "(-1) * free_mpio_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Thread {{thread_name}} (mpio)",
+          "refId": "B"
+        }
+      ],
+      "title": "Free Count - mio(+)/mpio(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 22
+      },
+      "id": 42,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "map_mounted_volume_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "Mounted @ {{array_name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "map_unmounted_volid{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Unmounted @ {{array_name}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Volume Count",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 0,
+        "y": 30
+      },
+      "id": 36,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "alct_allocctx_pendio_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "{{array_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Pending IO CNT",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 4,
+        "y": 30
+      },
+      "id": 37,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "alct_free_seg_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "{{array_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Free Segment Count",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 8,
+        "y": 30
+      },
+      "id": 38,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "alct_gcvictim_segid{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "{{array_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "GC Victim Segment Count",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 12,
+        "y": 30
+      },
+      "id": 39,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "alct_victim_invalidpg_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "{{array_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "GC Victim Invalid Page Count",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${pos_metric_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 16,
+        "y": 30
+      },
+      "id": 43,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "SJAIMOY7k"
+          },
+          "exemplar": true,
+          "expr": "map_stripe_flush_pendio_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "interval": "",
+          "legendFormat": "stripe @ {{array_name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${pos_metric_data_source}"
+          },
+          "exemplar": true,
+          "expr": "(-1) * map_vsa_flush_pendio_cnt{job=\"${CI:raw}\", run_id=\"${run_id:raw}\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "vsa @ {{array_name}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Flush Pending IO Count - stripe(+)/vsa(-)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 15,
+      "panels": [],
+      "title": "Logs",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "${pos_log_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Debug"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 0,
+        "y": 38
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "alias": "Info",
+          "bucketAggs": [
+            {
+              "field": "instance_id.keyword",
+              "id": "2",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "1",
+                "size": "1"
+              },
+              "type": "terms"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "hide": false,
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "ci:${CI:raw} AND level:Info AND instance_id.keyword:${run_id:raw}",
+          "refId": "A",
+          "timeField": "@timestamp"
+        },
+        {
+          "alias": "Debug",
+          "bucketAggs": [
+            {
+              "field": "instance_id.keyword",
+              "id": "2",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "1",
+                "size": "1"
+              },
+              "type": "terms"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "hide": false,
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "ci:${CI:raw} AND level:Debug AND instance_id.keyword:${run_id:raw}",
+          "refId": "B",
+          "timeField": "@timestamp"
+        },
+        {
+          "alias": "Warning",
+          "bucketAggs": [
+            {
+              "field": "instance_id.keyword",
+              "id": "2",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "1",
+                "size": "1"
+              },
+              "type": "terms"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "hide": false,
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "ci:${CI:raw} AND level:Warning AND instance_id.keyword:${run_id:raw}",
+          "refId": "C",
+          "timeField": "@timestamp"
+        },
+        {
+          "alias": "Error",
+          "bucketAggs": [
+            {
+              "field": "instance_id.keyword",
+              "id": "2",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "1",
+                "size": "1"
+              },
+              "type": "terms"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "hide": false,
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "ci:${CI:raw} AND level:Error AND instance_id.keyword:${run_id:raw}",
+          "refId": "D",
+          "timeField": "@timestamp"
+        },
+        {
+          "alias": "Total",
+          "bucketAggs": [
+            {
+              "field": "instance_id.keyword",
+              "id": "2",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "1",
+                "size": "1"
+              },
+              "type": "terms"
+            }
+          ],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "hide": false,
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "ci:${CI:raw} AND instance_id.keyword:${run_id:raw}",
+          "refId": "E",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Log Level Statistics",
+      "transformations": [
+        {
+          "id": "seriesToColumns",
+          "options": {
+            "byField": "instance_id.keyword"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Count 2",
+                "Count 3",
+                "Count 4",
+                "Count 5",
+                "Count 1"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Count 1": "Info",
+              "Count 2": "Debug",
+              "Count 3": "Warning",
+              "Count 4": "Error",
+              "Count 5": "Total"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "${pos_log_data_source}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "@timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 202
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "level"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 77
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "host.name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 148
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 17,
+        "x": 5,
+        "y": 38
+      },
+      "id": 20,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Go to Kibana(Log viewer)",
+          "url": "http://12.36.192.145:5601/app/logs/stream?flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logPosition=(end:now,position:(tiebreaker:82844151,time:1646632421333),start:now-1d,streamLive:!f)&logFilter=(language:kuery,query:%27ci:${CI:raw}﻿%27AND%27instance_id.keyword:${run_id:raw}%27)"
+        }
+      ],
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [],
+          "datasource": {
+            "type": "elasticsearch",
+            "uid": "${pos_log_data_source}"
+          },
+          "metrics": [
+            {
+              "id": "1",
+              "settings": {
+                "size": "10000"
+              },
+              "type": "raw_data"
+            }
+          ],
+          "query": "ci:${CI:raw} AND instance_id.keyword:${run_id:raw}",
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "List of Recent 10000 Logs",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "@timestamp",
+                "host.name",
+                "inner_message",
+                "level"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "@timestamp": 0,
+              "host.name": 1,
+              "inner_message": 3,
+              "level": 2,
+              "process_id": 4,
+              "thread_id": 5
+            },
+            "renameByName": {
+              "@timestamp": "Timestamp",
+              "host.name": "Hostname",
+              "inner_message": "Message",
+              "level": "Level"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 3,
+        "x": 18,
+        "y": 46
+      },
+      "id": 41,
+      "options": {
+        "content": "",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.4.3",
+      "transparent": true,
+      "type": "text"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 35,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus-POS-metric",
+          "value": "Prometheus-POS-metric"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "pos_metric_data_source",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "/^Prometheus-POS-metric/",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "SystemSW_-_iBOF_-_TEST_CI_Development-IBOF-CD-LTVT_#46",
+          "value": "SystemSW_-_iBOF_-_TEST_CI_Development-IBOF-CD-LTVT_#46"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${pos_metric_data_source}"
+        },
+        "definition": "label_values(array_status, job)",
+        "description": "Select CI you want to inspect",
+        "hide": 0,
+        "includeAll": false,
+        "label": "",
+        "multi": false,
+        "name": "CI",
+        "options": [],
+        "query": {
+          "query": "label_values(array_status, job)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "/^SystemSW/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "40911907",
+          "value": "40911907"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${pos_metric_data_source}"
+        },
+        "definition": "label_values(array_status{job=\"${CI:raw}\"},run_id)",
+        "description": "Select run id",
+        "hide": 0,
+        "includeAll": false,
+        "label": "",
+        "multi": false,
+        "name": "run_id",
+        "options": [],
+        "query": {
+          "query": "label_values(array_status{job=\"${CI:raw}\"},run_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Elasticsearch-POS-Log",
+          "value": "Elasticsearch-POS-Log"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "pos_log_data_source",
+        "options": [],
+        "query": "elasticsearch",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "/^Elasticsearch-POS-Log/",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "POS CI Monitoring",
+  "uid": "WvuvMOY7z",
+  "version": 39,
+  "weekStart": ""
+}
