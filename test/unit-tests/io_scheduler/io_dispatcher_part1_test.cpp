@@ -30,26 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io_scheduler/io_dispatcher.h"
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <thread>
 #include <unistd.h>
 
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/io_scheduler/io_worker.h"
-#include "src/event_scheduler/io_completer.h"
-#include "src/include/i_array_device.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/logger/logger.h"
-#include "src/device/base/ublock_device.h"
-#include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/event_scheduler/event_factory.h"
+#include <thread>
 
+#include "src/device/base/ublock_device.h"
+#include "src/event_scheduler/event_factory.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/i_array_device.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_worker.h"
+#include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "test/unit-tests/bio/ubio_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/event_scheduler/event_factory_mock.h"
@@ -66,7 +64,6 @@ using ::testing::Return;
 
 namespace pos
 {
-
 TEST(IODispatcher, IODispatcher_Stack)
 {
     // Given: Do nothing
@@ -218,7 +215,7 @@ TEST(IODispatcher, AddDeviceForReactor_NotFirstReactorCore_SendEventFail)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
     ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(Return(false));
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
 
     // When: Call AddDeviceForReactor with MockUBlockDevice
@@ -234,10 +231,9 @@ TEST(IODispatcher, AddDeviceForReactor_NotFirstReactorCore_SendEventSuccess)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
     ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(Return(false));
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
-    std::thread t([&](void) -> void
-    {
+    std::thread t([&](void) -> void {
         usleep(100000); // 100ms, expect to reach while loop in _CallForFrontend
         IODispatcher::SetFrontendDone(true);
     });
@@ -256,7 +252,7 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_LastReactor)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
 
     // When 1: Call AddDeviceForReactor with Opened BlockDevice
@@ -292,13 +288,11 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(false));
     ON_CALL(mockEventFrameworkApi, GetNextReactor()).WillByDefault(Return(0));
-    ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(
-        [this] (uint32_t core, EventFuncOneParam func, void* arg1) -> bool
-        {
-            delete static_cast<UblockSharedPtr*>(arg1);
-            return false;
-        });
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault([this](uint32_t core, EventFuncOneParam func, void* arg1) -> bool {
+        delete static_cast<UblockSharedPtr*>(arg1);
+        return false;
+    });
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     EXPECT_CALL(*ublock.get(), Open()).Times(AtLeast(1));
@@ -323,18 +317,15 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(false));
     ON_CALL(mockEventFrameworkApi, GetNextReactor()).WillByDefault(Return(0));
-    ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(
-        [this] (uint32_t core, EventFuncOneParam func, void* arg1) -> bool
-        {
-            delete static_cast<UblockSharedPtr*>(arg1);
-            return true;
-        });
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault([this](uint32_t core, EventFuncOneParam func, void* arg1) -> bool {
+        delete static_cast<UblockSharedPtr*>(arg1);
+        return true;
+    });
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     EXPECT_CALL(*ublock.get(), Open()).Times(AtLeast(1));
-    std::thread t([&](void) -> void
-    {
+    std::thread t([&](void) -> void {
         usleep(100000); // 100ms, expect to reach while loop in _CallForFrontend
         IODispatcher::SetFrontendDone(true);
     });
@@ -359,7 +350,7 @@ TEST(IODispatcher, RemoveDeviceForReactor_FirstReactorCore_LastReactor)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
 
     auto ublock1 = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock1.get(), Open()).WillByDefault(Return(true));

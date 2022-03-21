@@ -30,26 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io_scheduler/io_dispatcher.h"
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <thread>
 #include <unistd.h>
 
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/io_scheduler/io_worker.h"
-#include "src/event_scheduler/io_completer.h"
-#include "src/include/i_array_device.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/logger/logger.h"
-#include "src/device/base/ublock_device.h"
-#include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/event_scheduler/event_factory.h"
+#include <thread>
 
+#include "src/device/base/ublock_device.h"
+#include "src/event_scheduler/event_factory.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/i_array_device.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_worker.h"
+#include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/bio/ubio_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
@@ -68,7 +66,6 @@ using ::testing::Return;
 
 namespace pos
 {
-
 TEST(IODispatcher, CompleteForThreadLocalDeviceList_SimpleCall)
 {
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
@@ -76,7 +73,7 @@ TEST(IODispatcher, CompleteForThreadLocalDeviceList_SimpleCall)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher {&mockEventFrameworkApi};
+    IODispatcher ioDispatcher{&mockEventFrameworkApi};
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     ON_CALL(*ublock.get(), CompleteIOs()).WillByDefault(Return(0));
@@ -141,7 +138,7 @@ TEST(IODispatcher, Submit_Reactor_Async_Recovery)
 
     // When 2: Call Submit with MockUbio, false(async) and true(isRecoveryNeeded)
     // But ubio doesn't need recovery
-    NiceMock<MockUBlockDevice> mockUBlockDevice {"", 0, nullptr};
+    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
     ON_CALL(mockUBlockDevice, SubmitAsyncIO(_)).WillByDefault(Return(3));
     ON_CALL(*ubio.get(), NeedRecovery()).WillByDefault(Return(false));
     ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
@@ -159,9 +156,9 @@ TEST(IODispatcher, Submit_Reactor_Async_NotRecovery)
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(true));
     IODispatcher ioDispatcher{&mockEventFrameworkApi};
-    NiceMock<MockUBlockDevice> mockUBlockDevice {"", 0, nullptr};
+    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
     ON_CALL(mockUBlockDevice, SubmitAsyncIO(_)).WillByDefault(Return(4));
-    NiceMock<MockArrayDevice> mockArrayDevice {nullptr};
+    NiceMock<MockArrayDevice> mockArrayDevice{nullptr};
     ON_CALL(mockArrayDevice, GetUblockPtr()).WillByDefault(Return(&mockUBlockDevice));
     auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), GetArrayDev()).WillByDefault(Return(&mockArrayDevice));
@@ -180,8 +177,11 @@ TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
     // Given: IODispatcher, MockEventFrameworkApi, MockUBlockDevice, MockUbio
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(false));
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
-    NiceMock<MockUBlockDevice> mockUBlockDevice {"", 0, nullptr};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, GetAllowedIoCount(_)).WillByDefault(Return(2));
+    IODispatcher ioDispatcher{&mockEventFrameworkApi, &mockEventScheduler};
+
+    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
     auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), SetSyncMode()).WillByDefault(Return());
     ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
@@ -202,11 +202,10 @@ TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
     // When 2: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
     // And ublock->GetDedicatedIOWorker return MockIOWorker
     cpu_set_t cpuSet;
-    NiceMock<MockIOWorker> mockIOWorker {cpuSet, 0};
+    NiceMock<MockIOWorker> mockIOWorker{cpuSet, 0};
     ON_CALL(mockIOWorker, EnqueueUbio(_)).WillByDefault(Return());
     ON_CALL(mockUBlockDevice, GetDedicatedIOWorker()).WillByDefault(Return(&mockIOWorker));
     actual = ioDispatcher.Submit(ubio, true, true);
-
     // Then 2: Expect actual value and expected value should be same
     EXPECT_EQ(actual, expected);
 }

@@ -56,41 +56,25 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("level"))
     {
         string level = doc["param"]["level"].get<std::string>();
-        qos_rebuild_policy newRebuildPolicy;
+        qos_backend_policy newBackendPolicy;
         if (level.compare("highest") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
-        }
-        else if (level.compare("higher") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHER;
-        }
-        else if (level.compare("high") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+            newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
         }
         else if (level.compare("medium") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_MEDIUM;
-        }
-        else if (level.compare("low") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
-        }
-        else if (level.compare("lower") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
+            newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
         else if (level.compare("lowest") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
+            newBackendPolicy.priorityImpact = PRIORITY_LOWEST;
         }
         else
         {
             return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "This level is unsupported", GetPosInfo());
         }
-        newRebuildPolicy.policyChange = true;
-        int retVal = QosManagerSingleton::Instance()->UpdateRebuildPolicy(newRebuildPolicy);
+        newBackendPolicy.policyChange = true;
+        int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
         if (retVal != SUCCESS)
         {
             return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "FAILED", GetPosInfo());

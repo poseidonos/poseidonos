@@ -43,8 +43,9 @@ namespace pos
 {
 static const uint64_t MAX_THRESHOLD = 100;
 
-FlushCmdManager::FlushCmdManager(void)
-: metaFlushInProgress(false)
+FlushCmdManager::FlushCmdManager(EventScheduler* eventSchedulerArg)
+: metaFlushInProgress(false),
+  eventScheduler(eventSchedulerArg)
 {
     for (int i = 0; i< MAX_VOLUME_COUNT; i++)
     {
@@ -97,7 +98,11 @@ FlushCmdManager::FinishMetaFlush(void)
 
         if (flushIo->IsInternalFlush() == true)
         {
-            EventSchedulerSingleton::Instance()->EnqueueEvent(flushCmdHandler);
+            if (nullptr == eventScheduler)
+            {
+                eventScheduler = EventSchedulerSingleton::Instance();
+            }
+            eventScheduler->EnqueueEvent(flushCmdHandler);
         }
         else
         {
@@ -123,7 +128,11 @@ FlushCmdManager::UpdateVSANewEntries(uint32_t volId, int arrayId)
     flushIo->SetInternalFlush(true);
 
     EventSmartPtr flushCmdHandler(new FlushCmdHandler(flushIo));
-    EventSchedulerSingleton::Instance()->EnqueueEvent(flushCmdHandler);
+    if (nullptr == eventScheduler)
+    {
+         eventScheduler = EventSchedulerSingleton::Instance();
+    }
+    eventScheduler->EnqueueEvent(flushCmdHandler);
 }
 
 bool

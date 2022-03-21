@@ -85,14 +85,15 @@ EmulateRead(UbioSmartPtr ubio)
 /* --------------------------------------------------------------------------*/
 IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
     DeviceDetachTrigger* detachTriggerArg,
-    QosManager* qosManagerArg)
+    QosManager* qosManagerArg, EventScheduler* eventSchedulerArg)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
   exit(false),
   id(id),
   detachTrigger(detachTriggerArg),
-  qosManager(qosManagerArg)
+  qosManager(qosManagerArg),
+  eventScheduler(eventSchedulerArg)
 {
     thread = new std::thread(&IOWorker::Run, this);
 

@@ -31,41 +31,37 @@
  */
 
 #pragma once
+#include <queue>
+#include <vector>
 
-#include "spdk/pos.h"
-#include "src/event_scheduler/callback.h"
-#include "src/event_scheduler/event.h"
-#include "src/io_scheduler/io_dispatcher.h"
-struct pos_io;
+#include "backend_policy.h"
+
 namespace pos
 {
-class IArrayInfo;
-class IDevInfo;
-class IIODispatcher;
-class IArrayDevMgr;
-class SmartLogMgr;
-class EventScheduler;
-
-class SmartLogPageHandler : public Event
+class BackendEventMinimumPolicy : public BackendPolicy
 {
 public:
-    SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
-        CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventScheduler = nullptr);
-    bool Execute(void);
+    BackendEventMinimumPolicy(
+        QosManager* qosManager,
+        std::vector<EventWorker*>* workerArray, uint32_t workerCount,
+        uint32_t ioWorkerCount = 1);
+    ~BackendEventMinimumPolicy();
+    virtual void EnqueueEvent(EventSmartPtr input);
+    virtual std::queue<EventSmartPtr> DequeueEvents(void);
+    virtual int Run();
+    virtual EventSmartPtr PickWorkerEvent(EventWorker*);
+    void CheckAndSetQueueOccupancy(BackendEvent eventId);
 
 private:
-    struct spdk_nvme_cmd* cmd;
-    pos_io* io;
-    void* smartLogPageData;
-    struct spdk_nvme_health_information_page* page;
-    uint32_t originCore;
-    CallbackSmartPtr callback;
-    IArrayInfo* arrayInfo;
-    IDevInfo* devInfo;
-    IIODispatcher* dispatcher;
-    IArrayDevMgr* arrayDevMgr;
-    SmartLogMgr* smartLogMgr;
-    EventScheduler* eventScheduler;
+    uint32_t _GetWorkerIDMinimumJobs(uint32_t numa);
+    bool _CheckContention(BackendEvent eventId);
+    bool _NoContentionCycleDone(uint32_t cycles);
+    void _IncrementCycles(void);
+    int32_t _GetEventWeight(BackendEvent eventId);
+
+    int32_t oldWeight[BackendEvent_Count] = {0};
+    int32_t runningWeight[BackendEvent_Count] = {0};
+    uint32_t cyclesElapsed = 0;
 };
+
 } // namespace pos

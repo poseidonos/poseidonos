@@ -47,6 +47,8 @@
 #include "src/device/device_detach_trigger.h"
 #include "src/device/unvme/unvme_ssd.h"
 #include "src/event_scheduler/event.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/backend_policy.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/include/pos_event_id.hpp"
@@ -65,14 +67,15 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
-    DeviceDetachTrigger* detachTriggerArg, QosManager* qosManagerArg)
+    DeviceDetachTrigger* detachTriggerArg, QosManager* qosManagerArg, EventScheduler* eventSchedulerArg)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
   exit(false),
   id(id),
   detachTrigger(detachTriggerArg),
-  qosManager(qosManagerArg)
+  qosManager(qosManagerArg),
+  eventScheduler(eventSchedulerArg)
 {
     if (nullptr == detachTrigger)
     {
@@ -83,9 +86,12 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
     {
         qosManager = QosManagerSingleton::Instance();
     }
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
     thread = new std::thread(&IOWorker::Run, this);
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Destructor
@@ -134,6 +140,10 @@ void
 IOWorker::EnqueueUbio(UbioSmartPtr ubio)
 {
     ioQueue->EnqueueUbio(ubio);
+    if (ubio != nullptr)
+    {
+        eventScheduler->IoEnqueued(ubio->GetEventType(), ubio->GetSize());
+    }
 }
 
 int
@@ -226,6 +236,7 @@ IOWorker::Run(void)
         {
             _SubmitAsyncIO(ubio);
             _DoPeriodicJob();
+            eventScheduler->IoDequeued(ubio->GetEventType(), ubio->GetSize());
             ubio = ioQueue->DequeueUbio();
         }
         _SubmitPendingIO();

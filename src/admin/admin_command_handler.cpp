@@ -55,6 +55,8 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
   arrayDevMgr(arrayDevMgr)
 {
     smartLogMgr = SmartLogMgrSingleton::Instance();
+    eventScheduler = EventSchedulerSingleton::Instance();
+
     void* bio = io->context;
     struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
     void* callerContext = bioPos->internal.caller_ctx;
@@ -62,9 +64,10 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;
 }
+
 AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
         CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
+        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventSchedulerArg)
 : io(posIo),
   originCore(originCore),
   callback(callback),
@@ -72,8 +75,13 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
   devInfo(devInfo),
   dispatcher(dispatcher),
   arrayDevMgr(arrayDevMgr),
-  smartLogMgr(smartLogMgr)
+  smartLogMgr(smartLogMgr),
+  eventScheduler(eventSchedulerArg)
 {
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
     void* bio = io->context;
     struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
     void* callerContext = bioPos->internal.caller_ctx;
@@ -81,7 +89,6 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;
 }
-
 AdminCommandHandler::~AdminCommandHandler(void)
 {
 }
@@ -103,7 +110,7 @@ AdminCommandHandler::Execute(void)
                     EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr, smartLogMgr));
                     bool result = event->Execute();
                     if (result == false)
-                        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+                        eventScheduler->EnqueueEvent(event);
                 }
                 else
                 {

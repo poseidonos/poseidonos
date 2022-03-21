@@ -34,21 +34,20 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/lib/system_timeout_checker_mock.h"
-
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 
 namespace pos
 {
-
 class StubCallbackC : public Callback
 {
 public:
     StubCallbackC(bool isFrontEnd, CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
-        SystemTimeoutChecker* timeoutChecker = nullptr)
-    : Callback(isFrontEnd, type, weight, timeoutChecker)
+        SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventSchedulerArg = nullptr)
+    : Callback(isFrontEnd, type, weight, timeoutChecker, eventSchedulerArg)
     {
     }
     virtual ~StubCallbackC(void) override
@@ -64,7 +63,7 @@ private:
     {
         return resultSpecificJob;
     }
-    bool resultSpecificJob {false};
+    bool resultSpecificJob{false};
 };
 
 TEST(Callback, Callback_Stack_DebugEnable)
@@ -74,7 +73,7 @@ TEST(Callback, Callback_Stack_DebugEnable)
     DumpSharedModuleInstanceEnable::debugLevelEnable = true;
 
     // When: Create StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
     DumpSharedModuleInstanceEnable::debugLevelEnable = original_value;
 
     // Then: Do nothing
@@ -87,7 +86,7 @@ TEST(Callback, Callback_Stack_DebugDisable)
     DumpSharedModuleInstanceEnable::debugLevelEnable = false;
 
     // When: Create StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
     DumpSharedModuleInstanceEnable::debugLevelEnable = original_value;
 
     // Then: Do nothing
@@ -121,7 +120,9 @@ TEST(Callback, SetTimeout)
 TEST(Callback, Execute_WithoutInvokeCallee)
 {
     // Given: StubCallbackC, SetResultSpecificJob
-    StubCallbackC callback {true};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    StubCallbackC callback{true, CallbackType_Unknown, 1, nullptr, &mockEventScheduler};
     callback.SetResultSpecificJob(false);
     bool actual, expected = false;
 
@@ -135,7 +136,9 @@ TEST(Callback, Execute_WithoutInvokeCallee)
 TEST(Callback, Execute_WithInvokeCallee_NormalCallee1)
 {
     // Given: StubCallbackC, callee
-    StubCallbackC callback {true};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    StubCallbackC callback{true, CallbackType_Unknown, 1, nullptr, &mockEventScheduler};
     callback.SetResultSpecificJob(true);
     auto callee = std::make_shared<StubCallbackC>(true);
     callee.get()->SetWaitingCount(1);
@@ -153,7 +156,9 @@ TEST(Callback, Execute_WithInvokeCallee_NormalCallee1)
 TEST(Callback, Execute_WithInvokeCallee_NormalCallee2)
 {
     // Given: StubCallbackC, callee
-    StubCallbackC callback {true};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    StubCallbackC callback{true, CallbackType_Unknown, 1, nullptr, &mockEventScheduler};
     callback.SetResultSpecificJob(true);
     auto callee = std::make_shared<StubCallbackC>(true);
     callee.get()->SetWaitingCount(1);
@@ -171,7 +176,10 @@ TEST(Callback, Execute_WithInvokeCallee_NormalCallee2)
 TEST(Callback, Execute_WithInvokeCallee_ErrorCallee)
 {
     // Given: StubCallbackC, callee
-    StubCallbackC callback {true, CallbackType_Unknown, 3};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    StubCallbackC callback{true, CallbackType_Unknown, 3, nullptr, &mockEventScheduler};
+
     callback.SetResultSpecificJob(true);
     callback.InformError(IOErrorType::GENERIC_ERROR);
     auto callee = std::make_shared<StubCallbackC>(true);
@@ -188,7 +196,10 @@ TEST(Callback, Execute_WithInvokeCallee_ErrorCallee)
 TEST(Callback, Execute_WithInvokeCallee_OverwaitingCallee)
 {
     // Given: StubCallbackC, callee
-    StubCallbackC callback {true};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    StubCallbackC callback{true, CallbackType_Unknown, 1, nullptr, &mockEventScheduler};
+
     callback.SetResultSpecificJob(true);
     auto callee = std::make_shared<StubCallbackC>(true);
     callee.get()->SetWaitingCount(10);
@@ -205,7 +216,7 @@ TEST(Callback, Execute_WithInvokeCallee_OverwaitingCallee)
 TEST(Callback, SetWaitingCount_SimpleCall)
 {
     // Given: StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
 
     // When: Call SetWaitingCount
     callback.SetWaitingCount(10);
@@ -216,7 +227,7 @@ TEST(Callback, SetWaitingCount_SimpleCall)
 TEST(Callback, SetCallee_InvalidCallee)
 {
     // Given: StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
     CallbackSmartPtr callee;
 
     // When: Call SetCallee
@@ -231,7 +242,7 @@ TEST(Callback, SetCallee_ValidCallee_DebugEnable)
     // Given: StubCallbackC
     bool original_value = DumpSharedModuleInstanceEnable::debugLevelEnable;
     DumpSharedModuleInstanceEnable::debugLevelEnable = true;
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
     auto callee = std::make_shared<StubCallbackC>(true);
 
     // When: Call SetCallee
@@ -246,7 +257,7 @@ TEST(Callback, SetCallee_ValidCallee_DebugDisable)
     // Given: StubCallbackC
     bool original_value = DumpSharedModuleInstanceEnable::debugLevelEnable;
     DumpSharedModuleInstanceEnable::debugLevelEnable = false;
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
     auto callee = std::make_shared<StubCallbackC>(true);
 
     // When: Call SetCallee
@@ -259,7 +270,7 @@ TEST(Callback, SetCallee_ValidCallee_DebugDisable)
 TEST(Callback, InformError_Success)
 {
     // Given: StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
 
     // When: Call SetWaitingCount
     callback.InformError(IOErrorType::SUCCESS);
@@ -270,7 +281,7 @@ TEST(Callback, InformError_Success)
 TEST(Callback, InformError_DeviceError)
 {
     // Given: StubCallbackC
-    StubCallbackC callback {true};
+    StubCallbackC callback{true};
 
     // When: Call SetWaitingCount
     callback.InformError(IOErrorType::DEVICE_ERROR);

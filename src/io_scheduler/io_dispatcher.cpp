@@ -33,6 +33,7 @@
 #include "io_dispatcher.h"
 
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/io_scheduler/dispatcher_policy.h"
 #include "src/io_scheduler/io_worker.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/i_array_device.h"
@@ -44,7 +45,6 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/event_factory.h"
 #include "src/device/device_detach_trigger.h"
-
 #include <unistd.h>
 
 namespace pos
@@ -59,7 +59,8 @@ IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     EventScheduler* eventSchedulerArg)
 : ioWorkerCount(0),
   deviceAllocationTurn(0),
-  eventScheduler(eventSchedulerArg)
+  eventScheduler(eventSchedulerArg),
+  dispPolicy(nullptr)
 {
     pthread_rwlock_init(&ioWorkerMapLock, nullptr);
     eventFrameworkApi = eventFrameworkApiArg;
@@ -71,6 +72,8 @@ IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     {
         eventScheduler = EventSchedulerSingleton::Instance();
     }
+    eventScheduler->InjectIODispatcher(this);
+    dispPolicy = new DispatcherPolicyQos(this, eventScheduler);
 }
 
 IODispatcher::~IODispatcher(void)
@@ -80,6 +83,8 @@ IODispatcher::~IODispatcher(void)
     {
         delete it->second;
     }
+    delete dispPolicy;
+    eventScheduler->EjectIODispatcher();
 }
 
 void
@@ -263,7 +268,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
         IOWorker* ioWorker = ublock->GetDedicatedIOWorker();
         if (likely(nullptr != ioWorker))
         {
-            ioWorker->EnqueueUbio(ubio);
+            dispPolicy->Submit(ioWorker, ubio);
         }
     }
 
@@ -273,6 +278,15 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
     }
 
     return 0;
+}
+
+void
+IODispatcher::ProcessQueues(void)
+{
+    if (likely(dispPolicy != nullptr))
+    {
+        dispPolicy->Process();
+    }
 }
 
 void

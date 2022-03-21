@@ -41,6 +41,9 @@
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/qos/qos_manager.h"
+#include "src/event_scheduler/backend_policy.h"
+
+// #pragma GCC optimize("O0")
 
 namespace pos
 {
@@ -93,6 +96,12 @@ EventWorker::EnqueueEvent(EventSmartPtr input)
     eventQueue->EnqueueEvent(input);
 }
 
+EventSmartPtr
+EventWorker::DequeueEvent()
+{
+    return eventQueue->DequeueEvent();
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Big loop
@@ -108,9 +117,9 @@ EventWorker::Run(void)
     pthread_setname_np(pthread_self(), name.str().c_str());
     sched_setaffinity(0, sizeof(eventCPUPool), &eventCPUPool);
 
-    while (false == exit)
+    while (exit == false)
     {
-        EventSmartPtr event = eventQueue->DequeueEvent();
+        EventSmartPtr event = eventScheduler->PickWorkerEvent(this);
         if (nullptr == event)
         {
             usleep(1);
@@ -118,6 +127,7 @@ EventWorker::Run(void)
         }
         running = true;
         bool done = event->Execute();
+        eventScheduler->CheckAndSetQueueOccupancy(event->GetEventType());
         running = false;
         if (done == false)
         {
@@ -131,6 +141,5 @@ EventWorker::GetQueueSize(void)
 {
     return eventQueue->GetQueueSize() + static_cast<uint32_t>(running);
 }
-
 
 } // namespace pos

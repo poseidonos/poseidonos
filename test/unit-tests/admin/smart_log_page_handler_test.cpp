@@ -67,8 +67,9 @@ TEST(SmartLogPageHandler, Execute_Return_true)
     struct spdk_nvme_health_information_page buffer;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockSmartLogMgr> smartLogMgr;
-
-    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, &buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, &buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr, &mockEventScheduler);
 
     bool actual, expected = true;
     actual = smartLogPageHandler.Execute();
@@ -87,8 +88,10 @@ TEST(SmartLogPageHandler, Execute_Return_true_null_buffer)
     struct spdk_nvme_health_information_page* buffer = nullptr;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockSmartLogMgr> smartLogMgr;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
 
-    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
+    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr, &mockEventScheduler);
 
     bool actual, expected = true;
     actual = smartLogPageHandler.Execute();
@@ -101,6 +104,8 @@ TEST(SmartLogPageHandler, Execute_Return_true_null_buffer_reenqueue)
     NiceMock<MockIIODispatcher> ioDispatcher;
     NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
     NiceMock<MockSmartLogMgr> smartLogMgr;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
 
     uint32_t originCore = 0;
     pos_io ibofIo;
@@ -109,7 +114,7 @@ TEST(SmartLogPageHandler, Execute_Return_true_null_buffer_reenqueue)
     struct spdk_nvme_health_information_page buffer;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
 
-    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, &buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
+    SmartLogPageHandler smartLogPageHandler(&cmd, &ibofIo, &buffer, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr, &mockEventScheduler);
 
     NiceMock<MockDiskQueryManager> mockDiskQueryManager(&cmd, &buffer, &ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
     ON_CALL(mockDiskQueryManager, Execute()).WillByDefault(Return(false));

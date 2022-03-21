@@ -40,11 +40,12 @@
 namespace pos
 {
 class Stripe;
+class EventScheduler;
 
 class FlushReadCompletion : public Callback
 {
 public:
-    explicit FlushReadCompletion(Stripe* stripe, int arrayId);
+    explicit FlushReadCompletion(Stripe* stripe, int arrayId, EventScheduler* eventScheduler = nullptr);
     ~FlushReadCompletion(void);
 
 private:
@@ -52,6 +53,7 @@ private:
 
     Stripe* stripe;
     int arrayId;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

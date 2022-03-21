@@ -35,8 +35,9 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/bio/ubio_mock.h"
-#include "test/unit-tests/device/device_detach_trigger_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
+#include "test/unit-tests/device/device_detach_trigger_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/qos/qos_manager_mock.h"
 
 using ::testing::_;
@@ -57,7 +58,7 @@ TEST(IOWorker, IOWorker_Stack)
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
 
     // When: Create IOWorker
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager};
 
     // Then: Do nothing
 }
@@ -88,7 +89,7 @@ TEST(IOWorker, GetWorkerId_SimpleCall)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 4444, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 4444, nullptr, &mockQosManager};
     uint32_t actual, expected = 4444;
 
     // When: Call GetWorkerId
@@ -107,7 +108,7 @@ TEST(IOWorker, DecreaseCurrentOutstandingIoCount_SimpleCall)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager};
 
     // When: Call DecreaseCurrentOutstandingIoCount
     ioWorker.DecreaseCurrentOutstandingIoCount(1);
@@ -124,7 +125,10 @@ TEST(IOWorker, EnqueueUbio_InputNullptr)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, IoEnqueued(_, _)).WillByDefault(Return());
+    ON_CALL(mockEventScheduler, IoDequeued(_, _)).WillByDefault(Return());
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager, &mockEventScheduler};
 
     // When: Call EnqueueUbio with nullptr
     ioWorker.EnqueueUbio(nullptr);
@@ -141,7 +145,7 @@ TEST(IOWorker, AddDevice_DeviceNullptr)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager};
     uint32_t actual, expected = 0;
 
     // When: Call AddDevice with nullptr
@@ -160,7 +164,7 @@ TEST(IOWorker, AddDevice_DeviceMockUBlock)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager};
     auto device = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*device.get(), Open()).WillByDefault(Return(true));
     EXPECT_CALL(*device.get(), GetName()).Times(AtLeast(1));
@@ -185,7 +189,7 @@ TEST(IOWorker, AddDevices_FourDevices)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, &mockDeviceDetachTrigger, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, &mockDeviceDetachTrigger, &mockQosManager};
     std::vector<UblockSharedPtr> devices;
     auto device1 = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*device1.get(), Open()).WillByDefault(Return(true));
@@ -231,7 +235,7 @@ TEST(IOWorker, RemoveDevice_SimpleCall)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager};
     auto device = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*device.get(), Open()).WillByDefault(Return(true));
     ON_CALL(*device.get(), Close()).WillByDefault(Return(0));
@@ -257,7 +261,10 @@ TEST(IOWorker, Run_NormalCase)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, IoEnqueued(_, _)).WillByDefault(Return());
+    ON_CALL(mockEventScheduler, IoDequeued(_, _)).WillByDefault(Return());
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager, &mockEventScheduler};
     auto device = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*device.get(), Open()).WillByDefault(Return(true));
     ON_CALL(*device.get(), CompleteIOs()).WillByDefault(Return(1));
@@ -286,7 +293,10 @@ TEST(IOWorker, Run_IOCountUnderflowCase)
     NiceMock<MockQosManager> mockQosManager;
     ON_CALL(mockQosManager, IOWorkerPoller(_, _)).WillByDefault(Return(0));
     ON_CALL(mockQosManager, HandleEventUbioSubmission(_, _, _, _)).WillByDefault(Return());
-    IOWorker ioWorker {cpuSet, 0, nullptr, &mockQosManager};
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, IoEnqueued(_, _)).WillByDefault(Return());
+    ON_CALL(mockEventScheduler, IoDequeued(_, _)).WillByDefault(Return());
+    IOWorker ioWorker{cpuSet, 0, nullptr, &mockQosManager, &mockEventScheduler};
     auto device = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*device.get(), Open()).WillByDefault(Return(true));
     ON_CALL(*device.get(), CompleteIOs()).WillByDefault(Return(3));

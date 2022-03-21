@@ -31,17 +31,23 @@
  */
 
 #include "partition_rebuild.h"
+
 #include "rebuilder.h"
+#include "src/allocator_service/allocator_service.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/allocator_service/allocator_service.h"
 
 namespace pos
 {
-PartitionRebuild::PartitionRebuild(RebuildBehavior* b)
-: bhvr(b)
+PartitionRebuild::PartitionRebuild(RebuildBehavior* b, EventScheduler* eventSchedulerArg)
+: bhvr(b),
+  eventScheduler(eventSchedulerArg)
 {
+    if (nullptr == eventScheduler)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
 }
 
 PartitionRebuild::~PartitionRebuild(void)
@@ -61,7 +67,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
         bhvr->GetContext()->rebuildComplete =
             bind(&PartitionRebuild::_Complete, this, placeholders::_1);
         EventSmartPtr rebuilder(new Rebuilder(bhvr));
-        EventSchedulerSingleton::Instance()->EnqueueEvent(rebuilder);
+        eventScheduler->EnqueueEvent(rebuilder);
     }
     else
     {

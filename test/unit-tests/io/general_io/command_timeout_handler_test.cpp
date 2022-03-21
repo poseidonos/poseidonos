@@ -169,7 +169,7 @@ TEST_F(CommandTimeoutHandlerFixture, __AbortSubmitHandler_DiskIO)
     delete abortContext;
 }
 
-TEST_F(CommandTimeoutHandlerFixture, __AbortSubmitHandler_Execute)
+TEST_F(CommandTimeoutHandlerFixture, DISABLED__AbortSubmitHandler_Execute)
 {
     // When : Timeout occured (cfs is not set)
     ctrlr.is_failed = false;

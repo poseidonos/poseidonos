@@ -46,7 +46,7 @@
 namespace pos
 {
 class SystemTimeoutChecker;
-
+class EventScheduler;
 enum CallbackType
 {
     CallbackType_Unknown = 0,
@@ -87,9 +87,8 @@ class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(
 {
 public:
     Callback(bool isFrontEnd, CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
-        SystemTimeoutChecker* timeoutChecker = nullptr);
+        SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventscheduler = nullptr);
     virtual ~Callback(void);
-
     bool Execute(void) final;
     void SetWaitingCount(uint32_t inputWaitingCount);
     virtual void SetCallee(CallbackSmartPtr callee);
@@ -125,5 +124,6 @@ private:
     static const uint32_t CALLER_FRAME;
     static const uint64_t DEFAULT_TIMEOUT_NS;
     static const uint64_t MAX_TIMEOUT_SEC;
+    EventScheduler *eventScheduler;
 };
 } // namespace pos

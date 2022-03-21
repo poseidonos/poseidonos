@@ -22,7 +22,7 @@ func TestSetSystemPropertyCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "low", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "lowest", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

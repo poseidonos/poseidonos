@@ -20,6 +20,7 @@ public:
     MOCK_METHOD(void, RemoveDeviceForIOWorker, (UblockSharedPtr dev), (override));
     MOCK_METHOD(void, CompleteForThreadLocalDeviceList, (), (override));
     MOCK_METHOD(int, Submit, (UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded), (override));
+    MOCK_METHOD(void, ProcessQueues, (), (override));
 };
 
 } // namespace pos

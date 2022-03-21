@@ -104,6 +104,7 @@ void
 Poseidonos::Terminate(void)
 {
     MemoryChecker::Enable(false);
+    EventSchedulerSingleton::Instance()->SetTerminate(true);
     NvmfTargetSingleton::ResetInstance();
     DeviceManagerSingleton::ResetInstance();
     IODispatcherSingleton::ResetInstance();
@@ -319,45 +320,28 @@ Poseidonos::_SetPerfImpact(void)
         &impact, ConfigType::CONFIG_TYPE_STRING);
     if (ret == EID(SUCCESS))
     {
-        qos_rebuild_policy newRebuildPolicy;
+        qos_backend_policy newRebuildPolicy;
         if (impact.compare("highest") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
-        }
-        else if (impact.compare("higher") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHER;
-        }
-        else if (impact.compare("high") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+            newRebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
         }
         else if (impact.compare("medium") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_MEDIUM;
-        }
-        else if (impact.compare("low") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
-        }
-        else if (impact.compare("lower") == 0)
-        {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
+            newRebuildPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
         else if (impact.compare("lowest") == 0)
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
         }
 
         else
         {
-            // changing the default priority to keep the weight value same as old(-800)
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
             POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
-                "Rebuild Perf Impact not supported, Set to default Low");
+                "Rebuild Perf Impact not supported, Set to default lowest");
         }
         newRebuildPolicy.policyChange = true;
-        retVal = QosManagerSingleton::Instance()->UpdateRebuildPolicy(newRebuildPolicy);
+        retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newRebuildPolicy);
         if (retVal != SUCCESS)
         {
             POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),

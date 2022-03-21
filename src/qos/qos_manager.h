@@ -114,8 +114,8 @@ public:
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
     virtual bool IsFeQosEnabled(void);
-    qos_rebuild_policy GetRebuildPolicy(std::string arrayName);
-    int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
+    qos_backend_policy GetBackendPolicy(BackendEvent);
+    int UpdateBackendPolicy(BackendEvent event, qos_backend_policy rebuildPolicy);
     void SetVolumeLimit(uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
     int64_t GetVolumeLimit(uint32_t volId, bool iops, uint32_t arrayId);
     bool IsVolumePolicyUpdated(uint32_t arrayId);
@@ -151,6 +151,7 @@ private:
     bool feQosEnabled;
     bool initialized;
     uint32_t pollerTime;
+    qos_backend_policy backendPolicyCli[BackendEvent_Count];
     std::atomic<uint32_t> pendingBackendEvents[BackendEvent_Count];
     std::atomic<uint32_t> eventLog[BackendEvent_Count];
     QosEventManager* qosEventManager;

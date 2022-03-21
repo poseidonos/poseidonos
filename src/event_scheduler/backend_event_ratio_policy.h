@@ -31,41 +31,42 @@
  */
 
 #pragma once
+#include <cstdint>
+#include <queue>
+#include <vector>
 
-#include "spdk/pos.h"
-#include "src/event_scheduler/callback.h"
-#include "src/event_scheduler/event.h"
-#include "src/io_scheduler/io_dispatcher.h"
-struct pos_io;
+#include "backend_policy.h"
+
 namespace pos
 {
-class IArrayInfo;
-class IDevInfo;
-class IIODispatcher;
-class IArrayDevMgr;
-class SmartLogMgr;
-class EventScheduler;
-
-class SmartLogPageHandler : public Event
+class BackendEventRatioPolicy : public BackendPolicy
 {
 public:
-    SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
-        CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventScheduler = nullptr);
-    bool Execute(void);
+    BackendEventRatioPolicy(QosManager* qosManager, std::vector<EventWorker*>* workerarray, uint32_t workerCount, uint32_t ioWorkerCount = 1);
+    ~BackendEventRatioPolicy();
+    virtual void EnqueueEvent(EventSmartPtr input);
+    virtual std::queue<EventSmartPtr> DequeueEvents(void);
+    virtual EventSmartPtr DequeueWorkerEvent(void);
+    virtual uint32_t GetWorkerQueueSize();
+    inline virtual int Run();
+    inline virtual EventSmartPtr PickWorkerEvent(EventWorker*);
+    void CheckAndSetQueueOccupancy(BackendEvent eventId);
 
 private:
-    struct spdk_nvme_cmd* cmd;
-    pos_io* io;
-    void* smartLogPageData;
-    struct spdk_nvme_health_information_page* page;
-    uint32_t originCore;
-    CallbackSmartPtr callback;
-    IArrayInfo* arrayInfo;
-    IDevInfo* devInfo;
-    IIODispatcher* dispatcher;
-    IArrayDevMgr* arrayDevMgr;
-    SmartLogMgr* smartLogMgr;
-    EventScheduler* eventScheduler;
+    int32_t _GetEventLimit(BackendEvent eventId);
+    void _CheckAndSetAllowedLimit(void);
+    void _InitLimitValues(void);
+
+    int32_t totalIOCount;
+    uint32_t totalEventCount;
+    std::atomic<int32_t> allowedEventCount[BackendEvent_Count];
+    std::atomic<int32_t> currentEventCount[BackendEvent_Count];
+    std::atomic<uint32_t> cycleCount[BackendEvent_Count];
+    std::atomic<int32_t> limit[BackendEvent_Count];
+    SchedulerQueue* feEventQueue[FE_QUEUES];
+    std::mutex frontendQueueLock[FE_QUEUES];
+    std::queue<EventSmartPtr> workerCommonQueue;
+    std::mutex workerQueueLock;
 };
+
 } // namespace pos
