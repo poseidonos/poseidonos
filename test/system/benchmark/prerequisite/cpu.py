@@ -32,16 +32,20 @@ def Scaling(id, pw, ip, opt):
 
     for core_index in range(num_core):
         try:
-            set_frequency = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-            set_frequency.extend(["echo", frequency, ">", f"/sys/devices/system/cpu/cpu{core_index}/cpufreq/scaling_max_freq"])
+            set_frequency = ["sshpass", "-p", pw,
+                             "ssh", f"{id}@{ip}", "sudo", "nohup"]
+            set_frequency.extend(
+                ["echo", frequency, ">", f"/sys/devices/system/cpu/cpu{core_index}/cpufreq/scaling_max_freq"])
             lib.subproc.sync_run(set_frequency, False, False)
         except Exception as e:
             lib.printer.red(set_frequency)
             lib.printer.red(f"{__name__} [Error] {e}")
             return -1
         try:
-            set_governor = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-            set_governor.extend(["echo", governor, ">", f"/sys/devices/system/cpu/cpu{core_index}/cpufreq/scaling_governor"])
+            set_governor = ["sshpass", "-p", pw,
+                            "ssh", f"{id}@{ip}", "sudo", "nohup"]
+            set_governor.extend(
+                ["echo", governor, ">", f"/sys/devices/system/cpu/cpu{core_index}/cpufreq/scaling_governor"])
             lib.subproc.sync_run(set_governor, False, False)
         except Exception as e:
             lib.printer.red(set_governor)

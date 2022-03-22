@@ -27,18 +27,26 @@ class Initiator:
     def Prepare(self, connect_nvme=False, subsystem_list=[]):
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
         if (self.prereq and self.prereq["CPU"]["RUN"]):
-            prerequisite.cpu.Scaling(self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
+            prerequisite.cpu.Scaling(
+                self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
         if (self.prereq and self.prereq["MEMORY"]["RUN"]):
-            prerequisite.memory.MaxMapCount(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["MAX_MAP_COUNT"])
-            prerequisite.memory.DropCaches(self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["DROP_CACHES"])
+            prerequisite.memory.MaxMapCount(
+                self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["MAX_MAP_COUNT"])
+            prerequisite.memory.DropCaches(
+                self.id, self.pw, self.nic_ssh, self.prereq["MEMORY"]["DROP_CACHES"])
         if (self.prereq and self.prereq["NETWORK"]["RUN"]):
-            prerequisite.network.IrqBalance(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
-            prerequisite.network.TcpTune(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
-            prerequisite.network.Nic(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
+            prerequisite.network.IrqBalance(
+                self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
+            prerequisite.network.TcpTune(
+                self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
+            prerequisite.network.Nic(
+                self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
         if (self.prereq and self.prereq["MODPROBE"]["RUN"]):
-            prerequisite.modprobe.Modprobe(self.id, self.pw, self.nic_ssh, self.prereq["MODPROBE"]["MODs"])
+            prerequisite.modprobe.Modprobe(
+                self.id, self.pw, self.nic_ssh, self.prereq["MODPROBE"]["MODs"])
         if (self.prereq and self.prereq["SPDK"]["RUN"]):
-            prerequisite.spdk.Setup(self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.spdk_dir)
+            prerequisite.spdk.Setup(
+                self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.spdk_dir)
 
         if -1 == pos.env.remove_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
             return False

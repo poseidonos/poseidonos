@@ -53,7 +53,8 @@ def play(json_targets, json_inits, json_scenario):
     # check auto generate
     test_target = targets[next(iter(targets))]
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     # run workload
@@ -79,7 +80,8 @@ def play(json_targets, json_inits, json_scenario):
             test_fio.opt["output"] = f"{init.output_dir}/0_seq_fill_{init.name}"
             for subsys in test_target.subsystem_list:
                 if subsys[0] == init.name:
-                    test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
+                    test_fio.jobs.append(
+                        f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
                 if not test_fio.Prepare():
                     skip_workload = True
                     break
@@ -102,7 +104,8 @@ def play(json_targets, json_inits, json_scenario):
         iodepth = ["1", "4", "16", "32"]
         for tc in testcase:
             # tc 마다 새로운 graph(png 파일)를 그리기 위해 여기에서 graph.manager.Fio 객체를 생성한다
-            graph_fio = graph.manager.Fio(f"{json_scenario['OUTPUT_DIR']}/{now_date}_1ms_qos_{tc[0]}")
+            graph_fio = graph.manager.Fio(
+                f"{json_scenario['OUTPUT_DIR']}/{now_date}_1ms_qos_{tc[0]}")
             for qd in iodepth:  # tc 는 iodepth list에 저장되어 있는 qd 만큼의 test를 반복한다
                 fio_cmdset = []  # 두 initiator에서 동시에 fio를 수행하기 위해 list로 초기화
                 output_name = f"{now_date}_fio_{tc[0]}_qd{qd}"
@@ -115,22 +118,27 @@ def play(json_targets, json_inits, json_scenario):
                     test_fio.opt["runtime"] = "60"
                     test_fio.opt["numjobs"] = "1"
                     test_fio.opt["thread"] = "1"
-                    test_fio.opt["group_reporting"] = "1"  # graph는 group_reporting만 현재 지원 (필수)
+                    # graph는 group_reporting만 현재 지원 (필수)
+                    test_fio.opt["group_reporting"] = "1"
                     test_fio.opt["direct"] = "1"
                     test_fio.opt["readwrite"] = "randrw"
                     test_fio.opt["rwmixread"] = tc[1]
                     test_fio.opt["bs"] = tc[2]
                     test_fio.opt["iodepth"] = qd
-                    test_fio.opt["eta"] = "always"  # eta graph 그리려면 해당 옵션이 필요 (필수)
-                    test_fio.opt["output-format"] = "json"  # 결과를 parsing하기 위한 옵셥 (필수)
+                    # eta graph 그리려면 해당 옵션이 필요 (필수)
+                    test_fio.opt["eta"] = "always"
+                    # 결과를 parsing하기 위한 옵셥 (필수)
+                    test_fio.opt["output-format"] = "json"
                     test_fio.opt["output"] = f"{init.output_dir}/{output_name}_{init.name}"
                     for subsys in test_target.subsystem_list:
                         if subsys[0] == init.name:
-                            test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
+                            test_fio.jobs.append(
+                                f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
                         if not test_fio.Prepare():
                             skip_workload = True
                             break
-                    fio_cmdset.append(test_fio.cmd)  # 각 initiator 마다 설정된 fio 정보를 저장
+                    # 각 initiator 마다 설정된 fio 정보를 저장
+                    fio_cmdset.append(test_fio.cmd)
                 if not skip_workload:
                     try:  # 완성된 fio_cmd들을 병렬수행
                         print(f" run -> {now_date}_fio_{tc[0]}_qd{qd}")
@@ -141,17 +149,22 @@ def play(json_targets, json_inits, json_scenario):
                     try:  # fio 완료 후, 결과를 output directory로 copy
                         for key in initiators:
                             init = initiators[key]
-                            lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
-                            lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
+                            lib.subproc.sync_run(
+                                f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
+                            lib.subproc.sync_run(
+                                f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
                     except Exception as e:
                         lib.printer.red(f"{__name__} [Error] {e}")
                         skip_workload = True
                     try:  # 결과를 add(parsing) & graph로 draw
                         for key in initiators:
                             init = initiators[key]
-                            graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}.eta", f"qd{qd}_{init.name}")
-                            graph_fio.DrawEta(["bw_read", "bw_write", "iops_read", "iops_write"])
-                            graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}", f"qd{qd}_{init.name}")
+                            graph_fio.AddEtaData(
+                                f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}.eta", f"qd{qd}_{init.name}")
+                            graph_fio.DrawEta(
+                                ["bw_read", "bw_write", "iops_read", "iops_write"])
+                            graph_fio.AddResultData(
+                                f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}", f"qd{qd}_{init.name}")
                             graph_fio.DrawResult()
                     except Exception as e:
                         lib.printer.red(f"{__name__} [Error] {e}")

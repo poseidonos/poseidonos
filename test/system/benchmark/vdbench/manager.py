@@ -16,21 +16,26 @@ class Vdbench:
         self.vdfile = "test.vd"
         self.vdbench_dir = vdbench_dir
         self.jvm = jvm
-        self.column_list = ["timestamp", "rate", "MB/sec", "resp", "read_resp", "write_resp"]
+        self.column_list = ["timestamp", "rate",
+                            "MB/sec", "resp", "read_resp", "write_resp"]
         self.output_dir = output_dir
 
     def CreateVdFile(self, initiators, rd_list, rd_idx=0, mulit_host=False):
-        create_cmd = ["sshpass", "-p", self.pw, "ssh", f"{self.id}@{self.nic_ssh}"]
-        create_cmd.extend(["echo", f"hd=default,jvms={self.jvm}", ">", f"{self.vdbench_dir}/{self.vdfile};"])
+        create_cmd = ["sshpass", "-p", self.pw,
+                      "ssh", f"{self.id}@{self.nic_ssh}"]
+        create_cmd.extend(
+            ["echo", f"hd=default,jvms={self.jvm}", ">", f"{self.vdbench_dir}/{self.vdfile};"])
         remote_cnt = 0
         if len(initiators) > 1:
             for key in initiators:
                 init = initiators[key]
                 if remote_cnt == 0:
-                    create_cmd.extend(["echo", "hd=localhost", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+                    create_cmd.extend(
+                        ["echo", "hd=localhost", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
                     remote_cnt += 1
                     continue
-                create_cmd.extend(["echo", f"hd={init.name},shell=ssh,system={init.nic_ssh},vdbench={init.vdbench_dir},user={init.id}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+                create_cmd.extend(
+                    ["echo", f"hd={init.name},shell=ssh,system={init.nic_ssh},vdbench={init.vdbench_dir},user={init.id}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
         vd_disk_names = {}
         remote_cnt = 0
         for key in initiators:
@@ -44,19 +49,24 @@ class Vdbench:
             for diskname in init.device_list:
                 sd_device_name = diskname.split('/')
                 vd_disk_name[diskname] = str(sd_device_name[2])
-                create_cmd.extend(["echo", f"sd={vd_disk_name[diskname]}_{init.name},host={hostname},lun={diskname},openflags=o_direct,size={self.opt['size']}"])
+                create_cmd.extend(
+                    ["echo", f"sd={vd_disk_name[diskname]}_{init.name},host={hostname},lun={diskname},openflags=o_direct,size={self.opt['size']}"])
                 create_cmd.extend([">>", f"{self.vdbench_dir}/{self.vdfile};"])
 
             vd_disk_names[key] = vd_disk_name
 
-        create_cmd.extend(["echo", rf"wd=seq,sd=nvme\*,xfersize=4k,rdpct=0,seekpct=0", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
-        create_cmd.extend(["echo", rf"wd=rand,sd=nvme\*,xfersize=4k,rdpct=0,seekpct=100", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+        create_cmd.extend(["echo", rf"wd=seq,sd=nvme\*,xfersize=4k,rdpct=0,seekpct=0",
+                          ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+        create_cmd.extend(["echo", rf"wd=rand,sd=nvme\*,xfersize=4k,rdpct=0,seekpct=100",
+                          ">>", f"{self.vdbench_dir}/{self.vdfile};"])
 
         if rd_idx == -1:
             for rd in rd_list:
-                create_cmd.extend(["echo", f"rd={rd}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+                create_cmd.extend(
+                    ["echo", f"rd={rd}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
         else:
-            create_cmd.extend(["echo", f"rd={rd_list[rd_idx]}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
+            create_cmd.extend(
+                ["echo", f"rd={rd_list[rd_idx]}", ">>", f"{self.vdbench_dir}/{self.vdfile};"])
 
         lib.subproc.sync_run(create_cmd, False, False)
         return vd_disk_names

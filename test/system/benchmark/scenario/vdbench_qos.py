@@ -58,7 +58,8 @@ def play(json_targets, json_inits, json_scenario):
     # check auto generate
 
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     if not skip_workload:
@@ -86,8 +87,8 @@ def play(json_targets, json_inits, json_scenario):
             #    "sc_list": [["bw", "value", "100"], ["reset", "", ""]]
             # },
             {
-               "title": "",
-               "sc_list": [["bw", ["1"], ["800"], "min"], ["bw", ["1"], ["1000"], "min"], ["bw", ["1"], ["1500"], "min"], ["reset", "", "", "min"]]
+                "title": "",
+                "sc_list": [["bw", ["1"], ["800"], "min"], ["bw", ["1"], ["1000"], "min"], ["bw", ["1"], ["1500"], "min"], ["reset", "", "", "min"]]
             },
             {
                 "title": "Throttle Max BW to 10% of Base Performance",
@@ -137,20 +138,22 @@ def play(json_targets, json_inits, json_scenario):
                 "title": "Throttle Each Volume with Different Value",
                 "sc_list": [["bw", ["3"], ["50"]], ["iops", ["1-2", "4-5"], ["10", "20"]], ["bw", ["3"], ["50"]]]
             }
-         ]
+        ]
 
         first_init_key = list(initiators.keys())[0]
         first_init = initiators[first_init_key]
 
         # create vd file & run
-        first_init_vdbench = vdbench.manager.Vdbench(first_init.name, first_init.id, first_init.pw, first_init.nic_ssh, first_init.vdbench_dir, json_scenario['OUTPUT_DIR'])
+        first_init_vdbench = vdbench.manager.Vdbench(
+            first_init.name, first_init.id, first_init.pw, first_init.nic_ssh, first_init.vdbench_dir, json_scenario['OUTPUT_DIR'])
         first_init_vdbench.opt["size"] = "8g"
         first_init_vdbench.CreateVdFile(initiators, rd_list, -1, True)
         first_init_vdbench.run(True)
         first_init_vdbench.CopyVdbenchTotalResult(True, workload_list)
 
         base_perf = {}
-        base_perf = first_init_vdbench.GetBasePerformance(workload_list)  # iops, MB/s
+        base_perf = first_init_vdbench.GetBasePerformance(
+            workload_list)  # iops, MB/s
 
         # run each test for each workload
         # make vd file with only 1 workload
@@ -161,15 +164,19 @@ def play(json_targets, json_inits, json_scenario):
             workload_name = workload_list[rd_idx]
 
             prev_expected_value = {}  # iops, MB/s
-            base_bw = prev_expected_value["bw"] = float(base_perf[workload_name]["bw"])
-            base_iops = prev_expected_value["iops"] = float(base_perf[workload_name]["iops"])
+            base_bw = prev_expected_value["bw"] = float(
+                base_perf[workload_name]["bw"])
+            base_iops = prev_expected_value["iops"] = float(
+                base_perf[workload_name]["iops"])
             base_iops /= 1000.0  # kiops
             print("\n")
-            lib.printer.green(f" === <Base Performance> IOPS: {base_iops} k, BW: {base_bw}MB/sec === ")
+            lib.printer.green(
+                f" === <Base Performance> IOPS: {base_iops} k, BW: {base_bw}MB/sec === ")
 
             # Create Vdbench File
             print(f" Run: {rd_list[rd_idx]}")
-            vd_disk_names = first_init_vdbench.CreateVdFile(initiators, rd_list, rd_idx)
+            vd_disk_names = first_init_vdbench.CreateVdFile(
+                initiators, rd_list, rd_idx)
             for tc in tc_list:
                 print("\n")
                 lib.printer.green(f" **** TEST NAME : {tc['title']} ****")
@@ -185,17 +192,20 @@ def play(json_targets, json_inits, json_scenario):
                     # Get Qos Command Option
                     limit = {}
                     # case1) {"type": , "how": , "value": } case2) {"type: ", "1-2": 10, "4-5": 20}
-                    limit = pos.qos.GetQosCommandOption(sc, base_perf[workload_name])
+                    limit = pos.qos.GetQosCommandOption(
+                        sc, base_perf[workload_name])
 
                     # Run Vdbench
-                    vdbench_thread = threading.Thread(target=first_init_vdbench.run)
+                    vdbench_thread = threading.Thread(
+                        target=first_init_vdbench.run)
                     vdbench_thread.start()
 
                     sleep(1)
                     # Set Throttling
                     expected_value = 0
                     if applyAllVolume is True:
-                        expected_value = pos.qos.SetQosToAllVolumes(test_target, limit)  # kiops, MB/s
+                        expected_value = pos.qos.SetQosToAllVolumes(
+                            test_target, limit)  # kiops, MB/s
                         if limit["type"] == "iops" and expected_value != -1:
                             expected_value *= 1000
                         if limit["type"] == "reset" or expected_value > base_perf[workload_name][limit["type"]]:
@@ -210,15 +220,20 @@ def play(json_targets, json_inits, json_scenario):
                     # Check Result
                     throttle_success = False
                     if applyAllVolume is True:
-                        first_init_vdbench.CopyVdbenchTotalResult(False, [workload_name])
-                        result_file = json_scenario['OUTPUT_DIR'] + "/" + workload_name + ".json"
-                        [throttle_success, prev_expected_value] = pos.qos.CheckQos(result_file, limit["type"], expected_value, prev_expected_value, base_perf[workload_name], limit["min"])
+                        first_init_vdbench.CopyVdbenchTotalResult(
+                            False, [workload_name])
+                        result_file = json_scenario['OUTPUT_DIR'] + \
+                            "/" + workload_name + ".json"
+                        [throttle_success, prev_expected_value] = pos.qos.CheckQos(
+                            result_file, limit["type"], expected_value, prev_expected_value, base_perf[workload_name], limit["min"])
 
                     else:
                         for key in initiators:
                             init = initiators[key]
-                            volume_id_list = init.GetVolumeIdOfDevice(vd_disk_names[key])
-                            throttle_success = pos.qos.CheckEachVolume(key, limit, vd_disk_names[key], first_init_vdbench, workload_name, volume_id_list, limit["min"])
+                            volume_id_list = init.GetVolumeIdOfDevice(
+                                vd_disk_names[key])
+                            throttle_success = pos.qos.CheckEachVolume(
+                                key, limit, vd_disk_names[key], first_init_vdbench, workload_name, volume_id_list, limit["min"])
 
                     if throttle_success is False:
                         lib.printer.red(f" Failed to QoS")
@@ -234,8 +249,10 @@ def play(json_targets, json_inits, json_scenario):
                 # Reset Qos After Each Test
                 limit = {"type": "reset", "how": "", "value": 0}
                 pos.qos.SetQosToAllVolumes(test_target, limit)
-                prev_expected_value["bw"] = float(base_perf[workload_name]["bw"])
-                prev_expected_value["iops"] = float(base_perf[workload_name]["iops"])
+                prev_expected_value["bw"] = float(
+                    base_perf[workload_name]["bw"])
+                prev_expected_value["iops"] = float(
+                    base_perf[workload_name]["iops"])
             if (error_return is True):
                 break
 

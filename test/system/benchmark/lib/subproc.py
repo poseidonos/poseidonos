@@ -8,9 +8,11 @@ def set_allow_stdout():
     global allow_stdout
     allow_stdout = True
 
+
 def write_log(cmd):
     if (allow_stdout is True):
         print(cmd)
+
 
 def sync_run(cmd, ignore_err=False, sh=True):
     proc = subprocess.Popen(

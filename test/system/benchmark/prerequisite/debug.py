@@ -28,7 +28,8 @@ def Apport(id, pw, ip, opt):
 
 
 def CorePattern(id, pw, ip, core_dir, core_pattern):
-    lib.printer.green(f" + {__name__}.CorePattern : {core_dir}, {core_pattern}")
+    lib.printer.green(
+        f" + {__name__}.CorePattern : {core_dir}, {core_pattern}")
     try:
         mk_core_dir = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} \
             sudo mkdir -p {core_dir}"
@@ -39,8 +40,10 @@ def CorePattern(id, pw, ip, core_dir, core_pattern):
         return -1
 
     try:
-        set_core_pattern = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-        set_core_pattern.extend(["echo", core_pattern, ">", "/proc/sys/kernel/core_pattern"])
+        set_core_pattern = ["sshpass", "-p", pw,
+                            "ssh", f"{id}@{ip}", "sudo", "nohup"]
+        set_core_pattern.extend(
+            ["echo", core_pattern, ">", "/proc/sys/kernel/core_pattern"])
         lib.subproc.sync_run(set_core_pattern, False, False)
     except Exception as e:
         lib.printer.red(set_core_pattern)

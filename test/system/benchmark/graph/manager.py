@@ -8,18 +8,29 @@ class Fio:
         print(self.pic_name)
         self.eta_data = {}
         self.result_data = []
-        self.result_data.append({"title": "read_iops", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "read_iops", "index": [], "value": []})
         self.result_data.append({"title": "read_bw", "index": [], "value": []})
-        self.result_data.append({"title": "read_clat_avg", "index": [], "value": []})
-        self.result_data.append({"title": "read_clat_99.9th", "index": [], "value": []})
-        self.result_data.append({"title": "read_clat_99.99th", "index": [], "value": []})
-        self.result_data.append({"title": "read_clat_max", "index": [], "value": []})
-        self.result_data.append({"title": "write_iops", "index": [], "value": []})
-        self.result_data.append({"title": "write_bw", "index": [], "value": []})
-        self.result_data.append({"title": "write_clat_avg", "index": [], "value": []})
-        self.result_data.append({"title": "write_clat_99.9th", "index": [], "value": []})
-        self.result_data.append({"title": "write_clat_99.99th", "index": [], "value": []})
-        self.result_data.append({"title": "write_clat_max", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "read_clat_avg", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "read_clat_99.9th", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "read_clat_99.99th", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "read_clat_max", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_iops", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_bw", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_clat_avg", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_clat_99.9th", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_clat_99.99th", "index": [], "value": []})
+        self.result_data.append(
+            {"title": "write_clat_max", "index": [], "value": []})
         self.log_data = {}
         self.log_data["bw"] = {}
         self.log_data["iops"] = {}

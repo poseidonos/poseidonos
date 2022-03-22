@@ -58,13 +58,15 @@ def play(json_targets, json_inits, json_scenario):
     # check auto generate
     test_target = targets[next(iter(targets))]
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     # run workload
     if not skip_workload:
         lib.printer.green(f" fio start")
-        graph_fio = graph.manager.Fio(f"{json_scenario['OUTPUT_DIR']}/{now_date}_sustained_write")
+        graph_fio = graph.manager.Fio(
+            f"{json_scenario['OUTPUT_DIR']}/{now_date}_sustained_write")
         # readwrite, block size, io depth
         testcase = [["write", "128k", "4", "seqfill"],
                     ["randwrite", "4k", "128", "randfill1"],
@@ -119,7 +121,8 @@ def play(json_targets, json_inits, json_scenario):
 
                 for subsys in test_target.subsystem_list:
                     if subsys[0] == init.name:
-                        test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
+                        test_fio.jobs.append(
+                            f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
                         if not test_fio.Prepare():
                             skip_workload = True
                             break
@@ -137,8 +140,10 @@ def play(json_targets, json_inits, json_scenario):
                 try:
                     for key in initiators:
                         init = initiators[key]
-                        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
-                        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")
                     skip_workload = True
@@ -146,9 +151,12 @@ def play(json_targets, json_inits, json_scenario):
                 try:
                     for key in initiators:
                         init = initiators[key]
-                        graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}.eta", f"{bs}_{rw}")
-                        graph_fio.DrawEta(["bw_read", "bw_write", "iops_read", "iops_write"])
-                        graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}", f"{bs}_{rw}")
+                        graph_fio.AddEtaData(
+                            f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}.eta", f"{bs}_{rw}")
+                        graph_fio.DrawEta(
+                            ["bw_read", "bw_write", "iops_read", "iops_write"])
+                        graph_fio.AddResultData(
+                            f"{json_scenario['OUTPUT_DIR']}/{output_name}_{init.name}", f"{bs}_{rw}")
                         graph_fio.DrawResult()
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")

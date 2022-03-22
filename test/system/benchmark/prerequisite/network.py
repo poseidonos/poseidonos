@@ -76,8 +76,10 @@ def TcpTune(id, pw, ip, opt):
         return -1
 
     try:
-        ipv4_tcp_wmem = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-        ipv4_tcp_wmem.extend(["sysctl", "-w", f"net.ipv4.tcp_wmem=\"{tcp_wmem}\""])
+        ipv4_tcp_wmem = ["sshpass", "-p", pw,
+                         "ssh", f"{id}@{ip}", "sudo", "nohup"]
+        ipv4_tcp_wmem.extend(
+            ["sysctl", "-w", f"net.ipv4.tcp_wmem=\"{tcp_wmem}\""])
         lib.subproc.sync_run(ipv4_tcp_wmem, False, False)
     except Exception as e:
         lib.printer.red(ipv4_tcp_wmem)
@@ -85,8 +87,10 @@ def TcpTune(id, pw, ip, opt):
         return -1
 
     try:
-        ipv4_tcp_rmem = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-        ipv4_tcp_rmem.extend(["sysctl", "-w", f"net.ipv4.tcp_rmem=\"{tcp_rmem}\""])
+        ipv4_tcp_rmem = ["sshpass", "-p", pw,
+                         "ssh", f"{id}@{ip}", "sudo", "nohup"]
+        ipv4_tcp_rmem.extend(
+            ["sysctl", "-w", f"net.ipv4.tcp_rmem=\"{tcp_rmem}\""])
         lib.subproc.sync_run(ipv4_tcp_rmem, False, False)
     except Exception as e:
         lib.printer.red(ipv4_tcp_rmem)

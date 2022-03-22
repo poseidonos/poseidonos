@@ -83,9 +83,11 @@ def execute_vdbench_event(first_init_vdbench, initiators, current_time):
     for vdbench_elem in vdbench_list:
         if ("submit" not in vdbench_elem and vdbench_elem["start"] <= current_time):
             print("")
-            print(f"Current Time : {current_time}s Run: {vdbench_elem['title']}")
+            print(
+                f"Current Time : {current_time}s Run: {vdbench_elem['title']}")
             print("")
-            vd_disk_names = first_init_vdbench.CreateVdFile(initiators, [vdbench_elem["event"]], 0)
+            vd_disk_names = first_init_vdbench.CreateVdFile(
+                initiators, [vdbench_elem["event"]], 0)
             vdbench_elem["vd_disk_names"] = vd_disk_names
             vdbench_thread = threading.Thread(target=first_init_vdbench.run)
             vdbench_thread.start()
@@ -118,14 +120,16 @@ def wait_vdbench_event(test_vdbench, initiators, current_time):
             continue
         if ("done" not in vdbench_elem and vdbench_elem["start"] + vdbench_elem["duration"] <= current_time):
             print("")
-            print(f"Current Time : {current_time}s Exit: {vdbench_elem['title']}")
+            print(
+                f"Current Time : {current_time}s Exit: {vdbench_elem['title']}")
             print("")
             vdbench_elem["thread"].join(timeout=60)
             vd_disk_names = vdbench_elem["vd_disk_names"]
             for key in initiators:
                 #init = initiators[key]
                 #volume_id_list = init.GetVolumeIdOfDevice(vd_disk_names[key])
-                result_array = pos.qos.GetResultQos(test_vdbench, key, vd_disk_names[key], "bw", vdbench_elem["workload"])
+                result_array = pos.qos.GetResultQos(
+                    test_vdbench, key, vd_disk_names[key], "bw", vdbench_elem["workload"])
                 result[key] = result_array
             vdbench_elem["done"] = True
             vdbench_elem["result_array"] = result
@@ -183,7 +187,8 @@ def play(json_targets, json_inits, json_scenario):
     # check auto generate
 
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     if not skip_workload:
@@ -193,7 +198,8 @@ def play(json_targets, json_inits, json_scenario):
         first_init = initiators[first_init_key]
 
         # create vd file & run
-        first_init_vdbench = vdbench.manager.Vdbench(first_init.name, first_init.id, first_init.pw, first_init.nic_ssh, first_init.vdbench_dir, json_scenario['OUTPUT_DIR'])
+        first_init_vdbench = vdbench.manager.Vdbench(
+            first_init.name, first_init.id, first_init.pw, first_init.nic_ssh, first_init.vdbench_dir, json_scenario['OUTPUT_DIR'])
         first_init_vdbench.opt["size"] = "8g"
 
         # run each test for each workload
@@ -202,7 +208,8 @@ def play(json_targets, json_inits, json_scenario):
         while(1):
             current_time = time() - start_time
             execute_vdbench_event(first_init_vdbench, initiators, current_time)
-            result = wait_vdbench_event(first_init_vdbench, initiators, current_time)
+            result = wait_vdbench_event(
+                first_init_vdbench, initiators, current_time)
             if ("done" in result):
                 break
             if (execute_qos_cli_event(test_target, current_time) is True):
@@ -220,14 +227,16 @@ def play(json_targets, json_inits, json_scenario):
                 if (index < len(vdbench_elem["result_array"]['Initiator01'][key])):
                     if (max_value < vdbench_elem["result_array"]['Initiator01'][key][index]):
                         max_value = vdbench_elem["result_array"]['Initiator01'][key][index]
-                    total_list[index] = total_list[index] + vdbench_elem["result_array"]['Initiator01'][key][index]
+                    total_list[index] = total_list[index] + \
+                        vdbench_elem["result_array"]['Initiator01'][key][index]
                     if (max_value < total_list[index]):
                         max_value = total_list[index]
         if ("result_array" in vdbench_elem):
             print(vdbench_elem["title"])
             print(vdbench_elem["result_array"])
             vdbench_elem["result_array"]['Initiator01']['total'] = total_list
-            graph.draw.DrawResultDict(vdbench_elem["result_array"]['Initiator01'], f"{vdbench_elem['title']}_graph.png", max_value * 1.2, "sec", "BW(MB/s)")
+            graph.draw.DrawResultDict(vdbench_elem["result_array"]['Initiator01'],
+                                      f"{vdbench_elem['title']}_graph.png", max_value * 1.2, "sec", "BW(MB/s)")
 
     for key in initiators:
         initiators[key].Wrapup(True, test_target.subsystem_list)

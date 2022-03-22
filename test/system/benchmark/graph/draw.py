@@ -69,7 +69,8 @@ def DrawEta(data, pic_name, graph_list):
     try:
         plt.clf()  # plot 초기화
         num_graph = len(graph_list)
-        fig = plt.figure(figsize=(8, 3 * num_graph))  # plot size 설정(unit: inch)
+        # plot size 설정(unit: inch)
+        fig = plt.figure(figsize=(8, 3 * num_graph))
 
         for i in range(num_graph):
             type = graph_list[i]
@@ -86,7 +87,8 @@ def DrawEta(data, pic_name, graph_list):
                 ax.yaxis.set_major_formatter(ticker.EngFormatter())
             ax.tick_params(axis='y', labelrotation=30, labelsize=8)
             for v in data.values():
-                plt.scatter(v["x"], v[type], s=10, label=v["title"])  # 점 그래프 그리기
+                plt.scatter(v["x"], v[type], s=10,
+                            label=v["title"])  # 점 그래프 그리기
                 plt.plot(v["x"], v[type])  # 선 그래프 그리기
             plt.legend(fontsize=8, loc="upper left", ncol=2)  # 범례 그리기
 
@@ -143,7 +145,8 @@ def DrawResult(data, pic_name):
             ax.set_yticklabels(data[i]["index"], fontsize=8)
             ax.invert_yaxis()
             if "lat" in data[i]["title"]:
-                ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatLatency))
+                ax.xaxis.set_major_formatter(
+                    ticker.FuncFormatter(FormatLatency))
             elif "iops" in data[i]["title"]:
                 ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatIOPS))
             elif "bw" in data[i]["title"]:
@@ -186,10 +189,12 @@ def DrawLogGraphWithType(data, pic_name, type):
     try:
         plt.clf()  # plot 초기화
         num_graph = len(data)
-        fig = plt.figure(figsize=(8, 3 * num_graph))  # plot size setting(unit: inch)
+        # plot size setting(unit: inch)
+        fig = plt.figure(figsize=(8, 3 * num_graph))
 
         for job in data:
-            ax = plt.subplot(num_graph, 1, int(job))  # subplot position(행, 렬, 순서)
+            # subplot position(행, 렬, 순서)
+            ax = plt.subplot(num_graph, 1, int(job))
             ax.set_title(job, fontsize=12)
             ax.grid(True, axis="y", color="lightgrey", zorder=0)
             if ("iops" == type):
@@ -197,15 +202,18 @@ def DrawLogGraphWithType(data, pic_name, type):
             elif ("bw" == type):
                 ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatKBW))
             elif ("lat" == type):
-                ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatLatency))
+                ax.yaxis.set_major_formatter(
+                    ticker.FuncFormatter(FormatLatency))
             else:
                 ax.yaxis.set_major_formatter(ticker.EngFormatter())
             ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatEpochTime))
             ax.tick_params(axis='y', labelrotation=30, labelsize=8)
             ax.tick_params(axis='x', labelrotation=0, labelsize=8)
-            plt.scatter(data[job]["read"]["x"], data[job]["read"]["y"], s=10, label="read")  # 점 그래프
+            plt.scatter(data[job]["read"]["x"], data[job]
+                        ["read"]["y"], s=10, label="read")  # 점 그래프
             plt.plot(data[job]["read"]["x"], data[job]["read"]["y"])  # 선 그래프
-            plt.scatter(data[job]["write"]["x"], data[job]["write"]["y"], s=10, label="write")
+            plt.scatter(data[job]["write"]["x"], data[job]
+                        ["write"]["y"], s=10, label="write")
             plt.plot(data[job]["write"]["x"], data[job]["write"]["y"])
             plt.legend(fontsize=8, loc="upper left", ncol=2)  # 범례 그리기
 

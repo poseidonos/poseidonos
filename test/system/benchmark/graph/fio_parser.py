@@ -58,16 +58,24 @@ def GetResultData(data, file, title):
             json_data = json.load(f)
             data[0]["value"].append(json_data["jobs"][0]["read"]["iops"])
             data[1]["value"].append(json_data["jobs"][0]["read"]["bw"])
-            data[2]["value"].append(json_data["jobs"][0]["read"]["clat_ns"]["mean"])
-            data[3]["value"].append(json_data["jobs"][0]["read"]["clat_ns"]["percentile"]["99.900000"])
-            data[4]["value"].append(json_data["jobs"][0]["read"]["clat_ns"]["percentile"]["99.990000"])
-            data[5]["value"].append(json_data["jobs"][0]["read"]["clat_ns"]["max"])
+            data[2]["value"].append(
+                json_data["jobs"][0]["read"]["clat_ns"]["mean"])
+            data[3]["value"].append(
+                json_data["jobs"][0]["read"]["clat_ns"]["percentile"]["99.900000"])
+            data[4]["value"].append(
+                json_data["jobs"][0]["read"]["clat_ns"]["percentile"]["99.990000"])
+            data[5]["value"].append(
+                json_data["jobs"][0]["read"]["clat_ns"]["max"])
             data[6]["value"].append(json_data["jobs"][0]["write"]["iops"])
             data[7]["value"].append(json_data["jobs"][0]["write"]["bw"])
-            data[8]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["mean"])
-            data[9]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.900000"])
-            data[10]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.990000"])
-            data[11]["value"].append(json_data["jobs"][0]["write"]["clat_ns"]["max"])
+            data[8]["value"].append(
+                json_data["jobs"][0]["write"]["clat_ns"]["mean"])
+            data[9]["value"].append(
+                json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.900000"])
+            data[10]["value"].append(
+                json_data["jobs"][0]["write"]["clat_ns"]["percentile"]["99.990000"])
+            data[11]["value"].append(
+                json_data["jobs"][0]["write"]["clat_ns"]["max"])
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
 
@@ -110,9 +118,11 @@ def GetLogData(data, dir, filename):
                 GetSingleLogFile(data["bw"], f"{dir}/{file}", bw_spliter[1])
             elif iops_file_prefix in file:
                 iops_spliter = file.split('.')
-                GetSingleLogFile(data["iops"], f"{dir}/{file}", iops_spliter[1])
+                GetSingleLogFile(
+                    data["iops"], f"{dir}/{file}", iops_spliter[1])
             elif clat_file_prefix in file:
                 clat_spliter = file.split('.')
-                GetSingleLogFile(data["clat"], f"{dir}/{file}", clat_spliter[1])
+                GetSingleLogFile(
+                    data["clat"], f"{dir}/{file}", clat_spliter[1])
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")

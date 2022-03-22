@@ -18,8 +18,10 @@ def Format(id, pw, ip, opt, udev_file, spdk_dir, pos_dir):
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
     try:
-        udev_admin = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-        udev_admin.extend(["udevadm", "control", "--reload-rules", "&&", "udevadm", "trigger"])
+        udev_admin = ["sshpass", "-p", pw,
+                      "ssh", f"{id}@{ip}", "sudo", "nohup"]
+        udev_admin.extend(
+            ["udevadm", "control", "--reload-rules", "&&", "udevadm", "trigger"])
         lib.subproc.sync_run(udev_admin, False, False)
     except Exception as e:
         lib.printer.red(udev_admin)
@@ -118,8 +120,10 @@ def Format(id, pw, ip, opt, udev_file, spdk_dir, pos_dir):
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
     try:
-        udev_admin = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo", "nohup"]
-        udev_admin.extend(["udevadm", "control", "--reload-rules", "&&", "udevadm", "trigger"])
+        udev_admin = ["sshpass", "-p", pw,
+                      "ssh", f"{id}@{ip}", "sudo", "nohup"]
+        udev_admin.extend(
+            ["udevadm", "control", "--reload-rules", "&&", "udevadm", "trigger"])
         lib.subproc.sync_run(udev_admin, False, False)
     except Exception as e:
         lib.printer.red(udev_admin)

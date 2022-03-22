@@ -58,30 +58,40 @@ def play(json_targets, json_inits, json_scenario):
     # set test_target & check auto generate
     test_target = targets[next(iter(targets))]
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     # run workload
     if not skip_workload:
         lib.printer.green(f" fio start")
 
-        graph_fio = graph.manager.Fio(f"{json_scenario['OUTPUT_DIR']}/{now_date}_normal")  # graph 객체 생성
+        graph_fio = graph.manager.Fio(
+            f"{json_scenario['OUTPUT_DIR']}/{now_date}_normal")  # graph 객체 생성
 
         tc_list = [
-            {"name": "1_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": test_target.volume_size, "time_based": "0", "runtime": "0", "log_avg_msec": "30000"},
-            {"name": "2_sr", "rw": "read", "bs": "128k", "iodepth": "4", "io_size": "1t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
-            {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
-            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
-            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
-            {"name": "6_rr", "rw": "randread", "bs": "4k", "iodepth": "128", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
-            {"name": "7_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"}
+            {"name": "1_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": test_target.volume_size,
+                "time_based": "0", "runtime": "0", "log_avg_msec": "30000"},
+            {"name": "2_sr", "rw": "read", "bs": "128k", "iodepth": "4", "io_size": "1t",
+                "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
+            {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128",
+                "io_size": "4t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
+            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
+            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128",
+                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
+            {"name": "6_rr", "rw": "randread", "bs": "4k", "iodepth": "128",
+                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
+            {"name": "7_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32",
+                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"}
         ]
 
         for tc in tc_list:
             fio_cmdset = []
             for key in initiators:
                 test_init = initiators[key]
-                test_fio = fio.manager.Fio(test_init.id, test_init.pw, test_init.nic_ssh)  # fio 객체 생성
+                test_fio = fio.manager.Fio(
+                    test_init.id, test_init.pw, test_init.nic_ssh)  # fio 객체 생성
                 test_fio.opt["numjobs"] = "1"
                 test_fio.opt["thread"] = "1"
                 test_fio.opt["ioengine"] = f"{test_init.spdk_dir}/examples/nvme/fio_plugin/fio_plugin"
@@ -102,18 +112,25 @@ def play(json_targets, json_inits, json_scenario):
                 test_fio.opt["iodepth"] = tc["iodepth"]
                 test_fio.opt["io_size"] = tc["io_size"]
                 test_fio.opt["output"] = f"{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name}"
-                test_fio.opt["eta"] = "always"                      # eta graph를 그리려면 해당 옵션이 필요
-                test_fio.opt["group_reporting"] = "1"               # 현재는 group_reporting만 지원
-                test_fio.opt["output-format"] = "json"              # 결과를 parsing 하기 위한 필수 옵션
-                test_fio.opt["per_job_logs"] = "1"                  # write_xxx_log option이 동작하기 위한 필수 옵션
-                test_fio.opt["log_unix_epoch"] = "1"                # write_xxx_log의 첫 번째 열이 epoch 시간으로 출력
-                test_fio.opt["log_avg_msec"] = tc["log_avg_msec"]   # write_xxx_log가 출력되는 주기
+                # eta graph를 그리려면 해당 옵션이 필요
+                test_fio.opt["eta"] = "always"
+                # 현재는 group_reporting만 지원
+                test_fio.opt["group_reporting"] = "1"
+                # 결과를 parsing 하기 위한 필수 옵션
+                test_fio.opt["output-format"] = "json"
+                # write_xxx_log option이 동작하기 위한 필수 옵션
+                test_fio.opt["per_job_logs"] = "1"
+                # write_xxx_log의 첫 번째 열이 epoch 시간으로 출력
+                test_fio.opt["log_unix_epoch"] = "1"
+                # write_xxx_log가 출력되는 주기
+                test_fio.opt["log_avg_msec"] = tc["log_avg_msec"]
                 test_fio.opt["write_bw_log"] = f"{test_fio.opt['output']}"
                 test_fio.opt["write_iops_log"] = f"{test_fio.opt['output']}"
                 test_fio.opt["write_lat_log"] = f"{test_fio.opt['output']}"
                 for subsys in test_target.subsystem_list:
                     if subsys[0] == test_init.name:
-                        test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
+                        test_fio.jobs.append(
+                            f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
                 if not test_fio.Prepare():
                     skip_workload = True
                     break
@@ -131,9 +148,12 @@ def play(json_targets, json_inits, json_scenario):
                 try:
                     for key in initiators:
                         test_init = initiators[key]
-                        lib.subproc.sync_run(f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name}.eta {json_scenario['OUTPUT_DIR']}")
-                        lib.subproc.sync_run(f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name} {json_scenario['OUTPUT_DIR']}")
-                        lib.subproc.sync_run(f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name}*.log {json_scenario['OUTPUT_DIR']}/log")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name}.eta {json_scenario['OUTPUT_DIR']}")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name} {json_scenario['OUTPUT_DIR']}")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_init.output_dir}/{now_date}_{tc['name']}_{test_init.name}*.log {json_scenario['OUTPUT_DIR']}/log")
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")
                     skip_workload = True
@@ -143,14 +163,19 @@ def play(json_targets, json_inits, json_scenario):
                         test_init = initiators[key]
                         # Eta
                         if "1_sw" != tc["name"] and "4_sus" != tc["name"]:
-                            graph_fio.AddEtaData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}.eta", f"{tc['name']}_{test_init.name}")
-                            graph_fio.DrawEta(["bw_read", "bw_write", "iops_read", "iops_write"])
+                            graph_fio.AddEtaData(
+                                f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}.eta", f"{tc['name']}_{test_init.name}")
+                            graph_fio.DrawEta(
+                                ["bw_read", "bw_write", "iops_read", "iops_write"])
                         # Result
-                        graph_fio.AddResultData(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}", f"{tc['name']}_{test_init.name}")
+                        graph_fio.AddResultData(
+                            f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}", f"{tc['name']}_{test_init.name}")
                         graph_fio.DrawResult()
                         # Log
-                        graph_fio.AddLogData(f"{json_scenario['OUTPUT_DIR']}/log", f"{now_date}_{tc['name']}_{test_init.name}")
-                        graph_fio.DrawLog(f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}")
+                        graph_fio.AddLogData(
+                            f"{json_scenario['OUTPUT_DIR']}/log", f"{now_date}_{tc['name']}_{test_init.name}")
+                        graph_fio.DrawLog(
+                            f"{json_scenario['OUTPUT_DIR']}/{now_date}_{tc['name']}_{test_init.name}")
                         graph_fio.ClearLogData()
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")

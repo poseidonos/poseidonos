@@ -42,7 +42,8 @@ def copy_pos_config(id, pw, ip, dir, cfg):
 def execute_pos(id, pw, ip, bin, dir, log):
     try:
         exe_cmd = ["sshpass", "-p", pw, "ssh", f"{id}@{ip}", "sudo"]
-        exe_cmd.extend(["nohup", f"{dir}/bin/{bin}", "&>>", f"{dir}/script/{log}&"])
+        exe_cmd.extend(["nohup", f"{dir}/bin/{bin}",
+                       "&>>", f"{dir}/script/{log}&"])
         lib.subproc.sync_run(exe_cmd, False, False)
     except Exception as e:
         lib.printer.red(exe_cmd)

@@ -7,7 +7,8 @@ class ArgParser:
 
     def __init__(self):
         parser = argparse.ArgumentParser(description="benchmark options")
-        parser.add_argument("--config", help="set specific json file (default: conf.json)")
+        parser.add_argument(
+            "--config", help="set specific json file (default: conf.json)")
         args = parser.parse_args()
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = curr_dir[0:len(curr_dir) - 25]

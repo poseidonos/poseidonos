@@ -52,7 +52,8 @@ def play(json_targets, json_inits, json_scenario):
 
     # check auto generate
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     # run workload
@@ -106,7 +107,8 @@ def play(json_targets, json_inits, json_scenario):
                         del test_fio.opt["bsrange"]
 
                 for test_device in init.device_list:
-                    test_fio.jobs.append(f" --name=job_{test_device} --filename={test_device}")
+                    test_fio.jobs.append(
+                        f" --name=job_{test_device} --filename={test_device}")
                     if not test_fio.Prepare():
                         skip_workload = True
                         break
@@ -123,7 +125,8 @@ def play(json_targets, json_inits, json_scenario):
                 try:
                     for key in initiators:
                         init = initiators[key]
-                        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
+                        lib.subproc.sync_run(
+                            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
                 except Exception as e:
                     lib.printer.red(f"{__name__} [Error] {e}")
                     skip_workload = True

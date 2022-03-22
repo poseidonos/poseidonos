@@ -213,7 +213,8 @@ def check_rebuild_complete(id, pw, ip, cli, dir, arr_name):
     ret = ''
     try:
         prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} array list --array-name {arr_name}"
+        cli_cmd = prefix + \
+            f" {dir}/bin/{cli} array list --array-name {arr_name}"
         ret = lib.subproc.sync_run(cli_cmd)
     except Exception as e:
         lib.printer.red(cli_cmd)
@@ -237,7 +238,8 @@ def add_spare(id, pw, ip, cli, dir, arr_name, dev_name):
     ret = ''
     try:
         prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} array addspare -a {arr_name} -s {dev_name}"
+        cli_cmd = prefix + \
+            f" {dir}/bin/{cli} array addspare -a {arr_name} -s {dev_name}"
         ret = lib.subproc.sync_run(cli_cmd)
     except Exception as e:
         lib.printer.red(cli_cmd)
@@ -249,7 +251,8 @@ def set_rebuild_impact(id, pw, ip, cli, dir, impact):
     ret = ''
     try:
         prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} system set-property --rebuild-impact {impact}"
+        cli_cmd = prefix + \
+            f" {dir}/bin/{cli} system set-property --rebuild-impact {impact}"
         ret = lib.subproc.sync_run(cli_cmd)
     except Exception as e:
         lib.printer.red(cli_cmd)
@@ -265,7 +268,8 @@ def set_qos(id, pw, ip, cli, dir, array_name, vol_name, limit_type, limit_value=
             prefix = "min"
         limit_value = int(limit_value)
         if (limit_type.lower() != "reset" and limit_value < 10 and limit_value != 0):
-            lib.printer.red(f"Cannot throttle {limit_type} to {limit_value} (minimum_limit_value: {min_limit_value}). Qos Command is ignored")
+            lib.printer.red(
+                f"Cannot throttle {limit_type} to {limit_value} (minimum_limit_value: {min_limit_value}). Qos Command is ignored")
             return -1
         if (limit_type.lower() == "reset"):
             cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} qos reset --array-name {array_name} --volume-name {vol_name}"

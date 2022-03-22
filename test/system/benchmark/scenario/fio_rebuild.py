@@ -59,7 +59,8 @@ def create_fio(tc, now_date, init, test_target, time_based):
 
     for subsys in test_target.subsystem_list:
         if subsys[0] == init.name:
-            test_fio.jobs.append(f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
+            test_fio.jobs.append(
+                f" --name=job_{subsys[2]} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={subsys[3]} trsvcid={subsys[4]} subnqn={subsys[1]} ns=1\"")
             if not test_fio.Prepare():
                 skip_workload = True
                 break
@@ -75,8 +76,10 @@ def create_fio(tc, now_date, init, test_target, time_based):
             skip_workload = True
 
     try:
-        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
-        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
+        lib.subproc.sync_run(
+            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name}.eta {json_scenario['OUTPUT_DIR']}")
+        lib.subproc.sync_run(
+            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
         skip_workload = True
@@ -133,7 +136,8 @@ def play(json_targets, json_inits, json_scenario):
     # check auto generate
     test_target = targets[next(iter(targets))]
     if "yes" != test_target.use_autogen:
-        lib.printer.red(f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+        lib.printer.red(
+            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
         skip_workload = True
 
     # run precondition
@@ -149,7 +153,8 @@ def play(json_targets, json_inits, json_scenario):
                     ]
 
         for tc in testcase:
-            fio_cmd, output = create_fio(tc, now_date, init, test_target, False)
+            fio_cmd, output = create_fio(
+                tc, now_date, init, test_target, False)
             try:
                 print(f" run -> {output}")
                 lib.subproc.sync_run(fio_cmd)
@@ -158,8 +163,10 @@ def play(json_targets, json_inits, json_scenario):
                 skip_workload = True
 
             try:
-                lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output}.eta {json_scenario['OUTPUT_DIR']}")
-                lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output} {json_scenario['OUTPUT_DIR']}")
+                lib.subproc.sync_run(
+                    f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output}.eta {json_scenario['OUTPUT_DIR']}")
+                lib.subproc.sync_run(
+                    f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output} {json_scenario['OUTPUT_DIR']}")
             except Exception as e:
                 lib.printer.red(f"{__name__} [Error] {e}")
                 skip_workload = True
@@ -198,9 +205,11 @@ def play(json_targets, json_inits, json_scenario):
                 ret = target_obj.SetRebuildImpact(tc[3])
 
                 # run fio
-                fio_cmd, output = create_fio(tc, now_date, init, test_target, True)
+                fio_cmd, output = create_fio(
+                    tc, now_date, init, test_target, True)
 
-                thread = threading.Thread(target=lib.subproc.sync_run, args=[fio_cmd, True])
+                thread = threading.Thread(
+                    target=lib.subproc.sync_run, args=[fio_cmd, True])
                 thread.daemon = True
                 thread.start()
 
@@ -223,9 +232,12 @@ def play(json_targets, json_inits, json_scenario):
 
         if 'noio' not in tc[3]:
             try:
-                lib.subproc.sync_run(f"sshpass -p {init.pw} ssh {init.id}@{init.nic_ssh} nohup 'pkill -15 fio'")
-                lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output}.eta {json_scenario['OUTPUT_DIR']}")
-                lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output} {json_scenario['OUTPUT_DIR']}")
+                lib.subproc.sync_run(
+                    f"sshpass -p {init.pw} ssh {init.id}@{init.nic_ssh} nohup 'pkill -15 fio'")
+                lib.subproc.sync_run(
+                    f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output}.eta {json_scenario['OUTPUT_DIR']}")
+                lib.subproc.sync_run(
+                    f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output} {json_scenario['OUTPUT_DIR']}")
             except Exception as e:
                 lib.printer.red(f"{__name__} [Error] {e}")
                 skip_workload = True
@@ -243,7 +255,8 @@ def play(json_targets, json_inits, json_scenario):
         print(tc, "retuild complete")
 
     try:
-        lib.subproc.sync_run(f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:/var/log/pos/rebuild_log {json_scenario['OUTPUT_DIR']}")
+        lib.subproc.sync_run(
+            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:/var/log/pos/rebuild_log {json_scenario['OUTPUT_DIR']}")
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
         skip_workload = True
