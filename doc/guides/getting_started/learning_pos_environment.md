@@ -19,7 +19,11 @@ POS relies on external software components to implement its functionalities. It 
 ### udev rule
 * defines a rule to follow when Linux detects hotplug events in subsystems, 
   - e.g., PCI attach/detach.
-* The default rule by POS is to detach newly-discovered NVMe devices from Linux kernel driver ("nvme") and attach to user level driver ("uio_pci_generic"). If needed, you could customize the rule further at ```/etc/udev/rules.d/99-custom-nvme.rules```. 
+* The default rule by POS is to detach newly-discovered NVMe devices from Linux kernel driver ("nvme") and attach to user level driver ("uio_pci_generic"). You can auto configure udev rule by executing following command:   
+```
+cd $POS_HOME; make udev_install
+```  
+If needed, you can customize the rule further at ```/etc/udev/rules.d/99-custom-nvme.rules```. 
 
 ### hugepages
 * are reserved and kept from being swapped out so that memory paging in/out operations
