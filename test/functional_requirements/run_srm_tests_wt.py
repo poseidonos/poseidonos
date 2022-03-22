@@ -63,7 +63,7 @@ def parse_argument():
 
 
 if __name__ == "__main__":
-    pos.disable_wt()
+    pos.enable_wt()
     mbr_reset()
     parse_argument()
     try:
@@ -72,8 +72,11 @@ if __name__ == "__main__":
 
     except subprocess.CalledProcessError:
         print("Fail to execute command")
+        pos.disable_wt()
         sys.exit(-1)
     except Exception as e:
         print("Fail to execute remote command", e)
+        pos.disable_wt()
         sys.exit(-1)
+    pos.disable_wt()
     sys.exit(0)

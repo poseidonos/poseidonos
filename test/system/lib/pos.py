@@ -4,6 +4,7 @@ import sys
 import cli
 import json_parser
 import time
+import os
 sys.path.append("../../functional_requirements/")
 import api
 
@@ -11,6 +12,7 @@ POS_ROOT = '../../../'
 LOG_PATH = 'pos.log'
 TR_ADDR = "10.100.11.21"
 TR_TYPE = 'TCP'
+WT_FILE = os.path.dirname(os.path.realpath(__file__)) + '/WT_ENABLED'
 
 isExecuted = False
 
@@ -93,3 +95,23 @@ def kill_pos():
 def flush_and_kill_pos():
     cli.wbt_request("flush_gcov","")
     kill_pos()
+
+
+def enable_wt():
+    print ("trying to enable write through: " + WT_FILE)
+    if os.path.exists(WT_FILE) is False:
+        with open(WT_FILE, "w") as flag:
+            flag.write("WT is enabled")
+    if is_wt_enabled() is True:
+        print ("write through enabled")
+
+
+def disable_wt():
+    print ("write through disabled: " + WT_FILE)
+    if os.path.exists(WT_FILE):
+        os.remove(WT_FILE)
+
+
+def is_wt_enabled():
+    ret = os.path.exists(WT_FILE)
+    return ret
