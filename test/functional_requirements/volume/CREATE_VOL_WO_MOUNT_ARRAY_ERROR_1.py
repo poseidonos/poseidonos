@@ -12,31 +12,23 @@ import pos
 import cli
 import api
 import pos_constant
-import test_result
 import CREATE_ARRAY_BASIC
 ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
-
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    result = test_result.expect_false(code)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
     CREATE_ARRAY_BASIC.execute()
     size = pos_constant.SIZE_1GB
     name = "vol1"
     out = cli.create_volume(name , str(size),"","",ARRAYNAME)
     return out
 
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

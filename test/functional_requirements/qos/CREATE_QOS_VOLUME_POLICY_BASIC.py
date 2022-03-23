@@ -16,7 +16,8 @@ import CREATE_VOL_BASIC_1
 
 def execute():
     CREATE_VOL_BASIC_1.execute()
-    out = cli.update_volume_qos(CREATE_VOL_BASIC_1.ARRAYNAME, "500", "100", CREATE_VOL_BASIC_1.VOL_NAME)
+    out = cli.update_volume_qos(CREATE_VOL_BASIC_1.VOL_NAME, "500", "100", CREATE_VOL_BASIC_1.ARRAYNAME)
+    print (out)
     return out
 
 

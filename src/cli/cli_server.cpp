@@ -178,8 +178,7 @@ TryProcessing(char* msg)
     {
         string res = reqHandler->ProcessCommand(msg);
 
-        if (!notifyDone)
-            threadRes = res;
+        threadRes = res;
 
         pthread_mutex_unlock(&workmutx);
         cv.notify_one();
@@ -464,7 +463,7 @@ CLIServer()
                         SSL_set_fd(ssl, cli_fd);
                         clnt->ssl = ssl;
 #endif
-                        if (pthread_mutex_trylock(&workmutx) == 0)
+                        if (pthread_mutex_lock(&workmutx) == 0)
                         {
                             clnt->work = true;
                             pthread_t t_id;
@@ -484,11 +483,6 @@ CLIServer()
                                     "thread_id:{}, error_code:{}", t_id, ret);
                             }
                             POS_TRACE_DEBUG(EID(CLI_CLIENT_DETACHED), "thread_id:{}", t_id);
-                        }
-                        else
-                        {
-                            clnt->work = false;
-                            ClientThread(clnt);
                         }
 
                         pthread_mutex_unlock(&mutx);

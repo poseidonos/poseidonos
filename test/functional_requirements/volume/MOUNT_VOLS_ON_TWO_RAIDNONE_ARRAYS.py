@@ -11,7 +11,6 @@ import json_parser
 import pos
 import cli
 import api
-import test_result
 import CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS
 
 VOL1_NAME = CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS.VOL1_NAME
@@ -19,13 +18,8 @@ VOL2_NAME = CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS.VOL2_NAME
 ARRAY1NAME = CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS.ARRAY1NAME
 ARRAY2NAME = CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS.ARRAY2NAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
-
 
 def execute():
-    clear_result()
     CREATE_VOLS_ON_TWO_RAIDNONE_ARRAYS.execute()
     out1 = cli.mount_volume(VOL1_NAME, ARRAY1NAME, "")
     print(out1)
@@ -41,6 +35,7 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
     ret = api.set_result_by_code_eq(out, 0, __file__)
     pos.flush_and_kill_pos()

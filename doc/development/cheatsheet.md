@@ -69,3 +69,51 @@ You can record your custom event log to the PoseidonOS event log file (/var/log/
     [10262307][21743][21815][2022-02-18 13:46:57.245744][1503][I]   CLI_CLIENT_DISCONNECTED - MSG:"A client has been disconnected." CAUSE:"" SOLUTION:"" VARIABLES:"fd:655" @ cli_server.cpp:170 RemoveClient() - POS: v0.10.6
     ...
     ```
+
+# Factory Reset
+If you're having trouble with your PoseidonOS configuration or unknown issue,
+you can reset your PoseidonOS to the initial state.
+
+Factory Reset will
+* Terminate PoseidonOS process
+* Reset config file  
+PoseidonOS config files exist in /etc/pos/pos.conf
+* Clear log files  
+PoseidonOS log files exist in /var/log/pos/*
+* Reset MBR area of devices  
+Write zero to MBR area
+Refer to [MBR Reset](#mbr-reset) for further details
+* Reset udev rule file  
+Refer to [learning hotplug](../guides/getting_started/learning_hotplug.md) for further details
+* Reset device driver  
+Unbind and bind device to userspace driver 'uio_pci_generic'  
+Same procedure with following script. `$POS_HOME/script/setup_env.sh`
+
+Usage :
+``` 
+root@R2U14-PSD-3:/poseidonos# cd ./script
+root@R2U14-PSD-3:/poseidonos/script# ./factory_reset.sh
+```
+
+# MBR Reset
+In PoseidonOS, MBR is the first 256KB area of each device containing PoseidonOS and its array information.
+Resetting MBR procedure contains resetting device drivers which unbinds all devices from uio_pci_generic driver and binds to nvme driver.
+After writing zero to the MBR area of every device, it binds to uio_pci_generic driver.
+And also it reset udev rule.
+
+Usage :
+``` 
+cd $POS_HOME/script; ./mbr_reset.sh
+```
+
+# Configuration Reset
+PoseidonOS has a default config file for general usage. You can copy and paste a default config file to reset config file.
+``` bash
+cp /etc/pos/default_pos.conf /etc/pos/pos.conf
+# if default_pos.conf doesn't exist
+cp $POS_HOME/config/pos.conf /etc/pos/pos.conf
+```
+
+# Udev Rule Setting
+Udev is the dynamic device manager for the Linux kernel. Udev manages device uevents from kernel. Udev works by the rule file on default rules directory `/lib/udev/rules.d/` and custom rules directory `/etc/udev/rules.d/`. When any new nvme device attaches to the system, it binds to kernel space device driver `nvme`. Because PoseidonOS uses a userspace device driver, it needs to be changed to userspace driver `uio_pci_generic` to provide hotplug feature.  
+Refer to [learning hotplug](../guides/getting_started/learning_hotplug.md) to enable hotplug by setting udev rule.

@@ -12,19 +12,10 @@ import api
 import cli
 import pos
 import json_parser
-import test_result
 import fio
 import MOUNT_VOL_BASIC_1
 
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
-
-
-def set_result(detail):
-    out = detail
-    code = json_parser.get_response_code(detail)
-    result = test_result.expect_true(code)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 
 def execute():
@@ -42,7 +33,8 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
-    test_result.clear_result(__file__)
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    ret = api.set_result_by_code_eq(out, 0, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

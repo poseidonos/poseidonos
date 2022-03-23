@@ -19,6 +19,7 @@ import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
+
 def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 30)
@@ -28,6 +29,7 @@ def execute():
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:
              return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

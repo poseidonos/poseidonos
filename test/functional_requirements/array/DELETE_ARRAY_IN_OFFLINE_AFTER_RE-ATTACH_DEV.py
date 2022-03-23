@@ -9,20 +9,18 @@ sys.path.append("../../system/lib/")
 import json_parser
 import pos
 import cli
-import test_result
 import pos_util
+import api
 import CREATE_ARRAY_NO_SPARE
 
 ARRAYNAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
 
 
-def set_result(detail):
+def check_result(detail):
     code = json_parser.get_response_code(detail)
-    result = "fail"
     if detail.find("\"class\": \"ARRAY\"") is -1:
-        result = "pass"
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
+        return "pass"
+    return "fail"
 
 
 def execute():
@@ -39,7 +37,9 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
-    test_result.clear_result(__file__)
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    result = check_result(out)
+    ret = api.set_result_manually(out, result, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

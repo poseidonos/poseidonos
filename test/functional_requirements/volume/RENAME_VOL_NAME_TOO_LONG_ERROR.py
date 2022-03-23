@@ -11,32 +11,24 @@ import json_parser
 import pos
 import cli
 import api
-import test_result
 import MOUNT_VOL_BASIC_1
 
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 NAME = MOUNT_VOL_BASIC_1.VOL_NAME
 LONG_NAME = "aaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccdddddddd"
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
-
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    result = test_result.expect_false(code)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
     MOUNT_VOL_BASIC_1.execute()
     out = cli.rename_volume(NAME, LONG_NAME, ARRAYNAME)
     return out
 
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)
