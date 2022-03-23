@@ -156,6 +156,9 @@ private:
         {"direct_access_for_journal_enable", "true"},
         {"time_interval_in_milliseconds_for_metric", "5000"}
     };
+    vector<ConfigKeyValue> wtData = {
+        {"enable", "false"}
+    };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
@@ -173,7 +176,8 @@ private:
         {"fe_qos", feQosData},
         {"flow_control", flowControlData},
         {"transport", transportData},
-        {"metafs", metaFsData}
+        {"metafs", metaFsData},
+        {"write_through", wtData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";
