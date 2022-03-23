@@ -12,7 +12,6 @@ import pos
 import cli
 import api
 import pos_constant
-import test_result
 import CREATE_VOL_BASIC_8
 
 ARRAYNAME = CREATE_VOL_BASIC_8.ARRAYNAME
@@ -21,13 +20,9 @@ VOL_SIZE = pos_constant.SIZE_1MB * 100
 VOL_IOPS = 10
 VOL_BW = 10
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
 
 def execute():
-    clear_result()
     CREATE_VOL_BASIC_8.execute()
     out = cli.create_volume(VOL_NAME_PREFIX + str(257), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), ARRAYNAME)
     return out
@@ -36,6 +31,8 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
     ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

@@ -16,9 +16,6 @@ import CREATE_VOL_BASIC_1
 
 ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
 def check_result(detail):
     data = json.loads(detail)
@@ -27,14 +24,8 @@ def check_result(detail):
         return "pass"
     return "fail"
 
-def set_result(detail):
-    result = check_result(detail)
-    code = json_parser.get_response_code(detail)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
     CREATE_VOL_BASIC_1.execute()
     cli.unmount_array(ARRAYNAME)
     out = cli.list_volume(ARRAYNAME)
@@ -43,6 +34,9 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    result = check_result(out)
+    ret = api.set_result_manually(out, result, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

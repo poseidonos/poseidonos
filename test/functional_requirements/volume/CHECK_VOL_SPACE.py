@@ -15,21 +15,15 @@ import MOUNT_VOL_BASIC_1
 VOL_NAME = MOUNT_VOL_BASIC_1.VOL_NAME
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
-def set_result(expected):
+def check_result(expected):
     out = cli.array_info(ARRAYNAME)
     used = json_parser.get_used(out)
-    result = "fail"
     if used != 0 and used == expected:
-        result = "pass"
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (0)" + "\n" + out)
+        return "pass"
+    return "fail"
 
 def execute():
-    clear_result()
     MOUNT_VOL_BASIC_1.execute()
     out = cli.array_info(ARRAYNAME)
     used = json_parser.get_used(out)
@@ -40,6 +34,9 @@ def execute():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    result = check_result(out)
+    ret = api.set_result_manually(cli.array_info(ARRAYNAME), result, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)

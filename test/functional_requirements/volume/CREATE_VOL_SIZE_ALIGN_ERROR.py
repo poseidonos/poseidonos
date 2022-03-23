@@ -12,31 +12,24 @@ import pos
 import cli
 import api
 import pos_constant
-import test_result
 import MOUNT_ARRAY_BASIC
 
 ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
-
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    result = test_result.expect_false(code)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
     MOUNT_ARRAY_BASIC.execute()
     size = pos_constant.SIZE_1GB - 2
     out = cli.create_volume("vol1", str(size),"","",ARRAYNAME)
     return out
 
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)
+

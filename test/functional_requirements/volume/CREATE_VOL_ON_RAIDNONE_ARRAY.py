@@ -22,11 +22,9 @@ VOL_BW = 0
 
 ARRAYNAME = MOUNT_RAIDNONE_ARRAY.ARRAYNAME
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
-def check_result(detail):
+def check_result():
+    detail = cli.list_volume(ARRAYNAME)
     expected_list = []
     expected_list.append(volume.Volume(VOL_NAME, VOL_SIZE, VOL_IOPS, VOL_BW))
 
@@ -49,22 +47,19 @@ def check_result(detail):
             return "fail"
     return "pass"
 
-def set_result(detail):
-    out = cli.list_volume(ARRAYNAME)
-    result = check_result(out)
-    code = json_parser.get_response_code(out)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    clear_result()
     MOUNT_RAIDNONE_ARRAY.execute()
     out = cli.create_volume(VOL_NAME, str(VOL_SIZE), "", "", ARRAYNAME)
     return out
 
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
+    api.clear_result(__file__)
     out = execute()
-    set_result(out)
+    result = check_result()
+    ret = api.set_result_manually(out, result, __file__)
     pos.flush_and_kill_pos()
+    exit(ret)
