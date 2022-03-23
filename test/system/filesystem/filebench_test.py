@@ -41,12 +41,17 @@ def remote_execute(ip, id, pw, command):
     return result
 
 def bring_up_ibofos():
-    print ("Try to execute poseidonos at target")
+    print("Try to execute poseidonos at target")
     target_script = args.ibofos_root + "/test/system/filesystem/filebench_test_target.py -f " + args.fabric_ip
     remote_execute(args.target_ip, args.target_id, args.target_pw, target_script)
 
+    time.sleep(10)
+    print("Try to start telemetry through poseidonos-cli")
+    target_script = args.ibofos_root + "/bin/poseidonos-cli telemetry start"
+    remote_execute(args.target_ip, args.target_id, args.target_pw, target_script)
+
 def execute_filebench_test():
-    print ("Execute filebench at initiator")
+    print("Execute filebench at initiator")
     initiator_script = args.ibofos_root + "/test/system/filesystem/filebench_test_initiator.py -f " + args.fabric_ip
     remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, initiator_script)
 

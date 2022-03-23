@@ -51,6 +51,9 @@ io_test()
     ${ROOT_DIR}/test/regression/start_poseidonos.sh
     EXPECT_PASS "start_poseidonos.sh" $?
 
+    sleep 10
+    ${ROOT_DIR}/bin/poseidonos-cli telemetry start
+
     sudo $ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c $CLEAN_BRINGUP -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
 

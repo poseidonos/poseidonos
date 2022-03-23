@@ -123,6 +123,18 @@ def volume_mount(id, pw, ip, cli, dir, vol_name, subnqn, arr_name):
         return -1
 
 
+def telemetry_start(id, pw, ip, cli, dir):
+    try:
+        prefix = prefix_string(id, pw, ip)
+        cli_cmd = prefix + f" {dir}/bin/{cli} telemetry start"
+        lib.subproc.sync_run(cli_cmd)
+        return 0
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1
+
+
 def telemetry_stop(id, pw, ip, cli, dir):
     try:
         prefix = prefix_string(id, pw, ip)

@@ -27,7 +27,7 @@ args = parser.parse_args()
 
 config_yaml = yaml.load(filebeat_default_config_yaml, Loader=yaml.SafeLoader)
 
-config_yaml['filebeat.inputs'][0]['paths'].append(os.path.join(os.path.abspath(args.log_path), '*'))
+config_yaml['filebeat.inputs'][0]['paths'].append(os.path.join(os.path.abspath(args.log_path), 'pos.log'))
 
 for t in args.tag.split(','):
     config_yaml['filebeat.inputs'][0]['tags'].append(t.strip())

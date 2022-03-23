@@ -6,6 +6,7 @@ import sys
 import psutil
 import paramiko
 import argparse
+import time
 
 default_pos_root = "/home/ibof/ibofos/"
 default_pos_config_filename = "ibofos_for_perf_ci.conf"
@@ -103,6 +104,13 @@ def bring_up_ibofos():
     print(bring_up_script)
     result = remote_execute(args.target_ip, args.target_id, args.target_pw, bring_up_script)
     print("Pos bring up success")
+
+    time.sleep(10)
+    print("Start telemetry")
+    start_telemetry_script = args.pos_root + "/bin/poseidonos-cli telemetry start"
+    print(start_telemetry_script)
+    remote_execute(args.target_ip, args.target_id, args.target_pw, start_telemetry_script)
+    print("Telemetry is available")
     # check_request_volume_mounted(result)
 
 def execute_performance_test():

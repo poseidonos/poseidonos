@@ -112,8 +112,10 @@ class Target:
                                                         self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
                     return False
 
-        pos.cli.telemetry_stop(
-            self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        # telemetry start
+        time.sleep(10)
+        pos.cli.telemetry_start(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
             buf_dev = array["BUFFER_DEVICE"]

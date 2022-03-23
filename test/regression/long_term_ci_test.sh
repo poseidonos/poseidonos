@@ -139,6 +139,9 @@ change_flow_control ${flow_control_enable}
 sudo ${rootdir}/test/regression/start_poseidonos.sh
 sleep 10
 
+sudo ${rootdir}/bin/poseidonos-cli telemetry start
+sleep 10
+
 sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S ${sizepervol}
 clean_bringup=0
 

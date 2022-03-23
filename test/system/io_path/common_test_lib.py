@@ -10,11 +10,16 @@ def start_pos(log_path, pos_root):
     print("\tStarting POS .. (log path: " + log_path + ")")
     pos_execution = pos_root + "bin/poseidonos"
     with open(log_path, "w") as output_file:
-        pos_proc = subprocess.Popen(pos_execution,
-                                    stdout=output_file, stderr=output_file)
-    subprocess.call(["sleep", "3"])
+        pos_proc = subprocess.Popen(pos_execution, stdout=output_file, stderr=output_file)
+    subprocess.call(["sleep", "10"])
     print("\tPOS Started!")
 
+    print("\tStarting Telemetry .. (log path: " + log_path + ")")
+    telemetry_execution = pos_root + "bin/poseidonos-cli"
+    with open(log_path, "w") as output_file:
+        telemetry_proc = subprocess.Popen([telemetry_execution, "telemetry", "start"], stdout=output_file, stderr=output_file)
+    subprocess.call(["sleep", "10"])
+    print("\tTelemetry Started!")
 
 def bringup_pos(**args):
     args['volume_cnt'] = 1

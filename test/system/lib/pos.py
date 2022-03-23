@@ -57,6 +57,10 @@ def start_pos():
         return False
     pos_bringup = POS_ROOT + "/test/system/lib/bring_up.sh"
     subprocess.call([pos_bringup, "-t", TR_TYPE, "-a", TR_ADDR])
+
+    time.sleep(10)
+    cli.start_telemetry()
+
     return True
 
 def start_pos_for_two_arrays():
@@ -95,7 +99,6 @@ def kill_pos():
 def flush_and_kill_pos():
     cli.wbt_request("flush_gcov","")
     kill_pos()
-
 
 def enable_wt():
     print ("trying to enable write through: " + WT_FILE)

@@ -261,6 +261,12 @@ start_pos()
 	done
 
     notice "Now poseidonos is running..."
+
+    sleep 10
+
+    echo "Telemetry starting..."
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli telemetry start
+    notice "Now telemetry is available"
 }
 
 establish_nvmef_target()

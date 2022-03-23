@@ -81,16 +81,6 @@ setup_filebeat()
             &"
 }
 
-run_pos-exporter()
-{
-    # run pos-exporter    
-    texecc "nohup ${BINARY_DIR}/pos-exporter \
-            < /dev/null \
-            1>${BINARY_DIR}/pos-exporter_stdout.txt \
-            2>${BINARY_DIR}/pos-exporter_stderr.txt \
-            &"
-}
-
 setup_prometheus()
 {
     # Clean up prometheus
@@ -114,6 +104,16 @@ setup_prometheus()
             < /dev/null \
             1>${BINARY_DIR}/${PROMETHEUS}/prometheus_stdout.txt \
             2>${BINARY_DIR}/${PROMETHEUS}/prometheus_stderr.txt \
+            &"
+}
+
+run_pos-exporter()
+{
+    # run pos-exporter    
+    texecc "nohup ${BINARY_DIR}/pos-exporter \
+            < /dev/null \
+            1>${BINARY_DIR}/pos-exporter_stdout.txt \
+            2>${BINARY_DIR}/pos-exporter_stderr.txt \
             &"
 }
 

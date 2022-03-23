@@ -407,6 +407,9 @@ start_ibofos(){
     texecc $TARGET_ROOT_DIR/test/regression/start_poseidonos.sh
     ibof_launch_wait
     EXPECT_PASS "POS OS Launch"  $?
+    
+    sleep 10
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli telemetry start
 }
 
 ###################################################

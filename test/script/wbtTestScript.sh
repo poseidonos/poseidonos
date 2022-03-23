@@ -145,6 +145,8 @@ echo "------------[Kill & Start poseidonos]----------------------------------"
 sudo ${ROOT_DIR}/test/script/kill_poseidonos.sh
 sudo ${ROOT_DIR}/script/start_poseidonos.sh
 sleep 10
+sudo ${ROOT_DIR}/bin/poseidonos-cli telemetry start
+sleep 10
 
 echo ------------[setup poseidonos]-------------------------------------------
 

@@ -459,6 +459,14 @@ create_base()
     return 0
 }
 
+start_telemetry()
+{
+    print_info "Starting telmetry..."
+    texecc ./bin/poseidonos-cli telemetry start
+    sleep 5
+    print_info "Now telemetry is available"
+}
+
 start_pos()
 {
     texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
@@ -468,6 +476,8 @@ start_pos()
 
     sleep 5 # takes longer if pos accesses actual drives
     print_info "Now pos is running..."
+
+    start_telemetry
 
     return 0
 }

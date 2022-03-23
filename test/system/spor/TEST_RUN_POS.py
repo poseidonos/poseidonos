@@ -4,6 +4,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 
 import TEST
 import TEST_LOG
@@ -64,6 +65,12 @@ def start_pos():
         pos_execution = TEST.pos_root + "bin/" + POSBIN
         with open(TEST.pos_log_path, "a") as log_file:
             pos_proc = subprocess.Popen(pos_execution, stdout=log_file, stderr=log_file)
+
+        time.sleep(10)
+        TEST_LOG.print_info("* Starting Telemetry")
+        telemetry_execution = TEST.pos_root + "bin/poseidonos-cli"
+        with open(TEST.pos_log_path, "a") as log_file:
+            telemetry_proc = subprocess.Popen([telemetry_execution, "telemetry", "start"], stdout=log_file, stderr=log_file)
 
     subprocess.call(["sleep", "10"])
 
