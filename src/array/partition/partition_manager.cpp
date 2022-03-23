@@ -70,6 +70,19 @@ PartitionManager::GetSizeInfo(PartitionType type)
     }
 }
 
+const PartitionPhysicalSize*
+PartitionManager::GetPhysicalSize(PartitionType type)
+{
+    if (nullptr == partitions[type])
+    {
+        return nullptr;
+    }
+    else
+    {
+        return partitions[type]->GetPhysicalSize();
+    }
+}
+
 int
 PartitionManager::CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
     RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import subprocess
+import pos
 import sys
 
 POS_ROOT = '../../../'
@@ -8,6 +9,7 @@ POS_CLI = POS_ROOT + "bin/poseidonos-cli"
 
 
 def send_request(msg):
+    print (msg)
     cli_req = POS_CLI + " --json-res "
     out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
     return out
@@ -66,6 +68,8 @@ def delete_array(array):
 def mount_array(array):
     param_str = ""
     param_str += "--array-name " + array
+    if pos.is_wt_enabled() is True:
+        param_str += " -w"
     return send_request("array mount " + param_str)
 
 

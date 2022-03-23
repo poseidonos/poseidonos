@@ -20,11 +20,12 @@
 #include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 
 using ::testing::_;
+using ::testing::A;
 using ::testing::AtLeast;
 using testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnArg;
 using ::testing::ReturnRef;
-using ::testing::A;
 
 namespace pos
 {
@@ -481,7 +482,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsUnmapVsaWhenFailedToAllocateFreeSe
     delete addrInfo;
 }
 
-TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
+TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUserStripeId)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -529,13 +530,14 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(0)).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe(A<StripeId>())).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*allocCtx, SetNewActiveStripeTail(_, newVsa, wbLsid)).Times(1);
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
 
     EXPECT_CALL(*iStripeMap, SetLSA(0, _, IN_WRITE_BUFFER_AREA)).Times(1);
     VirtualBlkAddr updatedVsa = {
         .stripeId = 0,
         .offset = 1};
     EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, updatedVsa)).Times(1);
+    StripeId userLsid = 0;
 
     // when
     auto ret = blkManager._AllocateBlks(0, 1);
@@ -545,7 +547,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, wbLsid);
+    EXPECT_EQ(ret.second, userLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -558,7 +560,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndWbStripeId)
     delete stripe;
 }
 
-TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNewStripeAllocation)
+TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromActiveStripe)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -572,7 +574,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0, true);
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
@@ -584,13 +586,14 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
+    ON_CALL(*iWbstripe, GetUserStripeId(_)).WillByDefault(ReturnArg<0>());
+
     // Given: Active stripe tail is not full
     VirtualBlkAddr vsa = {
         .stripeId = 10,
         .offset = 0};
-    StripeId wbLsid = 5;
+    StripeId userLsid = 10;
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillRepeatedly(Return(vsa));
-    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     VirtualBlkAddr updatedVsa = {
         .stripeId = 10,
         .offset = 1};
@@ -604,7 +607,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, wbLsid);
+    EXPECT_EQ(ret.second, userLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -617,7 +620,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripeWithoutNe
     delete stripe;
 }
 
-TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
+TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromWbStripe)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -631,7 +634,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0, true);
+    BlockManagerSpy blkManager(nullptr, iStripeMap, reverseMap, allocCtx, &blockAllocationStatus, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
@@ -642,6 +645,8 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillRepeatedly(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+
+    ON_CALL(*iWbstripe, GetUserStripeId(_)).WillByDefault(ReturnArg<0>());
 
     // Given: Active stripe tail is full
     VirtualBlkAddr vsa = {
@@ -664,12 +669,13 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_CALL(*allocCtx, SetCurrentSsdLsid(newVsid)).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe(A<StripeId>())).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
-    EXPECT_CALL(*allocCtx, SetNewActiveStripeTail(_, newVsa, wbLsid)).Times(1);
+    EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, newVsa)).Times(1);
 
-    EXPECT_CALL(*iStripeMap, SetLSA(newVsid, newVsid, IN_USER_AREA)).Times(1);
+    EXPECT_CALL(*iStripeMap, SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA)).Times(1);
     VirtualBlkAddr updatedVsa = {
         .stripeId = newVsid,
         .offset = 1};
+    StripeId userLsid = newVsid;
     EXPECT_CALL(*allocCtx, SetActiveStripeTail(_, updatedVsa)).Times(1);
 
     // when
@@ -680,7 +686,7 @@ TEST(BlockManager, _AllocateBlks_testWhenAllocatingBlocksFromUserStripe)
     EXPECT_EQ(ret.first.startVsa.offset, 0);
     EXPECT_EQ(ret.first.numBlks, 1);
 
-    EXPECT_EQ(ret.second, wbLsid);
+    EXPECT_EQ(ret.second, userLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -715,13 +721,14 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUnmapStripeIdWhenNe
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
 
+    ON_CALL(*iWbstripe, GetUserStripeId(_)).WillByDefault(ReturnArg<0>());
+
     // Given: Active stripe tail is not full
     VirtualBlkAddr vsa = {
         .stripeId = 10,
         .offset = 3};
+    StripeId userLsid = 10;
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
-    StripeId wbLsid = 13;
-    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
 
     // when
@@ -731,7 +738,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsAllocatedVsaAndUnmapStripeIdWhenNe
     EXPECT_EQ(ret.first.startVsa.stripeId, 10);
     EXPECT_EQ(ret.first.startVsa.offset, 3);
     EXPECT_EQ(ret.first.numBlks, 2);
-    EXPECT_EQ(ret.second, wbLsid);
+    EXPECT_EQ(ret.second, userLsid);
 
     delete iWbstripe;
     delete allocCtx;
@@ -768,10 +775,11 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsOnlyAllocatedBlockNumbaerWhenReque
     VirtualBlkAddr vsa = {
         .stripeId = 10,
         .offset = 3};
+    StripeId userLsid = 10;
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(vsa)).WillOnce(Return(vsa));
-    StripeId wbLsid = 12;
-    EXPECT_CALL(*allocCtx, GetActiveWbStripeId).WillRepeatedly(Return(wbLsid));
     EXPECT_CALL(*allocCtx, SetActiveStripeTail).Times(1);
+
+    ON_CALL(*iWbstripe, GetUserStripeId(_)).WillByDefault(ReturnArg<0>());
 
     // when
     auto ret = blkManager._AllocateBlks(0, 11);
@@ -779,7 +787,7 @@ TEST(BlockManager, _AllocateBlks_testIfReturnsOnlyAllocatedBlockNumbaerWhenReque
     EXPECT_EQ(ret.first.startVsa.stripeId, 10);
     EXPECT_EQ(ret.first.startVsa.offset, 3);
     EXPECT_EQ(ret.first.numBlks, 2);
-    EXPECT_EQ(ret.second, wbLsid);
+    EXPECT_EQ(ret.second, userLsid);
 
     delete iWbstripe;
     delete allocCtx;

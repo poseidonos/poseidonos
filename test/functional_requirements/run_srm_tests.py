@@ -13,7 +13,7 @@ import pos
 default_fabric_ip = "10.1.11.200"
 working_dir = os.path.dirname(os.path.realpath(__file__))
 POS_ROOT = '../../'
-test_suites = ["array", "devel", "device_management", "fault_tolerance", "logger", "qos", "subsystem", "system_overall", "telemetry", "volume"]
+test_suites = ["array", "devel", "device_management", "fault_tolerance", "logger", "simple_io", "subsystem", "system_overall", "volume"]
 
 
 def run_tests(dirname):
@@ -63,6 +63,7 @@ def parse_argument():
 
 
 if __name__ == "__main__":
+    pos.disable_wt()
     mbr_reset()
     parse_argument()
     try:

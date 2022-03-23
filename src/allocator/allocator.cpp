@@ -465,7 +465,7 @@ Allocator::_CreateSubmodules(void)
     tp = new TelemetryPublisher(("Allocator"));
     tp->AddDefaultLabel("array_name", arrName);
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
-    blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex(), iArrayInfo->IsWriteThroughEnabled());
+    blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }
 

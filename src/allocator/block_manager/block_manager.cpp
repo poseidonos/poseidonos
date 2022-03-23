@@ -46,13 +46,12 @@
 
 namespace pos
 {
-BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe)
+BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
 : addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeAllocator(nullptr),
   allocStatus(allocStatus),
   arrayId(arrayId),
-  allocateBlocksFromSSDStripe(allocateBlocksFromSSDStripe),
   tp(tp_)
 {
     allocCtx = allocCtx_;
@@ -60,8 +59,8 @@ BlockManager::BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap_, IRev
     iStripeMap = stripeMap_;
 }
 
-BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe)
-: BlockManager(tp_, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId, allocateBlocksFromSSDStripe)
+BlockManager::BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+: BlockManager(tp_, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
 {
     allocCtx = contextManager->GetAllocatorCtx();
     allocStatus = contextManager->GetAllocationStatus();
@@ -113,7 +112,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
 
     StripeId newVsid = arrayLsid;
     Stripe* stripe = new Stripe(iReverseMap, false, addrInfo->GetblksPerStripe());
-    stripe->Assign(newVsid, UINT32_MAX, 0);
+    stripe->Assign(newVsid, UINT32_MAX, iWBStripeAllocator->GetUserStripeId(newVsid), 0);
     return stripe;
 }
 
@@ -164,7 +163,7 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
 {
     assert(numBlks != 0);
     std::unique_lock<std::mutex> volLock(allocCtx->GetActiveStripeTailLock(asTailArrayIdx));
-    StripeId allocatedWbLsid = UNMAP_STRIPE;
+    StripeId allocatedUserStripe = UNMAP_STRIPE;
 
     VirtualBlkAddr curVsa = allocCtx->GetActiveStripeTail(asTailArrayIdx);
     if (_IsStripeFull(curVsa) || IsUnMapStripe(curVsa.stripeId))
@@ -175,15 +174,15 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
             return {{UNMAP_VSA, UINT32_MAX}, UNMAP_STRIPE};
         }
 
-        allocatedWbLsid = allocatedStripes.first;
+        allocatedUserStripe = allocatedStripes.second;
     }
     else
     {
-        allocatedWbLsid = allocCtx->GetActiveWbStripeId(asTailArrayIdx);
+        allocatedUserStripe = iWBStripeAllocator->GetUserStripeId(curVsa.stripeId);
     }
 
     VirtualBlks allocatedBlks = _AllocateBlocksFromActiveStripe(asTailArrayIdx, numBlks);
-    return {allocatedBlks, allocatedWbLsid};
+    return {allocatedBlks, allocatedUserStripe};
 }
 
 std::pair<StripeId, StripeId>
@@ -207,23 +206,14 @@ BlockManager::_AllocateStripesAndUpdateActiveStripeTail(ASTailArrayIdx asTailArr
     StripeId newVsid = userLsid;
     _AssignStripe(newVsid, wbLsid, asTailArrayIdx);
 
-    if (allocateBlocksFromSSDStripe == true)
-    {
-        // New blocks will be allocted from the ssd stripe in write-through mode
-        // WB stripe is allocated above, but will not be updated to the stripe map (temporally)
-        iStripeMap->SetLSA(newVsid, userLsid, IN_USER_AREA);
-    }
-    else
-    {
-        iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);
-    }
+    iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);
 
     // Temporally no lock required, as AllocateBlks and this function cannot be executed in parallel
     // TODO(jk.man.kim): add or move lock to wbuf tail manager
     VirtualBlkAddr curVsa = {
         .stripeId = newVsid,
         .offset = 0};
-    allocCtx->SetNewActiveStripeTail(asTailArrayIdx, curVsa, wbLsid);
+    allocCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
 
     return {wbLsid, userLsid};
 }
@@ -238,7 +228,7 @@ void
 BlockManager::_AssignStripe(StripeId vsid, StripeId wbLsid, ASTailArrayIdx asTailArrayIdx)
 {
     Stripe* stripe = iWBStripeAllocator->GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, asTailArrayIdx);
+    stripe->Assign(vsid, wbLsid, iWBStripeAllocator->GetUserStripeId(vsid), asTailArrayIdx);
 }
 
 StripeId
@@ -321,5 +311,4 @@ BlockManager::_AllocateBlocksFromActiveStripe(ASTailArrayIdx asTailArrayIdx, int
 
     return allocatedBlks;
 }
-
 } // namespace pos

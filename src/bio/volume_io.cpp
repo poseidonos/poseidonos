@@ -32,6 +32,7 @@
 
 #include "src/bio/volume_io.h"
 
+#include "src/array_mgmt/array_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/core_const.h"
@@ -48,24 +49,36 @@ const VirtualBlkAddr VolumeIo::INVALID_VSA = {.stripeId = UNMAP_STRIPE,
 const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
+: VolumeIo(buffer, unitCount, arrayId, ArrayMgr())
+{
+}
+
+VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt)
 : Ubio(buffer, unitCount, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  sectorRba(INVALID_RBA)
+  sectorRba(INVALID_RBA),
+  arrayMgmt(arrayMgmt)
 {
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
+: VolumeIo(volumeIo, ArrayMgr())
+{
+}
+
+VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
 : Ubio(volumeIo),
   volumeId(volumeIo.volumeId),
   originCore(volumeIo.originCore),
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
-  sectorRba(volumeIo.sectorRba)
+  sectorRba(volumeIo.sectorRba),
+  arrayMgmt(arrayMgmt)
 {
 }
 
@@ -103,25 +116,32 @@ VolumeIo::GetOriginVolumeIo(void)
 bool
 VolumeIo::IsPollingNecessary(void)
 {
-    if (dir == UbioDir::Read)
+    IArrayInfo* arrayInfo = arrayMgmt->GetInfo(this->GetArrayId())->arrayInfo;
+    if (arrayInfo->IsWriteThroughEnabled())
     {
         return true;
     }
     else
     {
-        if (GetSectorOffsetInBlock(GetSectorRba()) != 0)
+        if (dir == UbioDir::Read)
         {
             return true;
         }
-        uint64_t endAddress = GetSectorRba() + ChangeByteToSector(GetSize());
+        else
+        {
+            if (GetSectorOffsetInBlock(GetSectorRba()) != 0)
+            {
+                return true;
+            }
+            uint64_t endAddress = GetSectorRba() + ChangeByteToSector(GetSize());
 
-        if (GetSectorOffsetInBlock(endAddress) != 0)
-        {
-            return true;
+            if (GetSectorOffsetInBlock(endAddress) != 0)
+            {
+                return true;
+            }
         }
+        return false;
     }
-
-    return false;
 }
 
 uint32_t
@@ -324,7 +344,7 @@ VolumeIo::_IsInvalidVsa(VirtualBlkAddr& inputVsa)
 }
 
 void
-VolumeIo::SetWbLsid(StripeId inputStripeId)
+VolumeIo::SetUserLsid(StripeId inputStripeId)
 {
     if (unlikely(inputStripeId == UNMAP_STRIPE))
     {
@@ -336,7 +356,7 @@ VolumeIo::SetWbLsid(StripeId inputStripeId)
 }
 
 StripeId
-VolumeIo::GetWbLsid(void)
+VolumeIo::GetUserLsid(void)
 {
     if (unlikely(stripeId == UNMAP_STRIPE))
     {

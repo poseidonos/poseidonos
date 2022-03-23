@@ -152,6 +152,7 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
     uint64_t expected = 0;
     EXPECT_EQ(config.GetLogBufferSizeInConfig(), expected);
 }
+
 TEST(JournalConfiguration, Init_testIfMetaVolumeToUseIsUpdatedProperly)
 {
     NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
@@ -159,9 +160,12 @@ TEST(JournalConfiguration, Init_testIfMetaVolumeToUseIsUpdatedProperly)
 
     config.Init(true);
     EXPECT_EQ(config.GetMetaVolumeToUse(), MetaVolumeType::JournalVolume);
+    EXPECT_EQ(config.AreReplayWbStripesInUserArea(), true);
 
     config.Init(false);
     EXPECT_EQ(config.GetMetaVolumeToUse(), MetaVolumeType::NvRamVolume);
+    EXPECT_EQ(config.AreReplayWbStripesInUserArea(), false);
+
     delete configManager;
 }
 

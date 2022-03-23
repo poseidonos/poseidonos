@@ -13,6 +13,7 @@
 #include "test/unit-tests/array_components/components_info_mock.h"
 #include "test/unit-tests/array_mgmt/array_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/array_mgmt/interface/i_array_mgmt_mock.h"
 #include "test/unit-tests/bio/flush_io_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
@@ -224,7 +225,7 @@ TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     spdk_nvmf_request nvmfRequest;
     nvmf_h2c_msg nvmfMsg;
     spdk_nvme_cmd nvmeCmd;
-    NiceMock<MockArrayManager>* mockArrayManager = new NiceMock<MockArrayManager>();
+    NiceMock<MockIArrayMgmt>* mockArrayManager = new NiceMock<MockIArrayMgmt>();
     NiceMock<MockIArrayInfo>* mockArrayInfo = new NiceMock<MockIArrayInfo>();
     MockComponentsInfo mockComponentsInfo{mockArrayInfo, nullptr};
 
@@ -239,11 +240,10 @@ TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     bio.internal.caller_ctx = &nvmfRequest;
     posIo.context = &bio;
 
-    ON_CALL(*mockArrayManager, GetInfo(_)).WillByDefault(Return(&mockComponentsInfo));
     ON_CALL(*mockArrayInfo, GetArrayManager()).WillByDefault(Return(nullptr));
     EventSchedulerSingleton::Instance()->DequeueEvents();
 
-    aio.SubmitAsyncAdmin(posIo, mockArrayManager);
+    aio.SubmitAsyncAdmin(posIo, mockArrayInfo);
 
     // Then : check eventscheduler queue
     std::queue<EventSmartPtr> queueList = EventSchedulerSingleton::Instance()->DequeueEvents();

@@ -374,6 +374,7 @@ enum class POS_EVENT_ID
     JOURNAL_REPLAY_WB_TAIL = 3062,
     JOURNAL_REPLAY_USER_STRIPE_TAIL = 3063,
     JOURNAL_REPLAY_VOLUME_EVENT = 3064,
+    JOURNAL_REPLAY_WB_STRIPE = 3065,
 
     JOURNAL_DEBUG = 3099,
     JOURNAL_END = JOURNAL_DEBUG,
@@ -861,6 +862,9 @@ enum class POS_EVENT_ID
     FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
     FLUSH_CMD_ONGOING,
 
+    PARITY_ONLY_NOT_SUPPORTED,
+    WRITE_FOR_PARITY_FAILED,
+
     IOFRONTEND_END,
     IOFRONTEND_COUNT = IOFRONTEND_END - IOFRONTEND_START,
 
@@ -1317,6 +1321,18 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED,
             new PosEventInfoEntry("UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED",
                 "failed to configure array", "One or more SSDs are already in use elsewhere", "Try again with SSDs those are not in use")},
+        {(int)POS_EVENT_ID::RECOVER_INVALID_LBA,
+            new PosEventInfoEntry("RECOVER_INVALID_LBA",
+                "unable to restore requested lba", "The requested lba is out of the partition range", "Please check the partition address range")},
+        {(int)POS_EVENT_ID::ADDRESS_TRANSLATION_INVALID_LBA,
+            new PosEventInfoEntry("ADDRESS_TRANSLATION_INVALID_LBA",
+                "failed to translate", "The requested lba is out of the partition range", "Please check the partition address range")},
+        {(int)POS_EVENT_ID::ADDRESS_BYTE_TRANSLATION_INVALID_LBA,
+            new PosEventInfoEntry("ADDRESS_BYTE_TRANSLATION_INVALID_LBA",
+                "failed to translate", "The requested lba is out of the partition range", "Please check the partition address range")},
+        {(int)POS_EVENT_ID::ADDRESS_BYTE_TRANSLATION_IS_NOT_SUPPORTED,
+            new PosEventInfoEntry("ADDRESS_BYTE_TRANSLATION_IS_NOT_SUPPORTED",
+                "failed to translate", "Address byte translation is not supported in this partition", "Please check again if the partition supports byte injection.")},
         {(int)POS_EVENT_ID::VOL_NOT_FOUND,
             new PosEventInfoEntry("VOL_NOT_FOUND",
                 "failed to find a volume", "The volume of the requested name or ID could not be found", "Please check volume name or ID and try again")},

@@ -34,28 +34,36 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/bio/volume_io.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/io/frontend_io/write_for_parity.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/allocator/event/stripe_put_event.h"
+#include "src/io/backend_io/flush_completion.h"
 
 namespace pos
 {
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayId()),
-      EventFrameworkApiSingleton::Instance()->IsReactorNow())
+      EventFrameworkApiSingleton::Instance()->IsReactorNow(),
+      ArrayMgr())
 {
 }
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
-    IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow)
+    IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow,
+    IArrayMgmt* arrayMgr)
 : Callback(isReactorNow, CallbackType_WriteCompletion),
   volumeIo(input),
-  iWBStripeAllocator(iWBStripeAllocator)
+  iWBStripeAllocator(iWBStripeAllocator),
+  arrayMgr(arrayMgr)
 {
 }
 
@@ -100,8 +108,8 @@ bool
 WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
 {
     bool stripeUpdateSuccessful = true;
-    StripeId wbLsid = volumeIo->GetWbLsid();
-    Stripe* stripe = iWBStripeAllocator->GetStripe(wbLsid);
+    StripeAddr lsidEntry = volumeIo->GetLsidEntry();
+    Stripe* stripe = iWBStripeAllocator->GetStripe(lsidEntry.stripeId);
     if (likely(nullptr != stripe))
     {
         uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
@@ -130,7 +138,9 @@ bool
 WriteCompletion::_RequestFlush(Stripe* stripe)
 {
     bool requestFlushSuccessful = true;
-    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId()));
+    IArrayInfo* arrayInfo = arrayMgr->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId(),
+        arrayInfo->IsWriteThroughEnabled()));
 
     if (unlikely(stripe->Flush(event) < 0))
     {

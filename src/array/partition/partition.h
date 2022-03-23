@@ -64,7 +64,7 @@ public:
     virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
     virtual void RegisterService(IPartitionServices* svc) {}
     PartitionType GetType(void) { return type; }
-    uint64_t GetLastLba() { return lastLba; }
+    uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
     virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
 
@@ -74,7 +74,6 @@ protected:
     PartitionLogicalSize logicalSize;
     PartitionPhysicalSize physicalSize;
     vector<ArrayDevice*> devs;
-    uint64_t lastLba = 0;
     PartitionType type;
 };
 

@@ -54,7 +54,7 @@ NvmPartitionBuilder::Build(uint64_t startLba, Partitions& out)
     out[option.partitionType] = impl;
     if (next != nullptr)
     {
-        uint64_t nextLba = impl->GetLastLba();
+        uint64_t nextLba = impl->GetLastLba() + 1;
         return next->Build(nextLba, out);
     }
     return 0;

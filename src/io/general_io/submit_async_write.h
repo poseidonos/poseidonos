@@ -56,7 +56,7 @@ public:
     IOSubmitHandlerStatus Execute(std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO, CallbackSmartPtr callback,
-        int arrayId, bool needTrim);
+        int arrayId, bool needTrim, bool parityOnly = false);
 
 private:
     IIOLocker* locker;
@@ -64,5 +64,7 @@ private:
     IODispatcher* ioDispatcher;
 
     IOSubmitHandlerStatus _CheckAsyncWriteError(int arrayId);
+    UbioSmartPtr _SetupUbio(int arrayId, bool needTrim, BufferEntry& buffer,
+        PhysicalBlkAddr addr, CallbackSmartPtr arrayUnlocking, CallbackSmartPtr callback);
 };
 } // namespace pos

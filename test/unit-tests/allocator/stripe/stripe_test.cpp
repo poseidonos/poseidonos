@@ -23,12 +23,20 @@ TEST(Stripe, Stripe_TestConstructor)
 TEST(Stripe, Assign_TestSimpleSetter)
 {
     // given
-    NiceMock<MockReverseMapManager>* revMap = new NiceMock<MockReverseMapManager>();
-    Stripe stripe(revMap, false, 10);
-    EXPECT_CALL(*revMap, AllocReverseMapPack).Times(1);
+    NiceMock<MockReverseMapManager> revMap;
+    Stripe stripe(&revMap, false, 10);
+    EXPECT_CALL(revMap, AllocReverseMapPack).Times(1);
     // when
-    stripe.Assign(0, 0, 0);
-    delete revMap;
+    StripeId vsid = 10;
+    StripeId wbLsid = 24;
+    StripeId userLsid = 10;
+    uint32_t volumeId = 5;
+    stripe.Assign(vsid, wbLsid, userLsid, volumeId);
+
+    EXPECT_EQ(stripe.GetVsid(), vsid);
+    EXPECT_EQ(stripe.GetWbLsid(), wbLsid);
+    EXPECT_EQ(stripe.GetUserLsid(), userLsid);
+    EXPECT_EQ(stripe.GetVolumeId(), volumeId);
 }
 
 TEST(Stripe, GetAsTailArrayIdx_TestSimpleGetter)
@@ -79,14 +87,6 @@ TEST(Stripe, GetUserLsid_TestSimpleGetter)
     stripe.GetUserLsid();
 }
 
-TEST(Stripe, SetUserLsid_TestSimpleSetter)
-{
-    // given
-    Stripe stripe(nullptr, false, 10);
-    // when
-    stripe.SetUserLsid(0);
-}
-
 TEST(Stripe, Flush_TestwithRevMapPack)
 {
     // given
@@ -94,7 +94,7 @@ TEST(Stripe, Flush_TestwithRevMapPack)
     Stripe stripe(revMap, false, 10);
     EXPECT_CALL(*revMap, Flush).Times(1);
     // when
-    stripe.Assign(10, 20, 0);
+    stripe.Assign(10, 20, 10, 0);
     stripe.Flush(nullptr);
     delete revMap;
 }
@@ -247,7 +247,7 @@ TEST(Stripe, UpdateVictimVsa_TestSimpleSetter)
 
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
     EXPECT_CALL(*revMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
-    stripe.Assign(0, 0, 0);
+    stripe.Assign(0, 0, 0, 0);
     // when
     stripe.UpdateVictimVsa(0, vsa);
     delete revMap;
@@ -261,7 +261,7 @@ TEST(Stripe, GetVictimVsa_TestSimpleGetter)
     Stripe stripe(revMap, false, 1);
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 5};
     EXPECT_CALL(*revMap, AllocReverseMapPack).WillOnce(Return(nullptr));
-    stripe.Assign(0, 0, 0);
+    stripe.Assign(0, 0, 0, 0);
     stripe.UpdateVictimVsa(0, vsa);
     // when
     VirtualBlkAddr ret = stripe.GetVictimVsa(0);

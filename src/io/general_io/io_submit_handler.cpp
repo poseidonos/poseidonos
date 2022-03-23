@@ -94,7 +94,8 @@ IOSubmitHandler::SubmitAsyncIO(
     LogicalBlkAddr& startLSA, uint64_t blockCount,
     PartitionType partitionToIO,
     CallbackSmartPtr callback,
-    int arrayId)
+    int arrayId,
+    bool parityOnly)
 {
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
     do
@@ -111,7 +112,7 @@ IOSubmitHandler::SubmitAsyncIO(
             bool needTrim = false;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
-                partitionToIO, callback, arrayId, needTrim);
+                partitionToIO, callback, arrayId, needTrim, parityOnly);
         }
         else if (IODirection::TRIM == direction)
         {

@@ -53,6 +53,7 @@
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/block_map_update_request.h"
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
+#include "src/io/frontend_io/write_for_parity.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
@@ -210,8 +211,29 @@ void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
-    // If Read for partial write case, handling device failure is necessary.
-    ioDispatcher->Submit(volumeIo, false, isRead);
+    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
+
+    if (false == isWTEnabled)
+    {
+        // If Read for partial write case, handling device failure is necessary.
+        ioDispatcher->Submit(volumeIo, false, isRead);
+    }
+    else
+    {
+        if (false == isRead)
+        {
+            WriteForParity writeForParity(volumeIo);
+            bool ret  = writeForParity.Execute();
+            if (ret == false)
+            {
+                POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
+                POS_TRACE_ERROR(static_cast<int>(eventId),
+                    "Failed to copy user data to dram for parity");
+            }
+        }
+        ioDispatcher->Submit(volumeIo, false, true);
+    }
 }
 
 void
@@ -305,7 +327,7 @@ void
 WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool isTail)
 {
     VirtualBlkAddr vsa = vsaInfo.first;
-    StripeId wbLsid = vsaInfo.second;
+    StripeId userLsid = vsaInfo.second;
     uint32_t alignmentSize;
     uint32_t alignmentOffset;
 
@@ -324,7 +346,6 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
         volumeIo->Split(ChangeByteToSector(alignmentSize), isTail);
     split->SetOriginUbio(volumeIo);
     split->SetVsa(vsa);
-    split->SetWbLsid(wbLsid);
     CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
     split->SetCallback(callback);
 
@@ -332,6 +353,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 
     newVolumeIo->SetVolumeId(volumeId);
     newVolumeIo->SetOriginUbio(split);
+    newVolumeIo->SetUserLsid(userLsid);
     CallbackSmartPtr event(new ReadCompletionForPartialWrite(newVolumeIo,
         alignmentSize, alignmentOffset));
     newVolumeIo->SetCallback(event);
@@ -367,8 +389,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
-        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-            remainBlockCount);
+        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, 1);
         targetVsaRange = result.first;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 
@@ -419,9 +440,9 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlksInfo& virtualBlksInfo, CallbackSmartPtr callback)
 {
     VirtualBlks vsaRange = virtualBlksInfo.first;
-    StripeId wbLsid = virtualBlksInfo.second;
+    StripeId userLsid = virtualBlksInfo.second;
     VirtualBlkAddr startVsa = vsaRange.startVsa;
-    Translator translator(startVsa, volumeIo->GetArrayId());
+    Translator translator(startVsa, volumeIo->GetArrayId(), userLsid);
     void* mem = newVolumeIo->GetBuffer();
     list<PhysicalEntry> physicalEntries =
         translator.GetPhysicalEntries(mem, vsaRange.numBlks);
@@ -437,7 +458,7 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     }
     newVolumeIo->SetVsa(startVsa);
     newVolumeIo->SetPba(pba);
-    newVolumeIo->SetWbLsid(wbLsid);
+    newVolumeIo->SetUserLsid(userLsid);
 
     CallbackSmartPtr blockMapUpdateRequest(
         new BlockMapUpdateRequest(newVolumeIo, callback));

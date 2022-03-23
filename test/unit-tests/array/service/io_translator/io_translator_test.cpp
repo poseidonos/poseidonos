@@ -48,6 +48,7 @@ TEST(IOTranslator, Unregister_testIfArgumentsAreValid)
     vector<ArrayDevice*> devs;
     PartitionPhysicalSize physicalSize{
         .startLba = 5,
+        .lastLba = 100/* not interesting */,
         .blksPerChunk = 10,
         .chunksPerStripe = 4,
         .stripesPerSegment = 20,

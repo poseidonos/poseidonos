@@ -14,6 +14,7 @@ public:
     MOCK_METHOD(int, SetLogBufferSize, (uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl), (override));
     MOCK_METHOD(bool, IsEnabled, (), (override));
     MOCK_METHOD(bool, IsDebugEnabled, (), (override));
+    MOCK_METHOD(bool, AreReplayWbStripesInUserArea, (), (override));
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(uint64_t, GetLogBufferSize, (), (override));
     MOCK_METHOD(uint64_t, GetLogGroupSize, (), (override));

@@ -62,6 +62,7 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 1234,
         .chunksPerStripe = 4567,
         .stripesPerSegment = 0/* not interesting */,
@@ -77,6 +78,7 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 27,
         .chunksPerStripe = 10,
         .stripesPerSegment = 0/* not interesting */,
@@ -108,6 +110,7 @@ TEST(Raid5, MakeParity_testIfParityBufferIsProperlyCalculated)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 4,
         .chunksPerStripe = 4,
         .stripesPerSegment = 0/* not interesting */,
@@ -166,6 +169,7 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 27,
         .chunksPerStripe = 100,
         .stripesPerSegment = 0/* not interesting */,
@@ -193,6 +197,7 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 27,
         .chunksPerStripe = 100,
         .stripesPerSegment = 0/* not interesting */,
@@ -210,6 +215,7 @@ TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
     // Given
     const PartitionPhysicalSize physicalSize{
         .startLba = 0, /* not interesting */
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 27,
         .chunksPerStripe = 100,
         .stripesPerSegment = 0, /* not interesting */
@@ -254,6 +260,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsFailure)
 
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 1234,
         .chunksPerStripe = 4567,
         .stripesPerSegment = 0/* not interesting */,
@@ -279,6 +286,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsDegraded)
 
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 1234,
         .chunksPerStripe = 4567,
         .stripesPerSegment = 0/* not interesting */,
@@ -306,6 +314,7 @@ TEST(Raid5, GetRaidState_testIfRaid5IsNormal)
 
     const PartitionPhysicalSize physicalSize{
         .startLba = 0/* not interesting */,
+        .lastLba = 0/* not interesting */,
         .blksPerChunk = 1234,
         .chunksPerStripe = 4567,
         .stripesPerSegment = 0/* not interesting */,

@@ -309,7 +309,7 @@ AIO::CompleteIOs(void)
     DeviceManagerSingleton::Instance()->HandleCompletedCommand();
 }
 void
-AIO::SubmitAsyncAdmin(pos_io& io, IArrayMgmt* arrayManager)
+AIO::SubmitAsyncAdmin(pos_io& io, IArrayInfo* arrayInfo)
 {
     if (io.ioType == GET_LOG_PAGE)
     {
@@ -326,14 +326,17 @@ AIO::SubmitAsyncAdmin(pos_io& io, IArrayMgmt* arrayManager)
             ioContext.needPollingCount++;
         }
     }
+    if (arrayInfo == nullptr)
+    {
+        std::string arrayName(io.arrayName);
+        arrayInfo = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
+    }
     uint32_t originCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext, originCore));
-    std::string arrayName(io.arrayName);
-    IArrayInfo* info = arrayManager->GetInfo(arrayName)->arrayInfo;
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
-    IArrayDevMgr* arrayDevMgr = info->GetArrayManager();
-    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, info, devmgr, ioDispatcher, arrayDevMgr));
+    IArrayDevMgr* arrayDevMgr = arrayInfo->GetArrayManager();
+    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher, arrayDevMgr));
     EventSchedulerSingleton::Instance()->EnqueueEvent(event);
     return;
 }

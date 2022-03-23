@@ -337,6 +337,7 @@ Array::AddSpare(string devName)
     {
         ret = EID(ADD_SPARE_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
         POS_TRACE_WARN(ret, "arrayName:{}, RaidType:{}", name_, raidType);
+        pthread_rwlock_unlock(&stateLock);
         return ret;
     }
 

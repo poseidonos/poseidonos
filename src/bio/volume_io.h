@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include "src/array_mgmt/interface/i_array_mgmt.h"
 #include "src/bio/ubio.h"
 #include "src/include/smart_ptr_type.h"
 
@@ -71,7 +72,9 @@ public:
 
     VolumeIo(void) = delete;
     VolumeIo(void* buffer, uint32_t unitCount, int arrayId);
+    VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt);
     VolumeIo(const VolumeIo& volumeIo);
+    VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt);
     ~VolumeIo(void) override;
 
     virtual VolumeIoSmartPtr Split(uint32_t sectors, bool removalFromTail);
@@ -88,8 +91,8 @@ public:
     void SetVsa(VirtualBlkAddr&);
     void SetSectorRba(uint64_t inputSectorRba);
     virtual uint64_t GetSectorRba(void);
-    void SetWbLsid(StripeId stripeId);
-    virtual StripeId GetWbLsid(void);
+    void SetUserLsid(StripeId stripeId);
+    virtual StripeId GetUserLsid(void);
 
 private:
     static const StripeAddr INVALID_LSID_ENTRY;
@@ -103,6 +106,7 @@ private:
     VirtualBlkAddr vsa;
     uint64_t sectorRba;
     StripeId stripeId;
+    IArrayMgmt* arrayMgmt;
 
     bool _IsInvalidVolumeId(uint32_t inputVolumeId);
     virtual bool _IsInvalidLsidEntry(StripeAddr& inputLsidEntry);

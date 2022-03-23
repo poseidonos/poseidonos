@@ -37,12 +37,14 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/journal_manager/config/journal_configuration.h"
 
 namespace pos
 {
-FlushPendingStripes::FlushPendingStripes(PendingStripeList& pendingStripes,
+FlushPendingStripes::FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes,
     IWBStripeAllocator* wbStripeAllocator, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
+  config(config),
   pendingStripes(pendingStripes),
   wbStripeAllocator(wbStripeAllocator)
 {
@@ -60,7 +62,7 @@ FlushPendingStripes::~FlushPendingStripes(void)
 int
 FlushPendingStripes::GetNumSubTasks(void)
 {
-    return 2;
+    return 3;
 }
 
 int
@@ -89,9 +91,25 @@ FlushPendingStripes::Start(void)
     }
     reporter->SubTaskCompleted(GetId(), 1);
 
-    // Trigger flush of stripe whose remaining count reaches zero during replay
-    wbStripeAllocator->FlushAllPendingStripes();
+    // Load pending stripes from ssd to write buffer when write through is enabled
+    if (config->AreReplayWbStripesInUserArea() == true)
+    {
+        result = wbStripeAllocator->LoadPendingStripesToWriteBuffer();
+        if (result != 0)
+        {
+            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+                "Failed to load wb stripes in ssd");
+        }
+    }
     reporter->SubTaskCompleted(GetId(), 1);
+
+    // Trigger flush of stripe whose remaining count reaches zero during replay
+    if (result == 0)
+    {
+        wbStripeAllocator->FlushAllPendingStripes();
+    }
+    reporter->SubTaskCompleted(GetId(), 1);
+
     return result;
 }
 

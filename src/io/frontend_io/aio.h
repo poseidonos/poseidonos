@@ -38,6 +38,7 @@
 #include "spdk/pos.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/array_mgmt/interface/i_array_mgmt.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/bio/flush_io.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
@@ -87,7 +88,7 @@ public:
     void SubmitFlush(pos_io& posIo);
     void CompleteIOs(void);
     VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
-    void SubmitAsyncAdmin(pos_io& posIo, IArrayMgmt* arrayManager = ArrayMgr());
+    void SubmitAsyncAdmin(pos_io& posIo, IArrayInfo* arrayInfo = nullptr);
 
 private:
     static thread_local IOCtx ioContext;

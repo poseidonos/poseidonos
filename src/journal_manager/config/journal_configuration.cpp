@@ -57,6 +57,7 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   logBufferSizeInConfig(UINT64_MAX),
   metaPageSize(UINT64_MAX),
   maxPartitionSize(UINT64_MAX),
+  areReplayWbStripesInUserArea(false),
   debugEnabled(false),
   configManager(configManager),
   numLogGroups(2),
@@ -72,6 +73,8 @@ JournalConfiguration::~JournalConfiguration(void)
 void
 JournalConfiguration::Init(bool isWriteThroughEnabled)
 {
+    // TODO (meta): writeThroughEnabled should be of previous power cycle
+    areReplayWbStripesInUserArea = isWriteThroughEnabled;
     metaVolumeToUse = (isWriteThroughEnabled == true) ? (MetaVolumeType::JournalVolume) : (MetaVolumeType::NvRamVolume);
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION), "Journal will be stored on {}", metaVolumeToUse);
 }
@@ -108,6 +111,12 @@ bool
 JournalConfiguration::IsDebugEnabled(void)
 {
     return debugEnabled;
+}
+
+bool
+JournalConfiguration::AreReplayWbStripesInUserArea(void)
+{
+    return areReplayWbStripesInUserArea;
 }
 
 int

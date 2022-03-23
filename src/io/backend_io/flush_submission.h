@@ -49,9 +49,9 @@ class IIOTranslator;
 class FlushSubmission : public Event
 {
 public:
-    FlushSubmission(Stripe* inputStripe, int arrayId);
+    FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
     FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-        IIOTranslator* translator);
+        IIOTranslator* translator, bool isWTEnabled);
     ~FlushSubmission(void) override;
     bool Execute(void) override;
     uint32_t GetBufferListSize(void);
@@ -62,6 +62,7 @@ private:
     std::list<BufferEntry> bufferList;
     int arrayId;
     IIOTranslator* translator;
+    bool isWTEnabled;
 };
 
 } // namespace pos

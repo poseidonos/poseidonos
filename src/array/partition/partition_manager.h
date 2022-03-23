@@ -52,6 +52,7 @@ public:
     PartitionManager(void);
     virtual ~PartitionManager(void);
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
+    virtual const PartitionPhysicalSize* GetPhysicalSize(PartitionType type);
     virtual int CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
         RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc);
     virtual void DeletePartitions(void);

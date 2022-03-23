@@ -39,10 +39,11 @@
 
 namespace pos
 {
+class JournalConfiguration;
 class FlushPendingStripes : public ReplayTask
 {
 public:
-    FlushPendingStripes(PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
+    FlushPendingStripes(JournalConfiguration* config, PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
     virtual ~FlushPendingStripes(void);
 
     virtual int Start(void) override;
@@ -51,6 +52,7 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
+    JournalConfiguration* config;
     PendingStripeList& pendingStripes;
     IWBStripeAllocator* wbStripeAllocator;
 };

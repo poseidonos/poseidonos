@@ -79,7 +79,8 @@ enum CallbackType
     CallbackType_UpdateDataHandler,
     CallbackType_BlockMapUpdateRequestCompletion,
     CallbackType_StripeMapUpdateCompletion,
-    CallbackType_FlushCompletion
+    CallbackType_FlushCompletion,
+    CallbackType_WriteThroughStripeLoad
 };
 
 class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>

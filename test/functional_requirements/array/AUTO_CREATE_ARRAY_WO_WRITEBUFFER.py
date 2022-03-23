@@ -26,6 +26,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
+    exit(0) # reserved test for 2Q
     out = execute()
     ret = api.set_result_by_code_eq(out, 0, __file__)
     print(cli.array_info(ARRAYNAME))

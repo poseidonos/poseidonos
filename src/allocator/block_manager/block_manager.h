@@ -51,8 +51,8 @@ class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe = false);
-    BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId, bool allocateBlocksFromSSDStripe);
+    BlockManager(TelemetryPublisher* tp_, IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeAllocator* iwbstripeAllocator);
 
@@ -98,7 +98,6 @@ protected:
     BlockAllocationStatus* allocStatus;
 
     int arrayId;
-    bool allocateBlocksFromSSDStripe;
 
     AllocatorCtx* allocCtx;
     IReverseMap* iReverseMap;

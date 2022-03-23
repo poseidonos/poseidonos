@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/array_mgmt/interface/i_array_mgmt.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
 
@@ -46,7 +47,7 @@ class WriteCompletion : public Callback
 public:
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo);
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo,
-        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow);
+        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow, IArrayMgmt* arrayMgr);
     ~WriteCompletion(void) override;
 
 private:
@@ -56,5 +57,6 @@ private:
 
     VolumeIoSmartPtr volumeIo;
     IWBStripeAllocator* iWBStripeAllocator;
+    IArrayMgmt* arrayMgr;
 };
 } // namespace pos

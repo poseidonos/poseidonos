@@ -55,7 +55,7 @@ public:
     Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer, uint32_t numBlksPerStripe);
     Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe);
     virtual ~Stripe(void);
-    virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
+    virtual void Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx);
 
     virtual uint32_t GetVolumeId(void);
     virtual StripeId GetVsid(void);
@@ -65,7 +65,6 @@ public:
     virtual void SetWbLsid(StripeId wbAreaLsid);
 
     virtual StripeId GetUserLsid(void);
-    virtual void SetUserLsid(StripeId userAreaLsid);
 
     virtual void UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);

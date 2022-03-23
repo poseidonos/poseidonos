@@ -40,6 +40,7 @@
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/mapper/i_stripemap.h"
 #include "src/resource_manager/memory_manager.h"
 
 namespace pos
@@ -49,14 +50,18 @@ class IReverseMap;
 class BufferPool;
 class AllocatorCtx;
 class TelemetryPublisher;
+class StripeLoadStatus;
 
 class WBStripeManager : public IWBStripeAllocator
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId,
+    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager,
+        IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr,
+        BlockManager* blkMgr, StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
-    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
+        std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -69,13 +74,15 @@ public:
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual void FinishStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
+    virtual int LoadPendingStripesToWriteBuffer(void) override;
 
     virtual int FlushAllPendingStripes(void) override;
     virtual int FlushAllPendingStripesInVolume(int volumeId) override;
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) override;
 
-    virtual int FlushAllWbStripes(void);
+    virtual StripeId GetUserStripeId(StripeId vsid) override;
 
+    virtual int FlushAllWbStripes(void);
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
 
 protected:
@@ -90,11 +97,13 @@ protected:
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
     void _WaitForStripeFlushComplete(Stripe* stripe);
+    void _LoadStripe(StripeAddr from, StripeAddr to);
 
     std::vector<Stripe*> wbStripeArray;
     BufferPool* stripeBufferPool;
 
     // DOCs
+    IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     AllocatorCtx* allocCtx;
@@ -106,6 +115,7 @@ protected:
     IReverseMap* iReverseMap;
     uint32_t numVolumes;
     MemoryManager* memoryManager;
+    StripeLoadStatus* stripeLoadStatus;
 };
 
 } // namespace pos

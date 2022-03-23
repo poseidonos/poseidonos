@@ -37,6 +37,7 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/array/service/io_translator/io_translator.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 #include "src/mapper/i_stripemap.h"
@@ -50,9 +51,9 @@ public:
     Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         int arrayId, bool isRead = false, IVSAMap* iVSAMap = nullptr,
         IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr,
-        IIOTranslator* iTranslator = nullptr);
+        IIOTranslator* iTranslator = nullptr, IArrayInfo* arrayInfo = nullptr);
     Translator(uint32_t volumeId, BlkAddr rba, int arrayId, bool isRead);
-    Translator(const VirtualBlkAddr& vsa, int arrayId);
+    Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid = UNMAP_STRIPE, IArrayInfo* arrayInfo = nullptr);
     virtual ~Translator(void)
     {
     }
@@ -89,6 +90,8 @@ private:
     void _CheckSingleBlock(void);
     PartitionType _GetPartitionType(uint32_t blockIndex);
     int arrayId;
+    StripeId userLsid;
+    IArrayInfo* arrayInfo;
 };
 
 } // namespace pos

@@ -70,9 +70,9 @@ AsyncByteIO::_CallbackFunc(void *callbackPtr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(*callbackSmartPtr);
         }
-        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         delete callbackSmartPtr;
     }
+    IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
 }
 
 void*
@@ -183,7 +183,12 @@ AsyncByteIO::Execute(
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
-    CallbackSmartPtr* callbackSmartPtr = new CallbackSmartPtr(callback);
+
+    CallbackSmartPtr* callbackSmartPtr = nullptr;
+    if (callback != nullptr)
+    {
+        callbackSmartPtr = new CallbackSmartPtr(callback);
+    }
 
     // ToDo : It needs to be replaced abstracted api to support also nvram cache flush.
     AccelEngineApi::SubmitCopy(dstBuffer, srcBuffer, byteCount,
