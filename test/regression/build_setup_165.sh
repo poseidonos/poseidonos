@@ -11,6 +11,7 @@ master_bin_path="/mnt/rsa_nfs/pos-bin"
 pos_bin_filename="poseidonos"
 build_optimization="ON"
 job_number=12
+wt_enable=0
 
 printVariable()
 {
@@ -180,10 +181,13 @@ setupTest()
     echo 1 > /proc/sys/vm/drop_caches
     ./script/setup_env.sh
 
-    if [ $target_type == "VM" ]
+    if [ $wt_enable -eq 1 ]
     then
-        xecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
+        texecc cp $pos_working_dir/config/ibofos_for_psd_ci_wt.conf $pos_conf/pos.conf
+    else
+        texecc cp $pos_working_dir/config/ibofos_for_psd_ci.conf $pos_conf/pos.conf
     fi
+    
 
     rmmod nvme_tcp
     rmmod nvme_rdma
@@ -208,7 +212,7 @@ print_help()
     fi
 }
 
-while getopts "i:h:t:c:r:d:o:" opt
+while getopts "i:h:t:c:r:d:o:w" opt
 do
     case "$opt" in
         h) print_help
@@ -225,6 +229,8 @@ do
             pos_working_dir="${pos_root_dir}/ibofos"
             ;;
         o) build_optimization="$OPTARG"
+            ;;
+        w) wt_enable=1
             ;;
         ?) exit 2
             ;;
