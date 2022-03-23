@@ -384,10 +384,10 @@ Mio::GetStartLpn(void)
     return startLpn;
 }
 
-bool
-Mio::IsTargetStorageSSD(void)
+MetaStorageType
+Mio::GetTargetStorage(void)
 {
-    return originReq->targetMediaType == MetaStorageType::SSD;
+    return originReq->targetMediaType;
 }
 
 void*

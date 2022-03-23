@@ -455,7 +455,7 @@ MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
 void
 MioHandler::_FreeLockContext(Mio* mio)
 {
-    int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
+    int storage = (int)mio->GetTargetStorage();
     int arrayId = mio->GetArrayId();
 
     if (nullptr != ioRangeOverlapChker[arrayId][storage])
