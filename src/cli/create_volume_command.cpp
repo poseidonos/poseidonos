@@ -34,7 +34,9 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/qos/qos_manager.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/volume/volume_service.h"
+
 namespace pos_cli
 {
 CreateVolumeCommand::CreateVolumeCommand(void)
@@ -79,6 +81,21 @@ CreateVolumeCommand::Execute(json& doc, string rid)
             maxbw = doc["param"]["maxbw"].get<uint64_t>();
         }
 
+        int ret = FAIL;
+
+        ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        IArrayInfo* array = info->arrayInfo;
+        ArrayStateType arrayState = array->GetState();
+        if (arrayState == ArrayStateEnum::BROKEN)
+        {
+            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
+                arrayName, arrayState.ToString());
+
+            return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
+                "failed to create volume: " + volName + ", " + qosMsg, GetPosInfo());
+        }
+
         if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
         {
             maxiops = 0;
@@ -86,7 +103,6 @@ CreateVolumeCommand::Execute(json& doc, string rid)
             qosMsg = "Parameter setting skipped. Fe_qos is disabled.";
         }
 
-        int ret = FAIL;
         IVolumeManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 

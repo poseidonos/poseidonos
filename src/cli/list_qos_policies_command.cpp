@@ -37,6 +37,7 @@
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
+#include "src/array_mgmt/array_manager.h"
 
 #include <vector>
 
@@ -84,6 +85,19 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     array.SetAttribute(JsonAttribute("ArrayName", "\"" + arrayName + "\""));
     arrayJson.AddElement(array);
     data.SetArray(arrayJson);
+
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    IArrayInfo* arrayInfo = info->arrayInfo;
+    ArrayStateType arrayState = arrayInfo->GetState();
+    if (arrayState == ArrayStateEnum::BROKEN)
+    {
+        int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+        POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
+            arrayName, arrayState.ToString());
+        return jFormat.MakeResponse("LISTQOSPOLICIES", rid, FAIL,
+             "failed to list qos volume: " + volName, GetPosInfo());
+    }
 
     rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy(arrayName);
     string impact = _GetRebuildImpactString(rebuildPolicy.rebuildImpact);

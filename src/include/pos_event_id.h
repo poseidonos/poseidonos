@@ -83,6 +83,7 @@ enum class POS_EVENT_ID
     CLI_ARRAY_INFO_ARRAY_NOT_EXIST,
     CLI_AUTOCREATE_ARRAY_FAILURE,
     CLI_AUTOCREATE_ARRAY_SUCCESS,
+    CLI_COMMAND_FAILURE_ARRAY_BROKEN,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1182,6 +1183,9 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::CLI_AUTOCREATE_ARRAY_SUCCESS,
             new PosEventInfoEntry("CLI_AUTOCREATE_ARRAY_SUCCESS",
                 "an array has been created successfully via autocreate", "", "")},
+        {(int)POS_EVENT_ID::CLI_COMMAND_FAILURE_ARRAY_BROKEN,
+            new PosEventInfoEntry("CLI_COMMAND_FAILURE_ARRAY_BROKEN",
+                "failed to process the command", "the state of the array is not normal", "")},
 
         {(int)POS_EVENT_ID::CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS,
             new PosEventInfoEntry("CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS",

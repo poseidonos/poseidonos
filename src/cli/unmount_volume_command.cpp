@@ -34,6 +34,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/volume/volume_service.h"
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos_cli
 {
@@ -65,6 +66,21 @@ UnmountVolumeCommand::Execute(json& doc, string rid)
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         int ret = FAIL;
+
+        ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        IArrayInfo* array = info->arrayInfo;
+
+        ArrayStateType arrayState = array->GetState();
+        if (arrayState == ArrayStateEnum::BROKEN)
+        {
+            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
+                arrayName, arrayState.ToString());
+
+            return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
+                 "failed to unmount volume: " + volName, GetPosInfo());
+        }
+
         if (volMgr != nullptr)
         {
             ret = volMgr->Unmount(volName);

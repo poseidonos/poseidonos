@@ -75,6 +75,19 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
     }
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    IArrayInfo* array = info->arrayInfo;
+    ArrayStateType arrayState = array->GetState();
+    if (arrayState == ArrayStateEnum::BROKEN)
+    {
+        int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+        POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
+            arrayName, arrayState.ToString());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, FAIL,
+             "failed to reset qos policy for volumes", GetPosInfo());
+    }
+
     IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
