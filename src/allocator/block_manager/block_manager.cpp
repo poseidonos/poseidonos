@@ -112,7 +112,14 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
 
     StripeId newVsid = arrayLsid;
     Stripe* stripe = new Stripe(iReverseMap, false, addrInfo->GetblksPerStripe());
-    stripe->Assign(newVsid, UINT32_MAX, iWBStripeAllocator->GetUserStripeId(newVsid), 0);
+    bool stripeAssigned = stripe->Assign(newVsid, UINT32_MAX, iWBStripeAllocator->GetUserStripeId(newVsid), 0);
+    if (!stripeAssigned)
+    {
+        POS_TRACE_ERROR(EID(ALLOCATOR_FAILED_TO_ASSIGN_STRIPE),
+            "Failed to assign a stripe for GC destination for vsid {}, volume {}. Returning the stripe for now.", newVsid, volumeId);
+        return stripe; // TODO(yyu): replace it with nullptr to propagate the error
+    }
+
     return stripe;
 }
 
@@ -228,7 +235,12 @@ void
 BlockManager::_AssignStripe(StripeId vsid, StripeId wbLsid, ASTailArrayIdx asTailArrayIdx)
 {
     Stripe* stripe = iWBStripeAllocator->GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, iWBStripeAllocator->GetUserStripeId(vsid), asTailArrayIdx);
+    bool stripeAssigned = stripe->Assign(vsid, wbLsid, iWBStripeAllocator->GetUserStripeId(vsid), asTailArrayIdx);
+    if (!stripeAssigned)
+    {
+        POS_TRACE_ERROR(EID(ALLOCATOR_FAILED_TO_ASSIGN_STRIPE),
+            "Failed to assign a stripe for vsid {}, wbLsid {}, tailArrayIdx {}", vsid, wbLsid, asTailArrayIdx);
+    }
 }
 
 StripeId

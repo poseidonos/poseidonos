@@ -90,9 +90,16 @@ Stripe::GetVictimVsa(uint32_t offset)
     return oldVsaList[offset];
 }
 
-void
+bool
 Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArrayIdx tailArrayIdx_)
 {
+    if (vsid_ != userLsid_)
+    {
+        POS_TRACE_ERROR(EID(META_STRIPE_FAILED_TO_ASSIGN),
+            "Cannot assign a stripe when its vsid {} does not match with userLsid {}",
+            vsid_, userLsid_);
+        return false;
+    }
     vsid = vsid_;
     wbLsid = wbLsid_;
     userLsid = userLsid_;
@@ -108,6 +115,7 @@ Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArray
     {
         revMapPack = iReverseMap->Assign(wbLsid, vsid);
     }
+    return true;
 }
 
 bool

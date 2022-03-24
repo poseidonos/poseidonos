@@ -10,7 +10,7 @@ class MockStripe : public Stripe
 {
 public:
     using Stripe::Stripe;
-    MOCK_METHOD(void, Assign, (StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx), (override));
+    MOCK_METHOD(bool, Assign, (StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx), (override));
     MOCK_METHOD(uint32_t, GetVolumeId, (), (override));
     MOCK_METHOD(StripeId, GetVsid, (), (override));
     MOCK_METHOD(void, SetVsid, (StripeId virtsid), (override));

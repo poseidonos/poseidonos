@@ -418,13 +418,13 @@ TEST(WBStripeManager, _ReconstructAS_TestwithAllConditions)
     int ret = wbStripeManager._ReconstructAS(0, 0, 0, 0, param);
 
     // given 2.
-    EXPECT_CALL(*stripe, Assign).Times(1);
+    EXPECT_CALL(*stripe, Assign).WillOnce(Return(true));
     EXPECT_CALL(*stripe, DecreseBlksRemaining).WillOnce(Return(0));
     // when 2.
     ret = wbStripeManager._ReconstructAS(0, 0, 1, 0, param);
 
     // given 3.
-    EXPECT_CALL(*stripe, Assign).Times(1);
+    EXPECT_CALL(*stripe, Assign).WillOnce(Return(true));
     EXPECT_CALL(*stripe, DecreseBlksRemaining).WillOnce(Return(1));
     // when 2.
     ret = wbStripeManager._ReconstructAS(0, 0, 1, 0, param);

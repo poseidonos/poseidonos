@@ -362,7 +362,14 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     }
 
     stripe = GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, tailarrayidx, GetUserStripeId(vsid));
+    bool stripeAssigned = stripe->Assign(vsid, wbLsid, GetUserStripeId(vsid), tailarrayidx);
+    if (!stripeAssigned)
+    {
+        int errorCode = EID(ALLOCATOR_FAILED_TO_ASSIGN_STRIPE);
+        POS_TRACE_ERROR(errorCode,
+            "Failed to assign a stripe. Stopping active stripe reconstruction for vsid {}, tailarrayidx {}", vsid, tailarrayidx);
+        return -errorCode;
+    }
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_RECONSTRUCT_STRIPE),
         "Stripe (vsid {}, wbLsid {}, blockCount {}) is reconstructed",

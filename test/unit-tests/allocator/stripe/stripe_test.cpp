@@ -20,22 +20,35 @@ TEST(Stripe, Stripe_TestConstructor)
     delete stripe;
 }
 
-TEST(Stripe, Assign_TestSimpleSetter)
+TEST(Stripe, Assign_TestIfValidatesTheEqualityOfVsidAndUserLsid)
 {
-    // given
+    // Given 1: vsid == userLsid
     NiceMock<MockReverseMapManager> revMap;
     Stripe stripe(&revMap, false, 10);
     EXPECT_CALL(revMap, AllocReverseMapPack).Times(1);
-    // when
     StripeId vsid = 10;
     StripeId wbLsid = 24;
     StripeId userLsid = 10;
     uint32_t volumeId = 5;
-    stripe.Assign(vsid, wbLsid, userLsid, volumeId);
 
+    // When 1: we try to assign a stripe with vsid == userLsid
+    bool stripeAssigned = stripe.Assign(vsid, wbLsid, userLsid, volumeId);
+
+    // Then 1: we should succeed to assign
+    EXPECT_EQ(true, stripeAssigned);
+
+    // Given 2: vsid != userLsid
+    userLsid = vsid + 1;
+
+    // When 2: we try to assign a stripe with vsid != userLsid
+    stripeAssigned = stripe.Assign(vsid, wbLsid, userLsid, volumeId);
+
+    // Then 2: we should fail to assign
+    EXPECT_EQ(false, stripeAssigned);
+
+    // Simple setter tests
     EXPECT_EQ(stripe.GetVsid(), vsid);
     EXPECT_EQ(stripe.GetWbLsid(), wbLsid);
-    EXPECT_EQ(stripe.GetUserLsid(), userLsid);
     EXPECT_EQ(stripe.GetVolumeId(), volumeId);
 }
 
