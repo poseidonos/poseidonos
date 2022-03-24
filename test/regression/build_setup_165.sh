@@ -183,9 +183,9 @@ setupTest()
 
     if [ $wt_enable -eq 1 ]
     then
-        texecc cp $pos_working_dir/config/ibofos_for_psd_ci_wt.conf $pos_conf/pos.conf
+        cp $pos_working_dir/config/ibofos_for_psd_ci_wt.conf $pos_conf/pos.conf
     else
-        texecc cp $pos_working_dir/config/ibofos_for_psd_ci.conf $pos_conf/pos.conf
+        cp $pos_working_dir/config/ibofos_for_psd_ci.conf $pos_conf/pos.conf
     fi
     
 
