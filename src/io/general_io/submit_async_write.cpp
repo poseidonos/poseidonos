@@ -103,7 +103,6 @@ SubmitAsyncWrite::Execute(
     std::list<PhysicalWriteEntry> parityPhysicalWriteEntries;
     int parityResult = translator->GetParityList(
         arrayId, partitionToIO, parityPhysicalWriteEntries, logicalWriteEntry);
-
     if (ret != 0 || parityResult != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
@@ -152,6 +151,18 @@ SubmitAsyncWrite::Execute(
     for (PhysicalWriteEntry& parityPhysicalWriteEntry : parityPhysicalWriteEntries)
     {
         totalIoCount += parityPhysicalWriteEntry.buffers.size();
+    }
+
+    if (totalIoCount == 0)
+    {
+        bool done = callback->Execute();
+        IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+        if (false == done)
+        {
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+            return errorToReturn;
+        }
+        return IOSubmitHandlerStatus::SUCCESS;
     }
 
     callback->SetWaitingCount(1);
