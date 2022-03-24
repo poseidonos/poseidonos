@@ -113,12 +113,7 @@ WBStripeManager::Init(void)
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
         Stripe* stripe = new Stripe(iReverseMap, true, addrInfo->GetblksPerStripe());
-
-        for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
-        {
-            void* buffer = stripeBufferPool->TryGetBuffer();
-            stripe->AddDataBuffer(buffer);
-        }
+        // DEPRECATED: "stripe" used to have its dedicated buffer that would be allocated from stripeBufferPool, but not any more.
         wbStripeArray.push_back(stripe);
     }
 }

@@ -32,10 +32,15 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
     LogicalBlkAddr expectedAddr = {
         .stripeId = 5,
         .offset = 0 };
-    EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
-        IODirection::WRITE,
-        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
-        PartitionType::WRITE_BUFFER, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
+
+    for (int i = 0; i < CHUNK_CNT; i++)
+    {
+        EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
+            IODirection::WRITE,
+            _, expectedAddr, BLOCKS_IN_CHUNK,
+            PartitionType::WRITE_BUFFER, _, 0, _)).Times(1);
+        expectedAddr.offset += BLOCKS_IN_CHUNK;
+    }
 
     bool success = readStripeCompletion.Execute();
     EXPECT_EQ(success, true);
@@ -67,9 +72,10 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
     LogicalBlkAddr expectedAddr = {
         .stripeId = 5,
         .offset = 0 };
+
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
         IODirection::WRITE,
-        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
+        _, expectedAddr, BLOCKS_IN_CHUNK,
         PartitionType::WRITE_BUFFER, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
 
     bool success = readStripeCompletion.Execute();

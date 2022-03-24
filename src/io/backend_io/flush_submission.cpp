@@ -47,18 +47,20 @@
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
 FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled)
 : FlushSubmission(inputStripe,
       IIOSubmitHandler::GetInstance(), arrayId,
+      ArrayMgr()->GetInfo(arrayId) != nullptr ? ArrayMgr()->GetInfo(arrayId)->arrayInfo : nullptr,
       ArrayService::Instance()->Getter()->GetTranslator(), isWTEnabled)
 {
 }
 
 FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-    IIOTranslator* translator, bool isWTEnabled)
+    IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iIOSubmitHandler(ioSubmitHandler),
@@ -67,6 +69,16 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmit
   isWTEnabled(isWTEnabled)
 {
     SetEventType(BackendEvent_Flush);
+
+    if (arrayInfo == nullptr)
+    {
+        POS_TRACE_ERROR(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_ID), "Failed to retrieve array information for array id {}.", arrayId);
+        udSize = nullptr;
+    }
+    else
+    {
+        udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    }
 }
 
 FlushSubmission::~FlushSubmission(void)
@@ -123,7 +135,14 @@ FlushSubmission::Execute(void)
         }
     }
     char* offset = static_cast<char*>(basePointer) + (physicalEntry.addr.lba * ArrayConfig::SECTOR_SIZE_BYTE);
-    for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
+
+    if (udSize == nullptr)
+    {
+        POS_TRACE_ERROR(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_ID), "Failed to get a valid logical partition size for array id {}", arrayId);
+        return false;
+    }
+
+    for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; chunkCnt++)
     {
         BufferEntry bufferEntry(offset, BLOCKS_IN_CHUNK);
         bufferList.push_back(bufferEntry);
