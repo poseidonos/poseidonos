@@ -31,7 +31,6 @@ def play(json_targets, json_inits, json_scenario):
         except KeyError:
             lib.printer.red(" TargetError: Target KEY is invalid")
             return
-        target_obj.CliInLocal()
         if not target_obj.Prepare():
             skip_workload = True
             break

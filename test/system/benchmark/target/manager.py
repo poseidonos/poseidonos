@@ -23,13 +23,13 @@ class Target:
         self.spdk_no_shd_buf = json["SPDK"]["TRANSPORT"]["NUM_SHARED_BUFFER"]
         self.pos_dir = json["DIR"]
         self.pos_bin = json["POS"]["BIN"]
-        self.pos_cli = json["POS"]["CLI"]
         self.pos_cfg = json["POS"]["CFG"]
         self.pos_log = json["POS"]["LOG"]
         self.use_autogen = json["AUTO_GENERATE"]["USE"]
         self.subsystem_list = []
         self.array_volume_list = {}
         self.volume_size = ""
+        self.cli = pos.cli.Cli(json)
 
     def Prepare(self):
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
@@ -84,8 +84,7 @@ class Target:
         time.sleep(10)
 
         # spdk setting
-        if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
-            return False
+        self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
 
         # create subsystem and add listener
         if "yes" == self.use_autogen:
@@ -94,52 +93,41 @@ class Target:
                 for i in range(subsys["NUM"]):
                     nqn = f"nqn.2020-10.pos\\:subsystem{i+nqn_base+1:02d}"
                     sn = f"POS000000000000{i+nqn_base+1:02d}"
-                    if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn, sn):
-                        return False
-                    if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn,
-                                                            self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
-                        return False
+                    self.cli.subsystem_create(nqn, sn)
+                    self.cli.subsystem_add_listener(
+                        nqn, self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"])
                     subsystem_tmp = [subsys["INITIATOR"], nqn, sn,
                                      self.json["NIC"][subsys["IP"]], subsys["PORT"]]
                     self.subsystem_list.append(subsystem_tmp)
                 nqn_base += subsys["NUM"]
-
         else:
             for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
-                if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
-                    return False
-                if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"],
-                                                        self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
-                    return False
+                self.cli.subsystem_create(subsys["NQN"], subsys["SN"])
+                self.cli.subsystem_add_listener(
+                    subsys["NQN"], self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"])
 
         # telemetry start
         time.sleep(10)
-        pos.cli.telemetry_start(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        self.cli.telemetry_start()
 
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
             buf_dev = array["BUFFER_DEVICE"]
-            if -1 == pos.cli.bdev_malloc_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, buf_dev["NAME"],
-                                                buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"]):
-                return False
-        if -1 == pos.cli.device_scan(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
-            return False
-        if -1 == pos.cli.array_reset(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
-            return False
+            self.cli.device_create(
+                buf_dev["NAME"], buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"])
+
+        self.cli.device_scan()
+        self.cli.array_reset()
         for array in self.json["POS"]["ARRAYs"]:
-            if -1 == pos.cli.array_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["BUFFER_DEVICE"]["NAME"], array["USER_DEVICE_LIST"],
-                                          array["SPARE_DEVICE_LIST"], array["NAME"], array["RAID_TYPE"]):
-                return False
-            if -1 == pos.cli.array_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["NAME"]):
-                return False
+            self.cli.array_create(array["BUFFER_DEVICE"]["NAME"], array["USER_DEVICE_LIST"],
+                                  array["SPARE_DEVICE_LIST"], array["NAME"], array["RAID_TYPE"])
+            self.cli.array_mount(array["NAME"])
             if "yes" != self.use_autogen:
                 for volume in array["VOLUMEs"]:
-                    if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
-                                                   volume["SIZE"], array["NAME"]):
-                        return False
-                    if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
-                                                  volume["SUBNQN"], array["NAME"]):
-                        return False
+                    self.cli.volume_create(
+                        volume["NAME"], volume["SIZE"], array["NAME"])
+                    self.cli.volume_mount(
+                        volume["NAME"], volume["SUBNQN"], array["NAME"])
 
         # create, mount volume(auto)
         if "yes" == self.use_autogen:
@@ -152,35 +140,25 @@ class Target:
                         volume_name = f"VOL{i+nqn_base+1}"
                         volume_list.append(volume_name)
                         self.volume_size = vol["SIZE"]
-                        if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
-                                                       vol["SIZE"], vol["ARRAY"]):
-                            return False
-                        if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
-                                                      nqn, vol["ARRAY"]):
-                            return False
+                        self.cli.volume_create(
+                            volume_name, vol["SIZE"], vol["ARRAY"])
+                        self.cli.volume_mount(volume_name, nqn, vol["ARRAY"])
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
-        pos.cli.logger_setlevel(
-            self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "info")
+        self.cli.logger_set_level("info")
 
         # print subsystems
-        subsys = pos.cli.subsystem_list(
-            self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        subsys = self.cli.subsystem_list()
         print(subsys)
 
         lib.printer.green(f" '{self.name}' prepared")
         return True
 
-    def CliInLocal(self):
-        pos.set_cli_in_local()
-
     def Wrapup(self):
         for array in self.json["POS"]["ARRAYs"]:
-            if -1 == pos.cli.array_unmount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["NAME"]):
-                return False
-        if -1 == pos.cli.system_stop(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
-            return False
+            self.cli.array_unmount(array["NAME"])
+        self.cli.system_stop()
         lib.printer.green(f" '{self.name}' wrapped up")
         return True
 
@@ -197,8 +175,7 @@ class Target:
         time.sleep(1)
 
         # spdk setting
-        if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
-            return False
+        self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
 
         if "yes" == self.use_autogen:
             nqn_base = 0
@@ -206,41 +183,33 @@ class Target:
                 for i in range(subsys["NUM"]):
                     nqn = f"nqn.2020-10.pos\\:subsystem{i+nqn_base+1:02d}"
                     sn = f"POS000000000000{i+nqn_base+1:02d}"
-                    if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn, sn):
-                        return False
-                    if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn,
-                                                            self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
-                        return False
+                    self.cli.subsystem_create(nqn, sn)
+                    self.cli.subsystem_add_listener(
+                        nqn, self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"])
                     subsystem_tmp = [subsys["INITIATOR"], nqn, sn,
                                      self.json["NIC"][subsys["IP"]], subsys["PORT"]]
                     self.subsystem_list.append(subsystem_tmp)
                 nqn_base += subsys["NUM"]
         else:
             for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
-                if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
-                    return False
-                if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"],
-                                                        self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
-                    return False
+                self.cli.subsystem_create(subsys["NQN"], subsys["SN"])
+                self.cli.subsystem_add_listener(
+                    subsys["NQN"], self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"])
 
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
             buf_dev = array["BUFFER_DEVICE"]
-            if -1 == pos.cli.bdev_malloc_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, buf_dev["NAME"],
-                                                buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"]):
-                return False
-        if -1 == pos.cli.device_scan(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
-            return False
+            self.cli.device_create(
+                buf_dev["NAME"], buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"])
+        self.cli.device_scan()
 
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
-            if -1 == pos.cli.array_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["NAME"]):
-                return False
+            self.cli.array_mount(array["NAME"])
             if "yes" != self.use_autogen:
                 for volume in array["VOLUMEs"]:
-                    if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
-                                                  volume["SUBNQN"], array["NAME"]):
-                        return False
+                    self.cli.volume_mount(
+                        volume["NAME"], volume["SUBNQN"], array["NAME"])
 
         # create, mount volume(auto)
         if "yes" == self.use_autogen:
@@ -252,18 +221,14 @@ class Target:
                         nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
                         volume_name = f"VOL{i+nqn_base+1}"
                         volume_list.append(volume_name)
-                        if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
-                                                      nqn, vol["ARRAY"]):
-                            return False
+                        self.cli.volume_mount(volume_name, nqn, vol["ARRAY"])
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
-        pos.cli.logger_setlevel(
-            self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, "info")
+        self.cli.logger_set_level("info")
 
         # print subsystems
-        subsys = pos.cli.subsystem_list(
-            self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        subsys = self.cli.subsystem_list()
         print(subsys)
 
         lib.printer.green(f" '{self.name}' prepared")
@@ -276,13 +241,13 @@ class Target:
         return pos.env.pcie_scan(self.id, self.pw, self.nic_ssh)
 
     def CheckRebuildComplete(self, arr_name):
-        return pos.cli.check_rebuild_complete(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, arr_name)
+        return self.cli.array_list(arr_name)
 
     def DeviceList(self):
-        return pos.cli.device_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        return self.cli.device_list()
 
     def AddSpare(self, arr_name, dev_name):
-        return pos.cli.add_spare(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, arr_name, dev_name)
+        return self.cli.array_add_spare(arr_name, dev_name)
 
     def SetRebuildImpact(self, impact):
-        return pos.cli.set_rebuild_impact(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, impact)
+        return self.cli.system_set_property(impact)

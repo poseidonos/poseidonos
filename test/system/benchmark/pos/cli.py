@@ -1,275 +1,84 @@
 import lib
-import subprocess
-
-execute_cli_in_local = False
+from pos.cli_version import *
 
 
-def set_cli_in_local():
-    global execute_cli_in_local
-    execute_cli_in_local = True
-    return execute_cli_in_local
-
-
-def prefix_string(id, pw, ip):
-    prefix = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup"
-    if (execute_cli_in_local is True):
-        prefix = ""
-    return prefix
-
-
-def system_stop(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} system stop --force"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
-
-
-def device_scan(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} device scan"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
-
-
-def array_reset(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} devel resetmbr"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
-
-
-def array_create(id, pw, ip, cli, dir, buffer_dev, user_devs, spare_devs, arr_name, raid_type):
-    try:
-        if 0 == len(spare_devs):
-            prefix = prefix_string(id, pw, ip)
-            cli_cmd = prefix + \
-                f" {dir}/bin/{cli} array create -b {buffer_dev} -d {user_devs} --array-name {arr_name} --raid {raid_type}"
+class Cli:
+    def __init__(self, json):
+        cli_cmd = f"sshpass -p {json['PW']} ssh -o StrictHostKeyChecking=no \
+            {json['ID']}@{json['NIC']['SSH']} sudo nohup \
+            {json['DIR']}/bin/{json['POS']['CLI']} --version"
+        result = lib.subproc.sync_run(cli_cmd)
+        if ("poseidonos-cli version 1.0.1-202203213\n" == result):
+            self.cli = cli_1_0_1.Cli_1_0_1(json)
         else:
-            prefix = prefix_string(id, pw, ip)
-            cli_cmd = prefix + \
-                f" {dir}/bin/{cli} array create -b {buffer_dev} -d {user_devs} -s {spare_devs} --array-name {arr_name} --raid {raid_type}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+            raise ValueError(f"Not supported poseidonos-cli version: {result}")
 
+    def array_add_spare(self, arr_name, dev_name):
+        return self.cli.array_add_spare(arr_name, dev_name)
 
-def array_mount(id, pw, ip, cli, dir, arr_name):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} array mount --array-name {arr_name}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def array_create(self, buffer_dev, user_devs, spare_devs, arr_name, raid_type):
+        return self.cli.array_create(buffer_dev, user_devs,
+                                     spare_devs, arr_name, raid_type)
 
+    def array_list(self, arr_name):
+        return self.cli.array_list(arr_name)
 
-def array_unmount(id, pw, ip, cli, dir, arr_name):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} array unmount --array-name {arr_name} --force"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def array_mount(self, arr_name, wb_mode=False):
+        return self.cli.array_mount(arr_name, wb_mode)
 
+    def array_reset(self):
+        return self.cli.array_reset()
 
-def volume_create(id, pw, ip, cli, dir, vol_name, vol_size, arr_name):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} volume create --volume-name {vol_name} --size {vol_size} --maxiops 0 --maxbw 0 --array-name {arr_name}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def array_unmount(self, arr_name):
+        return self.cli.array_unmount(arr_name)
 
+    def device_create(self, dev_name, dev_type, num_blk, blk_size, numa):
+        return self.cli.device_create(dev_name, dev_type, num_blk, blk_size, numa)
 
-def volume_mount(id, pw, ip, cli, dir, vol_name, subnqn, arr_name):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} volume mount --volume-name {vol_name} --array-name {arr_name} --subnqn {subnqn} --force"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def device_list(self):
+        return self.cli.device_list()
 
+    def device_scan(self):
+        return self.cli.device_scan()
 
-def telemetry_start(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} telemetry start"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def logger_set_level(self, level):
+        return self.cli.logger_set_level(level)
 
+    def qos_create(self, arr_name, vol_name, maxbw, maxiops, minbw, miniops):
+        return self.cli.qos_create(arr_name, vol_name, maxbw, maxiops, minbw, miniops)
 
-def telemetry_stop(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} telemetry stop"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def qos_reset(self, arr_name, vol_name):
+        return self.cli.qos_reset(arr_name, vol_name)
 
+    def subsystem_add_listener(self, nqn, trtype, target_ip, port):
+        return self.cli.subsystem_add_listener(nqn, trtype, target_ip, port)
 
-def bdev_malloc_create(id, pw, ip, cli, dir, dev_name, dev_type, num_blk, blk_size, numa):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} device create --device-name {dev_name} --device-type {dev_type} --num-blocks {num_blk} --block-size {blk_size} --numa {numa}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def subsystem_create(self, nqn, sn):
+        return self.cli.subsystem_create(nqn, sn)
 
+    def subsystem_create_transport(self, trtype, num_shared_buf):
+        return self.cli.subsystem_create_transport(trtype, num_shared_buf)
 
-def transport_create(id, pw, ip, cli, dir, trtype, num_shared_buf):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} subsystem create-transport --trtype {trtype} -c 64 --num-shared-buf {num_shared_buf}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def subsystem_list(self):
+        return self.cli.subsystem_list()
 
+    def system_set_property(self, impact):
+        return self.cli.system_set_property(impact)
 
-def subsystem_create(id, pw, ip, cli, dir, nqn, sn):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} subsystem create --subnqn {nqn} --serial-number {sn} --model-number POS_VOLUME_EXTENSION -m 256 -o"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def system_stop(self):
+        return self.cli.system_stop()
 
+    def telemetry_start(self):
+        return self.cli.telemetry_start()
 
-def subsystem_add_listener(id, pw, ip, cli, dir, nqn, trtype, target_ip, port):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} subsystem add-listener --subnqn {nqn} -t {trtype} -i {target_ip} -p {port}"
-        lib.subproc.sync_run(cli_cmd)
-        return 0
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
+    def telemetry_stop(self):
+        return self.cli.telemetry_stop()
 
+    def volume_create(self, vol_name, vol_size, arr_name, maxiops=0, maxbw=0):
+        return self.cli.volume_create(vol_name, vol_size, arr_name, maxiops, maxbw)
 
-def subsystem_list(id, pw, ip, cli, dir):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} subsystem list"
-        return lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
-
-
-def logger_setlevel(id, pw, ip, cli, dir, level):
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} logger set-level --level {level}"
-        lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-        return -1
-
-
-def check_rebuild_complete(id, pw, ip, cli, dir, arr_name):
-    ret = ''
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} array list --array-name {arr_name}"
-        ret = lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-    return ret
-
-
-def device_list(id, pw, ip, cli, dir):
-    ret = ''
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + f" {dir}/bin/{cli} device list"
-        ret = lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-    return ret
-
-
-def add_spare(id, pw, ip, cli, dir, arr_name, dev_name):
-    ret = ''
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} array addspare -a {arr_name} -s {dev_name}"
-        ret = lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-    return ret
-
-
-def set_rebuild_impact(id, pw, ip, cli, dir, impact):
-    ret = ''
-    try:
-        prefix = prefix_string(id, pw, ip)
-        cli_cmd = prefix + \
-            f" {dir}/bin/{cli} system set-property --rebuild-impact {impact}"
-        ret = lib.subproc.sync_run(cli_cmd)
-    except Exception as e:
-        lib.printer.red(cli_cmd)
-        lib.printer.red(f"{__name__} [Error] {e}")
-    return ret
+    def volume_mount(self, vol_name, subnqn, arr_name):
+        return self.cli.volume_mount(vol_name, subnqn, arr_name)
 
 
 def set_qos(id, pw, ip, cli, dir, array_name, vol_name, limit_type, limit_value=0, min=False):
