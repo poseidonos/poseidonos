@@ -68,7 +68,6 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("array") && doc["param"].contains("vol"))
     {
         string arrayName = doc["param"]["array"].get<std::string>();
-        string volName = doc["param"]["vol"].get<std::string>();
 
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
         IArrayInfo* array = info->arrayInfo;
@@ -81,7 +80,7 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
                 arrayName, arrayState.ToString());
 
             return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, FAIL,
-                 "failed to create a qos policy for volume: " + volName, GetPosInfo());
+                 "failed to create a qos policy", GetPosInfo());
         }
 
         validInput = _HandleInputVolumes(doc);
