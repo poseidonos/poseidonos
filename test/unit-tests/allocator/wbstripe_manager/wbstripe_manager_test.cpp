@@ -621,6 +621,9 @@ TEST(WBStripeManager, LoadPendingStripesToWriteBuffer_testIfStripeLoadRequested)
     ON_CALL(addrInfo, GetblksPerStripe).WillByDefault(Return(128));
     ON_CALL(ctxManager, GetAllocatorCtx).WillByDefault(Return(&allocCtx));
 
+    addrInfo.SetUT(true);
+    EXPECT_CALL(addrInfo, IsUT).WillRepeatedly(Return(true));
+
     WBStripeManagerSpy wbStripeManager(nullptr, 1, nullptr, nullptr, &stripeMap, nullptr, &addrInfo, &ctxManager, &blkManager, &stripeLoadStatus, "", 0);
 
     // Add unflushed stripes

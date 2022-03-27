@@ -121,6 +121,12 @@ WBStripeManager::Init(void)
 void
 WBStripeManager::Dispose(void)
 {
+    if (nullptr != stripeLoadStatus && false == addrInfo->IsUT())
+    {
+        delete stripeLoadStatus;
+        stripeLoadStatus = nullptr;
+    }
+
     for (auto& stripeToClear : wbStripeArray)
     {
         if (nullptr != stripeToClear)
