@@ -151,13 +151,13 @@ MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 }
 
 bool
-MetaFsIoScheduler::AddArrayInfo(const int arrayId)
+MetaFsIoScheduler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
     bool result = true;
 
     for (auto metaIoWorker : metaIoWorkerList_)
     {
-        if (!metaIoWorker->AddArrayInfo(arrayId))
+        if (!metaIoWorker->AddArrayInfo(arrayId, map))
         {
             result = false;
             break;

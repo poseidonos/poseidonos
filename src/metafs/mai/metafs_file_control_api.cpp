@@ -31,6 +31,7 @@
  */
 
 #include "metafs_file_control_api.h"
+
 #include "src/metafs/log/metafs_log.h"
 
 namespace pos
@@ -39,8 +40,8 @@ MetaFsFileControlApi::MetaFsFileControlApi(void)
 {
 }
 
-MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaStorageSubsystem* storage,
-                                MetaVolumeManager* volMgr)
+MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
+    MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr)
 {
     this->arrayId = arrayId;
 
@@ -50,6 +51,8 @@ MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaStorageSubsystem* st
     nameMapByfd.clear();
     idxMapByName.clear();
 
+    this->storage = storage;
+    this->mgmt = mgmt;
     this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager(arrayId, storage) : volMgr;
 }
 
@@ -66,7 +69,7 @@ MetaFsFileControlApi::~MetaFsFileControlApi(void)
 
 POS_EVENT_ID
 MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
-                                MetaFilePropertySet prop, MetaVolumeType volumeType)
+    MetaFilePropertySet prop, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -228,7 +231,7 @@ MetaFsFileControlApi::GetAlignedFileIOSize(int fd, MetaVolumeType volumeType)
 // return data chunk size according to the data integrity level
 size_t
 MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-                                MetaVolumeType volumeType)
+    MetaVolumeType volumeType)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
@@ -237,7 +240,6 @@ MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
     reqMsg.fileProperty = prop;
     reqMsg.arrayId = arrayId;
     reqMsg.volType = volumeType;
-
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleEstimateDataChunkSizeReq()
 
@@ -253,7 +255,7 @@ MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
 
 size_t
 MetaFsFileControlApi::GetAvailableSpace(MetaFilePropertySet& prop,
-                                MetaVolumeType volumeType)
+    MetaVolumeType volumeType)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
@@ -341,7 +343,7 @@ MetaFsFileControlApi::Wbt_GetMetaFileList(MetaVolumeType type)
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         MFS_TRACE_DEBUG((int)rc,
-                "Request failed, type={}, arrayId={}", type, arrayId);
+            "Request failed, type={}, arrayId={}", type, arrayId);
     }
 
     return result;
@@ -393,7 +395,7 @@ MetaFsFileControlApi::_GetFileInode(std::string& fileName, MetaVolumeType type)
 
 void
 MetaFsFileControlApi::_AddFileContext(std::string& fileName,
-                        FileDescriptorType fd, MetaVolumeType type)
+    FileDescriptorType fd, MetaVolumeType type)
 {
     uint32_t index = 0;
     MetaFileInodeInfo* info = nullptr;
@@ -420,11 +422,11 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
         }
 
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "FileContext is allocated index={}, arrayId={}", index, arrayId);
+            "FileContext is allocated index={}, arrayId={}", index, arrayId);
 
         bitmap->SetBit(index);
-        nameMapByfd.insert({ make_pair(type, fd), fileName});
-        idxMapByName.insert({ make_pair(type, fileName), index});
+        nameMapByfd.insert({make_pair(type, fd), fileName});
+        idxMapByName.insert({make_pair(type, fileName), index});
     }
 
     // update
@@ -436,12 +438,14 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
     context->chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     context->extentsCount = info->data.field.extentCnt;
     context->extents = info->data.field.extentMap;
+    context->signature = mgmt->GetEpochSignature();
+    context->storage = storage;
     assert(context->extentsCount != 0);
 }
 
 void
 MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd,
-                        MetaVolumeType type)
+    MetaVolumeType type)
 {
     SPIN_LOCK_GUARD_IN_SCOPE(iLock);
 

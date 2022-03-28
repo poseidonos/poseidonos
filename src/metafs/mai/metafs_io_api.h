@@ -66,8 +66,8 @@ public:
     virtual POS_EVENT_ID SubmitIO(MetaFsAioCbCxt* cxt,
         MetaStorageType mediaType = MetaStorageType::SSD);
 
-    virtual bool AddArray(int arrayId);
-    virtual bool RemoveArray(int arrayId);
+    virtual bool AddArray(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map);
+    virtual bool RemoveArray(const int arrayId);
 
     virtual void SetStatus(bool isNormal);
 

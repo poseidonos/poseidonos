@@ -65,8 +65,8 @@ public:
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
     void Finalize(void);
 
-    bool AddArrayInfo(int arrayId);
-    bool RemoveArrayInfo(int arrayId);
+    bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map);
+    bool RemoveArrayInfo(const int arrayId);
 
 private:
     void _InitReqHandler(void);

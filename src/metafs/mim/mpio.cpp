@@ -179,7 +179,8 @@ Mpio::_CheckIOStatus(MpAioState expNextState)
 void
 Mpio::BuildCompositeMDPage(void)
 {
-    mdpage.Make(io.metaLpn, io.targetFD, io.arrayId);
+    mdpage.AttachControlInfo();
+    mdpage.Make(io.metaLpn, io.targetFD, io.arrayId, io.signature);
 }
 
 void*
@@ -195,36 +196,27 @@ Mpio::GetUserDataBuf(void)
 }
 
 bool
-Mpio::IsValidPage(void)
+Mpio::_CheckDataIntegrity(void) const
 {
-    mdpage.AttachControlInfo();
-
-    return mdpage.CheckValid(io.arrayId);
-}
-
-bool
-Mpio::CheckDataIntegrity(void)
-{
-    mdpage.AttachControlInfo();
-
-    bool integrityOk = true;
     if (false == mdpage.CheckLpnMismatch(io.metaLpn) ||
         false == mdpage.CheckFileMismatch(io.targetFD))
     {
-        integrityOk = false;
+        return false;
     }
 
-    return integrityOk;
+    return true;
 }
 
 bool
 Mpio::DoE2ECheck(MpAioState expNextState)
 {
-    if (IsValidPage())
+    mdpage.AttachControlInfo();
+
+    if (mdpage.CheckValid(io.arrayId, io.signature))
     {
-        if (false == CheckDataIntegrity())
+        if (!_CheckDataIntegrity())
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_INFORMATION,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_INFORMATION,
                 "[Mpio][DoE2ECheck ] E2E Check fail!, arrayId={}, mediaType={}, lpn={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn);
 

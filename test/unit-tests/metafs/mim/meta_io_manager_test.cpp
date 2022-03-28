@@ -150,13 +150,15 @@ TEST(MetaIoManager, CheckArray)
     MetaIoManager* mgr = new MetaIoManager(scheduler, storage);
     mgr->Init();
 
-    EXPECT_TRUE(mgr->AddArrayInfo(arrayId));
+    MaxMetaLpnMapPerMetaStorage map;
+
+    EXPECT_TRUE(mgr->AddArrayInfo(arrayId, map));
     EXPECT_TRUE(mgr->RemoveArrayInfo(arrayId));
 
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(false));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(false));
 
-    EXPECT_FALSE(mgr->AddArrayInfo(arrayId));
+    EXPECT_FALSE(mgr->AddArrayInfo(arrayId, map));
     EXPECT_FALSE(mgr->RemoveArrayInfo(arrayId));
 
     delete mgr;

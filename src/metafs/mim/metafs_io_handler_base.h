@@ -35,6 +35,8 @@
 #include <string>
 #include <thread>
 
+#include "src/metafs/include/meta_storage_specific.h"
+
 namespace pos
 {
 class MetaFsIoHandlerBase
@@ -48,7 +50,7 @@ public:
     virtual void StartThread(void) = 0;
     virtual void ExitThread(void);
 
-    virtual bool AddArrayInfo(const int arrayId) = 0;
+    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) = 0;
     virtual bool RemoveArrayInfo(const int arrayId) = 0;
 
     virtual void PrepareThread(void) const;

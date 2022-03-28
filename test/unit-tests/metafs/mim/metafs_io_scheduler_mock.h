@@ -46,7 +46,7 @@ public:
     MOCK_METHOD(void, StartThread, (), (override));
     MOCK_METHOD(void, ExitThread, (), (override));
     MOCK_METHOD(void, EnqueueNewReq, (MetaFsIoRequest* reqMsg), (override));
-    MOCK_METHOD(bool, AddArrayInfo, (const int arrayId), (override));
+    MOCK_METHOD(bool, AddArrayInfo, (const int arrayId, const MaxMetaLpnMapPerMetaStorage& map), (override));
     MOCK_METHOD(bool, RemoveArrayInfo, (const int arrayId), (override));
 };
 

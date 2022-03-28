@@ -39,16 +39,17 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "src/lib/bitmap.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/include/meta_file_context.h"
+#include "src/metafs/mai/metafs_management_api.h"
+#include "src/metafs/mvm/meta_volume_manager.h"
 #include "src/metafs/storage/mss.h"
 #include "src/metafs/util/metafs_spinlock.h"
-#include "src/metafs/mvm/meta_volume_manager.h"
-#include "src/metafs/include/meta_file_context.h"
-#include "src/meta_file_intf/meta_file_include.h"
 
 namespace pos
 {
@@ -56,29 +57,29 @@ class MetaFsFileControlApi
 {
 public:
     MetaFsFileControlApi(void);
-    explicit MetaFsFileControlApi(int arrayId, MetaStorageSubsystem* storage,
-                MetaVolumeManager* volMgr = nullptr);
+    explicit MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
+        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr = nullptr);
     virtual ~MetaFsFileControlApi(void);
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
-                MetaFilePropertySet prop = MetaFilePropertySet(),
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaFilePropertySet prop = MetaFilePropertySet(),
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Delete(std::string& fileName,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Open(std::string& fileName, int& fd,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Close(FileDescriptorType fd,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID CheckFileExist(std::string& fileName,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetFileSize(int fd,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetAlignedFileIOSize(int fd,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetAvailableSpace(MetaFilePropertySet& prop,
-                MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
     virtual void SetStatus(bool isNormal);
     virtual MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);
@@ -90,7 +91,7 @@ public:
     // for wbt commands
     virtual std::vector<MetaFileInfoDumpCxt> Wbt_GetMetaFileList(MetaVolumeType type);
     virtual MetaFileInodeInfo* Wbt_GetMetaFileInode(std::string& fileName,
-                MetaVolumeType type);
+        MetaVolumeType type);
 
     virtual void InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum);
     virtual bool CreateVolume(MetaVolumeType volType);
@@ -99,14 +100,16 @@ public:
 
 protected:
     MetaFileInodeInfo* _GetFileInode(std::string& fileName,
-                                    MetaVolumeType type);
+        MetaVolumeType type);
     void _AddFileContext(std::string& fileName, FileDescriptorType fd,
-                                    MetaVolumeType type);
+        MetaVolumeType type);
     void _RemoveFileContext(FileDescriptorType fd, MetaVolumeType type);
 
 private:
     int arrayId = INT32_MAX;
     bool isNormal = false;
+    MetaStorageSubsystem* storage;
+    MetaFsManagementApi* mgmt;
     MetaVolumeManager* volMgr = nullptr;
 
     BitMap* bitmap = nullptr;

@@ -29,8 +29,8 @@ public:
     MOCK_METHOD(POS_EVENT_ID, SubmitIO,
         (MetaFsAioCbCxt * cxt, MetaStorageType mediaType),
         (override));
-    MOCK_METHOD(bool, AddArray, (int arrayId), (override));
-    MOCK_METHOD(bool, RemoveArray, (int arrayId), (override));
+    MOCK_METHOD(bool, AddArray, (const int arrayId, const MaxMetaLpnMapPerMetaStorage& map), (override));
+    MOCK_METHOD(bool, RemoveArray, (const int arrayId), (override));
     MOCK_METHOD(void, SetStatus, (bool isNormal));
     MOCK_METHOD(void, SetMss, (MetaStorageSubsystem* metaStorage));
 };

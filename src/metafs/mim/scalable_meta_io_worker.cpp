@@ -83,9 +83,9 @@ ScalableMetaIoWorker::StartThread(void)
 }
 
 bool
-ScalableMetaIoWorker::AddArrayInfo(const int arrayId)
+ScalableMetaIoWorker::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
-    return topHalf_->AddArrayInfo(arrayId);
+    return topHalf_->AddArrayInfo(arrayId, map);
 }
 
 bool

@@ -32,17 +32,18 @@
 
 #pragma once
 
-#include <map>
-#include <vector>
-#include <string>
 #include <chrono>
+#include <map>
+#include <string>
+#include <vector>
 
-#include "metafs_io_multilevel_q.h"
 #include "metafs_io_handler_base.h"
+#include "metafs_io_multilevel_q.h"
 #include "mfs_io_range_overlap_chker.h"
+#include "mpio_handler.h"
+#include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/lib/metafs_pool.h"
 #include "src/metafs/mim/mio.h"
-#include "mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -69,7 +70,7 @@ public:
     virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     virtual void ExecuteMio(Mio& mio);
 
-    virtual bool AddArrayInfo(const int arrayId);
+    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map);
     virtual bool RemoveArrayInfo(const int arrayId);
 
     // for test
@@ -107,7 +108,7 @@ private:
     std::multimap<MetaLpnType, MetaFsIoRequest*> pendingIoRetryQ;
     static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
 
-    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = { 0 };
+    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = {0};
 
     const size_t MIO_POOL_SIZE;
     const size_t MPIO_POOL_SIZE;

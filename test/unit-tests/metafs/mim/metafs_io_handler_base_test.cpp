@@ -57,7 +57,7 @@ public:
     {
         th_ = new std::thread(std::bind(&MetaFsIoHandlerBaseTest::Execute, this));
     }
-    virtual bool AddArrayInfo(const int arrayId) override
+    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) override
     {
         return true;
     }

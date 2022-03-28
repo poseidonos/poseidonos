@@ -113,7 +113,7 @@ public:
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayInfo->GetIndex());
 
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex(), mss);
-        ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss);
+        ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss, mgmt);
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
         io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp);
 
@@ -153,6 +153,8 @@ protected:
     MockMetaFsIoApi* io;
 
     MockMetaFs* metaFs;
+
+    MaxMetaLpnMapPerMetaStorage map;
 };
 
 TEST_F(MioHandlerTestFixture, Normal)
@@ -169,8 +171,12 @@ TEST_F(MioHandlerTestFixture, Normal)
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
     EXPECT_CALL(*mgmt, IsValidVolume).WillRepeatedly(Return(true));
 
+    map.insert({MetaStorageType::SSD, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::SSD)});
+    map.insert({MetaStorageType::NVRAM, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::NVRAM)});
+    map.insert({MetaStorageType::JOURNAL_SSD, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::JOURNAL_SSD)});
+
     handler->BindPartialMpioHandler(bottomhalfHandler);
-    result = handler->AddArrayInfo(arrayInfo->GetIndex());
+    result = handler->AddArrayInfo(arrayInfo->GetIndex(), map);
     EXPECT_TRUE(result);
 
     for (int i = 0; i < MAX_COUNT; i++)
@@ -230,7 +236,11 @@ TEST_F(MioHandlerTestFixture, Repeat_AddAndRemoveArray)
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
     EXPECT_CALL(*mgmt, IsValidVolume).WillRepeatedly(Return(true));
 
-    result = handler->AddArrayInfo(arrayInfo->GetIndex());
+    map.insert({MetaStorageType::SSD, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::SSD)});
+    map.insert({MetaStorageType::NVRAM, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::NVRAM)});
+    map.insert({MetaStorageType::JOURNAL_SSD, ctrl->GetMaxMetaLpn((MetaVolumeType)MetaStorageType::JOURNAL_SSD)});
+
+    result = handler->AddArrayInfo(arrayInfo->GetIndex(), map);
     EXPECT_TRUE(result);
 
     result = handler->RemoveArrayInfo(arrayInfo->GetIndex());

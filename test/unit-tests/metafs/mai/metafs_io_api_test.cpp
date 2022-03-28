@@ -31,12 +31,13 @@
  */
 
 #include "src/metafs/mai/metafs_io_api.h"
+
+#include <gtest/gtest.h>
+
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mim/meta_io_manager_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-
-#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -128,7 +129,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
 
     MetaFsIoApi api(arrayId, ctrl, storage, tp, io);
@@ -169,7 +170,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
 
     MetaFsIoApi api(arrayId, ctrl, storage, tp, io);
@@ -286,7 +287,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
 
     MetaFsIoApi api(arrayId, ctrl, storage, tp, io);
@@ -327,7 +328,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
     NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
-    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage);
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
 
     MetaFsIoApi api(arrayId, ctrl, storage, tp, io);

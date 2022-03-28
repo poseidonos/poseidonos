@@ -400,7 +400,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
     MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
 
     mio->StoreTimestamp(MioTimestampStage::Allocate);
-    mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayId)->GetMss());
+    mio->Setup(&reqMsg, fileBaseLpn, reqMsg.fileCtx->storage);
 
     if (!mio->IsSyncIO())
     {
@@ -481,26 +481,19 @@ MioHandler::ExecuteMio(Mio& mio)
 }
 
 bool
-MioHandler::AddArrayInfo(const int arrayId)
+MioHandler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
-    bool result = true;
+    if (!map.size())
+        return false;
 
-    for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+    for (auto& entry : map)
     {
-        if (!metaFs->mgmt->IsValidVolume(static_cast<MetaVolumeType>(storage)))
-        {
-            result = false;
-            continue;
-        }
-
-        size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
-
+        uint32_t storage = (int)entry.first;
         ioRangeOverlapChker[arrayId][storage] = new MetaFsIoRangeOverlapChker();
-        ioRangeOverlapChker[arrayId][storage]->Init(maxLpn);
+        ioRangeOverlapChker[arrayId][storage]->Init(entry.second);
     }
 
-    return result;
+    return true;
 }
 
 // for test

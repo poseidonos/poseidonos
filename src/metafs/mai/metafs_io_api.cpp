@@ -179,13 +179,13 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
 }
 
 bool
-MetaFsIoApi::AddArray(int arrayId)
+MetaFsIoApi::AddArray(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
-    return ioMgr->AddArrayInfo(arrayId);
+    return ioMgr->AddArrayInfo(arrayId, map);
 }
 
 bool
-MetaFsIoApi::RemoveArray(int arrayId)
+MetaFsIoApi::RemoveArray(const int arrayId)
 {
     return ioMgr->RemoveArrayInfo(arrayId);
 }

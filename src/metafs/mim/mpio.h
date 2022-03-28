@@ -95,8 +95,6 @@ public:
     void SetCacheState(MpioCacheState state);
 
     void BuildCompositeMDPage(void);
-    bool IsValidPage(void);
-    bool CheckDataIntegrity(void);
     void* GetMDPageDataBuf(void);
     void* GetUserDataBuf(void);
 
@@ -139,6 +137,8 @@ protected:
 
     static void _HandleAsyncMemOpDone(void* obj);
     void _HandlePartialDone(void* notused = nullptr);
+
+    bool _CheckDataIntegrity(void) const;
 
 private:
     MssOpcode _ConvertToMssOpcode(const MpAioState mpioState);

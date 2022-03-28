@@ -35,8 +35,6 @@
 #include "mdpage_control_info.h"
 #include "os_header.h"
 
-#include <string>
-
 namespace pos
 {
 // MetaData Page
@@ -44,22 +42,29 @@ class MDPage
 {
 public:
     explicit MDPage(void* buf);
-    ~MDPage(void);
+    virtual ~MDPage(void);
 
-    void AttachControlInfo(void);
-    size_t GetDefaultDataChunkSize(void);
-
-    void Make(MetaLpnType metaLpn, FileDescriptorType fd, int arrayId);
-    uint8_t* GetDataBuf(void);
-    bool CheckValid(int arrayId);
-    bool CheckFileMismatch(FileDescriptorType fd);
-    bool CheckLpnMismatch(MetaLpnType srcLpn);
-    uint32_t GetMfsSignature(void);
-    void ClearCtrlInfo(void);
+    virtual void AttachControlInfo(void);
+    virtual void Make(const MetaLpnType metaLpn, const FileDescriptorType fd,
+        const int arrayId, const uint64_t signature);
+    virtual bool CheckValid(const int arrayId, const uint64_t signature) const;
+    virtual bool CheckFileMismatch(const FileDescriptorType fd) const;
+    virtual bool CheckLpnMismatch(const MetaLpnType srcLpn) const;
+    virtual void ClearCtrlInfo(void);
+    virtual uint8_t* GetDataBuf(void) const
+    {
+        return dataAll;
+    }
+    virtual size_t GetDefaultDataChunkSize(void) const
+    {
+        return MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    }
+    virtual uint32_t GetMfsSignature(void) const
+    {
+        return ctrlInfo->mfsSignature;
+    }
 
 private:
-    void _UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, int arrayId);
-
     uint8_t* dataAll;
     MDPageControlInfo* ctrlInfo;
 };

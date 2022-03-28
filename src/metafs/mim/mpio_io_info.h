@@ -54,7 +54,8 @@ public:
       byteSize(0),
       pageCnt(1),
       arrayId(INT32_MAX),
-      userBuf(nullptr)
+      userBuf(nullptr),
+      signature(UINT32_MAX)
     {
     }
 
@@ -69,6 +70,7 @@ public:
     MetaLpnType pageCnt; // should be 1 since currently we only supports 4KB considering IO Parallelism for 4KB IO
     int arrayId;
     void* userBuf;
+    uint64_t signature;
 
     static const MetaLpnType INVALID_LPN = UINT64_MAX;
     static const MetaLpnType MAX_MPIO_PAGE_CNT = 1;

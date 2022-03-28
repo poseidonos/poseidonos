@@ -53,7 +53,7 @@ public:
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;
-    virtual bool AddArrayInfo(const int arrayId) override;
+    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) override;
     virtual bool RemoveArrayInfo(const int arrayId) override;
     void Execute(void);
     void EnqueueNewReq(MetaFsIoRequest* reqMsg);

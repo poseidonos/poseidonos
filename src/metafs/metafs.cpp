@@ -74,7 +74,7 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
-    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_);
+    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt);
     io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
@@ -170,7 +170,7 @@ MetaFs::Init(void)
     if (POS_EVENT_ID::SUCCESS != rc)
         return (int)rc;
 
-    if (!io->AddArray(arrayId_))
+    if (!io->AddArray(arrayId_, _MakeLpnMap()))
         return (int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
 
     isNormal_ = true;
@@ -183,6 +183,23 @@ MetaFs::Init(void)
         "Mount metafs, arrayId: {}", arrayId_);
 
     return EID(SUCCESS);
+}
+
+MaxMetaLpnMapPerMetaStorage
+MetaFs::_MakeLpnMap(void) const
+{
+    MaxMetaLpnMapPerMetaStorage map;
+
+    for (uint32_t idx = 0; idx < (uint32_t)MetaVolumeType::Max; ++idx)
+    {
+        MetaVolumeType storage = static_cast<MetaVolumeType>(idx);
+        if (mgmt->IsValidVolume(storage))
+        {
+            map.insert({MetaFileUtil::ConvertToMediaType(storage), ctrl->GetMaxMetaLpn(storage)});
+        }
+    }
+
+    return map;
 }
 
 void
@@ -258,12 +275,6 @@ MetaFs::GetTheLastValidStripeId(void)
     LogicalBlkAddr addr = metaStorage_->TranslateAddress(MetaStorageType::SSD, theLastLpn);
 
     return addr.stripeId;
-}
-
-MetaStorageSubsystem*
-MetaFs::GetMss(void)
-{
-    return metaStorage_;
 }
 
 int

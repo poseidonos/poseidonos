@@ -32,6 +32,10 @@
 
 #pragma once
 
+#include <unordered_map>
+
+#include "src/metafs/common/metafs_type.h"
+
 namespace pos
 {
 enum class MetaStorageType
@@ -55,4 +59,6 @@ enum class MetaIoUnitEnum
 
     Default = BlockIO
 };
+
+using MaxMetaLpnMapPerMetaStorage = std::unordered_map<MetaStorageType, MetaLpnType>;
 } // namespace pos

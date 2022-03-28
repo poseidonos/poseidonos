@@ -31,15 +31,12 @@
  */
 
 #include "mio.h"
-#include "metafs_config.h"
-#include "metafs_common.h"
-#include "meta_volume_manager.h"
-#include "mpio.h"
-#include "metafs_control_request.h"
-#include "read_mpio.h"
-#include "write_mpio.h"
 
-#include <string>
+#include "meta_volume_manager.h"
+#include "metafs_common.h"
+#include "metafs_config.h"
+#include "metafs_control_request.h"
+#include "mpio.h"
 
 namespace pos
 {
@@ -255,8 +252,9 @@ Mio::GetMergedRequestList(void)
 }
 
 void
-Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
-    MetaLpnType lpn, FileSizeType byteOffset, FileSizeType byteSize, FileBufType buf, MetaLpnType lpnCnt, uint32_t mpio_id)
+Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo, MetaLpnType lpn,
+    FileSizeType byteOffset, FileSizeType byteSize, FileBufType buf,
+    MetaLpnType lpnCnt, uint32_t mpio_id)
 {
     mpioIoInfo.opcode = static_cast<MetaIoOpcode>(originReq->reqType);
     mpioIoInfo.targetMediaType = originReq->targetMediaType;
@@ -269,6 +267,7 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
     mpioIoInfo.tagId = originReq->tagId;
     mpioIoInfo.mpioId = mpio_id;
     mpioIoInfo.arrayId = originReq->arrayId;
+    mpioIoInfo.signature = originReq->fileCtx->signature;
 }
 
 // FIXME: for better parallel execution, let's issue io request for each mpio as soon as mio builds mpio contexta

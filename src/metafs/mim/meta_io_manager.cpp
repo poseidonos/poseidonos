@@ -116,9 +116,9 @@ MetaIoManager::Finalize(void)
 }
 
 bool
-MetaIoManager::AddArrayInfo(int arrayId)
+MetaIoManager::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
-    return ioScheduler->AddArrayInfo(arrayId);
+    return ioScheduler->AddArrayInfo(arrayId, map);
 }
 
 bool

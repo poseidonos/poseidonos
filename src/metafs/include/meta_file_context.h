@@ -35,6 +35,7 @@
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
+#include "src/metafs/storage/mss.h"
 
 namespace pos
 {
@@ -55,6 +56,8 @@ public:
         chunkSize = 0;
         extentsCount = 0;
         extents = nullptr;
+        signature = 0;
+        storage = nullptr;
     }
 
     // from MetaFileManager::CheckFileInActive()
@@ -65,5 +68,7 @@ public:
     FileSizeType chunkSize;
     int extentsCount;
     MetaFileExtent* extents;
+    uint64_t signature;
+    MetaStorageSubsystem* storage;
 };
 } // namespace pos

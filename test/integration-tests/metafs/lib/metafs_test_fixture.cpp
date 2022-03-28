@@ -69,7 +69,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
         comp->tpForMetafs = new NiceMock<MockTelemetryPublisher>;
         comp->storage = new TestMetaStorageSubsystem(arrayId);
         comp->mgmt = new MetaFsManagementApi(arrayId, comp->storage);
-        comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage);
+        comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage, comp->mgmt);
         comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs);
         comp->wbt = new MetaFsWBTApi(arrayId, comp->ctrl);
         comp->metaFs = new MetaFs(comp->arrayInfo, comp->isLoaded, comp->mgmt,

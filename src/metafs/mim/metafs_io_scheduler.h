@@ -54,7 +54,7 @@ public:
     void IssueRequest(MetaFsIoRequest* reqMsg);
     virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
-    virtual bool AddArrayInfo(const int arrayId) override;
+    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) override;
     virtual bool RemoveArrayInfo(const int arrayId) override;
 
     virtual void StartThread(void) override;

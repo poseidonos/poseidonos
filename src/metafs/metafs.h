@@ -66,7 +66,6 @@ public:
 
     virtual uint64_t GetEpochSignature(void);
     virtual StripeId GetTheLastValidStripeId(void);
-    MetaStorageSubsystem* GetMss(void);
     virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
 
     MetaFsManagementApi* mgmt;
@@ -83,6 +82,7 @@ private:
 
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList);
     std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
+    MaxMetaLpnMapPerMetaStorage _MakeLpnMap(void) const;
 
     bool isNpor_;
     bool isLoaded_;
