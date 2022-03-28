@@ -5,6 +5,7 @@ all:
 	# Copy library and config files
 	@cp -f ../bin/poseidonos src/usr/local/bin/
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
+	@cp -f ../bin/pos-exporter src/usr/local/bin/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
 	@cp -f ../lib/gperf/.libs/libtcmalloc.so* src/usr/local/lib/
 	@cp -rf ../lib/spdk src/usr/local/lib
