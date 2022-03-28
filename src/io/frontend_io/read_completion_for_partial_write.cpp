@@ -83,18 +83,23 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
         VolumeIoSmartPtr volumeIo = copyParam->volumeIo;
         translator = copyParam->translator;
 
+        void* mem = volumeIo->GetBuffer();
+        list<PhysicalEntry> physicalEntries;
+        StripeAddr lsidEntry;
         // If UT is executed, translator will be input.
         // otherwise, translator will be nullptr
         if (likely(translator == nullptr))
         {
             Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId(), volumeIo->GetUserLsid());
-            translator = &translatorLocal;
+            physicalEntries = translatorLocal.GetPhysicalEntries(mem, 1);
+            lsidEntry = translatorLocal.GetLsidEntry(0);
         }
-        void* mem = volumeIo->GetBuffer();
-
-        list<PhysicalEntry> physicalEntries = translator->GetPhysicalEntries(mem, 1);
+        else
+        {
+            physicalEntries = translator->GetPhysicalEntries(mem, 1);
+            lsidEntry = translator->GetLsidEntry(0);
+        }
         VolumeIoSmartPtr split = volumeIo->GetOriginVolumeIo();
-        StripeAddr lsidEntry = translator->GetLsidEntry(0);
         split->SetLsidEntry(lsidEntry);
 
         // TODO Support multiple buffers (for RAID1) - create additional VolumeIo
