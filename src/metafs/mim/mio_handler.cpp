@@ -484,7 +484,12 @@ bool
 MioHandler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
     if (!map.size())
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "There is no valid meta volume, coreId: {}",
+            coreId);
         return false;
+    }
 
     for (auto& entry : map)
     {
