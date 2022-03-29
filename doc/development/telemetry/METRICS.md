@@ -65,7 +65,8 @@
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-
+- [**ResourceMonitoring**](#Resource)
+  - [_**AvailableMemorySize**_](#availableMemorySize)
 ---
 ## **Device**
 
@@ -1059,5 +1060,25 @@ The updated volume id
 **Introduced**: v0.10.0
 
 The renamed Volume id
+
+---
+## **ResourceMonitoring**
+
+Resource group contains the metrics of the pos resource.
+
+---
+### _**AvailableMemorySize**_
+
+**ID**: 90000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"node_name": String}
+
+**Introduced**: v0.10.0
+
+Available memory size
 
 ---
