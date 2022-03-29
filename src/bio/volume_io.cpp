@@ -61,6 +61,7 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* ar
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
   sectorRba(INVALID_RBA),
+  stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
 }
@@ -78,6 +79,7 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),
   sectorRba(volumeIo.sectorRba),
+  stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
 }

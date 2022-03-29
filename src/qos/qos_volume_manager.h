@@ -66,10 +66,9 @@ public:
         QosArrayManager* qosArrayManager,
         EventFrameworkApi* eventFrameworkApiArg,
         QosManager* qosManager,
-        SpdkPosNvmfCaller* spdkPosNvmfCaller = new SpdkPosNvmfCaller(),
         SpdkPosVolumeCaller* spdkPosVolumeCaller = new SpdkPosVolumeCaller(),
         VolumeEventPublisher* volumeEventPublisher = VolumeEventPublisherSingleton::Instance());
-    ~QosVolumeManager(void) override;
+    virtual ~QosVolumeManager(void) override;
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
     int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
@@ -176,7 +175,6 @@ private:
     QosManager* qosManager;
     std::mutex subsysVolMapLock;
     const char* BDEV_NAME_PREFIX = "bdev_";
-    SpdkPosNvmfCaller* spdkPosNvmfCaller;
     SpdkPosVolumeCaller* spdkPosVolumeCaller;
     VolumeEventPublisher* volumeEventPublisher;
     pthread_rwlock_t nqnLock;

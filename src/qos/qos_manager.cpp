@@ -117,6 +117,7 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
     currentNumberOfArrays = 0;
     systemMinPolicy = false;
     affinityManager = AffinityManagerSingleton::Instance();
+    spdkManager = nullptr;
 }
 
 /* --------------------------------------------------------------------------*/

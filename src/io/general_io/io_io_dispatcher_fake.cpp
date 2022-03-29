@@ -42,7 +42,8 @@ static uint32_t CORE_FOR_IO_WORKER = 3;
 IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     EventScheduler* eventSchedulerArg)
 : ioWorkerCount(0),
-  deviceAllocationTurn(0)
+  deviceAllocationTurn(0),
+  eventScheduler(eventSchedulerArg)
 {
     cpu_set_t cpuSet;
 

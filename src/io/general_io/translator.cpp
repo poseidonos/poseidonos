@@ -66,6 +66,7 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
   isRead(isRead),
   volumeId(volumeId),
   arrayId(arrayId),
+  userLsid(UNMAP_STRIPE),
   arrayInfo(arrayInfo_)
 {
     if (nullptr == iVSAMap)
@@ -92,6 +93,8 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
             "Volume ID is not valid at Translator");
         throw eventId;
     }
+
+    vsaArray.fill(UNMAP_VSA);
 
     if (likely(iVSAMap != nullptr))
     {
@@ -137,6 +140,9 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
     {
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
     }
+
+    vsaArray.fill(UNMAP_VSA);
+
     vsaArray[0] = vsa;
     if (likely(iStripeMap != nullptr))
     {

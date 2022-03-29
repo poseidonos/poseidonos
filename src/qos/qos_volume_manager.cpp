@@ -80,7 +80,7 @@ QosContext* qosContextGlobal = nullptr;
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex,
     QosArrayManager* qosArrayMgr, EventFrameworkApi* eventFrameworkApiArg,
-    QosManager* qosManager, SpdkPosNvmfCaller* spdkPosNvmfCaller,
+    QosManager* qosManager,
     SpdkPosVolumeCaller* spdkPosVolumeCaller, VolumeEventPublisher* volumeEventPublisher)
 : VolumeEvent("QosManager", "", arrayIndex),
   eventFrameworkApi(eventFrameworkApiArg),
@@ -88,7 +88,6 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
   qosContext(qosCtx),
   qosArrayManager(qosArrayMgr),
   qosManager(qosManager),
-  spdkPosNvmfCaller(spdkPosNvmfCaller),
   spdkPosVolumeCaller(spdkPosVolumeCaller),
   volumeEventPublisher(volumeEventPublisher)
 {
@@ -97,6 +96,7 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
     volumeEventPublisher->RegisterSubscriber(this, "", arrayId);
     bwIopsRateLimit = new BwIopsRateLimit;
     parameterQueue = new ParameterQueue;
+
     for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
     {
         SetVolumeLimit(volId, DEFAULT_MAX_BW_IOPS, false);
@@ -112,6 +112,7 @@ QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arra
         avgIops[volId] = 0;
         minimumCheckCounter[volId] = 0;
         logPrintedCounter[volId] = 0;
+        volumeMap[volId] = false;
     }
     basicBwUnit = BASIC_BW_UNIT;
     basicIopsUnit = BASIC_IOPS_UNIT;
@@ -191,10 +192,7 @@ QosVolumeManager::~QosVolumeManager(void)
     volumeEventPublisher->RemoveSubscriber(this, "", arrayId);
     delete bwIopsRateLimit;
     delete parameterQueue;
-    if (spdkPosNvmfCaller != nullptr)
-    {
-        delete spdkPosNvmfCaller;
-    }
+
     if (spdkPosVolumeCaller != nullptr)
     {
         delete spdkPosVolumeCaller;
