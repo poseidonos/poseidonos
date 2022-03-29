@@ -31,8 +31,9 @@ class Target:
         self.volume_size = ""
         self.cli = pos.cli.Cli(json)
 
-    def Prepare(self):
+    def Prepare(self) -> None:
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
+
         if (self.prereq and self.prereq["CPU"]["RUN"]):
             prerequisite.cpu.Scaling(
                 self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
@@ -49,7 +50,8 @@ class Target:
                 self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
             prerequisite.network.TcpTune(
                 self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
-            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_AFFINITYs"],
+            prerequisite.network.IrqAffinity(self.id, self.pw, self.nic_ssh,
+                                             self.prereq["NETWORK"]["IRQ_AFFINITYs"],
                                              self.pos_dir)
             prerequisite.network.Nic(
                 self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
@@ -64,24 +66,20 @@ class Target:
                 self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["ULIMIT"])
             prerequisite.debug.Apport(
                 self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["APPORT"])
-            prerequisite.debug.CorePattern(self.id, self.pw, self.nic_ssh, self.prereq["DEBUG"]["DUMP_DIR"],
+            prerequisite.debug.CorePattern(self.id, self.pw, self.nic_ssh,
+                                           self.prereq["DEBUG"]["DUMP_DIR"],
                                            self.prereq["DEBUG"]["CORE_PATTERN"])
 
-        result = pos.env.check_pos_running(
+        result = pos.env.is_pos_running(
             self.id, self.pw, self.nic_ssh, self.pos_bin)
-        if -1 == result:
-            return False
-        elif result:
-            result = pos.env.kill_pos(
-                self.id, self.pw, self.nic_ssh, self.pos_bin)
-            if -1 == result:
-                return False
+        if (result):
+            pos.env.kill_pos(self.id, self.pw, self.nic_ssh, self.pos_bin)
             time.sleep(1)
-        if -1 == pos.env.copy_pos_config(self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg):
-            return False
-        if -1 == pos.env.execute_pos(self.id, self.pw, self.nic_ssh, self.pos_bin, self.pos_dir, self.pos_log):
-            return False
-        time.sleep(10)
+        pos.env.copy_pos_config(
+            self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg)
+        pos.env.execute_pos(self.id, self.pw, self.nic_ssh,
+                            self.pos_bin, self.pos_dir, self.pos_log)
+        time.sleep(3)
 
         # spdk setting
         self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
@@ -149,29 +147,26 @@ class Target:
         self.cli.logger_set_level("info")
 
         # print subsystems
-        subsys = self.cli.subsystem_list()
-        print(subsys)
+        print(self.cli.subsystem_list())
 
         lib.printer.green(f" '{self.name}' prepared")
-        return True
 
-    def Wrapup(self):
+    def Wrapup(self) -> None:
         for array in self.json["POS"]["ARRAYs"]:
             self.cli.array_unmount(array["NAME"])
         self.cli.system_stop()
         lib.printer.green(f" '{self.name}' wrapped up")
-        return True
 
-    def ForcedExit(self):
+    def ForcedExit(self) -> None:
         pos.env.kill_pos(self.id, self.pw, self.nic_ssh, self.pos_bin)
+        lib.printer.green(f" '{self.name}' forced exited")
         time.sleep(1)
 
-    def DirtyBringup(self):
-        if -1 == pos.env.copy_pos_config(self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg):
-            return False
-
-        if -1 == pos.env.execute_pos(self.id, self.pw, self.nic_ssh, self.pos_bin, self.pos_dir, self.pos_log):
-            return False
+    def DirtyBringup(self) -> None:
+        pos.env.copy_pos_config(
+            self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg)
+        pos.env.execute_pos(self.id, self.pw, self.nic_ssh,
+                            self.pos_bin, self.pos_dir, self.pos_log)
         time.sleep(1)
 
         # spdk setting
@@ -232,12 +227,11 @@ class Target:
         print(subsys)
 
         lib.printer.green(f" '{self.name}' prepared")
-        return True
 
-    def DetachDevice(self, dev):
+    def DetachDevice(self, dev) -> None:
         return pos.env.detach_device(self.id, self.pw, self.nic_ssh, dev)
 
-    def PcieScan(self):
+    def PcieScan(self) -> None:
         return pos.env.pcie_scan(self.id, self.pw, self.nic_ssh)
 
     def CheckRebuildComplete(self, arr_name):

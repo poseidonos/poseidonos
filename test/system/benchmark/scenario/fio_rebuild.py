@@ -2,12 +2,12 @@ import fio
 import initiator
 import json
 import lib
-import target
 import pos.env
-from datetime import datetime
-import time
-
+import target
 import threading
+import time
+import traceback
+from datetime import datetime
 
 
 def create_fio(tc, now_date, init, test_target, time_based):
@@ -105,40 +105,49 @@ def play(json_targets, json_inits, json_scenario):
     for json_target in json_targets:
         try:
             target_obj = target.manager.Target(json_target)
-            target_name = json_target["NAME"]
-            targets[target_name] = target_obj
-        except KeyError:
-            lib.printer.red(" TargetError: Target KEY is invalid")
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             return
-        if json_target["DIRTY_BRINGUP"] == "yes":
-            if not target_obj.DirtyBringup():
-                skip_workload = True
-                break
-        else:
-            if not target_obj.Prepare():
-                skip_workload = True
-                break
+        target_name = json_target["NAME"]
+
+        try:
+            if json_target["DIRTY_BRINGUP"] == "yes":
+                target_obj.DirtyBringup()
+            else:
+                target_obj.Prepare()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
+            skip_workload = True
+            target_obj.ForcedExit()
+            break
+        targets[target_name] = target_obj
 
     # init prepare
     initiators = {}
     for json_init in json_inits:
         try:
             init_obj = initiator.manager.Initiator(json_init)
-            init_name = json_init["NAME"]
-        except KeyError:
-            lib.printer.red(" InitiatorError: Initiator KEY is invalid")
-            return
-        if not init_obj.Prepare():
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
+            skip_workload = True
+            break
+        init_name = json_init["NAME"]
+
+        try:
+            init_obj.Prepare()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             skip_workload = True
             break
         initiators[init_name] = init_obj
 
     # check auto generate
-    test_target = targets[next(iter(targets))]
-    if "yes" != test_target.use_autogen:
-        lib.printer.red(
-            f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
-        skip_workload = True
+    if not skip_workload:
+        test_target = targets[next(iter(targets))]
+        if "yes" != test_target.use_autogen:
+            lib.printer.red(
+                f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
+            skip_workload = True
 
     # run precondition
     precondition = json_scenario["PRECONDITION"]
@@ -218,7 +227,7 @@ def play(json_targets, json_inits, json_scenario):
                 skip_workload = True
         # detach device to trigger rebuild
         device_to_detach = 0
-        ret = target_obj.DetachDevice(device_list[device_to_detach])
+        target_obj.DetachDevice(device_list[device_to_detach])
 
         # wait until rebuild finishes
         while(True):
@@ -264,12 +273,20 @@ def play(json_targets, json_inits, json_scenario):
     return
     # init wrapup
     for key in initiators:
-        initiators[key].Wrapup()
+        try:
+            initiators[key].Wrapup()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
+            skip_workload = True
 
     # target warpup
     for key in targets:
-        if not targets[key].Wrapup():
+        try:
+            targets[key].Wrapup()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             targets[key].ForcedExit()
+            skip_workload = True
 
     if skip_workload:
         lib.printer.red(f" -- '{__name__}' unexpected done --\n")

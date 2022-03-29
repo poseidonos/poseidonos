@@ -24,7 +24,7 @@ class Initiator:
         except Exception as e:
             self.vdbench_dir = ""
 
-    def Prepare(self, connect_nvme=False, subsystem_list=[]):
+    def Prepare(self, connect_nvme=False, subsystem_list=[]) -> None:
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
         if (self.prereq and self.prereq["CPU"]["RUN"]):
             prerequisite.cpu.Scaling(
@@ -48,61 +48,38 @@ class Initiator:
             prerequisite.spdk.Setup(
                 self.id, self.pw, self.nic_ssh, self.prereq["SPDK"], self.spdk_dir)
 
-        if -1 == pos.env.remove_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
-            return False
-
-        if -1 == pos.env.make_directory(self.id, self.pw, self.nic_ssh, self.output_dir):
-            return False
+        pos.env.remove_directory(
+            self.id, self.pw, self.nic_ssh, self.output_dir)
+        pos.env.make_directory(self.id, self.pw, self.nic_ssh, self.output_dir)
 
         if connect_nvme is True:
             self.DisconnectNvme(subsystem_list)
-            if -1 == self.DiscoverNvme(subsystem_list):
-                return False
-            if -1 == self.ConnectNvme(subsystem_list):
-                return False
+            self.DiscoverNvme(subsystem_list)
+            self.ConnectNvme(subsystem_list)
 
         lib.printer.green(f" '{self.name}' prepared")
-        return True
 
-    def Wrapup(self, connect_nvme=False, subsystem_list=[]):
+    def Wrapup(self, connect_nvme=False, subsystem_list=[]) -> None:
         if connect_nvme is True:
             self.DisconnectNvme(subsystem_list)
-
         lib.printer.green(f" '{self.name}' wrapped up")
-        return True
 
-    def DiscoverNvme(self, subsystem_list):
+    def DiscoverNvme(self, subsystem_list) -> None:
         for subsystem in subsystem_list:
             if self.name == subsystem[0]:
-                try:
-                    nvme_discover_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
-                        sudo nvme discover -t {self.spdk_tp} -a {subsystem[3]} -s {subsystem[4]}"
-                    lib.subproc.sync_run(nvme_discover_cmd)
-                except Exception as e:
-                    lib.printer.red(nvme_discover_cmd)
-                    lib.printer.red(f"{__name__} [Error] {e}")
-                    return -1
-        return 0
+                nvme_discover_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
+                    sudo nvme discover -t {self.spdk_tp} -a {subsystem[3]} -s {subsystem[4]}"
+                lib.subproc.sync_run(nvme_discover_cmd)
 
-    def ConnectNvme(self, subsystem_list):
+    def ConnectNvme(self, subsystem_list) -> None:
         for subsystem in subsystem_list:
             if self.name == subsystem[0]:
-                try:
-                    nvme_connect_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
-                        sudo nvme connect -n {subsystem[1]} -t {self.spdk_tp} -a {subsystem[3]} -s {subsystem[4]}"
-                    lib.subproc.sync_run(nvme_connect_cmd)
-                except Exception as e:
-                    lib.printer.red(nvme_connect_cmd)
-                    lib.printer.red(f"{__name__} [Error] {e}")
-                    return -1
-        try:
-            req_device_list = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
-                sudo nvme list"
-            device_list = lib.subproc.sync_run(req_device_list)
-        except Exception as e:
-            lib.printer.red(req_device_list)
-            lib.printer.red(f"{__name__} [Error] {e}")
-            return -1
+                nvme_connect_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
+                    sudo nvme connect -n {subsystem[1]} -t {self.spdk_tp} -a {subsystem[3]} -s {subsystem[4]}"
+                lib.subproc.sync_run(nvme_connect_cmd)
+        req_device_list = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
+            sudo nvme list"
+        device_list = lib.subproc.sync_run(req_device_list)
         device_lines = device_list.split("\n")
         device_num = len(device_lines)
         for device_idx in range(2, device_num - 1):
@@ -112,32 +89,20 @@ class Initiator:
                     self.device_list.append(device_node)
                     break
         print(" KDD Dev List:", self.device_list)
-        return 0
 
-    def DisconnectNvme(self, subsystem_list):
+    def DisconnectNvme(self, subsystem_list) -> None:
         for subsystem in subsystem_list:
             if self.name == subsystem[0]:
-                try:
-                    nvme_disconnect_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
-                        sudo nvme disconnect -n {subsystem[1]}"
-                    lib.subproc.sync_run(nvme_disconnect_cmd)
-                except Exception as e:
-                    lib.printer.red(nvme_disconnect_cmd)
-                    lib.printer.red(f"{__name__} [Error] {e}")
-                    return -1
-        return 0
+                nvme_disconnect_cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
+                    sudo nvme disconnect -n {subsystem[1]}"
+                lib.subproc.sync_run(nvme_disconnect_cmd)
 
     def GetVolumeIdOfDevice(self, device_list):
         volume_id_list = {}
         for key in device_list:
-            try:
-                cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
-                    sudo nvme list | awk '{{if ($1 == \"{key}\") print $2}}'"
-                serial_number = lib.subproc.sync_run(cmd)
-                volId = int(serial_number[3:])
-                volume_id_list[key] = volId
-            except Exception as e:
-                lib.printer.red(cmd)
-                lib.printer.red(f"{__name__} [Error] {e}")
-                break
+            cmd = f"sshpass -p {self.pw} ssh -o StrictHostKeyChecking=no {self.id}@{self.nic_ssh} \
+                sudo nvme list | awk '{{if ($1 == \"{key}\") print $2}}'"
+            serial_number = lib.subproc.sync_run(cmd)
+            volId = int(serial_number[3:])
+            volume_id_list[key] = volId
         return volume_id_list

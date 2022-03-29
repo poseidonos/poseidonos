@@ -1,4 +1,5 @@
 import asyncio
+import lib
 import subprocess
 
 allow_stdout = False
@@ -25,6 +26,7 @@ def sync_run(cmd, ignore_err=False, sh=True):
     write_log(cmd)
     err_str = err.decode("utf-8")
     if not ignore_err and 0 < len(err_str):
+        lib.printer.red(cmd)
         raise Exception(err_str)
     return out.decode("utf-8")
 
@@ -39,5 +41,6 @@ async def async_run(cmd, ignore_err=False):
     write_log(cmd)
     err_str = err.decode("utf-8")
     if not ignore_err and 0 < len(err_str):
+        lib.printer.red(cmd)
         raise Exception(err_str)
     return out.decode("utf-8")

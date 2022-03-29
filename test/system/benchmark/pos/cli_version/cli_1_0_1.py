@@ -14,11 +14,10 @@ class Cli_1_0_1(cli_interface.CliInterface):
         self.prefix = "".join(prefix_list)
 
     def _send_cli(self, cmd):
-        try:
-            return lib.subproc.sync_run(cmd)
-        except Exception as e:
-            lib.printer.red(cmd)
-            lib.printer.red(f"{__name__} [Error] {e}")
+        result = lib.subproc.sync_run(cmd)
+        if ("code" in result):
+            raise Exception(result)
+        return result
 
     def array_add_spare(self, arr_name, dev_name):
         cli_cmd = self.prefix + f"array addspare -a {arr_name} -s {dev_name}"

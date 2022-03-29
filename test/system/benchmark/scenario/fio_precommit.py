@@ -4,6 +4,7 @@ import initiator
 import json
 import lib
 import target
+import traceback
 from datetime import datetime
 
 
@@ -30,12 +31,17 @@ def play(json_targets, json_inits, json_scenario):  # player.py에서 호출하�
     for json_target in json_targets:
         try:
             target_obj = target.manager.Target(json_target)
-            target_name = json_target["NAME"]
-        except KeyError:
-            lib.printer.red(" TargetError: Target KEY is invalid")
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             return
-        if not target_obj.Prepare():
+        target_name = json_target["NAME"]
+
+        try:
+            target_obj.Prepare()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             skip_workload = True
+            target_obj.ForcedExit()
             break
         targets[target_name] = target_obj
 
@@ -44,11 +50,16 @@ def play(json_targets, json_inits, json_scenario):  # player.py에서 호출하�
     for json_init in json_inits:
         try:
             init_obj = initiator.manager.Initiator(json_init)
-            init_name = json_init["NAME"]
-        except KeyError:
-            lib.printer.red(" InitiatorError: Initiator KEY is invalid")
-            return
-        if not init_obj.Prepare():
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
+            skip_workload = True
+            break
+        init_name = json_init["NAME"]
+
+        try:
+            init_obj.Prepare()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             skip_workload = True
             break
         initiators[init_name] = init_obj
@@ -169,12 +180,20 @@ def play(json_targets, json_inits, json_scenario):  # player.py에서 호출하�
 
     # init wrapup
     for key in initiators:
-        initiators[key].Wrapup()
+        try:
+            initiators[key].Wrapup()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
+            skip_workload = True
 
     # target warpup
     for key in targets:
-        if not targets[key].Wrapup():
+        try:
+            targets[key].Wrapup()
+        except Exception as e:
+            lib.printer.red(traceback.format_exc())
             targets[key].ForcedExit()
+            skip_workload = True
 
     if skip_workload:
         lib.printer.red(f" -- '{__name__}' unexpected done --\n")

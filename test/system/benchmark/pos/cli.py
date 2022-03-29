@@ -8,7 +8,7 @@ class Cli:
             {json['ID']}@{json['NIC']['SSH']} sudo nohup \
             {json['DIR']}/bin/{json['POS']['CLI']} --version"
         result = lib.subproc.sync_run(cli_cmd)
-        if ("poseidonos-cli version 1.0.1-202203213\n" == result):
+        if ("poseidonos-cli version 1.0.1" in result):
             self.cli = cli_1_0_1.Cli_1_0_1(json)
         else:
             raise ValueError(f"Not supported poseidonos-cli version: {result}")
