@@ -422,15 +422,16 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
     // enqueue in same reactor as NvmfVolumePos::VolumeMounted so that pos_disk structure is populated with correct values before qos tries to access it.
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeMountHandler, vInfo, this);
-    volumeMap[vInfo->id] = true;
-    volumeName[vInfo->id] = volEventBase->volName;
+
     while (qosContext->GetVolumeOperationDone() == false)
     {
-        if (qosContext->GetVolumeOperationDone() == true)
-        {
-            break;
-        }
+        usleep(1);
     }
+
+    volumeMap[volEventBase->volId] = true;
+    volumeName[volEventBase->volId] = volEventBase->volName;
+
+    delete vInfo;
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 /* --------------------------------------------------------------------------*/
@@ -465,7 +466,6 @@ QosVolumeManager::_InternalVolMountHandlerQos(struct pos_volume_info* volMountIn
         UpdateSubsystemToVolumeMap(nqnId, volMountInfo->id);
         _UpdateVolumeMaxQos(volMountInfo->id, volMountInfo->iops_limit, volMountInfo->bw_limit, volMountInfo->array_name);
         qosContext->SetVolumeOperationDone(true);
-        delete (volMountInfo);
     }
 }
 
@@ -732,11 +732,10 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
 
     while (qosContext->GetVolumeOperationDone() == false)
     {
-        if (qosContext->GetVolumeOperationDone() == true)
-        {
-            break;
-        }
+        usleep(1);
     }
+
+    delete vInfo;
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 /* --------------------------------------------------------------------------*/
@@ -768,14 +767,9 @@ QosVolumeManager::_InternalVolUnmountHandlerQos(struct pos_volume_info* volUnmou
         string bdevName = _GetBdevName(volUnmountInfo->id, volUnmountInfo->array_name);
         uint32_t nqnId = 0;
         nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
-        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volUnmountInfo->id);
-        if (position != nqnVolumeMap[nqnId].end())
-        {
-            nqnVolumeMap[nqnId].erase(position);
-        }
+        DeleteVolumeFromSubsystemMap(nqnId, volUnmountInfo->id);
         _ClearVolumeParameters(volUnmountInfo->id);
         qosContext->SetVolumeOperationDone(true);
-        delete(volUnmountInfo);
     }
 }
 
@@ -840,12 +834,11 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
 
         while (qosContext->GetVolumeOperationDone() == false)
         {
-            if (qosContext->GetVolumeOperationDone() == true)
-            {
-                break;
-            }
+            usleep(1);
         }
+        delete vInfo;
     }
+
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 /* --------------------------------------------------------------------------*/
@@ -877,14 +870,9 @@ QosVolumeManager::_InternalVolDetachHandlerQos(struct pos_volume_info* volDetach
         string bdevName = _GetBdevName(volDetachInfo->id, volDetachInfo->array_name);
         uint32_t nqnId = 0;
         nqnId = spdkPosVolumeCaller->GetAttachedSubsystemId(bdevName.c_str());
-        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volDetachInfo->id);
-        if (position != nqnVolumeMap[nqnId].end())
-        {
-            nqnVolumeMap[nqnId].erase(position);
-        }
+        DeleteVolumeFromSubsystemMap(nqnId, volDetachInfo->id);
         _ClearVolumeParameters(volDetachInfo->id);
         qosContext->SetVolumeOperationDone(true);
-        delete(volDetachInfo);
     }
 }
 /* --------------------------------------------------------------------------*/
