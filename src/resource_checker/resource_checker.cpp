@@ -37,6 +37,7 @@
 
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
+#include "src/resource_checker/smart_collector.h"
 #include "src/resource_checker/environment_checker.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -193,6 +194,7 @@ ResourceChecker::Execute(void)
                 }
 
                 // sleep 60 sec
+                CollectSmartLogPage();
                 usleep(sleepSecTime * 1000 * 1000);
             }
             else
@@ -207,4 +209,11 @@ ResourceChecker::Execute(void)
     POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_EXECUTE_IN,
         "[ResourceChecker][Thread] Out Execute");
 }
-} // namespace pos
+
+void
+ResourceChecker::CollectSmartLogPage(void)
+{
+    SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
+    smartCollector->Execute();
+}
+}

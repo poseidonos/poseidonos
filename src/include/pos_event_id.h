@@ -660,6 +660,11 @@ enum class POS_EVENT_ID
     RESOURCE_CHECKER_SET_SLEEP_TIME = 3631,
     RESOURCE_CHECKER_END = 3632,
 
+    // --------------Smart collector (3700)----------------
+    SMART_COLLECTOR_CONSTRUCTOR = 3700,
+    SMART_COLLECTOR_DESSTRUCTOR = 3701,
+    SMART_COLLECTOR_CMD_ERR = 3702,
+
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical
     MFS_START = 4000,

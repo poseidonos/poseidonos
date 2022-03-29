@@ -1,4 +1,3 @@
-- [- _**AvailableMemorySize**_](#--availablememorysize)
 - [**Device**](#device)
   - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
   - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
@@ -87,8 +86,25 @@
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-- [**ResourceMonitoring**](#resourcemonitoring)
-  - [_**AvailableMemorySize**_](#availablememorysize)
+- [**Resource**](#resource)
+  - [_**AvailableMemorySize**_](#availableMemorySize)
+- [**Disk**](#disk)
+  - [_**SoftMediaErrorLow**_](#softMediaErrorLow)
+  - [_**SoftMediaErrorHigh**_](#softMediaErrorHigh)
+  - [_**PowerCycleLow**_](#powerCycleLow)
+  - [_**PowerCycleHigh**_](#powerCycleHigh)
+  - [_**PowerOnHourLow**_](#powerOnHourLow)
+  - [_**PowerOnHourHigh**_](#powerOnHourHigh)
+  - [_**UnsafeShutdownsLow**_](#unsafeShutdownsLow)
+  - [_**UnsafeShutdownsHigh**_](#unsafeShutdownsHigh)
+  - [_**Temperature**_](#temperature)
+  - [_**AvailableSpare**_](#availableSpare)
+  - [_**AvailableSpareThreshold**_](#availableSpareThreshold)
+  - [_**PercentageUsed**_](#percentageUsed)
+  - [_**ControllerBusyTimeLow**_](#controllerBusyTimeLow)
+  - [_**ControllerBusyTimeHigh**_](#controllerBusyTimeHigh)
+  - [_**WarningTemperatureTime**_](#warningTemperatureTime)
+  - [_**CriticalTemperatureTime**_](#criticalTemperatureTime)
 ---
 ## **Device**
 
@@ -1406,7 +1422,7 @@ The updated volume id
 The renamed Volume id
 
 ---
-## **ResourceMonitoring**
+## **Resource**
 
 Resource group contains the metrics of the pos resource.
 
@@ -1424,5 +1440,251 @@ Resource group contains the metrics of the pos resource.
 **Introduced**: v0.10.0
 
 Available memory size
+
+---
+## **Disk**
+
+disk group contains the smart metrics.
+
+---
+### _**softMediaErrorLow**_
+
+**ID**: 110000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Soft Media Error Low Value
+
+---
+### _**softMediaErrorHigh**_
+
+**ID**: 110001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Soft Media Error High Value
+
+---
+### _**powerCycleLow**_
+
+**ID**: 110002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power cycle Low Value
+
+---
+### _**powerCycleHigh**_
+
+**ID**: 110003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power cycle High Value
+
+---
+### _**powerOnHourLow**_
+
+**ID**: 110004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power On Hour Low Value
+
+---
+### _**powerOnHourHigh**_
+
+**ID**: 110005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power On Hour High Value
+
+---
+### _**unsafeShutdownsLow**_
+
+**ID**: 110006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Unsafe Shutdowns Low Value
+
+---
+### _**unsafeShutdownsHigh**_
+
+**ID**: 110007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Unsafe Shutdowns High Value
+
+---
+### _**temperature**_
+
+**ID**: 110008
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Temperature Value
+
+---
+### _**availableSpare**_
+
+**ID**: 110009
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Available Spare Value
+
+---
+### _**availableSpareThreshold**_
+
+**ID**: 110010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Available Spare Threshold Value
+
+---
+### _**percentageUsed**_
+
+**ID**: 110011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Percentage Used Value
+
+---
+### _**controllerBusyTimeLow**_
+
+
+**ID**: 110012
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Controller Busy Time Low Value
+
+---
+### _**controllerBusyTimeHigh**_
+
+**ID**: 110013
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Controller Busy Time High Value
+
+---
+### _**warningTemperatureTime**_
+
+**ID**: 110014
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Warning Temperature Time Value
+
+---
+### _**criticalTemperatureTime**_
+
+**ID**: 110015
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Critical Temperature Time Value
 
 ---

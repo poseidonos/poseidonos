@@ -30,47 +30,44 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RESOURCE_CHECKER_H_
-#define RESOURCE_CHECKER_H_
+#ifndef SMART_COLLECTOR_H_
+#define SMART_COLLECTOR_H_
 
-#include <string.h>
-
-#include <thread>
-#include <vector>
+#include <string>
 
 #include "src/lib/singleton.h"
 
+struct spdk_nvme_cpl;
+struct spdk_nvme_health_information_page;
+struct spdk_nvme_ctrlr;
+
 namespace pos
 {
-class AffinityManager;
 class TelemetryPublisher;
 class TelemetryClient;
-class EnvironmentChecker;
 
-class ResourceChecker
+enum class SmartReturnType
+{
+    SUCCESS = 0,
+    SEND_ERR,
+    RESPONSE_ERR,
+    CTRL_NOT_EXIST
+};
+
+class SmartCollector
 {
 public:
-    ResourceChecker(void);
-    virtual ~ResourceChecker(void);
+    SmartCollector(void);
+    virtual ~SmartCollector(void);
     void Execute(void);
-    uint64_t GetIterationCount(void);
-    void SetSleepTime(uint32_t time);
-    void Enable(void);
+    SmartReturnType CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_nvme_ctrlr* ctrlr);
 
 private:
-    void CollectSmartLogPage(void);
-    bool enable;
-    uint64_t runningCnt;
-    uint32_t sleepSecTime;
-    std::thread* th = nullptr;
-    AffinityManager* affinityManager = nullptr; // Get singletone object
-    TelemetryClient* telemetryClient = nullptr; // Get singletone object
-    TelemetryPublisher* publisher = nullptr;    // new
-    EnvironmentChecker* envChecker = nullptr;   // new
-
-    const int SLEEP_TIME_SEC = 60;
+    static void CompleteSmartLogPage(void* arg, const spdk_nvme_cpl* cpl);
+    TelemetryClient* telemetryClient = nullptr;
+    TelemetryPublisher* publisher = nullptr;
 };
-using ResourceCheckerSingleton = Singleton<ResourceChecker>;
+using SmartCollectorSingleton = Singleton<SmartCollector>;
 } // namespace pos
 
-#endif // RESOURCE_CHECKER_H_
+#endif // SMART_COLLECTOR_H_
