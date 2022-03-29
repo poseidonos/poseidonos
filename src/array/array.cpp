@@ -742,7 +742,7 @@ Array::_DetachData(ArrayDevice* target)
         }
     }
 
-    if (needStopRebuild || state->IsBroken())
+    if (needStopRebuild)
     {
         POS_TRACE_INFO(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
             "Stop the rebuild due to detachment of the rebuild target device or Array broken");
@@ -865,10 +865,11 @@ Array::TriggerRebuild(ArrayDevice* target)
     uint32_t arrId = index_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
     list<RebuildTarget*> tasks = svc->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
+    bool isWT = isWTEnabled;
+    thread t([arrRebuilder, arrName, arrId, target, cb, tasks, isWT]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets, isWT);
     });
 
     t.detach();
@@ -923,7 +924,7 @@ Array::_RegisterService(void)
         {
             if (devMgr_ != nullptr)
             {
-                IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+                ArrayService::Instance()->Setter()->IncludeDevicesToLocker(devMgr_->GetDataDevices());
             }
             else
             {
@@ -944,7 +945,7 @@ Array::_UnregisterService(void)
     arrayService->Setter()->Unregister(name_, index_);
     if (devMgr_ != nullptr)
     {
-        IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
+        ArrayService::Instance()->Setter()->ExcludeDevicesFromLocker(devMgr_->GetDataDevices());
     }
 }
 } // namespace pos

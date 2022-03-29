@@ -55,7 +55,7 @@ public:
     ArrayRebuild(void) {}
     ArrayRebuild(string arrayName, uint32_t arrayId,
             ArrayDevice* dev, RebuildComplete cb,
-            list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory);
+            list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory, bool isWT = false);
     virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
         list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
     virtual ~ArrayRebuild(void);

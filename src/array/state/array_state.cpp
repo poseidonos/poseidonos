@@ -392,12 +392,16 @@ void
 ArrayState::SetRebuildDone(bool isSuccess)
 {
     iStateControl->Remove(rebuildingState);
-    if (isSuccess)
+    if (state == ArrayStateEnum::REBUILD)
     {
-        if (state == ArrayStateEnum::REBUILD)
+        if (isSuccess)
         {
             iStateControl->Remove(degradedState);
             _SetState(ArrayStateEnum::NORMAL);
+        }
+        else
+        {
+            _SetState(ArrayStateEnum::DEGRADED);
         }
     }
 }

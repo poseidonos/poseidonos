@@ -60,7 +60,7 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
 
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     vector<ArrayDevice*> mockDevs;
-    EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillOnce(Return(mockDevs));
+    EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillRepeatedly(Return(mockDevs));
     EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER)));
     EXPECT_CALL(*mockState, SetMount).Times(0);
     EXPECT_CALL(*mockArrayService, Unregister).Times(1);

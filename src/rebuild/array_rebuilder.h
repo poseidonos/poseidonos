@@ -52,7 +52,7 @@ public:
     ArrayRebuilder(IRebuildNotification* noti);
     virtual ~ArrayRebuilder() {}
     void Rebuild(string arrayname, uint32_t arrayId, ArrayDevice* dev,
-                RebuildComplete cb, list<RebuildTarget*>& tgt) override;
+                RebuildComplete cb, list<RebuildTarget*>& tgt, bool isWT = false) override;
     void StopRebuild(string arrayname) override;
     void RebuildDone(RebuildResult result) override;
     void WaitRebuildDone(string arrayname) override;

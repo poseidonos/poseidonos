@@ -37,6 +37,7 @@
 #include "i_io_locker.h"
 #include "locker_group.h"
 #include "src/lib/singleton.h"
+#include "src/include/partition_type.h"
 
 #include <string>
 #include <map>
@@ -49,10 +50,11 @@ namespace pos
 class IOLocker : public IIOLocker
 {
 public:
-    IOLocker(void) {}
+    explicit IOLocker(string lockerName);
     virtual ~IOLocker(void) {}
     bool Register(vector<ArrayDevice*> devList);
     void Unregister(vector<ArrayDevice*> devList);
+    uint32_t Size(void) { return lockers.size(); }
     bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) override;
     bool ResetBusyLock(IArrayDevice* dev) override;
     bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;
@@ -63,7 +65,6 @@ private:
     StripeLocker* _Find(IArrayDevice* dev);
     map<IArrayDevice*, StripeLocker*> lockers;
     LockerGroup group;
+    string name;
 };
-
-using IOLockerSingleton = Singleton<IOLocker>;
 } // namespace pos

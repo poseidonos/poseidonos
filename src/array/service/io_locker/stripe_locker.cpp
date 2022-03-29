@@ -71,8 +71,8 @@ StripeLocker::TryBusyLock(StripeId from, StripeId to)
         }
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
-        "StripeLocker::TryBusyLock, {} ~ {}", from, to);
+    // POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+    //     "StripeLocker::TryBusyLock, {} ~ {}", from, to);
     if (busyRange == nullptr)
     {
         busyRange = new BusyRange();
@@ -113,8 +113,8 @@ StripeLocker::TryLock(StripeId id)
     {
         if (isBusyRangeChanging == true)
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
-                "Locker is now state changing. Stripe {} is refused", id);
+            // POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+            //     "Locker is now state changing. Stripe {} is refused", id);
             return false;
         }
         if (busyRange != nullptr && busyRange->IsBusy(id) == true)

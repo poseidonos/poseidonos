@@ -41,7 +41,7 @@ namespace pos
 {
 ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                         ArrayDevice* dev, RebuildComplete cb,
-                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory)
+                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory, bool isWT)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
@@ -57,7 +57,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         if (ctx && factory != nullptr)
         {
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Try to create PartitionRebuild for {}", ctx->part);
+                "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
@@ -65,6 +65,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                 bhvr->GetContext()->arrayIndex = arrayId;
                 bhvr->GetContext()->prog = prog;
                 bhvr->GetContext()->logger = rLogger;
+                bhvr->GetContext()->isWT = isWT;
                 bhvr->UpdateProgress(0);
                 PartitionRebuild* ptnRbd = new PartitionRebuild(bhvr);
                 if (ptnRbd->TotalStripes() > 0)
