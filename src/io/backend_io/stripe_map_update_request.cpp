@@ -36,14 +36,14 @@
 #include <sstream>
 
 #include "flush_completion.h"
-#include "src/allocator/stripe/stripe.h"
 #include "src/allocator/event/stripe_put_event.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/io/backend_io/flush_count.h"
 #include "src/io/backend_io/flush_completion.h"
+#include "src/io/backend_io/flush_count.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/meta_service/meta_service.h"
@@ -67,6 +67,7 @@ StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* strip
   completionEvent(event)
 {
     arrayId = arrayIdInput;
+    SetEventType(BackendEvent_Flush);
 }
 
 StripeMapUpdateRequest::~StripeMapUpdateRequest(void)
