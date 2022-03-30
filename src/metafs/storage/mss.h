@@ -32,11 +32,10 @@
 
 #pragma once
 
-#include <string>
 #include "meta_storage_specific.h"
 #include "mss_opcode.h"
 #include "mss_state.h"
-#include "mss_status_callback.h"
+#include "mss_aio_cb_cxt.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 
@@ -50,25 +49,31 @@ namespace pos
 class MetaStorageSubsystem
 {
 public:
-    explicit MetaStorageSubsystem(int arrayId);
+    MetaStorageSubsystem(void) = delete;
+    explicit MetaStorageSubsystem(const int arrayId);
     virtual ~MetaStorageSubsystem(void);
 
-    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
+    virtual POS_EVENT_ID CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
+        const uint64_t capacity, const bool formatFlag = false) = 0;
     virtual POS_EVENT_ID Open(void) = 0;
     virtual POS_EVENT_ID Close(void) = 0;
-    virtual uint64_t GetCapacity(MetaStorageType mediaType) = 0;
-    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
-    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual uint64_t GetCapacity(const MetaStorageType mediaType) = 0;
+    virtual POS_EVENT_ID ReadPage(const MetaStorageType mediaType, const MetaLpnType metaLpn,
+        void* buffer, const MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID WritePage(const MetaStorageType mediaType, const MetaLpnType metaLpn,
+        void* buffer, const MetaLpnType numPages) = 0;
     virtual bool IsAIOSupport(void) = 0; // Asynchronos API's used with pstore
     virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) = 0;
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
 
-    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
-    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) = 0;
+    virtual POS_EVENT_ID TrimFileData(const MetaStorageType mediaType, const MetaLpnType startLpn,
+        void* buffer, const MetaLpnType numPages) = 0;
+    virtual LogicalBlkAddr TranslateAddress(const MetaStorageType type, const MetaLpnType theLpn) = 0;
 
-    virtual POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
-        MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid);
-    virtual POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
+    virtual POS_EVENT_ID DoPageIO(const MssOpcode opcode, const MetaStorageType mediaType,
+        const MetaLpnType metaLpn, void* buffer, const MetaLpnType numPages,
+        const uint32_t mpio_id, const uint32_t tagid);
+    virtual POS_EVENT_ID DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* cb);
 
 protected:
     int arrayId;

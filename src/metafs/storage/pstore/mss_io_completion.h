@@ -30,25 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef _INCLUDE_MSS_IO_COMPLETION_H
+#define _INCLUDE_MSS_IO_COMPLETION_H
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include "src/event_scheduler/callback.h"
+#include "src/metafs/storage/pstore/mss_aio_cb_cxt.h"
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+class MssIoCompletion : public Callback
 {
 public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
-};
+    explicit MssIoCompletion(MssAioCbCxt* cb);
+    virtual ~MssIoCompletion(void);
 
+private:
+    bool _DoSpecificJob(void) override;
+
+    MssAioCbCxt* cbCxt;
+};
 } // namespace pos
+
+#endif // _INCLUDE_MSS_IO_COMPLETION_H

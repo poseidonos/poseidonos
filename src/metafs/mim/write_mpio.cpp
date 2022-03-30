@@ -43,7 +43,12 @@ WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled)
   prevBuf(nullptr),
   currBuf(nullptr)
 {
-    assert(mdPageBuf != nullptr);
+    if (!mdPageBuf)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The buffer is null.");
+        assert(false);
+    }
     _InitStateHandler();
 }
 
@@ -151,11 +156,7 @@ WriteMpio::_PrepareWrite(MpAioState expNextState)
 bool
 WriteMpio::_MergeData(MpAioState expNextState)
 {
-    int contd2NextRun;
-    void* mdpageBuf = GetMDPageDataBuf();
-    void* userBuf = GetUserDataBuf();
-
-    contd2NextRun = _MergeMDPage(userBuf, io.startByteOffset, io.byteSize, mdpageBuf);
+    int contd2NextRun = _MergeMDPage(io.userBuf, io.startByteOffset, io.byteSize, GetMDPageDataBuf());
 
     SetNextState(expNextState); // WriteMpio::_PrepareWrite()
 

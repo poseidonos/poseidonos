@@ -30,25 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/metafs/mim/meta_async_cb_cxt.h"
 
-#include <list>
-#include <string>
-#include <vector>
+#include <gtest/gtest.h>
 
-#include "src/metafs/mim/write_mpio.h"
+#include <functional>
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+class MetaAsyncCbCxtTester
 {
 public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
+    MetaAsyncCbCxtTester(void)
+    : result(false)
+    {
+    }
+    void TestCallbackFunction(void* data)
+    {
+        int* obj = reinterpret_cast<int*>(data);
+        *obj = 10;
+        SetResult(true);
+    }
+    void SetResult(const bool flag)
+    {
+        result = flag;
+    }
+    bool GetResult(void) const
+    {
+        return result;
+    }
+
+private:
+    bool result;
 };
 
+TEST(MetaAsyncCbCxt, Init_testIfMssAioDataWillBeSet)
+{
+    MetaAsyncCbCxtTester tester;
+    MetaAsyncCbCxt cxt;
+    AsyncCallback cb = std::bind(&MetaAsyncCbCxtTester::TestCallbackFunction, &tester, std::placeholders::_1);
+    int data = 0;
+
+    cxt.Init(&data, cb);
+
+    EXPECT_EQ(cxt.GetAsycCbCxt(), &data);
+}
+
+TEST(MetaAsyncCbCxt, InvokeCallback_checkIfTheCallbackWillBeCalled)
+{
+    MetaAsyncCbCxtTester tester;
+    MetaAsyncCbCxt cxt;
+    AsyncCallback cb = std::bind(&MetaAsyncCbCxtTester::TestCallbackFunction, &tester, std::placeholders::_1);
+    int data = 0;
+
+    cxt.Init(&data, cb);
+    cxt.InvokeCallback();
+
+    EXPECT_EQ(data, 10);
+    EXPECT_TRUE(tester.GetResult());
+}
 } // namespace pos

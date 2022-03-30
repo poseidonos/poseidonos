@@ -39,7 +39,7 @@
 #include "src/include/pos_event_id.h"
 #include "mdpage.h"
 #include "mfs_async_runnable_template.h"
-#include "mfs_asynccb_cxt_template.h"
+#include "meta_async_cb_cxt.h"
 #include "metafs_def.h"
 #include "metafs_io_request.h"
 #include "mim_state.h"
@@ -82,34 +82,45 @@ public:
     virtual ~Mpio(void);
     Mpio(const Mpio& mpio) = delete;
     Mpio& operator=(const Mpio& mio) = delete;
-    void Reset(void);
+    virtual void Reset(void);
 
     virtual void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
-    void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
-    virtual MpioType GetType(void) = 0;
+    virtual void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
+    virtual MpioType GetType(void) const = 0;
 
-    void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
-    bool IsPartialIO(void);
+    virtual void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
+    virtual bool IsPartialIO(void);
 
-    MpioCacheState GetCacheState(void);
-    void SetCacheState(MpioCacheState state);
+    virtual MpioCacheState GetCacheState(void);
+    virtual void SetCacheState(const MpioCacheState state)
+    {
+        cacheState = state;
+    }
 
-    void BuildCompositeMDPage(void);
-    void* GetMDPageDataBuf(void);
-    void* GetUserDataBuf(void);
+    virtual void BuildCompositeMDPage(void);
+    virtual void* GetMDPageDataBuf(void) const;
 
-    bool DoIO(MpAioState expNextState);
-    bool DoE2ECheck(MpAioState expNextState);
-    bool CheckReadStatus(MpAioState expNextState);
-    bool CheckWriteStatus(MpAioState expNextState);
-    MfsError GetErrorStatus(void);
-    void SetPriority(RequestPriority p);
-    RequestPriority GetPriority(void);
+    virtual bool DoIO(const MpAioState expNextState);
+    virtual bool DoE2ECheck(const MpAioState expNextState);
+    virtual bool CheckReadStatus(const MpAioState expNextState);
+    virtual bool CheckWriteStatus(const MpAioState expNextState);
+    virtual MfsError GetErrorStatus(void) const
+    {
+        return {error, errorStopState};
+    }
+    virtual void SetPriority(const RequestPriority p)
+    {
+        priority = p;
+    }
+    virtual RequestPriority GetPriority(void) const
+    {
+        return priority;
+    }
     virtual uint64_t GetId(void) const
     {
         return UNIQUE_ID;
     }
-    void PrintLog(std::string str, const int array, const int lpn) const
+    void PrintLog(const std::string& str, const int array, const int lpn) const
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             str + " id: {}, array: {}, lpn: {}", GetId(), array, lpn);
@@ -132,8 +143,8 @@ protected:
     RequestPriority priority;
 
     virtual void _InitStateHandler(void) = 0;
-    bool _DoMemCpy(void* dst, void* src, size_t nbytes);
-    bool _DoMemSetZero(void* addr, size_t nbytes);
+    bool _DoMemCpy(void* dst, void* src, const size_t nbytes);
+    bool _DoMemSetZero(void* addr, const size_t nbytes);
 
     static void _HandleAsyncMemOpDone(void* obj);
     void _HandlePartialDone(void* notused = nullptr);
@@ -142,14 +153,14 @@ protected:
 
 private:
     MssOpcode _ConvertToMssOpcode(const MpAioState mpioState);
-    bool _CheckIOStatus(MpAioState expNextState);
+    bool _CheckIOStatus(const MpAioState expNextState);
     void _BackupMssAioCbCxtPointer(MssAioCbCxt* cbCxt);
 
     MssAioData mssAioData;
     MssAioCbCxt mssAioCbCxt;
 
     PartialMpioDoneCb partialMpioDoneNotifier;
-    MssCallbackPointer mpioDoneCallback;
+    AsyncCallback mpioDoneCallback;
 
     const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;

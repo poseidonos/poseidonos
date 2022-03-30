@@ -32,23 +32,29 @@
 
 #include <gmock/gmock.h>
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include "src/metafs/storage/pstore/mss_aio_data.h"
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+class MockMssAioData : public MssAioData
 {
 public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
+    using MssAioData::MssAioData;
+    MOCK_METHOD(void, Init, (const int arrayId, const MetaStorageType media,
+        const MetaLpnType metaLpn, const MetaLpnType lpnCnt, void* buf,
+        const uint32_t mpioId, const uint32_t tagId, const FileSizeType offset));
+    MOCK_METHOD(int, GetArrayId, (), (const));
+    MOCK_METHOD(MetaStorageType, GetStorageType, (), (const));
+    MOCK_METHOD(MetaLpnType, GetMetaLpn, (), (const));
+    MOCK_METHOD(MetaLpnType, GetLpnCount, (), (const));
+    MOCK_METHOD(void*, GetBuffer, ());
+    MOCK_METHOD(int, GetError, (), (const));
+    MOCK_METHOD(void, SetError, (const int err));
+    MOCK_METHOD(bool, GetErrorStopState, (), (const));
+    MOCK_METHOD(void, SetErrorStopState, (const bool state));
+    MOCK_METHOD(uint32_t, GetMpioId, (), (const));
+    MOCK_METHOD(uint32_t, GetTagId, (), (const));
+    MOCK_METHOD(FileSizeType, GetOffset, (), (const));
 };
 
 } // namespace pos

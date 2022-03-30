@@ -42,8 +42,7 @@ public:
     explicit ReadMpio(void* mdPageBuf, const bool directAccessEnabled);
     virtual ~ReadMpio(void);
 
-    virtual MpioType
-    GetType(void) override
+    virtual MpioType GetType(void) const override
     {
         return MpioType::Read;
     }

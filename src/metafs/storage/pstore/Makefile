@@ -20,7 +20,8 @@ OBJECT_FILES = $(filter-out $(wildcard $(IBOF_SRC_DIR)/bin/obj/main.o) \
 			   , $(wildcard $(IBOF_SRC_DIR)/bin/obj/*.o))
 
 OBJECT_FILES += $(OBJ_DIR)/mss_disk_inplace.o
-OBJECT_FILES += $(OBJ_DIR)/mss_status_callback.o
+OBJECT_FILES += $(OBJ_DIR)/mss_aio_cb_cxt.o
+OBJECT_FILES += $(OBJ_DIR)/mss_io_completion.o
 OBJECT_FILES += $(OBJ_DIR)/mss_disk_place.o
 OBJECT_FILES += $(OBJ_DIR)/start_ibof.o
 OBJECT_FILES +=	$(OBJ_DIR)/mss_on_disk.o
@@ -98,7 +99,10 @@ endif
 $(OBJ_DIR)/mss_disk_place.o : $(SRC_DIR)/mss_disk_place.cpp
 	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)/mss_status_callback.o : $(SRC_DIR)/mss_status_callback.cpp
+$(OBJ_DIR)/mss_aio_cb_cxt.o : $(SRC_DIR)/mss_aio_cb_cxt.cpp
+	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+$(OBJ_DIR)/mss_aio_cb_cxt.o : $(SRC_DIR)/mss_io_completion.cpp
 	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/start_ibof.o : $(SRC_DIR)/unit_test/start_ibof.cpp

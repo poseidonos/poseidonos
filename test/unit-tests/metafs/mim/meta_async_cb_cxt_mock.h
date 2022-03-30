@@ -30,60 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <functional>
-#include <cassert>
+#include <list>
+#include <string>
+#include <vector>
 
-#include "metafs_def.h"
+#include "src/metafs/mim/meta_async_cb_cxt.h"
 
 namespace pos
 {
-using AsyncCallback = std::function<void(void*)>;
-
-class MetaAsyncCbCxt
+class MockMetaAsyncCbCxt : public MetaAsyncCbCxt
 {
 public:
-    MetaAsyncCbCxt(void)
-    : data(nullptr),
-      callback(nullptr)
-    {
-    }
+    using MetaAsyncCbCxt::MetaAsyncCbCxt;
 
-    MetaAsyncCbCxt(void* data, AsyncCallback callback)
-    : data(data),
-      callback(callback)
-    {
-    }
-
-    void
-    Init(void* data, AsyncCallback& callback)
-    {
-        this->data = data;
-        this->callback = callback;
-    }
-
-// LCOV_EXCL_START
-    virtual ~MetaAsyncCbCxt(void)
-    {
-    }
-// LCOV_EXCL_STOP
-
-    void*
-    GetAsycCbCxt(void)
-    {
-        return data;
-    }
-
-    void
-    InvokeCallback(void)
-    {
-        assert(callback != nullptr && data != nullptr);
-        callback(data);
-    }
-
-protected:
-    void* data;
-    AsyncCallback callback;
+    MOCK_METHOD(void, Init, (void* data, AsyncCallback& callback));
+    MOCK_METHOD(void*, GetAsycCbCxt, (), (const));
+    MOCK_METHOD(void, InvokeCallback, ());
 };
+
 } // namespace pos

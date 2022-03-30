@@ -32,83 +32,24 @@
 
 #pragma once
 
-#include <string>
-#include "instance_tagid_allocator.h"
-#include "meta_storage_specific.h"
-#include "mfs_asynccb_cxt_template.h"
-#include "metafs_common.h"
-#include "metafs_type.h"
-#include "os_header.h"
-#include "src/logger/logger.h"
+#include "meta_async_cb_cxt.h"
+#include "src/metafs/storage/pstore/mss_aio_data.h"
 
 namespace pos
 {
-/**
- * Consumer of MssOnDisk will provide callback function
- * using "callbackPtr" function pointer only for aysnchronous operations
- *
- * Could have porvided simple function but needed to encapsulate it for testing.
- */
-
-class MssAioData
-{
-public:
-    MssAioData(void)
-    : arrayId(INT32_MAX),
-      media(MetaStorageType::Default),
-      metaLpn(MetaFsCommonConst::INVALID_META_LPN),
-      lpnCnt(MetaFsCommonConst::INVALID_META_LPN),
-      buf(nullptr),
-      error(0),
-      errorStopState(false),
-      tagId(0),
-      mpioId(0),
-      offset(0)
-    {
-    }
-
-    void
-    Init(int arrayId, MetaStorageType media, MetaLpnType metaLpn, MetaLpnType lpnCnt, void* buf, uint32_t id, uint32_t tagId, FileSizeType offset)
-    {
-        this->arrayId = arrayId;
-        this->media = media;
-        this->metaLpn = metaLpn;
-        this->lpnCnt = lpnCnt;
-        this->buf = buf;
-        this->error = 0;
-        this->errorStopState = false;
-        this->mpioId = id;
-        this->tagId = tagId;
-        this->offset = offset;
-    }
-
-    int arrayId;
-    MetaStorageType media;
-    MetaLpnType metaLpn;
-    MetaLpnType lpnCnt;
-    void* buf;
-    int error;
-    bool errorStopState;
-    uint32_t tagId;
-    uint32_t mpioId;
-    FileSizeType offset;
-};
-
-using MssCallbackPointer = AsyncCallback;
-
 class MssAioCbCxt : public MetaAsyncCbCxt
 {
 public:
     MssAioCbCxt(void);
-
-    void Init(MssAioData* cxt, MssCallbackPointer& callback);
     virtual ~MssAioCbCxt(void);
-    void SaveIOStatus(int error);
-    int GetArrayId(void)
+
+    virtual void Init(MssAioData* cxt, AsyncCallback& callback);
+    virtual void SaveIOStatus(const int error);
+    virtual int GetArrayId(void) const
     {
-        return cxt->arrayId;
+        return cxt->GetArrayId();
     }
-    MssAioData* GetIoContext(void)
+    virtual MssAioData* GetIoContext(void) const
     {
         return cxt;
     }

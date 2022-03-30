@@ -6,7 +6,7 @@ MSS_UT_VSTORE_EN := 0
 SRCS += \
 	mss.cpp \
 	mss_utils.cpp \
-	mss_status_callback.cpp \
+	mss_aio_cb_cxt.cpp \
 
 ifeq ($(STANDALONE),1)
 	ifeq ($(MFS_INTEGRATION_TEST_EN),0)

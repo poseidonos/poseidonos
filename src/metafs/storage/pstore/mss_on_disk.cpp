@@ -30,23 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/storage/pstore/mss_on_disk.h"
-#include "src/metafs/storage/pstore/mss_disk_inplace.h"
-#include "src/metafs/config/metafs_config.h"
-#include "src/metafs/log/metafs_log.h"
-#include "src/include/array_config.h"
+#include "mss_on_disk.h"
 
+#include <algorithm>
 #include <list>
 #include <utility>
 
-#include "src/include/memory.h"
+#include "src/include/array_config.h"
+#include "src/metafs/config/metafs_config.h"
+#include "src/metafs/log/metafs_log.h"
+#include "src/metafs/storage/pstore/mss_disk_inplace.h"
 
 namespace pos
 {
-/**
- * Constructor
- */
-MssOnDisk::MssOnDisk(int arrayId)
+MssOnDisk::MssOnDisk(const int arrayId)
 : MetaStorageSubsystem(arrayId)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
@@ -58,9 +55,6 @@ MssOnDisk::MssOnDisk(int arrayId)
     }
 }
 
-/**
- * Destructor
- */
 MssOnDisk::~MssOnDisk(void)
 {
     _Finalize();
@@ -69,38 +63,37 @@ MssOnDisk::~MssOnDisk(void)
 void
 MssOnDisk::_Finalize(void)
 {
-    for (int i = mssDiskPlace.size() - 1; i >=0 ; --i)
+    for (size_t i = 0; i < mssDiskPlace.size(); ++i)
     {
         if (mssDiskPlace[i] != nullptr)
         {
             delete mssDiskPlace[i];
-            mssDiskPlace[i]= nullptr;
+            mssDiskPlace[i] = nullptr;
         }
     }
 }
 
-/**
- * Create Meta Storage Using fault tolerance layer.
- *
- * @mediaType  NVRAM/SDD type of media
- * @capacity size of area to use for meta filesystem
- *
- * @return Success(0)/Failure(-1)
- */
 POS_EVENT_ID
-MssOnDisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
+MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
+    const uint64_t capacity, const bool formatFlag)
 {
-    // 4KB aligned
-    assert(capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES == 0);
-    int index = static_cast<int>(mediaType);
+    if (capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "The capacity should be aligned to 4kb, capacity: {}", capacity);
+        assert(0);
+    }
+
+    const int index = static_cast<int>(mediaType);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Mss pstore CreateMetaStore called...");
-    if (mssDiskPlace[index] != nullptr)
+
+    if (mssDiskPlace[index])
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "You attempt to create meta storage again. media type={}",
-            (int)mediaType);
+            "You attempt to create meta storage again. mediaType: {}",
+            index);
         Open();
         return POS_EVENT_ID::SUCCESS; // just return success
     }
@@ -112,13 +105,9 @@ MssOnDisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capa
     }
     else
     {
-        // out of place
-    }
-    if (mssDiskPlace[index] == nullptr)
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_NULL,
-            "Mss Disk Place is null");
-        return POS_EVENT_ID::MFS_MEDIA_NULL;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "Invalid Option");
+        assert(0);
     }
 
     metaCapacity[index] = mssDiskPlace[index]->GetMetaDiskCapacity();
@@ -134,7 +123,9 @@ MssOnDisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capa
 
     if (formatFlag)
     {
-        // Format(mediaType, capacity);
+        // TODO (munseop.lim): need to implement
+        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_WARNING_MESSAGE,
+            "formatFlag isn't supported yet");
     }
 
     Open();
@@ -164,45 +155,36 @@ MssOnDisk::Close(void)
     return POS_EVENT_ID::SUCCESS;
 }
 
-/**
- * Get Total Meta Capacity
-  
- * @mediaType  NVRAM/SDD type of media
- * 
- * @return capacity of area reserved for meta
- */
-
 uint64_t
-MssOnDisk::GetCapacity(MetaStorageType mediaType)
+MssOnDisk::GetCapacity(const MetaStorageType mediaType)
 {
     int index = static_cast<int>(mediaType);
     return metaCapacity[index];
 }
 
 POS_EVENT_ID
-MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer)
+MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType mediaType,
+    const MetaLpnType pageNumber, const MetaLpnType numPages, void* buffer)
 {
-    POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
-    int index = static_cast<int>(mediaType);
+    MetaLpnType currLpn = pageNumber;
+    MetaLpnType requestLpnCount = numPages;
 
-    if (true == _CheckSanityErr(pageNumber, totalBlks[index]))
+    if (_CheckSanityErr(currLpn, totalBlks[static_cast<int>(mediaType)]))
     {
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
 
-    _AdjustPageIoToFitTargetPartition(mediaType, pageNumber, numPages);
+    _AdjustPageIoToFitTargetPartition(mediaType, currLpn, requestLpnCount);
 
     MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
-    // per-stripe io
-    MetaLpnType currLpn = pageNumber, currLpnCnt = numPages;
     const MetaLpnType maxLpnCntPerIO = storagelld->GetMaxLpnCntPerIOSubmit();
     uint8_t* currBuf = static_cast<uint8_t*>(buffer);
-    while (numPages > 0)
+    while (requestLpnCount > 0)
     {
         pos::LogicalBlkAddr blkAddr =
             storagelld->CalculateOnDiskAddress(currLpn); // get physical address
-        currLpnCnt = (numPages > (maxLpnCntPerIO - blkAddr.offset)) ? (maxLpnCntPerIO - blkAddr.offset) : numPages;
+        MetaLpnType currLpnCnt = std::min(requestLpnCount, maxLpnCntPerIO - blkAddr.offset);
 
         BufferEntry buffEntry(currBuf, currLpnCnt);
         std::list<BufferEntry> bufferList;
@@ -233,65 +215,44 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[MFS IO FAIL] Fail I/O Dut to System Stop State");
 
-            status = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
-
-            break;
+            return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
         }
 
-        currLpn += currLpnCnt;
         if (IODirection::TRIM != direction)
         {
             currBuf += (currLpnCnt * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
         }
-        numPages -= currLpnCnt;
+        currLpn += currLpnCnt;
+        requestLpnCount -= currLpnCnt;
     }
 
-    return status;
+    return POS_EVENT_ID::SUCCESS;
 }
 
-/**
- * read given page into buffer form disk
- *
- * @mediaType  NVRAM/SDD type of media
- * @pageNumber     Address of page to read. Must be 4K aligned.
- * @buffer  Destination memory to write data.
- * @numPages   Number of bytes in multiple of 4K pages.
- *
- * @return  Success(0)/Failure(-1)
- */
-
 POS_EVENT_ID
-MssOnDisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::ReadPage(const MetaStorageType mediaType, const MetaLpnType pageNumber,
+    void* buffer, const MetaLpnType numPages)
 {
     return _SendSyncRequest(IODirection::READ, mediaType, pageNumber, numPages, buffer);
 }
 
-/**
- * Write given page from buffer to disk
- *
- * @mediaType  NVRAM/SDD type of media
- * @pageNumber    Address of page to write. Must be 4K aligned.
- * @buffer  Source memory to read data.
- * @numPages  Number of bytes in multiple of 4K pages.
- *
- * @return  Success(0)/Failure(-1)
- */
-
 POS_EVENT_ID
-MssOnDisk::WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::WritePage(const MetaStorageType mediaType, const MetaLpnType pageNumber,
+    void* buffer, const MetaLpnType numPages)
 {
     return _SendSyncRequest(IODirection::WRITE, mediaType, pageNumber, numPages, buffer);
 }
 
 void
-MssOnDisk::_AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnType& targetPage, MetaLpnType& targetNumPages)
+MssOnDisk::_AdjustPageIoToFitTargetPartition(const MetaStorageType mediaType,
+    MetaLpnType& targetPage, MetaLpnType& targetNumPages)
 {
     targetPage = targetPage * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES / ArrayConfig::BLOCK_SIZE_BYTE;
     targetNumPages = targetNumPages * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES / ArrayConfig::BLOCK_SIZE_BYTE;
 }
 
 bool
-MssOnDisk::_CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity)
+MssOnDisk::_CheckSanityErr(const MetaLpnType pageNumber, const uint64_t arrayCapacity)
 {
     if (pageNumber >= arrayCapacity)
     {
@@ -305,29 +266,32 @@ MssOnDisk::_CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity)
 }
 
 POS_EVENT_ID
-MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
+MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
 {
     MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
-    assert(aioData != nullptr);
 
-    MetaLpnType pageNumber = aioData->metaLpn;
-    void* buffer = aioData->buf;
-    MetaLpnType numPages = aioData->lpnCnt;
-    MetaStorageType mediaType = aioData->media;
+    void* buffer = aioData->GetBuffer();
+    MetaLpnType startLpn = aioData->GetMetaLpn();
+    MetaLpnType requestLpnCount = aioData->GetLpnCount();
+    MetaStorageType mediaType = aioData->GetStorageType();
     POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
-    int index = static_cast<int>(mediaType);
 
     assert(pos::BLOCK_SIZE == MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-    if (true == _CheckSanityErr(pageNumber, totalBlks[index]))
+    if (true == _CheckSanityErr(startLpn, totalBlks[(int)mediaType]))
     {
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
-    _AdjustPageIoToFitTargetPartition(mediaType, pageNumber, numPages);
 
-    assert(numPages == 1);
-    // FIXME: when async for multi-pages gets supported,
-    // code below has to be revisited in order to send aio per stripe basis
+    _AdjustPageIoToFitTargetPartition(mediaType, startLpn, requestLpnCount);
+
+    if (requestLpnCount != 1)
+    {
+        // TODO (munseop.lim): need to support multi-pages IO
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "MetaFs does not support multi-pages IO.");
+        assert(false);
+    }
 
     MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
@@ -338,11 +302,11 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     bufferList.push_back(buffEntry);
 
     pos::LogicalBlkAddr blkAddr =
-        storagelld->CalculateOnDiskAddress(pageNumber); // get physical address
+        storagelld->CalculateOnDiskAddress(startLpn); // get physical address
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[MssDisk][SendReq ] type={}, req.tagId={}, mpio_id={}, stripe={}, offsetInDisk={}, buf[0]={}",
-        (int)direction, aioData->tagId, aioData->mpioId,
+        (int)direction, aioData->GetTagId(), aioData->GetMpioId(),
         blkAddr.stripeId, blkAddr.offset, *(uint32_t*)buffer);
 
     retryIoCnt = 0;
@@ -350,8 +314,8 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     do
     {
         ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
-            blkAddr, numPages /*4KB*/, storagelld->GetPartitionType(),
-            callback, arrayId);
+            blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId);
+
         if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
             ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
         {
@@ -373,7 +337,7 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "[MFS IO FAIL] Fail I/O Dut to System Stop State, type={}, req.tagId={}, mpio_id={}",
-            (int)direction, aioData->tagId, aioData->mpioId);
+            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
 
         status = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
     }
@@ -382,54 +346,16 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
 }
 
 LogicalBlkAddr
-MssOnDisk::TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
+MssOnDisk::TranslateAddress(const MetaStorageType type, const MetaLpnType theLpn)
 {
-    MssDiskPlace* storagelld = mssDiskPlace[(int)type];
-    pos::LogicalBlkAddr blkAddr = storagelld->CalculateOnDiskAddress(theLpn);
-
-    return blkAddr;
+    return mssDiskPlace[(int)type]->CalculateOnDiskAddress(theLpn);
 }
 
-std::vector<MssDiskPlace*>&
-MssOnDisk::GetMssDiskPlace(void)
-{
-    return mssDiskPlace;
-}
-
-bool
-MssOnDisk::IsAIOSupport(void)
-{
-    return true;
-}
-
-/**
- * Issue Asynchornous read call to read page from disk
- *
- * @mediaType  NVRAM/SDD type of media
- * @pageNumber page number to write
- * @buffer output buffer for data that we are reading from disk
- * @numPages number of pages to write
- * @callback notification mechanisam for request's status
- *
- * @return Success(0)/Failure(-1)
- */
 POS_EVENT_ID
 MssOnDisk::ReadPageAsync(MssAioCbCxt* cb)
 {
     return _SendAsyncRequest(IODirection::READ, cb);
 }
-
-/**
- * Issue Asynchornous write call to write page to disk
- *
- * @mediaType  NVRAM/SDD type of media
- * @pageNumber page number to write
- * @buffer input buffer data that need to be written to disk
- * @numPages number of pages to write
- * @callback notification mechanisam for request's status
- *
- * @return Success(0)/Failure(-1)
- */
 
 POS_EVENT_ID
 MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
@@ -438,7 +364,8 @@ MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
 }
 
 POS_EVENT_ID
-MssOnDisk::TrimFileData(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::TrimFileData(const MetaStorageType mediaType, const MetaLpnType pageNumber,
+    void* buffer, const MetaLpnType numPages)
 {
     return _SendSyncRequest(IODirection::TRIM, mediaType, pageNumber, numPages, buffer);
 }

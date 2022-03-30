@@ -146,23 +146,23 @@ TestMetaStorageSubsystem::DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb)
 {
     bool result = true;
     if (opcode == MssOpcode::Read)
-        result = files[cb->GetIoContext()->media]->Read(
-            cb->GetIoContext()->buf,
-            cb->GetIoContext()->metaLpn * BYTE_4K,
-            cb->GetIoContext()->lpnCnt * BYTE_4K);
+        result = files[cb->GetIoContext()->GetStorageType()]->Read(
+            cb->GetIoContext()->GetBuffer(),
+            cb->GetIoContext()->GetMetaLpn() * BYTE_4K,
+            cb->GetIoContext()->GetLpnCount() * BYTE_4K);
     else
-        result = files[cb->GetIoContext()->media]->Write(
-            cb->GetIoContext()->buf,
-            cb->GetIoContext()->metaLpn * BYTE_4K,
-            cb->GetIoContext()->lpnCnt * BYTE_4K);
+        result = files[cb->GetIoContext()->GetStorageType()]->Write(
+            cb->GetIoContext()->GetBuffer(),
+            cb->GetIoContext()->GetMetaLpn() * BYTE_4K,
+            cb->GetIoContext()->GetLpnCount() * BYTE_4K);
 
     if (!result)
     {
         std::cout << "the request was failed" << std::endl;
         printf("DoPageIOAsync, %s, result: %s, mediaType: %d, startLpn: %ld, size: %ld, mpio_id: %d, tagid: %d, thread: %d\n",
             ((int)opcode == 0) ? "write" : "read ", (result == true) ? "good" : "fail",
-            (int)cb->GetIoContext()->media, cb->GetIoContext()->metaLpn, cb->GetIoContext()->lpnCnt,
-            cb->GetIoContext()->mpioId, cb->GetIoContext()->tagId, sched_getcpu());
+            (int)cb->GetIoContext()->GetStorageType(), cb->GetIoContext()->GetMetaLpn(), cb->GetIoContext()->GetLpnCount(),
+            cb->GetIoContext()->GetMpioId(), cb->GetIoContext()->GetTagId(), sched_getcpu());
     }
 
     cb->InvokeCallback();

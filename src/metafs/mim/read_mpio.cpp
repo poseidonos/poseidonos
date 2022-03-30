@@ -31,7 +31,8 @@
  */
 
 #include "read_mpio.h"
-#include "mfs_asynccb_cxt_template.h"
+
+#include "meta_async_cb_cxt.h"
 #include "os_header.h"
 
 namespace pos
@@ -39,7 +40,12 @@ namespace pos
 ReadMpio::ReadMpio(void* mdPageBuf, const bool directAccessEnabled)
 : Mpio(mdPageBuf, directAccessEnabled)
 {
-    assert(mdPageBuf != nullptr);
+    if (!mdPageBuf)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            "The buffer is null.");
+        assert(false);
+    }
     _InitStateHandler();
 }
 
@@ -83,7 +89,7 @@ ReadMpio::_MakeReady(MpAioState expNextState)
 bool
 ReadMpio::_HandleError(MpAioState expNextState)
 {
-    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DATA_CORRUPTED,
+    POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DATA_CORRUPTED,
         "[Mpio][RdMpioError] ReadMpio Error...req.tagId={}, mpio_id={}",
         io.tagId, io.mpioId);
 
@@ -111,10 +117,10 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
 bool
 ReadMpio::_CopyToUserBuf(void)
 {
-    void* userBuf = GetUserDataBuf();
+    void* userBuf = io.userBuf;
     void* mdpageBuf = GetMDPageDataBuf();
-    uint32_t byteOffset = io.startByteOffset;
-    uint32_t byteSize = io.byteSize;
+    const uint32_t byteOffset = io.startByteOffset;
+    const uint32_t byteSize = io.byteSize;
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mpio][CopyDat2Buf] Copy R data to user buf req.tagId={}, mpio_id={}, offsetInChunk={}, size={}",

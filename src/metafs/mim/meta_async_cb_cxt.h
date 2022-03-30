@@ -30,25 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include <cassert>
+#include <functional>
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+using AsyncCallback = std::function<void(void*)>;
+
+class MetaAsyncCbCxt
 {
 public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
-};
+    MetaAsyncCbCxt(void)
+    : data_(nullptr),
+      callback_(nullptr)
+    {
+    }
 
+    MetaAsyncCbCxt(void* data, AsyncCallback callback)
+    : data_(data),
+      callback_(callback)
+    {
+    }
+
+    // LCOV_EXCL_START
+    virtual ~MetaAsyncCbCxt(void)
+    {
+    }
+    // LCOV_EXCL_STOP
+
+    virtual void Init(void* data, AsyncCallback& callback)
+    {
+        data_ = data;
+        callback_ = callback;
+    }
+
+    virtual void* GetAsycCbCxt(void) const
+    {
+        return data_;
+    }
+
+    virtual void InvokeCallback(void)
+    {
+        assert(callback_ != nullptr);
+        assert(data_ != nullptr);
+        callback_(data_);
+    }
+
+protected:
+    void* data_;
+    AsyncCallback callback_;
+};
 } // namespace pos

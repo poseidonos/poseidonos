@@ -41,8 +41,7 @@ class WriteMpio : public Mpio
 public:
     explicit WriteMpio(void* mdPageBuf, const bool directAccessEnabled);
     virtual ~WriteMpio(void);
-    virtual MpioType
-    GetType(void) override
+    virtual MpioType GetType(void) const override
     {
         return MpioType::Write;
     }

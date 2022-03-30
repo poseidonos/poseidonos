@@ -457,14 +457,16 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
         return false;
     }
 
-    if (POS_EVENT_ID::SUCCESS != metaStorage_->TrimFileData(type, start, nullptr, count))
+    POS_EVENT_ID rc = metaStorage_->TrimFileData(type, start, nullptr, count);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO((int)rc,
             "Meta file trim has been failed with NVMe DSM.");
 
-        if (POS_EVENT_ID::SUCCESS != metaStorage_->WritePage(type, start, trimBuffer_, count))
+        rc = metaStorage_->WritePage(type, start, trimBuffer_, count);
+        if (POS_EVENT_ID::SUCCESS != rc)
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO((int)rc,
                 "Meta file trim has been failed with zero writing.");
 
             return false;

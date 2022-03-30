@@ -30,33 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mss_status_callback.h"
+#include "src/metafs/storage/pstore/mss_aio_data.h"
+
+#include <gtest/gtest.h>
 
 namespace pos
 {
-InstanceTagIdAllocator mssAioTagAllocator;
-
-MssAioCbCxt::MssAioCbCxt(void)
-: cxt(nullptr)
+TEST(MssAioData, Init_testIfTheParamsCanBeSet)
 {
+    const int arrayId = 1;
+    const MetaStorageType media = MetaStorageType::JOURNAL_SSD;
+    const MetaLpnType metaLpn = 100;
+    const MetaLpnType lpnCnt = 15;
+    void* buf = nullptr;
+    const uint32_t mpioId = 20;
+    const uint32_t tagId = 21;
+    const FileSizeType offset = 30;
+
+    MssAioData data;
+    data.Init(arrayId, media, metaLpn, lpnCnt, buf, mpioId, tagId, offset);
+
+    EXPECT_EQ(data.GetArrayId(), arrayId);
+    EXPECT_EQ(data.GetStorageType(), media);
+    EXPECT_EQ(data.GetMetaLpn(), metaLpn);
+    EXPECT_EQ(data.GetLpnCount(), lpnCnt);
+    EXPECT_EQ(data.GetBuffer(), nullptr);
+    EXPECT_EQ(data.GetMpioId(), mpioId);
+    EXPECT_EQ(data.GetTagId(), tagId);
+    EXPECT_EQ(data.GetOffset(), offset);
 }
 
-void
-MssAioCbCxt::Init(MssAioData* cxt, MssCallbackPointer& callback)
+TEST(MssAioData, error_checkErrorSetterAndGetter)
 {
-    this->cxt = cxt;
-    MetaAsyncCbCxt::Init(cxt, callback);
+    MssAioData data;
+    data.SetError(2);
+    EXPECT_EQ(data.GetError(), 2);
 }
 
-// LCOV_EXCL_START
-MssAioCbCxt::~MssAioCbCxt(void)
+TEST(MssAioData, errorStopStatus_checkErrorSetterAndGetter)
 {
-}
-// LCOV_EXCL_STOP
-
-void
-MssAioCbCxt::SaveIOStatus(int error)
-{
-    cxt->error = error;
+    MssAioData data;
+    data.SetErrorStopState(true);
+    EXPECT_TRUE(data.GetErrorStopState());
 }
 } // namespace pos

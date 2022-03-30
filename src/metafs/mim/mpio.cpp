@@ -97,25 +97,6 @@ Mpio::SetLocalAioCbCxt(MpioAsyncDoneCb& callback)
     SetAsyncCbCxt(&aioCbCxt, false);
 }
 
-MfsError
-Mpio::GetErrorStatus(void)
-{
-    MfsError err(this->error, this->errorStopState);
-    return err;
-}
-
-void
-Mpio::SetPriority(RequestPriority p)
-{
-    priority = p;
-}
-
-RequestPriority
-Mpio::GetPriority(void)
-{
-    return priority;
-}
-
 void
 Mpio::SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier)
 {
@@ -134,32 +115,26 @@ Mpio::GetCacheState(void)
     return cacheState;
 }
 
-void
-Mpio::SetCacheState(MpioCacheState state)
-{
-    cacheState = state;
-}
-
 bool
-Mpio::CheckReadStatus(MpAioState expNextState)
+Mpio::CheckReadStatus(const MpAioState expNextState)
 {
     return _CheckIOStatus(expNextState);
 }
 
 bool
-Mpio::CheckWriteStatus(MpAioState expNextState)
+Mpio::CheckWriteStatus(const MpAioState expNextState)
 {
     return _CheckIOStatus(expNextState);
 }
 
 bool
-Mpio::_CheckIOStatus(MpAioState expNextState)
+Mpio::_CheckIOStatus(const MpAioState expNextState)
 {
     bool error = false;
 
     if (aioModeEnabled && (!forceSyncIO))
     {
-        if (mssAioData.error != 0 || mssAioData.errorStopState == true)
+        if (mssAioData.GetError() != 0 || mssAioData.GetErrorStopState() == true)
         {
             error = true;
         }
@@ -184,15 +159,9 @@ Mpio::BuildCompositeMDPage(void)
 }
 
 void*
-Mpio::GetMDPageDataBuf(void)
+Mpio::GetMDPageDataBuf(void) const
 {
     return mdpage.GetDataBuf();
-}
-
-void*
-Mpio::GetUserDataBuf(void)
-{
-    return io.userBuf;
 }
 
 bool
@@ -208,7 +177,7 @@ Mpio::_CheckDataIntegrity(void) const
 }
 
 bool
-Mpio::DoE2ECheck(MpAioState expNextState)
+Mpio::DoE2ECheck(const MpAioState expNextState)
 {
     mdpage.AttachControlInfo();
 
@@ -244,22 +213,23 @@ Mpio::DoE2ECheck(MpAioState expNextState)
 MssOpcode
 Mpio::_ConvertToMssOpcode(const MpAioState mpioState)
 {
-    if (mpioState == MpAioState::Read)
+    switch (mpioState)
     {
-        return MssOpcode::Read;
-    }
-    else if (mpioState == MpAioState::Write)
-    {
-        return MssOpcode::Write;
-    }
-    else
-    {
-        assert(false);
+        case MpAioState::Read:
+            return MssOpcode::Read;
+
+        case MpAioState::Write:
+            return MssOpcode::Write;
+
+        default:
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+                "Operation {} is not supported.", (int)mpioState);
+            assert(false);
     }
 }
 
 bool
-Mpio::DoIO(MpAioState expNextState)
+Mpio::DoIO(const MpAioState expNextState)
 {
     bool continueToNextStateRun = true;
     POS_EVENT_ID ret;
@@ -297,7 +267,7 @@ Mpio::DoIO(MpAioState expNextState)
             if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
             {
                 errorStopState = true;
-                mssAioData.errorStopState = true;
+                mssAioData.SetErrorStopState(true);
             }
         }
 
@@ -335,7 +305,7 @@ Mpio::_HandlePartialDone(void* notused)
 }
 
 bool
-Mpio::_DoMemCpy(void* dst, void* src, size_t nbytes)
+Mpio::_DoMemCpy(void* dst, void* src, const size_t nbytes)
 {
     bool syncOp = true;
     if (MetaFsMemLib::IsResourceAvailable())
@@ -351,7 +321,7 @@ Mpio::_DoMemCpy(void* dst, void* src, size_t nbytes)
 }
 
 bool
-Mpio::_DoMemSetZero(void* addr, size_t nbytes)
+Mpio::_DoMemSetZero(void* addr, const size_t nbytes)
 {
     bool syncOp = true;
     if (MetaFsMemLib::IsResourceAvailable())
@@ -369,7 +339,6 @@ Mpio::_DoMemSetZero(void* addr, size_t nbytes)
 void
 Mpio::_HandleAsyncMemOpDone(void* obj)
 {
-    Mpio* mpio = reinterpret_cast<Mpio*>(obj);
-    mpio->_HandlePartialDone();
+    reinterpret_cast<Mpio*>(obj)->_HandlePartialDone();
 }
 } // namespace pos

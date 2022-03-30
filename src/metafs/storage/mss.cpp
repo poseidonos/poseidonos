@@ -34,7 +34,7 @@
 
 namespace pos
 {
-MetaStorageSubsystem::MetaStorageSubsystem(int arrayId)
+MetaStorageSubsystem::MetaStorageSubsystem(const int arrayId)
 : arrayId(arrayId)
 {
 }
@@ -46,29 +46,20 @@ MetaStorageSubsystem::~MetaStorageSubsystem(void)
 // LCOV_EXCL_STOP
 
 POS_EVENT_ID
-MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,
-    MetaLpnType metaLpn, void* buffer, MetaLpnType numPages,
-    uint32_t mpio_id, uint32_t tagId)
+MetaStorageSubsystem::DoPageIO(const MssOpcode opcode, const MetaStorageType mediaType,
+    const MetaLpnType metaLpn, void* buffer, const MetaLpnType numPages,
+    const uint32_t mpio_id, const uint32_t tagId)
 {
     switch (opcode)
     {
         case MssOpcode::Read:
-        {
             return ReadPage(mediaType, metaLpn, buffer, numPages);
-        }
-        break;
 
         case MssOpcode::Write:
-        {
             return WritePage(mediaType, metaLpn, buffer, numPages);
-        }
-        break;
 
         case MssOpcode::Trim:
-        {
             return TrimFileData(mediaType, metaLpn, buffer, numPages);
-        }
-        break;
 
         default:
             assert(false);
@@ -76,28 +67,18 @@ MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,
 }
 
 POS_EVENT_ID
-MetaStorageSubsystem::DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb)
+MetaStorageSubsystem::DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* cb)
 {
     switch (opcode)
     {
         case MssOpcode::Read:
-        {
             return ReadPageAsync(cb);
-        }
-        break;
 
         case MssOpcode::Write:
-        {
             return WritePageAsync(cb);
-        }
-        break;
 
         case MssOpcode::Trim:
-        {
-            assert(false);
-        }
-        break;
-
+            // fall-through
         default:
             assert(false);
     }

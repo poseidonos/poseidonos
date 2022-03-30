@@ -32,23 +32,14 @@
 
 #include <gmock/gmock.h>
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include "src/metafs/storage/pstore/mss_io_completion.h"
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+class MockMssIoCompletion : public MssIoCompletion
 {
 public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
+    using MssIoCompletion::MssIoCompletion;
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
-
 } // namespace pos

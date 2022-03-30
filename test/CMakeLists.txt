@@ -207,7 +207,7 @@ INCLUDE_DIRECTORIES(
     # for "mss.h"
     ${POS_SRC_ROOT}/metafs/storage
 
-    # for "mss_status_callback.h"
+    # for "mss_aio_cb_cxt.h"
     ${POS_SRC_ROOT}/metafs/storage/pstore
 
     # for "meta_volume_manager.h"

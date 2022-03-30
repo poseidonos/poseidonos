@@ -30,25 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
-
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include "mss_aio_cb_cxt.h"
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+MssAioCbCxt::MssAioCbCxt(void)
+: cxt(nullptr)
 {
-public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
-};
+}
 
+// LCOV_EXCL_START
+MssAioCbCxt::~MssAioCbCxt(void)
+{
+}
+// LCOV_EXCL_STOP
+
+void
+MssAioCbCxt::Init(MssAioData* cxt, AsyncCallback& callback)
+{
+    this->cxt = cxt;
+    MetaAsyncCbCxt::Init(cxt, callback);
+}
+
+void
+MssAioCbCxt::SaveIOStatus(const int error)
+{
+    cxt->SetError(error);
+}
 } // namespace pos

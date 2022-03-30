@@ -41,18 +41,6 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(MssIoCompletion, MssIoCompletion_)
-{
-}
-
-TEST(MssIoCompletion, _DoSpecificJob_)
-{
-}
-
-} // namespace pos
-
-namespace pos
-{
 TEST(MssOnDisk, CheckCapacity_DefaultValue)
 {
     int arrayId = 0;

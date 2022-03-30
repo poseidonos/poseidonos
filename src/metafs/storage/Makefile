@@ -16,7 +16,8 @@ endif
 SRCS += \
 	mss.cpp \
 	mss_utils.cpp \
-	mss_status_callback.cpp \
+	mss_aio_cb_cxt.cpp \
+	mss_io_completion.cpp \
     mss_disk_inplace.cpp \
     mss_disk_place.cpp \
     mss_on_disk.cpp

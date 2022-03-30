@@ -55,7 +55,7 @@ public:
     {
         delete mss;
     }
-    MpioType GetType(void)
+    MpioType GetType(void) const override
     {
         return MpioType::Read;
     }

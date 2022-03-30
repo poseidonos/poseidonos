@@ -30,25 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/metafs/storage/pstore/mss_io_completion.h"
+
+#include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <list>
-#include <string>
-#include <vector>
+#include "test/unit-tests/metafs/storage/pstore/mss_aio_cb_cxt_mock.h"
 
-#include "src/metafs/mim/write_mpio.h"
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+TEST(MssIoCompletion, Execute)
 {
-public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
-};
+    NiceMock<MockMssAioCbCxt> cb;
+    MssIoCompletion completion(&cb);
 
+    EXPECT_CALL(cb, SaveIOStatus);
+    EXPECT_CALL(cb, InvokeCallback);
+
+    completion.Execute();
+}
 } // namespace pos

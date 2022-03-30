@@ -11,6 +11,8 @@ endif
 DEFINE += -DMSS_PSTORE_EN
 
 MSS_SRCS += \
+	mss_aio_cb_cxt.cpp \
+	mss_io_completion.cpp \
 	mss_disk_place.cpp \
 	mss_disk_inplace.cpp \
 	mss_on_disk.cpp

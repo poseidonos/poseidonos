@@ -34,86 +34,58 @@
 #define _INCLUDE_MSS_ONDISK_INCLUDE_H
 
 #include <vector>
-#include <string>
-#include "mfs_asynccb_cxt_template.h"
-#include "src/metafs/storage/mss.h"
+
+#include "meta_async_cb_cxt.h"
 #include "mss_disk_place.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/event_scheduler/callback.h"
-#include "src/include/backend_event.h"
+#include "src/metafs/storage/mss.h"
+#include "src/metafs/storage/pstore/mss_io_completion.h"
 
 #define INPLACE 1
 
-/**
- * Meta Storage Subsystem Persistant Storage OnDisk Update
- *
- * Provides concrete implementation of API's
- * provided by MetaStorageSubsystem class
- * for Disk OnDisk Store.
- *
- */
 namespace pos
 {
-class MssIoCompletion : public Callback
-{
-public:
-    explicit MssIoCompletion(MssAioCbCxt* cb)
-    : Callback(false, CallbackType_MssIoCompletion),
-      cbCxt(cb)
-    {
-        SetEventType(BackendEvent_MetaIO);
-    }
-
-    ~MssIoCompletion(void) override
-    {
-    }
-
-private:
-    bool
-    _DoSpecificJob(void) override
-    {
-        int iostatus = _GetErrorCount();
-
-        if (cbCxt != nullptr)
-        {
-            cbCxt->SaveIOStatus(iostatus);
-            cbCxt->InvokeCallback();
-        }
-
-        return true;
-    }
-
-    MssAioCbCxt* cbCxt;
-};
-
 class MssOnDisk : public MetaStorageSubsystem
 {
 public:
-    explicit MssOnDisk(int arrayId);
+    MssOnDisk(void) = delete;
+    explicit MssOnDisk(const int arrayId);
     virtual ~MssOnDisk(void);
 
     // Need to remove this function
-    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
+        const uint64_t capacity, const bool formatFlag = false) override;
     virtual POS_EVENT_ID Open(void) override;
     virtual POS_EVENT_ID Close(void) override;
-    virtual uint64_t GetCapacity(MetaStorageType mediaType) override;
-    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
-    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
-    virtual bool IsAIOSupport(void) override;
+    virtual uint64_t GetCapacity(const MetaStorageType mediaType) override;
+    virtual POS_EVENT_ID ReadPage(const MetaStorageType mediaType, const MetaLpnType pageNumber,
+        void* buffer, const MetaLpnType numPages) override;
+    virtual POS_EVENT_ID WritePage(const MetaStorageType mediaType, const MetaLpnType pageNumber,
+        void* buffer, const MetaLpnType numPages) override;
+    virtual bool IsAIOSupport(void) override
+    {
+        return true;
+    }
     virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
 
-    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
-    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) override;
+    virtual POS_EVENT_ID TrimFileData(const MetaStorageType mediaType, const MetaLpnType startLpn,
+        void* buffer, const MetaLpnType numPages) override;
+    virtual LogicalBlkAddr TranslateAddress(const MetaStorageType type, const MetaLpnType theLpn) override;
 
     // for test
-    virtual std::vector<MssDiskPlace*>& GetMssDiskPlace(void);
+    virtual std::vector<MssDiskPlace*>& GetMssDiskPlace(void)
+    {
+        return mssDiskPlace;
+    }
 
 private:
-    bool _CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity);
-    POS_EVENT_ID _SendSyncRequest(IODirection direction, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer);
-    POS_EVENT_ID _SendAsyncRequest(IODirection direction, MssAioCbCxt* cb);
-    void _AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnType& targetPage, MetaLpnType& targetNumPages);
+    bool _CheckSanityErr(const MetaLpnType pageNumber, const uint64_t arrayCapacity);
+    POS_EVENT_ID _SendSyncRequest(const IODirection direction, const MetaStorageType mediaType,
+        const MetaLpnType pageNumber, const MetaLpnType numPages, void* buffer);
+    POS_EVENT_ID _SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb);
+    void _AdjustPageIoToFitTargetPartition(const MetaStorageType mediaType, MetaLpnType& targetPage,
+        MetaLpnType& targetNumPages);
     void _Finalize(void);
 
     std::vector<MssDiskPlace*> mssDiskPlace;

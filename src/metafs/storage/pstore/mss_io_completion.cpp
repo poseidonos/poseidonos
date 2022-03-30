@@ -30,25 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "mss_io_completion.h"
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/metafs/mim/write_mpio.h"
+#include "src/event_scheduler/callback.h"
+#include "src/include/backend_event.h"
 
 namespace pos
 {
-class MockWriteMpio : public WriteMpio
+MssIoCompletion::MssIoCompletion(MssAioCbCxt* cb)
+: Callback(false, CallbackType_MssIoCompletion),
+  cbCxt(cb)
 {
-public:
-    using WriteMpio::WriteMpio;
-    MOCK_METHOD(void, Setup, (MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage), (override));
-    MOCK_METHOD(MpioType, GetType, (), (const, override));
-    MOCK_METHOD(uint64_t, GetId, (), (const, override));
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
-    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
-};
+    SetEventType(BackendEvent_MetaIO);
+}
 
+MssIoCompletion::~MssIoCompletion(void)
+{
+}
+
+bool
+MssIoCompletion::_DoSpecificJob(void)
+{
+    if (cbCxt)
+    {
+        cbCxt->SaveIOStatus(_GetErrorCount());
+        cbCxt->InvokeCallback();
+    }
+
+    return true;
+}
 } // namespace pos
