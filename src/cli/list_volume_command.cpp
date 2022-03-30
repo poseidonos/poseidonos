@@ -61,13 +61,12 @@ ListVolumeCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
+    int ret = FAIL;
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
-        return jFormat.MakeResponse(
-            "LISTVOLUME", rid, (int)POS_EVENT_ID::ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME,
-            "array does not exist named: " + arrayName,
-            GetPosInfo());
+        return jFormat.MakeResponse("LISTVOLUME", rid, ret,
+            "failed to list volume", GetPosInfo());
     }
 
     IArrayInfo* array = info->arrayInfo;
@@ -79,7 +78,7 @@ ListVolumeCommand::Execute(json& doc, string rid)
         POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
             arrayName, arrayState.ToString());
 
-        return jFormat.MakeResponse("LISTVOLUME", rid, FAIL,
+        return jFormat.MakeResponse("LISTVOLUME", rid, ret,
              "failed to list volume", GetPosInfo());
     }
 

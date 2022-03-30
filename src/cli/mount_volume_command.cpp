@@ -70,8 +70,13 @@ MountVolumeCommand::Execute(json& doc, string rid)
         string volName = doc["param"]["name"].get<std::string>();
 
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
-        IArrayInfo* array = info->arrayInfo;
+        if (info == nullptr)
+        {
+            return jFormat.MakeResponse("MOUNTVOLUME", rid, FAIL,
+                 "failed to mount volume:" + volName, GetPosInfo());
+        }
 
+        IArrayInfo* array = info->arrayInfo;
         ArrayStateType arrayState = array->GetState();
         if (arrayState == ArrayStateEnum::BROKEN)
         {

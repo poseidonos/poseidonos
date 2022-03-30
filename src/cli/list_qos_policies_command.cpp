@@ -88,6 +88,12 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
 
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        return jFormat.MakeResponse("LISTQOSPOLICIES", rid, FAIL,
+             "failed to list qos volume: " + volName, GetPosInfo());
+    }
+
     IArrayInfo* arrayInfo = info->arrayInfo;
     ArrayStateType arrayState = arrayInfo->GetState();
     if (arrayState == ArrayStateEnum::BROKEN)
@@ -95,6 +101,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
         POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
             arrayName, arrayState.ToString());
+
         return jFormat.MakeResponse("LISTQOSPOLICIES", rid, FAIL,
              "failed to list qos volume: " + volName, GetPosInfo());
     }

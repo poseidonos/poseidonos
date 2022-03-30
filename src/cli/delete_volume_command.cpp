@@ -66,6 +66,12 @@ DeleteVolumeCommand::Execute(json& doc, string rid)
         int ret = FAIL;
 
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        if (info == nullptr)
+        {
+            return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
+                 "failed to delete volume: " + volName, GetPosInfo());
+        }
+
         IArrayInfo* array = info->arrayInfo;
         ArrayStateType arrayState = array->GetState();
         if (arrayState == ArrayStateEnum::BROKEN)

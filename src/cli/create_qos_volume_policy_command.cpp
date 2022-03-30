@@ -70,8 +70,13 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
         string arrayName = doc["param"]["array"].get<std::string>();
 
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
-        IArrayInfo* array = info->arrayInfo;
+        if (info == nullptr)
+        {
+            return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, FAIL,
+                 "failed to create a qos policy", GetPosInfo());
+        }
 
+        IArrayInfo* array = info->arrayInfo;
         ArrayStateType arrayState = array->GetState();
         if (arrayState == ArrayStateEnum::BROKEN)
         {

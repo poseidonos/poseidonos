@@ -77,6 +77,12 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, FAIL,
+             "failed to reset qos policy for volumes", GetPosInfo());
+    }
+
     IArrayInfo* array = info->arrayInfo;
     ArrayStateType arrayState = array->GetState();
     if (arrayState == ArrayStateEnum::BROKEN)
@@ -84,6 +90,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
         POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
             arrayName, arrayState.ToString());
+
         return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, FAIL,
              "failed to reset qos policy for volumes", GetPosInfo());
     }

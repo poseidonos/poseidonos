@@ -262,6 +262,7 @@ enum class POS_EVENT_ID
     ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME = 2671,
     ARRAY_MGR_NO_ARRAY_OWNING_REQ_DEV = 2672,
     ARRAY_MGR_NO_ARRAY_MATCHING_REQ_ID = 2673,
+    ARRAY_MGR_NO_ARRAY_MATCHING_NAME = 2674,
 
     RECOVER_INVALID_LBA = 2680,
     RECOVER_REQ_DEV_NOT_FOUND = 2681,
@@ -1314,6 +1315,9 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND,
             new PosEventInfoEntry("ARRAY_NVM_NOT_FOUND",
                 "failed to configure array", "Write buffer device of the requested name could not be found", "Please check Write buffer device name and try again")},
+        {(int)POS_EVENT_ID::ARRAY_MGR_NO_ARRAY_MATCHING_NAME,
+            new PosEventInfoEntry("ARRAY_MGR_NO_ARRAY_MATCHING_NAME",
+                "failed to get array info", "Could not find the array with the given name", "Please check the array name again")},
         {(int)POS_EVENT_ID::UNABLE_TO_SET_NVM_MORE_THAN_ONE,
             new PosEventInfoEntry("UNABLE_TO_SET_NVM_MORE_THAN_ONE",
                 "failed to configure array", "Up to one write buffer device is allowed for each array", "Please enter only one write buffer device and try again")},

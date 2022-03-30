@@ -54,7 +54,7 @@ string
 CreateVolumeCommand::Execute(json& doc, string rid)
 {
     string arrayName = DEFAULT_ARRAY_NAME;
-    string qosMsg = "Qos Parameters set.";
+    string qosMsg = "QoS parameters are set";
 
     if (doc["param"].contains("array") == true)
     {
@@ -84,6 +84,11 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         int ret = FAIL;
 
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        if (info == nullptr)
+        {
+            return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
+                "failed to create volume: " + volName, GetPosInfo());
+        }
         IArrayInfo* array = info->arrayInfo;
         ArrayStateType arrayState = array->GetState();
         if (arrayState == ArrayStateEnum::BROKEN)
@@ -93,7 +98,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
                 arrayName, arrayState.ToString());
 
             return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
-                "failed to create volume: " + volName + ", " + qosMsg, GetPosInfo());
+                "failed to create volume: " + volName, GetPosInfo());
         }
 
         if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
