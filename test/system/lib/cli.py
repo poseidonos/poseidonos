@@ -9,7 +9,6 @@ POS_CLI = POS_ROOT + "bin/poseidonos-cli"
 
 
 def send_request(msg):
-    print (msg)
     cli_req = POS_CLI + " --json-res "
     out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
     return out

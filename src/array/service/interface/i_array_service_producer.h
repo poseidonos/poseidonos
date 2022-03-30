@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "src/array/service/io_device_checker/io_device_checker.h"
 #include "src/array/service/io_locker/io_locker.h"
