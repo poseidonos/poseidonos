@@ -95,12 +95,16 @@
             "POS": {
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
+                "CLI_LOCAL_RUN": true,
                 "CFG": "pos.conf",
                 "LOG": "pos.log",
+                "TELEMETRY": false,
+                "LOGGER_LEVEL": "info",
                 "ARRAYs": [
                     {
                         "NAME": "ARR0",
                         "RAID_TYPE": "RAID5",
+                        "WRITE_THROUGH": false,
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2",
                         "SPARE_DEVICE_LIST": "unvme-ns-3",
                         "BUFFER_DEVICE": {
@@ -152,7 +156,8 @@
     "Scenarios": [
         {
             "NAME": "fio_precommit",
-            "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"
+            "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output",
+            "SUBPROC_LOG": true
         }
     ]
 }

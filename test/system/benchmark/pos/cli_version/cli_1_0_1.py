@@ -1,22 +1,29 @@
+import json
 import lib
 import subprocess
 from pos.cli_version import cli_interface
 
 
 class Cli_1_0_1(cli_interface.CliInterface):
-    def __init__(self, json):
+    def __init__(self, json, local_run):
         prefix_list = []
-        prefix_list.append(f"sshpass -p {json['PW']}")
-        prefix_list.append(" ssh -o StrictHostKeyChecking=no ")
-        prefix_list.append(f"{json['ID']}@{json['NIC']['SSH']}")
-        prefix_list.append(" sudo nohup ")
-        prefix_list.append(f"{json['DIR']}/bin/{json['POS']['CLI']} ")
+        if not local_run:
+            prefix_list.append(f"sshpass -p {json['PW']}")
+            prefix_list.append(" ssh -o StrictHostKeyChecking=no ")
+            prefix_list.append(f"{json['ID']}@{json['NIC']['SSH']}")
+            prefix_list.append(" sudo nohup ")
+
+        prefix_list.append(
+            f"{json['DIR']}/bin/{json['POS']['CLI']} --json-res ")
         self.prefix = "".join(prefix_list)
 
     def _send_cli(self, cmd):
         result = lib.subproc.sync_run(cmd)
-        if ("code" in result):
-            raise Exception(result)
+        for line in result.splitlines():
+            json_obj = json.loads(line)
+            if (json_obj["Response"]["result"]["status"]["code"] != 0):
+                lib.printer.red(cmd)
+                raise Exception(f"{json.dumps(json_obj, indent=2)}")
         return result
 
     def array_add_spare(self, arr_name, dev_name):

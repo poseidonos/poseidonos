@@ -10,7 +10,7 @@ from datetime import datetime
 
 def play(json_targets, json_inits, json_scenario):
     lib.printer.green(f"\n -- '{__name__}' has began --")
-    lib.subproc.set_allow_stdout()
+
     raw_date = datetime.now()
     now_date = raw_date.strftime("%y%m%d_%H%M%S")
     skip_workload = False

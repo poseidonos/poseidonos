@@ -38,6 +38,9 @@ def play(json_cfg_file):
             lib.printer.red(f"{__name__} [Error] {e}")
             sys.exit(1)
 
+        if (scenario.get("SUBPROC_LOG") and scenario["SUBPROC_LOG"]):
+            lib.subproc.set_print_log(True)
+
         try:
             module = importlib.import_module(module_name)
         except ImportError:

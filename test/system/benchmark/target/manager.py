@@ -25,15 +25,28 @@ class Target:
         self.pos_bin = json["POS"]["BIN"]
         self.pos_cfg = json["POS"]["CFG"]
         self.pos_log = json["POS"]["LOG"]
+        try:
+            self.pos_logger_level = json["POS"]["LOGGER_LEVEL"]
+        except Exception as e:
+            self.pos_logger_level = "info"
+        try:
+            self.pos_telemetry = json["POS"]["TELEMETRY"]
+        except Exception as e:
+            self.pos_telemetry = True
         self.use_autogen = json["AUTO_GENERATE"]["USE"]
         self.subsystem_list = []
         self.array_volume_list = {}
         self.volume_size = ""
-        self.cli = pos.cli.Cli(json)
+        try:
+            self.cli_local_run = json["POS"]["CLI_LOCAL_RUN"]
+        except Exception as e:
+            self.cli_local_run = False
+        self.cli = pos.cli.Cli(json, self.cli_local_run)
 
     def Prepare(self) -> None:
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
 
+        # Step 1. Prerequisite Setting
         if (self.prereq and self.prereq["CPU"]["RUN"]):
             prerequisite.cpu.Scaling(
                 self.id, self.pw, self.nic_ssh, self.prereq["CPU"]["SCALING"])
@@ -70,6 +83,7 @@ class Target:
                                            self.prereq["DEBUG"]["DUMP_DIR"],
                                            self.prereq["DEBUG"]["CORE_PATTERN"])
 
+        # Step 2. POS Running
         result = pos.env.is_pos_running(
             self.id, self.pw, self.nic_ssh, self.pos_bin)
         if (result):
@@ -81,7 +95,7 @@ class Target:
                             self.pos_bin, self.pos_dir, self.pos_log)
         time.sleep(3)
 
-        # spdk setting
+        # Step 3. SPDK(via pos-cli) Setting
         self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
 
         # create subsystem and add listener
@@ -104,11 +118,13 @@ class Target:
                 self.cli.subsystem_add_listener(
                     subsys["NQN"], self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"])
 
-        # telemetry start
-        time.sleep(10)
-        self.cli.telemetry_start()
+        # Step 4. POS Setting
+        self.cli.logger_set_level(self.pos_logger_level)
+        if (self.pos_telemetry):
+            self.cli.telemetry_start()
+        else:
+            self.cli.telemetry_stop()
 
-        # pos setting
         for array in self.json["POS"]["ARRAYs"]:
             buf_dev = array["BUFFER_DEVICE"]
             self.cli.device_create(
@@ -119,7 +135,10 @@ class Target:
         for array in self.json["POS"]["ARRAYs"]:
             self.cli.array_create(array["BUFFER_DEVICE"]["NAME"], array["USER_DEVICE_LIST"],
                                   array["SPARE_DEVICE_LIST"], array["NAME"], array["RAID_TYPE"])
-            self.cli.array_mount(array["NAME"])
+            if array.get("WRITE_THROUGH"):
+                self.cli.array_mount(array["NAME"], array["WRITE_THROUGH"])
+            else:
+                self.cli.array_mount(array["NAME"])
             if "yes" != self.use_autogen:
                 for volume in array["VOLUMEs"]:
                     self.cli.volume_create(
@@ -144,10 +163,19 @@ class Target:
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
-        self.cli.logger_set_level("info")
-
         # print subsystems
-        print(self.cli.subsystem_list())
+        subsys_json_obj = json.loads(self.cli.subsystem_list())
+        subsys_list = subsys_json_obj["Response"]["result"]["data"]["subsystemlist"]
+        subsys_count = 1
+        for subsys in subsys_list:
+            if (subsys_count == 1):
+                print(f"{subsys['nqn']} {subsys['subtype']}")
+            else:
+                print(
+                    f"{subsys['nqn']} {subsys['subtype']} {subsys['serial_number']}")
+                print(f"  \u221F {subsys['listen_addresses']}")
+                print(f"  \u221F {subsys['namespaces']}")
+            subsys_count += 1
 
         lib.printer.green(f" '{self.name}' prepared")
 
@@ -167,7 +195,7 @@ class Target:
             self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg)
         pos.env.execute_pos(self.id, self.pw, self.nic_ssh,
                             self.pos_bin, self.pos_dir, self.pos_log)
-        time.sleep(1)
+        time.sleep(3)
 
         # spdk setting
         self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
@@ -200,7 +228,10 @@ class Target:
 
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
-            self.cli.array_mount(array["NAME"])
+            if array.get("WRITE_THROUGH"):
+                self.cli.array_mount(array["NAME"], array["WRITE_THROUGH"])
+            else:
+                self.cli.array_mount(array["NAME"])
             if "yes" != self.use_autogen:
                 for volume in array["VOLUMEs"]:
                     self.cli.volume_mount(
@@ -220,11 +251,21 @@ class Target:
                     nqn_base += vol["NUM"]
                     self.array_volume_list[vol["ARRAY"]] = volume_list
 
-        self.cli.logger_set_level("info")
+        self.cli.logger_set_level(self.pos_logger_level)
 
         # print subsystems
-        subsys = self.cli.subsystem_list()
-        print(subsys)
+        subsys_json_obj = json.loads(self.cli.subsystem_list())
+        subsys_list = subsys_json_obj["Response"]["result"]["data"]["subsystemlist"]
+        subsys_count = 1
+        for subsys in subsys_list:
+            if (subsys_count == 1):
+                print(f"{subsys['nqn']} {subsys['subtype']}")
+            else:
+                print(
+                    f"{subsys['nqn']} {subsys['subtype']} {subsys['serial_number']}")
+                print(f"  \u221F {subsys['listen_addresses']}")
+                print(f"  \u221F {subsys['namespaces']}")
+            subsys_count += 1
 
         lib.printer.green(f" '{self.name}' prepared")
 

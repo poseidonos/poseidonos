@@ -15,8 +15,6 @@ def play(json_targets, json_inits, json_scenario):
     now_date = raw_date.strftime("%y%m%d_%H%M%S")
     skip_workload = False
 
-    lib.subproc.set_allow_stdout()
-
     # validate arguments, 인자로 받은 json 정보가 있는지 확인
     if 0 == len(json_targets):
         lib.printer.red(" TargetError: At least 1 target has to exist")

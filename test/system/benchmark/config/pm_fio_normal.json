@@ -89,6 +89,7 @@
                 "CLI": "poseidonos-cli",
                 "CFG": "pos_multi_array_normal.conf",
                 "LOG": "pos.log",
+                "TELEMETRY": false,
                 "ARRAYs": [
                     {
                         "NAME": "ARR0",
@@ -260,7 +261,8 @@
     "Scenarios": [
         {
             "NAME": "fio_normal",
-            "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"
+            "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output",
+            "SUBPROC_LOG": true
         }
     ]
 }

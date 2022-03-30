@@ -147,7 +147,6 @@ def play(json_targets, json_inits, json_scenario):
     raw_date = datetime.now()
     now_date = raw_date.strftime("%y%m%d_%H%M%S")
     skip_workload = False
-    lib.subproc.set_allow_stdout()
 
     # validate arguments
     if 0 == len(json_targets):
