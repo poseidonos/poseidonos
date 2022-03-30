@@ -13,36 +13,84 @@ def ToFloat(str_val):
     return float(str_val)
 
 
-def GetEtaData(data, file, title):
-    try:  # data는 Fio의 eta_data 딕셔너리
-        data[title] = {}  # title이 graph의 subplot 이고 빈 딕셔너리 생성
-        data[title]["title"] = title  # subplot 이름 설정
-        data[title]["x"] = []  # subplot x 축 빈 리스트 생성
-        data[title]["bw_read"] = []  # subplot y 축 (bw_read) 빈 리스트 생성
-        data[title]["bw_write"] = []  # subplot y 축 (bw_write) 빈 리스트 생성
-        data[title]["iops_read"] = []  # subplot y 축 (iops_read) 빈 리스트 생성
-        data[title]["iops_write"] = []  # subplot y 축 (iops_write) 빈 리스트 생성
+def GetCsvData(data, file, title):
+    try:
+        data[title] = {}
+        data[title]["title"] = title
+        data[title]["x"] = []
+        data[title]["bandwidth"] = []
 
         fp = open(file, "r")
         lines = fp.readlines()
         for line in lines:
-            # Jobs: 3 (f=3): [W(3)][20.8%][r=0KiB/s,w=2027KiB/s][r=0,w=4055 IOPS][eta 00m:19s]
+            # 100, 232960, 1, 0
+            strings = line.split(", ")
+            if (4 <= len(strings)):
+                data[title]["x"].append(int(strings[0]))
+                data[title]["bandwidth"].append(int(strings[1]))
+        fp.close()
+    except Exception as e:
+        lib.printer.red(f"{__name__} [Error] {e}")
+        fp.close()
+
+
+def GetEtaData(data, file, title, use_time_axis=False):
+    try:
+        data[title] = {}
+        data[title]["title"] = title
+        data[title]["x"] = []
+        data[title]["bw_read"] = []
+        data[title]["bw_write"] = []
+        data[title]["iops_read"] = []
+        data[title]["iops_write"] = []
+
+        fp = open(file, "r")
+        lines = fp.readlines()
+        second = 0
+        for line in lines:
+            # line example : Jobs: 3 (f=3): [W(3)][20.8%][r=0KiB/s,w=2027KiB/s][r=0,w=4055 IOPS][eta 00m:19s]
             strings = line.split("[")
-            if (6 <= len(strings)):
+            if (3 <= len(strings) and "Jobs:" in strings[0]):
                 percentage = strings[2].split("%")[0]
                 if "-" in percentage:
                     continue
-                bandwidth = strings[3].split(",")
-                bw_read = bandwidth[0].split("=")[1].split("iB/s")[0]
-                bw_write = bandwidth[1].split("=")[1].split("iB/s")[0]
-                iops = strings[4].split(",")
-                iops_read = iops[0].split("=")[1]
-                iops_write = iops[1].split("=")[1].split(" ")[0]
-                data[title]["x"].append(float(percentage))
-                data[title]["bw_read"].append(ToFloat(bw_read))
-                data[title]["bw_write"].append(ToFloat(bw_write))
-                data[title]["iops_read"].append(ToFloat(iops_read))
-                data[title]["iops_write"].append(ToFloat(iops_write))
+                if use_time_axis is True:
+                    data[title]["x"].append(float(second))
+                    second += 1
+                else:
+                    data[title]["x"].append(float(percentage))
+                if(len(strings) is 4):
+                    data[title]["bw_read"].append(float(0))
+                    data[title]["bw_write"].append(float(0))
+                    data[title]["iops_read"].append(float(0))
+                    data[title]["iops_write"].append(float(0))
+                    continue
+                bandwidth = strings[3]
+
+                if "r=" in bandwidth and "w=" in bandwidth:
+                    bw_read = bandwidth.split(",")[0].split("=")[1].split("iB/s")[0]
+                    data[title]["bw_read"].append(ToFloat(bw_read))
+                    bw_write = bandwidth.split(",")[1].split("=")[1].split("iB/s")[0]
+                    data[title]["bw_write"].append(ToFloat(bw_write))
+                elif ("r=" in bandwidth):
+                    bw_read = bandwidth.split("=")[1].split("iB/s")[0]
+                    data[title]["bw_read"].append(ToFloat(bw_read))
+                elif ("w=" in bandwidth):
+                    bw_write = bandwidth.split("=")[1].split("iB/s")[0]
+                    data[title]["bw_write"].append(ToFloat(bw_write))
+
+                iops = strings[4]
+                if "r=" in iops and "w=" in iops:
+                    iops_read = iops.split(",")[0].split("=")[1].split(" ")[0]
+                    data[title]["iops_read"].append(ToFloat(iops_read))
+                    iops_write = iops.split(",")[1].split("=")[1].split(" ")[0]
+                    data[title]["iops_write"].append(ToFloat(iops_write))
+                elif ("r=" in iops):
+                    iops_read = iops.split("=")[1].split(" ")[0]
+                    data[title]["iops_read"].append(ToFloat(iops_read))
+                elif ("w=" in iops):
+                    iops_write = iops.split("=")[1].split(" ")[0]
+                    data[title]["iops_write"].append(ToFloat(iops_write))
         fp.close()
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
@@ -50,11 +98,11 @@ def GetEtaData(data, file, title):
 
 
 def GetResultData(data, file, title):
-    try:  # data는 Fio의 result_data 리스트
+    try:
         for i in range(len(data)):
-            data[i]["index"].append(title)  # subplot 이름 설정
+            data[i]["index"].append(title)
 
-        with open(file, "r") as f:  # result format이 json 임을 가정
+        with open(file, "r") as f:
             json_data = json.load(f)
             data[0]["value"].append(json_data["jobs"][0]["read"]["iops"])
             data[1]["value"].append(json_data["jobs"][0]["read"]["bw"])
@@ -105,7 +153,7 @@ def GetSingleLogFile(data, file, index):
 
 
 def GetLogData(data, dir, filename):
-    try:  # data는 Fio의 log_data 딕셔너리
+    try:
         bw_file_prefix = f"{filename}_bw"
         iops_file_prefix = f"{filename}_iops"
         clat_file_prefix = f"{filename}_clat"

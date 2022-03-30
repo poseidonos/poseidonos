@@ -31,44 +31,27 @@
  */
 
 #pragma once
-
-#include <chrono>
-#include <iostream>
+#include <string>
+#include <assert.h>
 
 namespace pos
 {
-class MetaFsTimeInterval
+class MetaFsTokenizer
 {
 public:
-    MetaFsTimeInterval(void) = delete;
-    explicit MetaFsTimeInterval(const int64_t intervalInMilliseconds)
-    : intervalInMilliseconds_(intervalInMilliseconds),
-      lastTime_(std::chrono::steady_clock::now())
+    virtual void SplitFourStringByColon(std::string existKeyString, std::string labels[])
     {
-    }
-    virtual ~MetaFsTimeInterval(void)
-    {
-    }
-    virtual size_t GetInterval(void) const
-    {
-        return intervalInMilliseconds_;
-    }
-    virtual bool CheckInterval(void)
-    {
-        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime_).count();
+        std::string::size_type _begin, _end = 0;
+        int i = 0;
 
-        if (elapsedTime >= intervalInMilliseconds_)
+        while ((_begin = existKeyString.find_first_not_of(':', _end)) != std::string::npos)
         {
-            lastTime_ = currentTime;
-            return true;
+            _end = existKeyString.find_first_of(':', _begin);
+            if (_end == std::string::npos) _end = existKeyString.length();
+            labels[i++] = existKeyString.substr(_begin, _end - _begin);
         }
 
-        return false;
+        assert(i == 4);
     }
-
-protected:
-    const int64_t intervalInMilliseconds_;
-    std::chrono::steady_clock::time_point lastTime_;
 };
 } // namespace pos

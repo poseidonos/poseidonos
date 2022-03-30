@@ -35,17 +35,17 @@
 #include <memory>
 #include <string>
 
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/include/address_type.h"
 #include "src/metafs/include/meta_storage_info.h"
+#include "src/metafs/lib/concurrent_metafs_time_interval.h"
 #include "src/metafs/mai/metafs_file_control_api.h"
-#include "src/metafs/mai/metafs_management_api.h"
 #include "src/metafs/mai/metafs_io_api.h"
+#include "src/metafs/mai/metafs_management_api.h"
 #include "src/metafs/mai/metafs_wbt_api.h"
 #include "src/metafs/storage/mss.h"
-
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/include/address_type.h"
 
 namespace pos
 {
@@ -55,8 +55,8 @@ public:
     MetaFs(void);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
-            MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
-            MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp);
+        MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
+        MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp);
     virtual ~MetaFs(void);
 
     virtual int Init(void) override;
@@ -84,6 +84,7 @@ private:
     std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
     MaxMetaLpnMapPerMetaStorage _MakeLpnMap(void) const;
 
+    ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval;
     bool isNpor_;
     bool isLoaded_;
     bool isNormal_;

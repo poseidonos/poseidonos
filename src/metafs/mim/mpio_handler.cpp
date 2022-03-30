@@ -48,15 +48,13 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
   metricSumOfMpioCount(0),
-  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric())
+  metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric())
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
         partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, RequestPriority>();
-
-    lastTime = std::chrono::steady_clock::now();
 }
 
 MpioHandler::~MpioHandler(void)
@@ -109,10 +107,7 @@ MpioHandler::BottomhalfMioProcessing(void)
 void
 MpioHandler::_SendPeriodicMetrics()
 {
-    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    size_t elapsedTime = (size_t)(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
-
-    if (elapsedTime >= TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC)
+    if (metaFsTimeInterval.CheckInterval())
     {
         std::string thread_name = to_string(coreId);
         POSMetric metricFreeMpioCnt(TEL40103_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
@@ -135,8 +130,6 @@ MpioHandler::_SendPeriodicMetrics()
             metricSumOfSpendTime = 0;
             metricSumOfMpioCount = 0;
         }
-
-        lastTime = currentTime;
     }
 }
 } // namespace pos

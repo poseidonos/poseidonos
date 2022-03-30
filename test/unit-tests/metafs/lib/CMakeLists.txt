@@ -1,2 +1,4 @@
 POS_ADD_UNIT_TEST(metafs_pool_ut metafs_pool_test.cpp)
 POS_ADD_UNIT_TEST(metafs_time_interval_ut metafs_time_interval_test.cpp)
+POS_ADD_UNIT_TEST(concurrent_metafs_time_interval_ut concurrent_metafs_time_interval_test.cpp)
+POS_ADD_UNIT_TEST(metafs_tokenizer_ut metafs_tokenizer_test.cpp)

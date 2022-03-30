@@ -16,6 +16,13 @@ def FormatLatency(y, idx=0):
         return f"{round(y)}ns"
 
 
+def FormatMsTime(x, idx=0):
+    if x >= 1e3:
+        return f"{round(x/1e3)}"
+    else:
+        return f"{round(x)}"
+
+
 def FormatIOPS(y, idx=0):
     if y >= 1e9:
         return f"{round(y/1e9)}Giops"
@@ -29,22 +36,22 @@ def FormatIOPS(y, idx=0):
 
 def FormatBW(y, idx=0):
     if y >= 1e9:
-        return f"{round(y/1e9)}GiB/s"
+        return f"{round(y/1e9, 1)}GiB/s"
     elif y >= 1e6:
-        return f"{round(y/1e6)}MiB/s"
+        return f"{round(y/1e6, 1)}MiB/s"
     elif y >= 1e3:
-        return f"{round(y/1e3)}KiB/s"
+        return f"{round(y/1e3, 1)}KiB/s"
     else:
         return f"{round(y)}B/s"
 
 
 def FormatKBW(y, idx=0):
     if y >= 1e9:
-        return f"{round(y/1e9)}TiB/s"
+        return f"{round(y/1e9, 1)}TiB/s"
     elif y >= 1e6:
-        return f"{round(y/1e6)}GiB/s"
+        return f"{round(y/1e6, 1)}GiB/s"
     elif y >= 1e3:
-        return f"{round(y/1e3)}MiB/s"
+        return f"{round(y/1e3, 1)}MiB/s"
     else:
         return f"{round(y)}KiB/s"
 
@@ -67,17 +74,17 @@ def FormatEpochTime(y, idx=0):
 
 def DrawEta(data, pic_name, graph_list):
     try:
-        plt.clf()  # plot 초기화
+        plt.clf()
         num_graph = len(graph_list)
-        # plot size 설정(unit: inch)
         fig = plt.figure(figsize=(8, 3 * num_graph))
 
         for i in range(num_graph):
             type = graph_list[i]
-            ax = plt.subplot(num_graph, 1, i + 1)  # subplot 생성(행, 렬, 순서)
+            ax = plt.subplot(num_graph, 1, i + 1)
             ax.set_title(type, fontsize=12)
             ax.grid(True, axis="y", color="lightgrey", zorder=0)
-            plt.xlabel("percentage", fontsize=9)
+            plt.xlabel("time (sec)", fontsize=9)
+            plt.ylim([0, 7000000000])
             if "iops" in type:
                 ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatIOPS))
             elif "bw" in type:
@@ -88,9 +95,9 @@ def DrawEta(data, pic_name, graph_list):
             ax.tick_params(axis='y', labelrotation=30, labelsize=8)
             for v in data.values():
                 plt.scatter(v["x"], v[type], s=10,
-                            label=v["title"])  # 점 그래프 그리기
-                plt.plot(v["x"], v[type])  # 선 그래프 그리기
-            plt.legend(fontsize=8, loc="upper left", ncol=2)  # 범례 그리기
+                            label=v["title"])
+                plt.plot(v["x"], v[type])
+            plt.legend(fontsize=8, loc="upper left", ncol=2)
 
         plt.tight_layout()
         plt.savefig(f"{pic_name}_eta.png", dpi=200)
@@ -100,23 +107,25 @@ def DrawEta(data, pic_name, graph_list):
         plt.close(fig)
 
 
-def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
-    fig = plt.figure(figsize=(12, 12))
+def DrawCsv(data, pic_name):
     try:
-        plt.clf()  # plot 초기화
-        plt.rcParams.update({'font.size': 22})
-        x_axis = []
-        plt.ylim(ymin=0.0, ymax=max_y)
-        plt.xlabel(x_axis_label)
-        plt.ylabel(y_axis_label)
-        for key in dict_data:
-            x_axis = []
-            for index in range(0, len(dict_data[key])):
-                x_axis.append(index)
-            plt.plot(x_axis, dict_data[key], label=key)
+        plt.clf()
+        fig = plt.figure(figsize=(8, 3))
 
-        plt.legend()
-        plt.savefig(f"output/{pic_name}_result.png", dpi=200)
+        type = "bandwidth"
+        ax = plt.subplot(1, 1, 1)
+        ax.set_title(type, fontsize=12)
+        ax.grid(True, axis="y", color="lightgrey", zorder=0)
+        plt.xlabel("time (sec)", fontsize=9)
+        ax.xaxis.set_major_formatter(ticker.FuncFormatter(FormatMsTime))
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(FormatBW))
+        ax.tick_params(axis='y', labelrotation=30, labelsize=8)
+        for v in data.values():
+            plt.plot(v["x"], v[type], label=v["title"])
+        plt.legend(fontsize=8, loc="upper left", ncol=2)
+
+        plt.tight_layout()
+        plt.savefig(f"{pic_name}_bandwidth.png", dpi=200)
         plt.close(fig)
     except Exception as e:
         lib.printer.red(f"{__name__} [Error] {e}")
@@ -125,16 +134,16 @@ def DrawResultDict(dict_data, pic_name, max_y, x_axis_label, y_axis_label):
 
 def DrawResult(data, pic_name):
     try:
-        plt.clf()  # plot 초기화
-        fig = plt.figure(figsize=(12, 12))  # plot size 설정(unit: inch)
+        plt.clf()
+        fig = plt.figure(figsize=(12, 12))
         prop_cycle = plt.rcParams["axes.prop_cycle"]
         color_list = prop_cycle.by_key()["color"]
 
         for i in range(12):
-            ax = plt.subplot(4, 3, i + 1)  # subplot 생성(행, 렬, 순서)
+            ax = plt.subplot(4, 3, i + 1)
             ax.set_title(data[i]["title"], fontsize=12)
             ax.grid(True, axis="x", color="lightgrey", zorder=0)
-            hbars = ax.barh(  # 가로 막대 그래프 그리기
+            hbars = ax.barh(  # draw horizontal bar graph
                 range(len(data[i]["value"])),
                 data[i]["value"],
                 align="center",
@@ -157,13 +166,12 @@ def DrawResult(data, pic_name):
 
             rects = ax.patches
             x_min, x_max = plt.gca().get_xlim()
-            for rect in rects:  # 막대에 label 붙여서 값 표시
+            for rect in rects:
                 x_val = rect.get_width()
                 y_val = rect.get_y() + rect.get_height() / 2
                 label = FormatSimpleFloat(x_val)
                 x_offset = 5
                 align = "left"
-                # 막대의 크기가 subplot의 3/4보다 크면 label이 subplot을 넘어가는 것 방지
                 if 0.75 < (x_val / x_max):
                     x_offset = -10
                     align = "right"
@@ -187,13 +195,11 @@ def DrawResult(data, pic_name):
 
 def DrawLogGraphWithType(data, pic_name, type):
     try:
-        plt.clf()  # plot 초기화
+        plt.clf()
         num_graph = len(data)
-        # plot size setting(unit: inch)
         fig = plt.figure(figsize=(8, 3 * num_graph))
 
         for job in data:
-            # subplot position(행, 렬, 순서)
             ax = plt.subplot(num_graph, 1, int(job))
             ax.set_title(job, fontsize=12)
             ax.grid(True, axis="y", color="lightgrey", zorder=0)
@@ -210,12 +216,12 @@ def DrawLogGraphWithType(data, pic_name, type):
             ax.tick_params(axis='y', labelrotation=30, labelsize=8)
             ax.tick_params(axis='x', labelrotation=0, labelsize=8)
             plt.scatter(data[job]["read"]["x"], data[job]
-                        ["read"]["y"], s=10, label="read")  # 점 그래프
-            plt.plot(data[job]["read"]["x"], data[job]["read"]["y"])  # 선 그래프
+                        ["read"]["y"], s=10, label="read")
+            plt.plot(data[job]["read"]["x"], data[job]["read"]["y"])
             plt.scatter(data[job]["write"]["x"], data[job]
                         ["write"]["y"], s=10, label="write")
             plt.plot(data[job]["write"]["x"], data[job]["write"]["y"])
-            plt.legend(fontsize=8, loc="upper left", ncol=2)  # 범례 그리기
+            plt.legend(fontsize=8, loc="upper left", ncol=2)
 
         plt.tight_layout()
         plt.savefig(pic_name, dpi=200)

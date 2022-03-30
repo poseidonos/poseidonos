@@ -110,12 +110,13 @@ public:
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
         EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
 
+        ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayInfo->GetIndex());
 
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex(), mss);
         ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss, mgmt);
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
-        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp);
+        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp, concurrentMetaFsTimeInterval);
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 

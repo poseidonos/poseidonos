@@ -37,10 +37,15 @@
 */
 #pragma once
 
+#include <string>
+#include <utility>
+
+#include "src/metafs/lib/concurrent_metafs_time_interval.h"
 #include "src/metafs/mai/metafs_file_control_api.h"
 #include "src/metafs/mim/meta_io_manager.h"
 #include "src/metafs/storage/mss.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "tbb/concurrent_unordered_map.h"
 
 namespace pos
 {
@@ -50,7 +55,7 @@ public:
     MetaFsIoApi(void);
     MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
         MetaStorageSubsystem* storage, TelemetryPublisher* tp,
-        MetaIoManager* io = nullptr);
+        ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval, MetaIoManager* io = nullptr);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,
@@ -71,6 +76,8 @@ public:
 
     virtual void SetStatus(bool isNormal);
 
+    tbb::concurrent_unordered_map<std::string, pair<uint64_t, uint64_t>> collectedMetricsMap;
+
 private:
     bool _AddFileInfo(MetaFsIoRequest& reqMsg);
 
@@ -78,12 +85,13 @@ private:
     POS_EVENT_ID _CheckFileIoBoundary(MetaFsIoRequest& reqMsg);
     POS_EVENT_ID _CheckReqSanity(MetaFsIoRequest& reqMsg);
     POS_EVENT_ID _ProcessRequest(MetaFsIoRequest& reqMsg);
-    void _SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize);
+    void _SendPeriodicMetrics(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize);
 
     int arrayId;
     bool isNormal;
     MetaIoManager* ioMgr;
     MetaFsFileControlApi* ctrlMgr;
     TelemetryPublisher* telemetryPublisher;
+    ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval;
 };
 } // namespace pos

@@ -48,6 +48,7 @@ MetaFs::MetaFs(void)
   io(nullptr),
   ctrl(nullptr),
   wbt(nullptr),
+  concurrentMetaFsTimeInterval(nullptr),
   isNpor_(false),
   isLoaded_(false),
   isNormal_(false),
@@ -73,9 +74,12 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     telemetryPublisher_ = new TelemetryPublisher("metafs_" + to_string(arrayId_));
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
+    // TODO(sang7.park) : need to combine with metafs config manager
+    concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
+
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
     ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt);
-    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_);
+    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);

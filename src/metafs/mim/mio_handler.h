@@ -43,7 +43,9 @@
 #include "mpio_handler.h"
 #include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/lib/metafs_pool.h"
+#include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/mio.h"
+#include "src/metafs/util/metafs_time.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -113,12 +115,11 @@ private:
     const size_t MIO_POOL_SIZE;
     const size_t MPIO_POOL_SIZE;
     const size_t WRITE_CACHE_CAPACITY;
-    const size_t TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC;
     int coreId;
 
     TelemetryPublisher* telemetryPublisher = nullptr;
-    std::chrono::steady_clock::time_point lastTime;
     int64_t metricSumOfSpendTime;
     int64_t metricSumOfMioCount;
+    MetaFsTimeInterval metaFsTimeInterval;
 };
 } // namespace pos

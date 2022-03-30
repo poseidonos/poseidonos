@@ -71,12 +71,14 @@ namespace pos
     static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
     static const std::string TEL40010_METAFS_USER_REQUEST = "user_request";
     static const std::string TEL40011_METAFS_USER_REQUEST_CNT = "user_request_cnt";
+    static const std::string TEL40012_METAFS_USER_REQUEST_PUBLISH_CNT_PER_INTERVAL = "user_request_publish_cnt_per_interval";
     static const std::string TEL40102_METAFS_FREE_MIO_CNT = "free_mio_cnt";
     static const std::string TEL40103_METAFS_FREE_MPIO_CNT = "free_mpio_cnt";
     static const std::string TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO = "sum_of_all_the_time_spent_by_mpio";
     static const std::string TEL40105_METAFS_SUM_OF_MPIO_COUNT = "sum_of_mpio_count";
     static const std::string TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO = "sum_of_all_the_time_spent_by_mio";
     static const std::string TEL40107_METAFS_SUM_OF_MIO_COUNT = "sum_of_mio_count";
+    static const std::string TEL40108_METAFS_MIO_HANDLER_IS_WORKING = "mio_handler_is_working";
 
     static const std::string TEL50000_READ_IOPS = "read_iops";
     static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";

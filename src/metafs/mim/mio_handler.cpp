@@ -60,11 +60,11 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
   MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
   WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
-  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric()),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
-  metricSumOfMioCount(0)
+  metricSumOfMioCount(0),
+  metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric())
 {
     ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
     ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
@@ -73,8 +73,6 @@ MioHandler::MioHandler(const int threadId, const int coreId,
     _CreateMioPool();
 
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
-
-    lastTime = std::chrono::steady_clock::now();
 
     this->bottomhalfHandler = nullptr;
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
@@ -95,15 +93,13 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
   MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
   WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
-  TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC(configManager->GetTimeIntervalInMillisecondsForMetric()),
   coreId(coreId),
   telemetryPublisher(tp),
   metricSumOfSpendTime(0),
-  metricSumOfMioCount(0)
+  metricSumOfMioCount(0),
+  metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric())
 {
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
-
-    lastTime = std::chrono::steady_clock::now();
 
     this->bottomhalfHandler = nullptr;
 }
@@ -212,10 +208,7 @@ MioHandler::_HandleIoSQ(void)
 void
 MioHandler::_SendPeriodicMetrics(void)
 {
-    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-    size_t elapsedTime = (size_t)(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
-
-    if (elapsedTime >= TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC)
+    if (metaFsTimeInterval.CheckInterval())
     {
         std::string thread_name = to_string(coreId);
         POSMetric metricFreeMioCnt(TEL40102_METAFS_FREE_MIO_CNT, POSMetricTypes::MT_GAUGE);
@@ -223,6 +216,11 @@ MioHandler::_SendPeriodicMetrics(void)
         metricFreeMioCnt.SetGaugeValue(mioPool->GetFreeCount());
         telemetryPublisher->PublishMetric(metricFreeMioCnt);
 
+        int64_t currTimeStamp = GetCurrDateTimestamp();
+        POSMetric metricMioHandlerWorking(TEL40108_METAFS_MIO_HANDLER_IS_WORKING, POSMetricTypes::MT_GAUGE);
+        metricMioHandlerWorking.AddLabel("thread_name", thread_name);
+        metricMioHandlerWorking.SetGaugeValue(currTimeStamp);
+        telemetryPublisher->PublishMetric(metricMioHandlerWorking);
         if (metricSumOfMioCount != 0)
         {
             POSMetric metricTime(TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO, POSMetricTypes::MT_GAUGE);
@@ -238,8 +236,6 @@ MioHandler::_SendPeriodicMetrics(void)
             metricSumOfSpendTime = 0;
             metricSumOfMioCount = 0;
         }
-
-        lastTime = currentTime;
     }
 }
 

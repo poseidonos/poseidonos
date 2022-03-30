@@ -36,6 +36,7 @@
 #include <string>
 
 #include "mpio_allocator.h"
+#include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -62,9 +63,8 @@ private:
     MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;
-    std::chrono::steady_clock::time_point lastTime;
     int64_t metricSumOfSpendTime;
     int64_t metricSumOfMpioCount;
-    const size_t TIME_INTERVAL_IN_MILLISECOND_FOR_METRIC;
+    MetaFsTimeInterval metaFsTimeInterval;
 };
 } // namespace pos

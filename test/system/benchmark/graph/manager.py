@@ -7,6 +7,7 @@ class Fio:
         self.pic_name = pic_name
         print(self.pic_name)
         self.eta_data = {}
+        self.csv_data = {}
         self.result_data = []
         self.result_data.append(
             {"title": "read_iops", "index": [], "value": []})
@@ -36,8 +37,8 @@ class Fio:
         self.log_data["iops"] = {}
         self.log_data["clat"] = {}
 
-    def AddEtaData(self, file, title):
-        graph.fio_parser.GetEtaData(self.eta_data, file, title)
+    def AddEtaData(self, file, title, use_time_axis=False):
+        graph.fio_parser.GetEtaData(self.eta_data, file, title, use_time_axis)
 
     def DrawEta(self, graph_list):
         graph.draw.DrawEta(self.eta_data, self.pic_name, graph_list)
@@ -71,3 +72,9 @@ class Fio:
         self.log_data["bw"] = {}
         self.log_data["iops"] = {}
         self.log_data["clat"] = {}
+
+    def AddCsvData(self, file, title):
+        graph.fio_parser.GetCsvData(self.csv_data, file, title)
+
+    def DrawCsv(self):
+        graph.draw.DrawCsv(self.csv_data, self.pic_name)

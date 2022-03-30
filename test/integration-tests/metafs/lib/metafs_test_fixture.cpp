@@ -50,6 +50,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
 {
     tpForMetaIo = new NiceMock<MockTelemetryPublisher>;
     config = new NiceMock<MockMetaFsConfigManager>(nullptr);
+    ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
     EXPECT_CALL(*config, Init).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32 * 1024));
@@ -70,7 +71,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
         comp->storage = new TestMetaStorageSubsystem(arrayId);
         comp->mgmt = new MetaFsManagementApi(arrayId, comp->storage);
         comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage, comp->mgmt);
-        comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs);
+        comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs, concurrentMetaFsTimeInterval);
         comp->wbt = new MetaFsWBTApi(arrayId, comp->ctrl);
         comp->metaFs = new MetaFs(comp->arrayInfo, comp->isLoaded, comp->mgmt,
             comp->ctrl, comp->io, comp->wbt, comp->storage, comp->tpForMetafs);

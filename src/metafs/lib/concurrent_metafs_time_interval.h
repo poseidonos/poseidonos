@@ -32,43 +32,52 @@
 
 #pragma once
 
+#include <src/metafs/lib/metafs_time_interval.h>
+#include <tbb/spin_rw_mutex.h>
+
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 namespace pos
 {
-class MetaFsTimeInterval
+class ConcurrentMetaFsTimeInterval : public MetaFsTimeInterval
 {
 public:
-    MetaFsTimeInterval(void) = delete;
-    explicit MetaFsTimeInterval(const int64_t intervalInMilliseconds)
-    : intervalInMilliseconds_(intervalInMilliseconds),
-      lastTime_(std::chrono::steady_clock::now())
+    ConcurrentMetaFsTimeInterval(void) = delete;
+    explicit ConcurrentMetaFsTimeInterval(const int64_t intervalInMilliseconds)
+    : MetaFsTimeInterval(intervalInMilliseconds)
     {
+        bool isWrite = true;
+        tbb::spin_rw_mutex_v3::scoped_lock rwLock(mutex, isWrite);
+        lastTime_ = std::chrono::steady_clock::now();
     }
-    virtual ~MetaFsTimeInterval(void)
+    virtual ~ConcurrentMetaFsTimeInterval(void)
     {
-    }
-    virtual size_t GetInterval(void) const
-    {
-        return intervalInMilliseconds_;
     }
     virtual bool CheckInterval(void)
     {
+        bool isWrite = false;
+        tbb::spin_rw_mutex_v3::scoped_lock rwLock(mutex, isWrite);
+
         std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime_).count();
 
         if (elapsedTime >= intervalInMilliseconds_)
         {
+            rwLock.upgrade_to_writer();
             lastTime_ = currentTime;
             return true;
         }
-
         return false;
     }
+    // Use this method only for UT
+    virtual std::chrono::steady_clock::time_point GetLastTime(void)
+    {
+        return lastTime_;
+    }
 
-protected:
-    const int64_t intervalInMilliseconds_;
-    std::chrono::steady_clock::time_point lastTime_;
+private:
+    tbb::spin_rw_mutex_v3 mutex;
 };
 } // namespace pos

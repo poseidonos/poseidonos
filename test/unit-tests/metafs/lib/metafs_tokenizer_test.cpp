@@ -30,45 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/metafs/lib/metafs_tokenizer.h"
 
-#include <chrono>
-#include <iostream>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class MetaFsTimeInterval
+TEST(MetaFsTokenizer, TestSplitFourStringByColonIsProperlyWorking)
 {
-public:
-    MetaFsTimeInterval(void) = delete;
-    explicit MetaFsTimeInterval(const int64_t intervalInMilliseconds)
-    : intervalInMilliseconds_(intervalInMilliseconds),
-      lastTime_(std::chrono::steady_clock::now())
-    {
-    }
-    virtual ~MetaFsTimeInterval(void)
-    {
-    }
-    virtual size_t GetInterval(void) const
-    {
-        return intervalInMilliseconds_;
-    }
-    virtual bool CheckInterval(void)
-    {
-        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime_).count();
+    // Given
+    MetaFsTokenizer metaFsTokenizer;
+    std::string labels[4];
+    std::string testKey = "10:write:metafs_0:6";
+    metaFsTokenizer.SplitFourStringByColon(testKey, labels);
 
-        if (elapsedTime >= intervalInMilliseconds_)
-        {
-            lastTime_ = currentTime;
-            return true;
-        }
-
-        return false;
-    }
-
-protected:
-    const int64_t intervalInMilliseconds_;
-    std::chrono::steady_clock::time_point lastTime_;
-};
+    // Then
+    EXPECT_EQ(labels[0], "10");
+    EXPECT_EQ(labels[1], "write");
+    EXPECT_EQ(labels[2], "metafs_0");
+    EXPECT_EQ(labels[3], "6");
+}
 } // namespace pos

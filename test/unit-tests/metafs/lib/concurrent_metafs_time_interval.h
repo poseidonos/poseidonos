@@ -30,45 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/metafs/lib/concurrent_metafs_time_interval.h"
 
-#include <chrono>
-#include <iostream>
+#include <gmock/gmock.h>
 
 namespace pos
 {
-class MetaFsTimeInterval
+class MockConcurrentMetaFsTimeInterval : public ConcurrentMetaFsTimeInterval
 {
 public:
-    MetaFsTimeInterval(void) = delete;
-    explicit MetaFsTimeInterval(const int64_t intervalInMilliseconds)
-    : intervalInMilliseconds_(intervalInMilliseconds),
-      lastTime_(std::chrono::steady_clock::now())
-    {
-    }
-    virtual ~MetaFsTimeInterval(void)
-    {
-    }
-    virtual size_t GetInterval(void) const
-    {
-        return intervalInMilliseconds_;
-    }
-    virtual bool CheckInterval(void)
-    {
-        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime_).count();
+    using ConcurrentMetaFsTimeInterval::MetaFsTimeInterval;
 
-        if (elapsedTime >= intervalInMilliseconds_)
-        {
-            lastTime_ = currentTime;
-            return true;
-        }
-
-        return false;
-    }
-
-protected:
-    const int64_t intervalInMilliseconds_;
-    std::chrono::steady_clock::time_point lastTime_;
+    MOCK_METHOD(bool, CheckInterval, (), (override));
 };
 } // namespace pos

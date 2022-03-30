@@ -36,6 +36,7 @@
 
 #include "instance_tagid_allocator.h"
 #include "metafs_aiocb_cxt.h"
+#include <src/metafs/lib/metafs_tokenizer.h>
 
 namespace pos
 {
@@ -51,12 +52,14 @@ MetaFsIoApi::MetaFsIoApi(void)
 }
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
-    MetaStorageSubsystem* storage, TelemetryPublisher* tp, MetaIoManager* io)
+    MetaStorageSubsystem* storage, TelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* metaFsTimeInterval,
+    MetaIoManager* io)
 : arrayId(arrayId),
   isNormal(false),
   ioMgr(io),
   ctrlMgr(ctrl),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  concurrentMetaFsTimeInterval(metaFsTimeInterval)
 {
     if (!ioMgr)
         ioMgr = new MetaIoManager(storage);
@@ -310,35 +313,79 @@ MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
         }
 
         rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
-        _SendMetric(reqMsg.reqType, reqMsg.fd, byteSize);
+        _SendPeriodicMetrics(reqMsg.reqType, reqMsg.fd, byteSize);
     }
 
     return rc;
 }
 
 void
-MetaFsIoApi::_SendMetric(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize)
+MetaFsIoApi::_SendPeriodicMetrics(MetaIoRequestType ioType, FileDescriptorType fd, size_t byteSize)
 {
-    // TODO (munseop.lim): need to improve
-    // std::string thread_name = std::to_string(sched_getcpu());
-    // std::string io_type = (ioType == MetaIoRequestType::Read) ? "read" : "write";
-    // std::string array_id = std::to_string(arrayId);
-    // std::string file_descriptor = std::to_string(fd);
+    // TODO(sang7.park) : find if there is better way to construct key for map
+    std::string thread_name = std::to_string(sched_getcpu());
+    std::string io_type = (ioType == MetaIoRequestType::Read) ? "read" : "write";
+    std::string array_id = std::to_string(arrayId);
+    std::string file_descriptor = std::to_string(fd);
+    std::string key_string = thread_name + ":" + io_type + " : " + array_id + ":" + file_descriptor;
+    MetaFsTokenizer metaFsTokenizer;
+    POSMetricVector* metricList = new POSMetricVector();
 
-    // POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_COUNT);
-    // metric.AddLabel("thread_name", thread_name);
-    // metric.AddLabel("io_type", io_type);
-    // metric.AddLabel("array_id", array_id);
-    // metric.AddLabel("fd", file_descriptor);
-    // metric.SetCountValue(byteSize);
-    // telemetryPublisher->PublishMetric(metric);
+    if (concurrentMetaFsTimeInterval->CheckInterval())
+    {
+        std::string labels[4];
+        for (auto it = collectedMetricsMap.begin(); it != collectedMetricsMap.end(); ++it)
+        {
+            std::string existKeyString = it->first;
+            pair<int, int> existValue = it->second;
 
-    // POSMetric metricCnt(TEL40011_METAFS_USER_REQUEST_CNT, POSMetricTypes::MT_COUNT);
-    // metricCnt.AddLabel("thread_name", thread_name);
-    // metricCnt.AddLabel("io_type", io_type);
-    // metricCnt.AddLabel("array_id", array_id);
-    // metricCnt.AddLabel("fd", file_descriptor);
-    // metricCnt.SetCountValue(1);
-    // telemetryPublisher->PublishMetric(metricCnt);
+            metaFsTokenizer.SplitFourStringByColon(existKeyString, labels);
+
+            POSMetric metric(TEL40010_METAFS_USER_REQUEST, POSMetricTypes::MT_COUNT);
+            metric.AddLabel("thread_name", labels[0]);
+            metric.AddLabel("io_type", labels[1]);
+            metric.AddLabel("array_id", labels[2]);
+            metric.AddLabel("fd", labels[3]);
+
+            POSMetric metricCnt(TEL40011_METAFS_USER_REQUEST_CNT, POSMetricTypes::MT_COUNT);
+            metricCnt.AddLabel("thread_name", labels[0]);
+            metricCnt.AddLabel("io_type", labels[1]);
+            metricCnt.AddLabel("array_id", labels[2]);
+            metricCnt.AddLabel("fd", labels[3]);
+
+            // Check current iteration key is same with key given by parameter
+            if (existKeyString == key_string)
+            {
+                metric.SetCountValue(existValue.first + byteSize);
+                metricCnt.SetCountValue(existValue.second + 1);
+            }
+            else
+            {
+                metric.SetCountValue(existValue.first);
+                metricCnt.SetCountValue(existValue.second);
+            }
+            metricList->push_back(metric);
+            metricList->push_back(metricCnt);
+
+            it->second.first = 0;
+            it->second.second = 0;
+        }
+        POSMetric metricPublishCnt(TEL40012_METAFS_USER_REQUEST_PUBLISH_CNT_PER_INTERVAL, POSMetricTypes::MT_COUNT);
+        metricPublishCnt.SetCountValue(1);
+        metricList->push_back(metricPublishCnt);
+        telemetryPublisher->PublishMetricList(metricList);
+    }
+    else
+    {
+        // If key does not exist, insert
+        auto result = collectedMetricsMap.insert({key_string, {byteSize, 1}});
+
+        // If key exist, update
+        if (result.second == false)
+        {
+            result.first->second.first += byteSize;
+            result.first->second.second += 1;
+        }
+    }
 }
 } // namespace pos
