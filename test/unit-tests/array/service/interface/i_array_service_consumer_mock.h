@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(IIOTranslator*, GetTranslator, (), (override));
     MOCK_METHOD(IIORecover*, GetRecover, (), (override));
     MOCK_METHOD(IIODeviceChecker*, GetDeviceChecker, (), (override));
+    MOCK_METHOD(IIOLocker*, GetIOLocker, (PartitionType), (override));
 };
 
 } // namespace pos

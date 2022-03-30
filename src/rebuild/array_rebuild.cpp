@@ -57,7 +57,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         if (ctx && factory != nullptr)
         {
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Try to create PartitionRebuild for {}", ctx->part);
+                "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {

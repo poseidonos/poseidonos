@@ -57,7 +57,7 @@ StripeBasedRaceRebuild::StripeBasedRaceRebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "StripeBasedRaceRebuild");
-    locker = IOLockerSingleton::Instance();
+    locker = ArrayService::Instance()->Getter()->GetIOLocker(ctx->part);
     assert(locker != nullptr);
 
     bool ret = _InitBuffers();
@@ -98,26 +98,26 @@ StripeBasedRaceRebuild::Read(void)
         {
             POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
                 "Partition {} rebuild done, but waiting lock release",
-                ctx->part);
+                PARTITION_TYPE_STR[ctx->part]);
             return false;
         }
         if (ctx->GetResult() == RebuildState::CANCELLED)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
-                "Partition {} (RAID1) rebuilding stopped",
-                ctx->part);
+                "Partition {} ({}) rebuilding stopped",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else if (ctx->GetResult() == RebuildState::FAIL)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
-                "Partition {} (RAID1) rebuilding failed",
-                ctx->part);
+                "Partition {} ({}) rebuilding failed",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else
         {
             POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-                "Partition {} (RAID1) rebuilding done",
-                ctx->part);
+                "Partition {} ({}) rebuilding done",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
             ctx->SetResult(RebuildState::PASS);
             UpdateProgress(ctx->stripeCnt);
         }
@@ -168,8 +168,8 @@ StripeBasedRaceRebuild::Read(void)
         if (res != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "Failed to recover stripe {} in Partition {} (RAID1), maxStripes:{}",
-                stripeId, ctx->part, maxStripeId);
+                "Failed to recover stripe {} in Partition {} ({}), maxStripes:{}",
+                stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString(), maxStripeId);
             ctx->SetResult(RebuildState::FAIL);
         }
     }
@@ -223,7 +223,7 @@ bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 
 void StripeBasedRaceRebuild::UpdateProgress(uint32_t val)
 {
-    ctx->prog->Update(ctx->part, val, ctx->stripeCnt);
+    ctx->prog->Update(PARTITION_TYPE_STR[ctx->part], val, ctx->stripeCnt);
 }
 
 } // namespace pos

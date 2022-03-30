@@ -120,20 +120,20 @@ SegmentBasedRebuild::Read(void)
         if (state == RebuildState::CANCELLED)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
-                "Partition {} (RAID5) rebuilding stopped",
-                ctx->part);
+                "Partition {} ({}) rebuilding stopped",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else if (state == RebuildState::FAIL)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
-                "Partition {} (RAID5) rebuilding failed",
-                ctx->part);
+                "Partition {} ({}) rebuilding failed",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else
         {
             POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-                "Partition {} (RAID5) rebuilding done",
-                ctx->part);
+                "Partition {} ({}) rebuilding done",
+                PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
             ctx->SetResult(RebuildState::PASS);
         }
 
@@ -170,8 +170,8 @@ SegmentBasedRebuild::Read(void)
         if (res != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "Failed to recover stripe {} in Partition {} (RAID5)",
-                stripeId, ctx->part);
+                "Failed to recover stripe {} in Partition {} ({})",
+                stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
             ctx->SetResult(RebuildState::FAIL);
         }
     }
@@ -231,7 +231,7 @@ void SegmentBasedRebuild::UpdateProgress(uint32_t val)
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "SegmentBasedRebuild::UpdateProgress, reamining:{}", remainingStripe);
-    ctx->prog->Update(ctx->part, val, remainingStripe);
+    ctx->prog->Update(PARTITION_TYPE_STR[ctx->part], val, remainingStripe);
 }
 
 } // namespace pos

@@ -923,7 +923,7 @@ Array::_RegisterService(void)
         {
             if (devMgr_ != nullptr)
             {
-                IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+                ArrayService::Instance()->Setter()->IncludeDevicesToLocker(devMgr_->GetDataDevices());
             }
             else
             {
@@ -944,7 +944,7 @@ Array::_UnregisterService(void)
     arrayService->Setter()->Unregister(name_, index_);
     if (devMgr_ != nullptr)
     {
-        IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
+        ArrayService::Instance()->Setter()->ExcludeDevicesFromLocker(devMgr_->GetDataDevices());
     }
 }
 } // namespace pos

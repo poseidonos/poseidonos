@@ -39,6 +39,12 @@
 namespace pos
 {
 
+IOLocker::IOLocker(string lockerName)
+: name(lockerName)
+{
+}
+
+
 bool
 IOLocker::Register(vector<ArrayDevice*> devList)
 {

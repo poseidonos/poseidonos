@@ -49,6 +49,8 @@ public:
     virtual int Register(string array, unsigned int arrayIndex,
         ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker) = 0;
     virtual void Unregister(string array, unsigned int arrayIndex) = 0;
+    virtual void IncludeDevicesToLocker(vector<ArrayDevice*> devList) = 0;
+    virtual void ExcludeDevicesFromLocker(vector<ArrayDevice*> devList) = 0;
 };
 
 } // namespace pos

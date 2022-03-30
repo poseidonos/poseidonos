@@ -45,10 +45,6 @@ ArrayUnlocking::ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId,
   stripeId(stripeId),
   locker(inputLocker)
 {
-    if (likely(locker == nullptr))
-    {
-        locker = IOLockerSingleton::Instance();
-    }
 }
 
 ArrayUnlocking::~ArrayUnlocking(void)
@@ -58,7 +54,10 @@ ArrayUnlocking::~ArrayUnlocking(void)
 bool
 ArrayUnlocking::_DoSpecificJob(void)
 {
-    locker->Unlock(lockedDevs, stripeId);
+    if (locker != nullptr)
+    {
+        locker->Unlock(lockedDevs, stripeId);
+    }
     IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
     return true;
 }

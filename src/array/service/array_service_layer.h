@@ -57,14 +57,19 @@ public:
     int Register(string array, unsigned int arrayIndex,
         ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker) override;
     void Unregister(string array, unsigned int arrayIndex) override;
+    void IncludeDevicesToLocker(vector<ArrayDevice*> devList) override;
+    void ExcludeDevicesFromLocker(vector<ArrayDevice*> devList) override;
     IIOTranslator* GetTranslator(void) override;
     IIORecover* GetRecover(void) override;
     IIODeviceChecker* GetDeviceChecker(void) override;
+    IIOLocker* GetIOLocker(PartitionType partType);
 
 private:
     IOTranslator* ioTranslator = nullptr;
     IORecover* ioRecover = nullptr;
     IODeviceChecker* deviceChecker = nullptr;
+    IOLocker* metaIOLocker = nullptr;
+    IOLocker* journalIOLocker = nullptr;
 };
 
 using ArrayService = Singleton<ArrayServiceLayer>;
