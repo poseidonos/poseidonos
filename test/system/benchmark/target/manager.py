@@ -13,18 +13,21 @@ class Target:
         self.id = json["ID"]
         self.pw = json["PW"]
         self.nic_ssh = json["NIC"]["SSH"]
-        self.nic_ip1 = json["NIC"]["IP1"]
         try:
             self.prereq = json["PREREQUISITE"]
         except Exception as e:
             self.prereq = None
-        self.spdk_dir = json["DIR"] + "/lib/spdk"
+        self.spdk_dir = json["POS"]["DIR"] + "/lib/spdk"
         self.spdk_tp = json["SPDK"]["TRANSPORT"]["TYPE"]
         self.spdk_no_shd_buf = json["SPDK"]["TRANSPORT"]["NUM_SHARED_BUFFER"]
-        self.pos_dir = json["DIR"]
+        self.pos_dir = json["POS"]["DIR"]
         self.pos_bin = json["POS"]["BIN"]
         self.pos_cfg = json["POS"]["CFG"]
         self.pos_log = json["POS"]["LOG"]
+        try:
+            self.pos_dirty_bringup = json["POS"]["DIRTY_BRINGUP"]
+        except Exception as e:
+            self.pos_dirty_bringup = False
         try:
             self.pos_logger_level = json["POS"]["LOGGER_LEVEL"]
         except Exception as e:
@@ -45,6 +48,10 @@ class Target:
 
     def Prepare(self) -> None:
         lib.printer.green(f" {__name__}.Prepare : {self.name}")
+
+        if (self.pos_dirty_bringup):
+            self.DirtyBringup()
+            return
 
         # Step 1. Prerequisite Setting
         if (self.prereq and self.prereq["CPU"]["RUN"]):
@@ -93,7 +100,7 @@ class Target:
             self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg)
         pos.env.execute_pos(self.id, self.pw, self.nic_ssh,
                             self.pos_bin, self.pos_dir, self.pos_log)
-        time.sleep(3)
+        time.sleep(5)
 
         # Step 3. SPDK(via pos-cli) Setting
         self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)
@@ -195,7 +202,7 @@ class Target:
             self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg)
         pos.env.execute_pos(self.id, self.pw, self.nic_ssh,
                             self.pos_bin, self.pos_dir, self.pos_log)
-        time.sleep(3)
+        time.sleep(5)
 
         # spdk setting
         self.cli.subsystem_create_transport(self.spdk_tp, self.spdk_no_shd_buf)

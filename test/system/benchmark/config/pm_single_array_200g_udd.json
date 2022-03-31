@@ -4,7 +4,6 @@
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/root/20211209/",
             "NIC": {
                 "SSH": "10.1.2.16",
                 "IP1": "10.100.2.16",
@@ -18,6 +17,7 @@
                 "SUBSYSTEMs": []
             },
             "POS": {
+                "DIR": "/root/20211209/",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CLI_LOCAL_RUN": true,

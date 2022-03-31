@@ -1,84 +1,67 @@
 {
-    "Targets":
-    [
+    "Targets": [
         {
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/home/psd/ibofos",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "10.1.2.14",
                 "IP1": "10.100.2.15",
                 "IP2": "10.100.2.14"
             },
-            "SPDK":
-            {
-                "TRANSPORT": 
-                {
+            "SPDK": {
+                "TRANSPORT": {
                     "TYPE": "tcp",
                     "NUM_SHARED_BUFFER": 4096
-                },                
-                "SUBSYSTEMs":
-                [
-                ]
+                },
+                "SUBSYSTEMs": []
             },
-            "POS":
-            {
+            "POS": {
+                "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "ibofos_for_perf_psd.conf",
                 "LOG": "pos.log",
-                "ARRAYs":
-                [
+                "ARRAYs": [
                     {
                         "NAME": "ARR0",
                         "RAID_TYPE": "RAID5",
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3",
                         "SPARE_DEVICE_LIST": "",
-                        "BUFFER_DEVICE":
-                        {
+                        "BUFFER_DEVICE": {
                             "NAME": "uram0",
                             "TYPE": "uram",
                             "NUM_BLOCKS": 8388608,
                             "BLOCK_SIZE": 512,
                             "NUMA": 0
                         },
-                        "VOLUMEs":
-                        [
-                        ]
+                        "VOLUMEs": []
                     },
                     {
                         "NAME": "ARR1",
                         "RAID_TYPE": "RAID5",
                         "USER_DEVICE_LIST": "unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7",
                         "SPARE_DEVICE_LIST": "",
-                        "BUFFER_DEVICE":
-                        {
+                        "BUFFER_DEVICE": {
                             "NAME": "uram1",
                             "TYPE": "uram",
                             "NUM_BLOCKS": 8388608,
                             "BLOCK_SIZE": 512,
                             "NUMA": 1
                         },
-                        "VOLUMEs":
-                        [
-                        ]
+                        "VOLUMEs": []
                     }
                 ]
             },
-            "AUTO_GENERATE":
-            {
+            "AUTO_GENERATE": {
                 "USE": "yes",
-                "SUBSYSTEMs":
-                [
+                "SUBSYSTEMs": [
                     {
                         "NUM": 5,
                         "IP": "IP1",
                         "PORT": 1158,
                         "INITIATOR": "Initiator01",
-                        "VOLUMEs":
-                        [
+                        "VOLUMEs": [
                             {
                                 "ARRAY": "ARR0",
                                 "NUM": 5,
@@ -91,8 +74,7 @@
                         "IP": "IP2",
                         "PORT": 1159,
                         "INITIATOR": "Initiator02",
-                        "VOLUMEs":
-                        [
+                        "VOLUMEs": [
                             {
                                 "ARRAY": "ARR1",
                                 "NUM": 6,
@@ -104,18 +86,15 @@
             }
         }
     ],
-    "Initiators":
-    [
+    "Initiators": [
         {
             "NAME": "Initiator01",
             "ID": "root",
             "PW": "psd",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "10.1.2.39"
             },
-            "SPDK":
-            {
+            "SPDK": {
                 "DIR": "/home/bamboo/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
@@ -124,19 +103,16 @@
             "NAME": "Initiator02",
             "ID": "root",
             "PW": "psd",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "10.1.2.40"
             },
-            "SPDK":
-            {
+            "SPDK": {
                 "DIR": "/home/bamboo/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         }
     ],
-    "Scenarios":
-    [
+    "Scenarios": [
         {
             "NAME": "fio_udd",
             "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"

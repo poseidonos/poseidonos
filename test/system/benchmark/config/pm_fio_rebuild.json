@@ -1,67 +1,53 @@
 {
-    "Targets":
-    [
+    "Targets": [
         {
             "NAME": "Target01",
             "ID": "target_id",
             "PW": "target_pw",
-            "DIR": "/home/psd/ibofos",
-            "DIRTY_BRINGUP": "no",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "target_ssh",
                 "IP1": "target_ip1"
             },
-            "SPDK":
-            {
-                "TRANSPORT": 
-                {
+            "SPDK": {
+                "TRANSPORT": {
                     "TYPE": "tcp",
                     "NUM_SHARED_BUFFER": 4096
-                },                
-                "SUBSYSTEMs":
-                [
-                ]
+                },
+                "SUBSYSTEMs": []
             },
-            "POS":
-            {
+            "POS": {
+                "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "ibofos_for_perf_psd.conf",
                 "LOG": "pos.log",
-                "ARRAYs":
-                [
+                "DIRTY_BRINGUP": false,
+                "ARRAYs": [
                     {
                         "NAME": "ARR0",
                         "RAID_TYPE": "RAID5",
-                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14", 
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14",
                         "SPARE_DEVICE_LIST": "unvme-ns-15",
-                        "BUFFER_DEVICE":
-                        {
+                        "BUFFER_DEVICE": {
                             "NAME": "uram0",
                             "TYPE": "uram",
                             "NUM_BLOCKS": 16777216,
                             "BLOCK_SIZE": 512,
                             "NUMA": 0
                         },
-                        "VOLUMEs":
-                        [
-                        ]
+                        "VOLUMEs": []
                     }
                 ]
             },
-            "AUTO_GENERATE":
-            {
+            "AUTO_GENERATE": {
                 "USE": "yes",
-                "SUBSYSTEMs":
-                [
+                "SUBSYSTEMs": [
                     {
                         "NUM": 43,
                         "IP": "IP1",
                         "PORT": 1158,
                         "INITIATOR": "Initiator01",
-                        "VOLUMEs":
-                        [
+                        "VOLUMEs": [
                             {
                                 "ARRAY": "ARR0",
                                 "NUM": 43,
@@ -73,25 +59,21 @@
             }
         }
     ],
-    "Initiators":
-    [
+    "Initiators": [
         {
             "NAME": "Initiator01",
             "ID": "init_id",
             "PW": "init_pw",
-            "NIC":
-            {
+            "NIC": {
                 "SSH": "init1_ssh"
             },
-            "SPDK":
-            {
+            "SPDK": {
                 "DIR": "/home/psd/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         }
     ],
-    "Scenarios":
-    [
+    "Scenarios": [
         {
             "NAME": "fio_rebuild",
             "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output",

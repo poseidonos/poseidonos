@@ -14,7 +14,7 @@ class Cli_1_0_1(cli_interface.CliInterface):
             prefix_list.append(" sudo nohup ")
 
         prefix_list.append(
-            f"{json['DIR']}/bin/{json['POS']['CLI']} --json-res ")
+            f"{json['POS']['DIR']}/bin/{json['POS']['CLI']} --json-res ")
         self.prefix = "".join(prefix_list)
 
     def _send_cli(self, cmd):

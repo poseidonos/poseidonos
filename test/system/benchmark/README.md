@@ -38,62 +38,6 @@ pip3 install -r requirements.txt
                 "SSH": "nic_ip_for_ssh",
                 "IP1": "nic_ip_for_test"
             },
-            "PREREQUISITE": {
-                "CPU": {
-                    "RUN": false,
-                    "SCALING": "max"
-                },
-                "SSD": {
-                    "RUN": false,
-                    "FORMAT": true
-                },
-                "MEMORY": {
-                    "RUN": false,
-                    "MAX_MAP_COUNT": 65535,
-                    "DROP_CACHES": 3
-                },
-                "NETWORK": {
-                    "RUN": false,
-                    "IRQ_BALANCE": "stop",
-                    "TCP_TUNE": "max",
-                    "IRQ_AFFINITYs": [
-                        {
-                            "NIC": "nic_interface",
-                            "CPU_LIST": "core_range"
-                        }
-                    ],
-                    "NICs": [
-                        {
-                            "INTERFACE": "nic_interface",
-                            "IP": "nic_ip_for_test",
-                            "NETMASK": 24,
-                            "MTU": 9000
-                        }
-                    ]
-                },
-                "MODPROBE": {
-                    "RUN": false,
-                    "MODs": [
-                        "nvme",
-                        "nvme_core",
-                        "nvme_fabrics",
-                        "nvme_tcp",
-                        "nvme_rdma"
-                    ]
-                },
-                "SPDK": {
-                    "RUN": false,
-                    "HUGE_EVEN_ALLOC": "yes",
-                    "NRHUGE": 65536
-                },
-                "DEBUG": {
-                    "RUN": false,
-                    "ULIMIT": "unlimited",
-                    "APPORT": "disable",
-                    "DUMP_DIR": "/etc/pos/core",
-                    "CORE_PATTERN": "/etc/pos/core/%E.core"
-                }
-            },
             "SPDK": {
                 "TRANSPORT": {
                     "TYPE": "tcp",

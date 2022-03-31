@@ -4,7 +4,6 @@
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/home/psd/ibofos",
             "NIC": {
                 "SSH": "10.1.4.15",
                 "IP1": "10.100.4.15",
@@ -18,6 +17,7 @@
                 "SUBSYSTEMs": []
             },
             "POS": {
+                "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CLI_LOCAL_RUN": true,

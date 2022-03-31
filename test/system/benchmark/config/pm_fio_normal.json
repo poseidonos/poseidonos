@@ -4,7 +4,6 @@
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/home/isaac/ibofos",
             "NIC": {
                 "SSH": "10.1.2.12",
                 "IP1": "10.100.2.12",
@@ -85,6 +84,7 @@
                 "SUBSYSTEMs": []
             },
             "POS": {
+                "DIR": "/home/isaac/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "pos_multi_array_normal.conf",

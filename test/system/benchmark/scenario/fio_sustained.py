@@ -37,10 +37,7 @@ def play(json_targets, json_inits, json_scenario):
         target_name = json_target["NAME"]
 
         try:
-            if json_target["DIRTY_BRINGUP"] == "yes":
-                target_obj.DirtyBringup()
-            else:
-                target_obj.Prepare()
+            target_obj.Prepare()
         except Exception as e:
             lib.printer.red(traceback.format_exc())
             skip_workload = True

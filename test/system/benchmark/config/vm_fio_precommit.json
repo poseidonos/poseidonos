@@ -4,7 +4,6 @@
             "NAME": "Target01",
             "ID": "root",
             "PW": "psd",
-            "DIR": "/home/psd/ibofos",
             "NIC": {
                 "SSH": "127.0.0.1",
                 "IP1": "127.0.0.1"
@@ -55,8 +54,8 @@
                 },
                 "SPDK": {
                     "RUN": false,
-                    "HUGE_EVEN_ALLOC": "yes",
-                    "NRHUGE": 65536
+                    "HUGE_EVEN_ALLOC": "no",
+                    "NRHUGE": 10705
                 },
                 "DEBUG": {
                     "RUN": false,
@@ -93,6 +92,7 @@
                 ]
             },
             "POS": {
+                "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CLI_LOCAL_RUN": true,

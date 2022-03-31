@@ -37,8 +37,9 @@ class Initiator:
         if (self.prereq and self.prereq["NETWORK"]["RUN"]):
             prerequisite.network.IrqBalance(
                 self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["IRQ_BALANCE"])
-            prerequisite.network.TcpTune(
-                self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
+            if self.prereq["NETWORK"].get("TCP_TUNE"):
+                prerequisite.network.TcpTune(
+                    self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["TCP_TUNE"])
             prerequisite.network.Nic(
                 self.id, self.pw, self.nic_ssh, self.prereq["NETWORK"]["NICs"])
         if (self.prereq and self.prereq["MODPROBE"]["RUN"]):
