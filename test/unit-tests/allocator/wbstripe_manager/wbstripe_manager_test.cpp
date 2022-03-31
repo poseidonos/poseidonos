@@ -279,11 +279,10 @@ TEST(WBStripeManager, FinishStripe_TestwithAllConditions)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManager wbStripeManager(nullptr, 1, nullptr, nullptr, nullptr, allocCtx, &addrInfo, ctxManager, blkManager, nullptr, "", 0);
-    for (int i = 0; i < 5; i++)
-    {
-        NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-        wbStripeManager.PushStripeToStripeArray(stripe);
-    }
+    NiceMock<MockStripe>* stripe1 = new NiceMock<MockStripe>();
+    
+    wbStripeManager.PushStripeToStripeArray(stripe1);
+    EXPECT_CALL(*stripe1, GetBlksRemaining).WillOnce(Return(5));
     // given 1.
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
     StripeAddr lsa = {
@@ -291,9 +290,28 @@ TEST(WBStripeManager, FinishStripe_TestwithAllConditions)
         .stripeId = 0};
     // when 1.
     wbStripeManager.FinishStripe(0, vsa);
-    // given 2.
-    vsa = {.stripeId = 0, .offset = UNMAP_OFFSET};
-    // when 2.
+
+    delete blkManager;
+    delete ctxManager;
+    delete allocCtx;
+}
+
+TEST(WBStripeManager, FinishStripe_TestwithAllConditions2)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetblksPerStripe(5);
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
+    WBStripeManager wbStripeManager(nullptr, 1, nullptr, nullptr, nullptr, allocCtx, &addrInfo, ctxManager, blkManager, nullptr, "", 0);
+    NiceMock<MockStripe>* stripe1 = new NiceMock<MockStripe>();
+    
+    wbStripeManager.PushStripeToStripeArray(stripe1);
+    EXPECT_CALL(*stripe1, GetBlksRemaining).WillOnce(Return(0));
+    // given 1.
+    VirtualBlkAddr vsa = {.stripeId = 0, .offset = UNMAP_OFFSET};
+    // when 1.
     wbStripeManager.FinishStripe(0, vsa);
 
     delete blkManager;
@@ -506,6 +524,7 @@ TEST(WBStripeManager, _FillBlocksToStripe_testIfStripeIsFilled)
     BlkOffset startOffset = 30;
     uint32_t numBlks = 5;
 
+    EXPECT_CALL(stripe, GetBlksRemaining).WillOnce(Return(numBlks));
     for (uint32_t offset = startOffset; offset < startOffset + numBlks; offset++)
     {
         EXPECT_CALL(stripe, UpdateReverseMapEntry(offset, INVALID_RBA, UINT32_MAX));
@@ -596,6 +615,7 @@ TEST(WBStripeManager, _FinishActiveStripe_testIfReturnsStripeWhenActiveStripeIsP
     for (int i = 0; i < 5; i++)
     {
         NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+        ON_CALL(*stripe, GetBlksRemaining).WillByDefault(Return(128));
         wbStripeManager.PushStripeToStripeArray(stripe);
     }
 
