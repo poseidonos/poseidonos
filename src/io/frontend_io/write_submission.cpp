@@ -389,7 +389,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
-        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, 1);
+        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, remainBlockCount);
         targetVsaRange = result.first;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 

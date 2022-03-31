@@ -389,6 +389,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
 Stripe*
 WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 {
+    std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr currentTail = allocCtx->GetActiveStripeTail(index);
     if (IsUnMapVsa(currentTail) == true)
     {
@@ -426,7 +427,6 @@ VirtualBlks
 WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
 {
     // TODO (meta): Move to allocator context
-    std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr tail = allocCtx->GetActiveStripeTail(index);
     VirtualBlks remainingBlocks = _GetRemainingBlocks(tail);
     allocCtx->SetActiveStripeTail(index, UNMAP_VSA);
