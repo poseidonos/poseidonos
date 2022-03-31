@@ -381,6 +381,8 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 void
 WriteSubmission::_AllocateFreeWriteBuffer(void)
 {
+    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
     int remainBlockCount = blockCount - allocatedBlockCount;
 
     while (remainBlockCount > 0)
@@ -389,7 +391,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
-        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, remainBlockCount);
+        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, isWTEnabled ? 1 : remainBlockCount);
         targetVsaRange = result.first;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 
@@ -398,11 +400,8 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
             POS_TRACE_DEBUG(eventId, "No free space in write buffer");
 
-            /*To do Remove after adding array Idx by Array*/
-            IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-
             IStateControl* stateControl =
-                StateManagerSingleton::Instance()->GetStateControl(info->GetName());
+                StateManagerSingleton::Instance()->GetStateControl(arrayInfo->GetName());
             if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
                 POS_EVENT_ID eventId =
