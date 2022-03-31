@@ -107,5 +107,11 @@ func makeLabelMap(labels []*pb.Label) *map[string]string {
 		labelMap[label.GetKey()] = label.GetValue()
 	}
 
+	// Add custom label by exporter if exists
+	if isValidCustomLabel() {
+		k, v := getCustomLabel()
+		labelMap[k] = v
+	}
+
 	return &labelMap
 }

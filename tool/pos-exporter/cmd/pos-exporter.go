@@ -9,6 +9,8 @@ var (
 func Run() {
 	var wait sync.WaitGroup
 	wait.Add(3)
+	
+	parseCustomLabel()
 
 	go runSubscriber()
 	go runProvider()
