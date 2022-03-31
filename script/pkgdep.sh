@@ -66,6 +66,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libtbb-dev
     # for nvme modules
     name=$(uname -r); apt-get install -y linux-modules-extra-${name}
+    # for tcmalloc
+    apt install -y libgoogle-perftools-dev
 
 
 else

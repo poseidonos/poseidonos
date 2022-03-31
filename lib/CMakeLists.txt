@@ -172,34 +172,6 @@ ExternalProject_Add(spdk
     COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/build/fio/spdk_nvme ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/examples/nvme/fio_plugin/fio_plugin)
 
-# Set gperf build options
-set(POS_DEP_GPERF "gperf")
-if (${USE_LOCAL_REPO} STREQUAL "y")
-    set(REPO_GPERF "${LOCAL_REPO}/gperftools.git")
-else()
-    set(REPO_GPERF "https://github.com/gperftools/gperftools.git")
-endif()
-
-# Build gperf conditionally
-ExternalProject_Add(gperf
-    GIT_REPOSITORY ${REPO_GPERF}
-    GIT_TAG "gperftools-2.7"
-    SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_GPERF}
-    BUILD_IN_SOURCE 1
-    LOG_DOWNLOAD ON
-    LOG_UPDATE ON
-    LOG_PATCH ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-    LOG_OUTPUT_ON_FAILURE ON
-    LOG_MERGED_STDOUTERR ON
-    CONFIGURE_COMMAND ./autogen.sh
-    COMMAND ./configure
-    BUILD_COMMAND make -j ${NUM_BUILD_CORE}
-    COMMAND make install
-    COMMAND ldconfig)
-
 # Set gtest build options
 set(POS_DEP_GTEST "gtest")
 set(GTEST_DIR "googletest")

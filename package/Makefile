@@ -7,10 +7,9 @@ all:
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
 	@cp -f ../bin/pos-exporter src/usr/local/bin/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
-	@cp -f ../lib/gperf/.libs/libtcmalloc.so* src/usr/local/lib/
-	@cp -rf ../lib/spdk src/usr/local/lib
-	@cp -f ../config/pos.conf src/etc/pos
-	@cp -f ../config/telemetry_default.yaml src/etc/pos
+	@cp -rf ../lib/spdk src/usr/local/lib/
+	@cp -f ../config/pos.conf src/etc/pos/
+	@cp -f ../config/telemetry_default.yaml src/etc/pos/
 	
 	# Copy CLI man page files
 	@gzip --keep ../tool/cli/docs/manpage/*
