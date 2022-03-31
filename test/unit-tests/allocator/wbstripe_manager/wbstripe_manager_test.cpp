@@ -101,6 +101,9 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_TestVolumeMounted)
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(UNMAP_VSA));
     EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Mounted));
 
+    std::mutex lock;
+    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
+
     // when
     std::shared_ptr<MockFlushIo> flushIo = std::make_shared<MockFlushIo>(0);
     wbStripeManager.FlushAllPendingStripesInVolume(volumeId, flushIo);
@@ -161,6 +164,9 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_testIfWaitsForStripesWithTh
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     EXPECT_CALL(*stripe, GetVolumeId).WillOnce(Return(10));
     wbStripeManager.PushStripeToStripeArray(stripe);
+
+    std::mutex lock;
+    EXPECT_CALL(*allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
 
     int ret = wbStripeManager.FlushAllPendingStripesInVolume(volumeId);
     EXPECT_EQ(ret, 0);
@@ -528,7 +534,9 @@ TEST(WBStripeManager, _FinishActiveStripe_testIfReturnsNullWhenNoActiveStripeExi
     }
 
     ASTailArrayIdx index = 3;
+    std::mutex lock;
     EXPECT_CALL(allocCtx, GetActiveStripeTail(index)).WillOnce(Return(UNMAP_VSA));
+    EXPECT_CALL(allocCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(lock));
 
     Stripe* actual = wbStripeManager._FinishActiveStripe(index);
     EXPECT_EQ(actual, nullptr);

@@ -69,11 +69,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
 : WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId()),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
       nullptr,
+      ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo,
       EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl,
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager,
+    IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl, IArrayInfo* inputArrayInfo,
     bool isReactorNow)
 : Event(isReactorNow),
   volumeIo(volumeIo),
@@ -84,15 +86,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   allocatedBlockCount(0),
   processedBlockCount(0),
   rbaStateManager(inputRbaStateManager),
-  iBlockAllocator(inputIBlockAllocator)
+  iBlockAllocator(inputIBlockAllocator),
+  flowControl(inputFlowControl),
+  arrayInfo(inputArrayInfo)
 {
-    flowControl = inputFlowControl;
     if (nullptr == flowControl)
     {
-        /*To do Remove after adding array Idx by Array*/
-        IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-
-        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(info->GetName());
+        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayInfo->GetName());
     }
 }
 
@@ -211,7 +211,6 @@ void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
-    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
     bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
 
     if (false == isWTEnabled)
@@ -381,7 +380,6 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 void
 WriteSubmission::_AllocateFreeWriteBuffer(void)
 {
-    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
     bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
     int remainBlockCount = blockCount - allocatedBlockCount;
 
