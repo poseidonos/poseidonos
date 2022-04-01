@@ -257,7 +257,7 @@ poseidonos: makedir
 makedir:
 	@`[ -d $(BINDIR) ] || mkdir -p $(BINDIR)`
 
-package:
+package: $(APP) pos-exporter
 	@$(MAKE) -C package
 clean :
 	@$(MAKE) -C src clean
