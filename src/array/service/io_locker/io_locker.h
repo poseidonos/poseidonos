@@ -50,7 +50,7 @@ namespace pos
 class IOLocker : public IIOLocker
 {
 public:
-    explicit IOLocker(string lockerName);
+    IOLocker(string lockerName);
     virtual ~IOLocker(void) {}
     bool Register(vector<ArrayDevice*> devList);
     void Unregister(vector<ArrayDevice*> devList);

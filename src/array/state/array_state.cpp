@@ -400,10 +400,6 @@ ArrayState::SetRebuildDone(bool isSuccess)
             _SetState(ArrayStateEnum::NORMAL);
         }
     }
-    else
-    {
-        _SetState(ArrayStateEnum::DEGRADED);
-    }
 }
 
 void

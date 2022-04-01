@@ -62,7 +62,8 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
         return new SegmentBasedRebuild(move(ctx), allocatorSvc);
     }
 
-    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "Partition {} does not support rebuild", PARTITION_TYPE_STR[ctx->part]);
+    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),"Partition {} does not support rebuild",
+        PARTITION_TYPE_STR[ctx->part]);
     return nullptr;
 }
 } // namespace pos

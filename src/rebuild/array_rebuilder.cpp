@@ -64,7 +64,13 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder, PrepareRebuild, isResume: {}, prepare_result: {}", resume, ret);
+        "ArrayRebuilder::Rebuild, PrepareRebuild, isResume: {}, ret:{}", resume, ret);
+
+    if (ret == EID(REBUILD_INVALIDATED))
+    {
+        mtxStart.unlock();
+        return;
+    }
 
     if (resume)
     {
@@ -81,15 +87,12 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
     ArrayRebuild* job = new ArrayRebuild(array, arrayId, dev, cb, tgt, &factory);
     jobsInProgress.emplace(array, job);
     mtxStart.unlock();
-
     if (ret == 0)
     {
         job->Start();
     }
     else
     {
-        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-            "Failed in preparation for rebuilding, ret: {}", ret);
         job->Discard();
     }
 }

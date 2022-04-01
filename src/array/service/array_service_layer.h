@@ -33,7 +33,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "src/array/service/interface/i_array_service_consumer.h"
 #include "src/array/service/interface/i_array_service_producer.h"
