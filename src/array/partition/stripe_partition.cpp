@@ -469,7 +469,7 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
     {
         unique_ptr<RebuildContext> ctx(new RebuildContext());
         ctx->raidType = raidType;
-        ctx->part = type;
+        ctx->part = PARTITION_TYPE_STR[type];
         ctx->faultIdx = index;
         ctx->faultDev = fault;
         ctx->stripeCnt = logicalSize.totalStripes;

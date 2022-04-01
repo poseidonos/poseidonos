@@ -46,24 +46,23 @@ RebuildBehaviorFactory::RebuildBehaviorFactory(IContextManager* allocator)
 RebuildBehavior*
 RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
-    if (ctx->part == PartitionType::JOURNAL_SSD)
+    if (ctx->part == PARTITION_TYPE_STR[PartitionType::JOURNAL_SSD])
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, StripeBasedRaceRebuild Created");
         return new StripeBasedRaceRebuild(move(ctx));
     }
-    else if (ctx->part == PartitionType::META_SSD)
+    else if (ctx->part == PARTITION_TYPE_STR[PartitionType::META_SSD])
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, StripeBasedRaceRebuild Created");
         return new StripeBasedRaceRebuild(move(ctx));
     }
-    else if (ctx->part == PartitionType::USER_DATA)
+    else if (ctx->part == PARTITION_TYPE_STR[PartitionType::USER_DATA])
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, SegmentBasedRebuild Created");
         return new SegmentBasedRebuild(move(ctx), allocatorSvc);
     }
 
-    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),"Partition {} does not support rebuild",
-        PARTITION_TYPE_STR[ctx->part]);
+    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, nullptr returned");
     return nullptr;
 }
 } // namespace pos

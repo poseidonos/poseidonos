@@ -43,7 +43,6 @@
 #include "src/include/rebuild_state.h"
 #include "src/include/address_type.h"
 #include "src/include/raid_type.h"
-#include "src/include/partition_type.h"
 #include "src/logger/logger.h"
 
 using namespace std;
@@ -59,7 +58,7 @@ class RebuildContext
 {
 public:
     string array;
-    PartitionType part;
+    string part;
     RaidType raidType;
     uint32_t arrayIndex = 0;
     uint32_t faultIdx = 0;

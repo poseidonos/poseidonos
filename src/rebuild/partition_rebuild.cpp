@@ -57,7 +57,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
     if (bhvr != nullptr)
     {
         bhvr->GetContext()->SetResult(RebuildState::REBUILDING);
-        bhvr->GetContext()->logger->SetPartitionRebuildStart(PARTITION_TYPE_STR[bhvr->GetContext()->part]);
+        bhvr->GetContext()->logger->SetPartitionRebuildStart(bhvr->GetContext()->part);
         bhvr->GetContext()->rebuildComplete =
             bind(&PartitionRebuild::_Complete, this, placeholders::_1);
         EventSmartPtr rebuilder(new Rebuilder(bhvr));

@@ -42,8 +42,6 @@ ArrayServiceLayer::ArrayServiceLayer(void)
     ioTranslator = new IOTranslator();
     ioRecover = new IORecover();
     deviceChecker = new IODeviceChecker();
-    metaIOLocker = new IOLocker("MetaLocker");
-    journalIOLocker = new IOLocker("JournalLocker");
 }
 
 ArrayServiceLayer::~ArrayServiceLayer(void)
@@ -97,20 +95,6 @@ ArrayServiceLayer::Unregister(string array, unsigned int arrayIndex)
     ioTranslator->Unregister(arrayIndex);
 }
 
-void
-ArrayServiceLayer::IncludeDevicesToLocker(vector<ArrayDevice*> devList)
-{
-    metaIOLocker->Register(devList);
-    journalIOLocker->Register(devList);
-}
-
-void
-ArrayServiceLayer::ExcludeDevicesFromLocker(vector<ArrayDevice*> devList)
-{
-    metaIOLocker->Unregister(devList);
-    journalIOLocker->Unregister(devList);
-}
-
 IIOTranslator*
 ArrayServiceLayer::GetTranslator(void)
 {
@@ -127,20 +111,6 @@ IIODeviceChecker*
 ArrayServiceLayer::GetDeviceChecker(void)
 {
     return deviceChecker;
-}
-
-IIOLocker*
-ArrayServiceLayer::GetIOLocker(PartitionType partType)
-{
-    if (partType == PartitionType::JOURNAL_SSD)
-    {
-        return journalIOLocker;
-    }
-    else if (partType == PartitionType::META_SSD)
-    {
-        return metaIOLocker;
-    }
-    return nullptr;
 }
 
 } // namespace pos

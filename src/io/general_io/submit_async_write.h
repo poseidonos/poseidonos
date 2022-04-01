@@ -51,7 +51,7 @@ class SubmitAsyncWrite
 {
 public:
     SubmitAsyncWrite(void);
-    SubmitAsyncWrite(IIOTranslator* translator, IODispatcher* ioDispatcher);
+    SubmitAsyncWrite(IIOLocker* locker, IIOTranslator* translator, IODispatcher* ioDispatcher);
     ~SubmitAsyncWrite(void);
     IOSubmitHandlerStatus Execute(std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
@@ -59,6 +59,7 @@ public:
         int arrayId, bool needTrim, bool parityOnly = false);
 
 private:
+    IIOLocker* locker;
     IIOTranslator* translator;
     IODispatcher* ioDispatcher;
 
