@@ -152,6 +152,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     //When: Execute WriteCompletion causing flush returning success
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(0));
+    ON_CALL(mockStripe, IsActiveFlushTarget).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&mockStripe));
     ON_CALL(mockIArrayMgmt, GetInfo(arrayId)).WillByDefault(Return(&info));
     ON_CALL(mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));

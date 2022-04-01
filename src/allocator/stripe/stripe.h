@@ -89,6 +89,9 @@ public:
 
     virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
 
+    virtual bool IsActiveFlushTarget(void);
+    virtual void SetActiveFlushTarget(void);
+
 protected: // for UT
     ASTailArrayIdx volumeId;
     StripeId vsid; // SSD LSID, Actually User Area LSID
@@ -107,6 +110,7 @@ protected: // for UT
     FlushIoSmartPtr flushIo;
     std::mutex flushIoUpdate;
     IReverseMap* iReverseMap;
+    std::atomic<bool> activeFlush;
 };
 
 } // namespace pos

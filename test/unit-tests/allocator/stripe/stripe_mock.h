@@ -33,6 +33,8 @@ public:
     MOCK_METHOD(DataBufferIter, DataBufferBegin, (), (override));
     MOCK_METHOD(DataBufferIter, DataBufferEnd, (), (override));
     MOCK_METHOD(void, UpdateFlushIo, (FlushIoSmartPtr flushIo), (override));
+    MOCK_METHOD(bool, IsActiveFlushTarget, (), (override));
+    MOCK_METHOD(void, SetActiveFlushTarget, (), (override));
 };
 
 } // namespace pos
