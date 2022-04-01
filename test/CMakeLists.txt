@@ -336,16 +336,6 @@ else()
     POS_ASSERT_FILE_EXIST("${POS_DEP_AIR}")
 endif()
 
-# Build fff conditionally
-SET(POS_DEP_FFF "${PROJ_ROOT}/lib/fff/fff.h")
-if(EXISTS "${POS_DEP_FFF}")
-    message("FFF library exists: ${POS_DEP_FFF}. Build skipped.")
-else()
-    message("FFF library needs to be built.")
-    execute_process(COMMAND make fff -j 4 -C ${PROJ_ROOT}/lib)
-    POS_ASSERT_FILE_EXIST("${POS_DEP_FFF}")
-endif()
-
 # Build nlohmann conditionally
 SET(POS_DEP_NLOHMANN "${PROJ_ROOT}/lib/nlohmann/json.hpp")
 if(EXISTS "${POS_DEP_NLOHMANN}")
@@ -397,16 +387,10 @@ endif(POS_BUILD_SHARED_LIB)
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/unit-tests/utils/*.cpp LIST_DIRECTORIES true)
-file(GLOB_RECURSE fff_mock_src ${POS_TEST_ROOT}/fff-mocks/*.c LIST_DIRECTORIES true)
 
 # for fixtures and utils
 add_library(
     postestlib STATIC ${fixture_src} ${utils_src}
-)
-
-# for C mocks (using fff)
-add_library(
-    fff_mock STATIC ${fff_mock_src}
 )
 
 link_directories (
@@ -464,7 +448,6 @@ SET(DEP_LIBRARIES
     jsoncpp
     jsonrpccpp-common
     jsonrpccpp-client
-    fff_mock
     yaml-cpp
     tbb
     pmem
