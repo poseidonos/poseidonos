@@ -46,12 +46,7 @@ RebuildBehaviorFactory::RebuildBehaviorFactory(IContextManager* allocator)
 RebuildBehavior*
 RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
-    if (ctx->part == PARTITION_TYPE_STR[PartitionType::JOURNAL_SSD])
-    {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, StripeBasedRaceRebuild Created");
-        return new StripeBasedRaceRebuild(move(ctx));
-    }
-    else if (ctx->part == PARTITION_TYPE_STR[PartitionType::META_SSD])
+    if (ctx->part == PARTITION_TYPE_STR[PartitionType::META_SSD])
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, StripeBasedRaceRebuild Created");
         return new StripeBasedRaceRebuild(move(ctx));
