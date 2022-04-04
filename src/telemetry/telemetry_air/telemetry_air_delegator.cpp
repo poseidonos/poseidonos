@@ -101,7 +101,7 @@ AddLatencyMetric(POSMetricVector* posMetricVector,
     AddLabelArrayVolumeInterval(posMetric, data, interval);
 
     std::stringstream stream_sample_count;
-    stream_sample_count << data["sample_cnt"];
+    stream_sample_count << data["period"]["sample_cnt"];
     posMetric.AddLabel("sample_count", stream_sample_count.str());
 
     posMetricVector->push_back(posMetric);
@@ -142,12 +142,12 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         std::string str_filter = stream_filter.str();
 
                         std::stringstream stream_iops;
-                        stream_iops << obj["iops"];
+                        stream_iops << obj["period"]["iops"];
                         uint32_t iops {0};
                         stream_iops >> iops;
 
                         std::stringstream stream_bw;
-                        stream_bw << obj["bw"];
+                        stream_bw << obj["period"]["bw"];
                         uint64_t bw {0};
                         stream_bw >> bw;
 
@@ -176,12 +176,12 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         auto& obj = objs[obj_it.first];
 
                         std::stringstream stream_mean;
-                        stream_mean << obj["mean"];
+                        stream_mean << obj["period"]["mean"];
                         uint32_t mean {0};
                         stream_mean >> mean;
 
                         std::stringstream stream_max;
-                        stream_max << obj["max"];
+                        stream_max << obj["period"]["max"];
                         uint32_t max {0};
                         stream_max >> max;
 
@@ -200,12 +200,12 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         auto& obj = objs[obj_it.first];
 
                         std::stringstream stream_mean;
-                        stream_mean << obj["mean"];
+                        stream_mean << obj["period"]["mean"];
                         uint32_t mean {0};
                         stream_mean >> mean;
 
                         std::stringstream stream_max;
-                        stream_max << obj["max"];
+                        stream_max << obj["period"]["max"];
                         uint32_t max {0};
                         stream_max >> max;
 
