@@ -117,3 +117,18 @@ cp $POS_HOME/config/pos.conf /etc/pos/pos.conf
 # Udev Rule Setting
 Udev is the dynamic device manager for the Linux kernel. Udev manages device uevents from kernel. Udev works by the rule file on default rules directory `/lib/udev/rules.d/` and custom rules directory `/etc/udev/rules.d/`. When any new nvme device attaches to the system, it binds to kernel space device driver `nvme`. Because PoseidonOS uses a userspace device driver, it needs to be changed to userspace driver `uio_pci_generic` to provide hotplug feature.  
 Refer to [learning hotplug](../guides/getting_started/learning_hotplug.md) to enable hotplug by setting udev rule.
+
+# Telemetry 
+In order for POS-Telemetry to collect data, the telemetry must be started through cli and exporter must be performed.
+Users can access Telemetry Metric collected through the web environment.
+
+1. Telemetry Enable using poseidon-cli, Start pos-exporter
+
+Usage :
+``` bash
+$POS_HOME/bin/poseidonos-cli telemetry start
+$POS_HOME/bin/pos-exporter
+
+2. Get Metric
+
+$ curl <pos-ip>:2112
