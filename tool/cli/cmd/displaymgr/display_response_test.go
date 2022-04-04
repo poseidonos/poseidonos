@@ -255,3 +255,16 @@ Array             : POSArray
 		t.Errorf("Expected: %q Output: %q", expected, output)
 	}
 }
+
+func TestWhenPosIsNotRunning(t *testing.T) {
+	var command = "ARRAYLIST"
+	var resJSON = `{"rid":"58ddcfa1-b3f2-11ec-860b-b42e99ff989b","command":"LISTARRAY","result":{"status":{"code":-1,"eventName":"CLI_CONNECTION_ERROR","description":"dial tcp 127.0.0.1:18716: connect: connection refused","cause":"","solution":""}},"info":{"version":""}}`
+
+	expected := `CLI_CONNECTION_ERROR - dial tcp 127.0.0.1:18716: connect: connection refused because  (solution: )
+`
+	output := hookResponse(command, resJSON, false, false)
+
+	if output != expected {
+		t.Errorf("Expected: %q Output: %q", expected, output)
+	}
+}

@@ -56,7 +56,9 @@ func printResToDebug(resJSON string) {
 }
 
 func printResInJSON(resJSON string) {
-	fmt.Println("{\"Response\":", resJSON, "}")
+	if resJSON != "" {
+		fmt.Println("{\"Response\":", resJSON, "}")
+	}
 }
 
 // TODO(mj): Currently, the output records may have whitespace.
@@ -559,6 +561,6 @@ func printEventInfo(code int, name string, desc string, cause string, solution s
 	fmt.Fprint(w, name+"\t-\t")
 	fmt.Fprint(w, desc)
 	fmt.Fprint(w, " because "+strings.ToLower(cause))
-	fmt.Fprintln(w, " (solution: "+solution+")")
+	fmt.Fprintln(w, " (solution: "+strings.ToLower(solution)+")")
 	w.Flush()
 }

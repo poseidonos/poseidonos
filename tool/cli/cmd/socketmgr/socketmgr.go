@@ -3,47 +3,56 @@ package socketmgr
 import (
 	"bufio"
 	"cli/cmd/globals"
+	"cli/cmd/messages"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
-	"os"
 	"pnconnector/src/log"
 )
 
-var conn net.Conn
-
-func connectToCliServer() {
+func connectToCliServer() (net.Conn, error) {
 	var err error
-	conn, err = net.Dial("tcp", globals.IPv4+":"+globals.Port)
+	conn, err := net.Dial("tcp", globals.IPv4+":"+globals.Port)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "cannot connect to the cli server: %s\n", err)
 		log.Error("cannot connect to the cli server:", err)
-		return
 	}
+
+	return conn, err
 }
 
 func SendReqAndReceiveRes(reqJSON string) string {
-	connectToCliServer()
-	defer closeConn()
-
-	if conn == nil {
+	conn, err := connectToCliServer()
+	if err != nil {
 		log.Error("cannot send a request to cli server: not connected")
-		return ""
+		return buildConnErrResp(reqJSON, err.Error())
 	}
+	defer conn.Close()
 
 	fmt.Fprintf(conn, reqJSON)
 	res, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil && err != io.EOF {
 		log.Error("could not receive data from the cli sever:", err)
-		return ""
+		return buildConnErrResp(reqJSON, err.Error())
 	}
 
 	return res
 }
 
-func closeConn() {
-	if conn == nil {
-		return
-	}
-	conn.Close()
+func buildConnErrResp(req string, errMsg string) string {
+	reqJson := messages.Request{}
+	json.Unmarshal([]byte(req), &reqJson)
+
+	resJson := messages.Response{}
+	resJson.RID = reqJson.RID
+	resJson.COMMAND = reqJson.COMMAND
+	resJson.RESULT.STATUS.CODE = globals.CliServerFailCode
+	resJson.RESULT.STATUS.EVENTNAME = "POS_CONNECTION_ERROR"
+	resJson.RESULT.STATUS.DESCRIPTION = errMsg
+	resJson.RESULT.STATUS.CAUSE = "PoseidonOS may not be running"
+	resJson.RESULT.STATUS.SOLUTION = "start PoseidonOS first"
+
+	resJsonStr, _ := json.Marshal(resJson)
+
+	return string(resJsonStr)
 }
