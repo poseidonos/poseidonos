@@ -11,7 +11,7 @@ import gdb_lib
 
 def show_metafs_mbr(metafsPtr):
     print("- mbr info")
-    requestString = 'p ((pos::MetaFs*)'+metafsPtr+').mgmt.sysMgr.mbrMgr.mbr.content'
+    requestString = 'p ((pos::MetaFs*)' + metafsPtr + ').mgmt.sysMgr.mbrMgr.mbr.content'
     output = gdb.execute(requestString + '.isNPOR', to_string=True)
     output = output.strip(',\n ')
     print("isNPOR: " + output.split('=')[1].strip())
@@ -30,12 +30,13 @@ def show_metafs_mbr(metafsPtr):
 
     for idx in range(partitionCnt):
         result = ""
-        output = gdb.execute(requestString + '.geometry.mediaPartitionInfo['+str(idx)+']', to_string=True)
+        output = gdb.execute(requestString + '.geometry.mediaPartitionInfo[' + str(idx) + ']', to_string=True)
         output = output.strip(',\n ').split('\n')
         output = [i.split('=') for i in output]
         for i in range(1, len(output) - 1):
             result += output[i][0].strip() + ": " + output[i][1].strip(", ") + " "
         print(result)
+
 
 def show_metafs_config():
     configList = gdb.execute('p *pos::debugInfo->metaFsService->configManager', to_string=True)
@@ -46,6 +47,7 @@ def show_metafs_config():
             item = list(filter(None, item.strip(',\n {}').split('=')))
             print(str(count) + " - " + item[0].strip() + ": " + item[1].strip())
             count += 1
+
 
 def get_metafs_ptr_list():
     metafsList = gdb.execute('p pos::debugInfo->metaFsService->fileSystems', to_string=True)
@@ -65,6 +67,7 @@ def get_metafs_ptr_list():
                     count += 1
     return metafsPtrList
 
+
 def show_array_list():
     arrayList = gdb.execute('p pos::debugInfo->metaFsService->arrayNameToId', to_string=True)
     arrayList = arrayList.split('\n')
@@ -77,8 +80,9 @@ def show_array_list():
             print(str(count) + ": arrayName: " + first + ", arrayId: " + second)
             count += 1
 
+
 def show_inode_info(inodePtr):
-    fieldList = gdb.execute('p ((pos::MetaFileInode*)'+inodePtr+').data.basic.field', to_string=True)
+    fieldList = gdb.execute('p ((pos::MetaFileInode*)' + inodePtr + ').data.basic.field', to_string=True)
     fieldList = fieldList.split('\n')
     fd = 0
     fileName = ""
@@ -91,18 +95,19 @@ def show_inode_info(inodePtr):
             # print(fileName)
     print("fd: " + str(fd) + ", fileName: " + fileName)
 
+
 def show_volume_info(volumePtr):
-    volumeType = gdb.execute('p ((pos::MetaVolume*)'+volumePtr+').volumeType', to_string=True)
+    volumeType = gdb.execute('p ((pos::MetaVolume*)' + volumePtr + ').volumeType', to_string=True)
     volumeType = volumeType.split('=')[1].strip(',\n ')
     print("- volume ptr: " + volumePtr + ", volumeType: " + volumeType)
-    inodePtrList = gdb.execute('p ((pos::MetaVolume*)'+volumePtr+').inodeMgr.fd2InodeMap', to_string=True)
+    inodePtrList = gdb.execute('p ((pos::MetaVolume*)' + volumePtr + ').inodeMgr.fd2InodeMap', to_string=True)
     inodePtrList = inodePtrList.split('\n')
     for line in inodePtrList:
         if "[" in line:
             inodeAddr = line.split('=')[1].strip(',\n ')
             show_inode_info(inodeAddr)
     print("- extent allocator")
-    output = gdb.execute('p ((pos::MetaVolume*)'+volumePtr+').inodeMgr.extentAllocator.freeList', to_string=True)
+    output = gdb.execute('p ((pos::MetaVolume*)' + volumePtr + ').inodeMgr.extentAllocator.freeList', to_string=True)
     output = output.split('\n')
     print("free list")
     extentStr = ""
@@ -113,11 +118,13 @@ def show_volume_info(volumePtr):
             extentStr += ", count: " + item.strip(", ").split(" = ")[1]
     print(extentStr)
 
+
 def show_metafs_io_info(metafsPtr):
     print("- meta io manager")
-    output = gdb.execute('p ((pos::MetaFs*)'+metafsPtr+').io.ioMgr.mioHandlerCount', to_string=True)
+    output = gdb.execute('p ((pos::MetaFs*)' + metafsPtr + ').io.ioMgr.mioHandlerCount', to_string=True)
     output = output.split('=')
     print("meta thread count: " + output[1].strip())
+
 
 def get_metafs_info_str(metafsPtr):
     requestStr = "p ((pos::MetaFs*)" + metafsPtr + ")"
@@ -127,7 +134,8 @@ def get_metafs_info_str(metafsPtr):
     arrayName = arrayName.split('=')[1].strip(',\n ')
     result = "arrayId: " + arrayId + ", arrayName: " + arrayName
     return result
-    
+
+
 def show_status():
     print("##### metafs information #####")
     print("\n# metafs config")
@@ -150,11 +158,11 @@ def show_status():
         show_metafs_io_info(metafsPtr)
         show_metafs_mbr(metafsPtr)
         count += 1
-        volumeContainerList = gdb.execute('p ((pos::MetaFs*)'+metafsPtr+').ctrl.volMgr.volContainer.volumeContainer', to_string=True)
+        volumeContainerList = gdb.execute('p ((pos::MetaFs*)' + metafsPtr + ').ctrl.volMgr.volContainer.volumeContainer', to_string=True)
         volumeContainerList = volumeContainerList.split('\n')
         for metaVolume in volumeContainerList:
             if "get() =" in metaVolume:
                 volumeAddr = metaVolume.split('=')
                 volumeAddr = volumeAddr[1].strip(',\n {}')
                 show_volume_info(volumeAddr)
-        print("- if you want to see ctrl.cxtList: " + "p ((pos::MetaFs*)"+metafsPtr+").ctrl.cxtList")
+        print("- if you want to see ctrl.cxtList: " + "p ((pos::MetaFs*)" + metafsPtr + ").ctrl.cxtList")
