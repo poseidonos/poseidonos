@@ -35,6 +35,7 @@
 #include "src/array/service/io_translator/io_translator.h"
 #include "src/array/service/io_recover/io_recover.h"
 #include "src/array/service/io_device_checker/io_device_checker.h"
+#include "src/array/service/io_locker/io_locker.h"
 
 using namespace std;
 
@@ -46,5 +47,6 @@ public:
     virtual IIOTranslator* GetTranslator(void) = 0;
     virtual IIORecover* GetRecover(void) = 0;
     virtual IIODeviceChecker* GetDeviceChecker(void) = 0;
+    virtual IIOLocker* GetIOLocker(PartitionType partType) = 0;
 };
 } // namespace pos

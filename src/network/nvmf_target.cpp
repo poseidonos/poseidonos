@@ -344,40 +344,39 @@ NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
     {
         spdkNvmfCaller = new SpdkNvmfCaller();
     }
-    struct spdk_nvmf_subsystem* subsystem =
-        spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
-    if (subsystem == nullptr)
+    if (nullptr != spdkNvmfCaller)
     {
-        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
-        if (spdkNvmfCaller != nullptr)
+        struct spdk_nvmf_subsystem* subsystem =
+            spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
+        if (subsystem == nullptr)
+        {
+            SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
+            delete spdkNvmfCaller;
+            return false;
+        }
+
+        struct EventContext* ctx = _CreateEventContext(callback, arg,
+            strdup(bdevName.c_str()), spdk_sprintf_alloc("%u", nsid));
+        if (ctx == nullptr)
         {
             delete spdkNvmfCaller;
+            return false;
         }
-        return false;
-    }
 
-    struct EventContext* ctx = _CreateEventContext(callback, arg,
-        strdup(bdevName.c_str()), spdk_sprintf_alloc("%u", nsid));
-    if (ctx == nullptr)
-    {
-        if (spdkNvmfCaller != nullptr)
+        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.attachNamespacePauseDone, ctx);
+        if (ret != 0)
         {
-            delete spdkNvmfCaller;
+            _AttachNamespaceWithPause(subsystem, ctx, nullptr, nullptr);
         }
-        return false;
-    }
-
-    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, nsid, nvmfCallbacks.attachNamespacePauseDone, ctx);
-    if (ret != 0)
-    {
-        _AttachNamespaceWithPause(subsystem, ctx, nullptr, nullptr);
-    }
-
-    if (spdkNvmfCaller != nullptr)
-    {
         delete spdkNvmfCaller;
+        return true;
     }
-    return true;
+    else
+    {
+        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        POS_TRACE_ERROR(event, "Failed to attach namespace with nsid. SpdkNvmfCaller is nullptr");
+        return false;
+    }
 }
 
 void
@@ -387,21 +386,26 @@ NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
     {
         spdkNvmfCaller = new SpdkNvmfCaller();
     }
-    struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
-    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
-    if (ret != 0)
-    {
-        SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
-        if (nullptr == eventFrameworkApi)
-        {
-            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
-        }
-        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_AttachNamespaceWithPause, subsystem, arg2);
-    }
 
     if (nullptr != spdkNvmfCaller)
     {
+        struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
+        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
+        if (ret != 0)
+        {
+            SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
+            if (nullptr == eventFrameworkApi)
+            {
+                eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+            }
+            eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_AttachNamespaceWithPause, subsystem, arg2);
+        }
         delete spdkNvmfCaller;
+    }
+    else
+    {
+        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        POS_TRACE_ERROR(event, "Failed to attach namespace. SpdkNvmfCaller is nullptr");
     }
 }
 
@@ -506,21 +510,25 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
         spdkNvmfCaller = new SpdkNvmfCaller();
     }
 
-    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
-        nvmfCallbacks.detachNamespacePauseDone, (void*)arg2);
-    if (ret != 0)
-    {
-        if (nullptr == eventFrameworkApi)
-        {
-            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
-        }
-        SPDK_NOTICELOG("failed to pause subsystem during detaching namespace : retrying \n");
-        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_DetachNamespaceWithPause, subsystem, arg2);
-    }
-
     if (nullptr != spdkNvmfCaller)
     {
+        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
+            nvmfCallbacks.detachNamespacePauseDone, (void*)arg2);
+        if (ret != 0)
+        {
+            if (nullptr == eventFrameworkApi)
+            {
+                eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+            }
+            SPDK_NOTICELOG("failed to pause subsystem during detaching namespace : retrying \n");
+            eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(), (EventFuncFourParams)_DetachNamespaceWithPause, subsystem, arg2);
+        }
         delete spdkNvmfCaller;
+    }
+    else
+    {
+        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        POS_TRACE_ERROR(event, "Failed to detach namespace. SpdkNvmfCaller is nullptr");
     }
 }
 
@@ -565,25 +573,29 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2, EventFrameworkA
         spdkNvmfCaller = new SpdkNvmfCaller();
     }
 
-    int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
-        nvmfCallbacks.detachNamespaceAllPauseDone, (void*)arg2);
-
-    if (ret != 0)
-    {
-        SPDK_NOTICELOG("failed to pause subsystem(%s) during detaching ns :retrying \n",
-            spdkNvmfCaller->SpdkNvmfSubsystemGetNqn(subsystem));
-
-        if (nullptr == eventFrameworkApi)
-        {
-            eventFrameworkApi = EventFrameworkApiSingleton::Instance();
-        }
-        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
-            (EventFuncFourParams)_DetachNamespaceAllWithPause, subsystem, arg2);
-    }
-
     if (nullptr != spdkNvmfCaller)
     {
+        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0,
+            nvmfCallbacks.detachNamespaceAllPauseDone, (void*)arg2);
+
+        if (ret != 0)
+        {
+            SPDK_NOTICELOG("failed to pause subsystem(%s) during detaching ns :retrying \n",
+                spdkNvmfCaller->SpdkNvmfSubsystemGetNqn(subsystem));
+
+            if (nullptr == eventFrameworkApi)
+            {
+                eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+            }
+            eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
+                (EventFuncFourParams)_DetachNamespaceAllWithPause, subsystem, arg2);
+        }
         delete spdkNvmfCaller;
+    }
+    else
+    {
+        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        POS_TRACE_ERROR(event, "Failed to detach namespace all. SpdkNvmfCaller is nullptr");
     }
 }
 

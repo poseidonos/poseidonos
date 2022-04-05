@@ -266,7 +266,7 @@ Mpio::DoIO(MpAioState expNextState)
     void* buf = GetMDPageDataBuf();
     MssOpcode opcode = _ConvertToMssOpcode(GetStateInExecution());
 
-    if (io.targetMediaType == MetaStorageType::NVRAM)
+    if (io.targetMediaType != MetaStorageType::SSD)
     {
         if (opcode == MssOpcode::Read)
             PrintLog("[io  -   read]", io.arrayId, io.metaLpn);

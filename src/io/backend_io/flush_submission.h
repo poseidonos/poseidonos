@@ -51,7 +51,7 @@ class FlushSubmission : public Event
 public:
     FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
     FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
-        IIOTranslator* translator, bool isWTEnabled);
+        IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled);
     ~FlushSubmission(void) override;
     bool Execute(void) override;
     uint32_t GetBufferListSize(void);
@@ -63,6 +63,7 @@ private:
     int arrayId;
     IIOTranslator* translator;
     bool isWTEnabled;
+    const PartitionLogicalSize* udSize;
 };
 
 } // namespace pos

@@ -60,7 +60,8 @@ class WriteSubmission : public IOController, public Event
 {
 public:
     explicit WriteSubmission(VolumeIoSmartPtr volumeIo);
-    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager, IBlockAllocator* iBlockAllocator, FlowControl* flowControl,
+    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager,
+        IBlockAllocator* iBlockAllocator, FlowControl* flowControl, IArrayInfo* arrayInfo,
         bool isReactorNow);
     ~WriteSubmission(void) override;
 
@@ -78,6 +79,7 @@ private:
     RBAStateManager* rbaStateManager;
     IBlockAllocator* iBlockAllocator;
     FlowControl* flowControl;
+    IArrayInfo* arrayInfo;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);

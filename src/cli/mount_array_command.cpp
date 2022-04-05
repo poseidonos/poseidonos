@@ -35,6 +35,7 @@
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/qos/qos_manager.h"
+#include "src/master_context/config_manager.h"
 
 namespace pos_cli
 {
@@ -62,6 +63,21 @@ MountArrayCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("enable_write_through") == true)
     {
         isWTenabled = doc["param"]["enable_write_through"].get<bool>();
+    }
+
+    if (isWTenabled == false)
+    {
+        bool isWTenabledAtConfig = false;
+        int ret = ConfigManagerSingleton::Instance()->GetValue("write_through", "enable",
+            &isWTenabledAtConfig, ConfigType::CONFIG_TYPE_BOOL);
+        if (ret == SUCCESS)
+        {
+            if (isWTenabledAtConfig == true)
+            {
+                isWTenabled = true;
+                POS_TRACE_WARN(EID(MOUNT_ARRAY_DEBUG_MSG), "Write through mode is forcibly activated by config");
+            }
+        }
     }
 
     JsonFormat jFormat;

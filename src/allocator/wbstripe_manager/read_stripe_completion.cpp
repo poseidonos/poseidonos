@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include "src/include/meta_const.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -59,20 +60,27 @@ ReadStripeCompletion::ReadStripeCompletion(StripeAddr stripeAddr, std::vector<vo
 bool
 ReadStripeCompletion::_DoSpecificJob(void)
 {
-    std::list<BufferEntry> bufferList;
-    uint32_t blockCount = 0;
-
+    IOSubmitHandlerStatus result = IOSubmitHandlerStatus::SUCCESS;
     for (auto b : buffers)
     {
-        BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
+        std::list<BufferEntry> bufferList;
+        uint32_t blockCount = BLOCKS_IN_CHUNK;
+        BufferEntry bufferEntry(b, blockCount);
         bufferList.push_back(bufferEntry);
-        blockCount += BLOCKS_IN_CHUNK;
-    }
 
-    IOSubmitHandlerStatus result =
-        ioSubmitHandler->SubmitAsyncIO(IODirection::WRITE,
+        // NOTE: Instead of submitting (a list of buffer entries, a single write address),
+        // we should be submitting (a single buffer, a single write address) if the partition of the destination is WRITE_BUFFER.
+        result = ioSubmitHandler->SubmitAsyncIO(IODirection::WRITE,
             bufferList, writeAddr, blockCount,
             PartitionType::WRITE_BUFFER, doneCallback, arrayId);
+        if (result != IOSubmitHandlerStatus::SUCCESS && result != IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
+        {
+            POS_TRACE_ERROR(result, "Failed to submit async write I/O when copying a stripe {} from SSD to Write Buffer.", writeAddr.stripeId);
+            return false;
+        }
+
+        writeAddr.offset += blockCount;
+    }
 
     return (result == IOSubmitHandlerStatus::SUCCESS ||
         result == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP);

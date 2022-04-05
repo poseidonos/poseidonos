@@ -108,7 +108,7 @@ public:
 
     virtual bool IsRead(void);
     virtual MetaLpnType GetStartLpn(void);
-    virtual bool IsTargetStorageSSD(void);
+    virtual MetaStorageType GetTargetStorage(void);
     virtual bool Init(MioState expNextState = MioState::Max);
     virtual bool Issue(MioState expNextState = MioState::Max);
     virtual bool Complete(MioState expNextState = MioState::Max);

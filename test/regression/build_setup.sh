@@ -11,6 +11,7 @@ master_bin_path="/psdData/pos-bin"
 pos_bin_filename="poseidonos"
 build_optimization="ON"
 job_number=12
+wt_enable=0
 
 texecc()
 {
@@ -189,7 +190,12 @@ setupTest()
 
     if [ $target_type == "VM" ]
     then
-        texecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
+        if [ $wt_enable -eq 1 ]
+        then
+            texecc cp $pos_working_dir/config/ibofos_for_vm_ci_wt.conf $pos_conf/pos.conf
+        else
+            texecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
+        fi
     fi
 
     texecc rmmod nvme_tcp
@@ -215,7 +221,7 @@ print_help()
     fi    
 }
 
-while getopts "i:h:t:c:r:d:o:" opt
+while getopts "i:h:t:c:r:d:o:w" opt
 do
     case "$opt" in
         h) print_help
@@ -232,6 +238,8 @@ do
             pos_working_dir="${pos_root_dir}/ibofos"
             ;;
         o) build_optimization="$OPTARG"
+            ;;
+        w) wt_enable=1
             ;;
         ?) exit 2
             ;;

@@ -84,15 +84,10 @@ Partition::IsValidLba(uint64_t lba)
 {
     if (physicalSize.startLba > lba || physicalSize.lastLba < lba)
     {
-        POS_TRACE_ERROR(EID(ADDRESS_TRANSLATION_INVALID_LBA),
-            "req_lba:{}, part_startLba:{}, part_lastLba:{}",
-            lba, physicalSize.startLba, physicalSize.lastLba);
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 bool

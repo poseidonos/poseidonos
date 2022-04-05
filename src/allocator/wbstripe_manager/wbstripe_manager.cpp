@@ -113,12 +113,7 @@ WBStripeManager::Init(void)
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
         Stripe* stripe = new Stripe(iReverseMap, true, addrInfo->GetblksPerStripe());
-
-        for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
-        {
-            void* buffer = stripeBufferPool->TryGetBuffer();
-            stripe->AddDataBuffer(buffer);
-        }
+        // DEPRECATED: "stripe" used to have its dedicated buffer that would be allocated from stripeBufferPool, but not any more.
         wbStripeArray.push_back(stripe);
     }
 }
@@ -126,6 +121,12 @@ WBStripeManager::Init(void)
 void
 WBStripeManager::Dispose(void)
 {
+    if (nullptr != stripeLoadStatus && false == addrInfo->IsUT())
+    {
+        delete stripeLoadStatus;
+        stripeLoadStatus = nullptr;
+    }
+
     for (auto& stripeToClear : wbStripeArray)
     {
         if (nullptr != stripeToClear)
@@ -362,7 +363,14 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     }
 
     stripe = GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, tailarrayidx, GetUserStripeId(vsid));
+    bool stripeAssigned = stripe->Assign(vsid, wbLsid, GetUserStripeId(vsid), tailarrayidx);
+    if (!stripeAssigned)
+    {
+        int errorCode = EID(ALLOCATOR_FAILED_TO_ASSIGN_STRIPE);
+        POS_TRACE_ERROR(errorCode,
+            "Failed to assign a stripe. Stopping active stripe reconstruction for vsid {}, tailarrayidx {}", vsid, tailarrayidx);
+        return -errorCode;
+    }
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_RECONSTRUCT_STRIPE),
         "Stripe (vsid {}, wbLsid {}, blockCount {}) is reconstructed",
@@ -381,6 +389,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
 Stripe*
 WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 {
+    std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr currentTail = allocCtx->GetActiveStripeTail(index);
     if (IsUnMapVsa(currentTail) == true)
     {
@@ -418,7 +427,6 @@ VirtualBlks
 WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
 {
     // TODO (meta): Move to allocator context
-    std::unique_lock<std::mutex> lock(allocCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr tail = allocCtx->GetActiveStripeTail(index);
     VirtualBlks remainingBlocks = _GetRemainingBlocks(tail);
     allocCtx->SetActiveStripeTail(index, UNMAP_VSA);
@@ -469,8 +477,8 @@ WBStripeManager::_FillBlocksToStripe(Stripe* stripe, StripeId wbLsid, BlkOffset 
     {
         stripe->UpdateReverseMapEntry(block, INVALID_RBA, UINT32_MAX);
     }
+    stripe->SetActiveFlushTarget();
     uint32_t remain = stripe->DecreseBlksRemaining(numBlks);
-
     return (remain == 0);
 }
 
@@ -478,7 +486,6 @@ Stripe*
 WBStripeManager::_FinishRemainingBlocks(StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks)
 {
     Stripe* activeStripe = wbStripeArray[wbLsid];
-
     bool flushRequired = _FillBlocksToStripe(activeStripe, wbLsid, startOffset, numBlks);
     if (flushRequired == true)
     {

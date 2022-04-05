@@ -45,10 +45,10 @@ ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
 
 void
 ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
-                        RebuildComplete cb, list<RebuildTarget*>& tgt)
+                        RebuildComplete cb, list<RebuildTarget*>& tgt, bool isWT)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::Rebuild {}, {} target partitions", array, tgt.size());
+        "Rebuild of {} requested, target_size: {}, isWT:{}", array, tgt.size(), isWT);
 
     if (_Find(array) != nullptr)
     {
@@ -56,20 +56,23 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
             "The rebuild of the same Array is not completed and a new rebuild is submitted");
         return;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::Rebuild, start job");
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), 
+        "{} is preparing to start rebuild", array);
 
     mtxStart.lock();
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::Rebuild, PrepareRebuild, isResume: {}, ret:{}", resume, ret);
-
-    if (ret == EID(REBUILD_INVALIDATED))
+    if (ret == 0)
     {
-        mtxStart.unlock();
-        return;
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "{} is ready to rebuild. isResume: {}", array, resume);
+    }
+    else
+    {
+         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+            "{} is failed to prepare rebuild and will be discarded, isResume: {}, prepare_result: {}",
+            array, resume, ret);
     }
 
     if (resume)
@@ -84,9 +87,10 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
         }
     }
     RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
-    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dev, cb, tgt, &factory);
+    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dev, cb, tgt, &factory, isWT);
     jobsInProgress.emplace(array, job);
     mtxStart.unlock();
+
     if (ret == 0)
     {
         job->Start();

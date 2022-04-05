@@ -1003,7 +1003,9 @@ class HistogramValue::_Internal {
 HistogramValue::HistogramValue(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   bucketrange_(arena),
-  bucketcount_(arena) {
+  bucketcount_(arena),
+  sum_(PROTOBUF_LONGLONG(0)),
+  totalcount_(PROTOBUF_ULONGLONG(0)) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:HistogramValue)

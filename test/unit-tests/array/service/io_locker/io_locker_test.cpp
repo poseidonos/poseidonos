@@ -12,7 +12,7 @@ TEST(IOLocker, IOLocker_testConstructor)
     // Given
 
     // When
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
 
     // Then
 }
@@ -20,7 +20,7 @@ TEST(IOLocker, IOLocker_testConstructor)
 TEST(IOLocker, Register_testIfArgumentsAreValid)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     vector<ArrayDevice*> devs;
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -37,7 +37,7 @@ TEST(IOLocker, Register_testIfArgumentsAreValid)
 TEST(IOLocker, Unregister_testIfArgumentsAreValid)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     vector<ArrayDevice*> devs;
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -54,7 +54,7 @@ TEST(IOLocker, Unregister_testIfArgumentsAreValid)
 TEST(IOLocker, TryBusyLock_testIfArgumentsAreValid)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     vector<ArrayDevice*> devs;
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -74,7 +74,7 @@ TEST(IOLocker, TryBusyLock_testIfArgumentsAreValid)
 TEST(IOLocker, ResetBusyLock_testIfArgumentsAreValid)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     vector<ArrayDevice*> devs;
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -92,7 +92,7 @@ TEST(IOLocker, ResetBusyLock_testIfArgumentsAreValid)
 TEST(IOLocker, TryLock_testIfArgumentsAreValid)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     vector<ArrayDevice*> devs;
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -113,7 +113,7 @@ TEST(IOLocker, TryLock_testIfArgumentsAreValid)
 TEST(IOLocker, TryLock_testForRollback)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
     UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
     UblockSharedPtr ublock3 = make_shared<MockUBlockDevice>("mock-dev3", 1024, nullptr);
@@ -154,7 +154,7 @@ TEST(IOLocker, TryLock_testForRollback)
 TEST(IOLocker, Unlock_testForSingleDev)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
     UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
@@ -175,7 +175,7 @@ TEST(IOLocker, Unlock_testForSingleDev)
 TEST(IOLocker, Unlock_testForMultipleDevs)
 {
     // Given
-    IOLocker ioLocker;
+    IOLocker ioLocker("lockerTest");
     UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
     UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;

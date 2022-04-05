@@ -51,15 +51,13 @@
 namespace pos
 {
 SubmitAsyncWrite::SubmitAsyncWrite(void)
-: SubmitAsyncWrite(IOLockerSingleton::Instance(),
-      ArrayService::Instance()->Getter()->GetTranslator(),
+: SubmitAsyncWrite(ArrayService::Instance()->Getter()->GetTranslator(),
       IODispatcherSingleton::Instance())
 {
 }
 
-SubmitAsyncWrite::SubmitAsyncWrite(IIOLocker* locker, IIOTranslator* translator, IODispatcher* ioDispatcher)
-: locker(locker),
-  translator(translator),
+SubmitAsyncWrite::SubmitAsyncWrite(IIOTranslator* translator, IODispatcher* ioDispatcher)
+: translator(translator),
   ioDispatcher(ioDispatcher)
 {
 }
@@ -103,7 +101,6 @@ SubmitAsyncWrite::Execute(
     std::list<PhysicalWriteEntry> parityPhysicalWriteEntries;
     int parityResult = translator->GetParityList(
         arrayId, partitionToIO, parityPhysicalWriteEntries, logicalWriteEntry);
-
     if (ret != 0 || parityResult != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
@@ -115,6 +112,7 @@ SubmitAsyncWrite::Execute(
 
     std::set<IArrayDevice*> targetDevices;
     StripeId stripeId = startLSA.stripeId;
+    IIOLocker* locker = ArrayService::Instance()->Getter()->GetIOLocker(partitionToIO);
     if (partitionToIO == PartitionType::META_SSD)
     {
         if (parityOnly == true)
@@ -143,6 +141,14 @@ SubmitAsyncWrite::Execute(
             return IOSubmitHandlerStatus::TRYLOCK_FAIL;
         }
     }
+    else if (partitionToIO == PartitionType::JOURNAL_SSD)
+    {
+        bool result = locker->TryLock(targetDevices, stripeId);
+        if (result == false)
+        {
+            return IOSubmitHandlerStatus::TRYLOCK_FAIL;
+        }
+    }
 
     uint32_t totalIoCount = 0;
     if (parityOnly == false)
@@ -152,6 +158,18 @@ SubmitAsyncWrite::Execute(
     for (PhysicalWriteEntry& parityPhysicalWriteEntry : parityPhysicalWriteEntries)
     {
         totalIoCount += parityPhysicalWriteEntry.buffers.size();
+    }
+
+    if (totalIoCount == 0)
+    {
+        bool done = callback->Execute();
+        IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+        if (false == done)
+        {
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+            return errorToReturn;
+        }
+        return IOSubmitHandlerStatus::SUCCESS;
     }
 
     callback->SetWaitingCount(1);

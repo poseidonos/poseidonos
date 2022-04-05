@@ -69,11 +69,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
 : WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId()),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
       nullptr,
+      ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo,
       EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl,
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager,
+    IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl, IArrayInfo* inputArrayInfo,
     bool isReactorNow)
 : Event(isReactorNow),
   volumeIo(volumeIo),
@@ -84,15 +86,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   allocatedBlockCount(0),
   processedBlockCount(0),
   rbaStateManager(inputRbaStateManager),
-  iBlockAllocator(inputIBlockAllocator)
+  iBlockAllocator(inputIBlockAllocator),
+  flowControl(inputFlowControl),
+  arrayInfo(inputArrayInfo)
 {
-    flowControl = inputFlowControl;
     if (nullptr == flowControl)
     {
-        /*To do Remove after adding array Idx by Array*/
-        IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-
-        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(info->GetName());
+        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayInfo->GetName());
     }
 }
 
@@ -211,7 +211,6 @@ void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
-    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
     bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
 
     if (false == isWTEnabled)
@@ -381,6 +380,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 void
 WriteSubmission::_AllocateFreeWriteBuffer(void)
 {
+    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
     int remainBlockCount = blockCount - allocatedBlockCount;
 
     while (remainBlockCount > 0)
@@ -389,7 +389,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
-        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, 1);
+        auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, remainBlockCount);
         targetVsaRange = result.first;
         airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 
@@ -398,11 +398,8 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
             POS_TRACE_DEBUG(eventId, "No free space in write buffer");
 
-            /*To do Remove after adding array Idx by Array*/
-            IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-
             IStateControl* stateControl =
-                StateManagerSingleton::Instance()->GetStateControl(info->GetName());
+                StateManagerSingleton::Instance()->GetStateControl(arrayInfo->GetName());
             if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
                 POS_EVENT_ID eventId =
@@ -412,7 +409,25 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             }
             break;
         }
-        _AddVirtualBlks(result);
+        if (true == isWTEnabled)
+        {
+            VirtualBlkAddr startVsa = targetVsaRange.startVsa;
+            for (uint32_t index = 0 ; index < targetVsaRange.numBlks; index++)
+            {
+                VirtualBlksInfo info;
+                VirtualBlks vsaInfo;
+                vsaInfo.startVsa = startVsa;
+                vsaInfo.numBlks = 1;
+                info.first = vsaInfo;
+                info.second = result.second;
+                _AddVirtualBlks(info);
+                startVsa.offset += 1;
+            }
+        }
+        else
+        {
+            _AddVirtualBlks(result);
+        }
         remainBlockCount -= targetVsaRange.numBlks;
     }
 }

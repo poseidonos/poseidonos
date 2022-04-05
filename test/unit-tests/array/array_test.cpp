@@ -60,7 +60,7 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
 
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     vector<ArrayDevice*> mockDevs;
-    EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillOnce(Return(mockDevs));
+    EXPECT_CALL(*mockArrDevMgr, GetDataDevices).WillRepeatedly(Return(mockDevs));
     EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(EID(MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER)));
     EXPECT_CALL(*mockState, SetMount).Times(0);
     EXPECT_CALL(*mockArrayService, Unregister).Times(1);
@@ -740,7 +740,6 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArra
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(false));
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::DEGRADED));
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
     Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, mockPtnMgr, mockState, NULL, NULL, NULL);
 
@@ -781,7 +780,6 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     EXPECT_CALL(*mockArrDev, SetUblock).Times(1);
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(true));
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false)); // the array is in mounted state as above, so cannot be in "broken" as a result
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL));

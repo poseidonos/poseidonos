@@ -43,6 +43,7 @@
 #include "src/include/rebuild_state.h"
 #include "src/include/address_type.h"
 #include "src/include/raid_type.h"
+#include "src/include/partition_type.h"
 #include "src/logger/logger.h"
 
 using namespace std;
@@ -58,7 +59,7 @@ class RebuildContext
 {
 public:
     string array;
-    string part;
+    PartitionType part;
     RaidType raidType;
     uint32_t arrayIndex = 0;
     uint32_t faultIdx = 0;
@@ -70,6 +71,7 @@ public:
     RebuildLogger* logger = nullptr;
     F2PTranslator translate;
     RebuildComplete rebuildComplete;
+    bool isWT = false;
     RebuildState GetResult()
     {
         unique_lock<mutex> lock(mtx);

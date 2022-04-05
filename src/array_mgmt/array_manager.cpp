@@ -264,7 +264,7 @@ ArrayManager::GetInfo(string name)
     }
     else
     {
-        POS_TRACE_WARN(EID(ARRAY_INFO_DEBUG_MSG), "No ArrayComponents found for {}. Returning null IArrayInfo.", name);
+        POS_TRACE_WARN(EID(ARRAY_MGR_NO_ARRAY_MATCHING_NAME), "ArrayName: {}", name);
         return nullptr;
     }
 }

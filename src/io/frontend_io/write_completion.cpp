@@ -139,8 +139,13 @@ WriteCompletion::_RequestFlush(Stripe* stripe)
 {
     bool requestFlushSuccessful = true;
     IArrayInfo* arrayInfo = arrayMgr->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId(),
-        arrayInfo->IsWriteThroughEnabled()));
+    bool parityOnly = arrayInfo->IsWriteThroughEnabled();
+    if (stripe->IsActiveFlushTarget() == true)
+    {
+        parityOnly = false;
+    }
+
+    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId(), parityOnly));
 
     if (unlikely(stripe->Flush(event) < 0))
     {

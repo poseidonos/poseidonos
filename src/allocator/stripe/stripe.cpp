@@ -56,7 +56,8 @@ Stripe::Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer_
   referenceCount(0),
   totalBlksPerUserStripe(numBlksPerStripe), // for UT
   withDataBuffer(withDataBuffer_),
-  iReverseMap(revMapMan)
+  iReverseMap(revMapMan),
+  activeFlush(false)
 {
     flushIo = nullptr;
 }
@@ -90,9 +91,16 @@ Stripe::GetVictimVsa(uint32_t offset)
     return oldVsaList[offset];
 }
 
-void
+bool
 Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArrayIdx tailArrayIdx_)
 {
+    if (vsid_ != userLsid_)
+    {
+        POS_TRACE_ERROR(EID(META_STRIPE_FAILED_TO_ASSIGN),
+            "Cannot assign a stripe when its vsid {} does not match with userLsid {}",
+            vsid_, userLsid_);
+        return false;
+    }
     vsid = vsid_;
     wbLsid = wbLsid_;
     userLsid = userLsid_;
@@ -100,6 +108,7 @@ Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArray
     oldVsaList.assign(totalBlksPerUserStripe, UNMAP_VSA);
     remaining.store(totalBlksPerUserStripe, memory_order_release);
     finished = false;
+    activeFlush = false;
     if (withDataBuffer == false)
     {
         revMapPack = iReverseMap->AllocReverseMapPack(vsid);
@@ -108,6 +117,7 @@ Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArray
     {
         revMapPack = iReverseMap->Assign(wbLsid, vsid);
     }
+    return true;
 }
 
 bool
@@ -259,6 +269,18 @@ Stripe::UpdateFlushIo(FlushIoSmartPtr flushIo)
         flushIo->IncreaseStripeCnt();
         this->flushIo = flushIo;
     }
+}
+
+bool
+Stripe::IsActiveFlushTarget(void)
+{
+    return activeFlush;
+}
+
+void
+Stripe::SetActiveFlushTarget(void)
+{
+    activeFlush = true;
 }
 
 } // namespace pos

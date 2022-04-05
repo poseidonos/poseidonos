@@ -32,6 +32,7 @@
 
 #include "array_service_layer.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 using namespace std;
 
@@ -42,6 +43,8 @@ ArrayServiceLayer::ArrayServiceLayer(void)
     ioTranslator = new IOTranslator();
     ioRecover = new IORecover();
     deviceChecker = new IODeviceChecker();
+    metaIOLocker = new IOLocker("MetaLocker");
+    journalIOLocker = new IOLocker("JournalLocker");
 }
 
 ArrayServiceLayer::~ArrayServiceLayer(void)
@@ -67,6 +70,7 @@ int
 ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
     ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker)
 {
+    unique_lock<mutex> lock(mtx);
     bool ret = true;
 
     ret = ioTranslator->Register(arrayIndex, trans);
@@ -90,9 +94,32 @@ ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
 void
 ArrayServiceLayer::Unregister(string array, unsigned int arrayIndex)
 {
+    unique_lock<mutex> lock(mtx);
     deviceChecker->Unregister(arrayIndex);
     ioRecover->Unregister(arrayIndex);
     ioTranslator->Unregister(arrayIndex);
+}
+
+void
+ArrayServiceLayer::IncludeDevicesToLocker(vector<ArrayDevice*> devList, bool isWT)
+{
+    unique_lock<mutex> lock(mtx);
+    metaIOLocker->Register(devList);
+    if (isWT == true)
+    {
+        journalIOLocker->Register(devList);
+    }
+}
+
+void
+ArrayServiceLayer::ExcludeDevicesFromLocker(vector<ArrayDevice*> devList, bool isWT)
+{
+    unique_lock<mutex> lock(mtx);
+    metaIOLocker->Unregister(devList);
+    if (isWT == true)
+    {
+        journalIOLocker->Unregister(devList);
+    }
 }
 
 IIOTranslator*
@@ -111,6 +138,20 @@ IIODeviceChecker*
 ArrayServiceLayer::GetDeviceChecker(void)
 {
     return deviceChecker;
+}
+
+IIOLocker*
+ArrayServiceLayer::GetIOLocker(PartitionType partType)
+{
+    if (partType == PartitionType::JOURNAL_SSD)
+    {
+        return journalIOLocker;
+    }
+    else if (partType == PartitionType::META_SSD)
+    {
+        return metaIOLocker;
+    }
+    return nullptr;
 }
 
 } // namespace pos

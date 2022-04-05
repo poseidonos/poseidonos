@@ -55,7 +55,7 @@ public:
     Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer, uint32_t numBlksPerStripe);
     Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe);
     virtual ~Stripe(void);
-    virtual void Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx);
+    virtual bool Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx);
 
     virtual uint32_t GetVolumeId(void);
     virtual StripeId GetVsid(void);
@@ -89,6 +89,9 @@ public:
 
     virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
 
+    virtual bool IsActiveFlushTarget(void);
+    virtual void SetActiveFlushTarget(void);
+
 protected: // for UT
     ASTailArrayIdx volumeId;
     StripeId vsid; // SSD LSID, Actually User Area LSID
@@ -107,6 +110,7 @@ protected: // for UT
     FlushIoSmartPtr flushIo;
     std::mutex flushIoUpdate;
     IReverseMap* iReverseMap;
+    std::atomic<bool> activeFlush;
 };
 
 } // namespace pos

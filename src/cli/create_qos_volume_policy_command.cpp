@@ -64,8 +64,30 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, QosReturnCode::FAILURE, "Fe qos is disabled. So skipping QOS Settings.", GetPosInfo());
     }
-    if (doc["param"].contains("vol"))
+
+    if (doc["param"].contains("array") && doc["param"].contains("vol"))
     {
+        string arrayName = doc["param"]["array"].get<std::string>();
+
+        ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+        if (info == nullptr)
+        {
+            return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, FAIL,
+                 "failed to create a qos policy", GetPosInfo());
+        }
+
+        IArrayInfo* array = info->arrayInfo;
+        ArrayStateType arrayState = array->GetState();
+        if (arrayState == ArrayStateEnum::BROKEN)
+        {
+            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
+                arrayName, arrayState.ToString());
+
+            return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, FAIL,
+                 "failed to create a qos policy", GetPosInfo());
+        }
+
         validInput = _HandleInputVolumes(doc);
         if (false == validInput)
         {
