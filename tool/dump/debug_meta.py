@@ -48,7 +48,7 @@ class DebugMetaCmd(gdb.Command):
 
         else:
             print("Help : ")
-            help_f = open(current_path + '/README_POS_GDB')
+            help_f = open(current_path + '/README_DEBUG_META')
             for line in help_f:
                 print(line.rstrip('\n'))
 
