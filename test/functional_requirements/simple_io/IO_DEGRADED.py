@@ -19,14 +19,16 @@ import MOUNT_VOL_NO_SPARE
 ARRAYNAME = MOUNT_VOL_NO_SPARE.ARRAYNAME
 DETACH_TARGET = MOUNT_VOL_NO_SPARE.ANY_DATA
 
+
 def execute():
     MOUNT_VOL_NO_SPARE.execute()
-    fio_proc = fio.st+art_fio(0, 40)
+    fio_proc = fio.start_fio(0, 40)
     time.sleep(10)
     print("detach device: " + DETACH_TARGET)
     api.detach_ssd(DETACH_TARGET)
     fio.wait_fio(fio_proc)
     return cli.array_info(ARRAYNAME)
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

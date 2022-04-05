@@ -48,7 +48,7 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
                         RebuildComplete cb, list<RebuildTarget*>& tgt, bool isWT)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::Rebuild {}, {} target partitions", array, tgt.size());
+        "Rebuild of {} requested, target_size: {}, isWT:{}", array, tgt.size(), isWT);
 
     if (_Find(array) != nullptr)
     {
@@ -56,15 +56,24 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
             "The rebuild of the same Array is not completed and a new rebuild is submitted");
         return;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::Rebuild, start job");
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), 
+        "{} is preparing to start rebuild", array);
 
     mtxStart.lock();
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder, PrepareRebuild, isResume: {}, prepare_result: {}", resume, ret);
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "{} is ready to rebuild. isResume: {}", array, resume);
+    }
+    else
+    {
+         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+            "{} is failed to prepare rebuild and will be discarded, isResume: {}, prepare_result: {}",
+            array, resume, ret);
+    }
 
     if (resume)
     {
@@ -88,8 +97,6 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dev,
     }
     else
     {
-        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-            "Failed in preparation for rebuilding, ret: {}", ret);
         job->Discard();
     }
 }

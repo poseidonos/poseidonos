@@ -54,7 +54,6 @@ public:
     virtual ~IOLocker(void) {}
     bool Register(vector<ArrayDevice*> devList);
     void Unregister(vector<ArrayDevice*> devList);
-    uint32_t Size(void) { return lockers.size(); }
     bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) override;
     bool ResetBusyLock(IArrayDevice* dev) override;
     bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;

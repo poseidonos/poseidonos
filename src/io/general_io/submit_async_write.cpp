@@ -141,7 +141,7 @@ SubmitAsyncWrite::Execute(
             return IOSubmitHandlerStatus::TRYLOCK_FAIL;
         }
     }
-    else if (partitionToIO == PartitionType::JOURNAL_SSD && locker != nullptr)
+    else if (partitionToIO == PartitionType::JOURNAL_SSD)
     {
         bool result = locker->TryLock(targetDevices, stripeId);
         if (result == false)

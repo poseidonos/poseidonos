@@ -32,6 +32,7 @@
 
 #include "array_service_layer.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ ArrayServiceLayer::ArrayServiceLayer(void)
     ioRecover = new IORecover();
     deviceChecker = new IODeviceChecker();
     metaIOLocker = new IOLocker("MetaLocker");
+    journalIOLocker = new IOLocker("JournalLocker");
 }
 
 ArrayServiceLayer::~ArrayServiceLayer(void)
@@ -105,10 +107,6 @@ ArrayServiceLayer::IncludeDevicesToLocker(vector<ArrayDevice*> devList, bool isW
     metaIOLocker->Register(devList);
     if (isWT == true)
     {
-        if (journalIOLocker == nullptr)
-        {
-            journalIOLocker = new IOLocker("JournalLocker");
-        }
         journalIOLocker->Register(devList);
     }
 }
@@ -121,11 +119,6 @@ ArrayServiceLayer::ExcludeDevicesFromLocker(vector<ArrayDevice*> devList, bool i
     if (isWT == true)
     {
         journalIOLocker->Unregister(devList);
-        if (journalIOLocker->Size() == 0)
-        {
-            delete journalIOLocker;
-            journalIOLocker = nullptr;
-        }
     }
 }
 
