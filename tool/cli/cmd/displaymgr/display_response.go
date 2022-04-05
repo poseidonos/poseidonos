@@ -56,7 +56,9 @@ func printResToDebug(resJSON string) {
 }
 
 func printResInJSON(resJSON string) {
-	fmt.Println("{\"Response\":", resJSON, "}")
+	if resJSON != "" {
+		fmt.Println("{\"Response\":", resJSON, "}")
+	}
 }
 
 // TODO(mj): Currently, the output records may have whitespace.
@@ -216,7 +218,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10)+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXBW)+"\t"+
@@ -242,7 +244,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "Name\t: "+volume.VOLUMENAME)
 		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.TOTAL))
 		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.REMAIN))
-		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10))
+		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10))
 		fmt.Fprintln(w, "Status\t: "+volume.STATUS)
 		fmt.Fprintln(w, "MaximumIOPS\t: "+strconv.Itoa(volume.MAXIOPS))
 		fmt.Fprintln(w, "MaximumBandwidth\t: "+strconv.Itoa(volume.MAXBW))
@@ -559,6 +561,6 @@ func printEventInfo(code int, name string, desc string, cause string, solution s
 	fmt.Fprint(w, name+"\t-\t")
 	fmt.Fprint(w, desc)
 	fmt.Fprint(w, " because "+strings.ToLower(cause))
-	fmt.Fprintln(w, " (solution: "+solution+")")
+	fmt.Fprintln(w, " (solution: "+strings.ToLower(solution)+")")
 	w.Flush()
 }

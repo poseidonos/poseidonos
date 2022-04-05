@@ -46,10 +46,10 @@ func TestListVolumeResHumanReadable(t *testing.T) {
 		`{"name":"vol2","id":1,"total":11474836480,"remain":8474836480,` +
 		`"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
 
-	expected := `Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
---------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
-vol1      |0     |214748364800                 |214748364800                 |100        |Mounted    |0                |0
-vol2      |1     |11474836480                  |8474836480                   |73         |Unmounted  |0                |0
+	expected := `Name      |ID       |Total             |Remaining         |Used%     |Status     |MaxIOPS   |MaxBW     |MinIOPS   |MinBW
+--------- |-------- |----------------- |----------------- |--------- |---------- |--------- |--------- |--------- |---------
+vol1      |0        |214748364800      |214748364800      |0         |Mounted    |0         |0         |0         |0
+vol2      |1        |11474836480       |8474836480        |27        |Unmounted  |0         |0         |0         |0
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -238,7 +238,7 @@ func TestVolumeInfoResHumanReadable(t *testing.T) {
 	expected := `Name              : vol1
 TotalCapacity     : 107374182400
 RemainingCapacity : 0
-Used%             : 0
+Used%             : 100
 Status            : Unmounted
 MaximumIOPS       : 0
 MaximumBandwidth  : 0
@@ -248,6 +248,19 @@ SubNQN            :
 UUID              : 3da91570-86b5-44f5-b6c6-b28e17883723
 Array             : POSArray
 
+`
+	output := hookResponse(command, resJSON, false, false)
+
+	if output != expected {
+		t.Errorf("Expected: %q Output: %q", expected, output)
+	}
+}
+
+func TestWhenPosIsNotRunning(t *testing.T) {
+	var command = "ARRAYLIST"
+	var resJSON = `{"rid":"58ddcfa1-b3f2-11ec-860b-b42e99ff989b","command":"LISTARRAY","result":{"status":{"code":-1,"eventName":"CLI_CONNECTION_ERROR","description":"dial tcp 127.0.0.1:18716: connect: connection refused","cause":"","solution":""}},"info":{"version":""}}`
+
+	expected := `CLI_CONNECTION_ERROR - dial tcp 127.0.0.1:18716: connect: connection refused because  (solution: )
 `
 	output := hookResponse(command, resJSON, false, false)
 
