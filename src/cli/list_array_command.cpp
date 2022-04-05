@@ -116,6 +116,7 @@ ListArrayCommand::Execute(json& doc, string rid)
                 }
                 arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
                 arrayElement.SetAttribute(JsonAttribute("data_raid", "\"" + info->GetDataRaidType() + "\""));
+                arrayElement.SetAttribute(JsonAttribute("write_through_enabled", info->IsWriteThroughEnabled() ? "true" : "false"));
             }
 
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));

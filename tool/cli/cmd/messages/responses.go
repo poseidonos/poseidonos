@@ -89,6 +89,7 @@ type Array struct {
 	GCMODE             string   `json:"gc_mode,omitempty"`
 	METARAID           string   `json:"meta_raid,omitempty"`
 	DATARAID           string   `json:"data_raid,omitempty"`
+	WRITETHROUGH       bool     `json:"write_through_enabled,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
 }
 

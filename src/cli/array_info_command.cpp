@@ -93,6 +93,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
     data.SetAttribute(JsonAttribute("meta_raid", "\"" + array->GetMetaRaidType() + "\""));
     data.SetAttribute(JsonAttribute("data_raid", "\"" + array->GetDataRaidType() + "\""));
+    data.SetAttribute(JsonAttribute("write_through_enabled", array->IsWriteThroughEnabled() ? "true" : "false"));
 
     if (array->GetState() >= ArrayStateEnum::NORMAL)
     {
