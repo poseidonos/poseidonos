@@ -47,8 +47,8 @@ EOF
 manual_ibofos_run_mode=0
 #---------------------------------
 # manual configuration (edit below according to yours)
-ibof_phy_volume_size_mb=102400
-test_volume_size_mb=102400
+ibof_phy_volume_size_mb=51200
+test_volume_size_mb=51200
 max_io_range_mb=512 #5GB
 dummy_size_mb=$((${max_io_range_mb}*10))
 cwd=`pwd`

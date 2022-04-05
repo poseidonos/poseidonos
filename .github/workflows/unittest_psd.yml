@@ -1,0 +1,52 @@
+
+name: M-UnitTest_PSD_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Unit_Test:
+    runs-on: PSD
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Build UT and Run
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/ut_build_run_unittest_psd.sh
+        .github/workflows/script/unit/ut_build_run_unittest_psd.sh ${{github.workspace}}
+
+    - name: Copy UT Result to CI Server
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/copy_ut_result.sh
+        .github/workflows/script/unit/copy_ut_result.sh ${{github.workspace}} ${{github.sha}}
+
+    - name: Copy gcov report back to CI server
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/copy_gcov_report.sh
+        .github/workflows/script/unit/copy_gcov_report.sh ${{github.workspace}}
+
+    - uses: mikepenz/action-junit-report@v2
+      if: always() # always run even if the previous step fails
+      with:
+        report_paths: 'UnitTestResult/*.xml'

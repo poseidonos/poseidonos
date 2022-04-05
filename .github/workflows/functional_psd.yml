@@ -1,0 +1,285 @@
+
+# This is a basic workflow to help you get started with Actions
+
+name: M2_Functional_PSD_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Build:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+  Fault_Tolerance:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Fault Tolerance Test
+      working-directory: ${{github.workspace}}
+      run: |
+        sudo test/regression/fault_tolerance_ci_test.sh -f 127.0.0.1
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
+
+  File_Bench:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: File Bench Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/filebench.py
+        .github/workflows/script/filebench.py -r ${{github.workspace}}
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "filebench" -r ${{github.sha}} -d ${{github.workspace}}
+
+
+  IO_Path_System_Level:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: IO Path System Level Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/io_path_system_level.sh
+        .github/workflows/script/io_path_system_level.sh ${{github.workspace}}
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "iopath" -r ${{github.sha}} -d ${{github.workspace}}
+
+
+
+  Multi_Volume_IO:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: Multi Volume IO Test
+      working-directory: ${{github.workspace}}
+      run: |
+        sudo test/regression/multi_volume_io_ci_test.sh
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "multi_volume_io" -r ${{github.sha}} -d ${{github.workspace}}
+
+
+  NPOR:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: NPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        sudo test/regression/npor_ci_test.sh -f 127.0.0.1
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
+
+  NVMe_Flush:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: Flush Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh 
+        .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh ${{github.workspace}}
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "flush" -r ${{github.sha}} -d ${{github.workspace}}
+
+  NVMe_Smart_Log:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: NVMe Smart Log Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/nvme_flush/nvme_smart_log.sh
+        .github/workflows/script/nvme_flush/nvme_smart_log.sh ${{github.workspace}} 
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -n "volume" -r ${{github.sha}}
+
+  QoS:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: QoS Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/qos/qos.sh 
+        .github/workflows/script/qos/qos.sh ${{github.workspace}} PM
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "qos" -r ${{github.sha}} -d ${{github.workspace}}
+
+
+  SPOR:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
+        .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
+
+  Volume_Test:
+    runs-on: PSD
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    
+    - name: Volume Test
+      working-directory: ${{github.workspace}}
+      run: |
+        sudo test/regression/volume_ci_test.sh -f 127.0.0.1
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}

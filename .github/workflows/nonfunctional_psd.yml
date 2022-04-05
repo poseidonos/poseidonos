@@ -1,0 +1,159 @@
+
+# This is a basic workflow to help you get started with Actions
+
+name: M3-NonFunctional_PSD_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Build:
+    runs-on: PSD
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+  Performance_Test:
+    runs-on: PSD
+    if: runner.name == 'sre4-14'
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Setup Initiator
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/initiator_setup.sh
+        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
+
+    - name: Performance Test - with Journal Off
+      working-directory: ${{github.workspace}}
+      run: |
+        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf ibofos_for_perf_ci.conf -tr ${{github.sha}}_journal_off -tn POS_devel -r ${{github.workspace}}
+        sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@${{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_off.csv ${{github.workspace}}
+
+    - name: Performance Test - with Journal
+      working-directory: ${{github.workspace}}
+      env:
+        SW_128K_LIMIT: 0
+        SR_128K_LIMIT: 0
+        RW_4K_LIMIT: 0
+        RR_4k_LIMIT: 0
+      run: |
+        sudo jq -r  '.journal.enable |= true'  config/ibofos_for_perf_ci.conf > config/tmp.conf
+        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf tmp.conf -tr ${{github.sha}}_journal_on -tn POS_journal -sw $SW_128K_LIMIT -sr $SR_128K_LIMIT -rw $RW_4K_LIMIT -rr $RR_4K_LIMIT -r ${{github.workspace}}
+        sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@{{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_on.csv ${{github.workspace}}
+
+    - name: Clean Backup
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup_165.sh
+        .github/workflows/script/clean_backup_165.sh -i ${{secrets.R2U18_PSD_IP}} -p "M3-NonFunctional_PM_Test" -n "performance" -r ${{github.sha}} -d ${{github.workspace}}
+
+  Sustained_Performance_test:
+    runs-on: PSD
+    if: runner.name == 'sre4-14'
+    steps:
+  
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    # - name: Build Setup
+    #   working-directory: ${{github.workspace}}
+    #   run: | 
+    #     chmod +x .github/workflows/script/build_setup_165.sh
+    #     .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Setup Init 1
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/initiator_setup.sh
+        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
+
+    - name: Setup Init 2
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/initiator_setup.sh
+        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{secrets.R2U18_PSD_INITIATOR2_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR2_WORKING_DIR}} ${{github.sha}}
+
+    - name: Short-term Sustained Write
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/performance/sustained_write.sh
+        .github/workflows/script/performance/sustained_write.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
+
+
+    - name: Save Artifacts
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/save_artifacts.sh
+        .github/workflows/script/save_artifacts.sh ${{secrets.R2U18_PSD_IP}} ${{github.workspace}}
+
+
+  Rebuild_Performance_test:
+    runs-on: PSD
+    if: runner.name == 'sre4-14'
+    steps:
+  
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup_165.sh
+        .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Setup Init 1
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/initiator_setup.sh
+        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
+
+    - name: Setup Init 2
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/initiator_setup.sh
+        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{secrets.R2U18_PSD_INITIATOR2_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR2_WORKING_DIR}} ${{github.sha}}
+
+    - name: Short-term Sustained Write
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/performance/sustained.sh
+        .github/workflows/script/performance/sustained.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
+
+    - name: Save Artifacts
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/save_artifacts.sh
+        .github/workflows/script/save_artifacts.sh ${{secrets.R2U18_PSD_IP}} ${{github.workspace}}

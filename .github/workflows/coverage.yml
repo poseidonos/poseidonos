@@ -1,0 +1,116 @@
+
+name: M4-Coverage_VM_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Postcommit_Test:
+    runs-on: VM
+    timeout-minutes: 1440
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic # delete -i ${bamboo.capability.target_ip} -t VM
+
+    - name: Build UT and Run
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/ut_build_run_coverage.sh
+        .github/workflows/script/unit/ut_build_run_coverage.sh ${{github.workspace}}
+
+    - name: Volume Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/volume/volume.sh
+        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+
+    - name: Normal IO Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/normal_io.sh
+        .github/workflows/script/normal_io_npor_spor/normal_io.sh ${{github.workspace}}
+
+    - name: NPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/npor.sh
+        .github/workflows/script/normal_io_npor_spor/npor.sh ${{github.workspace}}
+
+    - name: Rebuild Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rebuild/rebuild.sh
+        .github/workflows/script/rebuild/rebuild.sh ${{github.workspace}}
+
+    - name: SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
+        .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
+
+    - name: WBT Command Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/wb_io_st/wbt_command_coverage.sh
+        .github/workflows/script/wb_io_st/wbt_command_coverage.sh ${{github.workspace}}
+
+    - name: Qos Test 
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/qos/qos.sh
+        .github/workflows/script/qos/qos.sh ${{github.workspace}} VM
+
+    - name: NVMe Flush Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/nvme_flush/nvme_flush.sh
+        .github/workflows/script/nvme_flush/nvme_flush.sh ${{github.workspace}}
+
+    - name: GC vm test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/gc_vm/gc_vm.sh
+        .github/workflows/script/gc_vm/gc_vm.sh ${{github.workspace}}
+
+    - name: SRM Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/srm/srm.sh
+        .github/workflows/script/srm/srm.sh ${{github.workspace}}
+
+    - name: Various Configuration Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/various_config.sh
+        .github/workflows/script/various_config.sh ${{github.workspace}}
+
+    - name: Calculate Code Coverage for UT/IT/ST
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/code_coverage.sh
+        .github/workflows/script/code_coverage.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Coverage_LOG
+        path: |
+          /var/log/pos

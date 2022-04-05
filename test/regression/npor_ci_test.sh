@@ -58,8 +58,8 @@ test_iter_cnt=3
 manual_pos_run_mode=0
 #---------------------------------
 # manual configuration (edit below according to yours)
-ibof_phy_volume_size_mb=102400
-test_volume_size_mb=102400
+ibof_phy_volume_size_mb=51200
+test_volume_size_mb=51200
 max_io_range_mb=1024 #128
 cwd="/home/ibof/ibofos/script"
 target_ip="127.0.0.1"

@@ -1,0 +1,279 @@
+
+# This is a basic workflow to help you get started with Actions
+
+name: C-Precommit_VM_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  IO_Exception_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+
+    - name: IO + Exception Simple
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/io_exception/io_exception.sh
+        .github/workflows/script/io_exception/io_exception.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: IO_Exception_LOG
+        path: |
+          /var/log/pos
+
+  Normal_IO_NPOR_SPOR_Test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic
+    
+    - name: Normal IO Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/normal_io.sh
+        .github/workflows/script/normal_io_npor_spor/normal_io.sh ${{github.workspace}}
+
+    - name: NPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/npor.sh
+        .github/workflows/script/normal_io_npor_spor/npor.sh ${{github.workspace}}
+
+    - name: SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/spor_precommit.sh
+        .github/workflows/script/normal_io_npor_spor/spor_precommit.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Normal_IO_NPOR_SPOR_LOG
+        path: |
+          /var/log/pos
+
+  Rebuild_SPOR_test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: Rebuild SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rebuild_spor/rebuild_spor.sh
+        .github/workflows/script/rebuild_spor/rebuild_spor.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Rebuild_SPOR_LOG
+        path: |
+          /var/log/pos
+
+
+  Rebuild_Test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: Rebuild Test 
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rebuild/rebuild.sh
+        .github/workflows/script/rebuild/rebuild.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Rebuild_LOG
+        path: |
+          /var/log/pos
+
+
+  Rotational_Rebuild_Test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: Rotational Rebuild Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rotational_rebuild/rotational_rebuild.sh
+        .github/workflows/script/rotational_rebuild/rotational_rebuild.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Rotational_Rebuild_LOG
+        path: |
+          /var/log/pos
+
+  Unit_Test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: UT Build and Run
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/ut_build_run_precommit.sh
+        .github/workflows/script/unit/ut_build_run_precommit.sh ${{github.workspace}}
+
+    - name: Copy UT Result to CI Server
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/copy_ut_result.sh
+        .github/workflows/script/unit/copy_ut_result.sh ${{github.workspace}} ${{github.sha}}
+
+    - uses: mikepenz/action-junit-report@v2
+      if: always() # always run even if the previous step fails
+      with:
+        report_paths: 'UnitTestResult/*.xml'
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Unit_LOG
+        path: |
+          /var/log/pos
+
+  Volume_Test:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: Volume Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/volume/volume.sh
+        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Volume_LOG
+        path: |
+          /var/log/pos
+
+  WBT_IO_ST:
+    runs-on: VM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+    
+    - name: WBT Command Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/wb_io_st/wbt_command_pre.sh
+        .github/workflows/script/wb_io_st/wbt_command_pre.sh ${{github.workspace}} 
+
+    - name: IO System Level Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/wb_io_st/io_system_level.sh
+        .github/workflows/script/wb_io_st/io_system_level.sh ${{github.workspace}} ${{github.sha}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: WBT_IO_ST_LOG
+        path: |
+          /var/log/pos

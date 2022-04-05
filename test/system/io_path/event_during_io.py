@@ -25,7 +25,7 @@ log_path = "pos.log"
 nvme_device_0 = "unvme-ns-0"
 nvme_device_1 = "unvme-ns-1"
 
-volume_size = 2147483648 * 2
+volume_size = 2147483648
 stdout_type = subprocess.DEVNULL
 multi_threads = 24
 print_on = False

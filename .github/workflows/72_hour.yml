@@ -1,0 +1,50 @@
+
+name: M8-72H_VM_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Three_Days_Test:
+    runs-on: VM
+    timeout-minutes: 4320
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic # delete -i ${bamboo.capability.target_ip} -t VM
+
+    - name: 72 Hour VM Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/72_hour.sh
+        .github/workflows/script/72_hour.sh ${{github.workspace}}
+
+    - name: CleanUp Script
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/cleanup.sh
+        .github/workflows/script/cleanup.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Three_Days_LOG
+        path: |
+          /var/log/pos

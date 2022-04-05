@@ -1,0 +1,134 @@
+
+name: M1-PostVM_Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Postcommit_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic # delete -i ${bamboo.capability.target_ip} -t VM
+
+    - name: Volume Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/volume/volume.sh
+        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+
+    - name: Clean Backup After Volume Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Normal IO Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/normal_io.sh
+        .github/workflows/script/normal_io_npor_spor/normal_io.sh ${{github.workspace}}
+
+    - name: Clean Backup After Normal IO
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normalio" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: NPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/npor.sh
+        .github/workflows/script/normal_io_npor_spor/npor.sh ${{github.workspace}}
+
+    - name: Clean Backup After Npor Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Rebuild Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rebuild/rebuild.sh
+        .github/workflows/script/rebuild/rebuild.sh ${{github.workspace}}
+
+    - name: Clean Backup After Fault Tolerance Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
+        .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
+
+    - name: Clean Backup After SPOR Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: IO Intensive + Unmount Volume / Array
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/io_intensive/unmount_volume_array.sh
+        .github/workflows/script/io_intensive/unmount_volume_array.sh ${{github.workspace}}
+
+    - name: IO Intensive + Detach
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/io_intensive/detach.sh
+        .github/workflows/script/io_intensive/detach.sh ${{github.workspace}}
+
+    - name: WBT Command Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/wb_io_st/wbt_command_post.sh
+        .github/workflows/script/wb_io_st/wbt_command_post.sh ${{github.workspace}}
+
+    - name: IO Unit Build and Test
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/io_unit_build/io_unit_build.sh
+        .github/workflows/script/io_unit_build/io_unit_build.sh ${{github.workspace}} ${{github.sha}}
+
+    - uses: nrwl/last-successful-commit-action@v1
+      id: last_successful_commit
+      with:
+        branch: 'main'
+        workflow_id: 'postcommit.yml'
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Print Result
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/print_result.sh
+        .github/workflows/script/print_result.sh ${{github.workspace}} ${{ steps.last_successful_commit.outputs.commit_hash }} ${{github.sha}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: POST_LOG
+        path: |
+          /var/log/pos
