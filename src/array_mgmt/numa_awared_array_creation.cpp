@@ -43,7 +43,8 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
     result.code = EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS);
     int requiredDevCnt = dataCnt + spareCnt;
     auto&& systemDevs = Enumerable::Where(devMgr->GetDevs(),
-        [](auto d) { return d->GetClass() == DeviceClass::SYSTEM; });
+        [](auto d) { return (d->GetClass() == DeviceClass::SYSTEM &&
+                             d->GetType() == DeviceType::SSD); });
 
     auto&& devsByNuma = Enumerable::GroupBy(systemDevs,
         [](auto d) { return d->GetNuma(); });
