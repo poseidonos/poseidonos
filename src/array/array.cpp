@@ -197,12 +197,14 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     ret = _Flush(meta);
     if (ret != 0)
     {
+        abrControl->DeleteAbr(name_);
         goto error;
     }
 
     ret = _CreatePartitions(RaidType(meta.metaRaidType), RaidType(meta.dataRaidType));
     if (ret != 0)
     {
+        abrControl->DeleteAbr(name_);
         goto error;
     }
 
@@ -761,7 +763,7 @@ Array::_RebuildDone(RebuildResult result)
     POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
         "Array({}) rebuild done. result:{} (2-PASS, 3-CANCELLED, 4-FAIL)", name_, result.result);
     rebuilder->RebuildDone(result);
-    pthread_rwlock_wrlock(&stateLock);    
+    pthread_rwlock_wrlock(&stateLock);
     if (result.target->GetState() == ArrayDeviceState::REBUILD &&
         result.result == RebuildState::PASS)
     {
