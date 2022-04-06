@@ -51,6 +51,7 @@ def check_result():
 def execute():
     MOUNT_RAID10_ARRAY.execute()
     out = cli.create_volume(VOL_NAME, str(VOL_SIZE), "", "", ARRAYNAME)
+    print (out)
     return out
 
 

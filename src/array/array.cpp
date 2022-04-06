@@ -759,43 +759,25 @@ void
 Array::_RebuildDone(RebuildResult result)
 {
     POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
-        "Array({}) rebuild done. result:{}", name_, result.result);
+        "Array({}) rebuild done. result:{} (2-PASS, 3-CANCELLED, 4-FAIL)", name_, result.result);
     rebuilder->RebuildDone(result);
-    pthread_rwlock_wrlock(&stateLock);
-    if (result.result != RebuildState::PASS)
-    {
-        state->SetRebuildDone(false);
-        pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
-            "Array({}) rebuild done. but result:{} . Retry ", name_, result.result);
-        EventSmartPtr event(new RebuildHandler(this, nullptr));
-        eventScheduler->EnqueueEvent(event);
-        return;
-    }
-
-    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
-        "Array({}) rebuild done. as success.", name_, result.result);
-
-    bool needRebuildAgain = false;
-    if (result.target->GetState() != ArrayDeviceState::FAULT)
+    pthread_rwlock_wrlock(&stateLock);    
+    if (result.target->GetState() == ArrayDeviceState::REBUILD &&
+        result.result == RebuildState::PASS)
     {
         result.target->SetState(ArrayDeviceState::NORMAL);
     }
-    else
+    if (result.result == RebuildState::PASS)
     {
-        needRebuildAgain = true;
-        POS_TRACE_WARN(EID(REBUILD_ARRAY_DEBUG_MSG),
-            "The rebuild {} is done, but it needs to rebuild again since the target device was detached during a rebuilding.",
-            name_);
+        int ret = _Flush();
+        if (0 != ret)
+        {
+            POS_TRACE_ERROR(ret, "Unable to update the device state of array({})", name_);
+        }
     }
-
-    state->SetRebuildDone(true);
-    int ret = _Flush();
-    if (0 != ret)
-    {
-        POS_TRACE_ERROR(ret, "Unable to update the device state of array({})", name_);
-    }
-    if (needRebuildAgain)
+    RaidState rs = ptnMgr->GetRaidState();
+    state->RaidStateUpdated(rs);
+    if (state->IsRebuildable())
     {
         EventSmartPtr event(new RebuildHandler(this, nullptr));
         eventScheduler->EnqueueEvent(event);
