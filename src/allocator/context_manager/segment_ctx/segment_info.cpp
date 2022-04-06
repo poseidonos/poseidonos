@@ -77,19 +77,38 @@ SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 }
 
 std::pair<bool, SegmentState>
-SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
+SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool isForced)
 {
+    std::lock_guard<std::mutex> lock(seglock);
     int32_t decreased = validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {
-        std::lock_guard<std::mutex> lock(seglock);
-        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
+        if (true == isForced)
         {
-            std::pair<bool, SegmentState> result = {true, state};
-            _MoveToFreeState();
+            if (state == SegmentState::VICTIM)
+            {
+                std::pair<bool, SegmentState> result = {true, state};
+                _MoveToFreeState();
 
-            return result;
+                return result;
+            }
+            else
+            {
+                POS_TRACE_ERROR(EID(SEGMENT_WAS_NOT_VICTIM),
+                "Segment was not victim state:{}", state);
+                assert(false);
+            }
+        }
+        else
+        {
+            if (state == SegmentState::SSD)
+            {
+                std::pair<bool, SegmentState> result = {true, state};
+                _MoveToFreeState();
+
+                return result;
+            }
         }
     }
     else if (decreased < 0)
@@ -140,6 +159,7 @@ SegmentInfo::_MoveToFreeState(void)
 void
 SegmentInfo::MoveToNvramState(void)
 {
+    std::lock_guard<std::mutex> lock(seglock);
     if (state != SegmentState::FREE)
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
@@ -172,6 +192,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
 bool
 SegmentInfo::MoveToVictimState(void)
 {
+    std::lock_guard<std::mutex> lock(seglock);
     if (state != SegmentState::SSD)
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
@@ -180,7 +201,6 @@ SegmentInfo::MoveToVictimState(void)
     }
     else
     {
-        std::lock_guard<std::mutex> lock(seglock);
         state = SegmentState::VICTIM;
 
         return true;

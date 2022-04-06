@@ -260,6 +260,19 @@ Copier::_CopyCompleteState(void)
     gcStatus->SetCopyInfo(true /*started*/, victimId,
         invalidBlkCnt /*invalid cnt*/, meta->GetDoneCopyBlks() /*copy cnt*/);
 
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    if (NULL != segmentCtx)
+    {
+        uint32_t validBlkCnt = segmentCtx->GetValidBlockCount(victimId);
+        if (0 == validBlkCnt)
+        {
+            // Change to free state
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_COPY_COMPLETE,
+                "Move to free state, id:{}", victimId);
+            segmentCtx->MoveToFreeState(victimId);
+        }
+    }
+
     _ChangeEventState(CopierStateType::COPIER_THRESHOLD_CHECK_STATE);
 
     if (false == thresholdCheck)

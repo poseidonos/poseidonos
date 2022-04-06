@@ -123,6 +123,10 @@ VictimStripe::LoadValidBlock(void)
         return true;
     }
 
+    POS_TRACE_INFO((int)POS_EVENT_ID::GC_LOAD_VALID_BLOCKS,
+        "[LoadValidBlock] blockOffset:{}, myLsid:{}, validBlkInfos.empty():{}",
+        blockOffset, myLsid, validBlkInfos.empty());
+
     for (; blockOffset < dataBlks; blockOffset++)
     {
         if (chunkIndex != blockOffset / BLOCKS_IN_CHUNK)
@@ -142,7 +146,6 @@ VictimStripe::LoadValidBlock(void)
         {
             continue;
         }
-
 
         int shouldRetry = OK_READY;
         blkInfo.vsa = iVSAMap->GetVSAInternal(blkInfo.volID, blkInfo.rba, shouldRetry);

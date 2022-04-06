@@ -165,6 +165,23 @@ SegmentCtx::Dispose(void)
 }
 
 void
+SegmentCtx::MoveToFreeState(SegmentId segId)
+{
+    bool removed = segmentList[SegmentState::VICTIM]->RemoveFromList(segId);
+
+    if (true == removed)
+    {
+        _SegmentFreed(segId);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
+            "Segment is already freed, segmentId: {}, removed from the list: {}",
+            segId, removed);
+    }
+}
+
+void
 SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
     uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
@@ -177,9 +194,9 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 bool
-SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
+SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced)
 {
-    auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt);
+    auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, isForced);
 
     bool segmentFreed = result.first;
     if (segmentFreed == true)
@@ -187,7 +204,7 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
         SegmentState prevState = result.second;
         bool removed = segmentList[prevState]->RemoveFromList(segId);
 
-        POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+        POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
             "Segment is freed, segmentId: {}, prevState: {}, removed from the list: {}",
             segId, prevState, removed);
         _SegmentFreed(segId);
@@ -374,7 +391,9 @@ SegmentCtx::AllocateFreeSegment(void)
             segmentList[SegmentState::NVRAM]->AddToList(segId);
 
             uint64_t freeSegCount = GetNumOfFreeSegmentWoLock();
-            POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] allocate segmentId:{}, free segment count:{}", segId, freeSegCount);
+            POS_TRACE_INFO(EID(ALLOCATOR_START),
+                "[AllocateFreeSegment] allocate segmentId:{}, free segment count:{}",
+                segId, freeSegCount);
             POSMetricValue v;
             v.gauge = freeSegCount;
             tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
@@ -433,6 +452,11 @@ SegmentCtx::_FindMostInvalidSSDSegment(void)
             minValidCount = cnt;
         }
     }
+
+    POS_TRACE_INFO(EID(ALLOCATOR_START),
+        "[_FindMostInvalidSSDSegment] victimSegment:{}, minValidCount:{}",
+        victimSegment, minValidCount);
+
     return victimSegment;
 }
 
@@ -442,12 +466,19 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
     assert(victimSegment != UNMAP_SEGMENT);
 
     bool stateChanged = segmentInfos[victimSegment].MoveToVictimState();
+    POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM),
+                "[_SetVictimSegment] victimSegment:{}, stateChanged:{}",
+                victimSegment, stateChanged);
     if (stateChanged == true)
     {
         // This segment is in SSD LIST or REBUILD LIST
-        if (rebuildList->Contains(victimSegment) == true)
+        bool isContained = rebuildList->Contains(victimSegment);
+        if (true == isContained)
         {
             // do nothing. this segment will be return to the victim list when rebuidl is completed
+            POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM),
+                "[_SetVictimSegment] rebuild list contains? :{}",
+                isContained);
         }
         else
         {
@@ -635,7 +666,7 @@ SegmentCtx::_BuildRebuildSegmentListFromTheList(SegmentState state)
         SegmentId targetSegment = segmentList[state]->PopSegment();
         if (targetSegment != UNMAP_SEGMENT)
         {
-            POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+            POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
                 "Segment is added to the rebuild target, segmentId {}, state {}",
                 targetSegment, segmentInfos[targetSegment].GetState());
             rebuildList->AddToList(targetSegment);

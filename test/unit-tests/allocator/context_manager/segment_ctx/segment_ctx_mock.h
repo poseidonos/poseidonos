@@ -24,7 +24,7 @@ public:
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(bool, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(bool, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt, bool isForced), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
@@ -47,6 +47,7 @@ public:
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, UpdateGcFreeSegment, (uint32_t arrayId), (override));
+    MOCK_METHOD(void, MoveToFreeState, (SegmentId segId), (override));
 };
 
 } // namespace pos

@@ -75,7 +75,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
 
     // Then 3. Old map should be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).WillOnce(ReturnRef(oldVsas));
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas));
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas, false));
 
     // Then 4. New map should be validated
     EXPECT_CALL(segmentCtx, ValidateBlks(newVsas));
@@ -191,8 +191,8 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
 
     // Then 3. Old map should not be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(numOldVsaRange).WillOnce(ReturnRef(oldVsas[0])).WillOnce(ReturnRef(oldVsas[1]));
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[0])).Times(1);
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[1])).Times(1);
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[0], false)).Times(1);
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[1], false)).Times(1);
 
     // Then 4. New map should be validated
     EXPECT_CALL(segmentCtx, ValidateBlks(newVsas));
