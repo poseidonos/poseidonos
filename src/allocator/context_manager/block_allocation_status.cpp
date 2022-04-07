@@ -31,6 +31,7 @@
 */
 
 #include "src/allocator/context_manager/block_allocation_status.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -40,6 +41,15 @@ BlockAllocationStatus::BlockAllocationStatus(void)
     for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
     {
         blkAllocProhibited[volume] = false;
+        pthread_rwlock_init(&lock_volume[volume], nullptr);
+    }
+}
+
+BlockAllocationStatus::~BlockAllocationStatus(void)
+{
+    for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
+    {
+        pthread_rwlock_destroy(&lock_volume[volume]);
     }
 }
 
@@ -98,5 +108,71 @@ bool
 BlockAllocationStatus::TryProhibitBlockAllocation(int volumeId)
 {
     return (blkAllocProhibited[volumeId].exchange(true) == false);
+}
+
+void
+BlockAllocationStatus::Lock(void)
+{
+    for (auto volumeId = 0; volumeId < MAX_VOLUME_COUNT; volumeId++)
+    {
+        auto result = pthread_rwlock_wrlock(&lock_volume[volumeId]);
+        if (result)
+        {
+            POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}, result:{}", volumeId, result);
+        }
+        else
+        {
+            POS_TRACE_INFO(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}", volumeId);
+        }
+    }
+}
+
+void
+BlockAllocationStatus::Unlock(void)
+{
+    for (auto volumeId = 0; volumeId < MAX_VOLUME_COUNT; volumeId++)
+    {
+        auto result = pthread_rwlock_unlock(&lock_volume[volumeId]);
+        if (result)
+        {
+            POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}, result:{}", volumeId, result);
+        }
+        else
+        {
+            POS_TRACE_INFO(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}", volumeId);
+        }
+    }
+}
+
+bool
+BlockAllocationStatus::TryRdLock(int volumeId)
+{
+    auto result = pthread_rwlock_tryrdlock(&lock_volume[volumeId]);
+    if (result)
+    {
+        POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}, result:{}", volumeId, result);
+        return false;
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}", volumeId);
+        return true;
+    }
+}
+
+bool
+BlockAllocationStatus::Unlock(int volumeId)
+{
+    auto result = pthread_rwlock_unlock(&lock_volume[volumeId]);
+    if (result)
+    {
+        POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}, result:{}", volumeId, result);
+        return false;
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}", volumeId);
+        return true;
+    }
 }
 } // namespace pos

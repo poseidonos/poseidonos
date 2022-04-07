@@ -190,6 +190,7 @@ int
 Allocator::PrepareRebuild(void)
 {
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
+    blockManager->Lock();
     blockManager->TurnOffBlkAllocation();
 
     int ret = 0;
@@ -199,7 +200,8 @@ Allocator::PrepareRebuild(void)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes flush failed, ret {}", ret);
         blockManager->TurnOnBlkAllocation();
-        return ret;   
+        blockManager->Unlock();
+        return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
 
@@ -223,6 +225,7 @@ Allocator::PrepareRebuild(void)
         }
 
         blockManager->TurnOnBlkAllocation();
+        blockManager->Unlock();
         return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "MakeRebuildTarget Done @PrepareRebuild()");
@@ -232,11 +235,13 @@ Allocator::PrepareRebuild(void)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Failed to get next segment");
         blockManager->TurnOnBlkAllocation();
+        blockManager->Unlock();
         return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
 
     blockManager->TurnOnBlkAllocation();
+    blockManager->Unlock();
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild() with return {}", ret);
 
     return ret;

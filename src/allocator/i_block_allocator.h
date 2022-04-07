@@ -50,6 +50,9 @@ public:
 
     virtual bool BlockAllocating(uint32_t volumeId) = 0;
     virtual void UnblockAllocating(uint32_t volumeId) = 0;
+
+    virtual bool TryRdLock(uint32_t volumeId) = 0;
+    virtual bool Unlock(uint32_t volumeId) = 0;
 };
 
 } // namespace pos

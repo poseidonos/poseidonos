@@ -90,4 +90,20 @@ TEST(BlockAllocationStatus, TryProhibitBlockAllocation_testIfBlockAllocationProh
     }
 }
 
+TEST(BlockAllocationStatus, Lock_testIfAllRwlocksWorkWell)
+{
+    BlockAllocationStatus status;
+    status.Lock();
+    status.Unlock();
+}
+
+TEST(BlockAllocationStatus, TryRdLockWithVolumeId_testIfTheRwlockWorksWell)
+{
+    BlockAllocationStatus status;
+    const int volumeId = 0;
+
+    EXPECT_TRUE(status.TryRdLock(volumeId));
+    EXPECT_TRUE(status.TryRdLock(volumeId));
+    EXPECT_TRUE(status.Unlock(volumeId));
+}
 }  // namespace pos
