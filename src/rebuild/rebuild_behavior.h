@@ -58,9 +58,8 @@ protected:
     bool _InitBuffers(void);
     bool _InitRecoverBuffers(string owner);
     bool _InitRebuildReadBuffers(string owner, int totalChunksToRead);
-
+    int _GetTotalReadChunksForRecovery(void);
     virtual string _GetClassName(void) = 0;
-    virtual int _GetTotalReadChunksForRecovery(void) = 0;
 
     unique_ptr<RebuildContext> ctx = nullptr;
     MemoryManager* mm = nullptr;

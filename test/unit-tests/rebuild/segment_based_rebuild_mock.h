@@ -15,7 +15,6 @@ public:
     MOCK_METHOD(bool, Complete, (uint32_t targetId, UbioSmartPtr ubio), (override));
     MOCK_METHOD(void, UpdateProgress, (uint32_t val), (override));
     MOCK_METHOD(string, _GetClassName, (), (override));
-    MOCK_METHOD(int, _GetTotalReadChunksForRecovery, (), (override));
 };
 
 } // namespace pos

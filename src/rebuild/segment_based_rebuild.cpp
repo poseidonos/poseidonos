@@ -75,12 +75,6 @@ SegmentBasedRebuild::_GetClassName(void)
     return typeid(this).name();
 }
 
-int
-SegmentBasedRebuild::_GetTotalReadChunksForRecovery(void)
-{
-    return ctx->size->chunksPerStripe - 1; // Except faulty device
-}
-
 SegmentId
 SegmentBasedRebuild::_NextSegment(void)
 {

@@ -75,12 +75,6 @@ StripeBasedRaceRebuild::_GetClassName(void)
     return typeid(this).name();
 }
 
-int
-StripeBasedRaceRebuild::_GetTotalReadChunksForRecovery(void)
-{
-    return 1; // Mirror
-}
-
 bool
 StripeBasedRaceRebuild::Read(void)
 {
@@ -152,7 +146,6 @@ StripeBasedRaceRebuild::Read(void)
         void* buffer = recoverBuffers->TryGetBuffer();
         assert(buffer != nullptr);
 
-
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->arrayIndex));
         ubio->dir = UbioDir::Write;
         FtBlkAddr fta = {.stripeId = stripeId,
@@ -206,16 +199,15 @@ bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     locker->Unlock(ctx->faultDev, targetId);
+    recoverBuffers->ReturnBuffer(ubio->GetBuffer());
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
-
     if (currentTaskCnt == 0)
     {
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_MetadataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
     }
-    recoverBuffers->ReturnBuffer(ubio->GetBuffer());
     ubio = nullptr;
 
     return true;

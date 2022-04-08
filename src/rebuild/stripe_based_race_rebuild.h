@@ -53,7 +53,6 @@ public:
 
 private:
     virtual string _GetClassName(void);
-    virtual int _GetTotalReadChunksForRecovery(void);
 
     StripeId baseStripe = 0;
     IIOLocker* locker = nullptr;

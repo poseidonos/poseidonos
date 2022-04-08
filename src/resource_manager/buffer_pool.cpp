@@ -50,7 +50,7 @@ BufferPool::BufferPool(const BufferInfo info,
         "BufferPool Construct");
     if (hugepageAllocator == nullptr)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Faild to get hugepageAllocator");
         return;
     }
@@ -114,11 +114,12 @@ BufferPool::_Alloc(void)
         }
 
         freeBuffers.push_back(buffer);
-        totalBuffers.push_back(buffer);
         buffer += BUFFER_INFO.size;
         remainBufferCount--;
     }
-
+    freeBufferSize = initSize = freeBuffers.size();
+    POS_TRACE_INFO(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "{} buffers are allocated in {}", initSize, BUFFER_INFO.owner);
     return true;
 }
 
@@ -129,7 +130,7 @@ BufferPool::TryGetBuffer(void)
 
     if (freeBuffers.empty())
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::BUFFER_POOL_EMPTY,
+        POS_TRACE_WARN(POS_EVENT_ID::BUFFER_POOL_EMPTY,
             "Failed to get buffer. {} Pool is empty", BUFFER_INFO.owner);
         return nullptr;
     }
@@ -137,7 +138,10 @@ BufferPool::TryGetBuffer(void)
     void* buffer = nullptr;
     buffer = freeBuffers.front();
     freeBuffers.pop_front();
-
+    freeBufferSize--;
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "A Buffer is issued, {}/{} buffers in {}",
+            freeBufferSize, initSize, BUFFER_INFO.owner);
     return buffer;
 }
 
@@ -146,11 +150,15 @@ BufferPool::ReturnBuffer(void* buffer)
 {
     if (buffer == nullptr)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Failed to return buffer. Buffer is Null");
         return;
     }
 
     unique_lock<mutex> lock(freeBufferLock);
     freeBuffers.push_back(buffer);
+    freeBufferSize++;
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "A Buffer is retrieved, {}/{} buffers in {}",
+            freeBufferSize, initSize, BUFFER_INFO.owner);
 }

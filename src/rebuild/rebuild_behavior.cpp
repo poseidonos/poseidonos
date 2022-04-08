@@ -36,6 +36,7 @@
 #include "src/include/array_config.h"
 #include "src/resource_manager/buffer_pool.h"
 #include "src/resource_manager/memory_manager.h"
+#include "src/logger/logger.h"
 
 using namespace pos;
 
@@ -48,8 +49,24 @@ RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> ctx,
 // LCOV_EXCL_START
 RebuildBehavior::~RebuildBehavior(void)
 {
-    delete recoverBuffers;
-    delete rebuildReadBuffers;
+    if (recoverBuffers != nullptr)
+    {
+        if (recoverBuffers->IsFull() == false)
+        {
+            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+                "Some buffers in recoverBuffers were not returned but deleted.");
+        }
+        delete recoverBuffers;
+    }
+    if (rebuildReadBuffers != nullptr)
+    {
+        if (rebuildReadBuffers->IsFull() == false)
+        {
+            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+                "Some buffers in rebuildReadBuffers were not returned but deleted.");
+        }
+        delete rebuildReadBuffers;
+    }
 }
 // LCOV_EXCL_STOP
 void
@@ -97,7 +114,7 @@ RebuildBehavior::_InitRebuildReadBuffers(string owner, int totalChunksToRead)
 bool
 RebuildBehavior::_InitBuffers(void)
 {
-    string owner = _GetClassName();
+    string owner = _GetClassName() + to_string(ctx->arrayIndex);
     bool ret = _InitRecoverBuffers(owner);
     if (ret == false)
     {
@@ -107,4 +124,14 @@ RebuildBehavior::_InitBuffers(void)
     int totalChunks = _GetTotalReadChunksForRecovery();
     ret = _InitRebuildReadBuffers(owner, totalChunks);
     return ret;
+}
+
+int
+RebuildBehavior::_GetTotalReadChunksForRecovery(void)
+{
+    if (ctx->raidType == RaidTypeEnum::RAID10)
+    {
+        return 1;
+    }
+    return ctx->size->chunksPerStripe - 1; // for RAID5
 }

@@ -55,7 +55,7 @@ public:
 
     virtual void* TryGetBuffer(void);
     virtual void ReturnBuffer(void*);
-
+    virtual bool IsFull(void) { return freeBufferSize == initSize; }
 private:
     bool _Alloc(void);
     void _Clear(void);
@@ -65,9 +65,9 @@ private:
 
     std::mutex freeBufferLock;
     std::list<void*> freeBuffers;
-    std::list<void*> totalBuffers;
     std::list<void*> allocatedHugepages;
-
+    uint32_t freeBufferSize = 0;
+    uint32_t initSize = 0;
     HugepageAllocator* hugepageAllocator;
 };
 
