@@ -43,7 +43,8 @@ IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     EventScheduler* eventSchedulerArg)
 : ioWorkerCount(0),
   deviceAllocationTurn(0),
-  eventScheduler(eventSchedulerArg)
+  eventScheduler(eventSchedulerArg),
+  dispPolicy(nullptr)
 {
     cpu_set_t cpuSet;
 
