@@ -3,6 +3,7 @@ package arraycmds
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -37,7 +38,7 @@ Example:
 
 		req, err := buildCreateArrayReq(command)
 		if err != nil {
-			log.Error(err)
+			fmt.Println("error: " + err.Error())
 			return
 		}
 
@@ -74,6 +75,11 @@ func buildCreateArrayReq(command string) (messages.Request, error) {
 			return req, err
 		}
 		create_array_raid = "NONE"
+	}
+
+	if isRAIDConstMet(len(dataDevs), create_array_raid) == false {
+		err := errors.New(`RAID10 only supports even number of data devices.`)
+		return req, err
 	}
 
 	param := messages.CreateArrayParam{
