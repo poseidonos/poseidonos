@@ -190,6 +190,11 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                             return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
+                    if (prevVolPolicy.minIops != 0)
+                    {
+                         errorMsg = "Min IOPS already set for the volume, please call QoS reset to set Min Bandwidth";
+                         return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                    }
                     newVolPolicy.policyChange = true;
                 }
             }
@@ -267,6 +272,11 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                             return static_cast<int>(POS_EVENT_ID::VOL_REQ_QOS_OUT_OF_RANGE);
                         }
                     }
+                    if (prevVolPolicy.minBw != 0)
+                    {
+                         errorMsg = "Min Bw already set for the volume, please call QoS reset to set Min IOPS";
+                         return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                    }
                     newVolPolicy.policyChange = true;
                 }
             }
@@ -323,12 +333,6 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 errorMsg = "Either Min IOPS or Min BW Allowed";
                 return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
             }
-            retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
-            if (retVal != SUCCESS)
-            {
-                errorMsg = "QoS update in Volume Manager failed";
-                return retVal;
-            }
             int32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
             if (arrayId != -1)
             {
@@ -354,6 +358,12 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                         break;
                     }
                 }
+                return retVal;
+            }
+            retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
+            if (retVal != SUCCESS)
+            {
+                errorMsg = "QoS update in Volume Manager failed";
                 return retVal;
             }
         }
