@@ -55,6 +55,14 @@ public:
       workerArray(workerArrayInput),
       workerCount(workerCount)
     {
+        numaDedicatedSchedulingPolicy = false;
+        for (int type = BackendEvent_Start; type < BackendEvent_Count; type++)
+        {
+            queueOccupied[type] = false;
+            eventQueue[type] = nullptr;
+            ioControl.allowedIOCount[type] = 0;
+            ioControl.currentIOCount[type] = 0;
+        }
     }
 
     void Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NODES],
@@ -110,7 +118,7 @@ protected:
     }
     static const uint32_t MAX_NUMA = RTE_MAX_NUMA_NODES;
     QosManager* qosManager;
-    std::vector<EventWorker*>* workerArray;
+    std::vector<EventWorker*>* workerArray = {nullptr};
     uint32_t workerCount;
     std::vector<uint32_t> workerIDPerNumaVector[MAX_NUMA];
     std::vector<uint32_t> totalWorkerIDVector;

@@ -94,6 +94,7 @@ EventScheduler::EventScheduler(QosManager* qosManagerArg,
         workerIDPerNumaVector[numa].clear();
     }
 
+    workerArray.clear();
     totalWorkerIDVector.clear();
     ioDispatcher = nullptr;
     terminateStarted = false;
