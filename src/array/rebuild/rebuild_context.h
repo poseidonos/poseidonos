@@ -59,7 +59,7 @@ class RebuildContext
 {
 public:
     string array;
-    PartitionType part;
+    PartitionType part = PartitionType::META_NVM;
     RaidType raidType;
     uint32_t arrayIndex = 0;
     uint32_t faultIdx = 0;
