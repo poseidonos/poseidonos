@@ -57,7 +57,7 @@
 #define M_QOS_CORRECTION_CYCLE (100)
 #define M_QOS_AVERAGE_WINDOW_SIZE (100)
 #define M_STRIPES_CONSUMED_HIGH_THRESHOLD (1000)
-#define MAX_IO_WORKER 8 // Currently this is hardcoded, will be taken from affinity manager in next revision
+#define MAX_IO_WORKER 32 // Currently this is hardcoded, will be taken from affinity manager in next revision
 
 #define MAX_THROTTLING_RATE (0.99)
 #define POLLING_FREQ_PER_QOS_SLICE (20)
@@ -74,15 +74,22 @@
 const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
 
+const int MAX_EVENTS_PER_EVENT_WORKER = 50;
+const int MAX_IO_COUNT = 512 * 8;
+
+const uint8_t PRIORITY_HIGHEST = 3;
+const uint8_t PRIORITY_MEDIUM = 2;
+const uint8_t PRIORITY_LOWEST = 1;
+const uint8_t PRIORITY_DEFAULT = PRIORITY_LOWEST;
 const uint8_t PRIORITY_INVALID = 0;
-const uint8_t PRIORITY_HIGHEST = 1;
-const uint8_t PRIORITY_HIGHER = 2;
-const uint8_t PRIORITY_HIGH = 3;
-const uint8_t PRIORITY_MEDIUM = 4;
-const uint8_t PRIORITY_LOW = 5;
-const uint8_t PRIORITY_LOWER = 6;
-const uint8_t PRIORITY_LOWEST = 7;
-const uint8_t PRIORITY_DEFAULT = PRIORITY_HIGHEST;
+
+const uint32_t WT_LEVEL1 = 2;
+const uint32_t WT_LEVEL2 = 70;
+const uint32_t WT_LEVEL3 =  6000;
+
+const int LEVEL_SUPPORT = 3;
+const int weightArr[] = {1, 2, 70, 6000};
+const int FALLBACK_WEIGHT = weightArr[0];
 
 const int PRIO_WT_HIGHEST = 20;
 const int PRIO_WT_HIGHER = 10;
@@ -119,7 +126,7 @@ const uint32_t UPPER_GC_TH = 30;
 const uint32_t MID_GC_TH = 20;
 const uint32_t LOW_GC_TH = 5;
 
-const uint32_t NO_CONTENTION_CYCLES = 100;
+const uint32_t NO_CONTENTION_CYCLES = 10000;
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -295,14 +302,14 @@ struct qos_vol_policy
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
-struct qos_rebuild_policy
+struct qos_backend_policy
 {
-    qos_rebuild_policy(void)
+    qos_backend_policy(void)
     {
-        rebuildImpact = PRIORITY_DEFAULT;
+        priorityImpact = PRIORITY_DEFAULT;
         policyChange = false;
     }
-    uint8_t rebuildImpact;
+    uint8_t priorityImpact;
     bool policyChange;
 };
 

@@ -45,7 +45,7 @@ namespace pos
 class FlushCmdManager
 {
 public:
-    FlushCmdManager(void);
+    FlushCmdManager(EventScheduler* eventScheduler = nullptr);
     virtual ~FlushCmdManager(void);
     virtual bool IsFlushEnabled(void);
     virtual bool CanFlushMeta(FlushIoSmartPtr flushIo);
@@ -64,6 +64,7 @@ private:
     bool backendFlushInProgress[MAX_VOLUME_COUNT];
     bool metaFlushInProgress;
     FlushConfiguration config;
+    EventScheduler* eventScheduler;
 };
 
 using FlushCmdManagerSingleton = Singleton<FlushCmdManager>;

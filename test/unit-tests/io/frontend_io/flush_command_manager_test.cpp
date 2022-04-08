@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/bio/flush_io_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -93,7 +94,9 @@ TEST(FlushCmdManager, FlushCmdManager_FinishMetaFlush_CheckWithCanFlushMeta)
 
 TEST(FlushCmdManager, FlushCmdManager_UpdateVSANewEntries_Normal)
 {
-    FlushCmdManager flushCmdManager;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    FlushCmdManager flushCmdManager(&mockEventScheduler);
     flushCmdManager.UpdateVSANewEntries(0, 0);
 }
 

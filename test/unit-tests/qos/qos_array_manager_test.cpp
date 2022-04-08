@@ -2,12 +2,13 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "src/io/frontend_io/aio_submission_adapter.h"
+
 #include "src/include/backend_event.h"
+#include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/qos/qos_common.h"
 #include "test/unit-tests/qos/qos_context_mock.h"
-#include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include "test/unit-tests/qos/qos_manager_mock.h"
+#include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -80,7 +81,7 @@ TEST(QosArrayManager, Check_Update_And_GetUsedStripeCnt)
     ASSERT_EQ(newUsedStripeCnt, oldUsedStripeCnt);
 }
 
-TEST(QosArrayManager, Check_Get_And_Update_RebuildPolicy)
+/*TEST(QosArrayManager, Check_Get_And_Update_RebuildPolicy)
 {
     NiceMock<MockQosContext> mockQoscontext;
     NiceMock<MockQosManager> mockQosManager;
@@ -97,7 +98,7 @@ TEST(QosArrayManager, Check_Get_And_Update_RebuildPolicy)
     ASSERT_EQ(retPolicy.rebuildImpact, setPolicy.rebuildImpact);
     ASSERT_EQ(retPolicy.policyChange, setPolicy.policyChange);
 }
-
+*/
 TEST(QosArrayManager, Check_Set_And_Get_VolumeLimit)
 {
     NiceMock<MockQosContext> mockQoscontext;

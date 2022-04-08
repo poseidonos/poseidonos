@@ -45,12 +45,12 @@
 
 namespace pos
 {
-class EventScheduler;
 class IOQueue;
 class Ubio;
 class UBlockDevice;
 class DeviceDetachTrigger;
 class QosManager;
+class EventScheduler;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -63,7 +63,7 @@ class IOWorker
 public:
     IOWorker(cpu_set_t cpuSetInput, uint32_t id,
         DeviceDetachTrigger* detachTrigger = nullptr,
-        QosManager* qosManager = nullptr);
+        QosManager* qosManager = nullptr, EventScheduler* eventScheduler = nullptr);
     virtual ~IOWorker(void);
     uint32_t GetWorkerId(void);
     virtual void DecreaseCurrentOutstandingIoCount(int count);
@@ -99,5 +99,6 @@ private:
     DeviceDetachTrigger* detachTrigger;
     bool productDetachTrigger {false};
     QosManager* qosManager;
+    EventScheduler *eventScheduler;
 };
 } // namespace pos

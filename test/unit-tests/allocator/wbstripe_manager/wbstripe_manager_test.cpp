@@ -15,6 +15,7 @@
 #include "test/unit-tests/allocator/wbstripe_manager/stripe_load_status_mock.h"
 #include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_spy.h"
 #include "test/unit-tests/bio/flush_io_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
@@ -653,7 +654,11 @@ TEST(WBStripeManager, LoadPendingStripesToWriteBuffer_testIfStripeLoadRequested)
     addrInfo.SetUT(true);
     EXPECT_CALL(addrInfo, IsUT).WillRepeatedly(Return(true));
 
-    WBStripeManagerSpy wbStripeManager(nullptr, 1, nullptr, nullptr, &stripeMap, nullptr, &addrInfo, &ctxManager, &blkManager, &stripeLoadStatus, "", 0);
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+
+    WBStripeManagerSpy wbStripeManager(nullptr, 1, nullptr, nullptr, &stripeMap, nullptr, &addrInfo, &ctxManager,
+        &blkManager, &stripeLoadStatus, "", 0, MemoryManagerSingleton::Instance(), &mockEventScheduler);
 
     // Add unflushed stripes
     for (uint32_t i = 0; i < 5; i++)

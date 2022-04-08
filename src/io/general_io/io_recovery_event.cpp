@@ -36,9 +36,9 @@
 #include "src/array/service/io_device_checker/i_io_device_checker.h"
 #include "src/bio/ubio.h"
 #include "src/event_scheduler/io_completer.h"
-#include "src/io/backend_io/rebuild_io/rebuild_read.h"
-#include "src/include/branch_prediction.h"
 #include "src/include/backend_event.h"
+#include "src/include/branch_prediction.h"
+#include "src/io/backend_io/rebuild_io/rebuild_read.h"
 
 namespace pos
 {
@@ -51,6 +51,7 @@ IoRecoveryEvent::IoRecoveryEvent(UbioSmartPtr ubio, IoCompleter* ioCompleter_)
         ioCompleter = new IoCompleter(ubio);
         ownIoCompleter = true;
     }
+    SetEventType(BackendEvent_FrontendIO);
 }
 
 IoRecoveryEvent::~IoRecoveryEvent(void)

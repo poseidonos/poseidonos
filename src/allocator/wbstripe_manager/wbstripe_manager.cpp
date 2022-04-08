@@ -56,7 +56,7 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
     IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_,
     AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
     StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
-    MemoryManager* memoryManager)
+    MemoryManager* memoryManager, EventScheduler* eventSchedulerArg)
 : stripeBufferPool(nullptr),
   iStripeMap(istripeMap_),
   addrInfo(info),
@@ -72,6 +72,7 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
     volumeManager = volManager;
     numVolumes = numVolumes_;
     iReverseMap = iReverseMap_;
+    eventScheduler = eventSchedulerArg;
 }
 
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
@@ -100,14 +101,17 @@ WBStripeManager::Init(void)
     {
         iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayId);
     }
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
 
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = CHUNK_SIZE,
-        .count = totalNvmStripes * chunksPerStripe
-    };
+        .count = totalNvmStripes * chunksPerStripe};
     stripeBufferPool = memoryManager->CreateBufferPool(info);
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
@@ -583,6 +587,6 @@ WBStripeManager::_LoadStripe(StripeAddr from, StripeAddr to)
     CallbackSmartPtr readStripeCompletion(new ReadStripeCompletion(to, bufferList, writeStripeCompletion, arrayId));
     CallbackSmartPtr readStripe(new ReadStripe(from, bufferList, readStripeCompletion, arrayId));
 
-    EventSchedulerSingleton::Instance()->EnqueueEvent(readStripe);
+    eventScheduler->EnqueueEvent(readStripe);
 }
 } // namespace pos

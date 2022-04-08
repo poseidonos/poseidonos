@@ -29,7 +29,8 @@ def execute():
     api.detach_ssd(DETACH_TARGET_DEV)
 
     if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
-        time.sleep(1)
+        print ("rebuilding started")
+        time.sleep(0.5)
         cli.stop_rebuilding(ARRAYNAME)
         timout = 30000 #30s
         if api.wait_situation(ARRAYNAME, "DEGRADED", timout) is True:

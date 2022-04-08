@@ -357,31 +357,7 @@ QosArrayManager::GetUsedStripeCnt(void)
 {
     return usedStripeCnt;
 }
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-qos_rebuild_policy
-QosArrayManager::GetRebuildPolicy(void)
-{
-    return rebuildPolicyCli;
-}
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-int
-QosArrayManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
-{
-    rebuildPolicyCli = rebuildPolicy;
-    return QosReturnCode::SUCCESS;
-}
+
 /* --------------------------------------------------------------------------*/
 /**
   * @Synopsis

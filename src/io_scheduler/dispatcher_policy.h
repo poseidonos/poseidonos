@@ -30,49 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/event_scheduler/minimum_job_policy.h"
-#include "src/event_scheduler/event_scheduler.h"
+#pragma once
+#include "src/include/smart_ptr_type.h"
+
 namespace pos
 {
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Constuctor
- *
- * @Param    workerCountInput
- */
-/* --------------------------------------------------------------------------*/
-MinimumJobPolicy::MinimumJobPolicy(unsigned int workerCountInput, EventScheduler* eventSchedulerArg)
-: workerCount(workerCountInput),
-  currentWorkerID(workerCount - 1),
-  eventScheduler(eventSchedulerArg)
-{
-    if (nullptr == eventScheduler)
-    {
-        eventScheduler = EventSchedulerSingleton::Instance();
-    }
-}
+class IODispatcher;
+class IOWorker;
+class EventScheduler;
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Destructor
- */
-/* --------------------------------------------------------------------------*/
-MinimumJobPolicy::~MinimumJobPolicy(void)
+class DispatcherPolicyI
 {
-}
+public:
+    DispatcherPolicyI(IODispatcher* dispatcherInput, EventScheduler* schedulerInput);
+    virtual ~DispatcherPolicyI();
+    virtual void Submit(IOWorker* ioWorker, UbioSmartPtr ubio) = 0;
+    virtual void Process(void) = 0;
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Return EventWorkerID for next execution
- *
- *
- * @Returns  EventWorkerID for next execution
- */
-/* --------------------------------------------------------------------------*/
-unsigned int
-MinimumJobPolicy::GetProperWorkerID(uint32_t numa)
+protected:
+    IODispatcher* ioDispatcher;
+    EventScheduler* eventScheduler;
+};
+
+class DispatcherPolicyDirect : public DispatcherPolicyI
 {
-    uint32_t workerID = eventScheduler->GetWorkerIDMinimumJobs(numa);
-    return workerID;
-}
+public:
+    DispatcherPolicyDirect(IODispatcher* dispatcherInput, EventScheduler* schedulerInput);
+    ~DispatcherPolicyDirect();
+
+    virtual void Submit(IOWorker* ioWorker, UbioSmartPtr ubio) override;
+    virtual void Process(void) override;
+};
+
+class DispatcherPolicyQos : public DispatcherPolicyI
+{
+public:
+    DispatcherPolicyQos(IODispatcher* dispatcherInput, EventScheduler* schedulerInput);
+    ~DispatcherPolicyQos();
+
+    virtual void Submit(IOWorker* ioWorker, UbioSmartPtr ubio) override;
+    inline virtual void Process(void) override;
+};
+
 } // namespace pos

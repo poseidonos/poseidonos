@@ -101,7 +101,7 @@ MountVolumeCommand::Execute(json& doc, string rid)
         if (ret == SUCCESS)
         {
             return jFormat.MakeResponse("MOUNTVOLUME", rid, ret,
-                volName + "is mounted successfully", GetPosInfo());
+                volName + " is mounted successfully", GetPosInfo());
         }
         else
         {

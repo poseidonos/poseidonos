@@ -21,10 +21,10 @@ var SetSystemPropCmd = &cobra.Command{
 Set the property of PoseidonOS. 
 
 Syntax:
-	poseidonos-cli system set-property [--rebuild-impact (highest | higher | high | medium | low | lower | lowest)]
+	poseidonos-cli system set-property [--rebuild-impact (highest | medium | lowest)]
 
 Example (To set the impact of rebuilding process on the I/O performance to low):
-	poseidonos-cli system set-property --rebuild-impact low.
+	poseidonos-cli system set-property --rebuild-impact lowest
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO(mj): now the message format is for REBUILDPERFIMPACT only.

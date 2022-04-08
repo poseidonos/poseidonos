@@ -44,13 +44,14 @@ class IDevInfo;
 class IIODispatcher;
 class IArrayDevMgr;
 class SmartLogMgr;
+class EventScheduler;
 
 class SmartLogPageHandler : public Event
 {
 public:
     SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
         CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr);
+        IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventScheduler = nullptr);
     bool Execute(void);
 
 private:
@@ -65,5 +66,6 @@ private:
     IIODispatcher* dispatcher;
     IArrayDevMgr* arrayDevMgr;
     SmartLogMgr* smartLogMgr;
+    EventScheduler* eventScheduler;
 };
 } // namespace pos

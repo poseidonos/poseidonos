@@ -37,14 +37,14 @@ namespace pos
 enum BackendEvent
 {
     BackendEvent_Start = 0,
-    BackendEvent_Flush = BackendEvent_Start,
+    BackendEvent_FrontendIO = BackendEvent_Start,
+    BackendEvent_Flush,
     BackendEvent_GC,
     BackendEvent_UserdataRebuild,
-    BackendEvent_MetadataRebuild,
-    BackendEvent_FrontendIO,
+    BackendEvent_MetadataRebuild = BackendEvent_UserdataRebuild,
     BackendEvent_MetaIO,
+    BackendEvent_Unknown,
     BackendEvent_End,
     BackendEvent_Count = BackendEvent_End - BackendEvent_Start,
-    BackendEvent_Unknown
 };
 } // namespace pos

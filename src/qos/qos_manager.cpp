@@ -83,6 +83,7 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
 
     for (uint32_t event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
+        backendPolicyCli[event].priorityImpact = PRIORITY_DEFAULT;
         pendingBackendEvents[event] = M_RESET_TO_ZERO;
         eventLog[event] = M_RESET_TO_ZERO;
         oldLog[event] = M_RESET_TO_ZERO;
@@ -764,24 +765,11 @@ QosManager::GetEventLog(BackendEvent event)
   * @Returns
   */
 /* --------------------------------------------------------------------------*/
-qos_rebuild_policy
-QosManager::GetRebuildPolicy(std::string arrayName)
+qos_backend_policy
+QosManager::GetBackendPolicy(BackendEvent eventType)
 {
-    {
-        std::lock_guard<std::mutex> lock(mapUpdateLock);
-        if (arrayNameMap.size() != 0)
-        {
-            if (arrayNameMap.find(arrayName) != arrayNameMap.end())
-            {
-                std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-                uint32_t arrayId = arrayNameMap[arrayName];
-                return qosArrayManager[arrayId]->GetRebuildPolicy();
-            }
-        }
-    }
-    qos_rebuild_policy qosRebuildPolicyInvalid;
-    qosRebuildPolicyInvalid.rebuildImpact = PRIORITY_INVALID;
-    return qosRebuildPolicyInvalid;
+    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+    return backendPolicyCli[eventType];
 }
 
 /* --------------------------------------------------------------------------*/
@@ -792,12 +780,21 @@ QosManager::GetRebuildPolicy(std::string arrayName)
  */
 /* --------------------------------------------------------------------------*/
 int
-QosManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
+QosManager::UpdateBackendPolicy(BackendEvent eventType, qos_backend_policy backendPolicy)
 {
-    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+    backendPolicyCli[eventType] = backendPolicy;
+    if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_LOWEST)
     {
-        std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-        qosArrayManager[i]->UpdateRebuildPolicy(rebuildPolicy);
+        qos_backend_policy policy;
+        policy.priorityImpact = PRIORITY_HIGHEST;
+        backendPolicyCli[BackendEvent_FrontendIO] = policy;
+    }
+    else if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_HIGHEST)
+    {
+        qos_backend_policy policy;
+        policy.priorityImpact = PRIORITY_LOWEST;
+        backendPolicyCli[BackendEvent_FrontendIO] = policy;
     }
     return QosReturnCode::SUCCESS;
 }

@@ -35,10 +35,12 @@
 #include <memory>
 #include <unordered_map>
 #include <mutex>
+#include <queue>
 #include <vector>
 #include <utility>
 
 #include "src/device/i_io_dispatcher.h"
+#include "src/include/backend_event.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -48,6 +50,8 @@ class IOWorker;
 class EventFactory;
 class EventFrameworkApi;
 class EventScheduler;
+class DispatcherPolicyI;
+
 class IODispatcher : public IIODispatcher
 {
 public:
@@ -68,9 +72,13 @@ public:
 
     void CompleteForThreadLocalDeviceList(void) override;
     int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) override;
+    void ProcessQueues(void) override;
 
     static void RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory);
     static void SetFrontendDone(bool value);
+
+    std::queue<std::pair<IOWorker*, UbioSmartPtr>> ioQueue[BackendEvent_Count];
+    std::mutex ioQueueLock[BackendEvent_Count];
 
 private:
     uint32_t _GetLogicalCore(cpu_set_t cpuSet, uint32_t index);
@@ -90,6 +98,8 @@ private:
     uint32_t deviceAllocationTurn;
     EventScheduler* eventScheduler;
     std::mutex deviceLock;
+    DispatcherPolicyI* dispPolicy;
+
     enum class DispatcherAction
     {
         OPEN,

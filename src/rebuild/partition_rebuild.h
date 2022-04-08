@@ -35,15 +35,18 @@
 #include "rebuild_behavior.h"
 #include "src/array/rebuild/rebuild_target.h"
 #include "src/include/rebuild_state.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 using namespace std;
 
 namespace pos
 {
+class EventScheduler;
+
 class PartitionRebuild
 {
 public:
-    explicit PartitionRebuild(RebuildBehavior* b);
+    explicit PartitionRebuild(RebuildBehavior* b, EventScheduler* eventScheduler = nullptr);
     virtual ~PartitionRebuild(void);
     virtual void Start(RebuildComplete cb);
     virtual void Stop(void);
@@ -54,6 +57,7 @@ private:
     void _Complete(RebuildResult res);
     RebuildBehavior* bhvr = nullptr;
     RebuildComplete completeCb;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

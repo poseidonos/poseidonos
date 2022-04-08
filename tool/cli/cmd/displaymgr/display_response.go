@@ -86,6 +86,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"DatetimeUpdated\t"+
 				globals.FieldSeparator+"TotalCapacity\t"+
 				globals.FieldSeparator+"UsedCapacity\t"+
+				globals.FieldSeparator+"WriteThrough\t"+
 				globals.FieldSeparator+"RAID")
 
 		// Horizontal line
@@ -95,6 +96,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"----------\t"+
 				globals.FieldSeparator+"---------------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"-------------\t"+
 				globals.FieldSeparator+"-------------\t"+
 				globals.FieldSeparator+"-------------\t"+
 				globals.FieldSeparator+"----------")
@@ -109,6 +111,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+array.UPDATEDATETIME+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, array.CAPACITY)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, array.USED)+"\t"+
+					globals.FieldSeparator+strconv.FormatBool(array.WRITETHROUGH)+"\t"+
 					globals.FieldSeparator+array.DATARAID)
 
 			fmt.Fprintln(w, "")
@@ -142,6 +145,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "GCMode\t: "+array.GCMODE)
 		fmt.Fprintln(w, "MetaRAID\t: "+array.METARAID)
 		fmt.Fprintln(w, "DataRAID\t: "+array.DATARAID)
+		fmt.Fprintln(w, "WriteThrough\t: "+strconv.FormatBool(array.WRITETHROUGH))
 		fmt.Fprint(w, "BufferDevs\t: ")
 
 		for _, device := range array.DEVICELIST {
@@ -218,7 +222,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10)+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXBW)+"\t"+
@@ -244,7 +248,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "Name\t: "+volume.VOLUMENAME)
 		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.TOTAL))
 		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.REMAIN))
-		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10))
+		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10))
 		fmt.Fprintln(w, "Status\t: "+volume.STATUS)
 		fmt.Fprintln(w, "MaximumIOPS\t: "+strconv.Itoa(volume.MAXIOPS))
 		fmt.Fprintln(w, "MaximumBandwidth\t: "+strconv.Itoa(volume.MAXBW))

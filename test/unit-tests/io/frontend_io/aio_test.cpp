@@ -178,7 +178,7 @@ TEST(AIO, AIO_Constructor_Heap)
     delete aio;
 }
 
-TEST(AIO, AIO_SubmitAsyncIO_IoTypeInvalidThrow)
+TEST(AIO, DISABLED_AIO_SubmitAsyncIO_IoTypeInvalidThrow)
 {
     // Given
     pos_io posIo;
@@ -191,7 +191,7 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeInvalidThrow)
     EXPECT_THROW(aio.SubmitAsyncIO(volIo), POS_EVENT_ID);
 }
 
-TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
+TEST(AIO, DISABLED_AIO_SubmitAsyncIO_IoTypeFlush)
 {
     // Given
     pos_io posIo;
@@ -206,7 +206,7 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
     // aio.SubmitFlush(posIo);
 }
 
-TEST(AIO, AIO_CompleteIOs_CompleteIOs)
+TEST(AIO, DISABLED_AIO_CompleteIOs_CompleteIOs)
 {
     // Given
     AIO aio;
@@ -217,7 +217,7 @@ TEST(AIO, AIO_CompleteIOs_CompleteIOs)
     // Then : do nothing
 }
 
-TEST(AIO, AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
+TEST(AIO, DISABLED_AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
 {
     // Given
     AIO aio;

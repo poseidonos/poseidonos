@@ -103,6 +103,8 @@ def wait_state(arrayname, state_expected, timeout_ms = -1):
     while check_state(arrayname, state_expected) == False:
         time.sleep(0.01)
         elapsed_ms += 10
+        if elapsed_ms % 1000 is 0:
+            print (get_situation(arrayname))
         if timeout_ms != -1 and elapsed_ms > timeout_ms:
             return False
     return True
@@ -112,9 +114,26 @@ def wait_situation(arrayname, situation_expected, timeout_ms = -1):
     while check_situation(arrayname, situation_expected) == False:
         time.sleep(0.01)
         elapsed_ms += 10
+        if elapsed_ms % 1000 is 0:
+            print (get_situation(arrayname))
         if timeout_ms != -1 and elapsed_ms > timeout_ms:
             return False
     return True
+
+
+def wait_situation_changed(arrayname, curr_situation, timeout_ms = -1):
+    elapsed_ms = 0
+    situ = get_situation(arrayname)
+    while situ == curr_situation:
+        time.sleep(0.01)
+        elapsed_ms += 10
+        if elapsed_ms % 1000 is 0:
+            print (situ)
+        if timeout_ms != -1 and elapsed_ms > timeout_ms:
+            return situ
+        situ = get_situation(arrayname)
+    return situ
+
 
 def is_offline(arrayname):
     return get_state(arrayname) == "OFFLINE"

@@ -1,0 +1,11 @@
+
+meta
+
+PLEASE EXECUTE IN POS CALLSTACK (NOT IN SPDK or ANOTHER LIB STACK)
+custom gdb command for utilizing debugging.
+
+source debug_meta.py
+meta [command] [subcommand]
+
+1) meta metafs
+   show debug info and simple report about metafs

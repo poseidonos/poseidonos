@@ -124,12 +124,12 @@ TEST(QosManager, Test_Getter_Setter_SubsystemToVolumeMap)
 
 TEST(QosManager, Test_Getter_Setter_LogEvent)
 {
-     QosManager qosManager;
-     BackendEvent eventId = BackendEvent_Flush;
-     uint32_t InitCount = qosManager.GetEventLog(eventId);
-     qosManager.LogEvent(eventId);
-     uint32_t count = qosManager.GetEventLog(eventId);
-     ASSERT_EQ(count, InitCount+1);
+    QosManager qosManager;
+    BackendEvent eventId = BackendEvent_Flush;
+    uint32_t InitCount = qosManager.GetEventLog(eventId);
+    qosManager.LogEvent(eventId);
+    uint32_t count = qosManager.GetEventLog(eventId);
+    ASSERT_EQ(count, InitCount + 1);
 }
 
 TEST(QosManager, Test_IsMinimumPolicyInEffectInSystem)
@@ -228,18 +228,19 @@ TEST(QosManager, Test_Getter_GetVolumePolicyMap)
     qosManager.GetVolumePolicyMap(arrayId, volumePolicyMapCopy);
 }
 
-TEST(QosManager, Test_Getter_UpdateRebuildPolicy)
+TEST(QosManager, Test_Getter_UpdateBackendPolicy)
 {
     QosManager qosManager;
-    qos_rebuild_policy rebuildPolicy;
-    rebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+    qos_backend_policy rebuildPolicy;
+    rebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
     std::string arrayName = "POSArray";
     qosManager.UpdateArrayMap(arrayName);
     uint32_t arrayId = 0;
-    qosManager.UpdateRebuildPolicy(rebuildPolicy);
-    qos_rebuild_policy retRebuildPolicy = qosManager.GetRebuildPolicy(arrayName);
-    ASSERT_EQ(retRebuildPolicy.rebuildImpact, rebuildPolicy.rebuildImpact);
+    qosManager.UpdateBackendPolicy(BackendEvent_UserdataRebuild, rebuildPolicy);
+    qos_backend_policy retRebuildPolicy = qosManager.GetBackendPolicy(BackendEvent_UserdataRebuild);
+    ASSERT_EQ(retRebuildPolicy.priorityImpact, rebuildPolicy.priorityImpact);
 }
+
 NiceMock<MockConfigManager>*
 CreateQosMockConfigManager(bool isQosEnabled)
 {

@@ -15,6 +15,7 @@
 #include "test/unit-tests/device/i_dev_info_mock.h"
 #include "test/unit-tests/device/i_io_dispatcher_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using ::testing::_;
 using testing::NiceMock;
@@ -41,7 +42,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Heap_Nine_Args)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
-    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
+    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr);
     delete req;
     delete bioPos;
     delete adminCommandHandler;
@@ -159,6 +160,9 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue)
     NiceMock<MockIIODispatcher> ioDispatcher;
     NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+
     uint32_t originCore = 0;
 
     struct spdk_nvmf_request* req = new struct spdk_nvmf_request();
@@ -173,7 +177,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue)
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
     ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(true));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr, &mockEventScheduler);
 
     bool expected = true, actual;
     actual = adminCommandHandler.Execute();

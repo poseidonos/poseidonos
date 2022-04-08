@@ -46,10 +46,10 @@ func TestListVolumeResHumanReadable(t *testing.T) {
 		`{"name":"vol2","id":1,"total":11474836480,"remain":8474836480,` +
 		`"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
 
-	expected := `Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
---------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
-vol1      |0     |214748364800                 |214748364800                 |100        |Mounted    |0                |0
-vol2      |1     |11474836480                  |8474836480                   |73         |Unmounted  |0                |0
+	expected := `Name      |ID       |Total             |Remaining         |Used%     |Status     |MaxIOPS   |MaxBW     |MinIOPS   |MinBW
+--------- |-------- |----------------- |----------------- |--------- |---------- |--------- |--------- |--------- |---------
+vol1      |0        |214748364800      |214748364800      |0         |Mounted    |0         |0         |0         |0
+vol2      |1        |11474836480       |8474836480        |27        |Unmounted  |0         |0         |0         |0
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -63,29 +63,29 @@ func TestArrayInfoResHumanReadable(t *testing.T) {
 	var resJSON = `{"command":"ARRAYINFO","rid":"fromCLI",` +
 		`"result":{"status":{"code":0,"description":"DONE"},` +
 		`"data":{"index": 0,"name":"TargetArrayName", ` +
-		`"state":"BUSY","situation":"REBUILDING", "rebuilding_progress":10, ` +
+		`"state":"BUSY","situation":"REBUILDING", "rebuilding_progress":76, ` +
 		`"capacity":120795955200, "used":107374182400, ` +
 		`"devicelist":[{"type":"BUFFER","name":"uram0"}, ` +
 		`{"type":"DATA","name":"unvme-ns-0"},{"type":"DATA","name":"unvme-ns-1"},` +
 		`{"type":"DATA","name":"unvme-ns-2"},{"type":"SPARE","name":"unvme-ns-3"}]}}}`
 
-	expected := `Array : TargetArrayName
-------------------------------------
-Index               : 0
-State               : BUSY
-Situation           : REBUILDING
-Rebuilding Progress : 0
-Total(byte)         : 120795955200
-Used(byte)          : 107374182400
-
-Devices
-Name       Type
-----       ------
-uram0      BUFFER
-unvme-ns-0 DATA
-unvme-ns-1 DATA
-unvme-ns-2 DATA
-unvme-ns-3 SPARE
+	expected := `Name               : TargetArrayName
+Index              : 0
+UniqueID           : 0
+State              : BUSY
+Situation          : REBUILDING
+CreateDatetime     : 
+UpdateDatetime     : 
+RebuildingProgress : 76
+Total              : 120795955200
+Used               : 107374182400
+GCMode             : 
+MetaRAID           : 
+DataRAID           : 
+WriteThrough       : false
+BufferDevs         : uram0      
+DataDevs           : unvme-ns-0 unvme-ns-1 unvme-ns-2 
+SpareDevs          : unvme-ns-3 
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -238,7 +238,7 @@ func TestVolumeInfoResHumanReadable(t *testing.T) {
 	expected := `Name              : vol1
 TotalCapacity     : 107374182400
 RemainingCapacity : 0
-Used%             : 0
+Used%             : 100
 Status            : Unmounted
 MaximumIOPS       : 0
 MaximumBandwidth  : 0

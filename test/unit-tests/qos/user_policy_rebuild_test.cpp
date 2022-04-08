@@ -25,20 +25,15 @@ TEST(RebuildUserPolicy, Reset)
     ASSERT_EQ(setRebuildImpact, PRIORITY_DEFAULT);
 }
 
-TEST(RebuildUserPolicy, GetRebuildImpact)
-{
-    RebuildUserPolicy rebuildUserPolicy;
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_HIGH);
-    uint8_t setRebuildImpact = rebuildUserPolicy.GetRebuildImpact();
-    ASSERT_EQ(setRebuildImpact, PRIORITY_HIGH);
-}
-TEST(RebuildUserPolicy, SetRebuildImpact_Valid)
+TEST(RebuildUserPolicy, GetterSetterRebuildImpact_Valid)
 {
     RebuildUserPolicy rebuildUserPolicy;
     rebuildUserPolicy.Reset();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_LOW);
+    qos_backend_policy rebuildPolicy;
+    rebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
+    rebuildUserPolicy.SetRebuildImpact(rebuildPolicy.priorityImpact);
     uint8_t setRebuildImpact = rebuildUserPolicy.GetRebuildImpact();
-    ASSERT_EQ(setRebuildImpact, PRIORITY_LOW);
+    ASSERT_EQ(setRebuildImpact, PRIORITY_HIGHEST);
 }
 
 TEST(RebuildUserPolicy, SetRebuildImpact_Invalid)

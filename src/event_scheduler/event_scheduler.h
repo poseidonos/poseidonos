@@ -48,13 +48,17 @@
 
 namespace pos
 {
+
 class AffinityManager;
 class ConfigManager;
-class ISchedulerPolicy;
+class BackendPolicy;
 class EventQueue;
 class EventWorker;
 class SchedulerQueue;
 class QosManager;
+class IIODispatcher;
+
+const uint32_t FE_QUEUES = 47;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Schedule events to Event worker
@@ -70,21 +74,23 @@ public:
     virtual ~EventScheduler(void);
     void Initialize(uint32_t workerCountInput, cpu_set_t schedulerCPUInput,
         cpu_set_t eventCPUSetInput);
-    virtual uint32_t GetWorkerIDMinimumJobs(uint32_t numa);
+    void InjectIODispatcher(IIODispatcher *ioDispatcher);
+    void EjectIODispatcher(void);
     virtual void EnqueueEvent(EventSmartPtr input);
     std::queue<EventSmartPtr> DequeueEvents(void);
+    virtual int32_t GetAllowedIoCount(BackendEvent type);
+    virtual void IoEnqueued(BackendEvent type, uint64_t size);
+    virtual void IoDequeued(BackendEvent type, uint64_t size);
+    virtual EventSmartPtr PickWorkerEvent(EventWorker *worker);
+    virtual void CheckAndSetQueueOccupancy(BackendEvent eventId);
     void Run(void);
-    std::mutex queueLock[BackendEvent_Count];
-
+    BackendPolicy* policy;
+    void SetTerminate(bool value)
+    {
+        terminateStarted = value;
+    }
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
-    bool _CheckContention(BackendEvent eventId);
-    void _CheckAndSetQueueOccupancy(BackendEvent eventId);
-    bool _GetQueueOccupancy(BackendEvent eventId);
-    bool _NoContentionCycleDone(uint32_t cycles);
-    void _IncrementCycles(void);
-    int32_t _GetEventWeight(BackendEvent eventId);
-    ISchedulerPolicy* policy;
     std::atomic<bool> exit;
     uint32_t workerCount;
     std::vector<EventWorker*> workerArray;
@@ -94,16 +100,12 @@ private:
     static const uint32_t MAX_NUMA = RTE_MAX_NUMA_NODES;
     std::vector<uint32_t> workerIDPerNumaVector[MAX_NUMA];
     std::vector<uint32_t> totalWorkerIDVector;
-
-    SchedulerQueue* eventQueue[BackendEvent_Count];
-    int32_t oldWeight[BackendEvent_Count] = {0};
-    int32_t runningWeight[BackendEvent_Count] = {0};
-    bool queueOccupied[BackendEvent_Count] = {false};
     bool numaDedicatedSchedulingPolicy;
-    uint32_t cyclesElapsed = 0;
     QosManager* qosManager;
     ConfigManager* configManager;
     AffinityManager* affinityManager;
+    IIODispatcher *ioDispatcher;
+    std::atomic<bool> terminateStarted;
 };
 
 using EventSchedulerSingleton = Singleton<EventScheduler>;

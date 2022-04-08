@@ -88,11 +88,12 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
     data.SetAttribute(JsonAttribute("create_datetime", "\"" + array->GetCreateDatetime() + "\""));
     data.SetAttribute(JsonAttribute("update_datetime", "\"" + array->GetUpdateDatetime() + "\""));
-    data.SetAttribute(JsonAttribute("rebuilding_progress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
+    data.SetAttribute(JsonAttribute("rebuilding_progress", to_string(array->GetRebuildingProgress())));
     data.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
     data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
     data.SetAttribute(JsonAttribute("meta_raid", "\"" + array->GetMetaRaidType() + "\""));
     data.SetAttribute(JsonAttribute("data_raid", "\"" + array->GetDataRaidType() + "\""));
+    data.SetAttribute(JsonAttribute("write_through_enabled", array->IsWriteThroughEnabled() ? "true" : "false"));
 
     if (array->GetState() >= ArrayStateEnum::NORMAL)
     {

@@ -66,8 +66,6 @@ public:
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, VolumeIoSmartPtr io);
     void VolumeQosPoller(IbofIoSubmissionAdapter* aioSubmission, double offset);
     bool IsFeQosEnabled(void);
-    qos_rebuild_policy GetRebuildPolicy(void);
-    int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
     void SetVolumeLimit(uint32_t volId, int64_t weight, bool iops);
     void GetMountedVolumes(std::list<uint32_t>& volumeList);
     int64_t GetVolumeLimit(uint32_t volId, bool iops);
@@ -99,7 +97,6 @@ private:
     std::atomic<bool> volumePolicyUpdated;
     uint32_t gcFreeSegments;
     qos_vol_policy volPolicyCli[MAX_VOLUME_COUNT];
-    qos_rebuild_policy rebuildPolicyCli;
     std::map<uint32_t, qos_vol_policy> volumePolicyMapCli;
     QosManager* qosManager;
     QosVolumeManager* qosVolumeManager;

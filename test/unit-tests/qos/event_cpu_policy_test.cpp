@@ -36,26 +36,6 @@ TEST(EventCpuPolicy, HandlePolicy_priority_highest)
     EventCpuPolicy eventCpuPolicy(&mockQosContext);
     eventCpuPolicy.HandlePolicy();
 }
-TEST(EventCpuPolicy, HandlePolicy_priority_higher)
-{
-    NiceMock<MockQosContext> mockQosContext;
-    QosUserPolicy userPolicy;
-    ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
-    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_HIGHER);
-    EventCpuPolicy eventCpuPolicy(&mockQosContext);
-    eventCpuPolicy.HandlePolicy();
-}
-TEST(EventCpuPolicy, HandlePolicy_priority_high)
-{
-    NiceMock<MockQosContext> mockQosContext;
-    QosUserPolicy userPolicy;
-    ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
-    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_HIGH);
-    EventCpuPolicy eventCpuPolicy(&mockQosContext);
-    eventCpuPolicy.HandlePolicy();
-}
 TEST(EventCpuPolicy, HandlePolicy_priority_medium)
 {
     NiceMock<MockQosContext> mockQosContext;
@@ -63,26 +43,6 @@ TEST(EventCpuPolicy, HandlePolicy_priority_medium)
     ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
     rebuildUserPolicy.SetRebuildImpact(PRIORITY_MEDIUM);
-    EventCpuPolicy eventCpuPolicy(&mockQosContext);
-    eventCpuPolicy.HandlePolicy();
-}
-TEST(EventCpuPolicy, HandlePolicy_priority_low)
-{
-    NiceMock<MockQosContext> mockQosContext;
-    QosUserPolicy userPolicy;
-    ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
-    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_LOW);
-    EventCpuPolicy eventCpuPolicy(&mockQosContext);
-    eventCpuPolicy.HandlePolicy();
-}
-TEST(EventCpuPolicy, HandlePolicy_priority_lower)
-{
-    NiceMock<MockQosContext> mockQosContext;
-    QosUserPolicy userPolicy;
-    ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
-    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_LOWER);
     EventCpuPolicy eventCpuPolicy(&mockQosContext);
     eventCpuPolicy.HandlePolicy();
 }

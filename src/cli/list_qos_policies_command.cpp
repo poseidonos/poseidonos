@@ -63,7 +63,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     string errorMsg;
     int validVol = -1;
     string volName;
-    qos_rebuild_policy rebuildPolicy;
+    qos_backend_policy backendPolicy;
     qos_vol_policy volPolicy;
 
     string arrayName = "";
@@ -86,7 +86,6 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     arrayJson.AddElement(array);
     data.SetArray(arrayJson);
 
-
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
@@ -106,8 +105,8 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
              "failed to list qos volume: " + volName, GetPosInfo());
     }
 
-    rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy(arrayName);
-    string impact = _GetRebuildImpactString(rebuildPolicy.rebuildImpact);
+    backendPolicy = QosManagerSingleton::Instance()->GetBackendPolicy(BackendEvent_UserdataRebuild);
+    string impact = _GetRebuildImpactString(backendPolicy.priorityImpact);
 
     JsonElement rebuild("");
     rebuild.SetAttribute(JsonAttribute("rebuild", "\"" + impact + "\""));
@@ -165,14 +164,14 @@ QosListPoliciesCommand::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {
-        case PRIORITY_HIGH:
-            return "high";
+        case PRIORITY_HIGHEST:
+            return "highest";
 
         case PRIORITY_MEDIUM:
             return "medium";
 
-        case PRIORITY_LOW:
-            return "low";
+        case PRIORITY_LOWEST:
+            return "lowest";
 
         default:
             return "unknown";

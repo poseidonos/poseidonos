@@ -9,6 +9,7 @@
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -45,7 +46,9 @@ TEST(FlushReadCompletion, FlushReadCompletion_DoSpecificJob_NormalCase)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    FlushReadCompletion flushReadCompletion(&mockStripe, 0);
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
+    FlushReadCompletion flushReadCompletion(&mockStripe, 0, &mockEventScheduler);
     bool actual, expected{true};
 
     // When: call by base class(Callback)' Execute()

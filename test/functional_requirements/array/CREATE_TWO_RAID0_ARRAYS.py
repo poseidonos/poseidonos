@@ -20,6 +20,7 @@ DATA2 = "unvme-ns-2,unvme-ns-3"
 ARRAY1NAME = "POSArray1"
 ARRAY2NAME = "POSArray2"
 
+
 def execute():
     isSingleArray = False
     SCAN_DEV_BASIC.execute(isSingleArray)
@@ -33,6 +34,7 @@ def execute():
         return out2
     else:
         return out1
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

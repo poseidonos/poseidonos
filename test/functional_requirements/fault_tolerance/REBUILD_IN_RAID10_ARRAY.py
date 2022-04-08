@@ -17,19 +17,25 @@ import MOUNT_VOL_ON_RAID10_ARRAY
 import fio
 import time
 DETACH_TARGET_DEV = "unvme-ns-0"
+NEW_SPARE_DEV = "unvme-ns-4"
 ARRAYNAME = MOUNT_VOL_ON_RAID10_ARRAY.ARRAYNAME
+
 
 def execute():
     MOUNT_VOL_ON_RAID10_ARRAY.execute()
     fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
-    api.detach_ssd(DETACH_TARGET_DEV)
+    api.detach_ssd_and_attach(DETACH_TARGET_DEV)
+    time.sleep(1)
+    cli.add_device(NEW_SPARE_DEV, ARRAYNAME)
+    time.sleep(1)
     timeout = 10000 #10secs
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
         print ("now rebuilding...")
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:
              return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

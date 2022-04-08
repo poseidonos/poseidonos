@@ -13,13 +13,14 @@ import json
 import CREATE_RAID10_ARRAY
 
 ARRAYNAME = CREATE_RAID10_ARRAY.ARRAYNAME
-SPARE = CREATE_RAID10_ARRAY.SPARE
+
 
 def execute():
     CREATE_RAID10_ARRAY.execute()
     out = cli.mount_array(ARRAYNAME)
     print (out)
     return out
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

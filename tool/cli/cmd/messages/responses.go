@@ -83,12 +83,13 @@ type Array struct {
 	SITUATION          string   `json:"situation,omitempty"`
 	CREATEDATETIME     string   `json:"create_datetime,omitempty"`
 	UPDATEDATETIME     string   `json:"update_datetime,omitempty"`
-	REBUILDINGPROGRESS int      `json:"rebuilding_progress,omitempty"`
+	REBUILDINGPROGRESS uint32   `json:"rebuilding_progress,omitempty"`
 	CAPACITY           uint64   `json:"capacity,omitempty"`
 	USED               uint64   `json:"used,omitempty"`
 	GCMODE             string   `json:"gc_mode,omitempty"`
 	METARAID           string   `json:"meta_raid,omitempty"`
 	DATARAID           string   `json:"data_raid,omitempty"`
+	WRITETHROUGH       bool     `json:"write_through_enabled,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
 }
 

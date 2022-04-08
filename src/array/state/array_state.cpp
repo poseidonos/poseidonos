@@ -264,6 +264,8 @@ ArrayState::SetUnmount(void)
 void
 ArrayState::RaidStateUpdated(RaidState rs)
 {
+    POS_TRACE_INFO(EID(ARRAY_EVENT_STATE_CHANGED),
+        "RaidStateUpdated: {} (0-NORMAL, 1-DEGRADED, 2-FAILURE)", rs);
     if (rs == RaidState::FAILURE)
     {
         _SetState(ArrayStateEnum::BROKEN);
@@ -416,10 +418,19 @@ ArrayState::StateChanged(StateContext* prev, StateContext* next)
 void
 ArrayState::_SetState(ArrayStateEnum newState)
 {
-    POS_TRACE_DEBUG(EID(ARRAY_EVENT_STATE_CHANGED), "_SetState, CurrState:{}, NewState:{}", state.ToString(), newState);
+    POS_TRACE_DEBUG(EID(ARRAY_EVENT_STATE_CHANGED), "_SetState, CurrState:{}, NewState:{}",
+        state.ToString(), ArrayStateType(newState).ToString());
     if (state != newState)
     {
-        if (newState == ArrayStateEnum::DEGRADED)
+        if (state == ArrayStateEnum::REBUILD)
+        {
+            iStateControl->Remove(rebuildingState);
+        }
+        if (newState == ArrayStateEnum::NORMAL)
+        {
+            iStateControl->Remove(degradedState);
+        }
+        else if (newState == ArrayStateEnum::DEGRADED && state != ArrayStateEnum::REBUILD)
         {
             iStateControl->Invoke(degradedState);
         }
@@ -438,8 +449,7 @@ ArrayState::_SetState(ArrayStateEnum newState)
 
         state = newState;
         POS_TRACE_INFO(EID(ARRAY_EVENT_STATE_CHANGED),
-            "Array state is changed to {}",
-            state.ToString());
+            "Array state is changed to {}", state.ToString());
     }
     _PublishCurrentState();
 }

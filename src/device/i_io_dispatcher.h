@@ -60,6 +60,7 @@ public:
 
     virtual void CompleteForThreadLocalDeviceList(void) = 0;
     virtual int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) = 0;
+    virtual void ProcessQueues(void) = 0;
 };
 
 } // namespace pos

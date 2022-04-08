@@ -61,8 +61,8 @@ public:
     ~EventWorker(void);
 
     void EnqueueEvent(EventSmartPtr Input);
+    EventSmartPtr DequeueEvent();
     uint32_t GetQueueSize(void);
-
     void Run(void);
 
 private:

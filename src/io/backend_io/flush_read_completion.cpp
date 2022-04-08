@@ -41,10 +41,11 @@
 
 namespace pos
 {
-FlushReadCompletion::FlushReadCompletion(Stripe* stripe, int arrayId)
+FlushReadCompletion::FlushReadCompletion(Stripe* stripe, int arrayId, EventScheduler* eventSchedulerArg)
 : Callback(false, CallbackType_FlushReadCompletion),
   stripe(stripe),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  eventScheduler(eventSchedulerArg)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -65,7 +66,11 @@ FlushReadCompletion::_DoSpecificJob(void)
             "Fail to allocate memory");
         return false;
     }
-    EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+    if (nullptr == eventScheduler)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
+    eventScheduler->EnqueueEvent(flushEvent);
 
     return true;
 }

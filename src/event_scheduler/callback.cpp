@@ -59,7 +59,7 @@ DumpModule<DumpBuffer> dumpCallbackError(DUMP_NAME,
     DumpModule<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
     DEFAULT_DUMP_ON);
 
-Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg)
+Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg, EventScheduler* eventSchedulerArg)
 : Event(isFrontEnd),
   errorCount(0),
   errorBitMap((int)IOErrorType::CALLBACK_ERROR_MAX_COUNT),
@@ -70,7 +70,8 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
   timeoutChecker(timeoutCheckerArg),
   returnAddress(nullptr),
   executed(false),
-  type(type)
+  type(type),
+  eventScheduler(eventSchedulerArg)
 {
     objectAddress = reinterpret_cast<uint64_t>(this);
     airlog("LAT_Callback", "AIR_NEW", type, objectAddress);
@@ -82,6 +83,10 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
             timeoutChecker = new SystemTimeoutChecker;
             timeoutChecker->SetTimeout(timeoutNs);
         }
+    }
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
     }
 }
 
@@ -215,7 +220,7 @@ Callback::_InvokeCallee(void)
             return;
         }
 
-        EventSchedulerSingleton::Instance()->EnqueueEvent(callee);
+        eventScheduler->EnqueueEvent(callee);
     }
 }
 
