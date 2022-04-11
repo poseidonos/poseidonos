@@ -30,7 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "backend_policy.h"
+
 #include <atomic>
 #include <mutex>
 #include <queue>
@@ -41,60 +42,51 @@
 
 namespace pos
 {
-class EventWorker;
-class EventQueue;
-class SchedulerQueue;
-class QosManager;
-
-class BackendPolicy
+BackendPolicy::BackendPolicy(QosManager* qosManagerArg, std::vector<EventWorker*>* workerArrayInput, uint32_t workerCount, uint32_t ioWorkerCount)
+: qosManager(qosManagerArg),
+  workerArray(workerArrayInput),
+  workerCount(workerCount)
 {
-public:
-    BackendPolicy(QosManager* qosManagerArg,
-        std::vector<EventWorker*>* workerArrayInput, uint32_t workerCount, uint32_t ioWorkerCount);
-
-    void Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NODES],
-        std::vector<uint32_t> itotalWorkerIDVector, bool inumaDedicatedSchedulingPolicy);
-    virtual ~BackendPolicy();
-    virtual void EnqueueEvent(EventSmartPtr input) = 0;
-    virtual std::queue<EventSmartPtr> DequeueEvents(void) = 0;
-    virtual int Run() = 0;
-    virtual EventSmartPtr PickWorkerEvent(EventWorker*) = 0;
-    virtual void CheckAndSetQueueOccupancy(BackendEvent eventId) = 0;
-
-    inline void IoEnqueued(BackendEvent type, uint64_t size)
+    numaDedicatedSchedulingPolicy = false;
+    workerArray = {nullptr};
+    for (int type = BackendEvent_Start; type < BackendEvent_Count; type++)
     {
-        ioControl.currentIOCount[type] += size / Ubio::BYTES_PER_UNIT;
+        queueOccupied[type] = false;
+        eventQueue[type] = nullptr;
+        ioControl.allowedIOCount[type] = 0;
+        ioControl.currentIOCount[type] = 0;
     }
+}
 
-    inline void IoDequeued(BackendEvent type, uint64_t size)
+BackendPolicy::~BackendPolicy()
+{
+    qosManager = nullptr;
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
-        ioControl.currentIOCount[type] -= size / Ubio::BYTES_PER_UNIT;
+        delete eventQueue[event];
     }
+}
 
-    inline int32_t GetAllowedIoCount(BackendEvent type)
+void
+BackendPolicy::Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NODES],
+    std::vector<uint32_t> itotalWorkerIDVector, bool inumaDedicatedSchedulingPolicy)
+{
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
-        return ioControl.allowedIOCount[type] - ioControl.currentIOCount[type];
+        eventQueue[event] = new SchedulerQueue{qosManager};
     }
-
-protected:
-    bool _GetQueueOccupancy(BackendEvent eventId);
-    static const uint32_t MAX_NUMA = RTE_MAX_NUMA_NODES;
-    QosManager* qosManager;
-    std::vector<EventWorker*>* workerArray;
-    uint32_t workerCount;
-    std::vector<uint32_t> workerIDPerNumaVector[MAX_NUMA];
-    std::vector<uint32_t> totalWorkerIDVector;
-    bool numaDedicatedSchedulingPolicy;
-
-    std::atomic<uint64_t> outstandingFrontendIO;
-    std::atomic<bool> queueOccupied[BackendEvent_Count];
-    SchedulerQueue* eventQueue[BackendEvent_Count];
-    std::mutex queueLock[BackendEvent_Count];
-    struct IoControl
+    for (unsigned int numa = 0; numa < RTE_MAX_NUMA_NODES; ++numa)
     {
-        std::atomic<int32_t> currentIOCount[BackendEvent_Count];
-        std::atomic<int32_t> allowedIOCount[BackendEvent_Count];
-    } ioControl;
-};
+        workerIDPerNumaVector[numa] = iworkerIDPerNumaVector[numa];
+    }
+    totalWorkerIDVector = itotalWorkerIDVector;
+    numaDedicatedSchedulingPolicy = inumaDedicatedSchedulingPolicy;
+}
+
+bool
+BackendPolicy::_GetQueueOccupancy(BackendEvent eventId)
+{
+    return queueOccupied[eventId];
+}
 
 } // namespace pos
