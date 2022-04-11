@@ -73,7 +73,7 @@ BackendPolicy::Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NO
 {
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
-        eventQueue[event] = new SchedulerQueue{qosManager};
+        eventQueue[event] = new SchedulerQueue {qosManager};
     }
     for (unsigned int numa = 0; numa < RTE_MAX_NUMA_NODES; ++numa)
     {
