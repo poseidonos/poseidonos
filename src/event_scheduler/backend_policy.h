@@ -31,13 +31,16 @@
  */
 
 #pragma once
+
+#include <rte_config.h>
+
 #include <atomic>
 #include <mutex>
 #include <queue>
 #include <vector>
 
-#include "src/event_scheduler/scheduler_queue.h"
-#include "src/qos/qos_manager.h"
+#include "src/bio/ubio.h"
+#include "src/include/backend_event.h"
 
 namespace pos
 {
@@ -45,6 +48,8 @@ class EventWorker;
 class EventQueue;
 class SchedulerQueue;
 class QosManager;
+
+const uint32_t FE_QUEUES = 47;
 
 class BackendPolicy
 {

@@ -48,7 +48,6 @@
 
 namespace pos
 {
-
 class AffinityManager;
 class ConfigManager;
 class BackendPolicy;
@@ -58,7 +57,6 @@ class SchedulerQueue;
 class QosManager;
 class IIODispatcher;
 
-const uint32_t FE_QUEUES = 47;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Schedule events to Event worker
@@ -74,14 +72,14 @@ public:
     virtual ~EventScheduler(void);
     void Initialize(uint32_t workerCountInput, cpu_set_t schedulerCPUInput,
         cpu_set_t eventCPUSetInput);
-    void InjectIODispatcher(IIODispatcher *ioDispatcher);
+    void InjectIODispatcher(IIODispatcher* ioDispatcher);
     void EjectIODispatcher(void);
     virtual void EnqueueEvent(EventSmartPtr input);
     std::queue<EventSmartPtr> DequeueEvents(void);
     virtual int32_t GetAllowedIoCount(BackendEvent type);
     virtual void IoEnqueued(BackendEvent type, uint64_t size);
     virtual void IoDequeued(BackendEvent type, uint64_t size);
-    virtual EventSmartPtr PickWorkerEvent(EventWorker *worker);
+    virtual EventSmartPtr PickWorkerEvent(EventWorker* worker);
     virtual void CheckAndSetQueueOccupancy(BackendEvent eventId);
     void Run(void);
     BackendPolicy* policy;
@@ -89,6 +87,7 @@ public:
     {
         terminateStarted = value;
     }
+
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
     std::atomic<bool> exit;
@@ -104,7 +103,7 @@ private:
     QosManager* qosManager;
     ConfigManager* configManager;
     AffinityManager* affinityManager;
-    IIODispatcher *ioDispatcher;
+    IIODispatcher* ioDispatcher;
     std::atomic<bool> terminateStarted;
 };
 
