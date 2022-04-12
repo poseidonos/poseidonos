@@ -192,7 +192,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     }
                     if (prevVolPolicy.minIops != 0)
                     {
-                         errorMsg = "Min IOPS already set for the volume, please call QoS reset to set Min Bandwidth";
+                         errorMsg = "Min IOPS already set for the volume. Please call poseidonos-cli qos reset and then set Min Bw using poseidonos-cli qos create";
                          return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
                     }
                     newVolPolicy.policyChange = true;
@@ -274,7 +274,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     }
                     if (prevVolPolicy.minBw != 0)
                     {
-                         errorMsg = "Min Bw already set for the volume, please call QoS reset to set Min IOPS";
+                         errorMsg = "Min Bw already set for the volume. Please call poseidonos-cli qos reset and then set Min IOPS using poseidonos-cli qos create";
                          return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
                     }
                     newVolPolicy.policyChange = true;
