@@ -6,10 +6,10 @@ poseidonos-cli - A command-line interface for PoseidonOS
 
 poseidonos-cli - A command-line interface for PoseidonOS
 
-	PoseidonOS command-ine interface (PoseidonOS CLI) is a management tool for PoseidonOS.
+	PoseidonOS command-line interface (PoseidonOS CLI) is a management tool for PoseidonOS.
 	Using PoseidonOS CLI, you can start/stop PoseidonOS and manage arrays, devices, and volumes of PoseidonOS.
 	
-	To see detailed information about the commands of PoseidonOS, type --help or -h for each command.
+	Type --help or -h with the command to see detailed information about each command.
 
 Syntax: 
   poseidonos-cli [global-flags] commands subcommand [flags]
