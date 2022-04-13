@@ -78,7 +78,8 @@ TelemetryClient::DeregisterPublisher(std::string name)
     auto ret = publisherList.erase(name);
     if (ret == 0)
     {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! tried to erase publisher:{}, but it's not registered", name);
+        // activate logs after the official release of telemetry
+        // POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! tried to erase publisher:{}, but it's not registered", name);
     }
     else
     {
