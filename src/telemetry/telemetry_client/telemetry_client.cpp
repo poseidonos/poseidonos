@@ -189,4 +189,11 @@ TelemetryClient::Notify(const std::string& key, const std::string& value)
     return true;
 }
 
+bool
+TelemetryClient::IsPublisherRegistered(const std::string name)
+{
+    auto ret = publisherList.find(name);
+    return (ret != publisherList.end());
+}
+
 } // namespace pos

@@ -62,6 +62,7 @@ public:
     virtual bool StartUsingDataPoolForAllPublisher(void);
     virtual bool StopUsingDataPoolForAllPublisher(void);
     virtual bool Notify(const std::string& key, const std::string& value) override;
+    virtual bool IsPublisherRegistered(const std::string name);
 
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;
