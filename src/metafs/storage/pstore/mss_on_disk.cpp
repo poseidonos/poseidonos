@@ -31,18 +31,14 @@
  */
 
 #include "src/metafs/storage/pstore/mss_on_disk.h"
-#include "src/metafs/storage/pstore/mss_disk_inplace.h"
-#include "src/metafs/config/metafs_config.h"
-#include "src/metafs/log/metafs_log.h"
-#include "src/include/array_config.h"
-#ifdef LEGACY_IOPATH
-#include "mss_disk_handler.h"
-#endif
 
-#include <list>
 #include <utility>
 
+#include "src/include/array_config.h"
 #include "src/include/memory.h"
+#include "src/metafs/config/metafs_config.h"
+#include "src/metafs/log/metafs_log.h"
+#include "src/metafs/storage/pstore/mss_disk_inplace.h"
 
 namespace pos
 {
@@ -72,12 +68,12 @@ MssOnDisk::~MssOnDisk(void)
 void
 MssOnDisk::_Finalize(void)
 {
-    for (int i = mssDiskPlace.size() - 1; i >=0 ; --i)
+    for (int i = mssDiskPlace.size() - 1; i >= 0; --i)
     {
         if (mssDiskPlace[i] != nullptr)
         {
             delete mssDiskPlace[i];
-            mssDiskPlace[i]= nullptr;
+            mssDiskPlace[i] = nullptr;
         }
     }
 }
@@ -201,16 +197,14 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
     MetaLpnType currLpn = pageNumber, currLpnCnt = numPages;
     const MetaLpnType maxLpnCntPerIO = storagelld->GetMaxLpnCntPerIOSubmit();
     uint8_t* currBuf = static_cast<uint8_t*>(buffer);
+
     while (numPages > 0)
     {
         pos::LogicalBlkAddr blkAddr =
             storagelld->CalculateOnDiskAddress(currLpn); // get physical address
         currLpnCnt = (numPages > (maxLpnCntPerIO - blkAddr.offset)) ? (maxLpnCntPerIO - blkAddr.offset) : numPages;
 
-        BufferEntry buffEntry(currBuf, currLpnCnt);
-        std::list<BufferEntry> bufferList;
-        bufferList.push_back(buffEntry);
-
+        std::list<BufferEntry> bufferList = _GetBufferList(mediaType, blkAddr.offset, currLpnCnt, currBuf);
         IOSubmitHandlerStatus ioStatus;
         do
         {
@@ -250,6 +244,29 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
     }
 
     return status;
+}
+
+std::list<BufferEntry>
+MssOnDisk::_GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer)
+{
+    std::list<BufferEntry> list;
+    const uint64_t BLOCKS_PER_CHUNK = mssDiskPlace[(int)mediaType]->GetLpnCntPerChunk();
+    const uint64_t START_CHUNK = offset / BLOCKS_PER_CHUNK;
+    const uint64_t LAST_CHUNK = (offset + count - 1) / BLOCKS_PER_CHUNK;
+    uint64_t blocksInThisChunk = (START_CHUNK == LAST_CHUNK) ? count : (((START_CHUNK + 1) * BLOCKS_PER_CHUNK) - offset);
+    uint8_t* currentBuffer = buffer;
+    uint64_t remainBlocks = count;
+
+    for (uint64_t i = START_CHUNK; i <= LAST_CHUNK; ++i)
+    {
+        BufferEntry buffEntry(currentBuffer, blocksInThisChunk);
+        list.push_back(buffEntry);
+        currentBuffer += (blocksInThisChunk * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+        remainBlocks -= blocksInThisChunk;
+        blocksInThisChunk = std::min(BLOCKS_PER_CHUNK, remainBlocks);
+    }
+
+    return list;
 }
 
 /**

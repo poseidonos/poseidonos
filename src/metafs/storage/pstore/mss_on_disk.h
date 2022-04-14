@@ -33,14 +33,17 @@
 #ifndef _INCLUDE_MSS_ONDISK_INCLUDE_H
 #define _INCLUDE_MSS_ONDISK_INCLUDE_H
 
-#include <vector>
+#include <list>
 #include <string>
+#include <vector>
+
 #include "mfs_asynccb_cxt_template.h"
-#include "src/metafs/storage/mss.h"
 #include "mss_disk_place.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/array/ft/buffer_entry.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/backend_event.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/metafs/storage/mss.h"
 
 #define INPLACE 1
 
@@ -115,6 +118,7 @@ private:
     POS_EVENT_ID _SendAsyncRequest(IODirection direction, MssAioCbCxt* cb);
     void _AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnType& targetPage, MetaLpnType& targetNumPages);
     void _Finalize(void);
+    std::list<BufferEntry> _GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer);
 
     std::vector<MssDiskPlace*> mssDiskPlace;
     std::vector<uint64_t> metaCapacity;

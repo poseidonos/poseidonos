@@ -31,9 +31,10 @@
  */
 
 #include "mss_disk_inplace.h"
-#include "src/array_mgmt/array_manager.h"
 
 #include <string>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -72,6 +73,13 @@ MssDiskInplace::GetMaxLpnCntPerIOSubmit(void)
 {
     return array->GetSizeInfo(partitionType)->blksPerStripe;
 }
+
+uint32_t
+MssDiskInplace::GetLpnCntPerChunk(void)
+{
+    return array->GetSizeInfo(partitionType)->blksPerChunk;
+}
+
 /**
  * Calculate on disk address for given LPN.
  * This is for inplace update of data. So static mapping.
