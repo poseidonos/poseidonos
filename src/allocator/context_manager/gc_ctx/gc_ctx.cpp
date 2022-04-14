@@ -84,6 +84,10 @@ GcCtx::GetCurrentGcMode(int numFreeSegments)
     {
         newGcMode = MODE_NORMAL_GC;
     }
+    else
+    {
+        newGcMode = MODE_NO_GC;
+    }
 
     if (curGcMode != newGcMode)
     {
