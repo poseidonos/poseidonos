@@ -484,7 +484,7 @@ MbrManager::CreateAbr(ArrayMeta& meta)
     ret = mapMgr->CheckAllDevices(meta);
     if (ret != 0)
     {
-        POS_TRACE_ERROR(ret, "Device is already in other array");
+        POS_TRACE_ERROR(ret, "");
         pthread_rwlock_unlock(&mbrLock);
         return ret;
     }
