@@ -71,8 +71,7 @@ DeleteSubsystemCommand::Execute(json& doc, string rid)
     if (ret != SUCCESS)
     {
         return jFormat.MakeResponse(
-            "DELETESUBSYSTEM", rid, FAIL,
-            errorMessage, GetPosInfo());
+            "DELETESUBSYSTEM", rid, ret, errorMessage, GetPosInfo());
     }
 
     return jFormat.MakeResponse(

@@ -1430,4 +1430,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::VOL_REQ_PROCESSED_BUT_ERROR_OCCURED,
             new PosEventInfoEntry("VOL_REQ_PROCESSED_BUT_ERROR_OCCURED",
                 "failed to process the volume request perfectly", "Some requests were successful, but an error occurred during execution.", "Please report the errors")},
+        {(int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
+            new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
+                "failed to delete volumes", "a timeout has occured", "Please report the errors")},
     };
