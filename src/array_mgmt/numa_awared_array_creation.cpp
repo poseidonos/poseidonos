@@ -51,6 +51,12 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
 
     DevName bufferName(buffers.front());
     UblockSharedPtr buf = devMgr->GetDev(bufferName);
+    if (buf == nullptr)
+    {
+        result.code = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
+        POS_TRACE_WARN(result.code, "nvm_name:{}", bufferName);
+        return;
+    }
     int targetNuma = buf->GetNuma();
     size_t numofDevsInTargetNuma = 0;
     size_t maxNumofDevsInTargetNumaWithSameCapacity = 0;
