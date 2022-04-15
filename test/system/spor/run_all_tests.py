@@ -15,13 +15,16 @@ RESET = "\033[0;0m"
 def print_msg(msg):
     print(GREEN + msg + RESET)
 
+
 def print_err(msg):
     print(RED + msg + RESET)
+
 
 def get_tests(filter):
     test_list = glob.glob(filter)
     test_list.sort()
     return test_list
+
 
 def get_test_list(test_set_filter=[]):
     if(len(test_set_filter) == 0):
@@ -33,6 +36,7 @@ def get_test_list(test_set_filter=[]):
     for test_name in test_set_filter:
         tests += get_tests(test_name)
     return tests
+
 
 def run_test(testlist):
     print_msg("[Test list]\n- " + '\n- '.join(testlist))
@@ -64,6 +68,11 @@ if __name__ == "__main__":
         sys.argv = sys.argv[:-2]
     else:
         tests = get_test_list()
+
+    if len(sys.argv) > 6 and sys.argv[5] == "-r":
+        run_time = sys.argv[6]
+    else:
+        run_time = 0
 
     result = run_test(tests)
 

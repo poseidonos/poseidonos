@@ -48,3 +48,4 @@ EXPECTED_MEMORY_FIO = 0.4
 max_num_vol_per_array = 10
 num_data_ssds_per_array = 3
 num_spare_ssds_per_array = 0
+run_time = 10

@@ -17,7 +17,7 @@ import TEST_SETUP_POS
 arrayId = 0
 volId = 1
 current_test = 0
-run_time = 10
+run_time = 0
 
 ############################################################################
 # Test Description
@@ -75,6 +75,8 @@ if __name__ == "__main__":
 
     TEST_SETUP_POS.create_subsystem(arrayId, volId)
     TEST_SETUP_POS.create_volume(arrayId, volId)
+
+    run_time = TEST.run_time
 
     execute()
 
