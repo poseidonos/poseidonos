@@ -56,6 +56,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dev);
         if (ctx && factory != nullptr)
         {
+            ctx->isWT = isWT;
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
@@ -65,7 +66,6 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                 bhvr->GetContext()->arrayIndex = arrayId;
                 bhvr->GetContext()->prog = prog;
                 bhvr->GetContext()->logger = rLogger;
-                bhvr->GetContext()->isWT = isWT;
                 bhvr->UpdateProgress(0);
                 PartitionRebuild* ptnRbd = new PartitionRebuild(bhvr);
                 if (ptnRbd->TotalStripes() > 0)

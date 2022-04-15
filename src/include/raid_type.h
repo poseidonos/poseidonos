@@ -76,7 +76,7 @@ private:
     RaidTypeEnum val;
     string RAID_STR[(int)RaidTypeEnum::TYPE_COUNT] =
     {
-        "NOT_SUPPORTED"
+        "NOT_SUPPORTED",
         "NONE",
         "RAID0",
         "RAID5",

@@ -148,23 +148,25 @@ Array::_LoadImpl(void)
 int
 Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({})", name_);
-
     RaidType dataRaidType = RaidType(dataFt);
     RaidType metaRaidType = RaidType(metaFt);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({}), metaFt:{}, dataFt:{}",
+        name_, metaRaidType.ToString(), dataRaidType.ToString());
+
     if (dataRaidType == RaidTypeEnum::NOT_SUPPORTED ||
         metaRaidType == RaidTypeEnum::NOT_SUPPORTED)
     {
         int ret = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
-        POS_TRACE_INFO(ret, "RaidType, Data: {}, Meta: {}", dataFt, metaFt);
+        POS_TRACE_WARN(ret, "metaFt: {}, dataFt: {}",
+            metaRaidType.ToString(), dataRaidType.ToString());
         return ret;
     }
-    bool needSpare = dataRaidType != RaidTypeEnum::NONE &&
+    bool canAddSpare = dataRaidType != RaidTypeEnum::NONE &&
                 dataRaidType != RaidTypeEnum::RAID0;
-    if (needSpare == false && nameSet.spares.size() > 0)
+    if (canAddSpare == false && nameSet.spares.size() > 0)
     {
         int ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
-        POS_TRACE_INFO(ret, "RaidType: {}", dataFt);
+        POS_TRACE_WARN(ret, "RaidType: {}", dataRaidType.ToString());
         return ret;
     }
 
