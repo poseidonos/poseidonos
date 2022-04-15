@@ -48,10 +48,10 @@ class ContextIoManager
 public:
     enum IOTYPE
     {
-        IOTYPE_READ,
-        IOTYPE_FLUSH,
-        IOTYPE_REBUILDFLUSH,
-        IOTYPE_ALL
+        IOTYPE_READ = 1,
+        IOTYPE_FLUSH = 2,
+        IOTYPE_REBUILD_FLUSH = 4,
+        IOTYPE_ALL = (IOTYPE_READ | IOTYPE_FLUSH | IOTYPE_REBUILD_FLUSH),
     };
     ContextIoManager(void) = default;
     ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp,
@@ -78,6 +78,7 @@ private:
     int _GetNumFilesReading(void);
     int _GetNumFilesFlushing(void);
     int _GetNumRebuildFlush(void);
+    uint32_t _GetPendingIoCount(uint32_t checkType);
 
     std::atomic<bool> flushInProgress;
 

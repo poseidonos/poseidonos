@@ -158,33 +158,43 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
     return ret;
 }
 
+uint32_t
+ContextIoManager::_GetPendingIoCount(uint32_t checkType)
+{
+    uint32_t pendingIoCount = 0;
+
+    if (checkType & IOTYPE_READ)
+    {
+        pendingIoCount += _GetNumFilesReading();
+    }
+
+    if (checkType & IOTYPE_FLUSH)
+    {
+        pendingIoCount += _GetNumFilesFlushing();
+    }
+
+    if (checkType & IOTYPE_REBUILD_FLUSH)
+    {
+        pendingIoCount += _GetNumRebuildFlush();
+    }
+
+    return pendingIoCount;
+}
+
 void
 ContextIoManager::WaitPendingIo(IOTYPE type)
 {
-    while (type == IOTYPE_ALL)
+    if (true == addrInfo->IsUT())
     {
-        if ((_GetNumFilesReading() + _GetNumFilesFlushing() + _GetNumRebuildFlush() == 0) || (addrInfo->IsUT() == true))
-        {
-            return;
-        }
-        usleep(1);
+        return;
     }
-    while (type == IOTYPE_READ)
+
+    uint32_t pendingIoCount = 0;
+    do
     {
-        if ((_GetNumFilesReading() == 0) || (addrInfo->IsUT() == true))
-        {
-            return;
-        }
+        pendingIoCount = _GetPendingIoCount((uint32_t)type);
         usleep(1);
-    }
-    while (type == IOTYPE_FLUSH)
-    {
-        if ((_GetNumFilesFlushing() == 0) || (addrInfo->IsUT() == true))
-        {
-            return;
-        }
-        usleep(1);
-    }
+    } while (0 != pendingIoCount);
 }
 
 void
