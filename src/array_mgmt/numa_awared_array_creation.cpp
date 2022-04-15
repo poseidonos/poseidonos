@@ -54,7 +54,7 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
     if (buf == nullptr)
     {
         result.code = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
-        POS_TRACE_WARN(result.code, "nvm_name:{}", bufferName);
+        POS_TRACE_WARN(result.code, "nvm_name:{}", buffers.front());
         return;
     }
     int targetNuma = buf->GetNuma();
