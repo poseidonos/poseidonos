@@ -98,7 +98,7 @@ GcCtx::GetCurrentGcMode(int numFreeSegments)
         {
             blockAllocStatus->ProhibitUserBlockAllocation();
         }
-        else if (newGcMode == MODE_NORMAL_GC)
+        else
         {
             blockAllocStatus->PermitUserBlockAllocation();
         }
