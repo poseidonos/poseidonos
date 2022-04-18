@@ -22,9 +22,11 @@ jobs:
 
     - uses: actions/checkout@v2
 
+    # Need separation building from running
     - name: Build UT and Run
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/unit/ut_build_run_unittest.sh
         .github/workflows/script/unit/ut_build_run_unittest.sh ${{github.workspace}}
 

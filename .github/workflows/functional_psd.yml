@@ -46,6 +46,7 @@ jobs:
     - name: Fault Tolerance Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/fault_tolerance_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup
@@ -71,6 +72,7 @@ jobs:
     - name: File Bench Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/filebench.py
         .github/workflows/script/filebench.py -r ${{github.workspace}}
 
@@ -98,6 +100,7 @@ jobs:
     - name: IO Path System Level Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/io_path_system_level.sh
         .github/workflows/script/io_path_system_level.sh ${{github.workspace}}
 
@@ -126,6 +129,7 @@ jobs:
     - name: Multi Volume IO Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/multi_volume_io_ci_test.sh
 
     - name: Clean Backup
@@ -152,6 +156,7 @@ jobs:
     - name: NPOR Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/npor_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup
@@ -177,6 +182,7 @@ jobs:
     - name: Flush Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh 
         .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh ${{github.workspace}}
 
@@ -197,6 +203,7 @@ jobs:
     - name: NVMe Smart Log Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/nvme_flush/nvme_smart_log.sh
         .github/workflows/script/nvme_flush/nvme_smart_log.sh ${{github.workspace}} 
 
@@ -223,6 +230,7 @@ jobs:
     - name: QoS Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/qos/qos.sh 
         .github/workflows/script/qos/qos.sh ${{github.workspace}} PM
 
@@ -250,6 +258,7 @@ jobs:
     - name: SPOR Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
         .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
 
@@ -276,6 +285,7 @@ jobs:
     - name: Volume Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/volume_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup

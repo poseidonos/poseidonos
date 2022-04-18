@@ -189,6 +189,7 @@ jobs:
         chmod +x .github/workflows/script/build_setup.sh
         .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
     
+    # Need separation building from running
     - name: UT Build and Run
       working-directory: ${{github.workspace}}
       run: |

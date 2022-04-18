@@ -29,9 +29,10 @@ jobs:
         chmod +x .github/workflows/script/build_setup.sh
         .github/workflows/script/build_setup.sh -t PM -r ${{github.sha}} -d ${{github.workspace}}
 
-    - name: Long Term VM Test
+    - name: Long Term Test
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/longterm.sh
         .github/workflows/script/longterm.sh ${{github.workspace}}
 

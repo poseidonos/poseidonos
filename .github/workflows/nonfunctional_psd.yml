@@ -53,12 +53,15 @@ jobs:
         .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
 
     - name: Performance Test - with Journal Off
+      id: with_journal_off
       working-directory: ${{github.workspace}}
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}}-${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf ibofos_for_perf_ci.conf -tr ${{github.sha}}_journal_off -tn POS_devel -r ${{github.workspace}}
         sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@${{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_off.csv ${{github.workspace}}
 
     - name: Performance Test - with Journal
+      id: with_journal
       working-directory: ${{github.workspace}}
       env:
         SW_128K_LIMIT: 0
@@ -66,6 +69,7 @@ jobs:
         RW_4K_LIMIT: 0
         RR_4k_LIMIT: 0
       run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}}-${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo jq -r  '.journal.enable |= true'  config/ibofos_for_perf_ci.conf > config/tmp.conf
         test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf tmp.conf -tr ${{github.sha}}_journal_on -tn POS_journal -sw $SW_128K_LIMIT -sr $SR_128K_LIMIT -rw $RW_4K_LIMIT -rr $RR_4K_LIMIT -r ${{github.workspace}}
         sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@{{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_on.csv ${{github.workspace}}
@@ -106,7 +110,8 @@ jobs:
 
     - name: Short-term Sustained Write
       working-directory: ${{github.workspace}}
-      run: | 
+      run: |
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/performance/sustained_write.sh
         .github/workflows/script/performance/sustained_write.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
 
@@ -149,6 +154,7 @@ jobs:
     - name: Short-term Sustained Write
       working-directory: ${{github.workspace}}
       run: | 
+        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/performance/sustained.sh
         .github/workflows/script/performance/sustained.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
 
