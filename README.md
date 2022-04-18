@@ -565,6 +565,9 @@ Name      |ID    |TotalCapacity                |RemainingCapacity            |Re
 --------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
 vol1      |0     |50T                          |50T                          |100        |Mounted    |0                |0
 ```
+- Note 1: the RemainingCapacity of a newly created volume is set to the TotalCapacity when the volume is mounted for the first time. 
+  Once every block of the volume is touched/written, the RemainingCapacity would remain at 0 until the volume gets deleted.
+  The RemainingCapacity captures the internal state of block mappings and should not be interpreted as user's file system free space.
 
 #### Retrieve NVM subsystem information
 Using the subsystem list command, you can see that the NVM namespace has been added to the NVM subsystem with its bdev_name.
