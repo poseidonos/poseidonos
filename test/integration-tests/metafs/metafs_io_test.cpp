@@ -30,8 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <atomic>
+#include <algorithm>
 #include <cstring>
 
+#include "src/metafs/common/metafs_stopwatch.h"
+#include "src/metafs/include/metafs_aiocb_cxt.h"
 #include "test/integration-tests/metafs/lib/test_metafs.h"
 
 using namespace std;
@@ -50,12 +54,30 @@ public:
     virtual ~MetaFsIoTest(void)
     {
     }
+    void DoneCallback(void* data)
+    {
+        ioDone = true;
+    }
 
 protected:
     int arrayId;
-    const size_t COUNT_OF_META_LPN_FOR_SSD = 1000;
-    const size_t COUNT_OF_META_LPN_FOR_NVM = 100;
+    std::atomic<bool> ioDone;
 };
+
+int
+GenerateSequentialDataPattern(void)
+{
+    static int i = 0;
+    return ++i;
+}
+
+enum PerformanceStage
+{
+    Start,
+    Done,
+    Count
+};
+
 
 TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_InRotation)
 {
@@ -104,5 +126,119 @@ TEST_F(MetaFsIoTest, testIfMetaFsCanRejectTheRequestsDueToOutOfRange)
 
     result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
     EXPECT_EQ(result, POS_EVENT_ID::MFS_INVALID_PARAMETER);
+}
+
+TEST_F(MetaFsIoTest, testIfPartialSyncIoCanBeWork)
+{
+    std::generate_n(writeBuf, BYTE_4K, GenerateSequentialDataPattern);
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    FileDescriptorType fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
+
+    rc = GetMetaFs(arrayId)->io->Write(fd, 0, 4, writeBuf, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Write(fd, 4, 128, writeBuf + 4, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Write(fd, 132, 8, writeBuf + 132, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Write(fd, 140, BYTE_4K - 140, writeBuf + 140, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+
+    memset(readBuf, 0, BYTE_4K);
+    rc = GetMetaFs(arrayId)->io->Read(fd, 0, 4, readBuf, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Read(fd, 4, 128, readBuf + 4, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Read(fd, 132, 8, readBuf + 132, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    rc = GetMetaFs(arrayId)->io->Read(fd, 140, BYTE_4K - 140, readBuf + 140, MetaStorageType::SSD);
+    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+
+    EXPECT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
+}
+
+TEST_F(MetaFsIoTest, testMetaFsPerformance_SyncWrite)
+{
+    const size_t TEST_SIZE = BYTE_4K * COUNT_OF_META_LPN_FOR_SSD;
+    MetaFsStopwatch<PerformanceStage> stopWatch;
+
+    stopWatch.StoreTimestamp();
+    for (int i = 0; i < TEST_SIZE / BYTE_4K; ++i)
+    {
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "iteration: " << i << ", write fail code: " << (int)result;
+    }
+    stopWatch.StoreTimestamp();
+
+    std::cout << "Write Size: " << (double)TEST_SIZE / 1024 / 1024 << " MB" << std::endl;
+    std::cout << "ElapsedTime: " << stopWatch.GetElapsedInMilli().count() << " ms" << std::endl;
+    std::cout << "Performance: " << (double)((double)TEST_SIZE / stopWatch.GetElapsedInMilli().count()) / 1024 / 1024 * 1000 << " MB/s" << std::endl;
+}
+
+TEST_F(MetaFsIoTest, testMetaFsPerformance_AsyncWrite)
+{
+    const size_t TEST_SIZE = BYTE_4K * COUNT_OF_META_LPN_FOR_SSD;
+    const FileDescriptorType fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
+    MetaFsStopwatch<PerformanceStage> stopWatch;
+    char* buffer = new char[TEST_SIZE];
+
+    ioDone = false;
+    MetaFsAioCbCxt cxt(MetaFsIoOpcode::Write, fd, arrayId, 0, TEST_SIZE, buffer, [&](void* data) { ioDone = true; });
+
+    stopWatch.StoreTimestamp();
+    POS_EVENT_ID result = GetMetaFs(arrayId)->io->SubmitIO(&cxt);
+    ASSERT_EQ(result, POS_EVENT_ID::SUCCESS);
+    while (!ioDone)
+    {
+    }
+    stopWatch.StoreTimestamp();
+
+    std::cout << "Write Size: " << (double)TEST_SIZE / 1024 / 1024 << " MB" << std::endl;
+    std::cout << "ElapsedTime: " << stopWatch.GetElapsedInMilli().count() << " ms" << std::endl;
+    std::cout << "Performance: " << (double)((double)TEST_SIZE / stopWatch.GetElapsedInMilli().count()) / 1024 / 1024 * 1000 << " MB/s" << std::endl;
+
+    delete[] buffer;
+}
+
+TEST_F(MetaFsIoTest, testMetaFsPerformance_SyncRead)
+{
+    const size_t TEST_SIZE = BYTE_4K * COUNT_OF_META_LPN_FOR_SSD;
+    MetaFsStopwatch<PerformanceStage> stopWatch;
+
+    stopWatch.StoreTimestamp();
+    for (int i = 0; i < TEST_SIZE / BYTE_4K; ++i)
+    {
+        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        ASSERT_EQ(result, POS_EVENT_ID::SUCCESS) << "iteration: " << i << ", write fail code: " << (int)result;
+    }
+    stopWatch.StoreTimestamp();
+
+    std::cout << "Read Size: " << (double)TEST_SIZE / 1024 / 1024 << " MB" << std::endl;
+    std::cout << "ElapsedTime: " << stopWatch.GetElapsedInMilli().count() << " ms" << std::endl;
+    std::cout << "Performance: " << (double)((double)TEST_SIZE / stopWatch.GetElapsedInMilli().count()) / 1024 / 1024 * 1000 << " MB/s" << std::endl;
+}
+
+TEST_F(MetaFsIoTest, testMetaFsPerformance_AsyncRead)
+{
+    const size_t TEST_SIZE = BYTE_4K * COUNT_OF_META_LPN_FOR_SSD;
+    const FileDescriptorType fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
+    MetaFsStopwatch<PerformanceStage> stopWatch;
+    char* buffer = new char[TEST_SIZE];
+
+    ioDone = false;
+    MetaFsAioCbCxt cxt(MetaFsIoOpcode::Read, fd, arrayId, 0, TEST_SIZE, buffer, [&](void* data) { ioDone = true; });
+
+    stopWatch.StoreTimestamp();
+    POS_EVENT_ID result = GetMetaFs(arrayId)->io->SubmitIO(&cxt);
+    ASSERT_EQ(result, POS_EVENT_ID::SUCCESS);
+    while (!ioDone)
+    {
+    }
+    stopWatch.StoreTimestamp();
+
+    std::cout << "Read Size: " << (double)TEST_SIZE / 1024 / 1024 << " MB" << std::endl;
+    std::cout << "ElapsedTime: " << stopWatch.GetElapsedInMilli().count() << " ms" << std::endl;
+    std::cout << "Performance: " << (double)((double)TEST_SIZE / stopWatch.GetElapsedInMilli().count()) / 1024 / 1024 * 1000 << " MB/s" << std::endl;
+
+    delete[] buffer;
 }
 } // namespace pos

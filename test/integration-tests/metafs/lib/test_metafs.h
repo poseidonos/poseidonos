@@ -118,13 +118,13 @@ public:
             ASSERT_EQ(0, GetMetaFs(arrayId)->Init());
 
             // create meta file
-            MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+            POS_EVENT_ID rc_mgmt;
 
             for (auto& info : files[arrayId])
             {
                 rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
                     info.second.fileSize, info.second.prop, info.first);
-                ASSERT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
+                ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
                 ASSERT_EQ(GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             }
         }
@@ -261,7 +261,7 @@ protected:
     std::vector<std::shared_ptr<BufferContext>> bufferList;
 
     const size_t BYTE_4K = 4032;
-    const size_t COUNT_OF_META_LPN_FOR_SSD = 1000;
+    const size_t COUNT_OF_META_LPN_FOR_SSD = 10000;
     const size_t COUNT_OF_META_LPN_FOR_NVM = 100;
 
     std::atomic<size_t> doneCount;
