@@ -80,6 +80,7 @@
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/reset_event_wrr_policy_command.h"
 #include "src/cli/update_event_wrr_policy_command.h"
+#include "src/cli/get_system_property_command.h"
 
 namespace pos_cli
 {
@@ -132,6 +133,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
     cmdDictionary["RESETEVENTWRRPOLICY"] = new ResetEventWrrPolicyCommand();
+    cmdDictionary["GETSYSTEMPROPERTY"] = new GetSystemPropertyCommand();
 }
 
 RequestHandler::~RequestHandler(void)

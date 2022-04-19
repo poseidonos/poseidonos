@@ -43,6 +43,22 @@ type POSInfoData struct {
 	VERSION string `json:version"`
 }
 
+type POSPropertyResponse struct {
+	RID     string            `json:"rid"`
+	COMMAND string            `json:"command"`
+	RESULT  POSPropertyResult `json:"result,omitempty"`
+	INFO    Info              `json:"info"`
+}
+
+type POSPropertyResult struct {
+	STATUS Status          `json:"status,omitempty"`
+	DATA   POSPropertyData `json:"data,omitempty"`
+}
+
+type POSPropertyData struct {
+	REBUILDPOLICY string `json:"rebuild_policy"`
+}
+
 // Response for LISTARRAY & ARRAYINFO commands
 type ListArrayResponse struct {
 	RID     string          `json:"rid"`

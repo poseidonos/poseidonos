@@ -9,7 +9,7 @@ System commands for PoseidonOS. Use this command category to start/stop
 PoseidonOS or get the information of PoseidonOS.
 
 Syntax: 
-  poseidonos-cli system [start|stop|info|set-property] [flags]
+  poseidonos-cli system [start|stop|info|set-property|get-property] [flags]
 
 Example (to start PoseidonOS):
   poseidonos-cli system start
@@ -40,6 +40,7 @@ poseidonos-cli system [flags]
 ### SEE ALSO
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli system get-property](poseidonos-cli_system_get-property.md)	 - Display the property of PoseidonOS.
 * [poseidonos-cli system info](poseidonos-cli_system_info.md)	 - Display information of PoseidonOS.
 * [poseidonos-cli system set-property](poseidonos-cli_system_set-property.md)	 - Set the property of PoseidonOS.
 * [poseidonos-cli system start](poseidonos-cli_system_start.md)	 - Start PoseidonOS.

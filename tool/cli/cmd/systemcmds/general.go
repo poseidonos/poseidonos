@@ -12,7 +12,7 @@ System commands for PoseidonOS. Use this command category to start/stop
 PoseidonOS or get the information of PoseidonOS.
 
 Syntax: 
-  poseidonos-cli system [start|stop|info|set-property] [flags]
+  poseidonos-cli system [start|stop|info|set-property|get-property] [flags]
 
 Example (to start PoseidonOS):
   poseidonos-cli system start
@@ -27,4 +27,5 @@ func init() {
 	SystemCmd.AddCommand(StopSystemCmd)
 	SystemCmd.AddCommand(SystemInfoCmd)
 	SystemCmd.AddCommand(SetSystemPropCmd)
+	SystemCmd.AddCommand(GetSystemPropCmd)
 }

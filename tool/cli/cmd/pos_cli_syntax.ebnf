@@ -186,6 +186,7 @@ SystemCmd = "system" ,
   | StopSystemCmd
   | SystemInfoCmd
   | SetSystemPropertyCmd
+  | GetSystemPropertyCmd
   ) ;
 
 StartSystemCmd = "start" ;
@@ -196,6 +197,8 @@ SystemInfoCmd = "info" ;
 
 SetSystemPropertyCmd = "set-property" , [ "--rebuild-impact" ,
   ( "high" | "low" ) ] ;
+
+GetSystemPropertyCmd = "get-property" ;
 
 LoggerCmd = "logger" ,
   ( SetLogLevelCmd

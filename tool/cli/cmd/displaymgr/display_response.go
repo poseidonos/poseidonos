@@ -542,6 +542,21 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		fmt.Println(res.RESULT.DATA.VERSION)
 
+	case "GETSYSTEMPROPERTY":
+		res := messages.POSPropertyResponse{}
+		json.Unmarshal([]byte(resJSON), &res)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+		fmt.Fprintln(w, "RebuildPerfImpact\t: "+res.RESULT.DATA.REBUILDPOLICY)
+
+		w.Flush()
+
 	case "STARTPOS":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
