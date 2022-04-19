@@ -1,5 +1,0 @@
-POS_ADD_UNIT_TEST(mvm_MetaFileInodeMgr_test_ut mvm_MetaFileInodeMgr_test_test.cpp)
-POS_ADD_UNIT_TEST(mvm_func_negative_test_ut mvm_func_negative_test_test.cpp)
-POS_ADD_UNIT_TEST(mvm_func_positive_test_ut mvm_func_positive_test_test.cpp)
-POS_ADD_UNIT_TEST(mvm_base_test_ut mvm_base_test_test.cpp)
-POS_ADD_UNIT_TEST(mvm_test_ut mvm_test_test.cpp)

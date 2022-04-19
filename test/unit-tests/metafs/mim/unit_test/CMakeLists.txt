@@ -1,6 +1,0 @@
-POS_ADD_UNIT_TEST(mim_aio_positive_test_ut mim_aio_positive_test_test.cpp)
-POS_ADD_UNIT_TEST(mim_test_ut mim_test_test.cpp)
-POS_ADD_UNIT_TEST(mim_io_range_overlap_chker_test_ut mim_io_range_overlap_chker_test_test.cpp)
-POS_ADD_UNIT_TEST(mim_func_positive_test_ut mim_func_positive_test_test.cpp)
-POS_ADD_UNIT_TEST(mim_func_negative_test_ut mim_func_negative_test_test.cpp)
-POS_ADD_UNIT_TEST(mim_base_test_ut mim_base_test_test.cpp)
