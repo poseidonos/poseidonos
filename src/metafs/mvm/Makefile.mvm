@@ -1,36 +1,7 @@
 include $(MFS_TOP_DIR)/mvm/Makefile.include
 
-UT_MVM_EN := 0
-MOCK_MVM_EN := 0
-FAKE_MVM_EN := 0
-STUB_MVM_EN := 0
-
-ifeq ($(MFS_INTEGRATION_TEST_EN),1)
-else
-ifeq ($(ut),mvm)
-$(info Meta filesystem unit test option enabled - for "MVM block" ...)
-MFS_INTEGRATION_TEST_EN = 0
-UT_MVM_EN = 1
-else ifeq ($(ut),)
-else
-MOCK_MVM_EN = 1
-endif
-endif # MFS_INTEGRATION_TEST_EN
-########################################
-
 MVM_SRCS += \
 	mf_inode.cpp \
-
-ifeq ($(MOCK_MVM_EN), 1)
-
-MFS_INCLUDE_PATH += \
-	mvm/mock \
-
-MVM_SRCS += \
-	mvm_top_mock.cpp
-
-else
-MVM_SRCS += \
 	meta_volume.cpp \
 	ssd_meta_volume.cpp \
 	nvram_meta_volume.cpp \
@@ -46,22 +17,4 @@ MVM_SRCS += \
 	inode_table.cpp \
 	on_volume_meta_region_mgr.cpp \
 
-endif
-
-ifeq ($(UT_MVM_EN), 1)
-UT_PATH += \
-	mvm/unit_test \
-
-endif
-
-ifeq ($(UT_MVM_EN), 1)
-#UT_SRCS += \
-#	mvm_test.cpp \
-#	mvm_func_positive_test.cpp \
-#	mvm_func_negative_test.cpp \
-
-endif
-
 SRCS += $(MVM_SRCS)
-
-DEFINE += "-DMFS_MOCK_MVM_EN=$(MOCK_MVM_EN)"

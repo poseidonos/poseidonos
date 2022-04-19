@@ -18,31 +18,15 @@ MFS_INCLUDE_PATH += \
 	util \
 	lib \
 	include \
-	common \
-	api_base\
-    unit_test 
-
-
-ifdef MFS_EXT_TESTDOUBLE
-	TESTDOUBLE_TOP_DIR=testdouble
-	DEFINE += -DMFS_EXT_TESTDOUBLE_EN=1
-	MFS_INCLUDE_PATH += \
-		$(TESTDOUBLE_TOP_DIR) \
-		$(TESTDOUBLE_TOP_DIR)/$(MFS_EXT_TESTDOUBLE)
-
-else
+	common
 
 include $(MFS_TOP_DIR)/ext_ibofos_module.mk
-include $(MFS_TOP_DIR)/mai/Makefile.include
 include $(MFS_TOP_DIR)/msc/Makefile.include
 include $(MFS_TOP_DIR)/mdi/Makefile.include
 include $(MFS_TOP_DIR)/mim/Makefile.include
 include $(MFS_TOP_DIR)/mvm/Makefile.include
 include $(MFS_TOP_DIR)/storage/Makefile.include
 
-endif
-
-DEFINE += "-DMFS_DEBUG=$(MFS_DEBUG)"
 DEFINE += "-DMFS_DEBUG_TRACE=$(MFS_DEBUG_TRACE)"
 MFS_INCLUDE_PATH := $(addprefix -I${MFS_TOP_DIR}/, $(MFS_INCLUDE_PATH))
 MFS_INCLUDE_PATH += $(addprefix -I, ${VPATH})

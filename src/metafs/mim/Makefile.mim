@@ -1,36 +1,7 @@
-#UT_PATH, VPATH, OBJS
 include $(MFS_TOP_DIR)/mim/Makefile.include
-
-UT_MIM_EN := 0
-MOCK_MIM_EN := 0
-
-
-ifeq ($(MFS_INTEGRATION_TEST_EN),1)
-else
-ifeq ($(ut), mim)
-$(info Meta filesystem unit test option enabled - for "MIM block" ...)
-MFS_INTEGRATION_TEST_EN = 0
-UT_MIM_EN = 1
-else ifeq ($(ut),)
-else
-MOCK_MIM_EN = 1
-endif
-endif # MFS_INTEGRATION_TEST_EN
-########################################################
 
 MIM_SRCS += \
 	metafs_io_request.cpp \
-
-ifeq ($(MOCK_MIM_EN), 1)
-
-MFS_INCLUDE_PATH +=	\
-	$(MIM_TOP_DIR)/mock
-
-MIM_SRCS += \
-	mim_top_mock.cpp \
-
-else
-MIM_SRCS += \
 	metafs_io_multi_q.cpp \
 	meta_io_manager.cpp \
 	metafs_io_scheduler.cpp \
@@ -47,24 +18,4 @@ MIM_SRCS += \
 	mfs_io_range_overlap_chker.cpp \
 	mdpage_buf_pool.cpp
 
-endif
-
-ifeq ($(UT_MIM_EN), 1)
-UT_PATH += \
-	$(MFS_TOP_DIR)/mim/unit_test \
-
-endif
-
-#ifeq ($(UT_MIM_EN), 1)
-#UT_SRCS += \
-#	mim_func_positive_test.cpp \
-#	mim_func_negative_test.cpp \
-#    mim_test.cpp \
-#	mim_io_range_overlap_chker_test.cpp 
-#
-#endif
-
 SRCS += $(MIM_SRCS)
-VPATH += $(UT_PATH)
-
-DEFINE += "-DMFS_MOCK_MIM_EN=$(MOCK_MIM_EN)"

@@ -5,5 +5,4 @@ MFS_INCLUDE_PATH += \
 	$(MVM_TOP_DIR) \
 	$(MVM_TOP_DIR)/volume \
 	$(MVM_TOP_DIR)/volume/ssd \
-	$(MVM_TOP_DIR)/volume/nvram \
-    $(MVM_TOP_DIR)/unit_test
+	$(MVM_TOP_DIR)/volume/nvram

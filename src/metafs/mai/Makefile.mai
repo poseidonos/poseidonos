@@ -1,13 +1,5 @@
 include $(MFS_TOP_DIR)/mai/Makefile.include
 
-UT_MAI_WBT_EN := 0
-
-ifeq ($(ut),wbt)
-$(info WBT unit test option enabled - for "MAI block" ...)
-UT_MAI_WBT_EN = 1
-endif
-
-# MAI
 MAI_SRCS += \
 	metafs_management_api.cpp \
 	metafs_file_control_api.cpp \
@@ -15,9 +7,3 @@ MAI_SRCS += \
 	metafs_wbt_api.cpp \
 
 SRCS += $(MAI_SRCS)
-
-#ifeq ($(UT_MAI_WBT_EN), 1)
-#UT_PATH += \
-#	mai/unit_test \
-
-#endif
