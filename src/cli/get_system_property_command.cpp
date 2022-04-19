@@ -63,7 +63,7 @@ GetSystemPropertyCommand::Execute(json& doc, string rid)
     JsonElement data("data");
 
     JsonArray rebuildImpact("rebuildPolicy");
-    
+
     backendPolicy = QosManagerSingleton::Instance()->GetBackendPolicy(BackendEvent_UserdataRebuild);
     string impact = _GetRebuildImpactString(backendPolicy.priorityImpact);
 
