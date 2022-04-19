@@ -46,7 +46,6 @@
 
 #include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
-#include "src/metafs/include/metafs_return_code.h"
 #include "src/metafs/metafs.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 

@@ -1,7 +1,6 @@
 POS_ADD_UNIT_TEST(os_header_ut os_header_test.cpp)
 POS_ADD_UNIT_TEST(meta_storage_specific_ut meta_storage_specific_test.cpp)
 POS_ADD_UNIT_TEST(mf_property_ut mf_property_test.cpp)
-POS_ADD_UNIT_TEST(metafs_return_code_ut metafs_return_code_test.cpp)
 POS_ADD_UNIT_TEST(meta_storage_info_ut meta_storage_info_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_type_ut meta_volume_type_test.cpp)
 POS_ADD_UNIT_TEST(mf_dataformat_ut mf_dataformat_test.cpp)

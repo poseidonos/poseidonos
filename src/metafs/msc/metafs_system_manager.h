@@ -33,7 +33,6 @@
 #pragma once
 
 #include "metafs_manager_base.h"
-#include "metafs_return_code.h"
 #include "msc_req.h"
 #include "src/metafs/msc/metafs_mbr_mgr.h"
 #include "src/metafs/include/meta_storage_info.h"

@@ -36,7 +36,6 @@
 
 #include "metafs_aiocb_cxt.h"
 #include "metafs_io_request.h"
-#include "metafs_return_code.h"
 #include "mim_state.h"
 #include "mpio.h"
 #include "mpio_allocator.h"

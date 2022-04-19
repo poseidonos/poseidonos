@@ -71,12 +71,12 @@ public:
         EXPECT_EQ(0, GetMetaFs(arrayId)->Init());
 
         // create meta file
-        MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+        POS_EVENT_ID rc_mgmt;
         MetaFilePropertySet prop;
         prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
         prop.ioOpType = MetaFileDominant::NoSpecific;
         rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, volumeType);
-        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
+        EXPECT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
     }
 
     virtual void
