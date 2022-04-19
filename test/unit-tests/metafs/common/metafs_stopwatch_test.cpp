@@ -96,6 +96,28 @@ TEST(MetaFsStopwatch, CheckStartAndStop)
     EXPECT_NE(result_3rd.count(), result_2nd.count());
 }
 
+TEST(MetaFsStopwatch, GetElapsedInMilli_testIfTheReturnValueIsInitValue)
+{
+    MetaFsStopwatch<TestTimestampStage> stopwatch;
+    EXPECT_EQ(0, stopwatch.GetElapsedInMilli().count());
+}
+
+TEST(MetaFsStopwatch, GetElapsedInMilli_testIfTheReturnValueIsInitValueEvenIfStoredTimeStampOnce)
+{
+    MetaFsStopwatch<TestTimestampStage> stopwatch;
+    stopwatch.StoreTimestamp();
+    EXPECT_EQ(0, stopwatch.GetElapsedInMilli().count());
+}
+
+TEST(MetaFsStopwatch, GetElapsedInMilli_testIfTheReturnValueIsNotInitValue)
+{
+    MetaFsStopwatch<TestTimestampStage> stopwatch;
+    stopwatch.StoreTimestamp();
+    usleep(1000);
+    stopwatch.StoreTimestamp();
+    EXPECT_NE(0, stopwatch.GetElapsedInMilli().count());
+}
+
 TEST(MetaFsStopwatch, CheckIfResetWillWorkCorrectly)
 {
     const size_t SIZE = 5;
