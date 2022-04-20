@@ -99,10 +99,10 @@ VersionedSegmentCtx::IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segI
 }
 
 void
-VersionedSegmentCtx::DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool isForced)
+VersionedSegmentCtx::DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
 {
     VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
-    targetSegInfo->DecreaseValidBlockCount(segId, cnt, isForced);
+    targetSegInfo->DecreaseValidBlockCount(segId, cnt, allowVictimSegRelease);
     // TODO (cheolho.kang): Add ISegmentContext method after introduced
 }
 

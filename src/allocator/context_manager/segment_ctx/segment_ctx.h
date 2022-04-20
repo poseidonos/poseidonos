@@ -80,7 +80,7 @@ public:
 
     virtual void MoveToFreeState(SegmentId segId);
     virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
+    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
@@ -100,6 +100,7 @@ public:
     virtual int SetRebuildCompleted(SegmentId segId);
     virtual int MakeRebuildTarget(void);
     virtual std::set<SegmentId> GetNvramSegmentList(void);
+    virtual std::set<SegmentId> GetVictimSegmentList(void);
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual std::set<SegmentId> GetRebuildSegmentList(void);

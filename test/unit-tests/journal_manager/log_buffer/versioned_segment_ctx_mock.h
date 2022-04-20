@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(void, DecreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool isForced), (override));
+    MOCK_METHOD(void, DecreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (uint32_t logGroupId, SegmentId segId), (override));
     MOCK_METHOD(void, UpdateSegmentContext, (uint32_t logGroupId), (override));
     MOCK_METHOD(VersionedSegmentInfo*, GetSegmentInfo, (uint32_t logGroupId), (override));

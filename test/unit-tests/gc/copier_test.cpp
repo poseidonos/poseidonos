@@ -106,6 +106,14 @@ public:
         gcCtx = new NiceMock<MockGcCtx>;
         segCtx = new NiceMock<MockSegmentCtx>;
 
+
+        EXPECT_CALL(*segCtx, GetVictimSegmentList)
+            .WillRepeatedly([]()
+            {
+                std::set<SegmentId> sets = {UNMAP_SEGMENT};
+                return sets;
+            });
+
         EXPECT_CALL(*iContextManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
         EXPECT_CALL(*iContextManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
     }

@@ -581,11 +581,11 @@ TEST(ContextManager, InvalidateBlks_TestSimpleSetter)
     // given 1.
     EXPECT_CALL(*segCtx, DecreaseValidBlockCount).WillOnce(Return(false));
     // when 1.
-    sut.InvalidateBlks(blks, false);
+    sut.InvalidateBlks(blks, true);
     // given 2.
     EXPECT_CALL(*segCtx, DecreaseValidBlockCount).WillOnce(Return(true));
     // when 2.
-    sut.InvalidateBlks(blks, false);
+    sut.InvalidateBlks(blks, true);
 }
 
 TEST(ContextManager, MakeRebuildTargetSegmentList_TestwithFlushOrwithoutFlush)

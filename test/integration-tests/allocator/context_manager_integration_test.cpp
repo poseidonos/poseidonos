@@ -248,7 +248,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
             .numBlks = maxValidBlkCount,
         };
 
-        contextManager.InvalidateBlks(blks, false);
+        contextManager.InvalidateBlks(blks, true);
     }
 
     // Then: State of overwritten segments must be FREE and occupied stripe count is zero

@@ -60,7 +60,7 @@ public:
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(int cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
-    virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(uint32_t dec, bool isForced);
+    virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease);
 
     virtual void SetOccupiedStripeCount(uint32_t cnt);
     virtual uint32_t GetOccupiedStripeCount(void);

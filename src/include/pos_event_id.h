@@ -536,6 +536,7 @@ enum class POS_EVENT_ID
     GC_COPIER_NOT_EXIST = 3428,
     GC_CANNOT_CREATE_COPIER = 3429,
     GC_ERROR_MSG = 3430,
+    GC_RELEASE_VICTIM_SEGMENT = 3431,
 
     // --------------Flow control (3500)----------------
     FC_START = 3500,

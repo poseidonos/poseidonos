@@ -77,27 +77,21 @@ SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 }
 
 std::pair<bool, SegmentState>
-SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool isForced)
+SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
 {
     std::lock_guard<std::mutex> lock(seglock);
     int32_t decreased = validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {
-        if (true == isForced)
+        if (true == allowVictimSegRelease)
         {
-            if (state == SegmentState::VICTIM)
+            if (state == SegmentState::VICTIM || state == SegmentState::SSD)
             {
                 std::pair<bool, SegmentState> result = {true, state};
                 _MoveToFreeState();
 
                 return result;
-            }
-            else
-            {
-                POS_TRACE_ERROR(EID(SEGMENT_WAS_NOT_VICTIM),
-                "Segment was not victim state:{}", state);
-                assert(false);
             }
         }
         else

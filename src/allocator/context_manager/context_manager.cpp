@@ -131,10 +131,10 @@ ContextManager::ValidateBlks(VirtualBlks blks)
 }
 
 void
-ContextManager::InvalidateBlks(VirtualBlks blks, bool isForced)
+ContextManager::InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks, isForced);
+    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks, allowVictimSegRelease);
 
     if (segmentFreed == true)
     {
