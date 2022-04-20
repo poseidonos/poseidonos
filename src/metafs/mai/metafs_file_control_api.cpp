@@ -36,24 +36,41 @@
 
 namespace pos
 {
+/* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(void)
+: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr, nullptr)
+{
+}
+
+/* for test */
+MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, const bool isNormal,
+    MetaStorageSubsystem* storage, MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
+    BitMap* bitmap)
+: arrayId(arrayId),
+  isNormal(isNormal),
+  storage(storage),
+  mgmt(mgmt),
+  volMgr(volMgr),
+  bitmap(bitmap)
 {
 }
 
 MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
     MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr)
+: MetaFsFileControlApi(arrayId, false, storage, mgmt, volMgr, new BitMap(MetaFsConfig::MAX_VOLUME_CNT))
 {
-    this->arrayId = arrayId;
-
-    bitmap = new BitMap(MetaFsConfig::MAX_VOLUME_CNT);
-    bitmap->ResetBitmap();
-
     nameMapByfd.clear();
     idxMapByName.clear();
 
-    this->storage = storage;
-    this->mgmt = mgmt;
-    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager(arrayId, storage) : volMgr;
+    if (!volMgr)
+    {
+        this->volMgr = new MetaVolumeManager(arrayId, storage);
+    }
+
+    if (bitmap)
+    {
+        bitmap->ResetBitmap();
+    }
 }
 
 MetaFsFileControlApi::~MetaFsFileControlApi(void)

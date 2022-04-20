@@ -56,8 +56,12 @@ namespace pos
 class MetaFsFileControlApi
 {
 public:
+    /* for test */
     MetaFsFileControlApi(void);
-    explicit MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
+    /* for test */
+    MetaFsFileControlApi(const int arrayId, const bool isNormal, MetaStorageSubsystem* storage,
+        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr, BitMap* bitmap);
+    MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
         MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr = nullptr);
     virtual ~MetaFsFileControlApi(void);
 
@@ -106,13 +110,13 @@ protected:
     void _RemoveFileContext(FileDescriptorType fd, MetaVolumeType type);
 
 private:
-    int arrayId = INT32_MAX;
-    bool isNormal = false;
+    int arrayId;
+    bool isNormal;
     MetaStorageSubsystem* storage;
     MetaFsManagementApi* mgmt;
-    MetaVolumeManager* volMgr = nullptr;
+    MetaVolumeManager* volMgr;
 
-    BitMap* bitmap = nullptr;
+    BitMap* bitmap;
     // (pair<MetaVolumeType, fd>, fileName)
     std::unordered_map<std::pair<MetaVolumeType, FileDescriptorType>, std::string, PairHash> nameMapByfd;
     // (pair<MetaVolumeType, fileName>, file index)
