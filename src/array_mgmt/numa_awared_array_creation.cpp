@@ -40,7 +40,7 @@ namespace pos
 {
 NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dataCnt, int spareCnt, DeviceManager* devMgr)
 {
-    result.code = EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS);
+    result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS);
     int requiredDevCnt = dataCnt + spareCnt;
     auto&& systemDevs = Enumerable::Where(devMgr->GetDevs(),
         [](auto d) { return (d->GetClass() == DeviceClass::SYSTEM &&
@@ -118,10 +118,14 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                 result.options.push_back(option);
                 result.code = EID(SUCCESS);
             }
+            else
+            {
+                result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS);
+            }
         }
     }
 
-    if (result.code == EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS))
+    if (result.code != EID(SUCCESS))
     {
         POS_TRACE_WARN(result.code, "required: {}, num of devs in same numa:{}, num of devs in same numa with same capacity: {}", requiredDevCnt, numofDevsInTargetNuma, maxNumofDevsInTargetNumaWithSameCapacity);
     }
