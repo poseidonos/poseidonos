@@ -28,6 +28,8 @@ public:
     virtual int FlushAllPendingStripes(void) { return 0; }
     virtual int FlushAllPendingStripesInVolume(int volumeId) { return 0; }
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) { return 0; }
+
+    virtual void NotifyShutdown(void) {}
 };
 
 } // namespace pos

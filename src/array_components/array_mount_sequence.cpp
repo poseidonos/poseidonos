@@ -36,12 +36,14 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_manager.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IStateControl* iState, string name, IVolumeManager* volMgr, IArrayRebuilder* rbdr)
-: ArrayMountSequence(seq, iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
+    IStateControl* iState, string name, IVolumeManager* volMgr, IArrayRebuilder* rbdr,
+    IWBStripeAllocator* wbStripeMgr)
+: ArrayMountSequence(seq, iState, name, nullptr, nullptr, nullptr, volMgr, rbdr, wbStripeMgr)
 {
     // delegated to other constructor.
 
@@ -55,14 +57,15 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IStateControl* iState, string name,
     StateContext* mountState, StateContext* unmountState, StateContext* normalState,
-    IVolumeManager* volMgr, IArrayRebuilder* rbdr)
+    IVolumeManager* volMgr, IArrayRebuilder* rbdr, IWBStripeAllocator* wbStripeMgr)
 : state(iState),
   mountState(mountState),
   unmountState(unmountState),
   normalState(normalState),
   arrayName(name),
   volMgr(volMgr),
-  rebuilder(rbdr)
+  rebuilder(rbdr),
+  wbStripeMgr(wbStripeMgr)
 {
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
@@ -198,13 +201,17 @@ ArrayMountSequence::Unmount(void)
 void
 ArrayMountSequence::Shutdown(void)
 {
-    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down {} ...", arrayName);
-    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - wait for rebuilding");
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down {} ...", arrayName);
+    // This should come before ArrayRebuilder::StopRebuild()
+    // to be able to break infinite loop when the array is in broken state.
+    // Please refer to AWIBOF-5943
+    wbStripeMgr->NotifyShutdown();
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - wait for rebuilding");
     rebuilder->StopRebuild(arrayName);
     rebuilder->WaitRebuildDone(arrayName);
-    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - rebuild done");
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - rebuild done");
     volMgr->DetachVolumes();
-    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - volumes detached");
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - volumes detached");
 
     // unmount meta, gc
     auto it = sequence.rbegin();
@@ -215,7 +222,7 @@ ArrayMountSequence::Shutdown(void)
 
     // unmount array
     (*it)->Shutdown();
-    POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - array shutdowned");
+    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - array shutdowned");
 }
 
 void

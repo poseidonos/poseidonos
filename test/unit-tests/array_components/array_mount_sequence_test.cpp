@@ -7,6 +7,7 @@
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/volume/volume_manager_mock.h"
 #include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -22,7 +23,7 @@ TEST(ArrayMountSequence, ArrayMountSequence_testConstructor)
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
 
     // When
-    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder, nullptr);
 
     // Then
 }
@@ -48,7 +49,7 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(0));
     EXPECT_CALL(stateControl, Remove).Times(1);
 
-    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder, nullptr);
 
     // When
     int actual = mntSeq.Mount();
@@ -83,7 +84,7 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     EXPECT_CALL(mockSeq3, Dispose).Times(1);
     EXPECT_CALL(stateControl, Remove).Times(1);
 
-    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder, nullptr);
 
     // When
     int actual = mntSeq.Mount();
@@ -102,7 +103,7 @@ TEST(ArrayMountSequence, Unmount_testIfFailsToUnmountWhenInFaultSituation)
 
     EXPECT_CALL(stateControl, GetState).WillOnce(Return(&mockStopState));
 
-    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder, nullptr);
 
     // When
     int actual = mntSeq.Unmount();
@@ -133,7 +134,7 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     EXPECT_CALL(mockSeq1, Dispose).Times(1);
     EXPECT_CALL(stateControl, Remove).Times(2);
 
-    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", nullptr, mockUnmountState, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", nullptr, mockUnmountState, nullptr, &mockVolMgr, mockRebuilder, nullptr);
 
     // When
     int actual = mntSeq.Unmount();
@@ -150,8 +151,9 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateC
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    NiceMock<MockIWBStripeAllocator> wbStripeMgr;
 
-    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder, &wbStripeMgr);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext normalContext("sender", SituationEnum::NORMAL);
@@ -159,6 +161,7 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateC
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
+    EXPECT_CALL(wbStripeMgr, NotifyShutdown).Times(1);
 
     EXPECT_CALL(mockSeq3, Flush).Times(1);
     EXPECT_CALL(mockSeq2, Flush).Times(1);
@@ -176,8 +179,9 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder mockRebuilder;
+    NiceMock<MockIWBStripeAllocator> wbStripeMgr;
 
-    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, &mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, &mockRebuilder, &wbStripeMgr);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext offlineContext("sender", SituationEnum::DEFAULT);
@@ -187,6 +191,7 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     EXPECT_CALL(mockSeq3, Shutdown).Times(0);
     EXPECT_CALL(mockSeq2, Shutdown).Times(0);
     EXPECT_CALL(mockSeq1, Shutdown).Times(0);
+    EXPECT_CALL(wbStripeMgr, NotifyShutdown).Times(0);
 
     // flush shouldn't be invoked
     EXPECT_CALL(mockSeq3, Flush).Times(0);
@@ -208,8 +213,9 @@ TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNex
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    NiceMock<MockIWBStripeAllocator> wbStripeMgr;
 
-    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder, &wbStripeMgr);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext offlineContext("sender", SituationEnum::DEFAULT);
@@ -217,6 +223,7 @@ TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNex
     EXPECT_CALL(mockSeq3, Shutdown).Times(0);
     EXPECT_CALL(mockSeq2, Shutdown).Times(0);
     EXPECT_CALL(mockSeq1, Shutdown).Times(0);
+    EXPECT_CALL(wbStripeMgr, NotifyShutdown).Times(1);
 
     // When & Then: trivial. as long as there's no exception, I'm good
     mntSeq.StateChanged(&offlineContext, &stopContext);

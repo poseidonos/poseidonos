@@ -47,6 +47,7 @@ class MetaUpdater;
 class MetaEventFactory;
 class MetaVolumeEventHandler;
 class MetaService;
+class IWBStripeAllocator;
 
 class Metadata : public IMountSequence
 {
@@ -63,6 +64,8 @@ public:
     virtual bool NeedRebuildAgain(void);
     virtual int PrepareRebuild(void);
     virtual void StopRebuilding(void);
+
+    virtual IWBStripeAllocator* GetWbStripeManager(void);
 
 private:
     IArrayInfo* arrayInfo;

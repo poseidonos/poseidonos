@@ -48,19 +48,22 @@ namespace pos
 {
 class IMountSequence;
 class VolumeManager;
+class IWBStripeAllocator;
 
 class ArrayMountSequence : public IStateObserver
 {
 public:
     ArrayMountSequence(vector<IMountSequence*> seq, IStateControl* iState, string name,
-                        IVolumeManager* volMgr, IArrayRebuilder* rbdr);
+                        IVolumeManager* volMgr, IArrayRebuilder* rbdr,
+                        IWBStripeAllocator* wbStripeMgr);
     ArrayMountSequence(vector<IMountSequence*> seq,
                         IStateControl* iState, string name,
                         StateContext* mountState,
                         StateContext* unmountState,
                         StateContext* normalState,
                         IVolumeManager* volMgr,
-                        IArrayRebuilder* rbdr);
+                        IArrayRebuilder* rbdr,
+                        IWBStripeAllocator* wbStripeMgr);
 
     virtual ~ArrayMountSequence(void);
     virtual int Mount(void);
@@ -83,5 +86,6 @@ private:
     string arrayName = "";
     IVolumeManager* volMgr = nullptr;
     IArrayRebuilder* rebuilder = nullptr;
+    IWBStripeAllocator* wbStripeMgr = nullptr;
 };
 } // namespace pos

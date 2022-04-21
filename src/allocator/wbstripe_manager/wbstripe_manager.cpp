@@ -66,7 +66,8 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
   arrayName(arrayName),
   arrayId(arrayId),
   memoryManager(memoryManager),
-  stripeLoadStatus(stripeLoadStatus)
+  stripeLoadStatus(stripeLoadStatus),
+  shuttingDown(false)
 {
     allocCtx = allocCtx_;
     volumeManager = volManager;
@@ -120,6 +121,8 @@ WBStripeManager::Init(void)
         // DEPRECATED: "stripe" used to have its dedicated buffer that would be allocated from stripeBufferPool, but not any more.
         wbStripeArray.push_back(stripe);
     }
+
+    shuttingDown = false;
 }
 
 void
@@ -262,10 +265,24 @@ WBStripeManager::_WaitForStripeFlushComplete(Stripe* stripe)
 {
     while (stripe->GetBlksRemaining() > 0)
     {
+        if (shuttingDown)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
+                "The array is shutting down. breaking stripe->GetBlksRemaining(). wblsid:{}",
+                stripe->GetWbLsid());
+            break;
+        }
         usleep(1);
     }
     while (stripe->IsFinished() == false)
     {
+        if (shuttingDown)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
+                "The array is shutting down. breaking stripe->IsFinished(). wblsid:{}",
+                stripe->GetWbLsid());
+            break;
+        }
         usleep(1);
     }
 }
@@ -588,5 +605,11 @@ WBStripeManager::_LoadStripe(StripeAddr from, StripeAddr to)
     CallbackSmartPtr readStripe(new ReadStripe(from, bufferList, readStripeCompletion, arrayId));
 
     eventScheduler->EnqueueEvent(readStripe);
+}
+
+void
+WBStripeManager::NotifyShutdown(void)
+{
+    shuttingDown = true;
 }
 } // namespace pos

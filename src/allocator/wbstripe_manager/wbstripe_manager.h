@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <map>
 #include <set>
 #include <string>
@@ -85,6 +86,7 @@ public:
 
     virtual int FlushAllWbStripes(void);
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
+    virtual void NotifyShutdown(void) override;
 
 protected:
     Stripe* _GetStripe(StripeAddr& lsidEntry);
@@ -118,6 +120,7 @@ protected:
     MemoryManager* memoryManager;
     StripeLoadStatus* stripeLoadStatus;
     EventScheduler* eventScheduler;
+    std::atomic<bool> shuttingDown;
 };
 
 } // namespace pos
