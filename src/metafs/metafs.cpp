@@ -159,7 +159,7 @@ MetaFs::Init(void)
 
     rc = _PrepareMetaVolume();
     if (POS_EVENT_ID::SUCCESS != rc)
-        return (int)rc;
+        return -(int)rc;
 
     if (!isLoaded_)
     {
@@ -172,10 +172,10 @@ MetaFs::Init(void)
 
     rc = _OpenMetaVolume();
     if (POS_EVENT_ID::SUCCESS != rc)
-        return (int)rc;
+        return -(int)rc;
 
     if (!io->AddArray(arrayId_, _MakeLpnMap()))
-        return (int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
+        return -(int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
 
     isNormal_ = true;
     mgmt->SetStatus(isNormal_);
