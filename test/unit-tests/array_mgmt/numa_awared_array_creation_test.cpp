@@ -331,6 +331,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughHomoSizeDev
     EXPECT_CALL(*mockSpareDev1.get(), GetSize).WillRepeatedly(Return(anotherSize));
 
     int homoNumaId = 1;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev1.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev2.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev3.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
@@ -384,6 +385,7 @@ TEST(NumaAwaredArrayCreation, NumaAwaredArrayCreation_testIfNotEnoughSystemDevic
     EXPECT_CALL(*mockSpareDev1.get(), GetSize).WillRepeatedly(Return(homoSize));
 
     int homoNumaId = 1;
+    EXPECT_CALL(*mockWriteBufferDev.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev1.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev2.get(), GetNuma).WillRepeatedly(Return(homoNumaId));
     EXPECT_CALL(*mockDataDev3.get(), GetNuma).WillRepeatedly(Return(homoNumaId));

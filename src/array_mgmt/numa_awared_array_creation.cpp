@@ -70,6 +70,11 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
         }
         auto sameNumaDevs = numaGroup.second;
         numofDevsInTargetNuma = sameNumaDevs.size();
+        if ((int)numofDevsInTargetNuma < requiredDevCnt)
+        {
+            continue;
+        }
+
         auto&& devsBySize = Enumerable::GroupBy(sameNumaDevs,
             [](auto d) { return d->GetSize(); });
 
