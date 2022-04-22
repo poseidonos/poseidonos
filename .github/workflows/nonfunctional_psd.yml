@@ -1,38 +1,40 @@
 
-# This is a basic workflow to help you get started with Actions
-
 name: M3-NonFunctional_PSD_Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ] 
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "build"
-  Build:
-    runs-on: PSD
-    steps:
+  workflow_run:
+    workflows: [M2_Functional_PSD_Test]
+    types: [completed]
     
-    - run: |
-        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
 
+jobs:
+  Prepare_Dashboard_Link:
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v2
+    - name: Make Dashboard Link for Workflow 
+      run: |
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
 
-    - name: Build Setup
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/build_setup_165.sh
-        .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+    - name: Upload Dashboard Link
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{github.workflow}}-Dashboard
+        path: |
+          ${{github.workspace}}/Dashboard.html
 
   Performance_Test:
     runs-on: PSD
-    if: runner.name == 'sre4-14'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} && runner.name == 'psd'
     steps:
     
     - run: |
@@ -44,21 +46,21 @@ jobs:
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/build_setup_165.sh
-        .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
+        .github/workflows/script/build_setup_165.sh -i ${{secrets.PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Setup Initiator
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/initiator_setup.sh
-        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
+        .github/workflows/script/initiator_setup.sh ${{secrets.PSD_INITIATOR_IP}} ${{secrets.PSD_INITIATOR_PASSWD}} ${{secrets.PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
 
     - name: Performance Test - with Journal Off
       id: with_journal_off
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}}-${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
-        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf ibofos_for_perf_ci.conf -tr ${{github.sha}}_journal_off -tn POS_devel -r ${{github.workspace}}
-        sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@${{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_off.csv ${{github.workspace}}
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}}_${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.PSD_FABRIC_IP}} -t ${{secrets.PSD_IP}} -i ${{secrets.PSD_INITIATOR_IP}} -cf ibofos_for_perf_ci.conf -tr ${{github.sha}}_journal_off -tn POS_devel -r ${{github.workspace}} -n ${{secrets.TARGET_NIC}}
+        sshpass -p ${{secrets.PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@${{secrets.PSD_INITIATOR_IP}}:${{secrets.INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_off.csv ${{github.workspace}}
 
     - name: Performance Test - with Journal
       id: with_journal
@@ -69,20 +71,22 @@ jobs:
         RW_4K_LIMIT: 0
         RR_4k_LIMIT: 0
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}}-${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}}_${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo jq -r  '.journal.enable |= true'  config/ibofos_for_perf_ci.conf > config/tmp.conf
-        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.R2U18_PSD_FABRIC_IP}} -t ${{secrets.R2U18_PSD_IP}} -i ${{secrets.R2U18_PSD_INITIATOR_IP}} -cf tmp.conf -tr ${{github.sha}}_journal_on -tn POS_journal -sw $SW_128K_LIMIT -sr $SR_128K_LIMIT -rw $RW_4K_LIMIT -rr $RR_4K_LIMIT -r ${{github.workspace}}
-        sshpass -p ${{R2U18_PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@{{secrets.R2U18_PSD_INITIATOR_IP}}:${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_on.csv ${{github.workspace}}
+        test/system/nvmf/initiator/automated/performance_test_ci.py -f ${{secrets.PSD_FABRIC_IP}} -t ${{secrets.PSD_IP}} -i ${{secrets.PSD_INITIATOR_IP}} -cf tmp.conf -tr ${{github.sha}}_journal_on -tn POS_journal -sw $SW_128K_LIMIT -sr $SR_128K_LIMIT -rw $RW_4K_LIMIT -rr $RR_4K_LIMIT -r ${{github.workspace}} -n ${{secrets.TARGET_NIC}}
+        sshpass -p ${{secrets.PSD_INITIATOR_PASSWD}} scp -o StrictHostKeyChecking=no root@{{secrets.PSD_INITIATOR_IP}}:${{secrets.PSD_INITIATOR_WORKING_DIR}}/AP_POS_${{github.sha}}_journal_on.csv ${{github.workspace}}
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
-        .github/workflows/script/clean_backup_165.sh -i ${{secrets.R2U18_PSD_IP}} -p "M3-NonFunctional_PM_Test" -n "performance" -r ${{github.sha}} -d ${{github.workspace}}
+        .github/workflows/script/clean_backup_165.sh -i ${{secrets.PSD_IP}} -p "M3-NonFunctional_PM_Test" -n "performance" -r ${{github.sha}} -d ${{github.workspace}}
 
   Sustained_Performance_test:
     runs-on: PSD
-    if: runner.name == 'sre4-14'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} && runner.name == 'psd'
     steps:
   
     - run: |
@@ -90,76 +94,33 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    # - name: Build Setup
-    #   working-directory: ${{github.workspace}}
-    #   run: | 
-    #     chmod +x .github/workflows/script/build_setup_165.sh
-    #     .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Setup Init 1
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/initiator_setup.sh
-        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
+        .github/workflows/script/initiator_setup.sh ${{secrets.PSD_INITIATOR_IP}} ${{secrets.PSD_INITIATOR_PASSWD}} ${{secrets.PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
 
     - name: Setup Init 2
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/initiator_setup.sh
-        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{secrets.R2U18_PSD_INITIATOR2_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR2_WORKING_DIR}} ${{github.sha}}
-
-    - name: Short-term Sustained Write
-      working-directory: ${{github.workspace}}
-      run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
-        chmod +x .github/workflows/script/performance/sustained_write.sh
-        .github/workflows/script/performance/sustained_write.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
-
-
-    - name: Save Artifacts
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/save_artifacts.sh
-        .github/workflows/script/save_artifacts.sh ${{secrets.R2U18_PSD_IP}} ${{github.workspace}}
-
-
-  Rebuild_Performance_test:
-    runs-on: PSD
-    if: runner.name == 'sre4-14'
-    steps:
-  
-    - run: |
-        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-
-    - uses: actions/checkout@v2
-
-    - name: Build Setup
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/build_setup_165.sh
-        .github/workflows/script/build_setup_165.sh -i ${{secrets.R2U18_PSD_IP}} -t PSD -r ${{github.sha}} -d ${{github.workspace}}
-
-    - name: Setup Init 1
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/initiator_setup.sh
-        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR_WORKING_DIR}} ${{github.sha}}
-
-    - name: Setup Init 2
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/initiator_setup.sh
-        .github/workflows/script/initiator_setup.sh ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{secrets.R2U18_PSD_INITIATOR2_PASSWD}} ${{secrets.R2U18_PSD_INITIATOR2_WORKING_DIR}} ${{github.sha}}
+        .github/workflows/script/initiator_setup.sh ${{secrets.PSD_INITIATOR2_IP}} ${{secrets.PSD_INITIATOR2_PASSWD}} ${{secrets.PSD_INITIATOR2_WORKING_DIR}} ${{github.sha}}
 
     - name: Short-term Sustained Write
       working-directory: ${{github.workspace}}
       run: | 
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/performance/sustained.sh
-        .github/workflows/script/performance/sustained.sh ${{secrets.R2U18_PSD_IP}} ${{secrets.R2U18_PSD_FABRIC_IP}} ${{secrets.R2U18_PSD_FABRIC_IP2}} ${{secrets.R2U18_PSD_INITIATOR_IP}} ${{secrets.R2U18_PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}}
+        .github/workflows/script/performance/sustained.sh ${{secrets.PSD_IP}} ${{secrets.PSD_FABRIC_IP}} ${{secrets.PSD_FABRIC_IP2}} ${{secrets.PSD_INITIATOR_IP}} ${{secrets.PSD_INITIATOR2_IP}} ${{github.workspace}} ${{github.sha}} ${{secrets.PSD_INITIATOR_WORKING_DIR}}  ${{secrets.PSD_INITIATOR2_WORKING_DIR}} 
 
     - name: Save Artifacts
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/save_artifacts.sh
-        .github/workflows/script/save_artifacts.sh ${{secrets.R2U18_PSD_IP}} ${{github.workspace}}
+        .github/workflows/script/save_artifacts.sh ${{secrets.PSD_IP}} ${{github.workspace}}
+
+  on-failure:
+    runs-on: PSD
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: echo 'The triggering workflow failed'

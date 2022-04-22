@@ -1,0 +1,2373 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "description": "You can monitor Metrics/Logs of POS in Github-Action processes",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 1,
+    "iteration": 1650518693547,
+    "links": [],
+    "liveNow": true,
+    "panels": [
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 32,
+        "panels": [],
+        "title": "Metric (Array)",
+        "type": "row"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "red",
+                    "index": 0,
+                    "text": "Not Exist"
+                  },
+                  "1": {
+                    "color": "green",
+                    "index": 1,
+                    "text": "Exist Normal"
+                  },
+                  "2": {
+                    "color": "orange",
+                    "index": 2,
+                    "text": "Exist Degraded"
+                  },
+                  "3": {
+                    "color": "red",
+                    "index": 3,
+                    "text": "Broken"
+                  },
+                  "4": {
+                    "color": "blue",
+                    "index": 4,
+                    "text": "Try Mount"
+                  },
+                  "5": {
+                    "color": "purple",
+                    "index": 5,
+                    "text": "Try Unmount"
+                  },
+                  "6": {
+                    "color": "green",
+                    "index": 6,
+                    "text": "Normal"
+                  },
+                  "7": {
+                    "color": "orange",
+                    "index": 7,
+                    "text": "Degraded"
+                  },
+                  "8": {
+                    "color": "red",
+                    "index": 8,
+                    "text": "Rebuild"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 18,
+          "x": 0,
+          "y": 1
+        },
+        "id": 25,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.2.5",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "format": "time_series",
+            "instant": false,
+            "interval": "",
+            "legendFormat": "Array ID: {{array_unique_id}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Status",
+        "transformations": [],
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 4
+        },
+        "id": 2,
+        "panels": [],
+        "title": "Metric (Volume)",
+        "type": "row"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "super-light-green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".*IOPS"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "iops"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": ".*BW"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "binBps"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 16,
+          "w": 4,
+          "x": 0,
+          "y": 5
+        },
+        "id": 13,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.2.5",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum(read_iops{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"})",
+            "format": "time_series",
+            "instant": false,
+            "interval": "",
+            "legendFormat": "Read IOPS",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum(read_rate_bytes_per_second{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"})",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Read BW",
+            "refId": "B"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum(write_iops{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"})",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Write IOPS",
+            "refId": "C"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum(write_rate_bytes_per_second{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"})",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Write BW",
+            "refId": "D"
+          }
+        ],
+        "title": "Summary",
+        "type": "stat"
+      },
+      {
+        "datasource": null,
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 50,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "normal"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "iops"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 4,
+          "y": 5
+        },
+        "id": 4,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "asc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "read_iops{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Read IOPS (Stacked)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 50,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "normal"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "binBps"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 10,
+          "y": 5
+        },
+        "id": 5,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "read_rate_bytes_per_second{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Read BW (Stacked)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "ns"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 16,
+          "y": 5
+        },
+        "id": 6,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "read_latency_mean_ns{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "read_latency_max_ns{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"} * (-1)",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+            "refId": "B"
+          }
+        ],
+        "title": "Read Latency - Mean(+)/Max(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 50,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "normal"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "iops"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 4,
+          "y": 13
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "write_iops{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Write IOPS (Stacked)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 50,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "normal"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "binBps"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 10,
+          "y": 13
+        },
+        "id": 9,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "write_rate_bytes_per_second{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Write BW (Stacked)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "ns"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 16,
+          "y": 13
+        },
+        "id": 10,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "write_latency_mean_ns{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "write_latency_max_ns{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"} * (-1)",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Vol_{{volume_id}} @ Array_{{array_id}} [count: {{sample_count}}]",
+            "refId": "B"
+          }
+        ],
+        "title": "Write Latency - Mean(+)/Max(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 21
+        },
+        "id": 34,
+        "panels": [],
+        "title": "Metric (Meta)",
+        "type": "row"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "ns"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 22
+        },
+        "id": 28,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum_of_all_the_time_spent_by_mio{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mio)",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "(-1) * sum_of_all_the_time_spent_by_mpio{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mpio)",
+            "refId": "B"
+          }
+        ],
+        "title": "Time - mio(+)/mpio(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 6,
+          "y": 22
+        },
+        "id": 29,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "sum_of_mio_count{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mio)",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "(-1) * sum_of_mpio_count{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mpio)",
+            "refId": "B"
+          }
+        ],
+        "title": "Count - mio(+)/mpio(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 22
+        },
+        "id": 30,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "free_mio_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mio)",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "(-1) * free_mpio_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Thread {{thread_name}} (mpio)",
+            "refId": "B"
+          }
+        ],
+        "title": "Free Count - mio(+)/mpio(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 6,
+          "x": 18,
+          "y": 22
+        },
+        "id": 42,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "map_mounted_volume_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "Mounted @ {{array_name}}",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "map_unmounted_volid{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "Unmounted @ {{array_name}}",
+            "refId": "B"
+          }
+        ],
+        "title": "Volume Count",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 0,
+          "y": 30
+        },
+        "id": 36,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "alct_allocctx_pendio_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "{{array_name}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Pending IO CNT",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 4,
+          "y": 30
+        },
+        "id": 37,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "alct_free_seg_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "{{array_name}}",
+            "refId": "A"
+          }
+        ],
+        "title": "Free Segment Count",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 8,
+          "y": 30
+        },
+        "id": 38,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "alct_gcvictim_segid{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "{{array_name}}",
+            "refId": "A"
+          }
+        ],
+        "title": "GC Victim Segment Count",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 12,
+          "y": 30
+        },
+        "id": 39,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "alct_victim_invalidpg_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "{{array_name}}",
+            "refId": "A"
+          }
+        ],
+        "title": "GC Victim Invalid Page Count",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": "${pos_metric_data_source}",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 16,
+          "y": 30
+        },
+        "id": 43,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "map_stripe_flush_pendio_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "interval": "",
+            "legendFormat": "stripe @ {{array_name}}",
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+            },
+            "exemplar": true,
+            "expr": "(-1) * map_vsa_flush_pendio_cnt{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\", run_id=\"${pos_run_id:raw}\"}",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "vsa @ {{array_name}}",
+            "refId": "B"
+          }
+        ],
+        "title": "Flush Pending IO Count - stripe(+)/vsa(-)",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "collapsed": true,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 37
+        },
+        "id": 15,
+        "panels": [
+          {
+            "datasource": {
+              "type": "elasticsearch",
+              "uid": "Elasticsearch"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Debug"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "blue",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Warning"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "super-light-orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Error"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Total"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 5,
+              "x": 0,
+              "y": 38
+            },
+            "id": 18,
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "text": {},
+              "textMode": "auto"
+            },
+            "pluginVersion": "8.2.5",
+            "targets": [
+              {
+                "alias": "Info",
+                "bucketAggs": [
+                  {
+                    "field": "pos_id.keyword",
+                    "id": "2",
+                    "settings": {
+                      "min_doc_count": "0",
+                      "order": "desc",
+                      "orderBy": "1",
+                      "size": "1"
+                    },
+                    "type": "terms"
+                  }
+                ],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "hide": false,
+                "metrics": [
+                  {
+                    "id": "1",
+                    "type": "count"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND level:Info AND pos_id.keyword:${run_id:raw}",
+                "refId": "A",
+                "timeField": "@timestamp"
+              },
+              {
+                "alias": "Debug",
+                "bucketAggs": [
+                  {
+                    "field": "pos_id.keyword",
+                    "id": "2",
+                    "settings": {
+                      "min_doc_count": "0",
+                      "order": "desc",
+                      "orderBy": "1",
+                      "size": "1"
+                    },
+                    "type": "terms"
+                  }
+                ],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "hide": false,
+                "metrics": [
+                  {
+                    "id": "1",
+                    "type": "count"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND level:Debug AND pos_id.keyword:${run_id:raw}",
+                "refId": "B",
+                "timeField": "@timestamp"
+              },
+              {
+                "alias": "Warning",
+                "bucketAggs": [
+                  {
+                    "field": "pos_id.keyword",
+                    "id": "2",
+                    "settings": {
+                      "min_doc_count": "0",
+                      "order": "desc",
+                      "orderBy": "1",
+                      "size": "1"
+                    },
+                    "type": "terms"
+                  }
+                ],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "hide": false,
+                "metrics": [
+                  {
+                    "id": "1",
+                    "type": "count"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND level:Warning AND pos_id.keyword:${run_id:raw}",
+                "refId": "C",
+                "timeField": "@timestamp"
+              },
+              {
+                "alias": "Error",
+                "bucketAggs": [
+                  {
+                    "field": "pos_id.keyword",
+                    "id": "2",
+                    "settings": {
+                      "min_doc_count": "0",
+                      "order": "desc",
+                      "orderBy": "1",
+                      "size": "1"
+                    },
+                    "type": "terms"
+                  }
+                ],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "hide": false,
+                "metrics": [
+                  {
+                    "id": "1",
+                    "type": "count"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND level:Error AND pos_id.keyword:${run_id:raw}",
+                "refId": "D",
+                "timeField": "@timestamp"
+              },
+              {
+                "alias": "Total",
+                "bucketAggs": [
+                  {
+                    "field": "pos_id.keyword",
+                    "id": "2",
+                    "settings": {
+                      "min_doc_count": "0",
+                      "order": "desc",
+                      "orderBy": "1",
+                      "size": "1"
+                    },
+                    "type": "terms"
+                  }
+                ],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "hide": false,
+                "metrics": [
+                  {
+                    "id": "1",
+                    "type": "count"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND pos_id.keyword:${run_id:raw}",
+                "refId": "E",
+                "timeField": "@timestamp"
+              }
+            ],
+            "title": "Log Level Statistics",
+            "transformations": [
+              {
+                "id": "seriesToColumns",
+                "options": {
+                  "byField": "pos_id.keyword"
+                }
+              },
+              {
+                "id": "filterFieldsByName",
+                "options": {
+                  "include": {
+                    "names": [
+                      "Count 1",
+                      "Count 2",
+                      "Count 3",
+                      "Count 4",
+                      "Count 5"
+                    ]
+                  }
+                }
+              },
+              {
+                "id": "organize",
+                "options": {
+                  "excludeByName": {},
+                  "indexByName": {},
+                  "renameByName": {
+                    "Count 1": "Info",
+                    "Count 2": "Debug",
+                    "Count 3": "Warning",
+                    "Count 4": "Error",
+                    "Count 5": "Total"
+                  }
+                }
+              }
+            ],
+            "type": "stat"
+          },
+          {
+            "datasource": {
+              "type": "elasticsearch",
+              "uid": "Elasticsearch"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "custom": {
+                  "align": "auto",
+                  "displayMode": "auto",
+                  "filterable": true
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "@timestamp"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 202
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "level"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 77
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "host.name"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 148
+                    }
+                  ]
+                }
+              ]
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 17,
+              "x": 5,
+              "y": 38
+            },
+            "id": 20,
+            "links": [
+              {
+                "targetBlank": true,
+                "title": "Go to Kibana(Log viewer)",
+                "url": "http://12.36.192.145:5601/app/logs/stream?logFilter=(language:kuery,query:%27pos_id:${run_id:raw}%27)&flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)"
+              }
+            ],
+            "options": {
+              "footer": {
+                "fields": "",
+                "reducer": [
+                  "sum"
+                ],
+                "show": false
+              },
+              "showHeader": true,
+              "sortBy": []
+            },
+            "pluginVersion": "8.2.5",
+            "targets": [
+              {
+                "alias": "",
+                "bucketAggs": [],
+                "datasource": {
+                  "type": "elasticsearch",
+                  "uid": "Elasticsearch"
+                },
+                "metrics": [
+                  {
+                    "id": "1",
+                    "settings": {
+                      "size": "10000"
+                    },
+                    "type": "raw_data"
+                  }
+                ],
+                "query": "ci:${CI:raw} AND pos_id:${run_id:raw}",
+                "refId": "A",
+                "timeField": "@timestamp"
+              }
+            ],
+            "title": "List of Recent 10000 Logs",
+            "transformations": [
+              {
+                "id": "filterFieldsByName",
+                "options": {
+                  "include": {
+                    "names": [
+                      "@timestamp",
+                      "host.name",
+                      "inner_message",
+                      "level"
+                    ]
+                  }
+                }
+              },
+              {
+                "id": "organize",
+                "options": {
+                  "excludeByName": {},
+                  "indexByName": {
+                    "@timestamp": 0,
+                    "host.name": 1,
+                    "inner_message": 3,
+                    "level": 2,
+                    "process_id": 4,
+                    "thread_id": 5
+                  },
+                  "renameByName": {
+                    "@timestamp": "Timestamp",
+                    "host.name": "Hostname",
+                    "inner_message": "Message",
+                    "level": "Level"
+                  }
+                }
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "datasource": null,
+            "gridPos": {
+              "h": 8,
+              "w": 3,
+              "x": 18,
+              "y": 46
+            },
+            "id": 41,
+            "options": {
+              "content": "",
+              "mode": "markdown"
+            },
+            "pluginVersion": "8.2.5",
+            "transparent": true,
+            "type": "text"
+          }
+        ],
+        "title": "Logs",
+        "type": "row"
+      }
+    ],
+    "refresh": false,
+    "schemaVersion": 32,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3",
+            "value": "Prometheus ws-96908d11-bc8b-4f0b-907e-9641652ef6f3"
+          },
+          "description": null,
+          "error": null,
+          "hide": 2,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "pos_metric_data_source",
+          "options": [],
+          "query": "prometheus",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "/^Prometheus ws/",
+          "skipUrlSync": false,
+          "type": "datasource"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "No data sources found",
+            "value": ""
+          },
+          "description": null,
+          "error": null,
+          "hide": 2,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "pos_log_data_source",
+          "options": [],
+          "query": "elasticsearch",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "/^Elasticsearch-POS-Log/",
+          "skipUrlSync": false,
+          "type": "datasource"
+        },
+        {
+          "description": "",
+          "error": null,
+          "hide": 2,
+          "label": null,
+          "name": "job_name",
+          "query": "Github-Action",
+          "skipUrlSync": false,
+          "type": "constant"
+        },
+        {
+          "allValue": null,
+          "current": {
+            "isNone": true,
+            "selected": false,
+            "text": "None",
+            "value": ""
+          },
+          "datasource": "${pos_metric_data_source}",
+          "definition": "label_values(array_status{job=\"${job_name:raw}\"}, ga_commit_hash)",
+          "description": "",
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": "Commit",
+          "multi": false,
+          "name": "ga_commit_hash",
+          "options": [],
+          "query": {
+            "query": "label_values(array_status{job=\"${job_name:raw}\"}, ga_commit_hash)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "allValue": null,
+          "current": {
+            "isNone": true,
+            "selected": false,
+            "text": "None",
+            "value": ""
+          },
+          "datasource": "${pos_metric_data_source}",
+          "definition": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\" }, ga_workflow)",
+          "description": "",
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": "Workflow",
+          "multi": false,
+          "name": "ga_workflow",
+          "options": [],
+          "query": {
+            "query": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\" }, ga_workflow)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "allValue": null,
+          "current": {
+            "isNone": true,
+            "selected": false,
+            "text": "None",
+            "value": ""
+          },
+          "datasource": "${pos_metric_data_source}",
+          "definition": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\"}, ga_detail)",
+          "description": "",
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": "Detail",
+          "multi": false,
+          "name": "ga_detail",
+          "options": [],
+          "query": {
+            "query": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\"}, ga_detail)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "allValue": null,
+          "current": {
+            "isNone": true,
+            "selected": false,
+            "text": "None",
+            "value": ""
+          },
+          "datasource": "${pos_metric_data_source}",
+          "definition": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\"}, run_id)",
+          "description": "",
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": "Run ID",
+          "multi": false,
+          "name": "pos_run_id",
+          "options": [],
+          "query": {
+            "query": "label_values(array_status{job=\"${job_name:raw}\", ga_commit_hash=\"${ga_commit_hash:raw}\", ga_workflow=\"${ga_workflow:raw}\", ga_detail=\"${ga_detail:raw}\"}, run_id)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "POS Github-Action Monitoring Dashboard",
+    "uid": "WvuvMOY7z",
+    "version": 10
+  }

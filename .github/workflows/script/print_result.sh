@@ -1,6 +1,4 @@
-pos_working_dir="$1" #추후 수정
-last_test_rev="$2"
-test_rev="$3"
+pos_working_dir="$1" 
 
 failed=0
 exitValue=0
@@ -83,9 +81,6 @@ else
     echo "\033[1;41mSome Test Failed\033[0m" 1>&2
     exitValue=1
 fi
-
-# Print Line counts of Pull-Request
-#cd ${pos_working_dir}/script; sudo ./pr_line_counter.sh ${last_test_rev} ${test_rev}
 
 echo "\033[1;36m******************************* \033[0m" 1>&2
 echo "\033[1;36m******************************* \033[0m" 1>&2

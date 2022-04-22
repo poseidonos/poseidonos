@@ -1,20 +1,20 @@
 
-# This is a basic workflow to help you get started with Actions
-
 name: C-Precommit_VM_Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   IO_Exception_Test:
     runs-on: VM
     steps:
@@ -187,8 +187,8 @@ jobs:
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
-    
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic
+         
     # Need separation building from running
     - name: UT Build and Run
       working-directory: ${{github.workspace}}
@@ -197,13 +197,14 @@ jobs:
         .github/workflows/script/unit/ut_build_run_precommit.sh ${{github.workspace}}
 
     - name: Copy UT Result to CI Server
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/unit/copy_ut_result.sh
         .github/workflows/script/unit/copy_ut_result.sh ${{github.workspace}} ${{github.sha}}
 
     - uses: mikepenz/action-junit-report@v2
-      if: always() # always run even if the previous step fails
+      if: always() 
       with:
         report_paths: 'UnitTestResult/*.xml'
 

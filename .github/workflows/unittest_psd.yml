@@ -1,19 +1,40 @@
 
 name: M-UnitTest_PSD_Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ] 
+  schedule:
+    - cron: '0 1 * * *'
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  check_date:
+    runs-on: PSD
+    name: Check latest commit
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+    - uses: actions/checkout@v2
+    - id: should_run
+      name: check latest commit is less than a day
+      if: ${{ github.event_name == 'schedule' }}
+      working-directory: ${{github.workspace}}
+      run: 
+        date=`date -d "-24 hours" "+%s"`; result=`git rev-list -1 --after=$date main`
+        test -z $result && echo "::set-output name=should_run::false"
+
   Unit_Test:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
 
@@ -28,27 +49,27 @@ jobs:
         chmod +x .github/workflows/script/build_setup_165.sh
         .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
 
-    # Need separation building from running
     - name: Build UT and Run
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/unit/ut_build_run_unittest_psd.sh
         .github/workflows/script/unit/ut_build_run_unittest_psd.sh ${{github.workspace}}
 
     - name: Copy UT Result to CI Server
+      if: always() 
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/unit/copy_ut_result.sh
         .github/workflows/script/unit/copy_ut_result.sh ${{github.workspace}} ${{github.sha}}
 
     - name: Copy gcov report back to CI server
+      if: always() 
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/unit/copy_gcov_report.sh
         .github/workflows/script/unit/copy_gcov_report.sh ${{github.workspace}}
 
     - uses: mikepenz/action-junit-report@v2
-      if: always() # always run even if the previous step fails
+      if: always() 
       with:
         report_paths: 'UnitTestResult/*.xml'

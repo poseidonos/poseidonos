@@ -1,21 +1,39 @@
 
 name: M8-72H_VM_Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ] 
-    
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * MON-FRI'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
+
 jobs:
-  # This workflow contains a single job called "build"
+  Prepare_Dashboard_Link:
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Make Dashboard link for workflow 
+      run: |
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
+
+    - name: Upload Dashboard Link
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{github.workflow}}-Dashboard
+        path: |
+          ${{github.workspace}}/Dashboard.html
+
   Three_Days_Test:
     runs-on: VM
-    timeout-minutes: 4320
+    timeout-minutes: 5000
     steps:
     
     - run: |
@@ -27,20 +45,22 @@ jobs:
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic # delete -i ${bamboo.capability.target_ip} -t VM
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
     - name: 72 Hour VM Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=NULL POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRI    TE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SEC    RET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/72_hour.sh
         .github/workflows/script/72_hour.sh ${{github.workspace}}
 
-    - name: CleanUp Script
+    - name: Clean Backup Script
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
-        chmod +x .github/workflows/script/cleanup.sh
-        .github/workflows/script/cleanup.sh ${{github.workspace}}
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M8-72H_VM_Test" -n "72h" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS log
       if: always()

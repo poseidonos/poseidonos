@@ -1,28 +1,62 @@
 
-# This is a basic workflow to help you get started with Actions
-
 name: M2_Functional_PSD_Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ] 
+  schedule:
+    - cron: '0 10-21/4 * * MON-FRI'
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  Prepare_Dashboard_Link:
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Make Dashboard Link for Workflow 
+      run: |
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
+
+    - name: Upload Dashboard Link
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{github.workflow}}-Dashboard
+        path: |
+          ${{github.workspace}}/Dashboard.html
+
+  check_date:
+    runs-on: PSD
+    name: Check latest commit
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+    - uses: actions/checkout@v2
+    - id: should_run
+      name: check latest commit is less than 4 hours
+      if: ${{ github.event_name == 'schedule' }}
+      working-directory: ${{github.workspace}}
+      run: 
+        date=`date -d "-4 hours" "+%s"`; result=`git rev-list -1 --after=$date main`
+        test -z $result && echo "::set-output name=should_run::false"
+
   Build:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
     - uses: actions/checkout@v2
-
     - name: Build Setup
       working-directory: ${{github.workspace}}
       run: | 
@@ -30,6 +64,8 @@ jobs:
         .github/workflows/script/build_setup_165.sh -t PSD -r ${{github.sha}} -d ${{github.workspace}}
 
   Fault_Tolerance:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -46,16 +82,20 @@ jobs:
     - name: Fault Tolerance Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/fault_tolerance_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
         .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
 
   File_Bench:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -72,11 +112,13 @@ jobs:
     - name: File Bench Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/filebench.py
         .github/workflows/script/filebench.py -r ${{github.workspace}}
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
@@ -84,6 +126,8 @@ jobs:
 
 
   IO_Path_System_Level:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -100,11 +144,13 @@ jobs:
     - name: IO Path System Level Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/io_path_system_level.sh
         .github/workflows/script/io_path_system_level.sh ${{github.workspace}}
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
@@ -113,6 +159,8 @@ jobs:
 
 
   Multi_Volume_IO:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -129,10 +177,12 @@ jobs:
     - name: Multi Volume IO Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/multi_volume_io_ci_test.sh
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
@@ -140,6 +190,8 @@ jobs:
 
 
   NPOR:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -156,16 +208,20 @@ jobs:
     - name: NPOR Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/npor_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
         .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
 
   NVMe_Flush:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -182,38 +238,21 @@ jobs:
     - name: Flush Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh 
         .github/workflows/script/nvme_flush/nvme_flush_functional_psd.sh ${{github.workspace}}
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
         .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "flush" -r ${{github.sha}} -d ${{github.workspace}}
 
-  NVMe_Smart_Log:
-    runs-on: PSD
-    steps:
-    - run: |
-        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-
-    - uses: actions/checkout@v2
-
-    - name: NVMe Smart Log Test
-      working-directory: ${{github.workspace}}
-      run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
-        chmod +x .github/workflows/script/nvme_flush/nvme_smart_log.sh
-        .github/workflows/script/nvme_flush/nvme_smart_log.sh ${{github.workspace}} 
-
-    - name: Clean Backup
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup_165.sh
-        .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -n "volume" -r ${{github.sha}}
-
   QoS:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -230,11 +269,13 @@ jobs:
     - name: QoS Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/qos/qos.sh 
         .github/workflows/script/qos/qos.sh ${{github.workspace}} PM
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
@@ -242,6 +283,8 @@ jobs:
 
 
   SPOR:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -258,17 +301,21 @@ jobs:
     - name: SPOR Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
         .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh
         .github/workflows/script/clean_backup_165.sh -i 127.0.0.1 -p "M2-Functional_PM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
 
   Volume_Test:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: PSD
     steps:
     - run: |
@@ -285,10 +332,12 @@ jobs:
     - name: Volume Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} ID=${{github.sha}}-${{github.workflow}}-${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.job}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         sudo test/regression/volume_ci_test.sh -f 127.0.0.1
 
     - name: Clean Backup
+      continue-on-error: true
+      if: always()
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup_165.sh

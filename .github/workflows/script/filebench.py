@@ -46,11 +46,6 @@ def terminate_pos():
     result = subprocess.run(check_ibofos_command, shell=True, stdout=subprocess.PIPE)
     print(result.stdout)
 
-    while (int(result) == 0):
-        print("Wait exit")
-        result = subprocess.run(check_ibofos_command, shell=True, stdout=subprocess.PIPE)
-        print(result.stdout)
-        time.sleep(0.5)
 
 if __name__ == "__main__":
     parse_argument()
