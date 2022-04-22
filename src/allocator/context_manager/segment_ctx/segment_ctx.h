@@ -78,8 +78,9 @@ public:
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
 
+    virtual void MoveToFreeState(SegmentId segId);
     virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual bool IncreaseOccupiedStripeCount(SegmentId segId);

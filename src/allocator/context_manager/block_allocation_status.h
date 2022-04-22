@@ -32,7 +32,10 @@
 
 #pragma once
 
+#include <pthread.h>
+
 #include <atomic>
+
 #include "src/volume/volume_base.h"
 
 namespace pos
@@ -41,7 +44,7 @@ class BlockAllocationStatus
 {
 public:
     BlockAllocationStatus(void);
-    virtual ~BlockAllocationStatus(void) = default;
+    virtual ~BlockAllocationStatus(void);
 
     virtual bool IsUserBlockAllocationProhibited(int volumeId);
     virtual bool IsBlockAllocationProhibited(int volumeId);
@@ -55,8 +58,15 @@ public:
 
     virtual bool TryProhibitBlockAllocation(int volumeId);
 
+    virtual void Lock(void);
+    virtual void Unlock(void);
+    virtual bool TryRdLock(int volumeId);
+    virtual bool Unlock(int volumeId);
+
 private:
     std::atomic<bool> blkAllocProhibited[MAX_VOLUME_COUNT];
     std::atomic<bool> userBlkAllocProhibited;
+
+    pthread_rwlock_t lock_volume[MAX_VOLUME_COUNT];
 };
 } // namespace pos

@@ -201,7 +201,8 @@ enum class POS_EVENT_ID
     CREATE_ARRAY_NVM_CAPACITY_IS_LT_MIN = 2514,
     CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA = 2515,
     CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL = 2517,
-    CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS = 2518,
+    CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS = 2518,
+    CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS = 2519,
 
     LOAD_ARRAY_DEBUG_MSG = 2530,
     LOAD_ARRAY_NVM_DOES_NOT_EXIST = 2531,
@@ -476,6 +477,7 @@ enum class POS_EVENT_ID
     WRONG_BLOCK_COUNT,
     PICKUP_ACTIVE_STRIPE,
     SEGMENT_WAS_VICTIM,
+    SEGMENT_WAS_NOT_VICTIM,
     ALLOCATOR_SEGMENT_FREED,
     VALID_COUNT_UNDERFLOWED,
     VALID_COUNT_OVERFLOWED,
@@ -489,6 +491,8 @@ enum class POS_EVENT_ID
     TELEMETRY_CLIENT_ERROR,
     UNKNOWN_ALLOCATOR_ERROR,
     ALLOCATOR_FAILED_TO_ASSIGN_STRIPE,
+    BLOCK_ALLOCATION_UNLOCK,
+    BLOCK_ALLOCATION_LOCK,
 
     ALLOCATOR_DEBUG,
     ALLOCATOR_END,
@@ -873,6 +877,9 @@ enum class POS_EVENT_ID
     PARITY_ONLY_NOT_SUPPORTED,
     WRITE_FOR_PARITY_FAILED,
 
+    WRHDLR_FAIL_TO_LOCK,
+    WRHDLR_FAIL_TO_UNLOCK,
+
     IOFRONTEND_END,
     IOFRONTEND_COUNT = IOFRONTEND_END - IOFRONTEND_START,
 
@@ -1239,9 +1246,15 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL,
             new PosEventInfoEntry("CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL",
                 "failed to create an array", "Failed to create buffer pool for parity calculation", "Please obtain enough Huge page memory and try again")},
-        {(int)POS_EVENT_ID::CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS,
-            new PosEventInfoEntry("CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS",
-                "failed to create an array", "The number of SSDs requested within the same NUMA is insufficient", "Please try again below the number of devices in the same NUMA")},
+        {(int)POS_EVENT_ID::CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS,
+            new PosEventInfoEntry("CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS",
+                "failed to create an array", "The number of SSDs requested on the same NUMA is insufficient", "Please check the number of unoccupied SSDs on the same NUMA with the same capacity and try again.")},
+        {(int)POS_EVENT_ID::CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS,
+            new PosEventInfoEntry("CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS",
+                "failed to create an array", "The number of SSDs requested with the same capacity on the same NUMA is insufficient", "Please check the number of unoccupied SSDs on the same NUMA with the same capacity and try again.")},
+        {(int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY,
+            new PosEventInfoEntry("MBR_DEVICE_ALREADY_IN_ARRAY",
+                "device already belongs to an array", "", "select another device")},
         {(int)POS_EVENT_ID::LOAD_ARRAY_NVM_DOES_NOT_EXIST,
             new PosEventInfoEntry("LOAD_ARRAY_NVM_DOES_NOT_EXIST",
                 "failed to load an array", "Write buffer device could not be found", "Please try again after whether there is a write buffer in the existing Array")},
@@ -1428,4 +1441,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::VOL_REQ_PROCESSED_BUT_ERROR_OCCURED,
             new PosEventInfoEntry("VOL_REQ_PROCESSED_BUT_ERROR_OCCURED",
                 "failed to process the volume request perfectly", "Some requests were successful, but an error occurred during execution.", "Please report the errors")},
+        {(int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
+            new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
+                "failed to delete volumes", "a timeout has occured", "Please report the errors")},
     };

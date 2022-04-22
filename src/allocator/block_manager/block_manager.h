@@ -66,6 +66,23 @@ public:
     virtual void TurnOffBlkAllocation(void);
     virtual void TurnOnBlkAllocation(void);
 
+    virtual bool TryRdLock(uint32_t volumeId)
+    {
+        return allocStatus->TryRdLock(volumeId);
+    }
+    virtual bool Unlock(uint32_t volumeId)
+    {
+        return allocStatus->Unlock(volumeId);
+    }
+    virtual void Lock(void)
+    {
+        allocStatus->Lock();
+    }
+    virtual void Unlock(void)
+    {
+        allocStatus->Unlock();
+    }
+
 protected:
     std::pair<VirtualBlks, StripeId> _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
     std::pair<StripeId, StripeId> _AllocateStripesAndUpdateActiveStripeTail(ASTailArrayIdx asTailArrayIdx);

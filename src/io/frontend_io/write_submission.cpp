@@ -383,6 +383,13 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
     bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
     int remainBlockCount = blockCount - allocatedBlockCount;
 
+    if (!iBlockAllocator->TryRdLock(volumeId))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_LOCK;
+        POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
+        return;
+    }
+
     while (remainBlockCount > 0)
     {
         VirtualBlks targetVsaRange;
@@ -429,6 +436,12 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             _AddVirtualBlks(result);
         }
         remainBlockCount -= targetVsaRange.numBlks;
+    }
+
+    if (!iBlockAllocator->Unlock(volumeId))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_UNLOCK;
+        POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
     }
 }
 

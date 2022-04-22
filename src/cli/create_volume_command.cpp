@@ -125,7 +125,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         {
             return jFormat.MakeResponse(
                 "CREATEVOLUME", rid, ret,
-                "failed to create " + volName + "(code:" + to_string(ret) + ")",
+                "failed to create " + volName,
                 GetPosInfo());
         }
     }

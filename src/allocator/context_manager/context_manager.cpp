@@ -116,8 +116,8 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 
     if (segmentFreed == true)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
-            "[FreeSegment] segmentId:{} freed by occupied stripe count", segId);
+        POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
+            "[UpdateOccupiedStripeCount] segmentId:{} freed by occupied stripe count", segId);
 
         segmentCtx->UpdateGcFreeSegment(arrayId);
     }
@@ -131,14 +131,16 @@ ContextManager::ValidateBlks(VirtualBlks blks)
 }
 
 void
-ContextManager::InvalidateBlks(VirtualBlks blks)
+ContextManager::InvalidateBlks(VirtualBlks blks, bool isForced)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks);
+    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks, isForced);
+
     if (segmentFreed == true)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_FREED),
-            "[FreeSegment] segmentId:{} freed by valid block count", segId);
+        POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
+            "[InvalidateBlks] segmentId:{} decrement count:{}, remainCnt:{} segmentFreed:{}",
+            segId, blks.numBlks, segmentCtx->GetValidBlockCount(segId), segmentFreed);
 
         segmentCtx->UpdateGcFreeSegment(arrayId);
     }
@@ -171,6 +173,7 @@ ContextManager::AllocateFreeSegment(void)
 SegmentId
 ContextManager::AllocateGCVictimSegment(void)
 {
+    std::lock_guard<std::mutex> lock(ctxLock);
     return segmentCtx->AllocateGCVictimSegment();
 }
 
@@ -205,6 +208,7 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
+    std::lock_guard<std::mutex> lock(ctxLock);
     return segmentCtx->GetRebuildTargetSegment();
 }
 

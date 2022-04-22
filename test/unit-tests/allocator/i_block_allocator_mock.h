@@ -19,6 +19,8 @@ public:
     MOCK_METHOD(void, PermitUserBlkAlloc, (), (override));
     MOCK_METHOD(bool, BlockAllocating, (uint32_t volumeId), (override));
     MOCK_METHOD(void, UnblockAllocating, (uint32_t volumeId), (override));
+    MOCK_METHOD(bool, TryRdLock, (uint32_t volumeId), (override));
+    MOCK_METHOD(bool, Unlock, (uint32_t volumeId), (override));
 };
 
 } // namespace pos

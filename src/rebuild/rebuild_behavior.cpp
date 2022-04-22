@@ -56,7 +56,8 @@ RebuildBehavior::~RebuildBehavior(void)
             POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
                 "Some buffers in recoverBuffers were not returned but deleted.");
         }
-        delete recoverBuffers;
+        mm->DeleteBufferPool(recoverBuffers);
+        recoverBuffers = nullptr;
     }
     if (rebuildReadBuffers != nullptr)
     {
@@ -65,7 +66,8 @@ RebuildBehavior::~RebuildBehavior(void)
             POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
                 "Some buffers in rebuildReadBuffers were not returned but deleted.");
         }
-        delete rebuildReadBuffers;
+        mm->DeleteBufferPool(rebuildReadBuffers);
+        rebuildReadBuffers = nullptr;
     }
 }
 // LCOV_EXCL_STOP

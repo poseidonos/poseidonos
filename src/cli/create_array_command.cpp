@@ -104,12 +104,12 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     if (0 != ret)
     {
         return jFormat.MakeResponse(
-            "CREATEARRAY", rid, ret, "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+            "CREATEARRAY", rid, ret, "failed to create array " + arrayName, GetPosInfo());
     }
     else
     {
         return jFormat.MakeResponse("CREATEARRAY", rid, SUCCESS,
-            arrayName + " is created successfully", GetPosInfo());
+            "array " + arrayName + " has been created successfully", GetPosInfo());
     }
 }
 }; // namespace pos_cli

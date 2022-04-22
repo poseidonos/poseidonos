@@ -75,11 +75,11 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
         int nanoSec = std::rand() % 100;
         std::thread th1(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th2(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
+        std::thread th2(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1, false);
         th1.join();
         th2.join();
 
-        std::thread th3(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1);
+        std::thread th3(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1, false);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
         std::thread th4(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         th3.join();
@@ -248,7 +248,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
             .numBlks = maxValidBlkCount,
         };
 
-        contextManager.InvalidateBlks(blks);
+        contextManager.InvalidateBlks(blks, false);
     }
 
     // Then: State of overwritten segments must be FREE and occupied stripe count is zero

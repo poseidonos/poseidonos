@@ -110,3 +110,8 @@ Situation indicates the detailed explanation of POS array state. Situation is al
 The following diagram illustrates what conditions trigger a state transition of POS array.
 
 ![state_transition_diagram](../images/state_transition_diagram.png)
+
+### Write Mode
+When mounting an array, you can set the write mode. A POS array supports two write modes: write-back and write-through.
+In write-back mode, when an initiator requests a write operation to POS, POS writes user data to a write buffer allocated in DRAM region. And then, POS sends back a write completion response to the initiator and flushes the data later at some time. The advantage of the write-back mode is low write latency. However, when a crash such as a sudden power-off occurs unexpectedly, the data in DRAM will be lost; this problem is called a data consistency problem. The initiator believes the data has been successfully written, but the data does not exist in the storage. 
+In the write-through mode, the data is directly written to the SSDs; POS using the write-through mode does not suffer from data consistency problems. However, the write latency becomes longer than that of write-back. The write completion response is sent to the initiator after the data is written to the SSDs. Therefore, You should consider this trade-off when choosing the write mode.

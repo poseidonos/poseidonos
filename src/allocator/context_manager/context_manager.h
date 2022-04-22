@@ -88,7 +88,7 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner);
 
     virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual void InvalidateBlks(VirtualBlks blks) override;
+    virtual void InvalidateBlks(VirtualBlks blks, bool isForced) override;
     virtual void UpdateOccupiedStripeCount(StripeId lsid) override;
 
     virtual int SetNextSsdLsid(void);

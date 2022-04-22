@@ -40,7 +40,7 @@ namespace pos
 {
 NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dataCnt, int spareCnt, DeviceManager* devMgr)
 {
-    result.code = EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS);
+    result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS);
     int requiredDevCnt = dataCnt + spareCnt;
     auto&& systemDevs = Enumerable::Where(devMgr->GetDevs(),
         [](auto d) { return (d->GetClass() == DeviceClass::SYSTEM &&
@@ -51,6 +51,12 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
 
     DevName bufferName(buffers.front());
     UblockSharedPtr buf = devMgr->GetDev(bufferName);
+    if (buf == nullptr)
+    {
+        result.code = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
+        POS_TRACE_WARN(result.code, "nvm_name:{}", buffers.front());
+        return;
+    }
     int targetNuma = buf->GetNuma();
     size_t numofDevsInTargetNuma = 0;
     size_t maxNumofDevsInTargetNumaWithSameCapacity = 0;
@@ -64,6 +70,11 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
         }
         auto sameNumaDevs = numaGroup.second;
         numofDevsInTargetNuma = sameNumaDevs.size();
+        if ((int)numofDevsInTargetNuma < requiredDevCnt)
+        {
+            continue;
+        }
+
         auto&& devsBySize = Enumerable::GroupBy(sameNumaDevs,
             [](auto d) { return d->GetSize(); });
 
@@ -112,10 +123,14 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                 result.options.push_back(option);
                 result.code = EID(SUCCESS);
             }
+            else
+            {
+                result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS);
+            }
         }
     }
 
-    if (result.code == EID(CREATE_ARRAY_INSUFFICIENT_NUMA_DEVS))
+    if (result.code != EID(SUCCESS))
     {
         POS_TRACE_WARN(result.code, "required: {}, num of devs in same numa:{}, num of devs in same numa with same capacity: {}", requiredDevCnt, numofDevsInTargetNuma, maxNumofDevsInTargetNumaWithSameCapacity);
     }

@@ -35,6 +35,8 @@ def parse_arguments(args):
                         help='Enable quick test mode, default: ' + str(TEST.quick_mode))
     parser.add_argument('-d', '--dump_log_buffer', default=TEST.dump_log_buffer, action='store_true',
                         help='Enable dump log buffer during test, default: ' + str(TEST.dump_log_buffer))
+    parser.add_argument('-r', '--run_time', type=int, default=TEST.run_time,
+                        help='Set running time, default: ' + str(TEST.run_time))
 
     args = parser.parse_args()
     TEST.traddr = args.fabric_ip
@@ -43,6 +45,7 @@ def parse_arguments(args):
     TEST.log_dir = args.log_dir
     TEST.quick_mode = args.quick_mode
     TEST.dump_log_buffer = args.dump_log_buffer
+    TEST.run_time = args.run_time
 
 
 def set_up(argv, test_name):

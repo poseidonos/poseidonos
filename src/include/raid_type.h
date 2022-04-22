@@ -40,6 +40,7 @@ namespace pos
 
 enum class RaidTypeEnum
 {
+    NOT_SUPPORTED,
     NONE,
     RAID0,
     RAID5,
@@ -54,7 +55,7 @@ public:
     RaidType(RaidTypeEnum t) : val(t) { }
     RaidType(string type)
     {
-        val = RaidTypeEnum::NONE;
+        val = RaidTypeEnum::NOT_SUPPORTED;
         for (int i = 0; i < (int)RaidTypeEnum::TYPE_COUNT; i++)
         {
             if (type == RAID_STR[i])
@@ -75,6 +76,7 @@ private:
     RaidTypeEnum val;
     string RAID_STR[(int)RaidTypeEnum::TYPE_COUNT] =
     {
+        "NOT_SUPPORTED",
         "NONE",
         "RAID0",
         "RAID5",

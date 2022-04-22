@@ -44,7 +44,7 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToNonZero)
     // given
     SegmentInfo segInfos(10, 0, SegmentState::FREE);
     // when
-    auto result = segInfos.DecreaseValidBlockCount(3);
+    auto result = segInfos.DecreaseValidBlockCount(3, false);
     bool segmentFreed = result.first;
     // then
     EXPECT_EQ(segmentFreed, false);
@@ -55,7 +55,7 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenSsdState)
     // given
     SegmentInfo segInfos(3, 10, SegmentState::SSD);
     // when
-    auto result = segInfos.DecreaseValidBlockCount(3);
+    auto result = segInfos.DecreaseValidBlockCount(3, false);
     bool segmentFreed = result.second;
     SegmentState prevState = result.second;
 
@@ -72,7 +72,7 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenNvramState)
     // given
     SegmentInfo segInfos(3, 10, SegmentState::NVRAM);
     // when
-    auto result = segInfos.DecreaseValidBlockCount(3);
+    auto result = segInfos.DecreaseValidBlockCount(3, false);
     bool segmentFreed = result.first;
     // then
     EXPECT_EQ(segmentFreed, false);

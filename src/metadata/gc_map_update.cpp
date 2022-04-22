@@ -105,7 +105,8 @@ GcMapUpdate::_InvalidateBlock(void)
         invalidVsa.offset = 0;
         VirtualBlks invalidVsaRange = {invalidVsa, invalidCnt};
 
-        segmentCtx->InvalidateBlks(invalidVsaRange);
+        bool allowVictimSegRelease = true;
+        segmentCtx->InvalidateBlks(invalidVsaRange, allowVictimSegRelease);
     }
 }
 

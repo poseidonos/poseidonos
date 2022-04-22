@@ -64,16 +64,16 @@ DeleteArrayCommand::Execute(json& doc, string rid)
     if (0 != ret)
     {
         return jFormat.MakeResponse(
-            "DELETEARRAY", rid, ret, "failed to delete " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+            "DELETEARRAY", rid, ret, "failed to delete " + arrayName, GetPosInfo());
     }
     bool deleteDone = nvmfTarget->DeletePosBdevAll(arrayName);
     if (false == deleteDone)
     {
         return jFormat.MakeResponse(
-            "DELETEARRAY", rid, (int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
-            "Some or every volumes in " + arrayName + " failed to delete.", GetPosInfo());
+            "DELETEARRAY", rid, EID(IONVMF_VOL_DELETE_TIMEOUT),
+            "failed to delete volumes in array " + arrayName, GetPosInfo());
     }
     return jFormat.MakeResponse("DELETEARRAY", rid, SUCCESS,
-        arrayName + " is deleted successfully", GetPosInfo());
+        arrayName + " has been deleted successfully", GetPosInfo());
 }
 }; // namespace pos_cli

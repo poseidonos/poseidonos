@@ -195,7 +195,8 @@ VSAMapContent::InvalidateAllBlocks(ISegmentCtx* segmentCtx)
             if (IsUnMapVsa(vsa) == false)
             {
                 VirtualBlks vBlks = {.startVsa = vsa, .numBlks = 1};
-                segmentCtx->InvalidateBlks(vBlks);
+                bool allowVictimSegRelease = false;
+                segmentCtx->InvalidateBlks(vBlks, allowVictimSegRelease);
             }
         }
 

@@ -194,7 +194,7 @@ TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValue)
 {
     EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(std::make_pair(false, SegmentState::FREE)));
 
-    bool ret = segCtx->DecreaseValidBlockCount(0, 1);
+    bool ret = segCtx->DecreaseValidBlockCount(0, 1, false);
     EXPECT_EQ(false, ret);
 }
 
@@ -205,7 +205,7 @@ TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_TestDecreaseValueWhenValid
     EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(1);
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(false));
 
-    bool ret = segCtx->DecreaseValidBlockCount(0, 1);
+    bool ret = segCtx->DecreaseValidBlockCount(0, 1, false);
     EXPECT_EQ(true, ret);
 }
 
@@ -217,7 +217,7 @@ TEST_F(SegmentCtxTestFixture, DecreaseValidBlockCount_testIfSegmentFreedAndRemov
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(true));
     EXPECT_CALL(rebuildCtx, FlushRebuildSegmentList).Times(1);
 
-    bool ret = segCtx->DecreaseValidBlockCount(0, 1);
+    bool ret = segCtx->DecreaseValidBlockCount(0, 1, false);
     EXPECT_EQ(true, ret);
 }
 
@@ -240,7 +240,7 @@ TEST(SegmentCtx, _SegmentFreed_testWhenSegmentIsInRebuilding)
     EXPECT_EQ(rebuildingSegment, 3);
 
     // When segment is freed, it will not be added to the free list
-    bool ret = segmentCtx.DecreaseValidBlockCount(rebuildingSegment, 1);
+    bool ret = segmentCtx.DecreaseValidBlockCount(rebuildingSegment, 1, false);
     EXPECT_EQ(ret, true);
 
     delete[] segInfos;
@@ -270,7 +270,7 @@ TEST(SegmentCtx, _SegmentFreed_testWhenSegmentIsRemovedFromTheRebuildList)
     EXPECT_CALL(gcCtx, GetCurrentGcMode);
 
     // When segment is freed, it will be added to the free list
-    bool ret = segmentCtx.DecreaseValidBlockCount(2, 1);
+    bool ret = segmentCtx.DecreaseValidBlockCount(2, 1, false);
     EXPECT_EQ(ret, true);
 
     delete[] segInfos;

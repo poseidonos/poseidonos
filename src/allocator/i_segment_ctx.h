@@ -40,7 +40,7 @@ class ISegmentCtx
 {
 public:
     virtual void ValidateBlks(VirtualBlks blks) = 0;
-    virtual void InvalidateBlks(VirtualBlks blks) = 0;
+    virtual void InvalidateBlks(VirtualBlks blks, bool isForced) = 0;
     virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
 };
 

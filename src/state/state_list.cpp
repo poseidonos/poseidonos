@@ -97,8 +97,8 @@ StateList::Remove(StateContext* ctx)
     else
     {
         listMutex.unlock();
-        POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
-            "couldn't remove statecontext because it's already gone - {}",
+        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+            "The requested state(situation: {}) has already been removed",
             (ctx->GetSituation().ToString()));
     }
 }

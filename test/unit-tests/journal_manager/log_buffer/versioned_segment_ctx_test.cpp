@@ -164,11 +164,11 @@ TEST(VersionedSegmentCtx, IncreaseValidBlockCount_testIfValidBlockCountIsIncreas
     // When, Then
     uint32_t targetLogGroup = 0;
     EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), IncreaseValidBlockCount(2, 3)).Times(1);
-    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), DecreaseValidBlockCount(2, 1)).Times(1);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), DecreaseValidBlockCount(2, 1, false)).Times(1);
     EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), IncreaseValidBlockCount(1, 4)).Times(1);
 
     versionedSegCtx.IncreaseValidBlockCount(targetLogGroup, 2, 3);
-    versionedSegCtx.DecreaseValidBlockCount(targetLogGroup, 2, 1);
+    versionedSegCtx.DecreaseValidBlockCount(targetLogGroup, 2, 1, false);
     versionedSegCtx.IncreaseValidBlockCount(targetLogGroup, 1, 4);
 }
 

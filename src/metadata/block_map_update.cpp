@@ -90,7 +90,8 @@ BlockMapUpdate::_DoSpecificJob(void)
          vsaRangeIndex++)
     {
         VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
-        segmentCtx->InvalidateBlks(vsaRange);
+        bool allowVictimSegRelease = false;
+        segmentCtx->InvalidateBlks(vsaRange, allowVictimSegRelease);
 
         POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, POS_EVENT_ID::MAPPER_SUCCESS,
             "Invalidate rba {} vsid {}", ChangeSectorToBlock(volumeIo->GetSectorRba()), vsaRange.startVsa.stripeId);

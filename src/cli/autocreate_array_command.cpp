@@ -101,10 +101,10 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     if (res.code != 0)
     {
         int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
-        POS_TRACE_WARN(event, "internal_event_code:{}", res.code);
+        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
             "AUTOCREATEARRAY", rid, res.code,
-                "failed to create " + arrayName + " (code:" + to_string(res.code) + ")", GetPosInfo());
+                "failed to create " + arrayName, GetPosInfo());
     }
 
     IArrayMgmt* array = ArrayMgr();
@@ -114,7 +114,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     if (0 != ret)
     {
         int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
-        POS_TRACE_WARN(event, "internal_event_code:{}", ret);
+        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
             "AUTOCREATEARRAY", rid, ret,
                 "failed to create " + arrayName, GetPosInfo());

@@ -149,7 +149,7 @@ MbrMapManager::_CheckDevices(vector<DeviceMeta>& devs)
         if (iter != arrayDeviceIndexMap.end())
         {
             int event_id = EID(MBR_DEVICE_ALREADY_IN_ARRAY);
-            POS_TRACE_WARN(event_id, "Device {} is already in array {}", dev.uid, iter->second);
+            POS_TRACE_WARN(event_id, "device_uid: {}, array: {}", dev.uid, iter->second);
             return event_id;
         }
     }

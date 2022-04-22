@@ -148,22 +148,34 @@ Array::_LoadImpl(void)
 int
 Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({})", name_);
+    RaidType dataRaidType = RaidType(dataFt);
+    RaidType metaRaidType = RaidType(metaFt);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({}), metaFt:{}, dataFt:{}",
+        name_, metaRaidType.ToString(), dataRaidType.ToString());
+
+    if (dataRaidType == RaidTypeEnum::NOT_SUPPORTED ||
+        metaRaidType == RaidTypeEnum::NOT_SUPPORTED)
+    {
+        int ret = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
+        POS_TRACE_WARN(ret, "metaFt: {}, dataFt: {}",
+            metaRaidType.ToString(), dataRaidType.ToString());
+        return ret;
+    }
+    bool canAddSpare = dataRaidType != RaidTypeEnum::NONE &&
+                dataRaidType != RaidTypeEnum::RAID0;
+    if (canAddSpare == false && nameSet.spares.size() > 0)
+    {
+        int ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
+        POS_TRACE_WARN(ret, "RaidType: {}", dataRaidType.ToString());
+        return ret;
+    }
+
     int ret = 0;
-    bool needSpare = true;
     ArrayMeta meta;
     ArrayNamePolicy namePolicy;
     UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
-    needSpare = RaidType(dataFt) != RaidTypeEnum::NONE && RaidType(dataFt) != RaidTypeEnum::RAID0;
-    if (needSpare == false && nameSet.spares.size() > 0)
-    {
-        ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
-        POS_TRACE_INFO(ret, "RaidType: {}", dataFt);
-        goto error;
-    }
-
     ret = devMgr_->ImportByName(nameSet);
     if (ret != 0)
     {

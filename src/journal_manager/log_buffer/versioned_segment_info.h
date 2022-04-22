@@ -47,7 +47,7 @@ public:
 
     virtual void Reset(void);
     virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
     virtual void IncreaseOccupiedStripeCount(SegmentId segId);
 
     virtual std::unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
