@@ -162,3 +162,32 @@ func TestCreateArrayCommandReqWithNoBufferError(t *testing.T) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }
+
+func TestCreateArrayWithRAID10AndOddDataDevsCommandReq(t *testing.T) {
+
+	// Command creation
+	rootCmd := cmd.RootCmd
+
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	globals.IsTestingReqBld = true
+
+	// Execute the command to test with argument
+	testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
+		"device1,device2,device3", "--spare", "devspare", "--array-name", "Array0", "--raid", "RAID10", "--json-req")
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `error: RAID10 only supports even number of data devices.
+`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
+	}
+}

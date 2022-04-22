@@ -61,6 +61,7 @@ ArrayState::~ArrayState(void)
     delete degradedState;
     if (publisher != nullptr)
     {
+        telemetryClient->DeregisterPublisher(publisher->GetName());
         delete publisher;
     }
 }

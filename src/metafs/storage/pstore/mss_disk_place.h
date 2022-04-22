@@ -34,11 +34,12 @@
 #define _INCLUDE_MSS_DISK_PLACE_H_
 
 #include <string>
+
+#include "meta_storage_specific.h"
+#include "os_header.h"
+#include "src/array/array.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
-#include "os_header.h"
-#include "meta_storage_specific.h"
-#include "src/array/array.h"
 
 namespace pos
 {
@@ -56,6 +57,7 @@ public:
     virtual uint64_t GetMetaDiskCapacity(void);
     virtual pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn) = 0;
     virtual uint32_t GetMaxLpnCntPerIOSubmit(void) = 0;
+    virtual uint32_t GetLpnCntPerChunk(void) = 0;
     pos::PartitionType
     GetPartitionType(void)
     {

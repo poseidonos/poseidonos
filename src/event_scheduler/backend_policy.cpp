@@ -30,40 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "backend_policy.h"
 
-#include <string>
+#include <atomic>
+#include <mutex>
+#include <queue>
+#include <vector>
 
-#include "src/array/rebuild/rebuild_context.h"
-#include "src/logger/logger.h"
-#include "src/resource_manager/memory_manager.h"
+#include "src/event_scheduler/scheduler_queue.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
-class BufferPool;
-class RebuildBehavior
+BackendPolicy::BackendPolicy(QosManager* qosManagerArg, std::vector<EventWorker*>* workerArrayInput, uint32_t workerCount, uint32_t ioWorkerCount)
+: qosManager(qosManagerArg),
+  workerArray(workerArrayInput),
+  workerCount(workerCount)
 {
-public:
-    RebuildBehavior(unique_ptr<RebuildContext> ctx,
-        MemoryManager* mm = MemoryManagerSingleton::Instance());
-    virtual ~RebuildBehavior(void);
-    virtual void StopRebuilding(void);
-    virtual RebuildContext* GetContext(void);
-    virtual bool Read(void) = 0;
-    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
-    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;
-    virtual void UpdateProgress(uint32_t val) = 0;
+    numaDedicatedSchedulingPolicy = false;
+    workerArray = {nullptr};
+    for (int type = BackendEvent_Start; type < BackendEvent_Count; type++)
+    {
+        queueOccupied[type] = false;
+        eventQueue[type] = nullptr;
+        ioControl.allowedIOCount[type] = 0;
+        ioControl.currentIOCount[type] = 0;
+    }
+}
 
-protected:
-    bool _InitBuffers(void);
-    bool _InitRecoverBuffers(string owner);
-    bool _InitRebuildReadBuffers(string owner, int totalChunksToRead);
-    int _GetTotalReadChunksForRecovery(void);
-    virtual string _GetClassName(void) = 0;
+BackendPolicy::~BackendPolicy()
+{
+    qosManager = nullptr;
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
+    {
+        delete eventQueue[event];
+    }
+}
 
-    unique_ptr<RebuildContext> ctx = nullptr;
-    MemoryManager* mm = nullptr;
-    BufferPool* recoverBuffers = nullptr;
-    BufferPool* rebuildReadBuffers = nullptr;
-};
+void
+BackendPolicy::Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NODES],
+    std::vector<uint32_t> itotalWorkerIDVector, bool inumaDedicatedSchedulingPolicy)
+{
+    for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
+    {
+        eventQueue[event] = new SchedulerQueue {qosManager};
+    }
+    for (unsigned int numa = 0; numa < RTE_MAX_NUMA_NODES; ++numa)
+    {
+        workerIDPerNumaVector[numa] = iworkerIDPerNumaVector[numa];
+    }
+    totalWorkerIDVector = itotalWorkerIDVector;
+    numaDedicatedSchedulingPolicy = inumaDedicatedSchedulingPolicy;
+}
+
+bool
+BackendPolicy::_GetQueueOccupancy(BackendEvent eventId)
+{
+    return queueOccupied[eventId];
+}
+
 } // namespace pos

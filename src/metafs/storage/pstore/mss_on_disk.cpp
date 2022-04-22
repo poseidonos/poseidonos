@@ -186,10 +186,7 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
             storagelld->CalculateOnDiskAddress(currLpn); // get physical address
         MetaLpnType currLpnCnt = std::min(requestLpnCount, maxLpnCntPerIO - blkAddr.offset);
 
-        BufferEntry buffEntry(currBuf, currLpnCnt);
-        std::list<BufferEntry> bufferList;
-        bufferList.push_back(buffEntry);
-
+        std::list<BufferEntry> bufferList = _GetBufferList(mediaType, blkAddr.offset, currLpnCnt, currBuf);
         IOSubmitHandlerStatus ioStatus;
         do
         {
@@ -228,6 +225,40 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
 
     return POS_EVENT_ID::SUCCESS;
 }
+
+std::list<BufferEntry>
+MssOnDisk::_GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer)
+{
+    std::list<BufferEntry> list;
+    const uint64_t BLOCKS_PER_CHUNK = mssDiskPlace[(int)mediaType]->GetLpnCntPerChunk();
+    const uint64_t START_CHUNK = offset / BLOCKS_PER_CHUNK;
+    const uint64_t LAST_CHUNK = (offset + count - 1) / BLOCKS_PER_CHUNK;
+    uint64_t blocksInThisChunk = (START_CHUNK == LAST_CHUNK) ? count : (((START_CHUNK + 1) * BLOCKS_PER_CHUNK) - offset);
+    uint8_t* currentBuffer = buffer;
+    uint64_t remainBlocks = count;
+
+    for (uint64_t i = START_CHUNK; i <= LAST_CHUNK; ++i)
+    {
+        BufferEntry buffEntry(currentBuffer, blocksInThisChunk);
+        list.push_back(buffEntry);
+        currentBuffer += (blocksInThisChunk * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+        remainBlocks -= blocksInThisChunk;
+        blocksInThisChunk = std::min(BLOCKS_PER_CHUNK, remainBlocks);
+    }
+
+    return list;
+}
+
+/**
+ * read given page into buffer form disk
+ *
+ * @mediaType  NVRAM/SDD type of media
+ * @pageNumber     Address of page to read. Must be 4K aligned.
+ * @buffer  Destination memory to write data.
+ * @numPages   Number of bytes in multiple of 4K pages.
+ *
+ * @return  Success(0)/Failure(-1)
+ */
 
 POS_EVENT_ID
 MssOnDisk::ReadPage(const MetaStorageType mediaType, const MetaLpnType pageNumber,

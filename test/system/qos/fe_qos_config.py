@@ -66,7 +66,7 @@ def main(argv):
             sys.exit()
         elif opt in ("-v", "--vm"):
             if ("true" == arg):
-                conf_file = "/../../../config/pos.conf"
+                conf_file = "/../../../config/ibofos_for_vm_ci.conf"
         elif opt in ("-s", "--set"):
             if ("true" != arg and "false" != arg):
                 help()

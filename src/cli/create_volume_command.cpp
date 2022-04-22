@@ -54,7 +54,7 @@ string
 CreateVolumeCommand::Execute(json& doc, string rid)
 {
     string arrayName = DEFAULT_ARRAY_NAME;
-    string qosMsg = "QoS parameters are set";
+    string qosMsg = "";
 
     if (doc["param"].contains("array") == true)
     {
@@ -118,8 +118,8 @@ CreateVolumeCommand::Execute(json& doc, string rid)
 
         if (ret == SUCCESS)
         {
-            return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
-                volName + " is created successfully." + qosMsg, GetPosInfo());
+            return jFormat.MakeResponse("CREATEVOLUME", rid, SUCCESS,
+                volName + " has been created successfully.", GetPosInfo());
         }
         else
         {

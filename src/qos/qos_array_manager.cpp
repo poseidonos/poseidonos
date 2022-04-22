@@ -149,11 +149,6 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
             {
                 return QosReturnCode::EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT;
             }
-            if ((minBwPolicy == true && policy.minIopsGuarantee) || (minBwPolicy == false && policy.minBwGuarantee))
-            {
-                return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-            }
-
             // Check if change in min policy or new volume policy
             std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
             auto it = minGuaranteeVolume.begin();

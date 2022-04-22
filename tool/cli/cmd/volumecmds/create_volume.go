@@ -2,6 +2,8 @@ package volumecmds
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"pnconnector/src/log"
 	"strings"
 
@@ -54,6 +56,11 @@ func formCreateVolumeReq(command string) messages.Request {
 	volumeSize := strings.TrimSpace(create_volume_volumeSize)
 	volumeSize = strings.ToUpper(create_volume_volumeSize)
 
+	if strings.Contains(volumeSize, ".") == true {
+		fmt.Println("The size of a volume must be an integer number.")
+		os.Exit(1)
+	}
+
 	if volumeSize[len(volumeSize)-1:] != "B" {
 		volumeSize += "B"
 	}
@@ -101,7 +108,7 @@ func init() {
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeSize,
 		"size", "", "0",
 		`The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
-If you do not specify the unit, it will be B in default.`)
+If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.)`)
 	CreateVolumeCmd.MarkFlagRequired("size")
 
 	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS,

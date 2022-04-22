@@ -49,6 +49,8 @@ ArrayServiceLayer::ArrayServiceLayer(void)
 
 ArrayServiceLayer::~ArrayServiceLayer(void)
 {
+    delete journalIOLocker;
+    delete metaIOLocker;
     delete deviceChecker;
     delete ioRecover;
     delete ioTranslator;

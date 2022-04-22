@@ -33,9 +33,9 @@
 #ifndef _INCLUDE_MSS_DISK_INPLACE_H
 #define _INCLUDE_MSS_DISK_INPLACE_H
 
-#include "src/metafs/storage/pstore/mss_disk_place.h"
-
 #include <string>
+
+#include "src/metafs/storage/pstore/mss_disk_place.h"
 
 namespace pos
 {
@@ -53,6 +53,7 @@ public:
     // Only inherit function whose defination will change
     virtual pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
     virtual uint32_t GetMaxLpnCntPerIOSubmit(void);
+    virtual uint32_t GetLpnCntPerChunk(void);
 };
 } // namespace pos
 

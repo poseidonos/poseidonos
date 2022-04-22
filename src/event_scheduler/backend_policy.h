@@ -31,13 +31,16 @@
  */
 
 #pragma once
+
+#include <rte_config.h>
+
 #include <atomic>
 #include <mutex>
 #include <queue>
 #include <vector>
 
-#include "src/event_scheduler/scheduler_queue.h"
-#include "src/qos/qos_manager.h"
+#include "src/bio/ubio.h"
+#include "src/include/backend_event.h"
 
 namespace pos
 {
@@ -46,44 +49,19 @@ class EventQueue;
 class SchedulerQueue;
 class QosManager;
 
+const uint32_t FE_QUEUES = 47;
+
 class BackendPolicy
 {
 public:
     BackendPolicy(QosManager* qosManagerArg,
-        std::vector<EventWorker*>* workerArrayInput, uint32_t workerCount, uint32_t ioWorkerCount)
-    : qosManager(qosManagerArg),
-      workerArray(workerArrayInput),
-      workerCount(workerCount)
-    {
-    }
+        std::vector<EventWorker*>* workerArrayInput, uint32_t workerCount, uint32_t ioWorkerCount);
 
     void Init(std::vector<uint32_t> iworkerIDPerNumaVector[RTE_MAX_NUMA_NODES],
-        std::vector<uint32_t> itotalWorkerIDVector, bool inumaDedicatedSchedulingPolicy)
-    {
-        for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
-        {
-            eventQueue[event] = new SchedulerQueue {qosManager};
-        }
-        for (unsigned int numa = 0; numa < RTE_MAX_NUMA_NODES; ++numa)
-        {
-            workerIDPerNumaVector[numa] = iworkerIDPerNumaVector[numa];
-        }
-        totalWorkerIDVector = itotalWorkerIDVector;
-        numaDedicatedSchedulingPolicy = inumaDedicatedSchedulingPolicy;
-    }
-
-    virtual ~BackendPolicy()
-    {
-        qosManager = nullptr;
-        for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count; event++)
-        {
-            delete eventQueue[event];
-        }
-    }
-
+        std::vector<uint32_t> itotalWorkerIDVector, bool inumaDedicatedSchedulingPolicy);
+    virtual ~BackendPolicy();
     virtual void EnqueueEvent(EventSmartPtr input) = 0;
     virtual std::queue<EventSmartPtr> DequeueEvents(void) = 0;
-
     virtual int Run() = 0;
     virtual EventSmartPtr PickWorkerEvent(EventWorker*) = 0;
     virtual void CheckAndSetQueueOccupancy(BackendEvent eventId) = 0;
@@ -104,10 +82,7 @@ public:
     }
 
 protected:
-    bool _GetQueueOccupancy(BackendEvent eventId)
-    {
-        return queueOccupied[eventId];
-    }
+    bool _GetQueueOccupancy(BackendEvent eventId);
     static const uint32_t MAX_NUMA = RTE_MAX_NUMA_NODES;
     QosManager* qosManager;
     std::vector<EventWorker*>* workerArray;

@@ -54,7 +54,6 @@ public:
 
 private:
     virtual string _GetClassName(void);
-    virtual int _GetTotalReadChunksForRecovery(void);
 
     SegmentId _NextSegment(void);
     IContextManager* allocatorSvc = nullptr;

@@ -87,6 +87,7 @@ private:
     void _AdjustPageIoToFitTargetPartition(const MetaStorageType mediaType, MetaLpnType& targetPage,
         MetaLpnType& targetNumPages);
     void _Finalize(void);
+    std::list<BufferEntry> _GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer);
 
     std::vector<MssDiskPlace*> mssDiskPlace;
     std::vector<uint64_t> metaCapacity;

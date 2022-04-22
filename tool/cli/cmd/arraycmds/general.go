@@ -58,3 +58,11 @@ func parseDevList(devsList string) []messages.DeviceNameList {
 
 	return devs
 }
+
+func isRAIDConstMet(numOfDataDevs int, raid string) bool {
+	if (strings.ToLower(raid) == "raid10") && (numOfDataDevs%2 == 1) {
+		return false
+	}
+
+	return true
+}

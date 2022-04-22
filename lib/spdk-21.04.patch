@@ -1,25 +1,3 @@
-diff --git .gitignore .gitignore
-index c9c85b925..59c9c6305 100644
---- .gitignore
-+++ .gitignore
-@@ -2,12 +2,17 @@
- *.a
- *.cmd
- *.d
-+*.dll
-+*.exe
- *.gcda
- *.gcno
- *.kdev4
- *.ko
-+*.lib
- *.log
- *.o
-+*.obj
-+*.pdb
- *.pyc
- *.so
- *.so.*
 diff --git CONFIG CONFIG
 index 8c49c7d2b..fb6bf0eb3 100644
 --- CONFIG
@@ -872,7 +850,7 @@ index 4fe815d06..cfcfc4a84 100644
  			nsid = req->cmd->nvme_cmd.nsid;
  
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
-index 05aaff048..07bd568dd 100644
+index 05aaff048..b732a8cf8 100644
 --- lib/nvmf/nvmf.c
 +++ lib/nvmf/nvmf.c
 @@ -37,6 +37,7 @@
@@ -928,6 +906,19 @@ index 05aaff048..07bd568dd 100644
  	qpair_ctx = calloc(1, sizeof(struct nvmf_qpair_disconnect_ctx));
  	if (!qpair_ctx) {
  		SPDK_ERRLOG("Unable to allocate context for nvmf_qpair_disconnect\n");
+@@ -1275,6 +1299,12 @@ poll_group_update_subsystem(struct spdk_nvmf_poll_group *group,
+ 
+ 	if (ns_changed) {
+ 		TAILQ_FOREACH(ctrlr, &subsystem->ctrlrs, link) {
++			/* It is possible that a ctrlr was added but the admin_qpair hasn't been
++			 * assigned yet.
++			 */
++			if (!ctrlr->admin_qpair) {
++				continue;
++			}
+ 			if (ctrlr->admin_qpair->group == group) {
+ 				nvmf_ctrlr_async_event_ns_notice(ctrlr);
+ 				nvmf_ctrlr_async_event_ana_change_notice(ctrlr);
 diff --git lib/nvmf/nvmf_internal.h lib/nvmf/nvmf_internal.h
 index d76b742a3..7a9fb03a9 100644
 --- lib/nvmf/nvmf_internal.h

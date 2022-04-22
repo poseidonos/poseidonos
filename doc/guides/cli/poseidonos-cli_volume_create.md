@@ -28,7 +28,7 @@ poseidonos-cli volume create [flags]
       --maxbw int            The maximum bandwidth for the volume in MB/s.
       --maxiops int          The maximum IOPS for the volume in Kilo.
       --size string          The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
-                             If you do not specify the unit, it will be B in default. (default "0")
+                             If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.) (default "0")
   -v, --volume-name string   The name of the volume to create.
 ```
 
