@@ -224,7 +224,7 @@ type ListVolumeResData struct {
 
 type Volume struct {
 	VOLUMENAME string `json:"name"`
-	VOLUMEID   int    `json:"id,omitempty"`
+	INDEX      int    `json:"index,omitempty"`
 	TOTAL      uint64 `json:"total"`
 	REMAIN     uint64 `json:"remain"`
 	STATUS     string `json:"status"`

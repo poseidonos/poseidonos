@@ -113,7 +113,8 @@ ListVolumeCommand::Execute(json& doc, string rid)
 
             JsonElement elem("");
             elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetName() + "\""));
-            elem.SetAttribute(JsonAttribute("id", to_string(idx)));
+            elem.SetAttribute(JsonAttribute("index", to_string(idx)));
+            elem.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
             elem.SetAttribute(JsonAttribute("total", to_string(vol->TotalSize())));
 
             VolumeStatus volumeStatus = vol->GetStatus();

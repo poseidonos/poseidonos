@@ -192,7 +192,8 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		// Header
 		fmt.Fprintln(w,
 			"Name\t"+
-				globals.FieldSeparator+"ID\t"+
+				globals.FieldSeparator+"Index\t"+
+				globals.FieldSeparator+"UUID\t"+
 				globals.FieldSeparator+"Total\t"+
 				globals.FieldSeparator+"Remaining\t"+
 				globals.FieldSeparator+"Used%\t"+
@@ -206,6 +207,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w,
 			"---------\t"+
 				globals.FieldSeparator+"--------\t"+
+				globals.FieldSeparator+"-------------------------------\t"+
 				globals.FieldSeparator+"-----------------\t"+
 				globals.FieldSeparator+"-----------------\t"+
 				globals.FieldSeparator+"---------\t"+
@@ -219,7 +221,8 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		for _, volume := range res.RESULT.DATA.VOLUMELIST {
 			fmt.Fprintln(w,
 				volume.VOLUMENAME+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.INDEX)+"\t"+
+					globals.FieldSeparator+volume.UUID+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
 					globals.FieldSeparator+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10)+"\t"+
@@ -245,6 +248,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
+		fmt.Fprintln(w, "UUID\t: "+volume.UUID)
 		fmt.Fprintln(w, "Name\t: "+volume.VOLUMENAME)
 		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.TOTAL))
 		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.REMAIN))
@@ -255,7 +259,6 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "MinimumIOPS\t: "+strconv.Itoa(volume.MINIOPS))
 		fmt.Fprintln(w, "MinimumBandwidth\t: "+strconv.Itoa(volume.MINBW))
 		fmt.Fprintln(w, "SubNQN\t: "+volume.SUBNQN)
-		fmt.Fprintln(w, "UUID\t: "+volume.UUID)
 		fmt.Fprintln(w, "Array\t: "+volume.ARRAYNAME)
 
 		fmt.Fprintln(w, "")
