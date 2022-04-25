@@ -120,12 +120,15 @@ VolumeCreator::_RollbackCreatedVolume(int exceptionEvent)
     if (vol != nullptr)
     {
         volumeList.Remove(vol->ID);
-        delete vol;
     }
     }
     catch(int& exceptionEvent)
     {
         POS_TRACE_ERROR(EID(VOL_EVENT_ROLLBACK_FAIL), "event_id: {}", exceptionEvent);
+        if (vol != nullptr)
+        {
+            delete vol;
+        }
     }
 }
 
