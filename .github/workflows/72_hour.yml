@@ -50,7 +50,7 @@ jobs:
     - name: 72 Hour VM Test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=NULL POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRI    TE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SEC    RET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=NULL POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/72_hour.sh
         .github/workflows/script/72_hour.sh ${{github.workspace}}
 
