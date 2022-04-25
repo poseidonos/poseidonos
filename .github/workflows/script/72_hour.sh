@@ -1,5 +1,5 @@
 target_fabric_ip=127.0.0.1
-pos_working_dir="$1" 
+pos_working_dir="$1"
 
 cd ${pos_working_dir}/test/system/longterm; sudo ./72hour_test.py ${target_fabric_ip}
 result=$?
