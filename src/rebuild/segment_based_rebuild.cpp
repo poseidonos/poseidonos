@@ -60,8 +60,6 @@ SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextM
   allocatorSvc(allocatorSvc)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "SegmentBasedRebuild");
-    bool ret = _InitBuffers();
-    assert(ret);
 }
 
 SegmentBasedRebuild::~SegmentBasedRebuild(void)
@@ -89,6 +87,26 @@ SegmentBasedRebuild::_NextSegment(void)
     }
     ctx->logger->rebuiltSegCnt++;
     return segId;
+}
+
+bool
+SegmentBasedRebuild::Init(void)
+{
+    if (isInitialized == false)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild try init, {}", PARTITION_TYPE_STR[ctx->part]);
+        bool ret = _InitBuffers();
+        if (ret == false)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Initialization retry because sufficient buffer for rebuild is not secured, {}",
+                PARTITION_TYPE_STR[ctx->part]);
+            return false;
+        }
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
+        isInitialized = true;
+    }
+
+    return Read();
 }
 
 bool

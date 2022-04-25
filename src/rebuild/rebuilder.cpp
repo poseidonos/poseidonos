@@ -41,14 +41,14 @@ Rebuilder::Rebuilder(RebuildBehavior* _b)
 : /*Event(false, BackendEvent_UserdataRebuild),*/ behavior(_b)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Rebuilder() - b:{}",
+        "Rebuilder() {}",
         (void*)behavior);
 }
 
 bool
 Rebuilder::Execute(void)
 {
-    return behavior->Read();
+    return behavior->Init();
 }
 
 } // namespace pos

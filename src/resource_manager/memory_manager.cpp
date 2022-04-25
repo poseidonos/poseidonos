@@ -73,14 +73,20 @@ MemoryManager::CreateBufferPool(BufferInfo& info, uint32_t socket)
         return nullptr;
     }
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-        "CreateBufferPool owner={}, size={}, count={}",
-        info.owner, info.size, info.count);
     BufferPool* pool = bufferPoolFactory->Create(info, socket);
     if (pool != nullptr)
     {
         unique_lock<mutex> lock(bufferPoolsLock);
         bufferPools.push_back(pool);
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "BufferPool is created, owner={}, size={}, count={}",
+            info.owner, info.size, info.count);
+    }
+    else
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Failed to create BufferPool, owner={}, size={}, count={}",
+            info.owner, info.size, info.count);
     }
 
     return pool;
@@ -106,14 +112,14 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
 {
     if (info.owner == "")
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Illegal buffer policy. Owner is empty");
         return false;
     }
 
     if (info.size == 0)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Illegal buffer policy. Buffer size is zero");
         return false;
     }
@@ -121,7 +127,7 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
     const uint32_t MEMORY_ALIGN_SIZE_BYTE = 4096;
     if (info.size % MEMORY_ALIGN_SIZE_BYTE != 0)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Illegal buffer policy. Buffer size is not aligned");
         return false;
     }
@@ -132,7 +138,7 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
     }
     else if (socket > affinityManager->GetNumaCount())
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Illegal buffer policy. Invalid socket");
         return false;
     }
