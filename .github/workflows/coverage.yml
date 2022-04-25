@@ -3,7 +3,7 @@ name: M4-Coverage_VM_Test
 
 on:
   schedule:
-    - cron: '0 4-21/3 * * MON-FRI'
+    - cron: '0 1,4,7,10,13,19,22 * * MON-FRI'
 
   workflow_dispatch:
     inputs:

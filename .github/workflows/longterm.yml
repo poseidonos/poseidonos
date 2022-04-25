@@ -3,7 +3,7 @@ name: M9-LongTerm_VM_Test
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 16 * * *'
 
   workflow_dispatch:
     inputs:
