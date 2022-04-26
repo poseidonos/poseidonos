@@ -208,18 +208,10 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     }
     else if (raidType == RaidTypeEnum::RAID5)
     {
-        Raid5* raid5 = new Raid5(&physicalSize);
         uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
         uint64_t maxGcStripes = 2048;
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
-        if (raid5->AllocParityPools(totalNvmStripes + maxGcStripes) == false)
-        {
-            delete raid5;
-            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
-            POS_TRACE_WARN(eventId, "required number of buffers:{}", totalNvmStripes + maxGcStripes);
-            return eventId;
-        }
+        Raid5* raid5 = new Raid5(&physicalSize, totalNvmStripes + maxGcStripes);
         method = raid5;
     }
     else if (raidType == RaidTypeEnum::NONE)

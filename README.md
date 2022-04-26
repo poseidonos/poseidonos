@@ -235,7 +235,7 @@ Execute poseidonos
 Wait poseidonos
 Wait poseidonos
 Wait poseidonos
-poseidonos is running in background...logfile=pos.log
+poseidonos is running in background...
 root@R2U14-PSD-3:/poseidonos/script#
 ```
 

@@ -42,8 +42,9 @@
 
 namespace pos
 {
-Raid5::Raid5(const PartitionPhysicalSize* pSize)
-: Method(RaidTypeEnum::RAID5)
+Raid5::Raid5(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
+: Method(RaidTypeEnum::RAID5),
+  parityBufferCntPerNuma(bufferCntPerNuma)
 {
     ftSize_ = {
         .minWriteBlkCnt = 0,
@@ -161,6 +162,15 @@ Raid5::CheckNumofDevsToConfigure(uint32_t numofDevs)
 BufferEntry
 Raid5::_AllocChunk()
 {
+    if (parityPools.size() == 0 && parityBufferCntPerNuma > 0)
+    {
+        bool ret = AllocParityPools(parityBufferCntPerNuma);
+        if (ret == false)
+        {
+            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
+            POS_TRACE_ERROR(eventId, "required number of buffers:{}", parityBufferCntPerNuma);
+        }
+    }
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
     void* mem = bufferPool->TryGetBuffer();
@@ -259,7 +269,6 @@ Raid5::AllocParityPools(uint64_t maxParityBufferCntPerNuma,
         * ArrayConfig::BLOCKS_PER_CHUNK;
 
     uint32_t totalNumaCount = affinityManager->GetNumaCount();
-    parityPools.clear();
 
     for (uint32_t numa = 0; numa < totalNumaCount; numa++)
     {
@@ -271,7 +280,7 @@ Raid5::AllocParityPools(uint64_t maxParityBufferCntPerNuma,
         BufferPool* pool = memoryManager->CreateBufferPool(info, numa);
         if (pool == nullptr)
         {
-            parityPools.clear();
+            ClearParityPools();
             return false;
         }
         parityPools.push_back(pool);

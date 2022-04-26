@@ -2,7 +2,6 @@
 # 
 # run_ibofos.sh
 #
-logfile="pos.log"
 root_dir=/root/workspace/ibofos
 ibofos=${root_dir}/bin/poseidonos
 NR_VOLUME=1
@@ -19,7 +18,7 @@ else
        ${root_dir}/script/setup_env.sh
         \rm -rf /dev/shm/ibof_nvmf_trace*
 #       ${root_dir}/script/m9k/cpumode.sh max
-        nohup $ibofos primary &>> ${logfile} &
+        nohup $ibofos primary &
         sleep 2
 #	sudo ${root_dir}/lib/spdk-19.01.1/scripts/rpc.py construct_malloc_bdev -b uram0 1024 512
 #	sudo ${root_dir}/lib/spdk-19.01.1/scripts/rpc.py nvmf_subsystem_create nqn.2019-04.pos:subsystem1 -a -s POS00000000000001

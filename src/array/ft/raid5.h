@@ -49,9 +49,9 @@ class BufferPool;
 class Raid5 : public Method
 {
 public:
-    explicit Raid5(const PartitionPhysicalSize* pSize);
+    explicit Raid5(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
     virtual ~Raid5();
-    virtual bool AllocParityPools(uint64_t maxParityBufferCntPerNuma,
+    virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
         AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
         MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
     virtual void ClearParityPools();
@@ -74,6 +74,7 @@ private:
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
     MemoryManager* memoryManager = nullptr;
+    uint64_t parityBufferCntPerNuma = 0;
 };
 
 } // namespace pos
