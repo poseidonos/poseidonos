@@ -121,3 +121,31 @@ func TestCreateVolumeCommandReqWithTB(t *testing.T) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }
+
+func TestCreateVolumeCommandReqWhenVolNameHasASpecialCharacter(t *testing.T) {
+
+	// Command creation
+	rootCmd := cmd.RootCmd
+
+	// mj: For testing, I temporarily redirect log output to buffer.
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	globals.IsTestingReqBld = true
+	// Execute the command to test with argument
+	testmgr.ExecuteCommand(rootCmd, "volume", "create", "--volume-name", "vol01%", "--array-name", "Array0", "--size", "500TB", "--maxiops", "5000", "--maxbw", "6000", "--json-req")
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"Request": {"command":"CREATEVOLUME","rid":"83179da1-c763-11ec-8c2a-b42e99ff989b","param":{"name":"vol01%","array":"Array0","size":549755813888000,"maxiops":5000,"maxbw":6000},"requestor":"cli"} }
+`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
+	}
+}

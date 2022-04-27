@@ -53,8 +53,9 @@ Example:
 
 func formCreateVolumeReq(command string) messages.Request {
 
-	volumeSize := strings.TrimSpace(create_volume_volumeSize)
-	volumeSize = strings.ToUpper(create_volume_volumeSize)
+	strings.Replace(create_volume_volumeName, "%", "%%", -1)
+
+	volumeSize := strings.ToUpper(strings.TrimSpace(create_volume_volumeSize))
 
 	if strings.Contains(volumeSize, ".") == true {
 		fmt.Println("The size of a volume must be an integer number.")
