@@ -102,7 +102,8 @@ MemoryManager::DeleteBufferPool(BufferPool* poolToDelete)
     {
         return false;
     }
-
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "BufferPool is deleted, owner={}", poolToDelete->GetOwner());
     delete poolToDelete;
     return true;
 }

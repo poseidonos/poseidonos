@@ -295,6 +295,8 @@ Raid5::ClearParityPools()
     {
         if (parityPools[i] != nullptr)
         {
+            POS_TRACE_DEBUG(EID(RAID_DEBUG_MSG), "ParityPool {} is cleared",
+                parityPools[i]->GetOwner());
             memoryManager->DeleteBufferPool(parityPools[i]);
             parityPools[i] = nullptr;
         }

@@ -57,6 +57,7 @@ public:
     virtual void ReturnBuffer(void*);
     virtual bool IsFull(void) { return freeBufferSize == initSize; }
     virtual bool IsAllocated(void) { return isAllocated; }
+    string GetOwner(void) { return BUFFER_INFO.owner; }
 private:
     bool _Alloc(void);
     void _Clear(void);
