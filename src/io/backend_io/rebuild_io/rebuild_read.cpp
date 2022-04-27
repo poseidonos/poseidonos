@@ -49,10 +49,11 @@ namespace pos
 int
 RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 {
+    int event = EID(IO_RECOVER_DEBUG_MSG);
+    POS_TRACE_DEBUG(event, "Trying to recover read");
     if (true == ubio->IsRetry())
     {
-        int event = 9999; // TODO(iopath) temporal event id
-        POS_TRACE_ERROR(event, "RebuildRead::GetRecoverMethod IsRetry");
+        POS_TRACE_ERROR(event, "RebuildRead, Failed again in retry");
         return event;
     }
 
@@ -120,7 +121,7 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
         IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
         ioDispatcher->Submit(split);
     }
-
+    POS_TRACE_DEBUG(event, "RebuildRead ubio is submitted");
     return EID(SUCCESS);
 }
 } // namespace pos

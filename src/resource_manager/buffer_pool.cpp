@@ -109,6 +109,8 @@ BufferPool::_Alloc(void)
 
             if (buffer == nullptr)
             {
+                POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+                    "Failed to allocated buffer for {}", BUFFER_INFO.owner);
                 return false;
             }
             remainBufferCount = allocSize * allocCount / BUFFER_INFO.size;
@@ -120,8 +122,6 @@ BufferPool::_Alloc(void)
         remainBufferCount--;
     }
     freeBufferSize = initSize = freeBuffers.size();
-    POS_TRACE_DEBUG(EID(RESOURCE_MANAGER_DEBUG_MSG),
-            "{} buffers are allocated for {}", initSize, BUFFER_INFO.owner);
     return true;
 }
 
