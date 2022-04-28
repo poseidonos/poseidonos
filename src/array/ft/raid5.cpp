@@ -164,6 +164,9 @@ Raid5::_AllocChunk()
 {
     if (parityPools.size() == 0 && parityBufferCntPerNuma > 0)
     {
+        POS_TRACE_WARN(EID(RAID_DEBUG_MSG),
+            "Attempt to reallocate ParityPool because it is not allocated during creation, req_buffersPerNuma:{}",
+            parityBufferCntPerNuma);
         bool ret = AllocParityPools(parityBufferCntPerNuma);
         if (ret == false)
         {

@@ -211,7 +211,14 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
         uint64_t maxGcStripes = 2048;
-        Raid5* raid5 = new Raid5(&physicalSize, totalNvmStripes + maxGcStripes);
+        uint64_t reqBuffersPerNuma = totalNvmStripes + maxGcStripes;
+        Raid5* raid5 = new Raid5(&physicalSize, reqBuffersPerNuma);
+        bool result = raid5->AllocParityPools(reqBuffersPerNuma);
+        if (result == false)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+                "Failed to alloc ParityPools for RAID5, request:{}", reqBuffersPerNuma);
+        }
         method = raid5;
     }
     else if (raidType == RaidTypeEnum::NONE)
