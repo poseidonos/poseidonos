@@ -53,7 +53,15 @@ static bool
 CompareNamespaceEntry(struct NsEntry* first, struct NsEntry* second)
 {
     int result = memcmp(first->trAddr, second->trAddr, MAX_TR_ADDR_LENGTH);
-    bool firstLess = (0 >= result);
+    bool firstLess = (0 > result);
+
+    if (0 == result)
+    {
+        uint32_t firstNsId = spdk_nvme_ns_get_id(first->u.nvme.ns);
+        uint32_t secondNsId = spdk_nvme_ns_get_id(second->u.nvme.ns);
+
+        firstLess = (firstNsId < secondNsId);
+    }
 
     return firstLess;
 }
