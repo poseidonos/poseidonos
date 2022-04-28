@@ -50,7 +50,6 @@ int
 RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 {
     int event = EID(IO_RECOVER_DEBUG_MSG);
-    POS_TRACE_DEBUG(event, "Trying to recover read");
     if (true == ubio->IsRetry())
     {
         POS_TRACE_ERROR(event, "RebuildRead, Failed again in retry");
