@@ -1,171 +1,78 @@
-import fio
-import initiator
+import graph
+import iogen
 import json
 import lib
-import target
+import node
+import rsfmt
 import traceback
-from datetime import datetime
 
 
-def play(json_targets, json_inits, json_scenario):
-    lib.printer.green(f"\n -- '{__name__}' has began --")
+def play(tgts, inits, scenario, timestamp, data):
+    try:  # Prepare sequence
+        node_manager = node.NodeManager(tgts, inits)
+        targets, initiators = node_manager.initialize()
 
-    raw_date = datetime.now()
-    now_date = raw_date.strftime("%y%m%d_%H%M%S")
-    skip_workload = False
+        test_case_list = [
+            {"name": "1_write", "rw": "write", "bs": "128k",
+                "iodepth": "4", "time_based": "1", "runtime": "15"},
+            {"name": "2_read", "rw": "read", "bs": "128k",
+                "iodepth": "4", "time_based": "1", "runtime": "15"},
+            {"name": "3_randwrite", "rw": "randwrite", "bs": "4k",
+                "iodepth": "4", "time_based": "1", "runtime": "15"},
+            {"name": "4_randread", "rw": "randread", "bs": "4k",
+                "iodepth": "4", "time_based": "1", "runtime": "15"}
+        ]
 
-    # validate arguments
-    if 0 == len(json_targets):
-        lib.printer.red(" TargetError: At least 1 target has to exist")
-        return
-    if 0 == len(json_inits):
-        lib.printer.red(" InitiatorError: At least 1 initiator has to exist")
-        return
-    if 0 == len(json_scenario):
-        lib.printer.red(" ScenarioError: At least 1 scenario has to exist")
-        return
+        grapher = graph.manager.Grapher(scenario, timestamp)
+        result_fmt = rsfmt.manager.Formatter(scenario, timestamp)
+        result_fmt.add_test_cases(test_case_list)
+    except Exception as e:
+        lib.printer.red(traceback.format_exc())
+        return data
 
-    # target prepare
-    targets = {}
-    for json_target in json_targets:
-        try:
-            target_obj = target.manager.Target(json_target)
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            return
-        target_name = json_target["NAME"]
-
-        try:
-            target_obj.Prepare()
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            skip_workload = True
-            target_obj.ForcedExit()
-            break
-        targets[target_name] = target_obj
-
-    # init prepare
-    initiators = {}
-    test_target = targets[next(iter(targets))]
-    for json_init in json_inits:
-        try:
-            init_obj = initiator.manager.Initiator(json_init)
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            skip_workload = True
-            break
-        init_name = json_init["NAME"]
-
-        try:
-            init_obj.Prepare(True, test_target.subsystem_list)
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            skip_workload = True
-            break
-        initiators[init_name] = init_obj
-
-    # check auto generate
-    if not skip_workload:
-        if "yes" != test_target.use_autogen:
-            lib.printer.red(
-                f"{__name__} [Error] check [TARGET][AUTO_GENERATE][USE] is 'yes' ")
-            skip_workload = True
-
-    # run workload
-    if not skip_workload:
-        lib.printer.green(f" fio start")
-
-        # readwrite, block size, io depth
-        testcase = [["write", "128k", "4"],
-                    ["read", "128k", "4"],
-                    ["randwrite", "4k", "128"],
-                    ["randread", "4k", "128"]
-                    ]
-
-        for tc in testcase:
-            fio_cmdset = []
-            rw = tc[0]
-            bs = tc[1]
-            iodepth = tc[2]
-            output_name = f"{now_date}_fio_{bs}_{rw}"
-
+    try:  # Test sequence
+        for test_case in test_case_list:
+            # setup fio_cmd
+            fio_cmd_list = []
             for key in initiators:
-                init = initiators[key]
-                test_fio = fio.manager.Fio(init.id, init.pw, init.nic_ssh)
-                test_fio.opt["ioengine"] = "libaio"
-                test_fio.opt["runtime"] = "15"
-                test_fio.opt["ramp_time"] = "5"
-                test_fio.opt["io_size"] = "8g"
-                test_fio.opt["verify"] = "0"
-                test_fio.opt["serialize_overlap"] = "1"
-                test_fio.opt["time_based"] = "1"
-                test_fio.opt["numjobs"] = "1"
-                test_fio.opt["thread"] = "1"
-                test_fio.opt["group_reporting"] = "1"
-                test_fio.opt["direct"] = "1"
-                test_fio.opt["readwrite"] = rw
-                test_fio.opt["bs"] = bs
-                test_fio.opt["iodepth"] = iodepth
+                fio_cmd = iogen.fio.Fio(initiators[key], timestamp)
+                fio_cmd.initialize(True)  # kdd setting True
+                fio_cmd.update(test_case)
+                fio_cmd_list.append(fio_cmd.stringify())
 
-                test_fio.opt["output"] = f"{init.output_dir}/{output_name}_{init.name}"
-                test_fio.opt["output-format"] = "json"
+            # run fio
+            lib.printer.green(f" run -> {timestamp} {test_case['name']}")
+            result_fmt.start_test(test_case["name"])
+            lib.subproc.parallel_run(fio_cmd_list)
 
-                if "randwrite" == rw or "randread" == rw:
-                    if test_fio.opt.get("norandommap"):
-                        del test_fio.opt["norandommap"]
-                else:
-                    test_fio.opt["norandommap"] = "1"
-                if "512-128k" == bs:
-                    test_fio.opt["bsrange"] = bs
-                else:
-                    if test_fio.opt.get("bsrange"):
-                        del test_fio.opt["bsrange"]
+            # copy output
+            for key in initiators:
+                initiators[key].copy_output(
+                    timestamp, test_case["name"], scenario["OUTPUT_DIR"])
 
-                for test_device in init.device_list:
-                    test_fio.jobs.append(
-                        f" --name=job_{test_device} --filename={test_device}")
-                    if not test_fio.Prepare():
-                        skip_workload = True
-                        break
-                fio_cmdset.append(test_fio.cmd)
+            # get result
+            for key in initiators:
+                file = (
+                    f"{scenario['OUTPUT_DIR']}/{timestamp}_"
+                    f"{test_case['name']}_{key}"
+                )
+                fio_result = lib.parser.parse_json_file(file)
+                print(json.dumps(fio_result, indent=2))
 
-            if not skip_workload:
-                try:
-                    print(f" run -> {now_date}_fio_{bs}_{rw}")
-                    fio.manager.parallel_run(fio_cmdset)
-                except Exception as e:
-                    lib.printer.red(f"{__name__} [Error] {e}")
-                    skip_workload = True
+            # set result status (& message)
+            result_fmt.end_test(test_case["name"], "pass")
 
-                try:
-                    for key in initiators:
-                        init = initiators[key]
-                        lib.subproc.sync_run(
-                            f"sshpass -p {init.pw} scp {init.id}@{init.nic_ssh}:{init.output_dir}/{output_name}_{init.name} {json_scenario['OUTPUT_DIR']}")
-                except Exception as e:
-                    lib.printer.red(f"{__name__} [Error] {e}")
-                    skip_workload = True
+            # draw graph
+            for key in initiators:
+                grapher.draw(initiators[key], test_case["name"])
 
-        lib.printer.green(f" fio end")
+    except Exception as e:
+        lib.printer.red(traceback.format_exc())
 
-    # init wrapup
-    for key in initiators:
-        try:
-            initiators[key].Wrapup(True, test_target.subsystem_list)
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            skip_workload = True
+    try:  # Wrapup sequence
+        result_fmt.write_file()
+        node_manager.finalize()
+    except Exception as e:
+        lib.printer.red(traceback.format_exc())
 
-    # target warpup
-    for key in targets:
-        try:
-            targets[key].Wrapup()
-        except Exception as e:
-            lib.printer.red(traceback.format_exc())
-            targets[key].ForcedExit()
-            skip_workload = True
-
-    if skip_workload:
-        lib.printer.red(f" -- '{__name__}' unexpected done --\n")
-    else:
-        lib.printer.green(f" -- '{__name__}' successfully done --\n")
+    return data
