@@ -5,80 +5,58 @@
             "ID": "root",
             "PW": "psd",
             "NIC": {
-                "SSH": "10.1.2.14",
-                "IP1": "10.100.2.15",
-                "IP2": "10.100.2.14"
+                "SSH": "10.1.2.12",
+                "IP1": "10.100.2.12"
             },
-            "SPDK": {
+            "POS": {
+                "DIR": "/home/isaac/ibofos",
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CFG": "pos_multi_array_normal.conf",
+                "LOG": "pos.log",
+                "TELEMETRY": false,
+                "LOGGER_LEVEL": "info",
                 "TRANSPORT": {
                     "TYPE": "tcp",
                     "NUM_SHARED_BUFFER": 4096
                 },
-                "SUBSYSTEMs": []
-            },
-            "POS": {
-                "DIR": "/home/psd/ibofos",
-                "BIN": "poseidonos",
-                "CLI": "poseidonos-cli",
-                "CFG": "ibofos_for_perf_psd.conf",
-                "LOG": "pos.log",
+                "SUBSYSTEMs": [
+                    {
+                        "NUM_SUBSYSTEMS": 5,
+                        "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                        "NQN_INDEX": 1,
+                        "SN_PREFIX": "POS00000000000",
+                        "SN_INDEX": 1,
+                        "IP": "IP1",
+                        "PORT": 1158
+                    }
+                ],
+                "DEVICEs": [
+                    {
+                        "NAME": "uram0",
+                        "TYPE": "uram",
+                        "NUM_BLOCKS": 16777216,
+                        "BLOCK_SIZE": 512,
+                        "NUMA": 0
+                    }
+                ],
                 "ARRAYs": [
                     {
                         "NAME": "ARR0",
-                        "RAID_TYPE": "RAID5",
+                        "RAID_OR_MEDIA": "RAID5",
+                        "WRITE_THROUGH": false,
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3",
                         "SPARE_DEVICE_LIST": "",
-                        "BUFFER_DEVICE": {
-                            "NAME": "uram0",
-                            "TYPE": "uram",
-                            "NUM_BLOCKS": 16777216,
-                            "BLOCK_SIZE": 512,
-                            "NUMA": 0
-                        },
-                        "VOLUMEs": []
-                    },
-                    {
-                        "NAME": "ARR1",
-                        "RAID_TYPE": "RAID5",
-                        "USER_DEVICE_LIST": "unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7",
-                        "SPARE_DEVICE_LIST": "",
-                        "BUFFER_DEVICE": {
-                            "NAME": "uram1",
-                            "TYPE": "uram",
-                            "NUM_BLOCKS": 16777216,
-                            "BLOCK_SIZE": 512,
-                            "NUMA": 1
-                        },
-                        "VOLUMEs": []
-                    }
-                ]
-            },
-            "AUTO_GENERATE": {
-                "USE": "yes",
-                "SUBSYSTEMs": [
-                    {
-                        "NUM": 5,
-                        "IP": "IP1",
-                        "PORT": 1158,
-                        "INITIATOR": "Initiator01",
+                        "BUFFER_DEV": "uram0",
                         "VOLUMEs": [
                             {
-                                "ARRAY": "ARR0",
-                                "NUM": 5,
-                                "SIZE": 214748364800
-                            }
-                        ]
-                    },
-                    {
-                        "NUM": 6,
-                        "IP": "IP2",
-                        "PORT": 1159,
-                        "INITIATOR": "Initiator02",
-                        "VOLUMEs": [
-                            {
-                                "ARRAY": "ARR1",
-                                "NUM": 6,
-                                "SIZE": 214748364800
+                                "NUM_VOLUMES": 5,
+                                "NAME_PREFIX": "VOL",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 204800,
+                                "USE_SUBSYSTEMS": 5,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 1
                             }
                         ]
                     }
@@ -92,30 +70,41 @@
             "ID": "root",
             "PW": "psd",
             "NIC": {
-                "SSH": "10.1.2.39"
+                "SSH": "10.1.2.30"
             },
             "SPDK": {
-                "DIR": "/home/bamboo/ibofos/lib/spdk",
+                "DIR": "/home/isaac/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
-            }
-        },
-        {
-            "NAME": "Initiator02",
-            "ID": "root",
-            "PW": "psd",
-            "NIC": {
-                "SSH": "10.1.2.40"
             },
-            "SPDK": {
-                "DIR": "/home/bamboo/ibofos/lib/spdk",
-                "TRANSPORT": "tcp"
-            }
+            "TARGETs": [
+                {
+                    "NAME": "Target01",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP1",
+                    "PORT": 1158,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 5,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "Scenarios": [
         {
+            "PATH": "./test/system/benchmark/scenario/fio_kdd.py",
             "NAME": "fio_kdd",
-            "OUTPUT_DIR": "./output"
+            "OUTPUT_DIR": "./output",
+            "RESULT_FORMAT": "junit_xml",
+            "SUBPROC_LOG": true
         }
     ]
 }
