@@ -166,7 +166,6 @@ BlockAllocationStatus::Unlock(int volumeId)
     }
     else
     {
-        POS_TRACE_INFO(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}", volumeId);
         return true;
     }
 }
