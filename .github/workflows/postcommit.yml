@@ -31,7 +31,7 @@ jobs:
         path: |
           ${{github.workspace}}/Dashboard.html
 
-  Postcommit_Test:
+  Volume_Test:
     runs-on: VM
     steps:
     
@@ -63,6 +63,30 @@ jobs:
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}
 
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: VOLUME_TEST_LOG
+        path: |
+          /var/log/pos
+
+  Normal_IO_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+
+
     - name: Normal IO Test
       id: normal_io_test
       if: always()
@@ -79,6 +103,29 @@ jobs:
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normalio" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: NORMAL_IO_LOG
+        path: |
+          /var/log/pos
+
+  NPOR_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
     - name: NPOR Test
       id: npor_test
@@ -97,6 +144,29 @@ jobs:
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
 
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: NPOR_LOG
+        path: |
+          /var/log/pos
+
+  Rebuild_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+
     - name: Rebuild Test
       id: rebuild_test
       if: always()
@@ -113,6 +183,29 @@ jobs:
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: REBUILD_LOG
+        path: |
+          /var/log/pos
+
+  SPOR_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
     - name: SPOR Test
       id: spor_test
@@ -131,6 +224,29 @@ jobs:
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
 
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: SPOR_LOG
+        path: |
+          /var/log/pos
+
+  IO_Intensive_Unmount_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+      
     - name: IO Intensive + Unmount Volume / Array
       id: io_intensive_unmount_volume_array
       if: always()
@@ -140,6 +256,29 @@ jobs:
         chmod +x .github/workflows/script/io_intensive/unmount_volume_array.sh
         .github/workflows/script/io_intensive/unmount_volume_array.sh ${{github.workspace}}
 
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: IO_INTENSIVE_UNMOUNT_LOG
+        path: |
+          /var/log/pos
+
+  IO_Intensive_Detach_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+
     - name: IO Intensive + Detach
       id: io_intensive_detach
       if: always()
@@ -148,6 +287,29 @@ jobs:
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/io_intensive/detach.sh
         .github/workflows/script/io_intensive/detach.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: IO_INTENSIVE_DETACH_LOG
+        path: |
+          /var/log/pos
+
+  WBT_IO_Unit_Test:
+    runs-on: VM
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
     - name: WBT Command Test
       id: wbt_command_test
@@ -167,17 +329,10 @@ jobs:
         chmod +x .github/workflows/script/io_unit_build/io_unit_build.sh
         .github/workflows/script/io_unit_build/io_unit_build.sh ${{github.workspace}} ${{github.sha}}
 
-    - name: Print Result
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/print_result.sh
-        .github/workflows/script/print_result.sh ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: POST_LOG
+        name: WBT_IO_UNIT_LOG
         path: |
           /var/log/pos
