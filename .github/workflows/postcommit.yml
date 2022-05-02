@@ -23,7 +23,6 @@ jobs:
     - name: Make Dashboard Link for Workflow 
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
-
     - name: Upload Dashboard Link
       uses: actions/upload-artifact@v3
       with:
@@ -336,3 +335,26 @@ jobs:
         name: WBT_IO_UNIT_LOG
         path: |
           /var/log/pos
+
+  Create_Issue:
+    needs: [ Volume_Test, Normal_IO_Test, NPOR_Test, Rebuild_Test, SPOR_Test, IO_Intensive_Unmount_Test, IO_Intensive_Detach_Test, WBT_IO_Unit_Test ]
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: JasonEtco/create-an-issue@v2
+      id: create-issue
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DASHBOARD_URL: ${{ secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK }}&refresh=5s&var-ga_commit_hash=${{ github.sha }}&var-ga_workflow=${{ github.workflow }}
+        ACTION_URL: https://github.com/poseidonos/poseidonos/actions/runs/${{ github.run_id }}
+        WORKFLOW_NAME: ${{ github.workflow }}
+        RUN_NUMBER: ${{ github.run_number }}
+        ACTOR: ${{ github.actor }}
+        SHA_URL: https://github.com/poseidonos/poseidonos/commit/${{ github.sha }}
+      with:
+        assignees: ${{github.actor}} 
+
+    - name: Make and Annotate Dashboard Link for Workflow
+      run: |
+        echo "::notice title=Go to Issue & Check Dashboard::Issue #${{ steps.create-issue.outputs.number }} is created for these jobs : ${{ steps.create-issue.outputs.url }}"
