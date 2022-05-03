@@ -5,8 +5,12 @@ import subprocess
 import argparse
 import psutil
 import sys
-import paramiko
 import time
+
+current_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.dirname(current_path) + "/lib"
+sys.path.insert(1, lib_path)
+import remote_procedure
 
 default_fabric_ip = "127.0.0.1"
 default_initiator_ip = "10.1.11.16"
@@ -17,38 +21,15 @@ default_target_id = "root"
 default_target_pw = "bamboo"
 default_ibofos_root = "/home/ibof/ibofos"
 
-def remote_execute(ip, id, pw, command):
-    cli = paramiko.SSHClient()
-    cli.load_system_host_keys()
-    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    cli.connect(ip, port=22, username=id, password=pw)
-    stdin, stdout, stderr = cli.exec_command(command)
-    result=""
-
-    for line in iter(stdout.readline, ""):
-       print(line, end="")
-       result += line
-
-    while not stdout.channel.exit_status_ready:
-        time.sleep(0.5)
-    exit_status = stdout.channel.recv_exit_status()
-
-    cli.close()
-
-    if (exit_status is not 0):
-        raise Exception(ip, command)
-
-    return result
-
 def bring_up_ibofos():
     print ("Try to execute poseidonos at target")
     target_script = args.ibofos_root + "/test/system/filesystem/filebench_test_target.py -f " + args.fabric_ip
-    remote_execute(args.target_ip, args.target_id, args.target_pw, target_script)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, target_script)
 
 def execute_filebench_test():
     print ("Execute filebench at initiator")
     initiator_script = args.ibofos_root + "/test/system/filesystem/filebench_test_initiator.py -f " + args.fabric_ip
-    remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, initiator_script)
+    remote_procedure.execute(args.initiator_ip, args.initiator_id, args.initiator_pw, initiator_script)
 
 def parse_argument():
     parser = argparse.ArgumentParser(description='Filebench Test')
@@ -74,14 +55,14 @@ def parse_argument():
 
 def terminate_pos():
     unmount_array_command = args.ibofos_root + "/bin/poseidonos-cli array unmount --array-name POSArray --force"
-    remote_execute(args.target_ip, args.target_id, args.target_pw, unmount_array_command)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, unmount_array_command)
     stop_pos_command = args.ibofos_root + "/bin/poseidonos-cli system stop --force"
-    remote_execute(args.target_ip, args.target_id, args.target_pw, stop_pos_command)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, stop_pos_command)
     check_ibofos_command = "pgrep -c poseidonos"
-    result = remote_execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
+    result = remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
     while (int(result) == 0):
         print("Wait exit")
-        result = remote_execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
+        result = remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
         time.sleep(0.5)
 
 if __name__ == "__main__":

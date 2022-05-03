@@ -5,28 +5,17 @@ import subprocess
 import argparse
 import psutil
 import sys
-import paramiko
 import time
 import threading
 
+current_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.dirname(current_path) + "/lib"
+sys.path.insert(1, lib_path)
+import remote_procedure
 
 def _remote_execute(ip, id, pw, command, stderr_report=False):
-    cli = paramiko.SSHClient()
-    cli.load_system_host_keys()
-    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    cli.connect(ip, port=22, username=id, password=pw)
-    stdin, stdout, stderr = cli.exec_command(command)
-    result = ""
-    if (stderr_report is True):
-        for line in iter(stderr.readline, ""):
-            print(line, end="")
-            result += line
-    for line in iter(stdout.readline, ""):
-        print(line, end="")
-        result += line
-    cli.close()
+    result = remote_procedure.execute(ip, id, pw, command, stderr_report)
     return result
-
 
 class Worker(threading.Thread):
     def __init__(self, name):
