@@ -659,11 +659,23 @@ void
 Array::SetPreferences(bool isWT)
 {
     isWTEnabled = isWT;
+    if (isWTEnabled == true)
+    {
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "WT of Array {} is enabled",
+            name_);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "WT of Array {} is disabled",
+            name_);
+    }
 }
 
 void
 Array::MountDone(void)
 {
+    POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Array {} is mounted, WT:{}",
+        name_, isWTEnabled);
     _CheckRebuildNecessity();
     int ret = _Flush();
     assert(ret == 0);

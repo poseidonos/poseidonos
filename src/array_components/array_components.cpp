@@ -161,7 +161,7 @@ ArrayComponents::GetInfo(void)
 int
 ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 {
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Creating array component for {}", arrayName);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Creating array component for {}", arrayName);
     int ret = array->Create(nameSet, metaFt, dataFt);
     if (ret != 0)
     {
@@ -171,14 +171,14 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
     _SetMountSequence();
 
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Array components for {} have been created.", arrayName);
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Array components for {} have been created.", arrayName);
     return 0;
 }
 
 int
 ArrayComponents::Load(void)
 {
-    POS_TRACE_DEBUG(EID(LOAD_ARRAY_DEBUG_MSG), "Loading array components for " + arrayName);
+    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Loading array components for " + arrayName);
     int ret = array->Load();
     if (ret != 0)
     {
@@ -188,13 +188,14 @@ ArrayComponents::Load(void)
     _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
     _SetMountSequence();
 
-    POS_TRACE_DEBUG(EID(LOAD_ARRAY_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
+    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
     return 0;
 }
 
 int
 ArrayComponents::Mount(bool isWTEnabled)
 {
+    POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Trying to mount Array {}, isWT:{}", arrayName, isWTEnabled);
     array->SetPreferences(isWTEnabled);
     int ret = arrayMountSequence->Mount();
     if (ret == 0)
@@ -211,6 +212,10 @@ ArrayComponents::Unmount(void)
     if (ret == 0)
     {
         ret = arrayMountSequence->Unmount();
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Array {} is not unmountable", arrayName);
     }
     return ret;
 }
