@@ -107,7 +107,6 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
 
     monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext, this);
     policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext, this);
-    processingManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Processing, qosContext, this);
     correctionManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Correction, qosContext, this);
 
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
@@ -140,7 +139,6 @@ QosManager::~QosManager(void)
     delete qosEventManager;
     delete monitoringManager;
     delete policyManager;
-    delete processingManager;
     delete correctionManager;
     delete qosContext;
     if (spdkEnvCaller != nullptr)
@@ -234,7 +232,6 @@ QosManager::_Finalize(void)
     qosEventManager->SetExitQos();
     monitoringManager->SetExitQos();
     policyManager->SetExitQos();
-    processingManager->SetExitQos();
     correctionManager->SetExitQos();
     if (nullptr != qosThread)
     {
@@ -384,10 +381,6 @@ QosManager::_GetNextInternalManager(QosInternalManagerType internalManagerType)
 
         case QosInternalManager_Policy:
             internalManager = policyManager;
-            break;
-
-        case QosInternalManager_Processing:
-            internalManager = processingManager;
             break;
 
         case QosInternalManager_Correction:

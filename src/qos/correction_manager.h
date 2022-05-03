@@ -46,7 +46,6 @@ class QosManager;
 class VolumeParameter;
 class VolumeUserPolicy;
 class IThrottlingLogic;
-class ReactorHeap;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis

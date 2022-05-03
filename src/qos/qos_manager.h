@@ -162,7 +162,6 @@ private:
     QosContext* qosContext;
     QosInternalManager* monitoringManager;
     QosInternalManager* policyManager;
-    QosInternalManager* processingManager;
     QosInternalManager* correctionManager;
     uint32_t currentNumberOfArrays;
     std::vector<uint32_t> prevIndexDeleted;
