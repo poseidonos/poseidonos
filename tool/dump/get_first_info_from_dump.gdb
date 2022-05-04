@@ -9,9 +9,3 @@ set logging on
 thread apply all bt
 set logging off
 
-set logging file pending_io.info
-set logging on
-posgdb pending io
-posgdb pending ubio
-set logging off
-
