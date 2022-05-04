@@ -73,8 +73,8 @@ void
 SignalHandler::Register(void)
 {
     signal(SIGINT, SignalHandler::INTHandler);
-    signal(SIGSEGV, SIG_DFL);
-    signal(SIGABRT, SIG_DFL);
+    signal(SIGSEGV, SignalHandler::ExceptionHandler);
+    signal(SIGABRT, SignalHandler::ExceptionHandler);
     signal(SIGUSR1, SIG_DFL);
 }
 
@@ -137,75 +137,10 @@ SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
 void
 SignalHandler::_ExceptionHandler(int sig)
 {
-    const uint64_t WAIT_TIMEOUT_NS = 8000000000ULL;
-    SystemTimeoutChecker* systemTimeoutChecker = nullptr;
-    sigset_t oldset;
-    // except sig, all other signal is masked.
-    SignalMask::MaskSignal(sig, &oldset);
-    if (listUpdated.exchange(true) == false)
-    {
-        dominantSignal = sig;
-        systemTimeoutChecker = new SystemTimeoutChecker;
-        systemTimeoutChecker->SetTimeout(WAIT_TIMEOUT_NS);
-        _GetThreadIdList();
-    }
-    // if some threads is in USR1, the other thread gets SEGV
-    // We trigger default signal handler immediately.
-    // We just abandon backtrace to handle simply
-    if (dominantSignal != sig)
-    {
-        if (sig == SIGSEGV || sig == SIGABRT)
-        {
-            signal(sig, SIG_DFL);
-            raise(sig);
-            // will not reach here
-        }
-        else
-        {
-            SignalMask::RestoreSignal(&oldset);
-            return;
-        }
-    }
     _BacktraceAndInvokeNextThread(sig);
-    if (systemTimeoutChecker != nullptr)
-    {
-        while (pendingThreads > 0 && systemTimeoutChecker->CheckTimeout() == false)
-        {
-            usleep(10);
-        }
-        switch (sig)
-        {
-            case SIGSEGV:
-            {
-                signal(SIGSEGV, SIG_DFL);
-                raise(SIGSEGV);
-                // will not reach here
-                break;
-            }
-            case SIGABRT:
-            {
-                signal(SIGABRT, SIG_DFL);
-                raise(SIGABRT);
-                // will not reach here
-                break;
-            }
-            case SIGUSR1:
-            {
-                break;
-            }
-            default:
-            {
-                signal(SIGABRT, SIG_DFL);
-                raise(SIGABRT);
-                // will not reach here
-                break;
-            }
-        }
-        pendingThreads = 0;
-        delete systemTimeoutChecker;
-        listUpdated = false;
-    }
-    SignalMask::RestoreSignal(&oldset);
+
+    signal(sig, SIG_DFL);
+    raise(sig);
 }
 
 void
