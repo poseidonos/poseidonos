@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+    "os/exec"
 	"path/filepath"
-	"pnconnector/src/util"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -46,10 +46,9 @@ Syntax:
 			// TODO(mj): Although go test for this command will be passed,
 			// it will print out some error commands because of the file path
 			// to the execution script. This needs to be fixed later.
-			path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-			// TODO(mj): The following script will not work when the client and the server are remote.
-			startCmd := fmt.Sprintf("/../script/start_poseidonos.sh")
-			err = util.ExecCmd(path+startCmd, false)
+			startScriptPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+			startScriptPath += "/../script/start_poseidonos.sh"
+			err := exec.Command("/bin/sh", "-c", "sudo "+startScriptPath).Run()
 			resJSON := ""
 			uuid := globals.GenerateUUID()
 			if err != nil {
@@ -59,7 +58,6 @@ Syntax:
 				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
 					`"description":"PoseidonOS has successfully started"}}}`
 			}
-
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 
