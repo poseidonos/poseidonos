@@ -53,7 +53,10 @@ Example:
 
 func formCreateVolumeReq(command string) messages.Request {
 
-	strings.Replace(create_volume_volumeName, "%", "%%", -1)
+	if globals.IsValidVolName(create_volume_volumeName) == false {
+		fmt.Println("The volume name must contain alphabetic characters only.")
+		os.Exit(1)
+	}
 
 	volumeSize := strings.ToUpper(strings.TrimSpace(create_volume_volumeSize))
 
