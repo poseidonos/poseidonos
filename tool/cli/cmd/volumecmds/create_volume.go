@@ -54,7 +54,7 @@ Example:
 func formCreateVolumeReq(command string) messages.Request {
 
 	if globals.IsValidVolName(create_volume_volumeName) == false {
-		fmt.Println("The volume name must contain alphabetic characters only.")
+		fmt.Println("The volume name must contain [a-zAZ_-] only.")
 		os.Exit(1)
 	}
 

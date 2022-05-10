@@ -19,7 +19,8 @@ func GenerateUUID() string {
 // ToDo (mj): this function needs to exploit CLI syntax EBNF
 func IsValidVolName(name string) bool {
 	for _, r := range name {
-		if !unicode.IsLetter(r) || !unicode.IsDigit(r) {
+		if (unicode.IsSymbol(r) == true) &&
+			!(r == '-' || r == '_' || r == ' ') {
 			return false
 		}
 	}
