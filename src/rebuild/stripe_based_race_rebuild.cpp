@@ -94,7 +94,8 @@ StripeBasedRaceRebuild::Init(void)
 bool
 StripeBasedRaceRebuild::Read(void)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild Read {}", PARTITION_TYPE_STR[ctx->part]);
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+        "Trying to read in rebuild, {}", PARTITION_TYPE_STR[ctx->part]);
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
@@ -154,8 +155,8 @@ StripeBasedRaceRebuild::Read(void)
     }
 
     ctx->taskCnt = currWorkload;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "StripeBasedRaceRebuild - from:{}, to:{}", from, to);
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "Trying to recover in rebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -181,6 +182,11 @@ StripeBasedRaceRebuild::Read(void)
                 stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString(), maxStripeId);
             ctx->SetResult(RebuildState::FAIL);
         }
+        else
+        {
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+                "Recover complete in rebuild, id:{}", stripeId);
+        }
     }
 
     baseStripe += currWorkload;
@@ -189,6 +195,7 @@ StripeBasedRaceRebuild::Read(void)
 
 bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Trying to write in rebuild, id:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_MetadataRebuild);
@@ -216,6 +223,7 @@ bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     locker->Unlock(ctx->faultDev, targetId);
     recoverBuffers->ReturnBuffer(ubio->GetBuffer());
 
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Write complete in rebuild, id:{}", targetId);
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)
     {

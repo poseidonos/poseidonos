@@ -120,7 +120,6 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
         IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
         ioDispatcher->Submit(split);
     }
-    POS_TRACE_DEBUG(event, "RebuildRead ubio is submitted");
     return EID(SUCCESS);
 }
 } // namespace pos
