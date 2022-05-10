@@ -65,12 +65,17 @@ protected:
 
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);
-    void _ResetWbufTail(int index);
-    void _UpdateWbufTail(int index, ActiveStripeAddr addr);
+    void _AddResetTailToFoundList(int index);
+    void _AddWbufTailToFoundList(int index, ActiveStripeAddr addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
-    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
 
-    void _RestorePendingStripes(void);
+    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
+    int _RestoreActiveStripes(void);
+    int _RestorePendingStripes(void);
+
+    void _AddActiveStripeToRestore(int index);
+    void _SetActiveStripeTail(int index, ActiveStripeAddr addr);
+    void _ResetActiveStripeTail(int index);
 
     const int INDEX_NOT_FOUND = -1;
 

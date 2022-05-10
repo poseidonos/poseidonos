@@ -43,7 +43,7 @@
 
 namespace pos
 {
-ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_)
+ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
@@ -298,7 +298,9 @@ ReverseMapManager::_FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vs
             return false;
         }
 
-        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWoCond(volumeId, rbaToCheck);
+        // Usually map is opened before, but exception exists in replay time.
+        // Map will be opened synchronously here only in replay time which is okay.
+        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWithSyncOpen(volumeId, rbaToCheck);
         if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
         {
             continue;
