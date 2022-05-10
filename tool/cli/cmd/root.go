@@ -71,7 +71,8 @@ var RootCmd = &cobra.Command{
 	Long: `poseidonos-cli - A command-line interface for PoseidonOS
 
 	PoseidonOS command-line interface (PoseidonOS CLI) is a management tool for PoseidonOS.
-	Using PoseidonOS CLI, you can start/stop PoseidonOS and manage arrays, devices, and volumes of PoseidonOS.
+	Using PoseidonOS CLI, you can start/stop PoseidonOS and manage storage resources
+	such as arrays, devices, and volumes.
 	
 	Type --help or -h with the command to see detailed information about each command.
 
