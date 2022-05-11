@@ -63,7 +63,7 @@ public:
     MOCK_METHOD(size_t, GetAvailableSpace, (const MetaVolumeType volumeType));
     MOCK_METHOD(bool, CheckFileInActive, (const MetaVolumeType volumeType, const FileDescriptorType fd));
     MOCK_METHOD(POS_EVENT_ID, AddFileInActiveList, (const MetaVolumeType volumeType, const FileDescriptorType fd));
-    MOCK_METHOD(bool, IsGivenFileCreated, (std::string& fileName));
+    MOCK_METHOD(bool, IsGivenFileCreated, (const MetaVolumeType volumeType, const std::string& fileName));
     MOCK_METHOD(void, RemoveFileFromActiveList, (const MetaVolumeType volumeType, const FileDescriptorType fd));
     MOCK_METHOD(FileSizeType, GetFileSize, (const MetaVolumeType volumeType, const FileDescriptorType fd));
     MOCK_METHOD(FileSizeType, GetDataChunkSize, (const MetaVolumeType volumeType, const FileDescriptorType fd));

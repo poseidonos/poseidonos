@@ -279,21 +279,14 @@ TEST_F(MetaVolumeContainerTexture, RemoveFileFromActiveList)
     container->RemoveFileFromActiveList(MetaVolumeType::SsdVolume, 10);
 }
 
-TEST_F(MetaVolumeContainerTexture, CheckFileCreated0)
-{
-    EXPECT_CALL(*ssdVolume, IsGivenFileCreated).WillOnce(Return(true));
-
-    std::string fileName = "TESTFILE";
-    EXPECT_EQ(container->IsGivenFileCreated(fileName), true);
-}
-
-TEST_F(MetaVolumeContainerTexture, CheckFileCreated1)
+TEST_F(MetaVolumeContainerTexture, IsGivenFileCreated_testIfAFileWhichHasTheSameNameExistsForEachMetaVolume)
 {
     EXPECT_CALL(*ssdVolume, IsGivenFileCreated).WillOnce(Return(false));
     EXPECT_CALL(*nvramVolume, IsGivenFileCreated).WillOnce(Return(true));
 
     std::string fileName = "TESTFILE";
-    EXPECT_EQ(container->IsGivenFileCreated(fileName), true);
+    EXPECT_EQ(container->IsGivenFileCreated(MetaVolumeType::SsdVolume, fileName), false);
+    EXPECT_EQ(container->IsGivenFileCreated(MetaVolumeType::NvRamVolume, fileName), true);
 }
 
 TEST_F(MetaVolumeContainerTexture, CheckFileSize)

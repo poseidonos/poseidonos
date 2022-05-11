@@ -337,19 +337,9 @@ MetaVolumeContainer::AddFileInActiveList(const MetaVolumeType volumeType, const 
 }
 
 bool
-MetaVolumeContainer::IsGivenFileCreated(std::string& fileName)
+MetaVolumeContainer::IsGivenFileCreated(const MetaVolumeType volumeType, const std::string& fileName)
 {
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    bool isCreated = false;
-
-    for (auto& vol : volumeContainer)
-    {
-        isCreated = vol.second->IsGivenFileCreated(fileKey);
-        if (isCreated)
-            break;
-    }
-
-    return isCreated;
+    return volumeContainer[volumeType]->IsGivenFileCreated(MetaFileUtil::GetHashKeyFromFileName(fileName));
 }
 
 void
