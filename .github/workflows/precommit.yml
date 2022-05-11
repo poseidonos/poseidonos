@@ -17,6 +17,7 @@ on:
 jobs:
   IO_Exception_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
     
     - run: |
@@ -46,6 +47,7 @@ jobs:
 
   Normal_IO_NPOR_SPOR_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -87,6 +89,7 @@ jobs:
 
   Rebuild_SPOR_test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -117,6 +120,7 @@ jobs:
 
   Rebuild_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -147,6 +151,7 @@ jobs:
 
   Rotational_Rebuild_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -176,6 +181,7 @@ jobs:
 
   Unit_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -218,6 +224,7 @@ jobs:
 
   Volume_Test:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |
@@ -247,6 +254,7 @@ jobs:
 
   WBT_IO_ST:
     runs-on: VM
+    timeout-minutes: 25
     steps:
 
     - run: |

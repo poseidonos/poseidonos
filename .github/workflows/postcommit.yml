@@ -23,7 +23,6 @@ jobs:
     - name: Make Dashboard Link for Workflow 
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
-
     - name: Upload Dashboard Link
       uses: actions/upload-artifact@v3
       with:
@@ -55,14 +54,6 @@ jobs:
         chmod +x .github/workflows/script/volume/volume.sh
         .github/workflows/script/volume/volume.sh ${{github.workspace}}
 
-    - name: Clean Backup After Volume Test
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
@@ -70,6 +61,21 @@ jobs:
         name: VOLUME_TEST_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After Volume Test
+      if: steps.volume_test.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.volume_test.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: VOLUME_TEST_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   Normal_IO_Test:
     runs-on: VM
@@ -96,14 +102,6 @@ jobs:
         chmod +x .github/workflows/script/normal_io_npor_spor/normal_io.sh
         .github/workflows/script/normal_io_npor_spor/normal_io.sh ${{github.workspace}}
 
-    - name: Clean Backup After Normal IO
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normalio" -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
@@ -111,6 +109,21 @@ jobs:
         name: NORMAL_IO_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After Normal IO
+      if: steps.normal_io_test.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normalio" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.normal_io_test.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: NORMAL_IO_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   NPOR_Test:
     runs-on: VM
@@ -136,14 +149,6 @@ jobs:
         chmod +x .github/workflows/script/normal_io_npor_spor/npor.sh
         .github/workflows/script/normal_io_npor_spor/npor.sh ${{github.workspace}}
 
-    - name: Clean Backup After Npor Test
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
@@ -151,6 +156,21 @@ jobs:
         name: NPOR_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After Npor Test
+      if: steps.npor_test.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.npor_test.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: NPOR_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   Rebuild_Test:
     runs-on: VM
@@ -176,14 +196,6 @@ jobs:
         chmod +x .github/workflows/script/rebuild/rebuild.sh
         .github/workflows/script/rebuild/rebuild.sh ${{github.workspace}}
 
-    - name: Clean Backup After Fault Tolerance Test
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
@@ -191,6 +203,21 @@ jobs:
         name: REBUILD_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After Fault Tolerance Test
+      if: steps.rebuild_test.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.rebuild_test.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: REBUILD_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   SPOR_Test:
     runs-on: VM
@@ -216,14 +243,6 @@ jobs:
         chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
         .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
 
-    - name: Clean Backup After SPOR Test
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
-
     - name: Upload POS log
       if: always()
       uses: actions/upload-artifact@v3
@@ -231,6 +250,21 @@ jobs:
         name: SPOR_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After SPOR Test
+      if: steps.spor_test.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.spor_test.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: SPOR_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   IO_Intensive_Unmount_Test:
     runs-on: VM
