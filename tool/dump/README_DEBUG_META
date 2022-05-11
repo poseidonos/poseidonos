@@ -27,3 +27,6 @@ meta [command] [subcommand]
 
 7) logpath path
    set log path for pos.log
+
+8) logfile file
+   set log files to search

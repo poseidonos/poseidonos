@@ -45,6 +45,7 @@ class PosGdbCmd(gdb.Command):
         gdb.execute("set print pretty", to_string=True)
         gdb.execute("set print elements 0", to_string=True)
         gdb.execute("set height unlimited", to_string=True)
+        gdb.execute("set max-value-size unlimited", to_string=True)
         print("Args Passed: %s" % args)
 
         gdb_lib.switch_to_pos_stack()

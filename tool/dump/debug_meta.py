@@ -18,6 +18,7 @@ import metafs
 
 class DebugMetaCmd(gdb.Command):
     log_path = "/var/log/pos"
+    log_file = "pos.*"
 
     def __init__(self):
         super(DebugMetaCmd, self).__init__(
@@ -46,6 +47,7 @@ class DebugMetaCmd(gdb.Command):
         gdb.execute("set print pretty", to_string=True)
         gdb.execute("set print elements 0", to_string=True)
         gdb.execute("set height unlimited", to_string=True)
+        gdb.execute("set max-value-size unlimited", to_string=True)
         print("Args Passed: %s" % args)
 
         gdb_lib.switch_to_pos_stack()
@@ -82,10 +84,14 @@ class DebugMetaCmd(gdb.Command):
 
         elif(args == 'lastlog'):
             args = args.replace('lastlog ', '').strip()
+            print("log path: " + self.log_path)
+            print("log file: pos.log")
             gdb.execute('shell cat ' + self.log_path + '/pos.log|tail -n 10')
 
         elif(args.find('lastlog ') == 0):
             args = args.replace('lastlog ', '').strip()
+            print("log path: " + self.log_path)
+            print("log file: pos.log")
             gdb.execute('shell cat ' + self.log_path + '/pos.log|tail -n "' + args + '"')
 
         elif(args.find('mem ') == 0):
@@ -94,11 +100,19 @@ class DebugMetaCmd(gdb.Command):
 
         elif(args.find('search ') == 0):
             args = args.replace('search ', '').strip()
-            gdb.execute('shell cat ' + self.log_path + '/pos.*.log|grep "' + args + '"')
+            print("log path: " + self.log_path)
+            print("log file: " + self.log_file)
+            gdb.execute('shell cat ' + self.log_path + '/' + self.log_file + '|grep "' + args + '"')
 
         elif(args.find('logpath ') == 0):
+            print("current log path: " + self.log_path)
             self.log_path = args.replace('logpath ', '').strip()
             print("set log path: " + self.log_path)
+
+        elif(args.find('logfile ') == 0):
+            print("current log file: " + self.log_file)
+            self.log_file = args.replace('logfile ', '').strip()
+            print("set log file: " + self.log_file)
 
         else:
             print("Help : ")
