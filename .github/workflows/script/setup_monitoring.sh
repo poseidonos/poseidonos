@@ -1,6 +1,8 @@
 #!/bin/bash
 
 PROMETHEUS_YAML_PATH=${POS_WORKING_DIR}/config/prometheus.yml
+FILEBEAT_YAML_PATH=${POS_WORKING_DIR}/config/filebeat.yml
+LOGSTASH_YAML_PATH=${POS_WORKING_DIR}/config/logstash.yml
 
 check_environment_variable()
 {
