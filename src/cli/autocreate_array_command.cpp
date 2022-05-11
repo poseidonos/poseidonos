@@ -100,8 +100,6 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     NumaAwaredArrayCreationResult res = creationDelegate.GetResult();
     if (res.code != 0)
     {
-        int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
-        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
             "AUTOCREATEARRAY", rid, res.code,
                 "failed to create " + arrayName, GetPosInfo());
@@ -113,8 +111,6 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
 
     if (0 != ret)
     {
-        int event = EID(CLI_AUTOCREATE_ARRAY_FAILURE);
-        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
             "AUTOCREATEARRAY", rid, ret,
                 "failed to create " + arrayName, GetPosInfo());

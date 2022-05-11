@@ -60,7 +60,7 @@ CreateSubsystemCommand::Execute(json& doc, string rid)
     if (ret != SUCCESS)
     {
         return jFormat.MakeResponse(
-            command, rid, ERROR_CODE, errorMessage, GetPosInfo());
+            command, rid, ret, errorMessage, GetPosInfo());
     }
 
     return jFormat.MakeResponse(

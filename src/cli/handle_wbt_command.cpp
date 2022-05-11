@@ -78,7 +78,7 @@ HandleWbtCommand::Execute(json& doc, string rid)
         errMsg = "invalid wbt command";
     }
 
-    if (ret < 0)
+    if (ret != 0)
     {
         return jFormat.MakeResponse("WBT " + testname, rid, ret, errMsg,
                 GetPosInfo());

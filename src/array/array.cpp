@@ -367,9 +367,9 @@ Array::AddSpare(string devName)
     if (dev == nullptr)
     {
         pthread_rwlock_unlock(&stateLock);
-        int eid = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
-        POS_TRACE_WARN(eid, "devName: {}", devName);
-        return eid;
+        ret = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(ret, "devName: {}", devName);
+        return ret;
     }
 
     string spareSN = dev->GetSN();
