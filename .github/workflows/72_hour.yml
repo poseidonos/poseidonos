@@ -47,20 +47,13 @@ jobs:
         chmod +x .github/workflows/script/build_setup.sh
         .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
-    - name: 72 Hour VM Test
+    - name: Three Days VM Test
+      id: three_days
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=NULL POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/72_hour.sh
         .github/workflows/script/72_hour.sh ${{github.workspace}}
-
-    - name: Clean Backup Script
-      continue-on-error: true
-      if: always()
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M8-72H_VM_Test" -n "72h" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS log
       if: always()
@@ -69,3 +62,18 @@ jobs:
         name: Three_Days_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup Script
+      if: steps.three_days.outcome == 'failure'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M8-72H_VM_Test" -n "72h" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: steps.three_days.outcome == 'failure'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Three_Days_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*

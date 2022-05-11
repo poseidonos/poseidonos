@@ -1,7 +1,6 @@
 #!/bin/bash
 pos_working_dir=0
 pos_core="/psdData/core"
-pos_log="/psdData/log"
 target_ip=0
 trtype="tcp"
 port=1158
@@ -46,34 +45,6 @@ coreDump()
     echo "Kill poseidonos to generate core dump files.."
     texecc pkill -11 poseidonos
     cd $pos_working_dir/tool/dump/; sudo ./trigger_core_dump.sh crashed
-
-    if [ -d $pos_core/$plan_name/$test_name/$test_rev ]
-    then
-        echo "Core File Directory: $pos_core/$plan_name/$test_name/$test_rev"
-    else
-        mkdir -p $pos_core/$plan_name/$test_name/$test_rev
-    fi
-
-    echo "Copying core dump files to service server $pos_core/$plan_name/$test_name/$test_rev"
-    cp -r $pos_working_dir/tool/dump/*.tar.gz* $pos_core/$plan_name/$test_name/$test_rev
-
-    echo "Deleting core dump files in ${target_ip} since files are copied to service server"
-    texecc rm /etc/pos/core/*
-    texecc rm $pos_working_dir/tool/dump/*.tar.gz*
-}
-
-backupLog()
-{
-    if  [ -d $pos_log/$plan_name/$test_name/$test_rev ]
-    then
-        echo "Log Files Directory: $pos_log/$plan_name/$test_name/$test_rev"
-    else
-        mkdir -p $pos_log/$plan_name/$test_name/$test_rev
-    fi
-
-    echo "Copying log files to service server $pos_log/$plan_name/$test_name/$test_rev"
-    cp -r /var/log/pos/* $pos_log/$plan_name/$test_name/$test_rev
-    rm -rf /var/log/pos/*
 }
 
 resetConfig()
@@ -120,7 +91,6 @@ done
 
 processCheck
 printVariable
-backupLog
 coreDump
 resetConfig
 
