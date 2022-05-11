@@ -384,10 +384,12 @@ TEST(ArrayManager, DeviceDetached_testIfZeroIsReturnedWhenNoArrayFoundForGivenSe
 {
     // Given
     string existingArray = "array1";
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    MockDeviceManager mockDevMgr(&mockAffinityMgr);
     auto mockAbrMgr = BuildMockAbrManager();
     EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(""));
     auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), &mockDevMgr, nullptr, nullptr);
 
     // When
     int actual = arrayMgr->DeviceDetached(mockUBlockSharedPtr);

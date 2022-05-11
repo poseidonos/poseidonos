@@ -34,7 +34,10 @@
 #define ARRAY_DEVICE_H_
 
 #include <atomic>
+#include <string>
 #include "src/include/i_array_device.h"
+
+using namespace std;
 
 namespace pos
 {
@@ -51,8 +54,11 @@ public:
     UblockSharedPtr GetUblock(void) override;
     UBlockDevice* GetUblockPtr(void) override;
     void SetUblock(UblockSharedPtr uBlock) override;
+    string PrevUblockInfo() { return prevUblockInfo; }
 
 private:
+    void _UpdateTrace(UblockSharedPtr uBlock);
+    string prevUblockInfo = "";
     UblockSharedPtr uBlock;
     ArrayDeviceState state;
 };

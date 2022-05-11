@@ -236,7 +236,10 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
     }
     else
     {
-        POS_TRACE_INFO(EID(ARRAY_EVENT_DEV_DETACHED), "No array found for device serial number {}. DeviceDetached event will be ignored.", dev->GetSN());
+        POS_TRACE_WARN(EID(ARRAY_EVENT_DEV_DETACHED),
+            "SSD is detached-There is no array to which {} ({}) belongs",
+            dev->GetName(), dev->GetSN());
+        deviceManager->RemoveDevice(dev);
     }
     return 0; // this function will be void type when device lock is removed
 }
