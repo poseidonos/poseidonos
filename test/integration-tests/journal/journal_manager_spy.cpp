@@ -46,7 +46,7 @@ JournalManagerSpy::~JournalManagerSpy(void)
 }
 
 int
-JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager)
+JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager)
 {
     int ret = JournalManager::_InitConfigAndPrepareLogBuffer(nullptr);
     if (ret < 0)

@@ -26,7 +26,7 @@ public:
     JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, IStateControl* stateSub, std::string logFileName);
     virtual ~JournalManagerSpy(void);
 
-    int InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager);
+    int InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager);
     int DoRecoveryForTest(void);
 
     void DeleteLogBuffer(void);

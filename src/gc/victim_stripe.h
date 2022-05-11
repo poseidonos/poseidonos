@@ -35,9 +35,10 @@
 #include <vector>
 #include <list>
 
+#include "src/array_models/interface/i_array_info.h"
 #include "src/mapper/i_reversemap.h"
 #include "src/mapper/reversemap/reverse_map.h"
-#include "src/array_models/interface/i_array_info.h"
+#include "src/volume/i_volume_io_manager.h"
 
 using namespace std;
 
@@ -53,7 +54,7 @@ struct BlkInfo
 class ReverseMapPack;
 class IVSAMap;
 class IStripeMap;
-class IVolumeManager;
+class IVolumeInfoManager;
 
 class VictimStripe
 {
@@ -63,7 +64,7 @@ public:
                 IReverseMap* inputRevMap,
                 IVSAMap* inputIVSAMap,
                 IStripeMap* inputIStripeMap,
-                IVolumeManager* inputVolumeManager);
+                IVolumeIoManager* inputVolumeManager);
 
     virtual ~VictimStripe(void);
     virtual void Load(StripeId _lsid, CallbackSmartPtr callback);
@@ -100,7 +101,7 @@ private:
     IReverseMap* iReverseMap;
     IVSAMap* iVSAMap;
     IStripeMap* iStripeMap;
-    IVolumeManager* volumeManager;
+    IVolumeIoManager* volumeManager;
     ReverseMapPack* revMapPack;
 };
 

@@ -41,8 +41,6 @@
 #include "src/include/meta_const.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
-#include "src/volume/i_volume_manager.h"
-#include "src/volume/volume_service.h"
 
 namespace pos
 {

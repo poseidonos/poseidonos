@@ -30,64 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/array_mgmt/array_manager.h"
-#include "src/include/address_type.h"
-#include "src/logger/logger.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/volume/volume_service.h"
-#include "src/wbt/read_vsa_map_entry_wbt_command.h"
+#pragma once
 
 #include <string>
+
+#include "src/volume/volume_list.h"
+#include "src/volume/volume_base.h"
+#include "src/qos/qos_common.h"
+
 namespace pos
 {
-ReadVsaMapEntryWbtCommand::ReadVsaMapEntryWbtCommand(void)
-:   WbtCommand(READ_VSAMAP_ENTRY, "read_vsamap_entry")
+class VolumeBase;
+
+class IVolumeEventManager
 {
-}
-// LCOV_EXCL_START
-ReadVsaMapEntryWbtCommand::~ReadVsaMapEntryWbtCommand(void)
-{
-}
-// LCOV_EXCL_STOP
-int
-ReadVsaMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
-{
-    int res = -1;
-    std::string arrayName = _GetParameter(argv, "array");
-    if (0 == arrayName.length())
-    {
-        return res;
-    }
-
-    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
-    if (info == nullptr)
-    {
-        return res;
-    }
-
-    std::string coutfile = "output.txt";
-    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    int volId = volMgr->VolumeID(argv["name"].get<std::string>());
-
-    if (volId < 0)
-    {
-        res = volId;
-    }
-    else
-    {
-        try
-        {
-            BlkAddr rba = static_cast<BlkAddr>(std::stoull(argv["rba"].get<std::string>()));
-            IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
-            res = iMapperWbt->ReadVsaMapEntry(volId, rba, coutfile);
-        }
-        catch (const std::exception& e)
-        {
-            POS_TRACE_ERROR(res, e.what());
-        }
-    }
-
-    return res;
-}
+public:
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) = 0;
+    virtual int Delete(std::string name) = 0;
+    virtual int Mount(std::string name, std::string subnqn) = 0;
+    virtual int Unmount(std::string name) = 0;
+    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int Rename(std::string oldname, std::string newname) = 0;
+    virtual void DetachVolumes(void) = 0;
+    virtual int CheckVolumeValidity(std::string name) = 0;
+};
 
 } // namespace pos
+
+/*
+
+*/

@@ -5,7 +5,7 @@
 #include "test/unit-tests/journal_manager/replay/log_delete_checker_mock.h"
 
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/volume/i_volume_manager_mock.h"
+#include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -19,7 +19,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVersionIsUpdatedToNew
     // Given
     NiceMock<MockLogDeleteChecker> logDeleteChecker;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIVolumeManager> volumeManager;
+    NiceMock<MockIVolumeInfoManager> volumeManager;
     NiceMock<MockReplayProgressReporter> progressReporter;
 
     uint64_t prevContextVersion = 2;
@@ -38,7 +38,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVersionIsUpdatedToNew
     EXPECT_CALL(volumeManager, VolumeName(volId, _)).WillRepeatedly(SetArgReferee<1>(volname));
 
     // Then
-    EXPECT_CALL(volumeManager, Delete(volname)).WillOnce(Return(0));
+    EXPECT_CALL(volumeManager, CancelVolumeReplay(volId)).WillOnce(Return(0));
 
     // When
     ReplayVolumeDeletion replayer(&logDeleteChecker, &contextManager, &volumeManager, &progressReporter);
@@ -50,7 +50,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVersionIsNotUpdated)
     // Given
     NiceMock<MockLogDeleteChecker> logDeleteChecker;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIVolumeManager> volumeManager;
+    NiceMock<MockIVolumeInfoManager> volumeManager;
     NiceMock<MockReplayProgressReporter> progressReporter;
 
     uint64_t prevContextVersion = 2;
@@ -66,7 +66,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVersionIsNotUpdated)
     ON_CALL(logDeleteChecker, GetDeletedVolumes).WillByDefault(Return(deletedVolumes));
 
     // Then
-    EXPECT_CALL(volumeManager, Delete(volname)).Times(0);
+    EXPECT_CALL(volumeManager, CancelVolumeReplay(volId)).Times(0);
 
     // When
     ReplayVolumeDeletion replayer(&logDeleteChecker, &contextManager, &volumeManager, &progressReporter);
@@ -78,7 +78,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVolumeDoesNotExist)
     // Given
     NiceMock<MockLogDeleteChecker> logDeleteChecker;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockIVolumeManager> volumeManager;
+    NiceMock<MockIVolumeInfoManager> volumeManager;
     NiceMock<MockReplayProgressReporter> progressReporter;
 
     uint64_t prevContextVersion = 2;
@@ -96,7 +96,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVolumeDoesNotExist)
     ON_CALL(volumeManager, GetVolumeStatus(volId)).WillByDefault(Return((int)(POS_EVENT_ID::VOL_NOT_FOUND)));
 
     // Then
-    EXPECT_CALL(volumeManager, Delete(volname)).Times(0);
+    EXPECT_CALL(volumeManager, CancelVolumeReplay(volId)).Times(0);
 
     // When
     ReplayVolumeDeletion replayer(&logDeleteChecker, &contextManager, &volumeManager, &progressReporter);

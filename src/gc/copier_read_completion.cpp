@@ -63,7 +63,7 @@ CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t 
 
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
                                             void* buffer, CopierMeta* meta, StripeId stripeId,
-                                            EventSmartPtr inputFlushEvent, IVolumeManager* inputVolumeManager,
+                                            EventSmartPtr inputFlushEvent, IVolumeIoManager* inputVolumeManager,
                                             EventScheduler* inputEventScheduler)
 : Callback(false, CallbackType_CopierReadCompletion),
   victimStripe(victimStripe),
