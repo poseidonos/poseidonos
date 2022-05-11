@@ -208,7 +208,7 @@ MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 bool
 MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
 {
-    if (isNPOR == false || GetVolumeType() == MetaVolumeType::SsdVolume)
+    if (isNPOR == false || GetVolumeType() != MetaVolumeType::NvRamVolume)
     {
         if (false == catalogMgr->LoadVolCatalog())
         {
