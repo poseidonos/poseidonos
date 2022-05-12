@@ -1,5 +1,4 @@
 #include <gmock/gmock.h>
-#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -25,9 +24,6 @@ public:
     MOCK_METHOD(std::set<SegmentId>, GetNvramSegmentList, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
-    MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
-    MOCK_METHOD(void, InvalidateBlks, (VirtualBlks blks, bool isForced), (override));
-    MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
     MOCK_METHOD(int, SetNextSsdLsid, (), (override));
     MOCK_METHOD(char*, GetContextSectionAddr, (int owner, int section), (override));
     MOCK_METHOD(int, GetContextSectionSize, (int owner, int section), (override));

@@ -48,7 +48,8 @@ public:
     int GetUrgentThreshold(void);
     void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
-    virtual GcMode GetCurrentGcMode(int numFreeSegments);
+    virtual GcMode GetCurrentGcMode(void);
+    virtual GcMode UpdateCurrentGcMode(int numFreeSegments);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;

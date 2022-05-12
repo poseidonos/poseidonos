@@ -60,7 +60,7 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
 class ContextIoManager;
 
-class ContextManager : public IContextManager, public ISegmentCtx
+class ContextManager : public IContextManager
 {
 public:
     ContextManager(void) = default;
@@ -87,10 +87,6 @@ public:
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
-    virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual void InvalidateBlks(VirtualBlks blks, bool isForced) override;
-    virtual void UpdateOccupiedStripeCount(StripeId lsid) override;
-
     virtual int SetNextSsdLsid(void);
     virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
@@ -99,7 +95,7 @@ public:
 
     // TODO (huijeong.kim) remove mixed use of SegmentCtx and ISegmentCtx
     virtual SegmentCtx* GetSegmentCtx(void) { return segmentCtx; }
-    virtual ISegmentCtx* GetISegmentCtx(void) { return this; }
+    virtual ISegmentCtx* GetISegmentCtx(void) { return segmentCtx; }
     virtual AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }
@@ -107,7 +103,6 @@ public:
 
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
 
-    virtual uint32_t GetArrayId(void);
 private:
     void _ResetSegmentStates(void);
 
