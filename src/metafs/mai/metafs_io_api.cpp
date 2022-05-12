@@ -47,7 +47,8 @@ MetaFsIoApi::MetaFsIoApi(void)
   isNormal(false),
   ioMgr(nullptr),
   ctrlMgr(nullptr),
-  telemetryPublisher(nullptr)
+  telemetryPublisher(nullptr),
+  concurrentMetaFsTimeInterval(nullptr)
 {
 }
 
