@@ -32,47 +32,18 @@
 
 #pragma once
 
-#include <cstdint>
-#include <thread>
-#include "src/debug/debug_info.h"
+#include "proto/generated/cpp/cli.grpc.pb.h"
+#include "proto/generated/cpp/cli.pb.h"
+#include <string>
 
-namespace pos
-{
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
+using grpc::Status;
+using grpc_cli::SystemInfoRequest;
+using grpc_cli::SystemInfoResponse;
 
-class Poseidonos
+class CommandProcessor
 {
 public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
-
-private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread;
+    CommandProcessor(void);
+    ~CommandProcessor(void);
+    Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
 };
-} // namespace pos
