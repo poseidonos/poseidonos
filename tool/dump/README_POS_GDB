@@ -8,7 +8,7 @@ source posgdb.py
 posgdb [command] [subcommand]
 
 1) posgdb debuginfo
-   show debug info and simple report 
+   show debug info and simple report
 
 2) posgdb pending io
    show pending ios for every thread and devices
@@ -36,7 +36,7 @@ posgdb [command] [subcommand]
    show object buffer of "dumpSharedPtr"
    ex ) posgdb pending object IO_CONTEXT
 
-10) posgdb backend io 
+10) posgdb backend io
    summary of backend io
 
 11) posgdb volume io
@@ -47,3 +47,6 @@ posgdb [command] [subcommand]
 
 13) posgdb rba info [array_id] [volume_id] [rba(4k unit)]
    see rba's stripe id and location
+
+14) posgdb make report
+   make initial analysis report based on current core dump information.
