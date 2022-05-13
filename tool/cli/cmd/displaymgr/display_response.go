@@ -530,7 +530,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 			w.Flush()
 		}
 
-	case "GETPOSINFO":
+	case "SYSTEMINFO":
 		res := messages.POSInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 

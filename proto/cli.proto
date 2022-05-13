@@ -1,0 +1,42 @@
+syntax="proto3";
+
+import "annotations.proto";
+
+package grpc_cli;
+
+option go_package = "cli/api";
+
+service PosCli {
+	rpc SystemInfo (SystemInfoRequest) returns (SystemInfoResponse) {
+		option (google.api.http) = {
+      		get: "/v1/systeminfo"
+    	};
+	}
+}
+
+message Status {
+	int32 code = 1;
+	string event_name = 2;
+	string description = 3;
+	string cause = 4;
+	string solution = 5;
+}
+
+message SystemInfoRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message SystemInfoResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message Data {
+			string version = 1;
+		}
+		Data data = 2;
+	}
+	Result result = 3;
+}
