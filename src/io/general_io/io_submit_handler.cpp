@@ -35,14 +35,13 @@
 #include <list>
 #include <string>
 
-
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
+#include "src/io/general_io/io_submit_handler_count.h"
+#include "src/io/general_io/submit_async_byte_io.h"
 #include "src/io/general_io/submit_async_read.h"
 #include "src/io/general_io/submit_async_write.h"
-#include "src/io/general_io/submit_async_byte_io.h"
 #include "src/io/general_io/sync_io_completion.h"
-#include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -68,7 +67,7 @@ IOSubmitHandler::SyncIO(
     CallbackSmartPtr callback(new SyncIoCompletion(needToWait, errorCount));
 
     IOSubmitHandlerStatus errorToReturn = SubmitAsyncIO(direction, bufferList,
-        startLSA, blockCount, partitionToIO, callback, arrayId);
+        startLSA, blockCount, partitionToIO, callback, arrayId, false);
 
     if (IOSubmitHandlerStatus::SUCCESS == errorToReturn ||
         IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorToReturn)
@@ -104,7 +103,8 @@ IOSubmitHandler::SubmitAsyncIO(
         {
             SubmitAsyncRead asyncRead(callback);
             IOSubmitHandlerCountSingleton::Instance()->pendingRead++;
-            errorToReturn = asyncRead.Execute(bufferList, startLSA, blockCount, partitionToIO, callback, arrayId);
+            errorToReturn = asyncRead.Execute(bufferList, startLSA, blockCount,
+                partitionToIO, callback, arrayId);
         }
         else if (IODirection::WRITE == direction)
         {
@@ -120,7 +120,7 @@ IOSubmitHandler::SubmitAsyncIO(
             bool needTrim = true;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
-                partitionToIO, callback, arrayId, needTrim);
+                partitionToIO, callback, arrayId, needTrim, false);
         }
         else
         {

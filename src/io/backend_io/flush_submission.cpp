@@ -36,6 +36,8 @@
 #include <string>
 
 #include "src/array/service/array_service_layer.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/include/backend_event.h"
@@ -43,11 +45,10 @@
 #include "src/include/i_array_device.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/io/backend_io/flush_count.h"
 #include "src/io/backend_io/flush_completion.h"
+#include "src/io/backend_io/flush_count.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
-#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {

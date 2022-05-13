@@ -45,8 +45,9 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
-#include "src/array_mgmt/array_manager.h"
 #include <set>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -185,7 +186,8 @@ SubmitAsyncWrite::Execute(
         for (PhysicalEntry& physicalEntry : physicalEntries)
         {
             BufferEntry& buffer = *iter;
-            UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalEntry.addr, arrayUnlocking, callback);
+            UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalEntry.addr,
+                arrayUnlocking, callback);
 
             if (ioDispatcher->Submit(ubio) < 0)
             {
@@ -199,7 +201,8 @@ SubmitAsyncWrite::Execute(
     for (PhysicalWriteEntry& physicalWriteEntry : parityPhysicalWriteEntries)
     {
         BufferEntry& buffer = physicalWriteEntry.buffers.front();
-        UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalWriteEntry.addr, arrayUnlocking, callback);
+        UbioSmartPtr ubio = _SetupUbio(arrayId, needTrim, buffer, physicalWriteEntry.addr,
+            arrayUnlocking, callback);
 
         if (ioDispatcher->Submit(ubio) < 0)
         {

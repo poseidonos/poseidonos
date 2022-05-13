@@ -37,6 +37,7 @@
 
 #include "src/array/ft/buffer_entry.h"
 #include "src/array/service/io_translator/i_io_translator.h"
+#include "src/bio/ubio.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 #include "src/include/pos_event_id.h"

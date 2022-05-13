@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <string>
 
+#include "src/bio/ubio.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
 #include "src/include/pos_event_id.hpp"

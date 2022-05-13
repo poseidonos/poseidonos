@@ -36,10 +36,11 @@
 #include <list>
 #include <string>
 
-#include "src/include/partition_type.h"
-#include "src/include/address_type.h"
-#include "src/include/smart_ptr_type.h"
 #include "src/array/ft/buffer_entry.h"
+#include "src/bio/ubio.h"
+#include "src/include/address_type.h"
+#include "src/include/partition_type.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/io_submit_interface/io_submit_handler_status.h"
 
 namespace pos

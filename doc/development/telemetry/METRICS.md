@@ -1,3 +1,28 @@
+- [**Device**](#device)
+  - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
+  - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
+  - [_**read_gc_iops_per_ssd**_](#read_gc_iops_per_ssd)
+  - [_**read_host_iops_per_ssd**_](#read_host_iops_per_ssd)
+  - [_**read_flush_iops_per_ssd**_](#read_flush_iops_per_ssd)
+  - [_**read_rebuild_iops_per_ssd**_](#read_rebuild_iops_per_ssd)
+  - [_**read_unknown_rate_bytes_per_second_per_ssd**_](#read_unknown_rate_bytes_per_second_per_ssd)
+  - [_**read_meta_rate_bytes_per_second_per_ssd**_](#read_meta_rate_bytes_per_second_per_ssd)
+  - [_**read_gc_rate_bytes_per_second_per_ssd**_](#read_gc_rate_bytes_per_second_per_ssd)
+  - [_**read_host_rate_bytes_per_second_per_ssd**_](#read_host_rate_bytes_per_second_per_ssd)
+  - [_**read_flush_rate_bytes_per_second_per_ssd**_](#read_flush_rate_bytes_per_second_per_ssd)
+  - [_**read_rebuild_rate_bytes_per_second_per_ssd**_](#read_rebuild_rate_bytes_per_second_per_ssd)
+  - [_**write_unknown_iops_per_ssd**_](#write_unknown_iops_per_ssd)
+  - [_**write_meta_iops_per_ssd**_](#write_meta_iops_per_ssd)
+  - [_**write_gc_iops_per_ssd**_](#write_gc_iops_per_ssd)
+  - [_**write_host_iops_per_ssd**_](#write_host_iops_per_ssd)
+  - [_**write_flush_iops_per_ssd**_](#write_flush_iops_per_ssd)
+  - [_**write_rebuild_iops_per_ssd**_](#write_rebuild_iops_per_ssd)
+  - [_**write_unknown_rate_bytes_per_second_per_ssd**_](#write_unknown_rate_bytes_per_second_per_ssd)
+  - [_**write_meta_rate_bytes_per_second_per_ssd**_](#write_meta_rate_bytes_per_second_per_ssd)
+  - [_**write_gc_rate_bytes_per_second_per_ssd**_](#write_gc_rate_bytes_per_second_per_ssd)
+  - [_**write_host_rate_bytes_per_second_per_ssd**_](#write_host_rate_bytes_per_second_per_ssd)
+  - [_**write_flush_rate_bytes_per_second_per_ssd**_](#write_flush_rate_bytes_per_second_per_ssd)
+  - [_**write_rebuild_rate_bytes_per_second_per_ssd**_](#write_rebuild_rate_bytes_per_second_per_ssd)
 - [**MetaFs**](#metafs)
   - [_**NormalShutdown**_](#normalshutdown)
   - [_**UserRequest**_](#userrequest)
@@ -35,7 +60,395 @@
   - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
 
 ---
+## **Device**
 
+Device group contains the metrics of the Devices (NVMe SSD)
+
+---
+
+### _**read_unknown_iops_per_ssd**_
+
+**ID**: 20000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of unknown type read in a specific SSD
+
+---
+
+### _**read_meta_iops_per_ssd**_
+
+**ID**: 20001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of meta type read in a specific SSD
+
+---
+
+### _**read_gc_iops_per_ssd**_
+
+**ID**: 20002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of gc type read in a specific SSD
+
+---
+
+### _**read_host_iops_per_ssd**_
+
+**ID**: 20003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of host type read in a specific SSD
+
+---
+
+### _**read_flush_iops_per_ssd**_
+
+**ID**: 20004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of flush type read in a specific SSD
+
+---
+
+### _**read_rebuild_iops_per_ssd**_
+
+**ID**: 20005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of rebuild type read in a specific SSD
+
+---
+
+### _**read_unknown_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of unknown type read in a specific SSD
+
+---
+
+### _**read_meta_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of meta type read in a specific SSD
+
+---
+
+### _**read_gc_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20008
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of gc type read in a specific SSD
+
+---
+
+### _**read_host_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20009
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.10.0
+
+The rate(bytes/second) of host type read in a specific SSD
+
+---
+
+### _**read_flush_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.10.0
+
+The rate(bytes/second) of flush type read in a specific SSD
+
+---
+
+### _**read_rebuild_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.10.0
+
+The rate(bytes/second) of host type read in a specific SSD
+
+---
+
+### _**write_unknown_iops_per_ssd**_
+
+**ID**: 20012
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of unknown type write in a specific SSD
+
+---
+
+### _**write_meta_iops_per_ssd**_
+
+**ID**: 20013
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of meta type write in a specific SSD
+
+---
+
+### _**write_gc_iops_per_ssd**_
+
+**ID**: 20014
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of gc type write in a specific SSD
+
+---
+
+### _**write_host_iops_per_ssd**_
+
+**ID**: 20015
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of host type write in a specific SSD
+
+---
+
+### _**write_flush_iops_per_ssd**_
+
+**ID**: 20016
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of flush type write in a specific SSD
+
+---
+
+### _**write_rebuild_iops_per_ssd**_
+
+**ID**: 20017
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of rebuild type write in a specific SSD
+
+---
+
+### _**write_unknown_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20018
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of unknown type write in a specific SSD
+
+---
+
+### _**write_meta_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20019
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of meta type write in a specific SSD
+
+---
+
+### _**write_gc_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20020
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of gc type write in a specific SSD
+
+---
+
+### _**write_host_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20021
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of host type write in a specific SSD
+
+---
+
+### _**write_flush_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20022
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of flush type write in a specific SSD
+
+---
+
+### _**write_rebuild_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20023
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of rebuild type write in a specific SSD
+
+---
 ## **MetaFs**
 
 MetaFs group contains the metrics of the Meta Filsystem.

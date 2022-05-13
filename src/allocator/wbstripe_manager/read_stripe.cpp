@@ -33,6 +33,7 @@
 #include "src/allocator/wbstripe_manager/read_stripe.h"
 
 #include "src/array/ft/buffer_entry.h"
+#include "src/bio/ubio.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -73,7 +74,8 @@ ReadStripe::_DoSpecificJob(void)
     IOSubmitHandlerStatus result =
         ioSubmitHandler->SubmitAsyncIO(IODirection::READ,
             bufferList, readAddr, blockCount,
-            PartitionType::USER_DATA, doneCallback, arrayId);
+            PartitionType::USER_DATA, doneCallback, arrayId,
+            false);
 
     return (result == IOSubmitHandlerStatus::SUCCESS ||
         result == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP);
