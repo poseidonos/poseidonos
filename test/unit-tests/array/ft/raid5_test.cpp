@@ -241,6 +241,7 @@ TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
 
     // Then
     EXPECT_TRUE(ret);
+    EXPECT_EQ(raid5.GetParityPoolSize(), 2);
 
     // When : Reset Pools
     raid5.ClearParityPools();
