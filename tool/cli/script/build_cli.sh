@@ -9,6 +9,15 @@ export POS_CLI_VERSION=1.0.1
 export GIT_COMMIT_CLI=$(git rev-list -1 HEAD)
 export BUILD_TIME_CLI=$(date +%s)
 
+GOPATH=$(${GO} env | grep GOPATH | awk -F"\"" '{print $2}')
+GOROOT=$(${GO} env | grep GOROOT | awk -F"\"" '{print $2}')
+export PATH=${PATH}:${GOROOT}/bin:${GOPATH}/bin
+
+mkdir api
+protoc --go_out=api --go_opt=paths=source_relative \
+    --go-grpc_out=api --go-grpc_opt=paths=source_relative \
+    -I $ROOT_DIR/../../proto cli.proto
+
 # Build CLI binary
 lib/pnconnector/script/build_resource.sh
 ${GO} build -tags debug,ssloff -ldflags "-X cli/cmd.PosCliVersion=$POS_CLI_VERSION -X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI -X cli/cmd.RootDir=$ROOT_DIR"
