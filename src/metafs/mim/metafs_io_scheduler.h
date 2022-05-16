@@ -45,6 +45,7 @@ namespace pos
 class MetaFsIoScheduler : public MetaFsIoHandlerBase
 {
 public:
+    MetaFsIoScheduler(void) = delete;
     explicit MetaFsIoScheduler(const int threadId, const int coreId,
         const int totalCoreCount, const std::string& threadName,
         const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
@@ -61,19 +62,36 @@ public:
     virtual void ExitThread(void) override;
     void Execute(void);
 
+    void RegisterMetaIoWorkerForTest(ScalableMetaIoWorker* metaIoWorker);
+
 private:
     MetaFsIoRequest* _FetchPendingNewReq(void);
     void _CreateMioThread(void);
+    void _SetRequestCount(int count);
+    void _SetCurrentContext(MetaFsIoRequest* reqMsg);
+    void _ClearCurrentContext(void);
+    void _UpdateCurrentLpnToNextExtent(void);
+    void _UpdateCurrentExtent(void);
 
     std::vector<ScalableMetaIoWorker*> metaIoWorkerList_;
     const size_t TOTAL_CORE_COUNT;
-    const size_t MIO_CORE_COUNT;
     const cpu_set_t MIO_CORE_SET;
+    size_t mioCoreCount_;
     MetaFsConfigManager* config_;
     TelemetryPublisher* tp_;
     size_t cpuStallCnt_;
     const size_t MAX_CPU_STALL_COUNT = 1000;
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ;
+    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ_;
+    MetaFsIoRequest* currentReqMsg_;
+    FileSizeType chunkSize_;
+    MetaLpnType fileBaseLpn_;
+    MetaLpnType startLpn_;
+    MetaLpnType currentLpn_;
+    size_t requestCount_;
+    size_t remainCount_;
+    int extentsCount_;
+    int currentExtent_;
+    MetaFileExtent* extents_;
 };
 } // namespace pos

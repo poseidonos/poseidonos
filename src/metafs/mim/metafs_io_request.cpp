@@ -208,4 +208,33 @@ MetaFsIoRequest::GetLogString(void) const
     log.append(", priority: " + (int)priority);
     return log;
 }
+
+MetaLpnType
+MetaFsIoRequest::GetStartLpn(void) const
+{
+    MetaLpnType start = 0;
+    MetaLpnType offsetInLpn = byteOffsetInFile / fileCtx->chunkSize;
+
+    for (int i = 0; i < extentsCount; ++i)
+    {
+        int64_t result = offsetInLpn - extents[i].GetCount();
+        if (result < 0)
+        {
+            start = extents[i].GetStartLpn() + offsetInLpn;
+            break;
+        }
+        offsetInLpn -= extents[i].GetCount();
+    }
+
+    return start;
+}
+
+size_t
+MetaFsIoRequest::GetRequestLpnCount(void) const
+{
+    size_t startLpn = byteOffsetInFile / fileCtx->chunkSize;
+    size_t endLpn = (byteOffsetInFile + byteSize - 1) / fileCtx->chunkSize;
+
+    return endLpn - startLpn + 1;
+}
 } // namespace pos
