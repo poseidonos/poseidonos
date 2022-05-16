@@ -33,16 +33,17 @@
 #pragma once
 
 #include <string>
+
 #include "meta_storage_specific.h"
 #include "metafs_common.h"
 #include "metafs_mutex.h"
 #include "metafs_spinlock.h"
 #include "os_header.h"
-#include "src/metafs/include/meta_file_context.h"
 #include "src/bio/volume_io.h"
-#include "src/metafs/include/meta_file_extent.h"
-#include "src/metafs/common/metafs_stopwatch.h"
 #include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/common/metafs_stopwatch.h"
+#include "src/metafs/include/meta_file_context.h"
+#include "src/metafs/include/meta_file_extent.h"
 
 namespace pos
 {
@@ -85,6 +86,8 @@ enum class IoRequestStage
     Create,
     Enqueue,
     Dequeue,
+    EnqueueToRetryQ,
+    DequeueToRetryQ,
     Complete,
     Count
 };
@@ -111,6 +114,8 @@ public:
         return retryFlag;
     }
     virtual std::string GetLogString(void) const;
+    virtual MetaLpnType GetStartLpn(void) const;
+    virtual size_t GetRequestLpnCount(void) const;
 
     MetaIoRequestType reqType;
     MetaIoMode ioMode;

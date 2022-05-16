@@ -1,6 +1,8 @@
 #include "src/metafs/mim/metafs_io_request.h"
-#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
+
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 
 namespace pos
 {
@@ -268,5 +270,229 @@ TEST(MetaFsIoRequest, GetLogString_testIfTheStringIsCorrect)
     log.append(", priority: " + (int)req.priority);
     std::string result = req.GetLogString();
     EXPECT_EQ(result, log);
+}
+
+TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedAccordingToByteOffset)
+{
+    // given
+    MetaFileExtent extents;
+    extents.SetStartLpn(0);
+    extents.SetCount(1024);
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = 4032;
+    fileCtx.fileBaseLpn = 0;
+    fileCtx.extentsCount = 1;
+    fileCtx.extents = &extents;
+    MetaFsIoRequest* req = new MetaFsIoRequest;
+    req->fileCtx = &fileCtx;
+    req->extents = req->fileCtx->extents;
+    req->extentsCount = req->fileCtx->extentsCount;
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 0);
+
+    // when
+    req->byteOffsetInFile = 2016;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 0);
+
+    // when
+    req->byteOffsetInFile = 4032;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 1);
+
+    // when
+    req->byteOffsetInFile = 4032 + 2016;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 1);
+
+    delete req;
+}
+
+TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedNotAccordingToByteSize)
+{
+    // given
+    MetaFileExtent extents;
+    extents.SetStartLpn(0);
+    extents.SetCount(1024);
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = 4032;
+    fileCtx.fileBaseLpn = 0;
+    fileCtx.extentsCount = 1;
+    fileCtx.extents = &extents;
+    MetaFsIoRequest* req = new MetaFsIoRequest;
+    req->fileCtx = &fileCtx;
+    req->extents = req->fileCtx->extents;
+    req->extentsCount = req->fileCtx->extentsCount;
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 2016;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 0);
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 0);
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 4032 + 2016;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 0);
+
+    // when
+    req->byteOffsetInFile = 4032;
+    req->byteSize = 2016;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 1);
+
+    // when
+    req->byteOffsetInFile = 4032;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 1);
+
+    // when
+    req->byteOffsetInFile = 4032;
+    req->byteSize = 4032 + 2016;
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 1);
+
+    delete req;
+}
+
+TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedAccordingToByteOffsetInComplicatedCases)
+{
+    // given
+    MetaFileExtent extents[3];
+    extents[0].SetStartLpn(43082495);
+    extents[0].SetCount(1048);
+    extents[1].SetStartLpn(43085111);
+    extents[1].SetCount(2088);
+    extents[2].SetStartLpn(43089807);
+    extents[2].SetCount(512);
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = 4032;
+    fileCtx.fileBaseLpn = 43082495;
+    fileCtx.extentsCount = 3;
+    fileCtx.extents = &extents[0];
+    MetaFsIoRequest* req = new MetaFsIoRequest;
+    req->fileCtx = &fileCtx;
+    req->extents = req->fileCtx->extents;
+    req->extentsCount = req->fileCtx->extentsCount;
+
+    // when, 1st
+    req->byteOffsetInFile = 4032; // from 2nd lpn (43082495 + 1)
+    req->byteSize = 4032;         // to 2nd lpn (43082495 + 1)
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 43082495 + 1);
+
+    // when, 2nd
+    req->byteOffsetInFile = 4032 * 2; // from 3rd lpn (43082495 + 2)
+    req->byteSize = 4032 * 1024;      // to 1026th lpn (43082495 + 1025)
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 43082495 + 2);
+
+    // when, 3rd
+    req->byteOffsetInFile = 4032 * 1026; // from 1027th lpn (43082495 + 1026)
+    req->byteSize = 4032 * 1024;         // to 1002nd of next extent (43085111 + 1001)
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 43083521);
+
+    // when, 4th
+    req->byteOffsetInFile = 4032 * 2050; // from 1003rd lpn of 2nd extent (43085111 + 1002)
+    req->byteSize = 4032 * 1024;         // to 2026th of the extent (43085111 + 2025)
+
+    // then
+    EXPECT_EQ(req->GetStartLpn(), 43085111 + 1002);
+
+    delete req;
+}
+
+TEST(MetaFsIoRequest, GetRequestLpnCount_testIfTheCountOfLpnIsCorrect)
+{
+    // given
+    MetaFileContext fileCtx;
+    MetaFsIoRequest* req = new MetaFsIoRequest;
+    req->fileCtx = &fileCtx;
+    fileCtx.chunkSize = 4032;
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 2016;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 1);
+
+    // when
+    req->byteOffsetInFile = 2016;
+    req->byteSize = 2016;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 1);
+
+    // when
+    req->byteOffsetInFile = 0;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 1);
+
+    // when
+    req->byteOffsetInFile = 2016;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 2);
+
+    // when
+    req->byteOffsetInFile = 4032;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 1);
+
+    // when
+    req->byteOffsetInFile = 4031;
+    req->byteSize = 4032;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 2);
+
+    // when
+    req->byteOffsetInFile = 4031;
+    req->byteSize = 4033;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 2);
+
+    // when
+    req->byteOffsetInFile = 4031;
+    req->byteSize = 4034;
+
+    // then
+    EXPECT_EQ(req->GetRequestLpnCount(), 3);
 }
 } // namespace pos
