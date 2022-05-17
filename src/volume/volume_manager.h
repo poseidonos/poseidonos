@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 
 #include "src/volume/i_volume_manager.h"
@@ -109,6 +110,9 @@ private:
 
     IArrayInfo* arrayInfo;
     IStateControl* state;
+
+    std::mutex volumeEventLock;
+    std::mutex volumeExceptionLock;
 };
 
 } // namespace pos
