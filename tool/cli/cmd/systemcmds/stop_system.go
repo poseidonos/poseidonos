@@ -26,9 +26,9 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if stop_system_isForced == false {
-			conf := displaymgr.AskConfirmation("WARNING: Stopping POS will " +
-				"affect the progressing I/Os.\n\n" +
-				"Are you sure you want to stop POS?")
+			conf := displaymgr.AskConfirmation(
+				"WARNING: This may affect the I/O operations in progress!!! " +
+					"Do you really want to stop PoseidonOS?")
 			if conf == false {
 				os.Exit(0)
 			}

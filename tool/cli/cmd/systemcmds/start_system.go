@@ -37,6 +37,10 @@ Syntax:
 			log.Error("error:", err)
 		}
 
+		if globals.IsJSONReq != true {
+			fmt.Println("Launching PoseidonOS...")
+		}
+
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// TODO(mj): Here, we execute a script to run POS. This needs to be revised in the future.
@@ -57,7 +61,7 @@ Syntax:
 					`"description":"PoseidonOS has failed to start with error code: 11000"}}}`
 			} else {
 				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
-					`"description":"PoseidonOS has successfully started"}}}`
+					`"description":"Done! PoseidonOS has started!"}}}`
 			}
 
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
