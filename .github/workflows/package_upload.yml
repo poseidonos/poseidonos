@@ -1,5 +1,5 @@
 
-name: Package_Upload_Test
+name: Package_Upload
 
 on:
   workflow_run:
