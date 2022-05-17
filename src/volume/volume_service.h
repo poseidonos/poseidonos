@@ -35,7 +35,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "i_volume_manager.h"
+#include "src/volume/i_volume_manager.h"
 
 #include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"

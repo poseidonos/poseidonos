@@ -19,7 +19,7 @@
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
-#include "test/unit-tests/volume/i_volume_manager_mock.h"
+#include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -84,7 +84,7 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_TestVolumeMounted)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(5);
-    NiceMock<MockIVolumeManager>* volManager = new NiceMock<MockIVolumeManager>();
+    NiceMock<MockIVolumeInfoManager>* volManager = new NiceMock<MockIVolumeInfoManager>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
@@ -119,7 +119,7 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_TestVolumeUnmounted)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(5);
-    NiceMock<MockIVolumeManager>* volManager = new NiceMock<MockIVolumeManager>();
+    NiceMock<MockIVolumeInfoManager>* volManager = new NiceMock<MockIVolumeInfoManager>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
@@ -443,7 +443,7 @@ TEST(WBStripeManager, ReconstructActiveStripe_TestFunc)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(1);
     addrInfo.SetblksPerStripe(1);
-    NiceMock<MockIVolumeManager>* vol = new NiceMock<MockIVolumeManager>();
+    NiceMock<MockIVolumeInfoManager>* vol = new NiceMock<MockIVolumeInfoManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     WBStripeManagerSpy wbStripeManager(nullptr, 1, reverseMap, vol, nullptr, nullptr, &addrInfo, nullptr, nullptr, nullptr, "", 0);
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = UNMAP_OFFSET};

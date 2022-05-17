@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstdint>
+#include <thread>
 #include "src/debug/debug_info.h"
 
 namespace pos
@@ -71,5 +72,7 @@ private:
     TelemetryAirDelegator* telemetryAirDelegator = nullptr;
     TelemetryPublisher* telemtryPublisherForAir = nullptr;
     SignalHandler* signalHandler = nullptr;
+
+    std::thread *GrpcCliServerThread;
 };
 } // namespace pos

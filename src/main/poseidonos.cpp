@@ -63,6 +63,7 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/cli/grpc_cli_server.h"
 
 namespace pos
 {
@@ -354,6 +355,7 @@ void
 Poseidonos::_RunCLIService(void)
 {
     pos_cli::CLIServerMain();
+    GrpcCliServerThread = new std::thread(RunGrpcServer);
 }
 
 } // namespace pos

@@ -106,7 +106,7 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
             if (volMgr != nullptr)
             {
                 string volName;
-                ret = volMgr->VolumeName(volId, volName);
+                ret = volMgr->GetVolumeName(volId, volName);
                 if (ret != SUCCESS)
                 {
                     errorMessage = "Failed to delete subsystem. Failed to find volume name. Only some of volumes are unmounted.";

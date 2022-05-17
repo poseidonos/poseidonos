@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "test/unit-tests/volume/i_volume_manager_mock.h"
+#include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using ::testing::AtLeast;
 using ::testing::NiceMock;
@@ -23,7 +23,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
     testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
-    volumeManager = new NiceMock<MockIVolumeManager>();
+    volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
     writeTester = new LogWriteTestFixture(testMapper, arrayInfo, journal, testInfo);

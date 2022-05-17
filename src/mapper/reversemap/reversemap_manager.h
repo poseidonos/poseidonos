@@ -39,7 +39,7 @@
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/meta_file_intf/meta_file_include.h"
-#include "src/volume/i_volume_manager.h"
+#include "src/volume/i_volume_info_manager.h"
 
 namespace pos
 {
@@ -48,7 +48,7 @@ class ReverseMapManager : public IReverseMap
 {
 public:
     ReverseMapManager(void) = default;
-    ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_);
+    ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_);
     virtual ~ReverseMapManager(void);
 
     virtual void Init(void);
@@ -83,7 +83,7 @@ private:
 
     VSAMapManager* iVSAMap;
     IStripeMap* iStripeMap;
-    IVolumeManager* volumeManager;
+    IVolumeInfoManager* volumeManager;
     MapperAddressInfo* addrInfo;
 };
 

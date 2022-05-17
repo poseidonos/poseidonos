@@ -43,7 +43,7 @@
 namespace pos
 {
 using StripeVec = std::vector<Stripe*>;
-class IVolumeManager;
+class IVolumeInfoManager;
 class WBStripeManagerSpy : public WBStripeManager
 {
 public:

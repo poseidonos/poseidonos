@@ -448,7 +448,7 @@ CLIServer()
                 }
                 else if (cli_fd >= 0)
                 {
-                    POS_TRACE_INFO(EID(CLI_CLIENT_ACCEPTED), "fd:{}, client_ip:{}, client_port:{}",
+                    POS_TRACE_TRACE(EID(CLI_CLIENT_ACCEPTED), "fd:{}, client_ip:{}, client_port:{}",
                         cli_fd, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
 
                     sock_pool_t* clnt = AddClient(cli_fd);

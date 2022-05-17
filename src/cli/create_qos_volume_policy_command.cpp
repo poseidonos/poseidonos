@@ -127,7 +127,7 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
         string volName = doc["param"]["vol"][i]["volumeName"];
         volumeNames.push_back(volName);
     }
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
         errorMsg = "Invalid Array Name";
@@ -135,8 +135,8 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
     }
     for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
     {
-        validVol = volMgr->VolumeID(*vol);
-        if (-1 == validVol)
+        validVol = volMgr->CheckVolumeValidity(*vol);
+        if (EID(SUCCESS) != validVol)
         {
             errorMsg = "Invalid Volume Name " + (*vol);
             return false;
@@ -153,7 +153,7 @@ uint32_t
 QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 {
     int retVal = -1;
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
     {
         std::pair<string, uint32_t> volume = (*vol);

@@ -58,7 +58,7 @@ class IWBStripeAllocator;
 class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
-class IVolumeManager;
+class IVolumeInfoManager;
 
 class ReplayHandler
 {
@@ -71,7 +71,7 @@ public:
         JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
     virtual void Dispose(void);
 
     virtual int Start(void);
@@ -81,7 +81,7 @@ private:
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
     void _AddTask(ReplayTask* task);
     int _ExecuteReplayTasks(void);
 

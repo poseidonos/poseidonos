@@ -34,17 +34,18 @@
 
 #include <string>
 
-#include "src/volume/volume_list.h"
-#include "src/volume/volume_base.h"
-#include "src/qos/qos_common.h"
+#include "src/volume/i_volume_event_manager.h"
+#include "src/volume/i_volume_info_manager.h"
+#include "src/volume/i_volume_io_manager.h"
 
 namespace pos
 {
 class VolumeBase;
 
-class IVolumeManager
+class IVolumeManager : public IVolumeEventManager, public IVolumeInfoManager, public IVolumeIoManager
 {
 public:
+    public:
     virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
@@ -53,8 +54,8 @@ public:
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual void DetachVolumes(void) = 0;
 
-    virtual int VolumeName(int volId, std::string& volName) = 0;
-    virtual int VolumeID(std::string volName) = 0;
+    virtual int GetVolumeName(int volId, std::string& volName) = 0;
+    virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;
@@ -65,8 +66,8 @@ public:
 
     virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) = 0;
     virtual int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) = 0;
+    
     virtual VolumeBase* GetVolume(int volId) = 0;
-
     virtual std::string GetArrayName(void) = 0;
 };
 

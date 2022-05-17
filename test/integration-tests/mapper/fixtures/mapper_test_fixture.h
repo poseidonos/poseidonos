@@ -36,7 +36,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/mapper/mapper.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
-#include "src/volume/i_volume_manager.h"
+#include "src/volume/i_volume_info_manager.h"
 
 #include "test/integration-tests/mapper/utils/random_for_it.h"
 #include "test/integration-tests/mapper/test_doubles/array_info_mock.h"
@@ -97,7 +97,7 @@ protected:
     VSAMapManager* vsaMapManagerSUT;
     StripeMapManager* stripeMapManagerSUT;
     ReverseMapManager* reverseMapManagerSUT;
-    IVolumeManager* volManager;
+    IVolumeInfoManager* volManager;
 
     Allocator* allocator;
     MockVolumeManager* mockVolumeManager;

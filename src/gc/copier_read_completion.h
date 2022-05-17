@@ -42,7 +42,7 @@
 
 namespace pos
 {
-class IVolumeManager;
+class IVolumeIoManager;
 class EventScheduler;
 
 class CopierReadCompletion : public Callback
@@ -52,7 +52,7 @@ public:
                         void* buffer, CopierMeta* meta, uint32_t stripeId);
     CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
                         void* buffer, CopierMeta* meta, StripeId stripeId,
-                        EventSmartPtr inputFlushEvent, IVolumeManager* inputVolumeManager,
+                        EventSmartPtr inputFlushEvent, IVolumeIoManager* inputVolumeManager,
                         EventScheduler* inputEventScheduler);
     ~CopierReadCompletion(void) override;
 
@@ -72,7 +72,7 @@ private:
     uint32_t allocatedCnt;
 
     EventSmartPtr inputFlushEvent;
-    IVolumeManager* volumeManager;
+    IVolumeIoManager* volumeManager;
     EventScheduler* eventScheduler;
 };
 
