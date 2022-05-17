@@ -108,7 +108,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
             qosMsg = "Parameter setting skipped. Fe_qos is disabled.";
         }
 
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         if (volMgr != nullptr)

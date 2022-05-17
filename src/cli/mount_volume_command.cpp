@@ -88,7 +88,7 @@ MountVolumeCommand::Execute(json& doc, string rid)
                  "failed to mount volume:" + volName, GetPosInfo());
         }
 
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         int ret = FAIL;

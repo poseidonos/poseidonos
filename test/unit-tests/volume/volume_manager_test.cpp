@@ -274,7 +274,7 @@ TEST(VolumeManager, VolumeName_)
     volumeManager->StateChanged(nullptr, &nextState);
 
     int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
-    int actual = volumeManager->VolumeName(0, name);
+    int actual = volumeManager->GetVolumeName(0, name);
 
     ASSERT_EQ(actual, expected);
 
@@ -300,7 +300,7 @@ TEST(VolumeManager, VolumeID_)
 
     // Then
     int expected = -1;
-    int actual = volumeManager->VolumeID(name);
+    int actual = volumeManager->GetVolumeID(name);
 
     ASSERT_EQ(actual, expected);
 

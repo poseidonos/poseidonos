@@ -109,7 +109,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         }
         for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
         {
-            validVol = volMgr->VolumeID(*vol);
+            validVol = volMgr->GetVolumeID(*vol);
             if (-1 == validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);

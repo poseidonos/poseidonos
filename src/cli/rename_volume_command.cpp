@@ -64,7 +64,7 @@ RenameVolumeCommand::Execute(json& doc, string rid)
         string oldName = doc["param"]["name"].get<std::string>();
         string newName = doc["param"]["newname"].get<std::string>();
 
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         int ret = FAIL;

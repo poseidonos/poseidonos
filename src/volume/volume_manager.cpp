@@ -187,6 +187,16 @@ VolumeManager::Delete(std::string name)
 }
 
 int
+VolumeManager::CancelVolumeReplay(int volId)
+{
+    std::string volname;
+    GetVolumeName(volId, volname);
+    int ret = Delete(volname);
+
+    return ret;
+}
+
+int
 VolumeManager::Mount(std::string name, std::string subnqn)
 {
     int ret = _CheckPrerequisite();
@@ -236,6 +246,20 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeRenamer.Do(oldName, newName);
+}
+
+int
+VolumeManager::CheckVolumeValidity(std::string Name)
+{
+    VolumeBase* vol = volumes.GetVolume(Name);
+
+    if (vol == nullptr)
+    {
+        POS_TRACE_INFO(EID(VOL_NOT_FOUND), "volId: {}", vol->ID);
+        return EID(VOL_NOT_FOUND);
+    }
+
+    return EID(SUCCESS);
 }
 
 int
@@ -313,7 +337,7 @@ VolumeManager::DetachVolumes(void)
 }
 
 int
-VolumeManager::VolumeName(int volId, std::string& name)
+VolumeManager::GetVolumeName(int volId, std::string& name)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -328,7 +352,7 @@ VolumeManager::VolumeName(int volId, std::string& name)
 }
 
 int
-VolumeManager::VolumeID(std::string name)
+VolumeManager::GetVolumeID(std::string name)
 {
     return volumes.GetID(name);
 }

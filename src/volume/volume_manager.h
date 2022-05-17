@@ -66,17 +66,19 @@ public:
     void Dispose(void) override;
     void Shutdown(void) override;
     void Flush(void) override;
+
     int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) override;
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;
     int Unmount(std::string name) override;
     int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) override;
     int Rename(std::string oldname, std::string newname) override;
+    int CheckVolumeValidity(std::string name) override;
 
     void DetachVolumes(void) override;
 
-    int VolumeName(int volId, std::string& volName) override;
-    int VolumeID(std::string volName) override;
+    int GetVolumeName(int volId, std::string& volName) override;
+    int GetVolumeID(std::string volName) override;
     int GetVolumeCount(void) override;
     int GetVolumeStatus(int volId) override;
     int CheckVolumeValidity(int volId) override;
@@ -84,12 +86,14 @@ public:
     int GetVolumeSize(int volId, uint64_t& volSize) override;
     VolumeList* GetVolumeList(void) override;
     std::string GetStatusStr(VolumeStatus status) override;
+    int CancelVolumeReplay(int volId) override;
 
     int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) override;
     int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) override;
     VolumeBase* GetVolume(int volId) override;
-    void StateChanged(StateContext* prev, StateContext* next) override;
     std::string GetArrayName(void) override;
+
+    void StateChanged(StateContext* prev, StateContext* next) override;
 
 private:
     int _LoadVolumes(void);

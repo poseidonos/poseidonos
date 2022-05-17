@@ -47,7 +47,7 @@ using namespace std;
 namespace pos
 {
 class IMountSequence;
-class VolumeManager;
+class IVolumeManager;
 
 class ArrayMountSequence : public IStateObserver
 {

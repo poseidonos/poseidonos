@@ -69,8 +69,8 @@ WriteReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
     BlkOffset offset = static_cast<BlkOffset>(std::stoull(argv["offset"].get<std::string>()));
     BlkAddr rba = static_cast<BlkAddr>(std::stoull(argv["rba"].get<std::string>()));
 
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    int volId = volMgr->VolumeID(argv["name"].get<std::string>());
+    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    int volId = volMgr->GetVolumeID(argv["name"].get<std::string>());
 
     if (volId < 0)
     {

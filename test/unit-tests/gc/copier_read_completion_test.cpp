@@ -18,7 +18,7 @@
 #include <test/unit-tests/utils/mock_builder.h>
 
 #include <test/unit-tests/gc/gc_flush_submission_mock.h>
-#include <test/unit-tests/volume/i_volume_manager_mock.h>
+#include <test/unit-tests/volume/i_volume_io_manager_mock.h>
 #include <test/unit-tests/event_scheduler/event_scheduler_mock.h>
 
 #include "test/unit-tests/resource_manager/buffer_pool_mock.h"
@@ -100,7 +100,7 @@ public:
         inputFlushEvent = std::make_shared<MockGcFlushSubmission>(
                 array->GetName(), blkInfoList, testVolumeId, dataBuffer, gcStripeManager,
                 nullptr, nullptr, nullptr, nullptr, nullptr);
-        inputVolumeManager = new NiceMock<MockIVolumeManager>();
+        inputVolumeManager = new NiceMock<MockIVolumeIoManager>();
         inputEventScheduler = new NiceMock<MockEventScheduler>;
 
         dataBuffer = new GcWriteBuffer();
@@ -145,7 +145,7 @@ protected:
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockIReverseMap>* iReverseMap;
     NiceMock<MockVictimStripe>* victimStripe;
-    NiceMock<MockIVolumeManager>* inputVolumeManager;
+    NiceMock<MockIVolumeIoManager>* inputVolumeManager;
     NiceMock<MockEventScheduler>* inputEventScheduler;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
