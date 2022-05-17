@@ -81,7 +81,7 @@ class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
 class IStateControl;
-class IVolumeManager;
+class IVolumeInfoManager;
 class MetaFsFileControlApi;
 class EventScheduler;
 class TelemetryPublisher;
@@ -118,7 +118,7 @@ public:
     virtual int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
-        IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+        IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
         EventScheduler* eventScheduler, TelemetryClient* tc);
 
     virtual void Dispose(void);
@@ -140,7 +140,7 @@ protected:
         IMapFlush* mapFlush,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
-        IVolumeManager* volumeManager, EventScheduler* eventScheduler);
+        IVolumeInfoManager* volumeManager, EventScheduler* eventScheduler);
     void _DisposeModules(void);
     void _ResetModules(void);
 

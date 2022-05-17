@@ -12,7 +12,7 @@
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
 #include <test/unit-tests/mapper/i_stripemap_mock.h>
-#include <test/unit-tests/volume/i_volume_manager_mock.h>
+#include <test/unit-tests/volume/i_volume_io_manager_mock.h>
 #include <test/unit-tests/gc/reverse_map_load_completion_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 
@@ -43,7 +43,7 @@ public:
         reverseMap = new NiceMock<MockIReverseMap>;
         vsaMap = new NiceMock<MockIVSAMap>;
         stripeMap = new NiceMock<MockIStripeMap>;
-        volumeManager = new NiceMock<MockIVolumeManager>;
+        volumeManager = new NiceMock<MockIVolumeIoManager>;
         reverseMapLoadCompletionPtr = std::make_shared<NiceMock<MockReverseMapLoadCompletion>>();
 
         EXPECT_CALL(*array, GetSizeInfo(PartitionType::USER_DATA)).WillOnce(Return((const PartitionLogicalSize*)&partitionLogicalSize));
@@ -82,7 +82,7 @@ protected:
     NiceMock<MockIReverseMap>* reverseMap;
     NiceMock<MockIVSAMap>* vsaMap;
     NiceMock<MockIStripeMap>* stripeMap;
-    NiceMock<MockIVolumeManager>* volumeManager;
+    NiceMock<MockIVolumeIoManager>* volumeManager;
     CallbackSmartPtr reverseMapLoadCompletionPtr;
 
     PartitionLogicalSize partitionLogicalSize = {

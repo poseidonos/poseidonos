@@ -43,7 +43,7 @@
 namespace pos
 {
 ReplayVolumeDeletion::ReplayVolumeDeletion(LogDeleteChecker* logDeleteChecker,
-    IContextManager* contextManager, IVolumeManager* volumeManager, ReplayProgressReporter* reporter)
+    IContextManager* contextManager, IVolumeInfoManager* volumeManager, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
   deleteChecker(logDeleteChecker),
   contextManager(contextManager),
@@ -67,9 +67,7 @@ ReplayVolumeDeletion::Start(void)
             int result = volumeManager->CheckVolumeValidity(vol.volumeId);
             if (result == EID(SUCCESS))
             {
-                std::string volname;
-                volumeManager->VolumeName(vol.volumeId, volname);
-                result = volumeManager->Delete(volname);
+                result = volumeManager->CancelVolumeReplay(vol.volumeId);
 
                 if (result == 0)
                 {

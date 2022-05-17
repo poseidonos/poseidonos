@@ -41,6 +41,20 @@ When PoseidonOS records event logs in JSON form, it is called structured logging
 [2022-03-04 15:56:08.557557315][23198][23302][78442531][1207][ info  ]     CLI_CLIENT_DISCONNECTED - A client has been disconnected., cause: , solution:, variables:fd:655, source: cli_server.cpp:168 RemoveClient(), pos_version: v0.10.6
 ```
 
+### Event Level
+PoseidonOS has the follwing event level structure:
+
+#### Severity ####
+debug < info < trace < warning < error < critical
+
+#### Description
+- Debug: this event is for debugging purpose.
+- Info: this event is a normal, high-level operation.
+- Trace: this event describes normal, lower-level operations with more details.
+- Warning: this event indicates that input from the user is errorneous, or the system is not working properly.
+- Error: this event indicates that an operation has failed because of an internal error.
+- Critical: this event indicates that a severe failure has occured. When this event occurs, the system may be not available.
+
 ### JSON form (when structured logging is on)
 ```json
 {"datetime":"2022-03-04 15:54:01.407056341","process_id":19646,"thread_id":19985,"pos_id":80861475,"event_id":1207,"level":"info","description":{"event_name:":"CLI_CLIENT_DISCONNECTED","message":"A client has been disconnected.","cause":"","solution":"","variables":"fd:655"},"source":"cli_server.cpp","line":"168","function":"RemoveClient","pos_version":"v0.10.6"},

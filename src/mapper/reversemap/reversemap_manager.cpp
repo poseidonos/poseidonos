@@ -41,7 +41,7 @@
 
 namespace pos
 {
-ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_)
+ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
