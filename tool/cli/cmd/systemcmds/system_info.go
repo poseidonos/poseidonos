@@ -41,7 +41,7 @@ Syntax:
 			}
 		} else {
 			if !(globals.IsTestingReqBld) {
-				res, err := grpcmgr.SendReqAndReceiveRes(req)
+				res, err := grpcmgr.SendSystemInfoRpc(req)
 				if err != nil {
 					log.Fatalf("could not send request: %v", err)
 				}

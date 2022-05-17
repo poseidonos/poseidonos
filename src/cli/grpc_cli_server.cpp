@@ -22,6 +22,14 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  Status SystemStop(ServerContext* context, const SystemStopRequest* request,
+                  SystemStopResponse* reply) override {
+
+    Status status = pc->ExecuteSystemStopCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {

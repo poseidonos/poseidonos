@@ -1084,6 +1084,10 @@ class PosEventInfoEntry
 static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
     {
         // map<eventId, PosEventInfoEntry(eventName, message, cause)>
+        {(int)POS_EVENT_ID::STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS,
+            new PosEventInfoEntry("STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS",
+                "Failed to terminate PoseidonOS", "At least one array is being mounted",
+                "Please try the command after a while")},
         {(int)POS_EVENT_ID::CLI_SERVER_INITIALIZED,
             new PosEventInfoEntry("CLI_SERVER_INITIALIZED",
                 "The CLI server has been initialized successfully.", "", "")},

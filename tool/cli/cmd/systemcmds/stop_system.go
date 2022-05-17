@@ -1,16 +1,17 @@
 package systemcmds
 
 import (
-	"encoding/json"
 	"os"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var StopSystemCmd = &cobra.Command{
@@ -34,22 +35,28 @@ Syntax:
 		}
 
 		var command = "STOPPOS"
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReq(command, uuid)
+		req := &pb.SystemStopRequest{Command: command, Rid: uuid, Requestor: "cli"}
 
-		reqJSON, err := json.Marshal(req)
-		if err != nil {
-			log.Error("error:", err)
-		}
+		if globals.EnableGrpc == false {
+			reqJSON := protojson.Format(req)
 
-		displaymgr.PrintRequest(string(reqJSON))
+			displaymgr.PrintRequest(string(reqJSON))
 
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			// Do not send request to server and print response when testing request build.
+			if !(globals.IsTestingReqBld) {
+				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			}
+		} else {
+			if !(globals.IsTestingReqBld) {
+				res, err := grpcmgr.SendSystemStopRpc(req)
+				if err != nil {
+					log.Fatalf("could not send request: %v", err)
+				}
+				displaymgr.PrintResponse(command, protojson.Format(res), globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			}
 		}
 	},
 }
