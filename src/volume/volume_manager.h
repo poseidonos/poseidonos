@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 
 #include "src/volume/i_volume_manager.h"
@@ -95,6 +96,9 @@ public:
     std::string GetArrayName(void) override;
 
     void StateChanged(StateContext* prev, StateContext* next) override;
+
+    std::mutex volumeEventLock;
+    std::mutex volumeDetachLock;
 
 private:
     int _LoadVolumes(void);

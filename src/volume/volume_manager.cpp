@@ -154,18 +154,21 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
 int
 VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw)
 {
-    if (initialized == false)
-    {
-        int eid = EID(CREATE_VOL_CAN_ONLY_BE_WHILE_ONLINE);
-        POS_TRACE_WARN(eid, "array_name: {}, vol_name: {}", arrayInfo->GetName(), name);
-        return eid;
-    }
-
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
     {
         return ret;
     }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
+    }
+
+
     VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     // setting default values for miniops and minbw
     uint64_t defaultMinIops = 0;
@@ -180,6 +183,14 @@ VolumeManager::Delete(std::string name)
     if (ret != EID(SUCCESS))
     {
         return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
     }
 
     VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
@@ -205,6 +216,14 @@ VolumeManager::Mount(std::string name, std::string subnqn)
         return ret;
     }
 
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
+    }
+
     VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeMounter.Do(name, subnqn);
 }
@@ -216,6 +235,14 @@ VolumeManager::Unmount(std::string name)
     if (ret != EID(SUCCESS))
     {
         return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
     }
 
     VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
@@ -231,6 +258,14 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
         return ret;
     }
 
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
+    }
+
     VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
 }
@@ -242,6 +277,14 @@ VolumeManager::Rename(std::string oldName, std::string newName)
     if (ret != EID(SUCCESS))
     {
         return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+
+    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    {
+        return EID(VOL_MGR_BUSY);
     }
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
@@ -347,6 +390,8 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
 void
 VolumeManager::DetachVolumes(void)
 {
+    volumeDetachLock.lock();
+
     VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     volumeDetacher.DoAll();
 }
@@ -400,7 +445,14 @@ VolumeManager::StateChanged(StateContext* prev, StateContext* next)
 int
 VolumeManager::_CheckPrerequisite(void)
 {
-    if (stopped == true)
+    if (initialized == false)
+    {
+        int eid = EID(VOL_MGR_NOT_INITIALIZED);
+        POS_TRACE_WARN(eid, "volume manager was not initialized");
+        return eid;
+    }
+
+    if ((stopped == true) || (arrayInfo->GetState() == ArrayStateEnum::BROKEN))
     {
         POS_TRACE_WARN(EID(VOL_REQ_REJECTED_IN_BROKEN_ARRAY),
             "array_name: {}", GetArrayName());

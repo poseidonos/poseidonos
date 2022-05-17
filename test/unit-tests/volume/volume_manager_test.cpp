@@ -68,7 +68,7 @@ TEST(VolumeManager, CreateVolume_testFailedToCreateVolIfArrayIsNotMounted)
     // When
     VolumeManager* volumeManager = new VolumeManager(iArrayInfo, iState);
 
-    int expected = (int)POS_EVENT_ID::CREATE_VOL_CAN_ONLY_BE_WHILE_ONLINE;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->Create(name, size, maxIops, maxBw);
 
     ASSERT_EQ(actual, expected);
@@ -97,7 +97,7 @@ TEST(VolumeManager, Delete_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->Delete(name);
 
     ASSERT_EQ(actual, expected);
@@ -126,7 +126,7 @@ TEST(VolumeManager, Mount_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->Mount(name, subnqn);
 
     ASSERT_EQ(actual, expected);
@@ -155,7 +155,7 @@ TEST(VolumeManager, Unmount_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->Unmount(name);
 
     ASSERT_EQ(actual, expected);
@@ -186,7 +186,7 @@ TEST(VolumeManager, UpdateQoS_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->UpdateQoS(name, maxIops, maxBw, minIops, minBw);
 
     ASSERT_EQ(actual, expected);
@@ -215,7 +215,7 @@ TEST(VolumeManager, Rename_)
     StateContext nextState(owner, SituationEnum::FAULT);
     volumeManager->StateChanged(nullptr, &nextState);
 
-    int expected = (int)POS_EVENT_ID::VOL_REQ_REJECTED_IN_BROKEN_ARRAY;
+    int expected = (int)POS_EVENT_ID::VOL_MGR_NOT_INITIALIZED;
     int actual = volumeManager->Rename(name, newName);
 
     ASSERT_EQ(actual, expected);
