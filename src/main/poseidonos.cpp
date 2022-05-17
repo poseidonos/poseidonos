@@ -112,6 +112,7 @@ Poseidonos::Terminate(void)
     QosManagerSingleton::Instance()->FinalizeSpdkManager();
     QosManagerSingleton::ResetInstance();
     FlushCmdManagerSingleton::ResetInstance();
+    SmartLogMgrSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler* submitHandler = static_cast<IOSubmitHandler*>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
