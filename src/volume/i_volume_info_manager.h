@@ -45,8 +45,8 @@ class VolumeBase;
 class IVolumeInfoManager
 {
 public:
-    virtual int VolumeName(int volId, std::string& volName) = 0;
-    virtual int VolumeID(std::string volName) = 0;
+    virtual int GetVolumeName(int volId, std::string& volName) = 0;
+    virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;

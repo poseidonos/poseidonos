@@ -35,7 +35,7 @@ TEST(ReplayVolumeDeletion, Start_testIfVolumeNotDeletedWhenVersionIsUpdatedToNew
     ON_CALL(logDeleteChecker, GetDeletedVolumes).WillByDefault(Return(deletedVolumes));
 
     ON_CALL(volumeManager, GetVolumeStatus(volId)).WillByDefault(Return(0));
-    EXPECT_CALL(volumeManager, VolumeName(volId, _)).WillRepeatedly(SetArgReferee<1>(volname));
+    EXPECT_CALL(volumeManager, GetVolumeName(volId, _)).WillRepeatedly(SetArgReferee<1>(volname));
 
     // Then
     EXPECT_CALL(volumeManager, CancelVolumeReplay(volId)).WillOnce(Return(0));

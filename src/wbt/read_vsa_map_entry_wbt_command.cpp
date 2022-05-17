@@ -67,7 +67,7 @@ ReadVsaMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     std::string coutfile = "output.txt";
     IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    int volId = volMgr->VolumeID(argv["name"].get<std::string>());
+    int volId = volMgr->GetVolumeID(argv["name"].get<std::string>());
 
     if (volId < 0)
     {

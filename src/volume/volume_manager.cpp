@@ -190,7 +190,7 @@ int
 VolumeManager::CancelVolumeReplay(int volId)
 {
     std::string volname;
-    VolumeName(volId, volname);
+    GetVolumeName(volId, volname);
     int ret = Delete(volname);
 
     return ret;
@@ -337,7 +337,7 @@ VolumeManager::DetachVolumes(void)
 }
 
 int
-VolumeManager::VolumeName(int volId, std::string& name)
+VolumeManager::GetVolumeName(int volId, std::string& name)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -352,7 +352,7 @@ VolumeManager::VolumeName(int volId, std::string& name)
 }
 
 int
-VolumeManager::VolumeID(std::string name)
+VolumeManager::GetVolumeID(std::string name)
 {
     return volumes.GetID(name);
 }

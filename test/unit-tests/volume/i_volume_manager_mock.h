@@ -19,8 +19,8 @@ public:
     MOCK_METHOD(int, UpdateQoS, (std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw), (override));
     MOCK_METHOD(int, Rename, (std::string oldname, std::string newname), (override));
     MOCK_METHOD(void, DetachVolumes, (), (override));
-    MOCK_METHOD(int, VolumeName, (int volId, std::string& volName), (override));
-    MOCK_METHOD(int, VolumeID, (std::string volName), (override));
+    MOCK_METHOD(int, GetVolumeName, (int volId, std::string& volName), (override));
+    MOCK_METHOD(int, GetVolumeID, (std::string volName), (override));
     MOCK_METHOD(int, GetVolumeCount, (), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
     MOCK_METHOD(int, GetVolumeStatus, (int volId), (override));

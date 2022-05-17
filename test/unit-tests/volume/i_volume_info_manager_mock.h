@@ -12,8 +12,8 @@ class MockIVolumeInfoManager : public IVolumeInfoManager
 {
 public:
     using IVolumeInfoManager::IVolumeInfoManager;
-    MOCK_METHOD(int, VolumeName, (int volId, std::string& volName), (override));
-    MOCK_METHOD(int, VolumeID, (std::string volName), (override));
+    MOCK_METHOD(int, GetVolumeName, (int volId, std::string& volName), (override));
+    MOCK_METHOD(int, GetVolumeID, (std::string volName), (override));
     MOCK_METHOD(int, GetVolumeCount, (), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
     MOCK_METHOD(int, GetVolumeStatus, (int volId), (override));

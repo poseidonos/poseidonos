@@ -99,7 +99,7 @@ VolumeInfoCommand::Execute(json& doc, string rid)
                 GetPosInfo());
     }
 
-    VolumeBase* vol = volMgr->GetVolume(volMgr->VolumeID(volumeName));
+    VolumeBase* vol = volMgr->GetVolume(volMgr->GetVolumeID(volumeName));
 
     if (vol == nullptr)
     {

@@ -77,8 +77,8 @@ public:
 
     void DetachVolumes(void) override;
 
-    int VolumeName(int volId, std::string& volName) override;
-    int VolumeID(std::string volName) override;
+    int GetVolumeName(int volId, std::string& volName) override;
+    int GetVolumeID(std::string volName) override;
     int GetVolumeCount(void) override;
     int GetVolumeStatus(int volId) override;
     int CheckVolumeValidity(int volId) override;

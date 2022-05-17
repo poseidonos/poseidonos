@@ -70,7 +70,7 @@ WriteReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
     BlkAddr rba = static_cast<BlkAddr>(std::stoull(argv["rba"].get<std::string>()));
 
     IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    int volId = volMgr->VolumeID(argv["name"].get<std::string>());
+    int volId = volMgr->GetVolumeID(argv["name"].get<std::string>());
 
     if (volId < 0)
     {
