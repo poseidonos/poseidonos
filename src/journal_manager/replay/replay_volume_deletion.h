@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/journal_manager/replay/replay_task.h"
-#include "src/volume/i_volume_manager.h"
+#include "src/volume/i_volume_info_manager.h"
 
 namespace pos
 {
@@ -44,7 +44,7 @@ class ReplayVolumeDeletion : public ReplayTask
 {
 public:
     ReplayVolumeDeletion(LogDeleteChecker* logDeleteChecker, IContextManager* contextManager,
-        IVolumeManager* volumeManager, ReplayProgressReporter* reporter);
+        IVolumeInfoManager* volumeManager, ReplayProgressReporter* reporter);
     virtual ~ReplayVolumeDeletion(void) = default;
 
     virtual int Start(void) override;
@@ -55,6 +55,6 @@ public:
 private:
     LogDeleteChecker* deleteChecker;
     IContextManager* contextManager;
-    IVolumeManager* volumeManager;
+    IVolumeInfoManager* volumeManager;
 };
 } // namespace pos

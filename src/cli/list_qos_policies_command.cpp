@@ -128,7 +128,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         }
         for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
         {
-            validVol = volMgr->VolumeID(*vol);
+            validVol = volMgr->GetVolumeID(*vol);
             if (-1 == validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
@@ -142,7 +142,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         for (auto vol = volumeIds.begin(); vol != volumeIds.end(); vol++)
         {
             volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(*vol, arrayName);
-            volMgr->VolumeName(*vol, volName);
+            volMgr->GetVolumeName(*vol, volName);
             JsonElement volume("");
             volume.SetAttribute(JsonAttribute("name", "\"" + volName + "\""));
             volume.SetAttribute(JsonAttribute("id", to_string(*vol)));

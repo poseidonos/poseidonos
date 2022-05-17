@@ -84,7 +84,7 @@ DeleteVolumeCommand::Execute(json& doc, string rid)
                  "failed to delete volume: " + volName, GetPosInfo());
         }
 
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         if (volMgr != nullptr)

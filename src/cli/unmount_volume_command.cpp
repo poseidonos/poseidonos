@@ -62,7 +62,7 @@ UnmountVolumeCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("name"))
     {
         string volName = doc["param"]["name"].get<std::string>();
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         int ret = FAIL;

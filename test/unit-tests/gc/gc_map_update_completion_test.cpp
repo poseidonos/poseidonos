@@ -15,7 +15,7 @@
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
-#include <test/unit-tests/volume/i_volume_manager_mock.h>
+#include <test/unit-tests/volume/i_volume_io_manager_mock.h>
 
 #include "test/unit-tests/resource_manager/memory_manager_mock.h"
 
@@ -65,7 +65,7 @@ public:
 
         contextManager = new NiceMock<MockIContextManager>;
         blockAllocator = new NiceMock<MockIBlockAllocator>;
-        volumeManager = new NiceMock<MockIVolumeManager>;
+        volumeManager = new NiceMock<MockIVolumeIoManager>;
     }
 
     virtual void
@@ -105,7 +105,7 @@ protected:
     NiceMock<MockIContextManager>* contextManager;
     NiceMock<MockIBlockAllocator>* blockAllocator;
 
-    NiceMock<MockIVolumeManager>* volumeManager;
+    NiceMock<MockIVolumeIoManager>* volumeManager;
     MockMemoryManager* memoryManager;
 
     GcStripeMapUpdateList mapUpdateInfoList;

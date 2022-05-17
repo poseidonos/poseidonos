@@ -68,7 +68,7 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayNa
                                             EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
                                             IArrayInfo* inputIArrayInfo,
                                             RBAStateManager* inputRbaStateManager,
-                                            IVolumeManager* inputVolumeManager)
+                                            IVolumeIoManager* inputVolumeManager)
 : Callback(false),
   stripe(stripe),
   arrayName(arrayName),

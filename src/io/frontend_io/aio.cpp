@@ -175,7 +175,7 @@ AioCompletion::_SendUserCompletion(void)
     }
     else
     {
-        IVolumeManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayId());
+        IVolumeIoManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayId());
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
             volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());

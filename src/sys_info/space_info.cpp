@@ -87,7 +87,7 @@ uint64_t
 SpaceInfo::Used(std::string& arrayName)
 {
     uint64_t usedSize = 0;
-    IVolumeManager* volMgr =
+    IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
     if (volMgr != nullptr)

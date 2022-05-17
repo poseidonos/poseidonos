@@ -29,8 +29,7 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "i_volume_manager.h"
+#include "volume_service.h"
 
 #include <string>
 
@@ -38,7 +37,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/volume/volume_service.h"
 
 namespace pos
 {

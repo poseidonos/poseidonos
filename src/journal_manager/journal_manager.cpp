@@ -203,7 +203,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
-    IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+    IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
     EventScheduler* eventScheduler, TelemetryClient* tc)
 {
     int result = 0;
@@ -389,7 +389,7 @@ void
 JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-    IContextReplayer* contextReplayer, IVolumeManager* volumeManager,
+    IContextReplayer* contextReplayer, IVolumeInfoManager* volumeManager,
     EventScheduler* eventScheduler)
 {
     telemetryClient = tc;

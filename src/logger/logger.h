@@ -235,6 +235,9 @@ reporter()
 #define POS_TRACE_INFO_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, static_cast<int>(eventid), __VA_ARGS__)
 
+#define POS_TRACE_TRACE_IN_MEMORY(dumpmodule, eventid, ...) \
+    logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__)
+
 #define POS_TRACE_WARN_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__)
 
@@ -249,6 +252,9 @@ reporter()
 
 #define POS_TRACE_INFO(eventid, ...) \
     logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, static_cast<int>(eventid), __VA_ARGS__)
+
+#define POS_TRACE_TRACE(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__)
 
 #define POS_TRACE_WARN(eventid, ...) \
     logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__)

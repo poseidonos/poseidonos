@@ -41,7 +41,7 @@ protected:
     AllocatorMock* testAllocator;
     ArrayInfoMock* arrayInfo;
     StateSubscriptionMock* stateSub;
-    IVolumeManager* volumeManager;
+    IVolumeInfoManager* volumeManager;
     MockTelemetryPublisher* telemetryPublisher;
     MockTelemetryClient* telemetryClient;
 

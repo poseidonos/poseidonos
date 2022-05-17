@@ -117,7 +117,7 @@ UNVMfSubmitHandler(struct pos_io* io)
 
         QosManager* qosManager = QosManagerSingleton::Instance();
 
-        IVolumeManager* volumeManager
+        IVolumeIoManager* volumeManager
             = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
 
         AIO aio;

@@ -57,7 +57,7 @@ const int NUM_ENTRIES = REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE; // 21
 
 class MetaFileIntf;
 class Stripe;
-class IVolumeManager;
+class IVolumeInfoManager;
 
 // The first page can have 21 * (16 - 1) == 315 entries
 // since the second page, it has 21 * 16 = 336 entries
