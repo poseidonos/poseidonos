@@ -35,4 +35,5 @@ make_dashboard_link()
 }
 
 check_environment_variable
+
 make_dashboard_link
