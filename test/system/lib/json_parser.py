@@ -1,13 +1,8 @@
 import json
 
 def get_response_code(result):
-    output = []
-    code = 0
-    output = result.splitlines()
-    output_count = len(output)
-    for i in range(0, output_count):
-        data = json.loads(output[i])
-        code |= data['Response']['result']['status']['code']
+    data = json.loads(result)
+    code = data['Response']['result']['status']['code']
     return code
 
 def get_data_code(result):
