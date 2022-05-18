@@ -11,6 +11,8 @@ using grpc::Status;
 using grpc_cli::PosCli;
 using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
+using grpc_cli::SystemStopRequest;
+using grpc_cli::SystemStopResponse;
 
 CommandProcessor* pc;
 
@@ -19,6 +21,14 @@ class PosCliServiceImpl final : public PosCli::Service {
                   SystemInfoResponse* reply) override {
 
     Status status = pc->ExecuteSystemInfoCommand(request, reply);
+    
+    return status;
+  }
+
+  Status SystemStop(ServerContext* context, const SystemStopRequest* request,
+                  SystemStopResponse* reply) override {
+
+    Status status = pc->ExecuteSystemStopCommand(request, reply);
     
     return status;
   }

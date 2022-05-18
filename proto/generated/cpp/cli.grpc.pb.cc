@@ -23,6 +23,7 @@ namespace grpc_cli {
 
 static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/SystemInfo",
+  "/grpc_cli.PosCli/SystemStop",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -33,6 +34,7 @@ std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::Ch
 
 PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
   : channel_(channel), rpcmethod_SystemInfo_(PosCli_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SystemStop_(PosCli_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -58,6 +60,29 @@ void PosCli::Stub::experimental_async::SystemInfo(::grpc::ClientContext* context
   return result;
 }
 
+::grpc::Status PosCli::Stub::SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc_cli::SystemStopResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SystemStop_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SystemStop_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SystemStop_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>* PosCli::Stub::PrepareAsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::SystemStopResponse, ::grpc_cli::SystemStopRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SystemStop_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>* PosCli::Stub::AsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSystemStopRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -69,12 +94,29 @@ PosCli::Service::Service() {
              ::grpc_cli::SystemInfoResponse* resp) {
                return service->SystemInfo(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::SystemStopRequest* req,
+             ::grpc_cli::SystemStopResponse* resp) {
+               return service->SystemStop(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::SystemInfo(::grpc::ServerContext* context, const ::grpc_cli::SystemInfoRequest* request, ::grpc_cli::SystemInfoResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::SystemStop(::grpc::ServerContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response) {
   (void) context;
   (void) request;
   (void) response;

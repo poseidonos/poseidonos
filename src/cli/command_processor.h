@@ -37,13 +37,23 @@
 #include <string>
 
 using grpc::Status;
+using grpc::StatusCode;
 using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
+using grpc_cli::SystemStopRequest;
+using grpc_cli::SystemStopResponse;
 
 class CommandProcessor
 {
 public:
     CommandProcessor(void);
     ~CommandProcessor(void);
+    void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
     Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
+    Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
+
+private:
+    bool _isPosTerminating;
+    bool _IsPosTerminating(void) { return _isPosTerminating; }
+    void _SetPosTerminating(bool input) { _isPosTerminating = input; }
 };
