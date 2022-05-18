@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Make Dashboard Link for Workflow 
       run: |
-        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
+        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" ESTIMATED_EXECUTION_TIME=$((1*60*60)) bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
 
     - name: Upload Dashboard Link
       uses: actions/upload-artifact@v3
