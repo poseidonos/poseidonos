@@ -102,7 +102,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
 
     wbStripeReplayer.Update(activeStripe);
 
-    // Then : Will restore the active stipre tail to this stripe
+    // Then : Will restore the active stripe tail to this stripe
     ExpectReconstructActiveStripe(&wbStripeAllocator, activeStripe, 0);
     ExpectRestoreActiveStripeTail(&contextReplayer, activeStripe);
 
