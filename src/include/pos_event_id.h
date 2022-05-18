@@ -549,6 +549,15 @@ enum class POS_EVENT_ID
     GC_CANNOT_CREATE_COPIER = 3429,
     GC_ERROR_MSG = 3430,
     GC_RELEASE_VICTIM_SEGMENT = 3431,
+    GC_THRESHOLD_CHECK_DISABLE = 3432,
+
+    // --------------WBT GC (3470)----------------
+    GC_WBT_START = 3470,
+    GC_WBT_ARGUMENT_ERROR = GC_WBT_START,
+    GC_WBT_INVALID_ARRAY_NAME = 3471,
+    GC_WBT_CANNOT_ENABLE = 3472,
+    GC_WBT_CANNOT_START = 3473,
+    GC_WBT_UNNECESSARY_GC = 3474,
 
     // --------------Flow control (3500)----------------
     FC_START = 3500,

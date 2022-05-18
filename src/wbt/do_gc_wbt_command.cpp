@@ -51,8 +51,10 @@ int
 DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     int returnValue = -1;
+
     if (!argv.contains("array"))
     {
+        POS_TRACE_ERROR(EID(GC_WBT_ARGUMENT_ERROR), "argv doesn't contain array.");
         return returnValue;
     }
     std::string arrayName = argv["array"].get<std::string>();
@@ -60,6 +62,7 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     if (gc == nullptr)
     {
+        POS_TRACE_ERROR(EID(GC_WBT_INVALID_ARRAY_NAME), "arrayName : {} is not available", arrayName);
         return returnValue;
     }
 
@@ -67,6 +70,7 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     if (0 != isEnabled)
     {
+        POS_TRACE_ERROR(EID(GC_WBT_CANNOT_ENABLE), "Failed to enable GC");
         return returnValue;
     }
 
@@ -74,6 +78,7 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     if (0 != gcStarted)
     {
+        POS_TRACE_ERROR(EID(GC_WBT_CANNOT_START), "Failed to start GC");
         return returnValue;
     }
 
@@ -82,6 +87,7 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     if (UNMAP_SEGMENT == victimId)
     {
+        POS_TRACE_INFO(EID(GC_WBT_UNNECESSARY_GC), "No segment to select as GC victim");
         return returnValue;
     }
 
