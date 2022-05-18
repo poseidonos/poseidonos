@@ -174,7 +174,7 @@ TEST_F(VolumeTest, RenameNormalTest)
     volMgr->Create(old_vol_name, SIZE, 0, 0);
     int res = volMgr->Rename(old_vol_name, new_vol_name);
     EXPECT_TRUE(res == EID(SUCCESS));
-    res = volMgr->VolumeID(new_vol_name);
+    res = volMgr->GetVolumeID(new_vol_name);
     EXPECT_TRUE(res == 0);
 
     // cleanup for next test
@@ -322,21 +322,21 @@ TEST_F(VolumeTest, VolumeIDNormalTest)
 {
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     volMgr->Create("testvol_id0", SIZE, 0, 0);
-    EXPECT_EQ(0, volMgr->VolumeID("testvol_id0"));
+    EXPECT_EQ(0, volMgr->GetVolumeID("testvol_id0"));
 
     volMgr->Create("testvol_id1", SIZE, 0, 0);
-    EXPECT_EQ(1, volMgr->VolumeID("testvol_id1"));
+    EXPECT_EQ(1, volMgr->GetVolumeID("testvol_id1"));
 
     volMgr->Create("testvol_id2", SIZE, 0, 0);
-    EXPECT_EQ(2, volMgr->VolumeID("testvol_id2"));
+    EXPECT_EQ(2, volMgr->GetVolumeID("testvol_id2"));
 
     volMgr->Delete("testvol_id1");
 
     volMgr->Create("testvol_id1_again", SIZE, 0, 0);
-    EXPECT_EQ(1, volMgr->VolumeID("testvol_id1_again"));
+    EXPECT_EQ(1, volMgr->GetVolumeID("testvol_id1_again"));
 
     volMgr->Delete("testvol_id0");
 
     volMgr->Create("testvol_id0_again", SIZE, 0, 0);
-    EXPECT_EQ(0, volMgr->VolumeID("testvol_id0_again"));
+    EXPECT_EQ(0, volMgr->GetVolumeID("testvol_id0_again"));
 }

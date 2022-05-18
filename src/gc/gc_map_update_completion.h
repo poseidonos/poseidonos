@@ -52,7 +52,7 @@ class EventScheduler;
 class GcStripeManager;
 class IArrayInfo;
 class RBAStateManager;
-class IVolumeManager;
+class IVolumeIoManager;
 
 class GcMapUpdateCompletion : public Callback
 {
@@ -63,7 +63,7 @@ public:
                         EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
                         IArrayInfo* inputIArrayInfo,
                         RBAStateManager* inputRbaStateManager,
-                        IVolumeManager* inputVolumeManager);
+                        IVolumeIoManager* inputVolumeManager);
     ~GcMapUpdateCompletion(void) override;
 
 private:
@@ -79,7 +79,7 @@ private:
 
     IArrayInfo* iArrayInfo;
     RBAStateManager* rbaStateManager;
-    IVolumeManager* volumeManager;
+    IVolumeIoManager* volumeManager;
 };
 
 } // namespace pos

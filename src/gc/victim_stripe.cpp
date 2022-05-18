@@ -57,7 +57,7 @@ VictimStripe::VictimStripe(IArrayInfo* array,
                         IReverseMap* inputRevMap,
                         IVSAMap* inputIVSAMap,
                         IStripeMap* inputIStripeMap,
-                        IVolumeManager* inputVolumeManager)
+                        IVolumeIoManager* inputVolumeManager)
 : myLsid(UNMAP_STRIPE),
   dataBlks(0),
   chunkIndex(0),

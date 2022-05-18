@@ -45,7 +45,7 @@
 
 namespace pos
 {
-class IVolumeManager;
+class IVolumeInfoManager;
 class IReverseMap;
 class BufferPool;
 class AllocatorCtx;
@@ -57,7 +57,7 @@ class WBStripeManager : public IWBStripeAllocator
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager,
+    WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeInfoManager* VolManager,
         IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr,
         BlockManager* blkMgr, StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance(), EventScheduler* eventScheduler = nullptr);
@@ -112,7 +112,7 @@ protected:
     TelemetryPublisher* tp;
     std::string arrayName;
     int arrayId;
-    IVolumeManager* volumeManager;
+    IVolumeInfoManager* volumeManager;
     IReverseMap* iReverseMap;
     uint32_t numVolumes;
     MemoryManager* memoryManager;

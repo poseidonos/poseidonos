@@ -53,7 +53,7 @@
 namespace pos
 {
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_,
-    IVolumeManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_,
+    IVolumeInfoManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_,
     AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
     StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
     MemoryManager* memoryManager, EventScheduler* eventSchedulerArg)

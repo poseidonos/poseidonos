@@ -60,7 +60,7 @@ ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)
 {
     config = journalConfiguration;
     logBuffer = journalLogBuffer;
@@ -73,7 +73,7 @@ void
 ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)
 {
     _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
     _AddTask(new ReplayLogs(logList, logDeleteChecker, vsaMap, stripeMap, segmentCtx,

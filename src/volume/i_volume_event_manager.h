@@ -32,77 +32,27 @@
 
 #pragma once
 
-#include <vector>
-#include <list>
+#include <string>
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/mapper/i_reversemap.h"
-#include "src/mapper/reversemap/reverse_map.h"
-#include "src/volume/i_volume_io_manager.h"
-
-using namespace std;
+#include "src/volume/volume_list.h"
+#include "src/volume/volume_base.h"
+#include "src/qos/qos_common.h"
 
 namespace pos
 {
-struct BlkInfo
-{
-    BlkAddr rba;
-    uint32_t volID;
-    VirtualBlkAddr vsa;
-};
+class VolumeBase;
 
-class ReverseMapPack;
-class IVSAMap;
-class IStripeMap;
-class IVolumeInfoManager;
-
-class VictimStripe
+class IVolumeEventManager
 {
 public:
-    explicit VictimStripe(IArrayInfo* array);
-    VictimStripe(IArrayInfo* array,
-                IReverseMap* inputRevMap,
-                IVSAMap* inputIVSAMap,
-                IStripeMap* inputIStripeMap,
-                IVolumeIoManager* inputVolumeManager);
-
-    virtual ~VictimStripe(void);
-    virtual void Load(StripeId _lsid, CallbackSmartPtr callback);
-
-    virtual list<BlkInfo>&
-    GetBlkInfoList(uint32_t index)
-    {
-        return validBlkInfos[index];
-    };
-
-    virtual uint32_t
-    GetBlkInfoListSize(void)
-    {
-        return validBlkInfos.size();
-    };
-
-    virtual bool LoadValidBlock(void);
-
-private:
-    void _InitValue(StripeId _lsid);
-    void _LoadReverseMap(CallbackSmartPtr callback);
-
-    StripeId myLsid;
-    vector<list<BlkInfo>> validBlkInfos;
-    list<BlkInfo> blkInfoList;
-
-    uint32_t dataBlks;
-    uint32_t chunkIndex;
-    uint32_t blockOffset;
-    uint32_t validBlockCnt;
-    bool isLoaded;
-
-    IArrayInfo* array;
-    IReverseMap* iReverseMap;
-    IVSAMap* iVSAMap;
-    IStripeMap* iStripeMap;
-    IVolumeIoManager* volumeManager;
-    ReverseMapPack* revMapPack;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) = 0;
+    virtual int Delete(std::string name) = 0;
+    virtual int Mount(std::string name, std::string subnqn) = 0;
+    virtual int Unmount(std::string name) = 0;
+    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int Rename(std::string oldname, std::string newname) = 0;
+    virtual void DetachVolumes(void) = 0;
+    virtual int CheckVolumeValidity(std::string name) = 0;
 };
 
 } // namespace pos
