@@ -11,6 +11,8 @@ using grpc::Status;
 using grpc_cli::PosCli;
 using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
+using grpc_cli::SystemStopRequest;
+using grpc_cli::SystemStopResponse;
 
 CommandProcessor* pc;
 

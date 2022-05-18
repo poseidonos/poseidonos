@@ -38,25 +38,29 @@ Syntax:
 		uuid := globals.GenerateUUID()
 
 		req := &pb.SystemStopRequest{Command: command, Rid: uuid, Requestor: "cli"}
+		reqJSON, err := protojson.Marshal(req)
+		if err != nil {
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
+		}
 
-		if globals.EnableGrpc == false {
-			reqJSON := protojson.Format(req)
+		displaymgr.PrintRequest(string(reqJSON))
 
-			displaymgr.PrintRequest(string(reqJSON))
+		// Do not send request to server and print response when testing request build.
+		if !(globals.IsTestingReqBld) {
+			var resJSON string
 
-			// Do not send request to server and print response when testing request build.
-			if !(globals.IsTestingReqBld) {
-				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-				displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-			}
-		} else {
-			if !(globals.IsTestingReqBld) {
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
 				res, err := grpcmgr.SendSystemStopRpc(req)
+				resByte, err := protojson.Marshal(res)
 				if err != nil {
-					log.Fatalf("could not send request: %v", err)
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
-				displaymgr.PrintResponse(command, protojson.Format(res), globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+				resJSON = string(resByte)
 			}
+
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

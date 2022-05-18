@@ -10,11 +10,6 @@ def get_response_code(result):
         code |= data['Response']['result']['status']['code']
     return code
 
-def get_response_code_from_grpc_json(result):
-    data = json.loads(result)
-    code = data['Response']['result']['status']['code']
-    return code
-
 def get_data_code(result):
     data = json.loads(result)
     code = data['Response']['result']['data']['returnCode']
