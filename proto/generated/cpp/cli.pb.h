@@ -219,6 +219,10 @@ class Status PROTOBUF_FINAL :
     kCodeFieldNumber = 1,
   };
   // string event_name = 2;
+  bool has_event_name() const;
+  private:
+  bool _internal_has_event_name() const;
+  public:
   void clear_event_name();
   const std::string& event_name() const;
   void set_event_name(const std::string& value);
@@ -235,6 +239,10 @@ class Status PROTOBUF_FINAL :
   public:
 
   // string description = 3;
+  bool has_description() const;
+  private:
+  bool _internal_has_description() const;
+  public:
   void clear_description();
   const std::string& description() const;
   void set_description(const std::string& value);
@@ -251,6 +259,10 @@ class Status PROTOBUF_FINAL :
   public:
 
   // string cause = 4;
+  bool has_cause() const;
+  private:
+  bool _internal_has_cause() const;
+  public:
   void clear_cause();
   const std::string& cause() const;
   void set_cause(const std::string& value);
@@ -267,6 +279,10 @@ class Status PROTOBUF_FINAL :
   public:
 
   // string solution = 5;
+  bool has_solution() const;
+  private:
+  bool _internal_has_solution() const;
+  public:
   void clear_solution();
   const std::string& solution() const;
   void set_solution(const std::string& value);
@@ -283,6 +299,10 @@ class Status PROTOBUF_FINAL :
   public:
 
   // int32 code = 1;
+  bool has_code() const;
+  private:
+  bool _internal_has_code() const;
+  public:
   void clear_code();
   ::PROTOBUF_NAMESPACE_ID::int32 code() const;
   void set_code(::PROTOBUF_NAMESPACE_ID::int32 value);
@@ -298,12 +318,13 @@ class Status PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr event_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr description_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr cause_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr solution_;
   ::PROTOBUF_NAMESPACE_ID::int32 code_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1688,8 +1709,16 @@ class SystemStopResponse PROTOBUF_FINAL :
 // Status
 
 // int32 code = 1;
+inline bool Status::_internal_has_code() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool Status::has_code() const {
+  return _internal_has_code();
+}
 inline void Status::clear_code() {
   code_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 Status::_internal_code() const {
   return code_;
@@ -1699,7 +1728,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 Status::code() const {
   return _internal_code();
 }
 inline void Status::_internal_set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
+  _has_bits_[0] |= 0x00000010u;
   code_ = value;
 }
 inline void Status::set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -1708,8 +1737,16 @@ inline void Status::set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
 }
 
 // string event_name = 2;
+inline bool Status::_internal_has_event_name() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool Status::has_event_name() const {
+  return _internal_has_event_name();
+}
 inline void Status::clear_event_name() {
   event_name_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& Status::event_name() const {
   // @@protoc_insertion_point(field_get:grpc_cli.Status.event_name)
@@ -1727,41 +1764,45 @@ inline const std::string& Status::_internal_event_name() const {
   return event_name_.Get();
 }
 inline void Status::_internal_set_event_name(const std::string& value) {
-  
+  _has_bits_[0] |= 0x00000001u;
   event_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void Status::set_event_name(std::string&& value) {
-  
+  _has_bits_[0] |= 0x00000001u;
   event_name_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Status.event_name)
 }
 inline void Status::set_event_name(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  
+  _has_bits_[0] |= 0x00000001u;
   event_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:grpc_cli.Status.event_name)
 }
 inline void Status::set_event_name(const char* value,
     size_t size) {
-  
+  _has_bits_[0] |= 0x00000001u;
   event_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:grpc_cli.Status.event_name)
 }
 inline std::string* Status::_internal_mutable_event_name() {
-  
+  _has_bits_[0] |= 0x00000001u;
   return event_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* Status::release_event_name() {
   // @@protoc_insertion_point(field_release:grpc_cli.Status.event_name)
-  return event_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (!_internal_has_event_name()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return event_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void Status::set_allocated_event_name(std::string* event_name) {
   if (event_name != nullptr) {
-    
+    _has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _has_bits_[0] &= ~0x00000001u;
   }
   event_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), event_name,
       GetArena());
@@ -1769,8 +1810,16 @@ inline void Status::set_allocated_event_name(std::string* event_name) {
 }
 
 // string description = 3;
+inline bool Status::_internal_has_description() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool Status::has_description() const {
+  return _internal_has_description();
+}
 inline void Status::clear_description() {
   description_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& Status::description() const {
   // @@protoc_insertion_point(field_get:grpc_cli.Status.description)
@@ -1788,41 +1837,45 @@ inline const std::string& Status::_internal_description() const {
   return description_.Get();
 }
 inline void Status::_internal_set_description(const std::string& value) {
-  
+  _has_bits_[0] |= 0x00000002u;
   description_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void Status::set_description(std::string&& value) {
-  
+  _has_bits_[0] |= 0x00000002u;
   description_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Status.description)
 }
 inline void Status::set_description(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  
+  _has_bits_[0] |= 0x00000002u;
   description_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:grpc_cli.Status.description)
 }
 inline void Status::set_description(const char* value,
     size_t size) {
-  
+  _has_bits_[0] |= 0x00000002u;
   description_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:grpc_cli.Status.description)
 }
 inline std::string* Status::_internal_mutable_description() {
-  
+  _has_bits_[0] |= 0x00000002u;
   return description_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* Status::release_description() {
   // @@protoc_insertion_point(field_release:grpc_cli.Status.description)
-  return description_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (!_internal_has_description()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return description_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void Status::set_allocated_description(std::string* description) {
   if (description != nullptr) {
-    
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _has_bits_[0] &= ~0x00000002u;
   }
   description_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), description,
       GetArena());
@@ -1830,8 +1883,16 @@ inline void Status::set_allocated_description(std::string* description) {
 }
 
 // string cause = 4;
+inline bool Status::_internal_has_cause() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool Status::has_cause() const {
+  return _internal_has_cause();
+}
 inline void Status::clear_cause() {
   cause_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const std::string& Status::cause() const {
   // @@protoc_insertion_point(field_get:grpc_cli.Status.cause)
@@ -1849,41 +1910,45 @@ inline const std::string& Status::_internal_cause() const {
   return cause_.Get();
 }
 inline void Status::_internal_set_cause(const std::string& value) {
-  
+  _has_bits_[0] |= 0x00000004u;
   cause_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void Status::set_cause(std::string&& value) {
-  
+  _has_bits_[0] |= 0x00000004u;
   cause_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Status.cause)
 }
 inline void Status::set_cause(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  
+  _has_bits_[0] |= 0x00000004u;
   cause_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:grpc_cli.Status.cause)
 }
 inline void Status::set_cause(const char* value,
     size_t size) {
-  
+  _has_bits_[0] |= 0x00000004u;
   cause_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:grpc_cli.Status.cause)
 }
 inline std::string* Status::_internal_mutable_cause() {
-  
+  _has_bits_[0] |= 0x00000004u;
   return cause_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* Status::release_cause() {
   // @@protoc_insertion_point(field_release:grpc_cli.Status.cause)
-  return cause_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (!_internal_has_cause()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return cause_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void Status::set_allocated_cause(std::string* cause) {
   if (cause != nullptr) {
-    
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    
+    _has_bits_[0] &= ~0x00000004u;
   }
   cause_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), cause,
       GetArena());
@@ -1891,8 +1956,16 @@ inline void Status::set_allocated_cause(std::string* cause) {
 }
 
 // string solution = 5;
+inline bool Status::_internal_has_solution() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool Status::has_solution() const {
+  return _internal_has_solution();
+}
 inline void Status::clear_solution() {
   solution_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline const std::string& Status::solution() const {
   // @@protoc_insertion_point(field_get:grpc_cli.Status.solution)
@@ -1910,41 +1983,45 @@ inline const std::string& Status::_internal_solution() const {
   return solution_.Get();
 }
 inline void Status::_internal_set_solution(const std::string& value) {
-  
+  _has_bits_[0] |= 0x00000008u;
   solution_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void Status::set_solution(std::string&& value) {
-  
+  _has_bits_[0] |= 0x00000008u;
   solution_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Status.solution)
 }
 inline void Status::set_solution(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  
+  _has_bits_[0] |= 0x00000008u;
   solution_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:grpc_cli.Status.solution)
 }
 inline void Status::set_solution(const char* value,
     size_t size) {
-  
+  _has_bits_[0] |= 0x00000008u;
   solution_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:grpc_cli.Status.solution)
 }
 inline std::string* Status::_internal_mutable_solution() {
-  
+  _has_bits_[0] |= 0x00000008u;
   return solution_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* Status::release_solution() {
   // @@protoc_insertion_point(field_release:grpc_cli.Status.solution)
-  return solution_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (!_internal_has_solution()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000008u;
+  return solution_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void Status::set_allocated_solution(std::string* solution) {
   if (solution != nullptr) {
-    
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    
+    _has_bits_[0] &= ~0x00000008u;
   }
   solution_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), solution,
       GetArena());

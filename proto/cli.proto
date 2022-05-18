@@ -20,11 +20,11 @@ service PosCli {
 }
 
 message Status {
-	int32 code = 1;
-	string event_name = 2;
-	string description = 3;
-	string cause = 4;
-	string solution = 5;
+	optional int32 code = 1;
+	optional string event_name = 2;
+	optional string description = 3;
+	optional string cause = 4;
+	optional string solution = 5;
 }
 
 message PosInfo {

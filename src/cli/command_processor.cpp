@@ -31,6 +31,8 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
     reply->mutable_info()->set_version(version);
     reply->mutable_result()->mutable_data()->set_version(version);
+    reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
+    reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
 
     return Status::OK;
 }
@@ -82,13 +84,15 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     {
         _SetPosTerminating(true);
         pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
-        reply->mutable_result()->mutable_status()->set_code(SUCCESS);
+        reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
+        reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
         reply->mutable_result()->mutable_status()->set_description(
             "PoseidonOS will terminate soon.");
     }
     else
     {
-        reply->mutable_result()->mutable_status()->set_code(SUCCESS);
+        reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
+        reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
         reply->mutable_result()->mutable_status()->set_description(
             "PoseidonOS is already being terminated.");
     }

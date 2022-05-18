@@ -146,7 +146,7 @@ static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_cli_2eproto = nullptr;
 
 const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Status, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Status, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -156,6 +156,11 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Status, description_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Status, cause_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Status, solution_),
+  4,
+  0,
+  1,
+  2,
+  3,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::PosInfo, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -217,15 +222,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, info_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, sizeof(::grpc_cli::Status)},
-  { 10, -1, sizeof(::grpc_cli::PosInfo)},
-  { 16, -1, sizeof(::grpc_cli::SystemInfoRequest)},
-  { 24, -1, sizeof(::grpc_cli::SystemInfoResponse_Result_Data)},
-  { 30, -1, sizeof(::grpc_cli::SystemInfoResponse_Result)},
-  { 37, -1, sizeof(::grpc_cli::SystemInfoResponse)},
-  { 46, -1, sizeof(::grpc_cli::SystemStopRequest)},
-  { 54, -1, sizeof(::grpc_cli::SystemStopResponse_Result)},
-  { 60, -1, sizeof(::grpc_cli::SystemStopResponse)},
+  { 0, 10, sizeof(::grpc_cli::Status)},
+  { 15, -1, sizeof(::grpc_cli::PosInfo)},
+  { 21, -1, sizeof(::grpc_cli::SystemInfoRequest)},
+  { 29, -1, sizeof(::grpc_cli::SystemInfoResponse_Result_Data)},
+  { 35, -1, sizeof(::grpc_cli::SystemInfoResponse_Result)},
+  { 42, -1, sizeof(::grpc_cli::SystemInfoResponse)},
+  { 51, -1, sizeof(::grpc_cli::SystemStopRequest)},
+  { 59, -1, sizeof(::grpc_cli::SystemStopResponse_Result)},
+  { 65, -1, sizeof(::grpc_cli::SystemStopResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -242,37 +247,39 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\tcli.proto\022\010grpc_cli\032\021annotations.proto"
-  "\"`\n\006Status\022\014\n\004code\030\001 \001(\005\022\022\n\nevent_name\030\002"
-  " \001(\t\022\023\n\013description\030\003 \001(\t\022\r\n\005cause\030\004 \001(\t"
-  "\022\020\n\010solution\030\005 \001(\t\"\032\n\007PosInfo\022\017\n\007version"
-  "\030\001 \001(\t\"D\n\021SystemInfoRequest\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\205\002\n"
-  "\022SystemInfoResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003"
-  "rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.Sys"
-  "temInfoResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
-  "rpc_cli.PosInfo\032{\n\006Result\022 \n\006status\030\001 \001("
-  "\0132\020.grpc_cli.Status\0226\n\004data\030\002 \001(\0132(.grpc"
-  "_cli.SystemInfoResponse.Result.Data\032\027\n\004D"
-  "ata\022\017\n\007version\030\001 \001(\t\"D\n\021SystemStopReques"
-  "t\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treque"
-  "stor\030\003 \001(\t\"\264\001\n\022SystemStopResponse\022\017\n\007com"
-  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132"
-  "#.grpc_cli.SystemStopResponse.Result\022\037\n\004"
-  "info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022"
-  " \n\006status\030\001 \001(\0132\020.grpc_cli.Status2\312\001\n\006Po"
-  "sCli\022_\n\nSystemInfo\022\033.grpc_cli.SystemInfo"
-  "Request\032\034.grpc_cli.SystemInfoResponse\"\026\202"
-  "\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSystemStop\022\033.gr"
-  "pc_cli.SystemStopRequest\032\034.grpc_cli.Syst"
-  "emStopResponse\"\026\202\323\344\223\002\020\022\016/v1/systemstopB\t"
-  "Z\007cli/apib\006proto3"
+  "\"\270\001\n\006Status\022\021\n\004code\030\001 \001(\005H\000\210\001\001\022\027\n\nevent_"
+  "name\030\002 \001(\tH\001\210\001\001\022\030\n\013description\030\003 \001(\tH\002\210\001"
+  "\001\022\022\n\005cause\030\004 \001(\tH\003\210\001\001\022\025\n\010solution\030\005 \001(\tH"
+  "\004\210\001\001B\007\n\005_codeB\r\n\013_event_nameB\016\n\014_descrip"
+  "tionB\010\n\006_causeB\013\n\t_solution\"\032\n\007PosInfo\022\017"
+  "\n\007version\030\001 \001(\t\"D\n\021SystemInfoRequest\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030"
+  "\003 \001(\t\"\205\002\n\022SystemInfoResponse\022\017\n\007command\030"
+  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grp"
+  "c_cli.SystemInfoResponse.Result\022\037\n\004info\030"
+  "\004 \001(\0132\021.grpc_cli.PosInfo\032{\n\006Result\022 \n\006st"
+  "atus\030\001 \001(\0132\020.grpc_cli.Status\0226\n\004data\030\002 \001"
+  "(\0132(.grpc_cli.SystemInfoResponse.Result."
+  "Data\032\027\n\004Data\022\017\n\007version\030\001 \001(\t\"D\n\021SystemS"
+  "topRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t"
+  "\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022SystemStopRespon"
+  "se\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006resu"
+  "lt\030\003 \001(\0132#.grpc_cli.SystemStopResponse.R"
+  "esult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*"
+  "\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Stat"
+  "us2\312\001\n\006PosCli\022_\n\nSystemInfo\022\033.grpc_cli.S"
+  "ystemInfoRequest\032\034.grpc_cli.SystemInfoRe"
+  "sponse\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSystem"
+  "Stop\022\033.grpc_cli.SystemStopRequest\032\034.grpc"
+  "_cli.SystemStopResponse\"\026\202\323\344\223\002\020\022\016/v1/sys"
+  "temstopB\tZ\007cli/apib\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 977, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  false, false, 1066, descriptor_table_protodef_cli_2eproto, "cli.proto", 
   &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 9,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
@@ -291,6 +298,22 @@ namespace grpc_cli {
 
 class Status::_Internal {
  public:
+  using HasBits = decltype(std::declval<Status>()._has_bits_);
+  static void set_has_code(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_event_name(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_description(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_cause(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_solution(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
 };
 
 Status::Status(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -300,25 +323,26 @@ Status::Status(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   // @@protoc_insertion_point(arena_constructor:grpc_cli.Status)
 }
 Status::Status(const Status& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   event_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_event_name().empty()) {
+  if (from._internal_has_event_name()) {
     event_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_event_name(), 
       GetArena());
   }
   description_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_description().empty()) {
+  if (from._internal_has_description()) {
     description_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_description(), 
       GetArena());
   }
   cause_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_cause().empty()) {
+  if (from._internal_has_cause()) {
     cause_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_cause(), 
       GetArena());
   }
   solution_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_solution().empty()) {
+  if (from._internal_has_solution()) {
     solution_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_solution(), 
       GetArena());
   }
@@ -364,16 +388,29 @@ void Status::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  event_name_.ClearToEmpty();
-  description_.ClearToEmpty();
-  cause_.ClearToEmpty();
-  solution_.ClearToEmpty();
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      event_name_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      description_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      cause_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      solution_.ClearNonDefaultToEmpty();
+    }
+  }
   code_ = 0;
+  _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* Status::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
@@ -382,6 +419,7 @@ const char* Status::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
       // int32 code = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_code(&has_bits);
           code_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -437,6 +475,7 @@ const char* Status::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
     }  // switch
   }  // while
 success:
+  _has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -451,13 +490,13 @@ failure:
   (void) cached_has_bits;
 
   // int32 code = 1;
-  if (this->code() != 0) {
+  if (_internal_has_code()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_code(), target);
   }
 
   // string event_name = 2;
-  if (this->event_name().size() > 0) {
+  if (_internal_has_event_name()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_event_name().data(), static_cast<int>(this->_internal_event_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -467,7 +506,7 @@ failure:
   }
 
   // string description = 3;
-  if (this->description().size() > 0) {
+  if (_internal_has_description()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_description().data(), static_cast<int>(this->_internal_description().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -477,7 +516,7 @@ failure:
   }
 
   // string cause = 4;
-  if (this->cause().size() > 0) {
+  if (_internal_has_cause()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_cause().data(), static_cast<int>(this->_internal_cause().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -487,7 +526,7 @@ failure:
   }
 
   // string solution = 5;
-  if (this->solution().size() > 0) {
+  if (_internal_has_solution()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_solution().data(), static_cast<int>(this->_internal_solution().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -512,41 +551,44 @@ size_t Status::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string event_name = 2;
-  if (this->event_name().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_event_name());
-  }
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000001fu) {
+    // string event_name = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_event_name());
+    }
 
-  // string description = 3;
-  if (this->description().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_description());
-  }
+    // string description = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_description());
+    }
 
-  // string cause = 4;
-  if (this->cause().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_cause());
-  }
+    // string cause = 4;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_cause());
+    }
 
-  // string solution = 5;
-  if (this->solution().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_solution());
-  }
+    // string solution = 5;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_solution());
+    }
 
-  // int32 code = 1;
-  if (this->code() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_code());
-  }
+    // int32 code = 1;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_code());
+    }
 
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -578,20 +620,24 @@ void Status::MergeFrom(const Status& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.event_name().size() > 0) {
-    _internal_set_event_name(from._internal_event_name());
-  }
-  if (from.description().size() > 0) {
-    _internal_set_description(from._internal_description());
-  }
-  if (from.cause().size() > 0) {
-    _internal_set_cause(from._internal_cause());
-  }
-  if (from.solution().size() > 0) {
-    _internal_set_solution(from._internal_solution());
-  }
-  if (from.code() != 0) {
-    _internal_set_code(from._internal_code());
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x0000001fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_event_name(from._internal_event_name());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_description(from._internal_description());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_cause(from._internal_cause());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_set_solution(from._internal_solution());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      code_ = from.code_;
+    }
+    _has_bits_[0] |= cached_has_bits;
   }
 }
 
@@ -616,6 +662,7 @@ bool Status::IsInitialized() const {
 void Status::InternalSwap(Status* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
   event_name_.Swap(&other->event_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   description_.Swap(&other->description_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   cause_.Swap(&other->cause_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
