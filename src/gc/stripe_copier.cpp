@@ -36,7 +36,6 @@
 #include <string>
 
 #include "Air.h"
-#include "src/bio/ubio.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_read_completion.h"
 #include "src/include/backend_event.h"
@@ -199,8 +198,7 @@ StripeCopier::CopyEvent::Execute(void)
 
     iIOSubmitHandler->SubmitAsyncIO(IODirection::READ,
         bufferList, lsa, numPage,
-        partitionType, callback, arrayIndex,
-        false);
+        partitionType, callback, arrayIndex);
     return true;
 }
 

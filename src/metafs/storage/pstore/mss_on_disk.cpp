@@ -36,7 +36,6 @@
 #include <list>
 #include <utility>
 
-#include "src/bio/ubio.h"
 #include "src/include/array_config.h"
 #include "src/metafs/config/metafs_config.h"
 #include "src/metafs/log/metafs_log.h"
@@ -346,8 +345,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     do
     {
         ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
-            blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId,
-            false);
+            blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId);
 
         if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
             ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)

@@ -38,7 +38,6 @@
 #include "src/array/ft/buffer_entry.h"
 #include "src/array/service/io_locker/i_io_locker.h"
 #include "src/array/service/io_translator/i_io_translator.h"
-#include "src/bio/ubio.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 #include "src/include/pos_event_id.h"
@@ -65,7 +64,6 @@ private:
 
     IOSubmitHandlerStatus _CheckAsyncWriteError(int arrayId);
     UbioSmartPtr _SetupUbio(int arrayId, bool needTrim, BufferEntry& buffer,
-        PhysicalBlkAddr addr, CallbackSmartPtr arrayUnlocking,
-        CallbackSmartPtr callback);
+        PhysicalBlkAddr addr, CallbackSmartPtr arrayUnlocking, CallbackSmartPtr callback);
 };
 } // namespace pos

@@ -67,7 +67,7 @@ IOSubmitHandler::SyncIO(
     CallbackSmartPtr callback(new SyncIoCompletion(needToWait, errorCount));
 
     IOSubmitHandlerStatus errorToReturn = SubmitAsyncIO(direction, bufferList,
-        startLSA, blockCount, partitionToIO, callback, arrayId, false);
+        startLSA, blockCount, partitionToIO, callback, arrayId);
 
     if (IOSubmitHandlerStatus::SUCCESS == errorToReturn ||
         IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorToReturn)

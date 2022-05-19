@@ -121,7 +121,6 @@ MergedIO::Process(int arrayId)
         event->SetCallee(callback);
         ubio->SetCallback(event);
         ubio->SetEventType(callback->GetEventType());
-
         if (ioDispatcher->Submit(ubio) < 0)
         {
             IOSubmitHandlerStatus status =

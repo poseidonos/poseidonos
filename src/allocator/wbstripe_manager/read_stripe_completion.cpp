@@ -34,7 +34,6 @@
 
 #include <stdlib.h>
 
-#include "src/bio/ubio.h"
 #include "src/include/meta_const.h"
 #include "src/logger/logger.h"
 
@@ -73,8 +72,7 @@ ReadStripeCompletion::_DoSpecificJob(void)
         // we should be submitting (a single buffer, a single write address) if the partition of the destination is WRITE_BUFFER.
         result = ioSubmitHandler->SubmitAsyncIO(IODirection::WRITE,
             bufferList, writeAddr, blockCount,
-            PartitionType::WRITE_BUFFER, doneCallback, arrayId,
-            false);
+            PartitionType::WRITE_BUFFER, doneCallback, arrayId);
         if (result != IOSubmitHandlerStatus::SUCCESS && result != IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
         {
             POS_TRACE_ERROR(result, "Failed to submit async write I/O when copying a stripe {} from SSD to Write Buffer.", writeAddr.stripeId);

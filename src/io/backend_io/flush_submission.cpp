@@ -37,7 +37,6 @@
 
 #include "src/array/service/array_service_layer.h"
 #include "src/array_mgmt/array_manager.h"
-#include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/include/backend_event.h"
