@@ -32,160 +32,103 @@
 
 #include "src/metafs/mim/mio.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
+
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-TEST(MioStateExecuteEntry, MioStateExecuteEntry_)
+using MioStateHandler = std::function<bool(MioState)>;
+
+class MioStateExecuteEntryTexture : public ::testing::Test
 {
+public:
+    MioStateExecuteEntryTexture(void)
+    {
+    }
+    ~MioStateExecuteEntryTexture(void)
+    {
+    }
+    virtual void SetUp(void) override
+    {
+        entry = nullptr;
+        result = false;
+    }
+    virtual void TearDown(void) override
+    {
+        if (entry)
+            delete entry;
+    }
+    bool CallbackTest(MioState st)
+    {
+        if (state == st)
+            result = true;
+
+        return true;
+    }
+
+protected:
+    MioState state;
+    MioStateHandler handler;
+    MioState expNextState;
+    bool result;
+
+    MioStateExecuteEntry* entry;
+};
+
+TEST_F(MioStateExecuteEntryTexture, Constructor)
+{
+    state = MioState::Complete;
+    handler = nullptr;
+    expNextState = MioState::Error;
+
+    entry = new MioStateExecuteEntry(state, handler, expNextState);
 }
 
-TEST(MioStateExecuteEntry, GetState_)
+TEST_F(MioStateExecuteEntryTexture, GetState_testIfTheStateSetByTheConstructorCanBeReturned)
 {
+    state = MioState::Complete;
+    handler = nullptr;
+    expNextState = MioState::Error;
+
+    entry = new MioStateExecuteEntry(state, handler, expNextState);
+
+    EXPECT_EQ(entry->GetState(), MioState::Complete);
+    EXPECT_EQ(entry->GetExpNextState(), MioState::Error);
 }
 
-TEST(MioStateExecuteEntry, GetExpNextState_)
+TEST_F(MioStateExecuteEntryTexture, DispatchHandler_testIfTheCallbackSetByTheConstructorCanBeCalled)
 {
-}
+    state = MioState::Complete;
+    handler = std::bind(&MioStateExecuteEntryTexture::CallbackTest, this, std::placeholders::_1);
+    expNextState = MioState::Error;
 
-TEST(MioStateExecuteEntry, DispatchHandler_)
-{
-}
+    entry = new MioStateExecuteEntry(state, handler, expNextState);
+    entry->DispatchHandler(MioState::Complete);
 
+    EXPECT_TRUE(result);
+}
 } // namespace pos
 
 namespace pos
 {
-TEST(Mio, Mio_)
+TEST(Mio, GetId_testIfTheUniqueIdIsUnique)
 {
-}
+    NiceMock<MockMetaFsConfigManager> conf(nullptr);
+    ON_CALL(conf, GetMpioPoolCapacity).WillByDefault(Return(1));
 
-TEST(Mio, InitStateHandler_)
-{
-}
+    MpioAllocator* mpioAllocator = new NiceMock<MockMpioAllocator>(&conf);
 
-TEST(Mio, Setup_)
-{
-}
+    Mio m1(mpioAllocator);
+    Mio m2(mpioAllocator);
 
-TEST(Mio, Reset_)
-{
-}
+    EXPECT_NE(m1.GetId(), m2.GetId());
 
-TEST(Mio, SetMpioDoneNotifier_)
-{
+    delete mpioAllocator;
 }
-
-TEST(Mio, SetMpioDonePoller_)
-{
-}
-
-TEST(Mio, SetIoCQ_)
-{
-}
-
-TEST(Mio, NotifiyPartialMpioDone_)
-{
-}
-
-TEST(Mio, IsSyncIO_)
-{
-}
-
-TEST(Mio, GetOpCode_)
-{
-}
-
-TEST(Mio, GetFD_)
-{
-}
-
-TEST(Mio, IsRead_)
-{
-}
-
-TEST(Mio, GetStartLpn_)
-{
-}
-
-TEST(Mio, IsTargetStorageSSD_)
-{
-}
-
-TEST(Mio, Init_)
-{
-}
-
-TEST(Mio, Issue_)
-{
-}
-
-TEST(Mio, Complete_)
-{
-}
-
-TEST(Mio, GetError_)
-{
-}
-
-TEST(Mio, GetClientAioCbCxt_)
-{
-}
-
-TEST(Mio, NotifyCompletionToClient_)
-{
-}
-
-TEST(Mio, SetLocalAioCbCxt_)
-{
-}
-
-TEST(Mio, SetMergedRequestList_)
-{
-}
-
-TEST(Mio, ClearMergedRequestList_)
-{
-}
-
-TEST(Mio, GetMergedRequestList_)
-{
-}
-
-TEST(Mio, _BindMpioAllocator_)
-{
-}
-
-TEST(Mio, _BuildMpioMap_)
-{
-}
-
-TEST(Mio, _PrepareMpioInfo_)
-{
-}
-
-TEST(Mio, _MarkMpioComplete_)
-{
-}
-
-TEST(Mio, _FinalizeMpio_)
-{
-}
-
-TEST(Mio, _NotifyIoCompletionToClient_)
-{
-}
-
-TEST(Mio, _AllocMpio_)
-{
-}
-
-TEST(Mio, _HandleMpioDone_)
-{
-}
-
-TEST(Mio, _LookupMpioType_)
-{
-}
-
 } // namespace pos
