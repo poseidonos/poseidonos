@@ -218,7 +218,7 @@ ClientThread(void* arg)
     if (str_len > 0)
     {
         int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVED;
-        POS_TRACE_INFO(event, "message:{}", clnt->recv_buff);
+        POS_TRACE_INFO(event, "{}", clnt->recv_buff);
 
         if (clnt->work)
         {

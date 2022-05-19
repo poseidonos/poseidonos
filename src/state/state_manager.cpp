@@ -50,7 +50,7 @@ IStateControl* StateManager::CreateStateControl(string array)
     StateControl* state = _Find(array);
     if (state == nullptr)
     {
-        state = new StateControl();
+        state = new StateControl(array);
         stateMap.emplace(array, state);
         POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_ADDED,
             "statecontrol of array:{} is added", array);

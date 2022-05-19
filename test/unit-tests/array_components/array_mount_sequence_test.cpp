@@ -17,7 +17,7 @@ TEST(ArrayMountSequence, ArrayMountSequence_testConstructor)
 {
     // Given
     vector<IMountSequence*> emptySeq;
-    MockStateControl stateControl;
+    MockStateControl stateControl("array");
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
@@ -33,7 +33,7 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
-    MockStateControl stateControl;
+    MockStateControl stateControl("array");
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
@@ -63,7 +63,7 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
-    MockStateControl stateControl;
+    MockStateControl stateControl("array");
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
@@ -97,7 +97,7 @@ TEST(ArrayMountSequence, Unmount_testIfFailsToUnmountWhenInFaultSituation)
 {
     // Given
     vector<IMountSequence*> emptySeq;
-    NiceMock<MockStateControl> stateControl;
+    NiceMock<MockStateControl> stateControl("array");
     StateContext mockStopState("sender", SituationEnum::FAULT);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
 
@@ -118,7 +118,7 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
 
-    NiceMock<MockStateControl> stateControl;
+    NiceMock<MockStateControl> stateControl("array");
     StateContext* mockUnmountState = new StateContext("sender", SituationEnum::TRY_UNMOUNT);
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     StateContext mockInitialState("sender", SituationEnum::NORMAL);
@@ -148,7 +148,7 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateC
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
-    NiceMock<MockStateControl> stateControl;
+    NiceMock<MockStateControl> stateControl("array");
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIWBStripeAllocator> wbStripeMgr;
@@ -176,7 +176,7 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
-    NiceMock<MockStateControl> stateControl;
+    NiceMock<MockStateControl> stateControl("array");
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder mockRebuilder;
     NiceMock<MockIWBStripeAllocator> wbStripeMgr;
@@ -210,7 +210,7 @@ TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNex
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
-    NiceMock<MockStateControl> stateControl;
+    NiceMock<MockStateControl> stateControl("array");
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIWBStripeAllocator> wbStripeMgr;

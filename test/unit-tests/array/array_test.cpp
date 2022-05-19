@@ -98,6 +98,7 @@ TEST(Array, Init_testIfInitIsDoneSuccessfully)
     vector<ArrayDevice*> mockDevs;
     EXPECT_CALL(*mockState, SetMount).Times(1);
     EXPECT_CALL(*mockArrayService, Register).WillOnce(Return(0));
+    EXPECT_CALL(*mockPartMgr, GetRaidType).Times(1);
     EXPECT_CALL(*mockArrayService, Unregister).Times(0);
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, mockPartMgr, mockState, mockSvc, NULL, mockArrayService);
@@ -160,9 +161,14 @@ TEST(Array, Load_testIfDoneSuccessfully)
     EXPECT_CALL(*mockArrDevMgr, Import).WillOnce(Return(0));                      // import will be successful
     EXPECT_CALL(*mockState, SetLoad).Times(1);                                    // SetLoad will be invoked once
     EXPECT_CALL(*mockPtnMgr, CreatePartitions).WillOnce(Return(0));                      // partition creation will be successful
-    EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL));   // raid state will be normal
+    EXPECT_CALL(*mockPtnMgr, GetRaidState).WillRepeatedly(Return(RaidState::NORMAL));   // raid state will be normal
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet)); // devMgr_ will be able to invoked once
-
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(2);
+    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
+    EXPECT_CALL(*mockState, GetSysState).Times(1);
+    EXPECT_CALL(*mockArrDevMgr, ExportToName).Times(1);
+    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
+    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
     // When: array is loaded
     int actual = array.Load();
 
@@ -833,6 +839,8 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
 {
     // Given: an array
     MockEventScheduler mockEventScheduler;
+    NiceMock<MockIStateControl> mockIStateControl;
+    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrayDeviceManager = new MockArrayDeviceManager(NULL, "mock");
     string mockDevName = "mockDevName";
     MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
@@ -847,8 +855,14 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     EXPECT_CALL(*mockUblockDevice, GetSN).WillOnce(Return(mockDevName));
     EXPECT_CALL(*mockArrayDeviceManager, ExportToMeta).Times(1);
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
+    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
+    EXPECT_CALL(*mockState, GetSysState).Times(1);
+    EXPECT_CALL(*mockArrayDeviceManager, ExportToName).Times(1);
+    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
+    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, mockPtnMgr, NULL, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: Mount is done
     array.MountDone();

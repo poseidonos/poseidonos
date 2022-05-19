@@ -105,7 +105,11 @@ main(int argc, char* argv[])
     }
 
     pos::Poseidonos _pos;
-    _pos.Init(argc, argv);
+    ret = _pos.Init(argc, argv);
+    if (ret != 0)
+    {
+        return ret;
+    }
     _pos.Run();
     _pos.Terminate();
 
