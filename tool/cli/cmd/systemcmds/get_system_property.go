@@ -1,15 +1,16 @@
 package systemcmds
 
 import (
-	"encoding/json"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+
+	pb "cli/api"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // TODO(mj): Currently, this command only supports REBUILDPERFIMPACT command.
@@ -29,21 +30,31 @@ Example:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "GETSYSTEMPROPERTY"
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReq(command, uuid)
-
-		reqJSON, err := json.Marshal(req)
+		req := &pb.GetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli"}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendGetSystemPropertyRpc(req)
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},

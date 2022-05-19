@@ -17,6 +17,11 @@ service PosCli {
       		get: "/v1/systemstop"
     	};
 	}
+	rpc GetSystemProperty (GetSystemPropertyRequest) returns (GetSystemPropertyResponse) {
+		option (google.api.http) = {
+      		get: "/v1/get_system_property"
+    	};
+	}
 }
 
 message Status {
@@ -62,6 +67,26 @@ message SystemStopResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message GetSystemPropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message GetSystemPropertyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message Data {
+			string rebuild_policy = 1;
+		}
+		Data data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
