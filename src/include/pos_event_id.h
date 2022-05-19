@@ -491,6 +491,7 @@ enum class POS_EVENT_ID
     ALLOCATOR_FAILED_TO_ASSIGN_STRIPE,
     BLOCK_ALLOCATION_UNLOCK,
     BLOCK_ALLOCATION_LOCK,
+    ALLOCATOR_NO_MATCHING_REQ_ARRAY_NAME,
 
     ALLOCATOR_DEBUG,
     ALLOCATOR_END,
@@ -546,6 +547,7 @@ enum class POS_EVENT_ID
     FC_SET_FORCERESET,
     FC_FORCERESET_DONE,
     FC_CONFIGURATION,
+    FC_NO_MATCHING_REQ_ARRAY_NAME,
 
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical

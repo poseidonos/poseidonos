@@ -41,6 +41,8 @@
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/gc/garbage_collector.h"
 #include "src/logger/logger.h"
+#include "src/gc/flow_control/flow_control.h"
+#include "src/gc/flow_control/flow_control_service.h"
 
 namespace pos
 {
@@ -100,8 +102,28 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         }
 
         IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
-        iAllocatorWbt->SetNormalGcThreshold(numGcThreshold);
-        iAllocatorWbt->SetUrgentThreshold(numUrgentThreshold);
+        if (nullptr == iAllocatorWbt)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_NO_MATCHING_REQ_ARRAY_NAME), "failed to get allocator");
+            return returnValue;
+        }
+        else
+        {
+            iAllocatorWbt->SetNormalGcThreshold(numGcThreshold);
+            iAllocatorWbt->SetUrgentThreshold(numUrgentThreshold);
+        }
+
+        // refresh gc threshold of flowControl
+        FlowControl* iFlowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName);
+        if (nullptr == iFlowControl)
+        {
+            POS_TRACE_ERROR(EID(FC_NO_MATCHING_REQ_ARRAY_NAME), "failed to get flowControl");
+            return returnValue;
+        }
+        else
+        {
+            iFlowControl->Init();
+        }
 
         IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
         SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
