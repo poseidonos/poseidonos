@@ -13,7 +13,7 @@ GOPATH=$(${GO} env | grep GOPATH | awk -F"\"" '{print $2}')
 GOROOT=$(${GO} env | grep GOROOT | awk -F"\"" '{print $2}')
 export PATH=${PATH}:${GOROOT}/bin:${GOPATH}/bin
 
-mkdir api
+mkdir -p api
 protoc --go_out=api --go_opt=paths=source_relative \
     --go-grpc_out=api --go-grpc_opt=paths=source_relative \
     -I $ROOT_DIR/../../proto cli.proto
@@ -26,7 +26,7 @@ mv ./cli bin/poseidonos-cli
 # Build CLI markdown and manpage documents
 cd docs
 rm markdown manpage -rf
-mkdir markdown manpage
+mkdir -p markdown manpage
 ${GO} build -o ../bin/gen_md gen_md.go
 ${GO} build -o ../bin/gen_man gen_man.go
 chmod +x ../bin/gen_md ../bin/gen_man

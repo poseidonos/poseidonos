@@ -93,7 +93,7 @@ Logger::Logger(void)
 
     console_sink->set_level(spdlog::level::trace);
     minor_sink->set_level(spdlog::level::debug);
-    major_sink->set_level(spdlog::level::warn);
+    major_sink->set_level(spdlog::level::trace);
 
     // Console log is always displayed in plain text form
     console_sink->set_pattern(BuildPattern(false));

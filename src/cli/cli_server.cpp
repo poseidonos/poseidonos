@@ -280,7 +280,7 @@ EnableReuseAddr(int sockfd)
             "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
         return rc;
     }
-    POS_TRACE_INFO(EID(CLI_REUSE_ADDR_ENABLED),
+    POS_TRACE_DEBUG(EID(CLI_REUSE_ADDR_ENABLED),
         "fd:{}, optval:{}, rc:{}", sockfd, optval, rc);
     return 0;
 }
@@ -448,7 +448,7 @@ CLIServer()
                 }
                 else if (cli_fd >= 0)
                 {
-                    POS_TRACE_TRACE(EID(CLI_CLIENT_ACCEPTED), "fd:{}, client_ip:{}, client_port:{}",
+                    POS_TRACE_DEBUG(EID(CLI_CLIENT_ACCEPTED), "fd:{}, client_ip:{}, client_port:{}",
                         cli_fd, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
 
                     sock_pool_t* clnt = AddClient(cli_fd);
