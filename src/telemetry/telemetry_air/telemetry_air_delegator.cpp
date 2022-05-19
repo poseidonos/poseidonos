@@ -63,14 +63,16 @@ AddLabelArrayVolumeInterval(POSMetric& posMetric,
 }
 
 void
-AddSSDId(POSMetric& posMetric,
-    const air::JSONdoc& data)
+AddSSDIdInterval(POSMetric& posMetric,
+    const air::JSONdoc& data, const std::string& interval)
 {
     std::stringstream stream_index;
-    stream_index << data["index"]; // 0x0205
+    stream_index << data["index"];
     uint64_t index{0};
     stream_index >> index;
     posMetric.AddLabel("SSD_id", std::to_string(index));
+
+    posMetric.AddLabel("interval", interval);
 }
 
 void
@@ -85,10 +87,12 @@ AddPerformanceMetric(POSMetricVector* posMetricVector,
     }
     if(getSSDId)
     {
-        AddSSDId(posMetric, data);
+        AddSSDIdInterval(posMetric, data, interval);
     }
-    AddLabelArrayVolumeInterval(posMetric, data, interval);
-
+    else
+    {
+        AddLabelArrayVolumeInterval(posMetric, data, interval);
+    }
     std::stringstream stream_thread_id;
     stream_thread_id << data["target_id"];
     posMetric.AddLabel("thread_id", stream_thread_id.str());

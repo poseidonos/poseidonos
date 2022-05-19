@@ -74,7 +74,7 @@ Device group contains the metrics of the Devices (NVMe SSD)
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -90,7 +90,7 @@ The IOPS of unknown type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -106,7 +106,7 @@ The IOPS of meta type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -122,7 +122,7 @@ The IOPS of gc type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -138,7 +138,7 @@ The IOPS of host type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -154,7 +154,7 @@ The IOPS of flush type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -170,7 +170,7 @@ The IOPS of rebuild type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -186,7 +186,7 @@ The rate(bytes/second) of unknown type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -202,7 +202,7 @@ The rate(bytes/second) of meta type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -218,7 +218,7 @@ The rate(bytes/second) of gc type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.10.0
 
@@ -234,7 +234,7 @@ The rate(bytes/second) of host type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.10.0
 
@@ -250,7 +250,7 @@ The rate(bytes/second) of flush type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.10.0
 
@@ -266,7 +266,7 @@ The rate(bytes/second) of host type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -282,7 +282,7 @@ The IOPS of unknown type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -298,7 +298,7 @@ The IOPS of meta type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -314,7 +314,7 @@ The IOPS of gc type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -330,7 +330,7 @@ The IOPS of host type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -346,7 +346,7 @@ The IOPS of flush type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -362,7 +362,7 @@ The IOPS of rebuild type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -378,7 +378,7 @@ The rate(bytes/second) of unknown type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -394,7 +394,7 @@ The rate(bytes/second) of meta type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -410,7 +410,7 @@ The rate(bytes/second) of gc type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -426,7 +426,7 @@ The rate(bytes/second) of host type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
@@ -442,7 +442,7 @@ The rate(bytes/second) of flush type write in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "SSD_id": Integer}
 
 **Introduced**: v0.11.0
 
