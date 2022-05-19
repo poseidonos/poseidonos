@@ -148,6 +148,7 @@ TEST_F(MpioAllocatorFixture, CheckCounter)
 {
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(), COUNT * 2);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), 0);
@@ -165,6 +166,7 @@ TEST_F(MpioAllocatorFixture, CheckCounter)
 
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
+    EXPECT_EQ(allocator->GetFreeCount(), (COUNT - popCount) * 2);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT - popCount);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - popCount);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), popCount);
