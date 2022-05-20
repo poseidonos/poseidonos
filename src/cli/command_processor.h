@@ -42,6 +42,8 @@ using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
 using grpc_cli::SystemStopRequest;
 using grpc_cli::SystemStopResponse;
+using grpc_cli::GetSystemPropertyRequest;
+using grpc_cli::GetSystemPropertyResponse;
 
 class CommandProcessor
 {
@@ -51,9 +53,11 @@ public:
     void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
     Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
     Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
+    Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
 
 private:
     bool _isPosTerminating;
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
+    std::string _GetRebuildImpactString(uint8_t impact);
 };

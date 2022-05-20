@@ -56,7 +56,7 @@ type POSPropertyResult struct {
 }
 
 type POSPropertyData struct {
-	REBUILDPOLICY string `json:"rebuild_policy"`
+	REBUILDPOLICY string `json:"rebuildPolicy"`
 }
 
 // Response for LISTARRAY & ARRAYINFO commands
