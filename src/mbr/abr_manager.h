@@ -63,6 +63,7 @@ public:
     virtual string GetLastUpdatedDateTime(string arrayName) override;
     virtual string GetCreatedDateTime(string arrayName) override;
     virtual int GetAbrList(std::vector<ArrayBootRecord>& abrList);
+    virtual void InitDisk(UblockSharedPtr dev);
 
 private:
     MbrManager* mbrManager;

@@ -247,7 +247,7 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
 void
 ArrayManager::DeviceAttached(UblockSharedPtr dev)
 {
-    // do nothing. reserved for future.
+    abrManager->InitDisk(dev);
 }
 
 int
