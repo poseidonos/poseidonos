@@ -221,10 +221,7 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVic
             "Segment is freed, segmentId: {}, prevState: {}, removed from the list: {}",
             segId, prevState, removed);
 
-        if (true == removed)
-        {
-            _SegmentFreed(segId);
-        }
+        _SegmentFreed(segId);
     }
 
     return segmentFreed;
