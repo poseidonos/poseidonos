@@ -127,7 +127,7 @@ setup_filebeat ()
 		  - type: log
 		    enabled: true
 		    paths:
-		      - /var/log/pos.log
+		      - /var/log/pos/pos.log
 		output.logstash:
 		  hosts: ["$(hostname -i):${LOGSTASH_PORT}"]
 		EOF
