@@ -16,6 +16,8 @@ SUBDIRS = allocator \
         master_context \
         gc \
         gc/flow_control \
+        pos_replicator \
+        pos_replicator/dummy_ha \
         array \
         array/device \
         array/ft \
@@ -34,7 +36,7 @@ SUBDIRS = allocator \
         volume \
         device \
         spdk_wrapper \
-		spdk_wrapper/caller \
+        spdk_wrapper/caller \
         mbr \
         bio \
         device/unvme \
