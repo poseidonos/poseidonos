@@ -49,11 +49,12 @@ ActiveWBStripeReplayer::ActiveWBStripeReplayer(PendingStripeList& pendingStripeL
 
 ActiveWBStripeReplayer::ActiveWBStripeReplayer(IContextReplayer* ctxReplayer,
     IWBStripeAllocator* wbstripeAllocator, IStripeMap* stripeMap,
-    PendingStripeList& pendingStripeList)
+    PendingStripeList& pendingStripeList, IArrayInfo* aInfo)
 : pendingStripes(pendingStripeList),
   contextReplayer(ctxReplayer),
   wbStripeAllocator(wbstripeAllocator),
-  stripeMap(stripeMap)
+  stripeMap(stripeMap),
+  arrayInfo(aInfo)
 {
     readTails = contextReplayer->GetAllActiveStripeTail();
     foundActiveStripes.resize(readTails.size());
@@ -215,10 +216,33 @@ void
 ActiveWBStripeReplayer::_AddActiveStripeToRestore(int index)
 {
     StripeAddr stripeAddr = stripeMap->GetLSA(readTails[index].stripeId);
-    assert(stripeAddr.stripeLoc == IN_WRITE_BUFFER_AREA);
+    if (_IsStripeFull(readTails[index]) && (stripeAddr.stripeLoc == IN_USER_AREA))
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+            "Reconstructing flushed active stripe will be skipped, wbIndex {}, vsid {}",
+            index, readTails[index].stripeId);
+    }
+    else
+    {
+        assert(stripeAddr.stripeLoc == IN_WRITE_BUFFER_AREA);
 
-    ActiveStripeAddr currentAddr(index, readTails[index], stripeAddr.stripeId);
-    foundActiveStripes[index].push_back(currentAddr);
+        ActiveStripeAddr currentAddr(index, readTails[index], stripeAddr.stripeId);
+        foundActiveStripes[index].push_back(currentAddr);
+    }
+}
+
+bool
+ActiveWBStripeReplayer::_IsStripeFull(VirtualBlkAddr vsa)
+{
+    assert(vsa.offset <= _GetNumBlksPerStripe());
+    return vsa.offset == _GetNumBlksPerStripe();
+}
+
+uint32_t
+ActiveWBStripeReplayer::_GetNumBlksPerStripe(void)
+{
+    const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    return udSize->blksPerStripe;
 }
 
 void

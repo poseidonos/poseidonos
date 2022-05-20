@@ -10,6 +10,7 @@
 #include "active_wb_stripe_replayer_spy.h"
 #include "test/unit-tests/allocator/i_context_replayer_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 
 using ::testing::_;
@@ -86,6 +87,10 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
     NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
 
     EXPECT_CALL(contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
 
@@ -95,7 +100,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find a single active stripe that is not full
     StripeInfo activeStripe = GetActiveStripe(defaultTestVol, defaultTestVol);
@@ -115,6 +120,10 @@ TEST(ActiveWBStripeReplayer, Replay_SingleFullActiveStripe)
     NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
 
     EXPECT_CALL(contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     StripeAddr unmapStripe = {
@@ -123,7 +132,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleFullActiveStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find a single active stripe that saturated
     StripeInfo fullActiveStripe = GetFlushedActiveStripe(defaultTestVol, defaultTestVol);
@@ -152,7 +161,12 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleFullStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several stripes on single volume
     for (int stripe = 0; stripe < 5; stripe++)
@@ -186,7 +200,12 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleFullStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several stripes on multiple volumes
     std::vector<StripeInfo> stripes;
@@ -235,7 +254,12 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several unflushed stripes on a single volume
     std::vector<StripeInfo> orphanStripes;
@@ -303,7 +327,12 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several unflushed stripes on a single volume
     std::vector<StripeInfo> orphanStripes;
@@ -370,7 +399,12 @@ TEST(ActiveWBStripeReplayer, Replay_testIfFoundPendingActiveStripes)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several stripes on single volume
     std::vector<StripeInfo> orphanStripes;
@@ -424,7 +458,12 @@ TEST(ActiveWBStripeReplayer, UpdateRevMaps_MultipleVolumeMultipleActiveStripe)
     EXPECT_CALL(stripeMap, GetLSA).WillRepeatedly(Return(unmapStripe));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayerSpy wbStripeReplayer(&contextReplayer, nullptr, &stripeMap, pendingStripes);
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    ActiveWBStripeReplayerSpy wbStripeReplayer(&contextReplayer, nullptr, &stripeMap, pendingStripes, &arrayInfo);
 
     // When : Find several unflushed stripes on a single volume
     int numVolume = 3;
@@ -475,15 +514,15 @@ TEST(ActiveWBStripeReplayer, Replay_testIfStoredActiveStripeIsRestored)
     NiceMock<MockIStripeMap> stripeMap;
 
     auto getVsid = [](int i) -> StripeId { return (StripeId)i; };
-    auto getOffset = [](int i) -> BlkOffset { return (BlkOffset)(10 + i); };
+    auto getOffset = [](int i) -> BlkOffset { return (BlkOffset)(12); };
     auto getWbLsid = [](int i) -> StripeId { return (StripeId)(20 + i); };
 
     std::vector<VirtualBlkAddr> readTails;
     for (uint32_t id = 0; id < ACTIVE_STRIPE_TAIL_ARRAYLEN; id++)
     {
         VirtualBlkAddr vsa = {
-            .stripeId = id,
-            .offset = 10 + id};
+            .stripeId = getVsid(id),
+            .offset = getOffset(id)};
         readTails.push_back(vsa);
 
         StripeAddr addr = {
@@ -493,8 +532,13 @@ TEST(ActiveWBStripeReplayer, Replay_testIfStoredActiveStripeIsRestored)
     }
     EXPECT_CALL(contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(readTails));
 
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
     PendingStripeList pendingStripes;
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // Then:
     for (uint32_t id = 0; id < ACTIVE_STRIPE_TAIL_ARRAYLEN; id++)
@@ -516,7 +560,7 @@ TEST(ActiveWBStripeReplayer, Replay_testIfStripeInfoIsAddedToStoredTail)
     NiceMock<MockIStripeMap> stripeMap;
 
     auto getVsid = [](int i) -> StripeId { return (StripeId)i; };
-    auto getOffset = [](int i) -> BlkOffset { return (BlkOffset)(10 + i); };
+    auto getOffset = [](int i) -> BlkOffset { return (BlkOffset)(13); };
     auto getWbLsid = [](int i) -> StripeId { return (StripeId)(20 + i); };
 
     std::vector<VirtualBlkAddr> readTails;
@@ -534,8 +578,13 @@ TEST(ActiveWBStripeReplayer, Replay_testIfStripeInfoIsAddedToStoredTail)
     }
     EXPECT_CALL(contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(readTails));
 
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = 128;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
     PendingStripeList pendingStripes;
-    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes);
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
 
     // When:
     for (uint32_t id = 0; id < ACTIVE_STRIPE_TAIL_ARRAYLEN; id++)
@@ -552,6 +601,60 @@ TEST(ActiveWBStripeReplayer, Replay_testIfStripeInfoIsAddedToStoredTail)
         StripeInfo activeStripe(id, getVsid(id), getWbLsid(id), getVsid(id), getOffset(id) + 2, id);
         ExpectReconstructActiveStripe(&wbStripeAllocator, activeStripe, 0);
     }
+
+    // When: replayer is requested to replay wbstripes without any update
+    wbStripeReplayer.Replay();
+}
+
+TEST(ActiveWBStripeReplayer, Replay_testIfRestoringFullStripeTailIsSkipped)
+{
+    // Given
+    NiceMock<MockIContextReplayer> contextReplayer;
+    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
+    NiceMock<MockIStripeMap> stripeMap;
+
+    uint32_t blksPerStripe = 128;
+    StripeId vsid = 100;
+    int volumeId = 0;
+
+    std::vector<VirtualBlkAddr> readTails;
+
+    // Volume 0 tail is flushed stripe, else all unmap stripes
+    VirtualBlkAddr vsa = {
+        .stripeId = vsid,
+        .offset = blksPerStripe};
+    readTails.push_back(vsa);
+
+    for (uint32_t id = 1; id < ACTIVE_STRIPE_TAIL_ARRAYLEN; id++)
+    {
+        readTails.push_back(UNMAP_VSA);
+    }
+
+    StripeAddr unmapStripe = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = UNMAP_STRIPE};
+    ON_CALL(stripeMap, GetLSA).WillByDefault(Return(unmapStripe));
+
+    StripeAddr addr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = vsid};
+    EXPECT_CALL(stripeMap, GetLSA(vsid)).WillRepeatedly(Return(addr));
+    EXPECT_CALL(contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(readTails));
+
+    NiceMock<MockIArrayInfo> arrayInfo;
+    PartitionLogicalSize size;
+    size.blksPerStripe = blksPerStripe;
+    ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&size));
+
+    PendingStripeList pendingStripes;
+    ActiveWBStripeReplayer wbStripeReplayer(&contextReplayer, &wbStripeAllocator, &stripeMap, pendingStripes, &arrayInfo);
+
+    // When: there's no update by found logs
+
+    // Then:
+    EXPECT_CALL(wbStripeAllocator,
+        ReconstructActiveStripe(volumeId, _, _, _))
+        .Times(0);
 
     // When: replayer is requested to replay wbstripes without any update
     wbStripeReplayer.Replay();

@@ -67,7 +67,7 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
   arrayInfo(arrayInfo)
 {
     wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer,
-        wbStripeAllocator, stripeMap, pendingWbStripes);
+        wbStripeAllocator, stripeMap, pendingWbStripes, arrayInfo);
     userStripeReplayer = new ActiveUserStripeReplayer(contextReplayer, arrayInfo);
 }
 
