@@ -84,6 +84,11 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
     else // Total Rebuild Case
     {
         mem = bufferPool->TryGetBuffer();
+        if (nullptr == mem)
+        {
+            POS_TRACE_DEBUG(POS_EVENT_ID::BUFFER_POOL_EMPTY,
+                "Failed to get buffer during recover read. {} Pool is empty", bufferPool->GetOwner());
+        }
     }
 
     UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt, ubio->GetArrayId()));

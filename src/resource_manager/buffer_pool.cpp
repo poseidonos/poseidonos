@@ -132,8 +132,6 @@ BufferPool::TryGetBuffer(void)
 
     if (freeBuffers.empty())
     {
-        POS_TRACE_WARN(POS_EVENT_ID::BUFFER_POOL_EMPTY,
-            "Failed to get buffer. {} Pool is empty", BUFFER_INFO.owner);
         return nullptr;
     }
 
