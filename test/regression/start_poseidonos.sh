@@ -8,7 +8,7 @@ execute_pos()
     if [ -f ${ROOT_DIR}/bin/$binary_name ];
     then
         echo "Execute poseidonOS"
-        nohup ${ROOT_DIR}/bin/$binary_name &
+        nohup ${ROOT_DIR}/bin/$binary_name > /dev/null 2>&1 &
     else
         echo "No executable poseidonOS file"
         exit -1
