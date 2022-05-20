@@ -136,6 +136,7 @@ setup_filebeat ()
     docker run \
             -d \
             -v ${FILEBEAT_CONF_PATH}:/usr/share/filebeat/filebeat.yml \
+	    -v /var/log/pos:/var/log/pos \
             docker.elastic.co/beats/filebeat-oss:8.2.0 -e --strict.perms=false
 }
 
