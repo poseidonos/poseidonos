@@ -225,14 +225,13 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
 
     // Set valid block count of each segments to 32 for test
     uint32_t maxValidBlkCount = 32;
-    uint32_t stripesPerSegment = 1024;
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlkCount));
-    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
         VirtualBlks blks = {
             .startVsa = {
-                .stripeId = segId * stripesPerSegment,
+                .stripeId = segId * STRIPE_PER_SEGMENT,
                 .offset = 0},
             .numBlks = maxValidBlkCount};
         segmentCtx->ValidateBlks(blks);
