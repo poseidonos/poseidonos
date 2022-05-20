@@ -11,6 +11,9 @@
 #include "src/logger/logger.h"
 #include "src/mbr/mbr_info.h"
 #include "src/master_context/version_provider.h"
+#include "src/qos/qos_common.h"
+#include "src/qos/qos_manager.h"
+#include "src/volume/volume_manager.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -98,4 +101,41 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     }
 
     return Status::OK;
+}
+
+Status
+CommandProcessor::ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request,
+    GetSystemPropertyResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
+    reply->mutable_info()->set_version(version);
+
+    qos_backend_policy backendPolicy = QosManagerSingleton::Instance()->GetBackendPolicy(BackendEvent_UserdataRebuild);
+    string impact = _GetRebuildImpactString(backendPolicy.priorityImpact);
+
+    reply->mutable_result()->mutable_data()->set_rebuild_policy(impact);
+    reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
+    reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
+    return Status::OK;
+}
+
+std::string
+CommandProcessor::_GetRebuildImpactString(uint8_t impact)
+{
+    switch (impact)
+    {
+        case PRIORITY_HIGHEST:
+            return "highest";
+
+        case PRIORITY_MEDIUM:
+            return "medium";
+
+        case PRIORITY_LOWEST:
+            return "lowest";
+
+        default:
+            return "unknown";
+    }
 }
