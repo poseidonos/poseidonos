@@ -167,20 +167,23 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         uint64_t bw{0};
                         stream_bw >> bw;
 
+                        std::string iopsMetricId;
+                        std::string bwMetricId;
+
                         if (0 == str_filter.compare("\"AIR_READ\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL50000_READ_IOPS,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval);
-                            AddPerformanceMetric(posMetricVector, TEL50001_READ_RATE_BYTES_PER_SECOND,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval);
+                            iopsMetricId = TEL50000_READ_IOPS;
+                            bwMetricId = TEL50001_READ_RATE_BYTES_PER_SECOND;
                         }
                         else
                         {
-                            AddPerformanceMetric(posMetricVector, TEL50010_WRITE_IOPS,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval);
-                            AddPerformanceMetric(posMetricVector, TEL50011_WRITE_RATE_BYTES_PER_SECOND,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval);
+                            iopsMetricId = TEL50010_WRITE_IOPS;
+                            bwMetricId = TEL50011_WRITE_RATE_BYTES_PER_SECOND;
                         }
+                        AddPerformanceMetric(posMetricVector, iopsMetricId,
+                                POSMetricTypes::MT_GAUGE, iops, obj, interval);
+                        AddPerformanceMetric(posMetricVector, bwMetricId,
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval);
                     }
                 }
 
@@ -254,48 +257,43 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         uint64_t bw{0};
                         stream_bw >> bw;
 
+                        std::string iopsMetricId;
+                        std::string bwMetricId;
+
                         if (0 == str_filter.compare("\"AIR_UNKNOWN\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20000_READ_UNKNOWN_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20000_READ_UNKNOWN_IOPS_PER_SSD;
+                            bwMetricId = TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_META\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20001_READ_META_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20007_READ_META_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20001_READ_META_IOPS_PER_SSD;
+                            bwMetricId = TEL20007_READ_META_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_GC\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20002_READ_GC_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20008_READ_GC_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20002_READ_GC_IOPS_PER_SSD;
+                            bwMetricId = TEL20008_READ_GC_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_HOST\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20003_READ_HOST_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20009_READ_HOST_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20003_READ_HOST_IOPS_PER_SSD;
+                            bwMetricId = TEL20009_READ_HOST_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_FLUSH\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20004_READ_FLUSH_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20010_READ_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20004_READ_FLUSH_IOPS_PER_SSD;
+                            bwMetricId = TEL20010_READ_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20005_READ_REBUILD_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20005_READ_REBUILD_IOPS_PER_SSD;
+                            bwMetricId = TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
+                        AddPerformanceMetric(posMetricVector, iopsMetricId,
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
+                        AddPerformanceMetric(posMetricVector, bwMetricId,
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
                     }
                 }
 
@@ -321,48 +319,43 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                         uint64_t bw{0};
                         stream_bw >> bw;
 
+                        std::string iopsMetricId;
+                        std::string bwMetricId;
+
                         if (0 == str_filter.compare("\"AIR_UNKNOWN\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD;
+                            bwMetricId = TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_META\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20013_WRITE_META_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20019_WRITE_META_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20013_WRITE_META_IOPS_PER_SSD;
+                            bwMetricId = TEL20019_WRITE_META_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_GC\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20014_WRITE_GC_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20014_WRITE_GC_IOPS_PER_SSD;
+                            bwMetricId = TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_HOST\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20015_WRITE_HOST_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20015_WRITE_HOST_IOPS_PER_SSD;
+                            bwMetricId = TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_FLUSH\""))
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20016_WRITE_FLUSH_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20016_WRITE_FLUSH_IOPS_PER_SSD;
+                            bwMetricId = TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else
                         {
-                            AddPerformanceMetric(posMetricVector, TEL20017_WRITE_REBUILD_IOPS_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
-                            AddPerformanceMetric(posMetricVector, TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD,
-                                POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            iopsMetricId = TEL20017_WRITE_REBUILD_IOPS_PER_SSD;
+                            bwMetricId = TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
+                        AddPerformanceMetric(posMetricVector, iopsMetricId,
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
+                        AddPerformanceMetric(posMetricVector, bwMetricId,
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
                     }
                 }
 
