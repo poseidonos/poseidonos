@@ -193,7 +193,7 @@ message CompleteHostWriteResponse {
 
 service PosControl {
     rpc StartVolumeSync(StartVolumeSyncRequest) returns (StartVolumeSyncResponse) {}
-    rpc FinishVolumeSync(FinishVolumeSyncRequest) returns (FinishVOlumeSyncResponse) {}
+    rpc FinishVolumeSync(FinishVolumeSyncRequest) returns (FinishVolumeSyncResponse) {}
     rpc SuspendWrite(SuspendWriteRequest) returns (SuspendWriteResponse) {}
     rpc ResumeWrite(ResumeWriteRequest) returns (ResumeWriteResponse) {}
 }
@@ -215,7 +215,7 @@ message FinishVolumeSyncRequest {
     bool is_primary = 3;
 }
 
-message FinishVOlumeSyncResponse {
+message FinishVolumeSyncResponse {
     PosResult result = 1;
     optional string reason = 2;
 }

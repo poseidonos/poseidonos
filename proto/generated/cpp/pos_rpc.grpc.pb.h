@@ -2842,12 +2842,12 @@ class PosControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::StartVolumeSyncResponse>> PrepareAsyncStartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::StartVolumeSyncResponse>>(PrepareAsyncStartVolumeSyncRaw(context, request, cq));
     }
-    virtual ::grpc::Status FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVOlumeSyncResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>> AsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>>(AsyncFinishVolumeSyncRaw(context, request, cq));
+    virtual ::grpc::Status FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVolumeSyncResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>> AsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>>(AsyncFinishVolumeSyncRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>> PrepareAsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>>(PrepareAsyncFinishVolumeSyncRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>> PrepareAsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>>(PrepareAsyncFinishVolumeSyncRaw(context, request, cq));
     }
     virtual ::grpc::Status SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::pos_rpc::SuspendWriteResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::SuspendWriteResponse>> AsyncSuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
@@ -2872,11 +2872,11 @@ class PosControl final {
       #else
       virtual void StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
-      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      virtual void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
       virtual void SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2901,8 +2901,8 @@ class PosControl final {
   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::StartVolumeSyncResponse>* AsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::StartVolumeSyncResponse>* PrepareAsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>* AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVOlumeSyncResponse>* PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>* AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::FinishVolumeSyncResponse>* PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::SuspendWriteResponse>* AsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::SuspendWriteResponse>* PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ResumeWriteResponse>* AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -2918,12 +2918,12 @@ class PosControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>> PrepareAsyncStartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>>(PrepareAsyncStartVolumeSyncRaw(context, request, cq));
     }
-    ::grpc::Status FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVOlumeSyncResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>> AsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>>(AsyncFinishVolumeSyncRaw(context, request, cq));
+    ::grpc::Status FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVolumeSyncResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>> AsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>>(AsyncFinishVolumeSyncRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>> PrepareAsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>>(PrepareAsyncFinishVolumeSyncRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>> PrepareAsyncFinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>>(PrepareAsyncFinishVolumeSyncRaw(context, request, cq));
     }
     ::grpc::Status SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::pos_rpc::SuspendWriteResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>> AsyncSuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
@@ -2948,11 +2948,11 @@ class PosControl final {
       #else
       void StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
-      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, std::function<void(::grpc::Status)>) override;
+      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
-      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      void FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
       void SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2979,8 +2979,8 @@ class PosControl final {
     class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* AsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* PrepareAsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>* AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>* PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* AsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -2997,7 +2997,7 @@ class PosControl final {
     Service();
     virtual ~Service();
     virtual ::grpc::Status StartVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response);
-    virtual ::grpc::Status FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response);
+    virtual ::grpc::Status FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response);
     virtual ::grpc::Status SuspendWrite(::grpc::ServerContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response);
     virtual ::grpc::Status ResumeWrite(::grpc::ServerContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response);
   };
@@ -3033,11 +3033,11 @@ class PosControl final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestFinishVolumeSync(::grpc::ServerContext* context, ::pos_rpc::FinishVolumeSyncRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::FinishVOlumeSyncResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestFinishVolumeSync(::grpc::ServerContext* context, ::pos_rpc::FinishVolumeSyncRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::FinishVolumeSyncResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -3141,38 +3141,38 @@ class PosControl final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse>(
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response) { return this->FinishVolumeSync(context, request, response); }));}
+                     context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response) { return this->FinishVolumeSync(context, request, response); }));}
     void SetMessageAllocatorFor_FinishVolumeSync(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
     #else
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
     #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
     ~ExperimentalWithCallbackMethod_FinishVolumeSync() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* FinishVolumeSync(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/)
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/)
     #else
     virtual ::grpc::experimental::ServerUnaryReactor* FinishVolumeSync(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/)
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/)
     #endif
       { return nullptr; }
   };
@@ -3304,7 +3304,7 @@ class PosControl final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3375,7 +3375,7 @@ class PosControl final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3486,7 +3486,7 @@ class PosControl final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -3610,10 +3610,10 @@ class PosControl final {
     WithStreamedUnaryMethod_FinishVolumeSync() {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse>(
+          ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse>(
             [this](::grpc::ServerContext* context,
                    ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse>* streamer) {
+                     ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse>* streamer) {
                        return this->StreamedFinishVolumeSync(context,
                          streamer);
                   }));
@@ -3622,12 +3622,12 @@ class PosControl final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVOlumeSyncResponse* /*response*/) override {
+    ::grpc::Status FinishVolumeSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::FinishVolumeSyncRequest* /*request*/, ::pos_rpc::FinishVolumeSyncResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedFinishVolumeSync(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::FinishVolumeSyncRequest,::pos_rpc::FinishVOlumeSyncResponse>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedFinishVolumeSync(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::FinishVolumeSyncRequest,::pos_rpc::FinishVolumeSyncResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_SuspendWrite : public BaseClass {

@@ -83,12 +83,12 @@ extern DeleteArrayRequestDefaultTypeInternal _DeleteArrayRequest_default_instanc
 class DeleteVolumeRequest;
 struct DeleteVolumeRequestDefaultTypeInternal;
 extern DeleteVolumeRequestDefaultTypeInternal _DeleteVolumeRequest_default_instance_;
-class FinishVOlumeSyncResponse;
-struct FinishVOlumeSyncResponseDefaultTypeInternal;
-extern FinishVOlumeSyncResponseDefaultTypeInternal _FinishVOlumeSyncResponse_default_instance_;
 class FinishVolumeSyncRequest;
 struct FinishVolumeSyncRequestDefaultTypeInternal;
 extern FinishVolumeSyncRequestDefaultTypeInternal _FinishVolumeSyncRequest_default_instance_;
+class FinishVolumeSyncResponse;
+struct FinishVolumeSyncResponseDefaultTypeInternal;
+extern FinishVolumeSyncResponseDefaultTypeInternal _FinishVolumeSyncResponse_default_instance_;
 class GetArrayListRequest;
 struct GetArrayListRequestDefaultTypeInternal;
 extern GetArrayListRequestDefaultTypeInternal _GetArrayListRequest_default_instance_;
@@ -163,8 +163,8 @@ template<> ::pos_rpc::CreateArrayRequest* Arena::CreateMaybeMessage<::pos_rpc::C
 template<> ::pos_rpc::CreateVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::CreateVolumeRequest>(Arena*);
 template<> ::pos_rpc::DeleteArrayRequest* Arena::CreateMaybeMessage<::pos_rpc::DeleteArrayRequest>(Arena*);
 template<> ::pos_rpc::DeleteVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::DeleteVolumeRequest>(Arena*);
-template<> ::pos_rpc::FinishVOlumeSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::FinishVOlumeSyncResponse>(Arena*);
 template<> ::pos_rpc::FinishVolumeSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::FinishVolumeSyncRequest>(Arena*);
+template<> ::pos_rpc::FinishVolumeSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::FinishVolumeSyncResponse>(Arena*);
 template<> ::pos_rpc::GetArrayListRequest* Arena::CreateMaybeMessage<::pos_rpc::GetArrayListRequest>(Arena*);
 template<> ::pos_rpc::GetVolumeListRequest* Arena::CreateMaybeMessage<::pos_rpc::GetVolumeListRequest>(Arena*);
 template<> ::pos_rpc::HealthCheckRequest* Arena::CreateMaybeMessage<::pos_rpc::HealthCheckRequest>(Arena*);
@@ -4860,24 +4860,24 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class FinishVOlumeSyncResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.FinishVOlumeSyncResponse) */ {
+class FinishVolumeSyncResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.FinishVolumeSyncResponse) */ {
  public:
-  inline FinishVOlumeSyncResponse() : FinishVOlumeSyncResponse(nullptr) {}
-  virtual ~FinishVOlumeSyncResponse();
-  explicit constexpr FinishVOlumeSyncResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline FinishVolumeSyncResponse() : FinishVolumeSyncResponse(nullptr) {}
+  virtual ~FinishVolumeSyncResponse();
+  explicit constexpr FinishVolumeSyncResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  FinishVOlumeSyncResponse(const FinishVOlumeSyncResponse& from);
-  FinishVOlumeSyncResponse(FinishVOlumeSyncResponse&& from) noexcept
-    : FinishVOlumeSyncResponse() {
+  FinishVolumeSyncResponse(const FinishVolumeSyncResponse& from);
+  FinishVolumeSyncResponse(FinishVolumeSyncResponse&& from) noexcept
+    : FinishVolumeSyncResponse() {
     *this = ::std::move(from);
   }
 
-  inline FinishVOlumeSyncResponse& operator=(const FinishVOlumeSyncResponse& from) {
+  inline FinishVolumeSyncResponse& operator=(const FinishVolumeSyncResponse& from) {
     CopyFrom(from);
     return *this;
   }
-  inline FinishVOlumeSyncResponse& operator=(FinishVOlumeSyncResponse&& from) noexcept {
+  inline FinishVolumeSyncResponse& operator=(FinishVolumeSyncResponse&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -4895,20 +4895,20 @@ class FinishVOlumeSyncResponse PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const FinishVOlumeSyncResponse& default_instance() {
+  static const FinishVolumeSyncResponse& default_instance() {
     return *internal_default_instance();
   }
-  static inline const FinishVOlumeSyncResponse* internal_default_instance() {
-    return reinterpret_cast<const FinishVOlumeSyncResponse*>(
-               &_FinishVOlumeSyncResponse_default_instance_);
+  static inline const FinishVolumeSyncResponse* internal_default_instance() {
+    return reinterpret_cast<const FinishVolumeSyncResponse*>(
+               &_FinishVolumeSyncResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     27;
 
-  friend void swap(FinishVOlumeSyncResponse& a, FinishVOlumeSyncResponse& b) {
+  friend void swap(FinishVolumeSyncResponse& a, FinishVolumeSyncResponse& b) {
     a.Swap(&b);
   }
-  inline void Swap(FinishVOlumeSyncResponse* other) {
+  inline void Swap(FinishVolumeSyncResponse* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -4916,7 +4916,7 @@ class FinishVOlumeSyncResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(FinishVOlumeSyncResponse* other) {
+  void UnsafeArenaSwap(FinishVolumeSyncResponse* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -4924,17 +4924,17 @@ class FinishVOlumeSyncResponse PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline FinishVOlumeSyncResponse* New() const final {
-    return CreateMaybeMessage<FinishVOlumeSyncResponse>(nullptr);
+  inline FinishVolumeSyncResponse* New() const final {
+    return CreateMaybeMessage<FinishVolumeSyncResponse>(nullptr);
   }
 
-  FinishVOlumeSyncResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<FinishVOlumeSyncResponse>(arena);
+  FinishVolumeSyncResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<FinishVolumeSyncResponse>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const FinishVOlumeSyncResponse& from);
-  void MergeFrom(const FinishVOlumeSyncResponse& from);
+  void CopyFrom(const FinishVolumeSyncResponse& from);
+  void MergeFrom(const FinishVolumeSyncResponse& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -4948,13 +4948,13 @@ class FinishVOlumeSyncResponse PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(FinishVOlumeSyncResponse* other);
+  void InternalSwap(FinishVolumeSyncResponse* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.FinishVOlumeSyncResponse";
+    return "pos_rpc.FinishVolumeSyncResponse";
   }
   protected:
-  explicit FinishVOlumeSyncResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit FinishVolumeSyncResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -5005,7 +5005,7 @@ class FinishVOlumeSyncResponse PROTOBUF_FINAL :
   void _internal_set_result(::pos_rpc::PosResult value);
   public:
 
-  // @@protoc_insertion_point(class_scope:pos_rpc.FinishVOlumeSyncResponse)
+  // @@protoc_insertion_point(class_scope:pos_rpc.FinishVolumeSyncResponse)
  private:
   class _Internal;
 
@@ -8738,91 +8738,91 @@ inline void FinishVolumeSyncRequest::set_is_primary(bool value) {
 
 // -------------------------------------------------------------------
 
-// FinishVOlumeSyncResponse
+// FinishVolumeSyncResponse
 
 // .pos_rpc.PosResult result = 1;
-inline void FinishVOlumeSyncResponse::clear_result() {
+inline void FinishVolumeSyncResponse::clear_result() {
   result_ = 0;
 }
-inline ::pos_rpc::PosResult FinishVOlumeSyncResponse::_internal_result() const {
+inline ::pos_rpc::PosResult FinishVolumeSyncResponse::_internal_result() const {
   return static_cast< ::pos_rpc::PosResult >(result_);
 }
-inline ::pos_rpc::PosResult FinishVOlumeSyncResponse::result() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.FinishVOlumeSyncResponse.result)
+inline ::pos_rpc::PosResult FinishVolumeSyncResponse::result() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.FinishVolumeSyncResponse.result)
   return _internal_result();
 }
-inline void FinishVOlumeSyncResponse::_internal_set_result(::pos_rpc::PosResult value) {
+inline void FinishVolumeSyncResponse::_internal_set_result(::pos_rpc::PosResult value) {
   
   result_ = value;
 }
-inline void FinishVOlumeSyncResponse::set_result(::pos_rpc::PosResult value) {
+inline void FinishVolumeSyncResponse::set_result(::pos_rpc::PosResult value) {
   _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.FinishVOlumeSyncResponse.result)
+  // @@protoc_insertion_point(field_set:pos_rpc.FinishVolumeSyncResponse.result)
 }
 
 // string reason = 2;
-inline bool FinishVOlumeSyncResponse::_internal_has_reason() const {
+inline bool FinishVolumeSyncResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool FinishVOlumeSyncResponse::has_reason() const {
+inline bool FinishVolumeSyncResponse::has_reason() const {
   return _internal_has_reason();
 }
-inline void FinishVOlumeSyncResponse::clear_reason() {
+inline void FinishVolumeSyncResponse::clear_reason() {
   reason_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& FinishVOlumeSyncResponse::reason() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.FinishVOlumeSyncResponse.reason)
+inline const std::string& FinishVolumeSyncResponse::reason() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.FinishVolumeSyncResponse.reason)
   return _internal_reason();
 }
-inline void FinishVOlumeSyncResponse::set_reason(const std::string& value) {
+inline void FinishVolumeSyncResponse::set_reason(const std::string& value) {
   _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.FinishVOlumeSyncResponse.reason)
+  // @@protoc_insertion_point(field_set:pos_rpc.FinishVolumeSyncResponse.reason)
 }
-inline std::string* FinishVOlumeSyncResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.FinishVOlumeSyncResponse.reason)
+inline std::string* FinishVolumeSyncResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.FinishVolumeSyncResponse.reason)
   return _internal_mutable_reason();
 }
-inline const std::string& FinishVOlumeSyncResponse::_internal_reason() const {
+inline const std::string& FinishVolumeSyncResponse::_internal_reason() const {
   return reason_.Get();
 }
-inline void FinishVOlumeSyncResponse::_internal_set_reason(const std::string& value) {
+inline void FinishVolumeSyncResponse::_internal_set_reason(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void FinishVOlumeSyncResponse::set_reason(std::string&& value) {
+inline void FinishVolumeSyncResponse::set_reason(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.FinishVOlumeSyncResponse.reason)
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.FinishVolumeSyncResponse.reason)
 }
-inline void FinishVOlumeSyncResponse::set_reason(const char* value) {
+inline void FinishVolumeSyncResponse::set_reason(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.FinishVOlumeSyncResponse.reason)
+  // @@protoc_insertion_point(field_set_char:pos_rpc.FinishVolumeSyncResponse.reason)
 }
-inline void FinishVOlumeSyncResponse::set_reason(const char* value,
+inline void FinishVolumeSyncResponse::set_reason(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.FinishVOlumeSyncResponse.reason)
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.FinishVolumeSyncResponse.reason)
 }
-inline std::string* FinishVOlumeSyncResponse::_internal_mutable_reason() {
+inline std::string* FinishVolumeSyncResponse::_internal_mutable_reason() {
   _has_bits_[0] |= 0x00000001u;
   return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* FinishVOlumeSyncResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:pos_rpc.FinishVOlumeSyncResponse.reason)
+inline std::string* FinishVolumeSyncResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:pos_rpc.FinishVolumeSyncResponse.reason)
   if (!_internal_has_reason()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void FinishVOlumeSyncResponse::set_allocated_reason(std::string* reason) {
+inline void FinishVolumeSyncResponse::set_allocated_reason(std::string* reason) {
   if (reason != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -8830,7 +8830,7 @@ inline void FinishVOlumeSyncResponse::set_allocated_reason(std::string* reason) 
   }
   reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.FinishVOlumeSyncResponse.reason)
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.FinishVolumeSyncResponse.reason)
 }
 
 // -------------------------------------------------------------------

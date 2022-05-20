@@ -667,23 +667,23 @@ void PosControl::Stub::experimental_async::StartVolumeSync(::grpc::ClientContext
   return result;
 }
 
-::grpc::Status PosControl::Stub::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVOlumeSyncResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_FinishVolumeSync_, context, request, response);
+::grpc::Status PosControl::Stub::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVolumeSyncResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_FinishVolumeSync_, context, request, response);
 }
 
-void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FinishVolumeSync_, context, request, response, std::move(f));
+void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FinishVolumeSync_, context, request, response, std::move(f));
 }
 
-void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FinishVolumeSync_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>* PosControl::Stub::PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::FinishVOlumeSyncResponse, ::pos_rpc::FinishVolumeSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_FinishVolumeSync_, context, request);
+::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* PosControl::Stub::PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::FinishVolumeSyncResponse, ::pos_rpc::FinishVolumeSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_FinishVolumeSync_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVOlumeSyncResponse>* PosControl::Stub::AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* PosControl::Stub::AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncFinishVolumeSyncRaw(context, request, cq);
   result->StartCall();
@@ -750,11 +750,11 @@ PosControl::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosControl_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVOlumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosControl::Service* service,
              ::grpc::ServerContext* ctx,
              const ::pos_rpc::FinishVolumeSyncRequest* req,
-             ::pos_rpc::FinishVOlumeSyncResponse* resp) {
+             ::pos_rpc::FinishVolumeSyncResponse* resp) {
                return service->FinishVolumeSync(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
@@ -789,7 +789,7 @@ PosControl::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status PosControl::Service::FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVOlumeSyncResponse* response) {
+::grpc::Status PosControl::Service::FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response) {
   (void) context;
   (void) request;
   (void) response;
