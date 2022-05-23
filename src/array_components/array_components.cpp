@@ -279,7 +279,7 @@ ArrayComponents::_SetMountSequence(void)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPO_DEBUG_MSG), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
-    arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayRebuilder, meta->GetWbStripeManager());
+    arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayRebuilder);
 }
 
 void

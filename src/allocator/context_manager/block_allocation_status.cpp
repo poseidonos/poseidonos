@@ -147,12 +147,17 @@ BlockAllocationStatus::Unlock(void)
 bool
 BlockAllocationStatus::TryRdLock(int volumeId)
 {
-    if (pthread_rwlock_tryrdlock(&lock_volume[volumeId]))
+    auto result = pthread_rwlock_tryrdlock(&lock_volume[volumeId]);
+    if (result)
     {
+        POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}, result:{}", volumeId, result);
         return false;
     }
-
-    return true;
+    else
+    {
+        POS_TRACE_INFO(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}", volumeId);
+        return true;
+    }
 }
 
 bool

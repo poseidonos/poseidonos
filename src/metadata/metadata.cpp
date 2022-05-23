@@ -272,10 +272,4 @@ Metadata::StopRebuilding(void)
     }
 }
 
-IWBStripeAllocator*
-Metadata::GetWbStripeManager(void)
-{
-    return allocator->GetIWBStripeAllocator();
-}
-
 } // namespace pos
