@@ -40,6 +40,14 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  Status SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
+                  SetSystemPropertyResponse* reply) override {
+
+    Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {

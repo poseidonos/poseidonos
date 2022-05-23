@@ -1,15 +1,15 @@
 package systemcmds
 
 import (
-	"encoding/json"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // TODO(mj): Currently, this command only supports REBUILDPERFIMPACT command.
@@ -31,25 +31,32 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 		// The message format should be extended for other properties also.
 
 		var command = "REBUILDPERFIMPACT"
-
-		param := messages.SetSystemPropReqParam{
-			LEVEL: set_system_property_level,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(req)
+		param := &pb.SetSystemPropertyRequest_Param{Level: set_system_property_level}
+		req := &pb.SetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendSetSystemPropertyRpc(req)
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
