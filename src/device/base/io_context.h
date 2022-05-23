@@ -84,6 +84,8 @@ public:
     virtual void ClearOutOfMemoryRetryCount(void);
     virtual uint32_t GetOutOfMemoryRetryCount(void);
 
+    virtual BackendEvent GetEventType(void);
+
 private:
     UbioSmartPtr ubio;
     std::list<IOContext*>::iterator keyForPendingIOList;

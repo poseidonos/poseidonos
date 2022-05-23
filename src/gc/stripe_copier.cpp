@@ -32,29 +32,29 @@
 
 #include "src/gc/stripe_copier.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include "Air.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_read_completion.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/logger/logger.h"
 #include "src/include/backend_event.h"
 #include "src/include/meta_const.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 StripeCopier::StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex)
 : StripeCopier(victimStripeId, meta, copyIndex,
-                nullptr, nullptr,
-                EventSchedulerSingleton::Instance())
+      nullptr, nullptr,
+      EventSchedulerSingleton::Instance())
 {
 }
 
 StripeCopier::StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex,
-                        EventSmartPtr inputCopyEvent, EventSmartPtr inputStripeCopier,
-                        EventScheduler* inputEventScheduler)
+    EventSmartPtr inputCopyEvent, EventSmartPtr inputStripeCopier,
+    EventScheduler* inputEventScheduler)
 : victimStripeId(victimStripeId),
   meta(meta),
   loadedValidBlock(false),
@@ -193,12 +193,12 @@ StripeCopier::CopyEvent::Execute(void)
 
     CallbackSmartPtr callback;
     callback = std::make_shared<CopierReadCompletion>(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
-                                                    listIndex, buffer, meta, stripeId);
+        listIndex, buffer, meta, stripeId);
     callback->SetEventType(BackendEvent_GC);
 
     iIOSubmitHandler->SubmitAsyncIO(IODirection::READ,
-                                    bufferList, lsa, numPage,
-                                    partitionType, callback, arrayIndex);
+        bufferList, lsa, numPage,
+        partitionType, callback, arrayIndex);
     return true;
 }
 

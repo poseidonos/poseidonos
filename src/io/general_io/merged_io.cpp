@@ -40,9 +40,9 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
-#include "src/array_mgmt/array_manager.h"
-
 #include <string>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -120,7 +120,6 @@ MergedIO::Process(int arrayId)
         event->SetEventType(callback->GetEventType());
         event->SetCallee(callback);
         ubio->SetCallback(event);
-
         ubio->SetEventType(callback->GetEventType());
         if (ioDispatcher->Submit(ubio) < 0)
         {
