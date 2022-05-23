@@ -108,6 +108,8 @@ TEST_F(MioStateExecuteEntryTexture, DispatchHandler_testIfTheCallbackSetByTheCon
     handler = std::bind(&MioStateExecuteEntryTexture::CallbackTest, this, std::placeholders::_1);
     expNextState = MioState::Error;
 
+    EXPECT_FALSE(result);
+
     entry = new MioStateExecuteEntry(state, handler, expNextState);
     entry->DispatchHandler(MioState::Complete);
 
