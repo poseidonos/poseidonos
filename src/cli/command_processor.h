@@ -44,6 +44,8 @@ using grpc_cli::SystemStopRequest;
 using grpc_cli::SystemStopResponse;
 using grpc_cli::GetSystemPropertyRequest;
 using grpc_cli::GetSystemPropertyResponse;
+using grpc_cli::SetSystemPropertyRequest;
+using grpc_cli::SetSystemPropertyResponse;
 
 class CommandProcessor
 {
@@ -54,6 +56,7 @@ public:
     Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
     Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
     Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
+    Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
 
 private:
     bool _isPosTerminating;

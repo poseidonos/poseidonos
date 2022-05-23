@@ -25,6 +25,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/SystemInfo",
   "/grpc_cli.PosCli/SystemStop",
   "/grpc_cli.PosCli/GetSystemProperty",
+  "/grpc_cli.PosCli/SetSystemProperty",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -37,6 +38,7 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   : channel_(channel), rpcmethod_SystemInfo_(PosCli_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SystemStop_(PosCli_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetSystemProperty_(PosCli_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetSystemProperty_(PosCli_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -108,6 +110,29 @@ void PosCli::Stub::experimental_async::GetSystemProperty(::grpc::ClientContext* 
   return result;
 }
 
+::grpc::Status PosCli::Stub::SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc_cli::SetSystemPropertyResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::SetSystemPropertyRequest, ::grpc_cli::SetSystemPropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetSystemProperty_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::SetSystemPropertyRequest, ::grpc_cli::SetSystemPropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSystemProperty_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSystemProperty_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* PosCli::Stub::PrepareAsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::SetSystemPropertyResponse, ::grpc_cli::SetSystemPropertyRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetSystemProperty_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* PosCli::Stub::AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetSystemPropertyRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -139,6 +164,16 @@ PosCli::Service::Service() {
              ::grpc_cli::GetSystemPropertyResponse* resp) {
                return service->GetSystemProperty(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[3],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetSystemPropertyRequest, ::grpc_cli::SetSystemPropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::SetSystemPropertyRequest* req,
+             ::grpc_cli::SetSystemPropertyResponse* resp) {
+               return service->SetSystemProperty(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -159,6 +194,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::GetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::SetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response) {
   (void) context;
   (void) request;
   (void) response;

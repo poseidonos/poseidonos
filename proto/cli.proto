@@ -22,6 +22,12 @@ service PosCli {
       		get: "/v1/get_system_property"
     	};
 	}
+
+	rpc SetSystemProperty (SetSystemPropertyRequest) returns (SetSystemPropertyResponse) {
+		option (google.api.http) = {
+      		get: "/v1/set_system_property/{level}"
+    	};
+	}
 }
 
 message Status {
@@ -87,6 +93,26 @@ message GetSystemPropertyResponse {
 			string rebuild_policy = 1;
 		}
 		Data data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetSystemPropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string level = 1;
+	}
+	Param param = 4;
+}
+
+message SetSystemPropertyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
 	}
 	Result result = 3;
 	PosInfo info = 4;
