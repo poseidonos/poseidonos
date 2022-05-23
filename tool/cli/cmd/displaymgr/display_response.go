@@ -561,6 +561,18 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		json.Unmarshal([]byte(resJSON), &res)
 		fmt.Println(res.RESULT.STATUS.DESCRIPTION)
 
+	case "STOPPOS":
+		res := messages.Response{}
+		json.Unmarshal([]byte(resJSON), &res)
+
+		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
+			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
+				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+			return
+		}
+
+		fmt.Println("PoseidonOS termination has been requested. PoseidonOS will be terminated soon.")
+
 	default:
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)

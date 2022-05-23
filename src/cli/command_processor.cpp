@@ -86,7 +86,7 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     {
         _SetPosTerminating(true);
         pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
-        _SetEventStatus(EID(POS_TERMINATION_TRIGGERED), reply->mutable_result()->mutable_status());
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
     }
     else
