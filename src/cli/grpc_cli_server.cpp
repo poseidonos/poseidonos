@@ -9,42 +9,42 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 using grpc_cli::PosCli;
-using grpc_cli::SystemInfoRequest;
-using grpc_cli::SystemInfoResponse;
-using grpc_cli::SystemStopRequest;
-using grpc_cli::SystemStopResponse;
 
 CommandProcessor* pc;
 
 class PosCliServiceImpl final : public PosCli::Service {
-  Status SystemInfo(ServerContext* context, const SystemInfoRequest* request,
-                  SystemInfoResponse* reply) override {
+  grpc::Status
+  SystemInfo(ServerContext* context, const SystemInfoRequest* request,
+                  SystemInfoResponse* reply) override
+  {
+      grpc::Status status = pc->ExecuteSystemInfoCommand(request, reply);
+    
+      return status;
+    }
 
-    Status status = pc->ExecuteSystemInfoCommand(request, reply);
+  grpc::Status
+  SystemStop(ServerContext* context, const SystemStopRequest* request,
+                  SystemStopResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteSystemStopCommand(request, reply);
     
     return status;
   }
 
-  Status SystemStop(ServerContext* context, const SystemStopRequest* request,
-                  SystemStopResponse* reply) override {
-
-    Status status = pc->ExecuteSystemStopCommand(request, reply);
+  grpc::Status
+  GetSystemProperty(ServerContext* context, const GetSystemPropertyRequest* request,
+                  GetSystemPropertyResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteGetSystemPropertyCommand(request, reply);
     
     return status;
   }
 
-    Status GetSystemProperty(ServerContext* context, const GetSystemPropertyRequest* request,
-                  GetSystemPropertyResponse* reply) override {
-
-    Status status = pc->ExecuteGetSystemPropertyCommand(request, reply);
-    
-    return status;
-  }
-
-  Status SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
-                  SetSystemPropertyResponse* reply) override {
-
-    Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
+  grpc::Status
+  SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
+                  SetSystemPropertyResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
     
     return status;
   }
