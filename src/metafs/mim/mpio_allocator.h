@@ -60,8 +60,8 @@ public:
     virtual size_t GetFreeCount(void) const
     {
         size_t total = 0;
-        for (uint32_t type = 0; type < (uint32_t)MpioType::Last; ++type)
-            pool_[(uint32_t)type]->GetFreeCount();
+        for (uint32_t type = 0; type < (uint32_t)MpioType::Max; ++type)
+            total += pool_[(uint32_t)type]->GetFreeCount();
         return total;
     }
     virtual size_t GetFreeCount(const MpioType type) const
