@@ -114,11 +114,8 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
             return returnValue;
         }
 
-        uint32_t arrayId = iContextManager->GetArrayId();
-        segmentCtx->UpdateGcFreeSegment(arrayId);
         int numOfFreeSegments = segmentCtx->GetNumOfFreeSegment();
-
-        if (MODE_URGENT_GC != gcCtx->GetCurrentGcMode(numOfFreeSegments))
+        if (MODE_URGENT_GC != gcCtx->UpdateCurrentGcMode(numOfFreeSegments))
         {
             IBlockAllocator* iBlockAllocator =
                 AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);

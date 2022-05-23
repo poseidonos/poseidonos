@@ -76,7 +76,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     rebuildCtx = new RebuildCtx(tp, info);
     blockAllocStatus = new BlockAllocationStatus();
     gcCtx = new GcCtx(blockAllocStatus);
-    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx);
+    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx, arrayId);
 
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
 
@@ -106,44 +106,6 @@ ContextManager::Init(void)
     segmentCtx->Init();
     rebuildCtx->Init();
     ioManager->Init();
-}
-
-void
-ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
-{
-    SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
-    bool segmentFreed = segmentCtx->IncreaseOccupiedStripeCount(segId);
-
-    if (segmentFreed == true)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
-            "[UpdateOccupiedStripeCount] segmentId:{} freed by occupied stripe count", segId);
-
-        segmentCtx->UpdateGcFreeSegment(arrayId);
-    }
-}
-
-void
-ContextManager::ValidateBlks(VirtualBlks blks)
-{
-    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    segmentCtx->IncreaseValidBlockCount(segId, blks.numBlks);
-}
-
-void
-ContextManager::InvalidateBlks(VirtualBlks blks, bool isForced)
-{
-    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, blks.numBlks, isForced);
-
-    if (segmentFreed == true)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
-            "[InvalidateBlks] segmentId:{} decrement count:{}, remainCnt:{} segmentFreed:{}",
-            segId, blks.numBlks, segmentCtx->GetValidBlockCount(segId), segmentFreed);
-
-        segmentCtx->UpdateGcFreeSegment(arrayId);
-    }
 }
 
 void
@@ -259,12 +221,6 @@ uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
-}
-
-uint32_t
-ContextManager::GetArrayId(void)
-{
-    return arrayId;
 }
 
 } // namespace pos

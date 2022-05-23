@@ -45,7 +45,6 @@ class IContextManager
 {
 public:
     virtual int FlushContexts(EventSmartPtr callback, bool sync) = 0;
-    virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
     virtual uint64_t GetStoredContextVersion(int owner) = 0;
 
     virtual SegmentId AllocateFreeSegment(void) = 0;
@@ -59,7 +58,6 @@ public:
 
     virtual SegmentCtx* GetSegmentCtx(void) = 0;
     virtual GcCtx* GetGcCtx(void) = 0;
-    virtual uint32_t GetArrayId(void) = 0;
 };
 
 } // namespace pos

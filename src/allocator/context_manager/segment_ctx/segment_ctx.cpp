@@ -43,13 +43,13 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_)
+    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_)
+: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_, arrayId_)
 {
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
+    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   rebuildList(rebuildSegmentList),
@@ -58,7 +58,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
   gcCtx(gcCtx_),
-  tp(tp_)
+  tp(tp_),
+  arrayId(arrayId_)
 {
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
@@ -82,8 +83,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-    AllocatorAddressInfo* info, GcCtx* gcCtx_)
-: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_)
+    AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_)
+: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_, arrayId_)
 {
 }
 
@@ -182,7 +183,14 @@ SegmentCtx::MoveToFreeState(SegmentId segId)
 }
 
 void
-SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
+SegmentCtx::ValidateBlks(VirtualBlks blks)
+{
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    _IncreaseValidBlockCount(segId, blks.numBlks);
+}
+
+void
+SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
     uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
     if (increasedValue > addrInfo->GetblksPerSegment())
@@ -194,7 +202,14 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 bool
-SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced)
+SegmentCtx::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    return _DecreaseValidBlockCount(segId, blks.numBlks, isForced);
+}
+
+bool
+SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced)
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, isForced);
 
@@ -220,7 +235,14 @@ SegmentCtx::GetValidBlockCount(SegmentId segId)
 }
 
 bool
-SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
+SegmentCtx::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
+    return _IncreaseOccupiedStripeCount(segId);
+}
+
+bool
+SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
 {
     uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
     bool segmentFreed = false;
@@ -390,14 +412,10 @@ SegmentCtx::AllocateFreeSegment(void)
             segmentInfos[segId].MoveToNvramState();
             segmentList[SegmentState::NVRAM]->AddToList(segId);
 
-            uint64_t freeSegCount = GetNumOfFreeSegmentWoLock();
+            int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_INFO(EID(ALLOCATOR_START),
-                "[AllocateFreeSegment] allocate segmentId:{}, free segment count:{}",
-                segId, freeSegCount);
-            POSMetricValue v;
-            v.gauge = freeSegCount;
-            tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
-            gcCtx->GetCurrentGcMode(freeSegCount);
+                "[AllocateFreeSegment] segmentId:{}, numFreeSegments:{}",
+                segId, numFreeSegment);
 
             return segId;
         }
@@ -528,10 +546,26 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
 
     segmentList[SegmentState::FREE]->AddToList(segmentId);
 
-    int numOfFreeSegments = GetNumOfFreeSegment();
+    int numOfFreeSegments = _OnNumFreeSegmentChanged();
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED),
-        "[FreeSegment] release segmentId:{} was freed, free segment count:{}", segmentId, numOfFreeSegments);
-    gcCtx->GetCurrentGcMode(numOfFreeSegments);
+        "[SegmentFreed] segmentId:{}, numFreeSegments:{}",
+        segmentId, numOfFreeSegments);
+}
+
+int
+SegmentCtx::_OnNumFreeSegmentChanged(void)
+{
+    int numOfFreeSegments = GetNumOfFreeSegment();
+
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numOfFreeSegments, arrayId);
+
+    gcCtx->UpdateCurrentGcMode(numOfFreeSegments);
+
+    POSMetricValue v;
+    v.gauge = numOfFreeSegments;
+    tp->PublishData(TEL30000_ALCT_FREE_SEG_CNT, v, MT_GAUGE);
+
+    return numOfFreeSegments;
 }
 
 void
@@ -553,6 +587,7 @@ SegmentCtx::ResetSegmentsStates(void)
     }
 
     _RebuildSegmentList();
+    _OnNumFreeSegmentChanged();
 }
 
 SegmentId
@@ -773,13 +808,6 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
             segmentInfos[segId].SetOccupiedStripeCount(src[segId]);
         }
     }
-}
-
-void
-SegmentCtx::UpdateGcFreeSegment(uint32_t arrayId)
-{
-    int numFreeSegments = GetNumOfFreeSegment();
-    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayId);
 }
 
 } // namespace pos

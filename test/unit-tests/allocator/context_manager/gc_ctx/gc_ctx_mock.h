@@ -10,7 +10,8 @@ class MockGcCtx : public GcCtx
 {
 public:
     using GcCtx::GcCtx;
-    MOCK_METHOD(GcMode, GetCurrentGcMode, (int numFreeSegments), (override));
+    MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
+    MOCK_METHOD(GcMode, UpdateCurrentGcMode, (int numFreeSegments), (override));
 };
 
 } // namespace pos

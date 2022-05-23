@@ -72,7 +72,7 @@ GcMapUpdate::_DoSpecificJob(void)
 
     StripeId currentLsid = stripe->GetUserLsid();
     stripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
-    contextManager->UpdateOccupiedStripeCount(currentLsid);
+    segmentCtx->UpdateOccupiedStripeCount(currentLsid);
 
     uint32_t validCount = mapUpdateInfoList.blockMapUpdateList.size();
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
