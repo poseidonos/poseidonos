@@ -7,8 +7,24 @@ Apply a filtering policy to logger.
 
 Apply a filtering policy to logger.
 
+  - Filtering file: when executing this command, PoseidonOS reads a filtering policy 
+  stored in a file. You can set the file path of the filter in the PoseidonOS configuration 
+  (the default path is /etc/conf/filter). If the file does not exist, you can create one.
+  
+  - Filter file format (EBNF):
+  [ include: FilterList ]
+  [ exclude: FIlterList ]
+  FilterList = FilterNumber | FilterNumber,FilterList
+  FilterNumber = { ( Number ) | ( Range ) }
+  Number = { Digit }
+  Range = Number-Number
+  
+  - Filter file example:
+  include: 1002,1005,6230,2000-3000
+  exclude: 1006,5003,8000-9000
+
 Syntax:
-	poseidonos-cli logger apply-filter
+  poseidonos-cli logger apply-filter
           
 
 ```
