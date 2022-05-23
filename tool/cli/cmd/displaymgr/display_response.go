@@ -8,7 +8,6 @@ import (
 	"os"
 	"pnconnector/src/util"
 	"strconv"
-	"strings"
 	"text/tabwriter"
 
 	"code.cloudfoundry.org/bytefmt"
@@ -577,9 +576,17 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 func printEventInfo(code int, name string, desc string, cause string, solution string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	fmt.Fprint(w, name+"\t-\t")
-	fmt.Fprint(w, desc)
-	fmt.Fprint(w, " because "+strings.ToLower(cause))
-	fmt.Fprintln(w, " (solution: "+strings.ToLower(solution)+")")
+	fmtStr := "%s (%d) - %s\n"
+
+	if cause != "" {
+		fmtStr += "Cause: " + cause + "\n"
+	}
+
+	if solution != "" {
+		fmtStr += "Solution: " + solution + "\n"
+	}
+
+	fmt.Fprintf(w, fmtStr, name, code, desc)
+
 	w.Flush()
 }

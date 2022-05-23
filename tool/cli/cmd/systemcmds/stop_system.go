@@ -27,7 +27,7 @@ Syntax:
 
 		if stop_system_isForced == false {
 			conf := displaymgr.AskConfirmation(
-				"WARNING: This may affect the I/O operations in progress!!! " +
+				"WARNING: This may affect the I/O operations in progress!!!\n" +
 					"Do you really want to stop PoseidonOS?")
 			if conf == false {
 				os.Exit(0)
