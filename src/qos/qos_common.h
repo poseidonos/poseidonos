@@ -88,7 +88,12 @@ const uint32_t WT_LEVEL2 = 70;
 const uint32_t WT_LEVEL3 =  6000;
 
 const int LEVEL_SUPPORT = 3;
-const int weightArr[] = {1, 2, 70, 6000};
+
+// Rebuild Impact is provided as "experimental" feature.
+// Please provide weight as below when you want to assign rebuild impact.
+// const int weightArr[] = {1, 2, 70, 6000};
+
+const int weightArr[] = {1, 2, 2, 2};
 const int FALLBACK_WEIGHT = weightArr[0];
 
 const int PRIO_WT_HIGHEST = 20;
