@@ -40,6 +40,31 @@ namespace pos
 #define TEL_RUNID_LABEL_KEY "run_id"
 
     // ID = "modulecode_itemname_collectiontype(count/history)"
+    static const std::string TEL20000_READ_UNKNOWN_IOPS_PER_SSD = "read_unknown_iops_per_ssd";
+    static const std::string TEL20001_READ_META_IOPS_PER_SSD = "read_meta_iops_per_ssd";
+    static const std::string TEL20002_READ_GC_IOPS_PER_SSD = "read_gc_iops_per_ssd";
+    static const std::string TEL20003_READ_HOST_IOPS_PER_SSD = "read_host_iops_per_ssd";
+    static const std::string TEL20004_READ_FLUSH_IOPS_PER_SSD = "read_flush_iops_per_ssd";
+    static const std::string TEL20005_READ_REBUILD_IOPS_PER_SSD = "read_rebuild_iops_per_ssd";
+    static const std::string TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD = "read_unknown_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20007_READ_META_RATE_BYTES_PER_SECOND_PER_SSD = "read_meta_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20008_READ_GC_RATE_BYTES_PER_SECOND_PER_SSD = "read_gc_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20009_READ_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "read_host_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20010_READ_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "read_flush_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "read_rebuild_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD = "write_unknown_iops_per_ssd";
+    static const std::string TEL20013_WRITE_META_IOPS_PER_SSD = "write_meta_iops_per_ssd";
+    static const std::string TEL20014_WRITE_GC_IOPS_PER_SSD = "write_gc_iops_per_ssd";
+    static const std::string TEL20015_WRITE_HOST_IOPS_PER_SSD = "write_host_iops_per_ssd";
+    static const std::string TEL20016_WRITE_FLUSH_IOPS_PER_SSD = "write_flush_iops_per_ssd";
+    static const std::string TEL20017_WRITE_REBUILD_IOPS_PER_SSD = "write_rebuild_iops_per_ssd";
+    static const std::string TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD = "write_unknown_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20019_WRITE_META_RATE_BYTES_PER_SECOND_PER_SSD = "write_meta_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD = "write_gc_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "write_host_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "write_flush_rate_bytes_per_second_per_ssd";
+    static const std::string TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "write_rebuild_rate_bytes_per_second_per_ssd";
+
     static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";
     static const std::string TEL30001_ALCT_ALCTX_PENDINGIO_CNT = "alct_allocctx_pendio_cnt";
     static const std::string TEL30002_ALCT_GCVICTIM_SEG = "alct_gcvictim_segid";

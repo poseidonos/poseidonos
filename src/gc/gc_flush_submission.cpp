@@ -37,44 +37,42 @@
 #include <string>
 
 #include "src/allocator/allocator.h"
-#include "src/allocator/stripe/stripe.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/backend_event.h"
-#include "src/logger/logger.h"
-#include "src/gc/gc_flush_completion.h"
-#include "src/io/general_io/rba_state_manager.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-
-#include "src/include/address_type.h"
-
 #include "src/allocator/i_block_allocator.h"
-#include "src/io/general_io/translator.h"
-#include "src/io/general_io/rba_state_service.h"
-
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/stripe/stripe.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array/service/array_service_layer.h"
 #include "src/array_mgmt/array_manager.h"
-#include "src/volume/volume_service.h"
+#include "src/bio/ubio.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/flow_control/flow_control_service.h"
-#include "src/array/service/array_service_layer.h"
+#include "src/gc/gc_flush_completion.h"
+#include "src/include/address_type.h"
+#include "src/include/backend_event.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/general_io/rba_state_manager.h"
+#include "src/io/general_io/rba_state_service.h"
+#include "src/io/general_io/translator.h"
+#include "src/logger/logger.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
 GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
+    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
 : GcFlushSubmission(arrayName, blkInfoList, volumeId, dataBuffer, gcStripeManager, nullptr,
-                    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
-                    IIOSubmitHandler::GetInstance(),
-                    FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
-                    ArrayMgr()->GetInfo(arrayName)->arrayInfo)
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
+      IIOSubmitHandler::GetInstance(),
+      FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo)
 {
 }
 
 GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
-                                    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                                    IIOSubmitHandler* inputIIOSubmitHandler,
-                                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
+    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
+    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
+    IIOSubmitHandler* inputIIOSubmitHandler,
+    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
 : Event(false, BackendEvent_Flush),
   arrayName(arrayName),
   blkInfoList(blkInfoList),
@@ -167,13 +165,14 @@ GcFlushSubmission::Execute(void)
         startLSA, blocksInStripe,
         USER_DATA,
         callback,
-        iArrayInfo->GetIndex());
+        iArrayInfo->GetIndex(),
+        false);
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
-            "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",
-            arrayName,
-            logicalStripeId,
-            (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
+        "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",
+        arrayName,
+        logicalStripeId,
+        (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }

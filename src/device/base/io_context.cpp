@@ -190,4 +190,10 @@ IOContext::CompleteIo(IOErrorType errorType)
     ubio = nullptr;
 }
 
+BackendEvent
+IOContext::GetEventType(void)
+{
+    return ubio->GetEventType();
+}
+
 } // namespace pos
