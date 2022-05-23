@@ -42,6 +42,8 @@ enum class POS_EVENT_ID
     // ------------------- PoseidonOS (0 - 999) -------------------
     SUCCESS = 0,
     POS_STARTED,
+    POS_TERMINATION_TRIGGERED,
+    POS_STOP_REJECTED_BEING_TERMINATED,
     POS_TERMINATED,
     POS_EVENT_ID_END = 999,
 
@@ -1085,6 +1087,19 @@ class PosEventInfoEntry
 static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
     {
         // map<eventId, PosEventInfoEntry(eventName, message, cause)>
+        {(int)POS_EVENT_ID::SUCCESS,
+            new PosEventInfoEntry("SUCCESS",
+                "", "",
+                "")},
+        {(int)POS_EVENT_ID::POS_TERMINATION_TRIGGERED,
+            new PosEventInfoEntry("POS_TERMINATION_TRIGGERED",
+                "PoseidonOS termination has been requested. Entering a termination process..", "",
+                "")},
+        {(int)POS_EVENT_ID::POS_STOP_REJECTED_BEING_TERMINATED,
+            new PosEventInfoEntry("POS_STOP_REJECTED_BEING_TERMINATED",
+                "STOPPOS command has been rejected.", "PoseidonOS is already in termination process.",
+                "Please wait a moment.")},
+
         {(int)POS_EVENT_ID::STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS,
             new PosEventInfoEntry("STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS",
                 "Failed to terminate PoseidonOS", "At least one array is being mounted",

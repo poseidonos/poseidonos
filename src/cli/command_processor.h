@@ -38,6 +38,7 @@
 
 using grpc::Status;
 using grpc::StatusCode;
+using grpc_cli::PosInfo;
 using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
 using grpc_cli::SystemStopRequest;
@@ -53,14 +54,16 @@ public:
     CommandProcessor(void);
     ~CommandProcessor(void);
     void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
-    Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
-    Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
-    Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
-    Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
+    grpc::Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
+    grpc::Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
+    grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
+    grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
 
 private:
     bool _isPosTerminating;
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
+    void _SetEventStatus(int eventId, grpc_cli::Status *status);
+    void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
 };
