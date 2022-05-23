@@ -45,8 +45,9 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
-#include "src/array_mgmt/array_manager.h"
 #include <set>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {

@@ -129,10 +129,56 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
             if (UbioDir::Read == dir)
             {
                 airlog("PERF_SSD", "AIR_READ", ssdId, size);
+                switch (ioCtx->GetEventType())
+                {
+                    case BackendEvent::BackendEvent_Unknown:
+                        airlog("PERF_SSD_Read", "AIR_UNKNOWN", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_MetaIO:
+                        airlog("PERF_SSD_Read", "AIR_META", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_GC:
+                        airlog("PERF_SSD_Read", "AIR_GC", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_FrontendIO:
+                        airlog("PERF_SSD_Read", "AIR_HOST", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_Flush:
+                        airlog("PERF_SSD_Read", "AIR_FLUSH", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_UserdataRebuild:
+                        airlog("PERF_SSD_Read", "AIR_REBUILD", ssdId, size);
+                        break;
+                    default:
+                        break;
+                }
             }
             else if (UbioDir::Write == dir)
             {
                 airlog("PERF_SSD", "AIR_WRITE", ssdId, size);
+                switch (ioCtx->GetEventType())
+                {
+                    case BackendEvent::BackendEvent_Unknown:
+                        airlog("PERF_SSD_Write", "AIR_UNKNOWN", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_MetaIO:
+                        airlog("PERF_SSD_Write", "AIR_META", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_GC:
+                        airlog("PERF_SSD_Write", "AIR_GC", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_FrontendIO:
+                        airlog("PERF_SSD_Write", "AIR_HOST", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_Flush:
+                        airlog("PERF_SSD_Write", "AIR_FLUSH", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_UserdataRebuild:
+                        airlog("PERF_SSD_Write", "AIR_REBUILD", ssdId, size);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             devCtx->ioCompletionCount++;

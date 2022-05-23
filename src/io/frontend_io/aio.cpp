@@ -222,6 +222,7 @@ AIO::CreateVolumeIo(pos_io& posIo)
     volumeIo->SetVolumeId(posIo.volume_id);
     uint64_t sectorRba = ChangeByteToSector(posIo.offset);
     volumeIo->SetSectorRba(sectorRba);
+    volumeIo->SetEventType(BackendEvent::BackendEvent_FrontendIO);
 
     CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
         ioContext));
