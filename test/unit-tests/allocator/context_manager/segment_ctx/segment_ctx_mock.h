@@ -23,11 +23,9 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(bool, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt, bool isForced), (override));
+    MOCK_METHOD(void, MoveToFreeState, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(bool, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId), (override));
     MOCK_METHOD(void, ResetSegmentsStates, (), (override));
     MOCK_METHOD(void, AllocateSegment, (SegmentId segId), (override));
@@ -46,8 +44,9 @@ public:
     MOCK_METHOD(bool, LoadRebuildList, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
-    MOCK_METHOD(void, UpdateGcFreeSegment, (uint32_t arrayId), (override));
-    MOCK_METHOD(void, MoveToFreeState, (SegmentId segId), (override));
+    MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
+    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool isForced), (override));
+    MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
 };
 
 } // namespace pos

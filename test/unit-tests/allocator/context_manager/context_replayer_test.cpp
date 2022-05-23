@@ -132,7 +132,6 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
 {
     // given
     AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(10);
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
@@ -140,7 +139,7 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
     ContextReplayer ctxReplayer(allocCtx, segCtx, &addrInfo);
 
     // given
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount(1)).WillOnce(Return(false));
+    EXPECT_CALL(*segCtx, UpdateOccupiedStripeCount(10));
     // when
     ctxReplayer.ReplayStripeFlushed(10);
 

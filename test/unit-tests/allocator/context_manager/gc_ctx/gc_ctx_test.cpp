@@ -16,12 +16,17 @@ TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
 
     gcCtx.SetNormalGcThreshold(10);
     gcCtx.SetUrgentThreshold(5);
-    gcCtx.GetCurrentGcMode(8);
-    // when
-    gcCtx.GetCurrentGcMode(13);
+
+    // when 1
+    int numFreeSegments = 8;
+    GcMode gcMode = gcCtx.UpdateCurrentGcMode(numFreeSegments);
+
+    // then 2
+    EXPECT_EQ(gcMode, GcMode::MODE_NORMAL_GC);
+    EXPECT_EQ(gcMode, gcCtx.GetCurrentGcMode());
 }
 
-TEST(GcCtx, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
+TEST(GcCtx, UpdateCurrentGcMode_ByNumberOfFreeSegment)
 {
     // given
     NiceMock<MockBlockAllocationStatus> blockAllocStatus;
@@ -31,35 +36,41 @@ TEST(GcCtx, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment)
     gcCtx->SetUrgentThreshold(5);
 
     // when 1.
-    GcMode ret = gcCtx->GetCurrentGcMode(11);
+    int numFreeSegments = 11;
+    GcMode ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
 
     // then 1.
     EXPECT_EQ(MODE_NO_GC, ret);
 
     // when 2.
-    ret = gcCtx->GetCurrentGcMode(10);
+    numFreeSegments = 10;
+    ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
     // then 2.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // when 3.
-    ret = gcCtx->GetCurrentGcMode(9);
+    numFreeSegments = 9;
+    ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
     // then 3.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     EXPECT_CALL(blockAllocStatus, ProhibitUserBlockAllocation);
     // when 4.
-    ret = gcCtx->GetCurrentGcMode(5);
+    numFreeSegments = 5;
+    ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
     // then 4.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 
     // when 5.
-    ret = gcCtx->GetCurrentGcMode(4);
+    numFreeSegments = 4;
+    ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
     // then 5.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 
     EXPECT_CALL(blockAllocStatus, PermitUserBlockAllocation);
     // when 6.
-    ret = gcCtx->GetCurrentGcMode(8);
+    numFreeSegments = 8;
+    ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
     // then 6.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 }

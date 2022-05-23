@@ -153,7 +153,6 @@ ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
     }
 
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
-    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
@@ -164,10 +163,7 @@ ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
         return "N/A";
     }
 
-    uint32_t arrayId = iContextManager->GetArrayId();
-    segmentCtx->UpdateGcFreeSegment(arrayId);
-    int numOfFreeSegments = segmentCtx->GetNumOfFreeSegment();
-    GcMode gcMode = gcCtx->GetCurrentGcMode(numOfFreeSegments);
+    GcMode gcMode = gcCtx->GetCurrentGcMode();
 
     std::string strGCMode;
 

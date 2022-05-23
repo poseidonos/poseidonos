@@ -67,7 +67,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
 
     // SegmentCtx (Real)
-    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx);
+    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx, 0);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
@@ -75,11 +75,21 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
         int nanoSec = std::rand() % 100;
         std::thread th1(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
-        std::thread th2(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1, false);
+        VirtualBlks blksToInvalidate = {
+            .startVsa = {
+                .stripeId = 0,
+                .offset = 0},
+            .numBlks = 1};
+        std::thread th2(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate, false);
         th1.join();
         th2.join();
 
-        std::thread th3(&SegmentCtx::DecreaseValidBlockCount, segmentCtx, 0, 1, false);
+        VirtualBlks blksToInvalidate2 = {
+            .startVsa = {
+                .stripeId = 3,
+                .offset = 0},
+            .numBlks = 1};
+        std::thread th3(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate2, false);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
         std::thread th4(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         th3.join();
@@ -203,7 +213,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockContextReplayer>* contextReplayer = new NiceMock<MockContextReplayer>;
     NiceMock<MockTelemetryPublisher> tp;
-    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx);
+    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, 0);
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
 
     std::mutex allocatorLock;
@@ -216,16 +226,22 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     // Set valid block count of each segments to 32 for test
     uint32_t maxValidBlkCount = 32;
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlkCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
-        segmentCtx->IncreaseValidBlockCount(segId, maxValidBlkCount);
+        VirtualBlks blks = {
+            .startVsa = {
+                .stripeId = segId * STRIPE_PER_SEGMENT,
+                .offset = 0},
+            .numBlks = maxValidBlkCount};
+        segmentCtx->ValidateBlks(blks);
     }
 
     // When : All stripes in each segment is occupied
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
     for (StripeId lsid = 0; lsid < STRIPE_PER_SEGMENT * numSegments; lsid++)
     {
-        contextManager.UpdateOccupiedStripeCount(lsid);
+        segmentCtx->UpdateOccupiedStripeCount(lsid);
     }
 
     // Then: State of occupied segments must be SSD
@@ -248,7 +264,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
             .numBlks = maxValidBlkCount,
         };
 
-        contextManager.InvalidateBlks(blks, false);
+        segmentCtx->InvalidateBlks(blks, false);
     }
 
     // Then: State of overwritten segments must be FREE and occupied stripe count is zero

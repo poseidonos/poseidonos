@@ -41,23 +41,24 @@
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 
 namespace pos
 {
 class TelemetryPublisher;
-class SegmentCtx : public IAllocatorFileIoClient
+class SegmentCtx : public IAllocatorFileIoClient, public ISegmentCtx
 {
 public:
     SegmentCtx(void) = default;
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_);
+        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_);
     SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_,
-        GcCtx* gcCtx_);
+        GcCtx* gcCtx_, int arrayId_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-        AllocatorAddressInfo* info, GcCtx* gcCtx_);
+        AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_);
     virtual ~SegmentCtx(void);
 
     // Only for UT
@@ -79,11 +80,8 @@ public:
     virtual int GetNumSections(void);
 
     virtual void MoveToFreeState(SegmentId segId);
-    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual int GetOccupiedStripeCount(SegmentId segId);
-    virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
     virtual SegmentState GetSegmentState(SegmentId segId);
     virtual void ResetSegmentsStates(void);
 
@@ -108,7 +106,9 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-    virtual void UpdateGcFreeSegment(uint32_t arrayId);
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
@@ -125,6 +125,12 @@ private:
     bool _SetVictimSegment(SegmentId victimSegment);
     void _BuildRebuildSegmentListFromTheList(SegmentState state);
     void _UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment);
+
+    void _IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    bool _DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
+    bool _IncreaseOccupiedStripeCount(SegmentId segId);
+
+    int _OnNumFreeSegmentChanged(void);
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -145,6 +151,8 @@ private:
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
+
+    int arrayId;
 };
 
 } // namespace pos

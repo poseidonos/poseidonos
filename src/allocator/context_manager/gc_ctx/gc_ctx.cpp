@@ -72,7 +72,13 @@ GcCtx::SetUrgentThreshold(int inputThreshold)
 }
 
 GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
+GcCtx::GetCurrentGcMode(void)
+{
+    return curGcMode;
+}
+
+GcMode
+GcCtx::UpdateCurrentGcMode(int numFreeSegments)
 {
     pos::GcMode newGcMode = curGcMode;
 

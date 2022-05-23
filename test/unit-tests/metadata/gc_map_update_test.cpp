@@ -72,7 +72,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
 
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
     ON_CALL(stripe, GetVsid).WillByDefault(Return(vsid));
-    EXPECT_CALL(contextManager, UpdateOccupiedStripeCount(userLsid)).Times(1);
+    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
 
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
     {

@@ -109,8 +109,7 @@ void
 ContextReplayer::ReplayStripeFlushed(StripeId userLsid)
 {
     // increase occupied stripe count
-    SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-    segmentCtx->IncreaseOccupiedStripeCount(segId);
+    segmentCtx->UpdateOccupiedStripeCount(userLsid);
 }
 
 void

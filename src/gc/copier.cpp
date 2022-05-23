@@ -177,10 +177,7 @@ Copier::_CompareThresholdState(void)
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
 
-    uint32_t arrayId = iContextManager->GetArrayId();
-    segmentCtx->UpdateGcFreeSegment(arrayId);
-    int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-    GcMode gcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
+    GcMode gcMode = gcCtx->GetCurrentGcMode();
 
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
@@ -193,6 +190,7 @@ Copier::_CompareThresholdState(void)
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
+            int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
             POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
                 numFreeSegments, victimId);

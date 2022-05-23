@@ -11,8 +11,8 @@ class MockISegmentCtx : public ISegmentCtx
 public:
     using ISegmentCtx::ISegmentCtx;
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
-    MOCK_METHOD(void, InvalidateBlks, (VirtualBlks blks, bool isForced), (override));
-    MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool isForced), (override));
+    MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
 };
 
 } // namespace pos

@@ -92,48 +92,6 @@ TEST(ContextManager, FlushContexts_testFlushStarted)
     EXPECT_LE(0, ret);
 }
 
-TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentIsNotFreed)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(false));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
-TEST(ContextManager, UpdateOccupiedStripeCount_testWhenSegmentFreed)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // expect
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-
-    // when
-    ctxManager.UpdateOccupiedStripeCount(5);
-}
-
 TEST(ContextManager, AllocateFreeSegment_TestFreeSegmentAllocationByState)
 {
     // given
@@ -528,64 +486,6 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleGetter)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
     // when
     ctxManager.NeedRebuildAgain();
-}
-
-TEST(ContextManager, ValidateBlks_TestSimple)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager sut(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    // given
-    VirtualBlkAddr vsa = {
-        .stripeId = 120,
-        .offset = 0};
-    VirtualBlks blks = {
-        .startVsa = vsa,
-        .numBlks = 1};
-
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(100));
-    EXPECT_CALL(*segCtx, IncreaseValidBlockCount(1, 1)).Times(1);
-    // when
-    sut.ValidateBlks(blks);
-}
-
-TEST(ContextManager, InvalidateBlks_TestSimpleSetter)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager sut(&tc, allocCtx, segCtx, reCtx, gcCtx, blockAllocStatus, ioManager, nullptr, &addrInfo, 0);
-
-    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(10));
-
-    VirtualBlkAddr vsa = {
-        .stripeId = 0,
-        .offset = 0};
-    VirtualBlks blks = {
-        .startVsa = vsa,
-        .numBlks = 1};
-    // given 1.
-    EXPECT_CALL(*segCtx, DecreaseValidBlockCount).WillOnce(Return(false));
-    // when 1.
-    sut.InvalidateBlks(blks, false);
-    // given 2.
-    EXPECT_CALL(*segCtx, DecreaseValidBlockCount).WillOnce(Return(true));
-    // when 2.
-    sut.InvalidateBlks(blks, false);
 }
 
 TEST(ContextManager, MakeRebuildTargetSegmentList_TestwithFlushOrwithoutFlush)

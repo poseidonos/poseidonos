@@ -127,7 +127,7 @@ setup_filebeat ()
 		  - type: log
 		    enabled: true
 		    paths:
-		      - /var/log/pos/pos.log
+		      - /mnt/log/pos/pos.log
 		output.logstash:
 		  hosts: ["$(hostname -i):${LOGSTASH_PORT}"]
 		EOF
@@ -136,7 +136,7 @@ setup_filebeat ()
     docker run \
             -d \
             -v ${FILEBEAT_CONF_PATH}:/usr/share/filebeat/filebeat.yml \
-	    -v /var/log/pos:/var/log/pos \
+			-v /var/log:/mnt/log \
             docker.elastic.co/beats/filebeat-oss:8.2.0 -e --strict.perms=false
 }
 
