@@ -103,7 +103,7 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
 }
 
 int
-PosReplicatorManager::CompelteUserIO(uint64_t lsn, int arrayId, int volumeId)
+PosReplicatorManager::CompleteUserIO(uint64_t lsn, int arrayId, int volumeId)
 {
     VolumeIoSmartPtr volumeIo;
     auto itr = donePosIoRequest[arrayId][volumeId].find(lsn);

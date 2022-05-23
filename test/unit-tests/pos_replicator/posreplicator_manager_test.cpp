@@ -53,9 +53,6 @@ PosReplicatorManager_ut::TearDown(void)
 TEST_F(PosReplicatorManager_ut, Init_)
 {
     // Then
-    posReplicatorManager->Init();
-    usleep(1000);
-
     posReplicatorManager->Dispose();
 }
 
@@ -83,7 +80,7 @@ TEST_F(PosReplicatorManager_ut, CompelteUserIO_)
     int arrayId = 0;
     int volumeId = 0;
 
-    posReplicatorManager->CompelteUserIO(lsn, arrayId, volumeId);
+    posReplicatorManager->CompleteUserIO(lsn, arrayId, volumeId);
 
 }
 

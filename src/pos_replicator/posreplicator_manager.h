@@ -67,7 +67,7 @@ public:
     void Clear(void);
 
     int NotifyNewUserIORequest(pos_io io);
-    int CompelteUserIO(uint64_t lsn, int arrayId, int volumeId);
+    int CompleteUserIO(uint64_t lsn, int arrayId, int volumeId);
 
     int UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId);
 

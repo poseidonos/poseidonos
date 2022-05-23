@@ -135,10 +135,8 @@ GrpcSubscriber::ReadBlocks(::grpc::ServerContext* context,
         return ret;
     }
 
-    char buffer[4096]; 
-
     PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::READ, arraySet.second, volumeSet.second,
-        request->rba(), request->num_blocks(), buffer);
+        request->rba(), request->num_blocks(), nullptr);
     return ::grpc::Status::OK;
 }
 
@@ -155,7 +153,7 @@ GrpcSubscriber::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc:
     {
         return ret;
     }
-    PosReplicatorManagerSingleton::Instance()->CompelteUserIO(request->lsn(), arraySet.second, volumeSet.second);
+    PosReplicatorManagerSingleton::Instance()->CompleteUserIO(request->lsn(), arraySet.second, volumeSet.second);
     return ::grpc::Status::OK;    
 }
 

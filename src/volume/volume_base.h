@@ -60,8 +60,7 @@ enum VolumeStatus
 
 enum VolumeReplicationMode
 {
-    InitialSyncMode,
-    RecoveryMode,
+    VolumeSyncMode,
     LiveReplicationMode,
     SingleNodeMode,
     MaxVolumeReplicatorStatus
@@ -126,7 +125,7 @@ public:
         return status;
     }
     VolumeReplicationMode
-    GetReplicatorStatus(void)
+    GetReplicatorMode(void)
     {
         return replicationMode;
     }
