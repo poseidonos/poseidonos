@@ -77,7 +77,7 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
 
                     reply->mutable_result()->mutable_status()->set_code(eventId);
 
-                    return Status(StatusCode::UNAVAILABLE, "");
+                    return Status::OK;
                 }
             }
         }
@@ -131,6 +131,7 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
     reply->mutable_info()->set_version(version);
 
     qos_backend_policy newBackendPolicy;
+
     if (request->param().level().compare("highest") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
@@ -147,15 +148,16 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
         {
             reply->mutable_result()->mutable_status()->set_code(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED));
             reply->mutable_result()->mutable_status()->set_event_name("CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED");
-            return Status(StatusCode::INVALID_ARGUMENT, "");         
+            return Status::OK;
         }
+
         newBackendPolicy.policyChange = true;
         int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
         if (retVal != SUCCESS)
         {
             reply->mutable_result()->mutable_status()->set_code(retVal);
             //reply->mutable_result()->mutable_status()->set_event_name("");
-            return Status(StatusCode::INTERNAL, "");    
+            return Status::OK;
         }
 
         reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
