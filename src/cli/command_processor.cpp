@@ -28,6 +28,8 @@ CommandProcessor::~CommandProcessor(void)
 grpc::Status
 CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply)
 {
+    logger()->SetCommand(request->command());
+    
     reply->set_command(request->command());
     reply->set_rid(request->rid());
     
@@ -37,12 +39,16 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     
+    logger()->ResetCommand();
+
     return grpc::Status::OK;
 }
 
 grpc::Status
 CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply)
 {
+    logger()->SetCommand(request->command());
+
     reply->set_command(request->command());
     reply->set_rid(request->rid());
     
@@ -95,6 +101,8 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
         _SetPosInfo(reply->mutable_info());
     }
 
+    logger()->ResetCommand();
+
     return grpc::Status::OK;
 }
 
@@ -102,6 +110,8 @@ grpc::Status
 CommandProcessor::ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request,
     GetSystemPropertyResponse* reply)
 {
+    logger()->SetCommand(request->command());
+
     reply->set_command(request->command());
     reply->set_rid(request->rid());
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
@@ -113,6 +123,9 @@ CommandProcessor::ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest
     reply->mutable_result()->mutable_data()->set_rebuild_policy(impact);
     reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
     reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
+
+    logger()->ResetCommand();
+    
     return grpc::Status::OK;
 }
 
@@ -120,6 +133,8 @@ grpc::Status
 CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request,
     SetSystemPropertyResponse* reply)
 {
+    logger()->SetCommand(request->command());
+
     reply->set_command(request->command());
     reply->set_rid(request->rid());
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
@@ -157,6 +172,9 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
 
         _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
+
+        logger()->ResetCommand();
+        
         return grpc::Status::OK;
 }
 

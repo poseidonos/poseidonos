@@ -160,7 +160,11 @@ RequestHandler::ProcessCommand(const char* msg)
             auto iter = cmdDictionary.find(command);
             if (iter != cmdDictionary.end())
             {
-                return iter->second->Execute(jsonDoc, rid);
+                logger()->SetCommand(command);
+                std::string result = iter->second->Execute(jsonDoc, rid);
+                logger()->ResetCommand();
+                
+                return result;
             }
             else
             {
