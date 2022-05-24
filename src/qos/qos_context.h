@@ -42,10 +42,6 @@
 #include "src/qos/parameters_all_events.h"
 #include "src/qos/parameters_all_volumes.h"
 #include "src/qos/qos_common.h"
-#include "src/qos/resource.h"
-#include "src/qos/resource_array.h"
-#include "src/qos/resource_cpu.h"
-#include "src/qos/resource_nvram.h"
 #include "src/qos/throttle_all_volumes.h"
 #include "src/qos/user_policy.h"
 #include "src/qos/user_policy_all_volumes.h"
@@ -68,7 +64,6 @@ public:
     virtual QosUserPolicy& GetQosUserPolicy(void);
     virtual QosParameters& GetQosParameters(void);
     QosCorrection& GetQosCorrection(void);
-    QosResource& GetQosResource(void);
     void ResetActiveVolume(void);
     virtual void InsertActiveVolume(uint32_t volId);
     virtual std::map<uint32_t, uint32_t>& GetActiveVolumes(void);
@@ -99,7 +94,6 @@ private:
     QosUserPolicy userPolicy;
     QosParameters parameters;
     QosCorrection correction;
-    QosResource resourceState;
     std::map<uint32_t, uint32_t> activeVolumeMap;
     std::map<pair<uint32_t, uint32_t>, uint32_t> activeReactorVolumeMap;
     std::map<uint32_t, map<uint32_t, uint32_t>> activeVolReactorMap;
