@@ -121,7 +121,6 @@ QosContext::Reset(void)
     userPolicy.Reset();
     parameters.Reset();
     correction.Reset();
-    resourceState.Reset();
     activeVolumeMap.clear();
     activeReactorVolumeMap.clear();
     timestamp = 0;
@@ -180,19 +179,6 @@ QosCorrection&
 QosContext::GetQosCorrection(void)
 {
     return correction;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-QosResource&
-QosContext::GetQosResource(void)
-{
-    return resourceState;
 }
 
 /* --------------------------------------------------------------------------*/

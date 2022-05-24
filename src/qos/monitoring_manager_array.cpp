@@ -37,8 +37,6 @@
 #include "src/qos/monitoring_manager.h"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/qos/resource.h"
-#include "src/qos/resource_cpu.h"
 #include "src/qos/user_policy_all_volumes.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
@@ -247,12 +245,6 @@ QosMonitoringManagerArray::UpdateVolumeParameter(uint32_t volId)
 void
 QosMonitoringManagerArray::UpdateContextResourceDetails(void)
 {
-    QosResource& resourceDetails = qosContext->GetQosResource();
-    ResourceNvramStripes& resourceNvramStripes = resourceDetails.GetResourceNvramStripes(arrayId);
-    ResourceArray& resourceArray = resourceDetails.GetResourceArray(arrayId);
-    uint32_t usedStripeCnt = qosManager->GetUsedStripeCnt(arrayId);
-    resourceNvramStripes.SetNvramStripesUsedCount(usedStripeCnt);
-    resourceArray.SetGcFreeSegment(qosManager->GetGcFreeSegment(arrayId));
 }
 /* --------------------------------------------------------------------------*/
 /**
