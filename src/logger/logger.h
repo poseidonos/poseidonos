@@ -123,11 +123,12 @@ public:
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
                             preferences.IsStrLoggingEnabled() ?
-                                "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
-                                "\t{} - {}, cause: {}, solution:{}, variables:{}",
+                                "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"command\":\"{}\",\"variables\":\"{}\"" :
+                                "\t{} - {}, cause: {}, solution:{}, command: {}, variables:{}",
                             entry->GetEventName(), entry->GetMessage(),
-                            entry->GetCause(), entry->GetSolution(),
-                        fmt), args...);
+                            entry->GetCause(), entry->GetSolution(), command,
+                        fmt),
+                    args...);
                 }
             }
             catch(const std::exception& e)
@@ -180,11 +181,17 @@ public:
         return preferences.ShouldLog(lvl, id);
     }
 
+    void SetCommand(const std::string command)
+    {
+        this->command = command;
+    }
+
 private:
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
+    std::string command; // POS command in process
     pos_logger::Preferences preferences;
 // LCOV_EXCL_STOP
 };
