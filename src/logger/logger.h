@@ -113,9 +113,9 @@ public:
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
                             preferences.IsStrLoggingEnabled() ?
-                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
-                            "\tNONE - {}, cause: NONE, solution:NONE, vairables:NONE",
-                        fmt), args...);
+                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"command\":\"{}\",\"variables\":\"\"" :
+                            "\tNONE - {}, cause: NONE, solution:NONE, command: {}, vairables:NONE",
+                        fmt, command), args...);
                 }
                 else
                 {
@@ -184,6 +184,11 @@ public:
     void SetCommand(const std::string command)
     {
         this->command = command;
+    }
+
+    void ResetCommand()
+    {
+        command = "";
     }
 
 private:

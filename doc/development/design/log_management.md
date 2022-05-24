@@ -35,10 +35,10 @@ When PoseidonOS records event logs in JSON form, it is called structured logging
 
 ### Plain-text form
 
-[datetime][process_id][thread_id][pos_id][event_id][level] event_name - MESSAGE because CAUSE, solution:SOLUTION, variables:COMMMA_SEPARATED_VARIABLES, source: FILE:LINE FUNCTION(), pos_version: VERSION
+[datetime][process_id][thread_id][pos_id][event_id][level] event_name - MESSAGE because CAUSE, solution:SOLUTION, command: COMMAND_IN_PROGRESS, variables:COMMMA_SEPARATED_VARIABLES, source: FILE:LINE FUNCTION(), pos_version: VERSION
 
 ```
-[2022-03-04 15:56:08.557557315][23198][23302][78442531][1207][ info  ]     CLI_CLIENT_DISCONNECTED - A client has been disconnected., cause: , solution:, variables:fd:655, source: cli_server.cpp:168 RemoveClient(), pos_version: v0.10.6
+[2022-03-04 15:56:08.557557315][23198][23302][78442531][1207][ info  ]     CLI_CLIENT_DISCONNECTED - A client has been disconnected., cause: , solution:, command: LISTARRAY, variables:fd:655, source: cli_server.cpp:168 RemoveClient(), pos_version: v0.10.6
 ```
 
 ### Event Level
@@ -57,7 +57,7 @@ debug < info < trace < warning < error < critical
 
 ### JSON form (when structured logging is on)
 ```json
-{"datetime":"2022-03-04 15:54:01.407056341","process_id":19646,"thread_id":19985,"pos_id":80861475,"event_id":1207,"level":"info","description":{"event_name:":"CLI_CLIENT_DISCONNECTED","message":"A client has been disconnected.","cause":"","solution":"","variables":"fd:655"},"source":"cli_server.cpp","line":"168","function":"RemoveClient","pos_version":"v0.10.6"},
+{"datetime":"2022-03-04 15:54:01.407056341","process_id":19646,"thread_id":19985,"pos_id":80861475,"event_id":1207,"level":"info","description":{"event_name:":"CLI_CLIENT_DISCONNECTED","message":"A client has been disconnected.","cause":"","solution":"","command":"LISTARRAY","variables":"fd:655"},"source":"cli_server.cpp","line":"168","function":"RemoveClient","pos_version":"v0.10.6"},
 ```
 
 # Log Message
