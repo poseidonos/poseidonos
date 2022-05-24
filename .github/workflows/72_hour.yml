@@ -64,14 +64,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup Script
-      if: steps.three_days.outcome == 'failure'
+      if: always() && steps.three_days.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M8-72H_VM_Test" -n "72h" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.three_days.outcome == 'failure'
+      if: always() && steps.three_days.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: Three_Days_CORE_DUMP

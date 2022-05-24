@@ -47,7 +47,6 @@ jobs:
 
     - name: Volume Test
       id: volume_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -63,14 +62,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup After Volume Test
-      if: steps.volume_test.outcome == 'failure'
+      if: always() && steps.volume_test.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "volume" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.volume_test.outcome == 'failure'
+      if: always() && steps.volume_test.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: VOLUME_TEST_CORE_DUMP
@@ -95,7 +94,6 @@ jobs:
 
     - name: Normal IO Test
       id: normal_io_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -111,14 +109,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup After Normal IO
-      if: steps.normal_io_test.outcome == 'failure'
+      if: always() && steps.normal_io_test.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normalio" -r ${{github.sha}} -d ${{github.workspace}}
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "normal_io" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.normal_io_test.outcome == 'failure'
+      if: always() && steps.normal_io_test.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: NORMAL_IO_CORE_DUMP
@@ -142,7 +140,6 @@ jobs:
 
     - name: NPOR Test
       id: npor_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -158,14 +155,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup After Npor Test
-      if: steps.npor_test.outcome == 'failure'
+      if: always() && steps.npor_test.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "npor" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.npor_test.outcome == 'failure'
+      if: always() && steps.npor_test.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: NPOR_CORE_DUMP
@@ -189,7 +186,6 @@ jobs:
 
     - name: Rebuild Test
       id: rebuild_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -205,14 +201,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup After Fault Tolerance Test
-      if: steps.rebuild_test.outcome == 'failure'
+      if: always() && steps.rebuild_test.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "fault_tolerance" -r ${{github.sha}} -d ${{github.workspace}}
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "rebuild" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.rebuild_test.outcome == 'failure'
+      if: always() && steps.rebuild_test.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: REBUILD_CORE_DUMP
@@ -236,7 +232,6 @@ jobs:
 
     - name: SPOR Test
       id: spor_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -252,14 +247,14 @@ jobs:
           /var/log/pos
 
     - name: Clean Backup After SPOR Test
-      if: steps.spor_test.outcome == 'failure'
+      if: always() && steps.spor_test.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "spor" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.spor_test.outcome == 'failure'
+      if: always() && steps.spor_test.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: SPOR_CORE_DUMP
@@ -283,7 +278,6 @@ jobs:
       
     - name: IO Intensive + Unmount Volume / Array
       id: io_intensive_unmount_volume_array
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -297,6 +291,21 @@ jobs:
         name: IO_INTENSIVE_UNMOUNT_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After IO_Intensive_Unmount Test
+      if: always() && steps.io_intensive_unmount_volume_array.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "IO_Intensive_Unmount" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: always() && steps.io_intensive_unmount_volume_array.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: IO_INTENSIVE_UNMOUNT_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   IO_Intensive_Detach_Test:
     runs-on: VM
@@ -315,7 +324,6 @@ jobs:
 
     - name: IO Intensive + Detach
       id: io_intensive_detach
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -329,6 +337,21 @@ jobs:
         name: IO_INTENSIVE_DETACH_LOG
         path: |
           /var/log/pos
+
+    - name: Clean Backup After IO_Intensive_Detach Test
+      if: always() && steps.io_intensive_detach.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "M1-PostVM_Test" -n "IO_Intensive_Detach" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: always() && steps.io_intensive_detach.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: IO_INTENSIVE_DETACH_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
 
   WBT_IO_Unit_Test:
     runs-on: VM
@@ -347,7 +370,6 @@ jobs:
 
     - name: WBT Command Test
       id: wbt_command_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -356,7 +378,6 @@ jobs:
 
     - name: IO Unit Build and Test
       id: io_unit_build_and_test
-      if: always()
       working-directory: ${{github.workspace}}
       run: |
         POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
@@ -370,3 +391,4 @@ jobs:
         name: WBT_IO_UNIT_LOG
         path: |
           /var/log/pos
+

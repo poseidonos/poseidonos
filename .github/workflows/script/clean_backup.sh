@@ -1,6 +1,5 @@
 #!/bin/bash
 pos_working_dir=0
-pos_core="/psdData/core"
 target_ip=0
 trtype="tcp"
 port=1158
