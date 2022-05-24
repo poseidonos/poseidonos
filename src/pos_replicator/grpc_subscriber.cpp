@@ -49,11 +49,13 @@ GrpcSubscriber::GrpcSubscriber(void)
     string address("0.0.0.0:50051");
 
     new std::thread(&GrpcSubscriber::RunServer, this, address);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been initialized. Server address : {}", address);
 }
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
     poseReplicatorGrpcServer->Shutdown();
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been destructed");
 }
 
 
@@ -69,7 +71,7 @@ GrpcSubscriber::RunServer(std::string address)
 }
 
 ::grpc::Status
-GrpcSubscriber::_CheckArgumentValidity(std::pair<std::string, int> arraySet,
+GrpcSubscriber::_CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
     std::pair<std::string, int> volumeSet)
 {
     int ret = PosReplicatorManagerSingleton::Instance()->ConvertNametoIdx(arraySet, volumeSet);
@@ -90,7 +92,7 @@ GrpcSubscriber::WriteHostBlocks(::grpc::ServerContext* context,
     std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
-    ::grpc::Status ret = _CheckArgumentValidity(arraySet, volumeSet);
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
 
     if (ret.ok() == false)
     {
@@ -108,7 +110,7 @@ GrpcSubscriber::WriteBlocks(::grpc::ServerContext* context,
     std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
-    ::grpc::Status ret = _CheckArgumentValidity(arraySet, volumeSet);
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
 
     if (ret.ok() == false)
     {
@@ -128,7 +130,7 @@ GrpcSubscriber::ReadBlocks(::grpc::ServerContext* context,
     std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
-    ::grpc::Status ret = _CheckArgumentValidity(arraySet, volumeSet);
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
 
     if (ret.ok() == false)
     {
@@ -147,7 +149,7 @@ GrpcSubscriber::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc:
     std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
-    ::grpc::Status ret = _CheckArgumentValidity(arraySet, volumeSet);
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
 
     if (ret.ok() == false)
     {

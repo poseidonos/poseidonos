@@ -41,12 +41,13 @@ namespace pos
 PosReplicatorManager::PosReplicatorManager(void)
 : volumeSubscriberCnt(0)
 {
-
     arrayConvertTable.clear();
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been constructed");
 }
 
 PosReplicatorManager::~PosReplicatorManager(void)
 {
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been destructed");
 }
 
 void
@@ -55,25 +56,30 @@ PosReplicatorManager::Init(void)
     // grpc server or client start
     grpcPublisher = new GrpcPublisher(nullptr);
     grpcSubscriber = new GrpcSubscriber();
-    
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been initialized");
 }
 
 void
 PosReplicatorManager::Dispose(void)
 {
     // stop grpc server or client
-    delete grpcPublisher;
-    delete grpcSubscriber;
+    if (grpcPublisher != nullptr)
+    {
+        delete grpcPublisher;
+    }
+    if (grpcSubscriber != nullptr)
+    {
+        delete grpcSubscriber;
+    }
+
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been disposed");
 }
 
 int
 PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
-{/**/
-    // user data가 새로 들어오면 본 함수를 통해 HA에 write request를 전달
-    // DB가 생성한 lsn을 HA를 통해 전달받아 해당 값과 POS_IO를 통해 _AddWaitPOSIoRequest 를 이용하여 POS_IO를 저장
-
+{
     uint64_t lsn;
-    char buf[4096]; // user IO Data를 복사해서 전달해야 함 같은 buffer에 동시접근이 발생할 경우 문제가 발생할 수 있음
+    char buf[4096]; // TODO(jeddy.choi): need to implement copy bytes between io and buf
 
     std::string arrayName;
     std::string volumeName;
@@ -82,11 +88,13 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
     ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, arrayName);
     if (ret != EID(SUCCESS))
     {
+        POS_TRACE_WARN(ret, "Invalid Input volume name");
         return ret;
     }
     ret = ConvertArrayIdtoArrayName(io.array_id, volumeName);
     if (ret != EID(SUCCESS))
     {
+        POS_TRACE_WARN(ret, "Invalid Input array name");
         return ret;
     }
 
@@ -95,6 +103,7 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
 
     if (ret != EID(SUCCESS))
     {
+        POS_TRACE_WARN(ret, "Fail PushHostWrite");
         return ret;
     }
     _AddWaitPOSIoRequest(lsn, io);
@@ -113,6 +122,8 @@ PosReplicatorManager::CompleteUserIO(uint64_t lsn, int arrayId, int volumeId)
     }
     else
     {
+        POS_TRACE_WARN(EID(HA_REQUESTED_NOT_FOUND), "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
+            lsn, arrayId, volumeId);
         return EID(HA_REQUESTED_NOT_FOUND);
     }
 
@@ -125,10 +136,7 @@ PosReplicatorManager::CompleteUserIO(uint64_t lsn, int arrayId, int volumeId)
 
 int
 PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId)
-{/**/
-    // User Volume Write 동작을 요청 AIO를 생성하고, AIO를 통해 수행된 Write Completion 동작이 Write Splitter로 돌아올 수 있도록 한다.
-    // _MakeWriteRequest 사용
-    // CompleteUserVolumeWrite(void)로 AIO 동작을 마친 callback이 올라올 수 있도록 한다.
+{
     pos_io userRequest;
 
     auto itr = waitPosIoRequest[arrayId][volumeId].find(lsn);
@@ -157,8 +165,7 @@ PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, 
     pos_io posIo;
 
     posIo = _MakePosIo(ioType, arrayId, volumeId, rba, num_blocks);
-    // Journal Volume에의 Write 동작 Request
-    // Completion이 CompleteJournalVolumeWrite()으로 돌아올 수 있도록 한다.
+
     _MakeIoRequest(GrpcCallbackType::GrpcReply, posIo, REPLICATOR_INVALID_LSN);
 
     return EID(SUCCESS);
@@ -184,14 +191,13 @@ PosReplicatorManager::_MakePosIo(IO_TYPE ioType, int arrayId, int volumeId, uint
 void
 PosReplicatorManager::HAWriteCompletion(uint64_t lsn, pos_io io)
 {
-    // Journal Volume의 Write 동작 Complete 
-    // HA에 Write가 완료되었음을 알린다.
     std::string volumeName;
     int ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
 
     if (ret != EID(SUCCESS))
     {
-        // to do POS log
+        POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
+            lsn, io.array_id, io.volume_id);
         return;
     }
 
@@ -201,15 +207,13 @@ PosReplicatorManager::HAWriteCompletion(uint64_t lsn, pos_io io)
 void
 PosReplicatorManager::HAReadCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr volumeIo)
 {
-    // read 완료 및 HA에 해당 read에 대한 결과값을 전달
-    // 4KB 단위로 Data를 전달하며 Unmap Data였을 경우 해당 Data가 Unmap이었음을 알린다.
-    // UECC의 경우에는 어떻게 할 것인가? -> 복구에 실패한 data에 대한 처리는 어떻게?
     std::string volumeName;
     int ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
 
     if (ret != EID(SUCCESS))
     {
-        // to do POS log
+        POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
+            lsn, io.array_id, io.volume_id);
         return;
     }
 
@@ -308,26 +312,18 @@ PosReplicatorManager::ConvertVolumeNametoVolumeId(std::string volumeName, int ar
 void
 PosReplicatorManager::_AddWaitPOSIoRequest(uint64_t lsn, pos_io io)
 {
-    // waitPosIoRequest 에 lns - POS_IO 를 이용하여 Hash에 저장
-    pos_io* inputIo = new pos_io;
-
-    memcpy(inputIo, &io, sizeof(pos_io));
-
-    waitPosIoRequest[io.array_id][io.volume_id].insert({lsn, *inputIo});
+    waitPosIoRequest[io.array_id][io.volume_id].insert({lsn, io});
 }
 
 void
 PosReplicatorManager::AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 {
-    // donePosIoRequest 에 lns - POS_IO 를 이용하여 Hash에 저장
     donePosIoRequest[volumeIo->GetArrayId()][volumeIo->GetVolumeId()].insert({lsn, volumeIo});
 }
 
 void
 PosReplicatorManager::_MakeIoRequest(GrpcCallbackType callbackType, pos_io io, uint64_t lsn)
 {
-    // volume copy / user data write를 위한 POS_IO를 생성한다.
-    //User Data의 경우 Done이 본 Write Splitter로 돌아올 수 있도록 callback을 변조해 둔다.
     AIO aio;
     VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(io, lsn);
 

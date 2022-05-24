@@ -54,10 +54,12 @@ GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_)
     }
 
     stub = ::replicator_rpc::ReplicatorIo::NewStub(channel);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcPublisher has been initialized with the channel newly established");
 }
 
 GrpcPublisher::~GrpcPublisher(void)
 {
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcPublisher has been destructed");
 }
 
 int
@@ -85,7 +87,8 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
 
     if (status.ok() == false)
     {
-        return EID(HA_INVALID_RETUNR_LSN);
+        POS_TRACE_WARN(EID(HA_INVALID_RETURN_LSN), "Fail PushHostWrite");
+        return EID(HA_INVALID_RETURN_LSN);
     }
     lsn = response.lsn();
 

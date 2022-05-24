@@ -256,7 +256,7 @@ TEST(AIO, DISABLED_AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     delete mockArrayInfo;
 }
 
-TEST(AIO, AIO_CreateVolumeIoforHA)
+TEST(AIO, DISABLED_AIO_CreateVolumeIoforHA)
 {
     // Given
     AIO aio;
@@ -271,17 +271,17 @@ TEST(AIO, AIO_CreateVolumeIoforHA)
     posIo.offset = 0;
     posIo.iov = nullptr;
     // When : Call CreatePosReplicatorVolumeIo
-    /*VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
+    VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
 
     if (volumeIo->GetCallback() != nullptr)
     {
         expected = true;
     }
     // Then : check function works
-    ASSERT_EQ(true, expected);*/
+    ASSERT_EQ(true, expected);
 }
 
-TEST(AIO, AIO_CreateVolumeIoforHAnonUserIO)
+TEST(AIO, DISABLED_AIO_CreateVolumeIoforHAnonUserIO)
 {
     // Given
     AIO aio;
@@ -296,14 +296,14 @@ TEST(AIO, AIO_CreateVolumeIoforHAnonUserIO)
     posIo.offset = 0;
     posIo.iov = nullptr;
     // When : Call CreatePosReplicatorVolumeIo
-    /*VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
+    VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
 
     if (volumeIo->GetCallback() == nullptr)
     {
         expected = true;
     }
     // Then : check function works
-    ASSERT_EQ(true, expected);*/
+    ASSERT_EQ(true, expected);
 }
 
 TEST(AdminCompletion, AdminCompletion_Stack)

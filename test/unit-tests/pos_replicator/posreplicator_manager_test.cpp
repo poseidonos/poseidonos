@@ -3,10 +3,12 @@
 #include <string>
 
 #include "spdk/pos.h"
+#include "src/include/pos_event_id.h"
 #include "src/pos_replicator/posreplicator_manager.h"
 #include "src/pos_replicator/dummy_ha/dummy_ha_server.h"
 #include "src/pos_replicator/dummy_ha/dummy_ha_client.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
+
 
 using namespace ::testing;
 
@@ -67,8 +69,9 @@ TEST_F(PosReplicatorManager_ut, NotifyNewUserIORequest_)
     io.arrayName = "";
 
     // Then
-    posReplicatorManager->NotifyNewUserIORequest(io);
-    
+    int ret = posReplicatorManager->NotifyNewUserIORequest(io);
+
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, CompelteUserIO_)
@@ -80,8 +83,9 @@ TEST_F(PosReplicatorManager_ut, CompelteUserIO_)
     int arrayId = 0;
     int volumeId = 0;
 
-    posReplicatorManager->CompleteUserIO(lsn, arrayId, volumeId);
+    int ret = posReplicatorManager->CompleteUserIO(lsn, arrayId, volumeId);
 
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, UserVolumeWriteSubmission_) // To do
@@ -93,10 +97,11 @@ TEST_F(PosReplicatorManager_ut, UserVolumeWriteSubmission_) // To do
     int arrayId = 0;
     int volumeId = 0;
 
-    posReplicatorManager->UserVolumeWriteSubmission(lsn, arrayId, volumeId);
+    int ret = posReplicatorManager->UserVolumeWriteSubmission(lsn, arrayId, volumeId);
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
-TEST_F(PosReplicatorManager_ut, HAIOSubmission_) // To do
+TEST_F(PosReplicatorManager_ut, DISABLED_HAIOSubmission_) // To do
 {
     // Given
 
@@ -108,7 +113,8 @@ TEST_F(PosReplicatorManager_ut, HAIOSubmission_) // To do
     uint64_t num_blocks;
     void* data;
 
-    //posReplicatorManager->HAIOSubmission(ioType, arrayId, volumeId, rba, num_blocks, data);
+    int ret = posReplicatorManager->HAIOSubmission(ioType, arrayId, volumeId, rba, num_blocks, data);
+    EXPECT_EQ(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, HAIOCompletion_)
@@ -154,7 +160,8 @@ TEST_F(PosReplicatorManager_ut, ConvertArrayIdtoArrayName_)
     // Then
     int arrayId;
     string arrayName;
-    posReplicatorManager->ConvertArrayIdtoArrayName(arrayId, arrayName);
+    int ret = posReplicatorManager->ConvertArrayIdtoArrayName(arrayId, arrayName);
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, ConvertVolumeIdtoVolumeName_)
@@ -165,7 +172,7 @@ TEST_F(PosReplicatorManager_ut, ConvertVolumeIdtoVolumeName_)
     string volumeName;
 
     // Then
-    posReplicatorManager->ConvertVolumeIdtoVolumeName(volumeId, arrayId, volumeName);
+    int ret = posReplicatorManager->ConvertVolumeIdtoVolumeName(volumeId, arrayId, volumeName);
 }
 
 TEST_F(PosReplicatorManager_ut, ConvertArrayNametoArrayId_)
@@ -174,7 +181,8 @@ TEST_F(PosReplicatorManager_ut, ConvertArrayNametoArrayId_)
     int volumeId;
     int arrayId;
     std::string arrayName;
-    posReplicatorManager->ConvertArrayNametoArrayId(arrayName);
+    int ret = posReplicatorManager->ConvertArrayNametoArrayId(arrayName);
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, ConvertVolumeNametoVolumeId_)
@@ -183,7 +191,8 @@ TEST_F(PosReplicatorManager_ut, ConvertVolumeNametoVolumeId_)
     int volumeId;
     int arrayId;
     std::string volumeName;
-    posReplicatorManager->ConvertVolumeNametoVolumeId(volumeName, arrayId);
+    int ret = posReplicatorManager->ConvertVolumeNametoVolumeId(volumeName, arrayId);
+    EXPECT_NE(EID(SUCCESS), ret);
 }
 
 TEST_F(PosReplicatorManager_ut, AddDonePOSIoRequest_)

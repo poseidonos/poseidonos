@@ -1025,10 +1025,12 @@ enum class POS_EVENT_ID
 
     // --------------HA Replication (8000)----------------
     HA_INVALID_INPUT_ARGUMENT = 8000,
-    HA_INVALID_RETUNR_LSN,
+    HA_INVALID_RETURN_LSN,
     HA_INSERT_REQUEST_FAIL,
     HA_REQUESTED_NOT_FOUND,
     HA_COMPLETION_FAIL,
+    HA_DEBUG_MSG,
+    HA_COUNT,
 
     // --------------Smart Log (8500)----------------
     SMART_LOG_INVALID_BUFFER = 8500,
