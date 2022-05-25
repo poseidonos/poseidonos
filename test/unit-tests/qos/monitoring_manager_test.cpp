@@ -57,7 +57,7 @@ TEST(QosMonitoringManager, Check_Execute_Getter_Setter_Internal_Manager_fe_qos_f
     ON_CALL(mockQoscontext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
     QosMonitoringManager qosMonitoringManager(&mockQoscontext, &mockQosManager);
     qosMonitoringManager.Execute();
-    QosInternalManagerType expectedManager = QosInternalManager_Processing;
+    QosInternalManagerType expectedManager = QosInternalManager_Policy;
     QosInternalManagerType actualManager = qosMonitoringManager.GetNextManagerType();
 }
 
@@ -97,7 +97,7 @@ TEST(QosMonitoringManager, Check_Execute_Getter_Setter_Internal_Manager_fe_qos_t
     ON_CALL(*mockSpdkPosNvmfCaller, SpdkNvmfGetReactorSubsystemMapping(_, _)).WillByDefault(Return(1));
     QosMonitoringManager qosMonitoringManager(&mockQoscontext, &mockQosManager, mockSpdkPosNvmfCaller);
     qosMonitoringManager.Execute();
-    QosInternalManagerType expectedManager = QosInternalManager_Processing;
+    QosInternalManagerType expectedManager = QosInternalManager_Policy;
     QosInternalManagerType actualManager = qosMonitoringManager.GetNextManagerType();
 }
 

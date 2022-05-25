@@ -34,7 +34,6 @@
 #include "src/qos/internal_manager.h"
 #include "src/qos/monitoring_manager.h"
 #include "src/qos/policy_manager.h"
-#include "src/qos/processing_manager.h"
 #include "src/qos/correction_manager.h"
 #include "src/qos/qos_context.h"
 
@@ -59,10 +58,6 @@ InternalManagerFactory::CreateInternalManager(QosInternalManagerType type, QosCo
 
         case QosInternalManager_Policy:
             internalManager = new QosPolicyManager(ctx, qosManager);
-            break;
-
-        case QosInternalManager_Processing:
-            internalManager = new QosProcessingManager(ctx, qosManager);
             break;
 
         case QosInternalManager_Correction:

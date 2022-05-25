@@ -149,21 +149,6 @@ QosMonitoringManager::_UpdateContextUserRebuildPolicy(void)
 void
 QosMonitoringManager::_UpdateContextResourceDetails(void)
 {
-    uint32_t maxArrays = qosManager->GetNumberOfArrays();
-    for (uint32_t i = 0; i < maxArrays; i++)
-    {
-        qosMonitoringManagerArray[i]->UpdateContextResourceDetails();
-    }
-    QosResource& resourceDetails = qosContext->GetQosResource();
-    ResourceCpu& resourceCpu = resourceDetails.GetResourceCpu();
-
-    for (uint32_t event = 0; event < BackendEvent_Count; event++)
-    {
-        uint32_t pendingEventCount = qosManager->GetPendingBackendEvents(static_cast<BackendEvent>(event));
-        resourceCpu.SetEventPendingCpuCount(static_cast<BackendEvent>(event), pendingEventCount);
-        uint32_t generatedCpuEvents = qosManager->GetEventLog(static_cast<BackendEvent>(event));
-        resourceCpu.SetTotalGeneratedEvents(static_cast<BackendEvent>(event), generatedCpuEvents);
-    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -267,7 +252,7 @@ QosMonitoringManager::_GatherActiveEventParameters(void)
 void
 QosMonitoringManager::_SetNextManagerType(void)
 {
-    nextManagerType = QosInternalManager_Processing;
+    nextManagerType = QosInternalManager_Policy;
 }
 
 /* --------------------------------------------------------------------------*/
