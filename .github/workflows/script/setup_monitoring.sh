@@ -80,7 +80,7 @@ setup_logstash ()
 		filter {
 		  grok{
 		    match => {
-		      "message" => "\[%{TIMESTAMP_ISO8601:[@metadata][time]}\]\[%{INT:process_id}\]\[%{INT:thread_id}\]\[%{INT:pos_id}\]\[%{INT:event_id}\]\[\s%{GREEDYDATA:level}\s\]%{GREEDYDATA:inner_message}"
+		      "message" => "\[%{TIMESTAMP_ISO8601:[@metadata][time]}\]\[%{INT:process_id}\]\[%{INT:thread_id}\]\[%{INT:pos_id}\]\[%{INT:event_id}\]\[\s*%{GREEDYDATA:level}\s*\]\s*%{GREEDYDATA:inner_message}"
 		    }
 		    add_field => {
 		      "ga_commit_hash" => "${GA_COMMIT_HASH}"
