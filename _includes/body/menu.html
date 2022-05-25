@@ -1,0 +1,27 @@
+<!--상단메뉴바-->
+<div id="_navbar" class="navbar fixed-top">
+    <div class="content">
+        <span class="sr-only">{{ site.data.strings.jump_to | default:"Jump to" }}{{ site.data.strings.colon | default:":" }}</span>
+        <div class="nav-btn-bar">
+            <a id="_menu" class="nav-btn no-hover" href="#_drawer--opened">
+                <span class="sr-only">{{ site.data.strings.navigation | default:"Navigation" }}</span>
+                <span class="icon-menu"></span>
+            </a>
+            <!--상단메뉴 카테고리들 -->
+            <div class="top-menu">
+                {% if site.menu %}
+                {% for node in site.menu %}
+                {% assign url = node.url | default: node.href %}
+                <a {% if forloop.first %}id="_drawer--opened" {% endif %} href="{% include_cached smart-url url=url %}" class="nav-btn top-menu {% if node.external %}external{% endif %}" {% if node.rel %}rel="{{ node.rel }}" {% endif %}>
+                    {{ node.name | default:node.title }}
+                </a>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!--검색 tipuesearch -->
+
+        </div>
+    </div>
+</div>
+<hr class="sr-only" hidden />

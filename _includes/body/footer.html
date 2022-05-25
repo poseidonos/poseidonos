@@ -1,0 +1,9 @@
+{% if site.copyright.size > 0 or site.legal.size > 0 or site.hydejack.advertise %}
+    <footer class="content" role="contentinfo">
+    <hr/>
+    {% if site.copyright.size > 0 %}
+        <p><small class="copyright">{{ site.copyright | markdownify | replace:'<p>','' | replace:'</p>','' }}</small></p>
+    {% endif %}
+    <hr class="sr-only"/>
+    </footer>
+{% endif %}
