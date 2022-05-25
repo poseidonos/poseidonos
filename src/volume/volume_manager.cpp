@@ -99,6 +99,8 @@ VolumeManager::Dispose(void)
     initialized = false;
     volumes.Clear();
 
+    volumeDetachLock.unlock();
+
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
 }
 
