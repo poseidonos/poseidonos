@@ -88,11 +88,14 @@ public:
     void SubmitFlush(pos_io& posIo);
     void CompleteIOs(void);
     VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
+    VolumeIoSmartPtr CreatePosReplicatorVolumeIo(pos_io& posIo, uint64_t lsn);
     void SubmitAsyncAdmin(pos_io& posIo, IArrayInfo* arrayInfo = nullptr);
 
 private:
     static thread_local IOCtx ioContext;
     FlushIoSmartPtr _CreateFlushIo(pos_io& posIo);
+    VolumeIoSmartPtr _CreateVolumeIo(pos_io& posIo);
+    void _IncreaseIoContextCnt(bool needPollingNecessary);
 };
 class AdminCompletion : public Callback,
                         public std::enable_shared_from_this<AdminCompletion>

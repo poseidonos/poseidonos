@@ -30,34 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <cstdint>
 
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
-#include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
-#include "proto/generated/cpp/replicator_rpc.pb.h"
+#ifndef POSREPLICATOR_CONST_H_
+#define POSREPLICATOR_CONST_H_
 
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
-#include <grpc++/grpc++.h>
+#define REPLICATOR_INVALID_LSN (0xFFFFFFFFFFFFFFFF)
 
 namespace pos
 {
-class GrpcPublisher
+enum GrpcCallbackType
 {
-public:
-    GrpcPublisher(std::shared_ptr<grpc::Channel> channel_);
-    ~GrpcPublisher(void);
-
-    int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buf, uint64_t& lsn);
-    int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
-    int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
-    int CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
-private:
-    std::unique_ptr<replicator_rpc::ReplicatorIo::Stub> stub;
+    GrpcReply,
+    WaitGrpc
 };
-}
+
+const int HA_INVALID_ARRAY_IDX = 0xFFFFFFFF;
+const int HA_INVALID_VOLUME_IDX = 0xFFFFFFFF;
+} // namespace pos
+
+#endif

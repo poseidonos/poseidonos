@@ -649,8 +649,8 @@
 | 5524       | DEVICEMGR_SETUPMODEL                            | DEBUG           | _SetupThreadModel                                                                                                        |   |
 | 5525       | DEVICEMGR_DEVICE_NOT_FOUND                      | DEBUG           | Device might be not scanned, continue to exit                                                                            |   |
 | 5700       | RESOURCE_MANAGER_DEBUG_MSG                      | DEBUG           | Failed to return buffer. Buffer is Null                                                                                  |   |
-| 8500       | INVALID_BUFFER_IN_SMART_LOG                     | ERROR           | Invalid buffer in smart log page                                                                                         |   |
-| 8501       | NO_DISK_IN_ARRAY                                | ERROR           | No Device in Array                                                                                                       |   |
+| 8500       | SMART_LOG_INVALID_BUFFER                        | ERROR           | Invalid buffer in smart log page                                                                                         |   |
+| 8501       | SMART_LOG_NO_DISK_IN_ARRAY                      | ERROR           | No Device in Array                                                                                                       |   |
 | 9000       | SYSTEM_SPACE_INFO                               |                 |                                                                                                                          |   |
 | 9001       | SYSTEM_VERSION                                  | INFO            | POS Version {}                                                                                                           |   |
 | 10000      | DEBUG_MEMORY_CHECK_DOUBLE_FREE                  | ERROR           | double free {}                                                                                                           |   |

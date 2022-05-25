@@ -73,7 +73,7 @@ SmartLogPageHandler::Execute(void)
 {
     if (smartLogPageData == NULL)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::INVALID_BUFFER_IN_SMART_LOG,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::SMART_LOG_INVALID_BUFFER,
             "Invalid buffer in smart log page");
         return true;
     }

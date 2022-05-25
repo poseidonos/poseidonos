@@ -71,6 +71,7 @@ class TelemetryClient;
 class TelemetryManagerService;
 class TelemetryConfig;
 class MemoryManager;
+class PosReplicatorManager;
 
 extern DebugInfo* debugInfo;
 
@@ -114,6 +115,7 @@ private:
     TelemetryClient* telemetryClient;
     TelemetryConfig* telemetryConfig;
     MemoryManager* memoryManager;
+    PosReplicatorManager* posReplicatorManager;
 };
 
 } // namespace pos
