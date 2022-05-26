@@ -103,8 +103,7 @@ MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
         // reqMsg     : only for meta scheduler, not meta handler thread
         // cloneReqMsg: new copy, sent to meta handler thread by scheduler
         // reqMsg->originalMsg: from a user thread
-        MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest();
-        cloneReqMsg->CopyUserReqMsg(*reqMsg);
+        MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest(*reqMsg);
 
         // 1st
         if (idx == startLpn)

@@ -143,8 +143,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
 
     // reqMsg     : original message, used only this thread
     // cloneReqMsg: new copy, only for meta scheduler, not meta handler thread
-    MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest();
-    cloneReqMsg->CopyUserReqMsg(reqMsg);
+    MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest(reqMsg);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[MSG ][EnqueueReq ] type={}, req.TagId={}, mediaType={}, io_mode={}, fileOffset={}, Size={}, Lpn={}",

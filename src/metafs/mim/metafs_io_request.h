@@ -94,9 +94,9 @@ class MetaFsIoRequest : public MetaFsRequestBase, public MetaFsStopwatch<IoReque
 {
 public:
     MetaFsIoRequest(void);
+    MetaFsIoRequest(const MetaFsIoRequest& req);
     virtual ~MetaFsIoRequest(void);
 
-    virtual void CopyUserReqMsg(const MetaFsIoRequest& req);
     virtual bool IsValid(void);
     virtual bool IsSyncIO(void);
     virtual bool IsIoCompleted(void);
