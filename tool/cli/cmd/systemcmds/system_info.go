@@ -5,14 +5,11 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
-	"fmt"
 	"log"
 
 	pb "cli/api"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -47,12 +44,8 @@ Syntax:
 			} else {
 				res, err := grpcmgr.SendSystemInfoRpc(req)
 				if err != nil {
-					status, _ := status.FromError(err)
-					switch status.Code() {
-					case codes.ResourceExhausted:
-						fmt.Println("PoseidonOS may be processing a command. Please try after a while.")
-						return
-					}
+					globals.PrintErrMsg(err)
+					return
 				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {

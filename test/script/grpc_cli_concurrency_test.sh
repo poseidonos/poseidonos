@@ -25,9 +25,11 @@ num_of_empty_response=$(grep -o '{}' nohup.out | wc -l)
 
 if [ $num_of_empty_response -eq 0 ]
 then
-    echo 'PASS: there is no empty response because of concurrent commands: ' $num_of_empty_response
+    echo 'PASS' 
 else
-    echo 'PASS: there is an empty response because of concurrent commands: ' $num_of_empty_response
+    echo 'FAIL'
 fi
+
+echo 'The number of errorneous response due to concurrent commands: ' $num_of_empty_response
 
 rm ./nohup.out
