@@ -47,7 +47,6 @@ public:
     MOCK_METHOD(bool, Init, ());
     MOCK_METHOD(size_t, GetMioPoolCapacity, (), (const));
     MOCK_METHOD(size_t, GetMpioPoolCapacity, (), (const));
-    MOCK_METHOD(bool, IsWriteMpioCacheEnabled, (), (const));
     MOCK_METHOD(size_t, GetWriteMpioCacheCapacity, (), (const));
     MOCK_METHOD(bool, IsDirectAccessEnabled, (), (const));
     MOCK_METHOD(size_t, GetTimeIntervalInMillisecondsForMetric, (), (const));
