@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(journal_rocks_intf_it journal_rocks_integration_test.cpp)

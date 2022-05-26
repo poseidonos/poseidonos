@@ -131,6 +131,8 @@ LDFLAGS += -no-pie -laio -ltcmalloc
 LDFLAGS += -lnuma
 LDFLAGS += -lyaml-cpp
 LDFLAGS += -ltbb
+LDFLAGS += -lrocksdb
+LDFLAGS += -lstdc++fs
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli

@@ -39,6 +39,7 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/journal_rocks_intf/journal_rocks_intf.h"
 
 namespace pos
 {
@@ -109,5 +110,7 @@ private:
     MetaFileIntf* logFile;
 
     char* initializedDataBuffer;
+
+    JournalRocksIntf* journalRocks;
 };
 } // namespace pos

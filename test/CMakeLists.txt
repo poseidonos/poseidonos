@@ -451,6 +451,8 @@ SET(DEP_LIBRARIES
     yaml-cpp
     tbb
     pmem
+    rocksdb
+    stdc++fs
 )
 
 find_package(PkgConfig REQUIRED)

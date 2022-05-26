@@ -63,13 +63,14 @@ ACTION_P(SetArg2ToLongAndReturn0, longValue)
 }
 
 NiceMock<MockConfigManager>*
-CreateMockConfigManager(bool isJournalEnabled, bool isDebugEnabled, uint64_t logBufferSizeInConfig)
+CreateMockConfigManager(bool isJournalEnabled, bool isDebugEnabled, uint64_t logBufferSizeInConfig, bool useRocksdb)
 {
     NiceMock<MockConfigManager>* configManager = new NiceMock<MockConfigManager>;
 
     ON_CALL(*configManager, GetValue("journal", "enable", _, _)).WillByDefault(SetArg2ToBoolAndReturn0(isJournalEnabled));
     ON_CALL(*configManager, GetValue("journal", "debug_mode", _, _)).WillByDefault(SetArg2ToBoolAndReturn0(isDebugEnabled));
     ON_CALL(*configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillByDefault(SetArg2ToLongAndReturn0(logBufferSizeInConfig));
+    ON_CALL(*configManager, GetValue("journal", "use_rocksdb", _, _)).WillByDefault(SetArg2ToBoolAndReturn0(useRocksdb));
 
     return configManager;
 }
@@ -83,13 +84,14 @@ AlignDownWithMetaPage(uint64_t input, JournalConfiguration* config)
 TEST(JournalConfiguration, JournalConfiguration_testConstructedSuccessfully)
 {
     // Given, When
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0, true);
     JournalConfiguration config(configManager);
 
     // Then
     bool expected = true;
     EXPECT_EQ(config.IsEnabled(), expected);
     EXPECT_EQ(config.IsDebugEnabled(), expected);
+    EXPECT_EQ(config.IsRocksdbEnabled(), expected);
 
     delete configManager;
 }
@@ -112,6 +114,35 @@ TEST(JournalConfiguration, JournalConfiguration_testWithJournalDisabled)
     // Then: Will journal enable be false
     bool expected = false;
     EXPECT_EQ(config.IsEnabled(), expected);
+}
+
+TEST(JournalConfiguration, JournalConfiguration_testWhenJournalEnabledIsJournalRocksEnabled)
+{
+    // Given journal is enabled
+    NiceMock<MockConfigManager> configManager;
+    
+    // When: Use RocksDB is enabled
+    EXPECT_CALL(configManager, GetValue);
+    EXPECT_CALL(configManager, GetValue("journal", "enable", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
+    EXPECT_CALL(configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
+
+    JournalConfiguration config(&configManager);
+
+    // Then: Will IsRocksdbEnabled() is true
+    bool expected = true;
+    EXPECT_EQ(config.IsRocksdbEnabled(), expected);
 }
 
 TEST(JournalConfiguration, JournalConfiguration_testIfFailedToReadJournalEnabled)
@@ -145,6 +176,8 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
         });
     EXPECT_CALL(configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
         { return -1; });
+    EXPECT_CALL(configManager, GetValue("journal", "use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
+        { return 0; });
 
     JournalConfiguration config(&configManager);
 
@@ -155,7 +188,7 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
 
 TEST(JournalConfiguration, Init_testIfMetaVolumeToUseIsUpdatedProperly)
 {
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0, false);
     JournalConfiguration config(configManager);
 
     config.Init(true);
@@ -173,7 +206,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLoadedLogBuffe
 {
     // Given: Loaded log buffer is is not zero such like dirty bringup
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0, false);
     JournalConfiguration config(configManager);
 
     uint64_t metaPageSize = 4032;
@@ -203,7 +236,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLoadedLogBuffe
     uint64_t maxPartitionSize = 16 * SIZE_MB;
     uint64_t logBufferSizeInMB = maxPartitionSize / SIZE_MB / 2;
 
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInMB);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInMB, false);
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
@@ -229,7 +262,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLogBufferSizeI
     uint64_t maxPartitionSize = 16 * 1024 * 1024;
 
     uint64_t logBufferSizeInConfig = 0;
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInConfig);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInConfig, false);
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
@@ -254,7 +287,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSettedSuccessfully)
     uint64_t metaPageSize = 4032;
     uint64_t maxPartitionSize = 16 * SIZE_MB;
     uint64_t logBufferSizeInMB = maxPartitionSize / 2 / SIZE_MB;
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInMB);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInMB, false);
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
@@ -280,7 +313,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfLogBufferSetWhenLogBufferSizeI
     uint64_t maxPartitionSize = 16 * 1024 * 1024;
 
     uint64_t logBufferSizeInConfig = maxPartitionSize * 2;
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInConfig);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, logBufferSizeInConfig, false);
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
@@ -302,7 +335,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfNVRAMSpaceIsNotEnough)
 {
     // Given: Max partition size is smaller than meta page size
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0);
+    NiceMock<MockConfigManager> *configManager = CreateMockConfigManager(true, true, 0, false);
     JournalConfiguration config(configManager);
 
     uint64_t metaPageSize = 4032;
