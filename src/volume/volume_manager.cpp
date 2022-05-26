@@ -165,8 +165,12 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(CREATE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        
         return EID(VOL_MGR_BUSY);
     }
 
@@ -184,14 +188,19 @@ VolumeManager::Delete(std::string name)
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
     {
+        POS_TRACE_WARN(EID(DELETE_VOL_DEBUG_MSG  ), "try alloc fail vol name: {}", name);
         return ret;
     }
 
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(DELETE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        
         return EID(VOL_MGR_BUSY);
     }
 
@@ -221,8 +230,12 @@ VolumeManager::Mount(std::string name, std::string subnqn)
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(MOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        
         return EID(VOL_MGR_BUSY);
     }
 
@@ -242,8 +255,12 @@ VolumeManager::Unmount(std::string name)
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(UNMOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        
         return EID(VOL_MGR_BUSY);
     }
 
@@ -263,8 +280,12 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        
         return EID(VOL_MGR_BUSY);
     }
 
@@ -284,8 +305,12 @@ VolumeManager::Rename(std::string oldName, std::string newName)
     unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
     unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
 
-    if (std::try_lock(volumeEventLock, volumeDetachLock) == false)
+    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+
+    if (ret != -1)
     {
+        POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, oldName);
+        
         return EID(VOL_MGR_BUSY);
     }
 
