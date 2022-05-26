@@ -32,17 +32,11 @@
 
 #include "rebuilder.h"
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-
 namespace pos
 {
 Rebuilder::Rebuilder(RebuildBehavior* _b)
 : /*Event(false, BackendEvent_UserdataRebuild),*/ behavior(_b)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Rebuilder() {}",
-        (void*)behavior);
 }
 
 bool

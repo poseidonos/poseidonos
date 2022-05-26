@@ -182,11 +182,6 @@ StripeBasedRaceRebuild::Read(void)
                 stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString(), maxStripeId);
             ctx->SetResult(RebuildState::FAIL);
         }
-        else
-        {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Recover complete in rebuild, id:{}", stripeId);
-        }
     }
 
     baseStripe += currWorkload;
@@ -195,7 +190,6 @@ StripeBasedRaceRebuild::Read(void)
 
 bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Trying to write in rebuild, id:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_MetadataRebuild);
@@ -223,7 +217,6 @@ bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     locker->Unlock(ctx->faultDev, targetId);
     recoverBuffers->ReturnBuffer(ubio->GetBuffer());
 
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Write complete in rebuild, id:{}", targetId);
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)
     {

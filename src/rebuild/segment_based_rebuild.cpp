@@ -161,7 +161,7 @@ SegmentBasedRebuild::Read(void)
 
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "Trying to recover in rebuild, segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
@@ -188,11 +188,6 @@ SegmentBasedRebuild::Read(void)
                 stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
             ctx->SetResult(RebuildState::FAIL);
         }
-        else
-        {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Recover complete in rebuild, id:{}", stripeId);
-        }
     }
 
     airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
@@ -201,7 +196,6 @@ SegmentBasedRebuild::Read(void)
 
 bool SegmentBasedRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Trying to write in rebuild, id:{}", targetId);
     uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
     airlog("LAT_SegmentBasedRebuildWrite", "AIR_BEGIN", 0, objAddr);
 
@@ -232,7 +226,6 @@ bool SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
 
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Write complete in rebuild, id:{}", targetId);
     if (currentTaskCnt == 0)
     {
         allocatorSvc->ReleaseRebuildSegment(targetId);
