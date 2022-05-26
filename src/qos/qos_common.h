@@ -215,7 +215,6 @@ enum QosInternalManagerType
     QosInternalManager_Start = 0,
     QosInternalManager_Monitor,
     QosInternalManager_Policy,
-    QosInternalManager_Processing,
     QosInternalManager_Correction,
     QosInternalManager_End,
     QosInternalManagerCount = QosInternalManager_End - QosInternalManager_Start,

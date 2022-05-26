@@ -53,10 +53,10 @@ public:
     GrpcPublisher(std::shared_ptr<grpc::Channel> channel_);
     ~GrpcPublisher(void);
 
-    uint64_t PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buf);
-    bool CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
-    bool CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
-    bool CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
+    int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buf, uint64_t& lsn);
+    int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
+    int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
+    int CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
 private:
     std::unique_ptr<replicator_rpc::ReplicatorIo::Stub> stub;
 };

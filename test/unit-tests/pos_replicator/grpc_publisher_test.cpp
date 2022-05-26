@@ -19,16 +19,17 @@ TEST(GrpcPublisher, GrpcPublisher_PushHostWrite)
     GrpcPublisher *posClient = new GrpcPublisher(nullptr);
 
     uint64_t rba = 10;
-    uint64_t size = 10;    
+    uint64_t size = 10;
+    uint64_t lsn;
     string volumeName = "";
     string arrayName = "";
     void* buf;
 
     // When
-    uint64_t ret = posClient->PushHostWrite(rba, size, volumeName, arrayName, buf);
+    uint64_t ret = posClient->PushHostWrite(rba, size, volumeName, arrayName, buf, lsn);
 
     // Then: Do Nothing
-    EXPECT_EQ(10, ret);
+    EXPECT_NE(rba, ret);
 }
 
 TEST(GrpcPublisher, GrpcPublisher_CompleteUserWrite)
@@ -47,7 +48,7 @@ TEST(GrpcPublisher, GrpcPublisher_CompleteUserWrite)
     bool ret = posClient->CompleteUserWrite(lsn, volumeName, arrayName);
 
     // Then: Do Nothing
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(true, ret);
 }
 
 TEST(GrpcPublisher, GrpcPublisher_CompleteWrite)
@@ -66,7 +67,7 @@ TEST(GrpcPublisher, GrpcPublisher_CompleteWrite)
     bool ret = posClient->CompleteWrite(lsn, volumeName, arrayName);
 
     // Then: Do Nothing
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(true, ret);
 }
 
 TEST(GrpcPublisher, GrpcPublisher_CompleteRead)
@@ -87,7 +88,7 @@ TEST(GrpcPublisher, GrpcPublisher_CompleteRead)
     bool ret = posClient->CompleteRead(lsn, size, volumeName, arrayName, buf);
 
     // Then: Do Nothing
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(true, ret);
 }
 
 }

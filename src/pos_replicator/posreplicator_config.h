@@ -30,38 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <cstdint>
 
-#include <map>
+#ifndef POSREPLICATOR_CONST_H_
+#define POSREPLICATOR_CONST_H_
 
-#include "src/qos/internal_manager.h"
-#include "src/qos/processing_manager_array.h"
-#include "src/qos/qos_common.h"
+#define REPLICATOR_INVALID_LSN (0xFFFFFFFFFFFFFFFF)
 
 namespace pos
 {
-class QosContext;
-class MovingAvgCompute;
-class QosManager;
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- */
-/* --------------------------------------------------------------------------*/
-class QosProcessingManager : public QosInternalManager
+enum GrpcCallbackType
 {
-public:
-    explicit QosProcessingManager(QosContext* qosCtx, QosManager* qosManager);
-    ~QosProcessingManager(void);
-    void Execute(void) override;
-    QosInternalManagerType GetNextManagerType(void) override;
-
-private:
-    void _SetNextManagerType(void);
-    QosContext* qosContext;
-    QosManager* qosManager;
-    QosInternalManagerType nextManagerType;
-    QosProcessingManagerArray* qosProcessingManagerArray[MAX_ARRAY_COUNT];
+    GrpcReply,
+    WaitGrpc
 };
+
+const int HA_INVALID_ARRAY_IDX = 0xFFFFFFFF;
+const int HA_INVALID_VOLUME_IDX = 0xFFFFFFFF;
 } // namespace pos
+
+#endif

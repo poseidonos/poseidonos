@@ -6,6 +6,7 @@
 #include "spdk/nvmf_transport.h"
 #include "spdk/pos.h"
 #include "src/bio/flush_io.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/io/frontend_io/flush_command_handler.h"
@@ -253,6 +254,56 @@ TEST(AIO, DISABLED_AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     EventSchedulerSingleton::Instance()->DequeueEvents();
     delete mockArrayManager;
     delete mockArrayInfo;
+}
+
+TEST(AIO, DISABLED_AIO_CreateVolumeIoforHA)
+{
+    // Given
+    AIO aio;
+    pos_io posIo;
+    IOCtx ioContext;
+    bool expected = false;
+    uint64_t lsn = 0;
+
+    posIo.array_id = 0;
+    posIo.ioType = IO_TYPE::WRITE;
+    posIo.volume_id = 0;
+    posIo.offset = 0;
+    posIo.iov = nullptr;
+    // When : Call CreatePosReplicatorVolumeIo
+    VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
+
+    if (volumeIo->GetCallback() != nullptr)
+    {
+        expected = true;
+    }
+    // Then : check function works
+    ASSERT_EQ(true, expected);
+}
+
+TEST(AIO, DISABLED_AIO_CreateVolumeIoforHAnonUserIO)
+{
+    // Given
+    AIO aio;
+    pos_io posIo;
+    IOCtx ioContext;
+    bool expected = false;
+    uint64_t lsn = REPLICATOR_INVALID_LSN;
+
+    posIo.array_id = 0;
+    posIo.ioType = IO_TYPE::WRITE;
+    posIo.volume_id = 0;
+    posIo.offset = 0;
+    posIo.iov = nullptr;
+    // When : Call CreatePosReplicatorVolumeIo
+    VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(posIo, lsn);
+
+    if (volumeIo->GetCallback() == nullptr)
+    {
+        expected = true;
+    }
+    // Then : check function works
+    ASSERT_EQ(true, expected);
 }
 
 TEST(AdminCompletion, AdminCompletion_Stack)

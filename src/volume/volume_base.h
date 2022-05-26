@@ -55,8 +55,15 @@ enum VolumeStatus
 {
     Unmounted,
     Mounted,
-    InitialSyncMode,
     MaxVolumeStatus
+};
+
+enum VolumeReplicationMode
+{
+    VolumeSyncMode,
+    LiveReplicationMode,
+    SingleNodeMode,
+    MaxVolumeReplicatorStatus
 };
 
 const uint32_t KIOPS = 1000;
@@ -117,6 +124,17 @@ public:
     {
         return status;
     }
+    VolumeReplicationMode
+    GetReplicatorMode(void)
+    {
+        return replicationMode;
+    }
+    void        
+    SetReplicatorStatus(VolumeReplicationMode mode)
+    {
+        replicationMode = mode;
+    }
+
     bool
     IsValid(void)
     {
@@ -162,6 +180,7 @@ public:
 protected:
     VolumeAttribute attribute;
     VolumeStatus status;
+    VolumeReplicationMode replicationMode;
     std::string name;
     std::string uuid;
     std::string array;
