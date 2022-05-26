@@ -43,13 +43,6 @@ TEST(QosContext, GetQosCorrection_Getter)
     ASSERT_NE(&qosCorrection, NULL);
 }
 
-TEST(QosContext, GetQosResource_Getter)
-{
-    QosContext qosContext;
-    QosResource qosResource = qosContext.GetQosResource();
-    ASSERT_NE(&qosResource, NULL);
-}
-
 TEST(QosContext, Check_Reset_Get_Insert_ActiveVolume)
 {
     QosContext qosContext;

@@ -87,7 +87,7 @@ DiskQueryManager::SendSmartCommandtoDisk(void)
 
     if (devices.size() == 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::NO_DISK_IN_ARRAY,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::SMART_LOG_NO_DISK_IN_ARRAY,
             "No Device in Array");
         return true;
     }

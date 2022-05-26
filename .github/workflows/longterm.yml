@@ -64,14 +64,14 @@ jobs:
           /var/log/pos
           
     - name: Clean Backup Script
-      if: steps.long_term.outcome == 'failure'
+      if: always() && steps.long_term.outcome != 'success'
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/clean_backup.sh
         .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M9-LongTerm_PM1_VM_Test" -n "longterm_vm" -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: Upload POS Core Dump
-      if: steps.long_term.outcome == 'failure'
+      if: always() && steps.long_term.outcome != 'success'
       uses: actions/upload-artifact@v3
       with:
         name: LONG_TERM_CORE_DUMP

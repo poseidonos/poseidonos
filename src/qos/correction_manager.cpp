@@ -35,7 +35,6 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/qos/reactor_heap.h"
 #include "src/qos/throttling_policy_deficit.h"
 #include <queue>
 #include <list>

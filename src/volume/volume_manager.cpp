@@ -292,6 +292,21 @@ VolumeManager::GetVolumeStatus(int volId)
 }
 
 int
+VolumeManager::GetVolumeReplicationMode(int volId)
+{
+    VolumeBase* vol = volumes.GetVolume(volId);
+
+    if (vol == nullptr)
+    {
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "volId: {}", volId);
+        return EID(VOL_NOT_FOUND);
+    }
+
+    VolumeStatus status = vol->GetStatus();
+    return static_cast<int>(status);
+}
+
+int
 VolumeManager::_LoadVolumes(void)
 {
     VolumeLoader volumeLoader(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());

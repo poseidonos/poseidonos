@@ -77,6 +77,9 @@ public:
     void RunServer(std::string address);
 
 private:
+    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
+            std::pair<std::string, int> volumeSet);
+
     std::unique_ptr<::grpc::Server> poseReplicatorGrpcServer;
 };
 }

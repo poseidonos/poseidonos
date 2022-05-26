@@ -39,6 +39,7 @@
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
+#include "src/pos_replicator/posreplicator_manager.h"
 
 namespace pos
 {
@@ -48,11 +49,13 @@ GrpcSubscriber::GrpcSubscriber(void)
     string address("0.0.0.0:50051");
 
     new std::thread(&GrpcSubscriber::RunServer, this, address);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been initialized. Server address : {}", address);
 }
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
     poseReplicatorGrpcServer->Shutdown();
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been destructed");
 }
 
 
@@ -68,9 +71,35 @@ GrpcSubscriber::RunServer(std::string address)
 }
 
 ::grpc::Status
+GrpcSubscriber::_CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
+    std::pair<std::string, int> volumeSet)
+{
+    int ret = PosReplicatorManagerSingleton::Instance()->ConvertNametoIdx(arraySet, volumeSet);
+
+    if (ret != EID(SUCCESS))
+    {
+        POS_TRACE_WARN(ret, "recieve invalid argument");
+        const string errorMsg = "recieve invalid argument";
+        return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, errorMsg);
+    }
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status
 GrpcSubscriber::WriteHostBlocks(::grpc::ServerContext* context,
     const pos_rpc::WriteHostBlocksRequest* request, pos_rpc::WriteHostBlocksResponse* response)
 {
+    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
+    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
+
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
+
+    if (ret.ok() == false)
+    {
+        return ret;
+    }
+
+    PosReplicatorManagerSingleton::Instance()->UserVolumeWriteSubmission(request->lsn(), arraySet.second, volumeSet.second);
     return ::grpc::Status::OK;
 }
 
@@ -78,6 +107,19 @@ GrpcSubscriber::WriteHostBlocks(::grpc::ServerContext* context,
 GrpcSubscriber::WriteBlocks(::grpc::ServerContext* context,
     const pos_rpc::WriteBlocksRequest* request, pos_rpc::WriteBlocksResponse* response)
 {
+    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
+    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
+
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
+
+    if (ret.ok() == false)
+    {
+        return ret;
+    }
+    
+    char buffer[4096];
+    PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::WRITE, arraySet.second, volumeSet.second,
+        request->rba(), request->num_blocks(), buffer);
     return ::grpc::Status::OK;
 }
 
@@ -85,13 +127,35 @@ GrpcSubscriber::WriteBlocks(::grpc::ServerContext* context,
 GrpcSubscriber::ReadBlocks(::grpc::ServerContext* context,
     const pos_rpc::ReadBlocksRequest* request, pos_rpc::ReadBlocksResponse* response)
 {
-    return ::grpc::Status::OK;    
+    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
+    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
+
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
+
+    if (ret.ok() == false)
+    {
+        return ret;
+    }
+
+    PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::READ, arraySet.second, volumeSet.second,
+        request->rba(), request->num_blocks(), nullptr);
+    return ::grpc::Status::OK;
 }
 
 ::grpc::Status
 GrpcSubscriber::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc::CompleteHostWriteRequest* request,
     pos_rpc::CompleteHostWriteResponse* response)
 {
+    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
+    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
+
+    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
+
+    if (ret.ok() == false)
+    {
+        return ret;
+    }
+    PosReplicatorManagerSingleton::Instance()->CompleteUserIO(request->lsn(), arraySet.second, volumeSet.second);
     return ::grpc::Status::OK;    
 }
 

@@ -51,6 +51,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/io/frontend_io/flush_command_handler.h"
@@ -186,7 +187,7 @@ AioCompletion::_SendUserCompletion(void)
 }
 
 VolumeIoSmartPtr
-AIO::CreateVolumeIo(pos_io& posIo)
+AIO::_CreateVolumeIo(pos_io& posIo)
 {
     uint64_t sectorSize = ChangeByteToSector(posIo.length);
     void* buffer = nullptr;
@@ -224,15 +225,47 @@ AIO::CreateVolumeIo(pos_io& posIo)
     volumeIo->SetSectorRba(sectorRba);
     volumeIo->SetEventType(BackendEvent::BackendEvent_FrontendIO);
 
-    CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
-        ioContext));
+    return volumeIo;
+}
 
-    volumeIo->SetCallback(aioCompletion);
-
+void
+AIO::_IncreaseIoContextCnt(bool needPollingNecessary)
+{
     ioContext.cnt++;
-    if (volumeIo->IsPollingNecessary())
+    if (needPollingNecessary)
     {
         ioContext.needPollingCount++;
+    }
+}
+
+VolumeIoSmartPtr
+AIO::CreateVolumeIo(pos_io& posIo)
+{
+    VolumeIoSmartPtr volumeIo = _CreateVolumeIo(posIo);
+    CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
+        ioContext));
+    volumeIo->SetCallback(aioCompletion);
+
+    _IncreaseIoContextCnt(volumeIo->IsPollingNecessary());
+
+    return volumeIo;
+}
+
+VolumeIoSmartPtr
+AIO::CreatePosReplicatorVolumeIo(pos_io& posIo, uint64_t lsn)
+{
+    VolumeIoSmartPtr volumeIo = _CreateVolumeIo(posIo);
+
+    if (lsn != REPLICATOR_INVALID_LSN)
+    {
+        CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
+        ioContext));
+        volumeIo->SetCallback(aioCompletion);
+        _IncreaseIoContextCnt(volumeIo->IsPollingNecessary());
+    }
+    else
+    {
+        volumeIo->SetCallback(nullptr);
     }
 
     return volumeIo;
