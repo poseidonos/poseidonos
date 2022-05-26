@@ -162,8 +162,9 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
@@ -192,8 +193,9 @@ VolumeManager::Delete(std::string name)
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
@@ -227,8 +229,9 @@ VolumeManager::Mount(std::string name, std::string subnqn)
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
@@ -252,8 +255,9 @@ VolumeManager::Unmount(std::string name)
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
@@ -277,8 +281,9 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
@@ -302,8 +307,9 @@ VolumeManager::Rename(std::string oldName, std::string newName)
         return ret;
     }
 
-    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
-    unique_lock<mutex> detachLock(volumeDetachLock, std::defer_lock);
+    std::unique_lock<std::mutex> eventLock, detachLock;
+    eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
+    detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
     ret = std::try_lock(volumeEventLock, volumeDetachLock);
 
