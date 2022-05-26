@@ -5,11 +5,14 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"fmt"
 
 	pb "cli/api"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -48,6 +51,14 @@ Example:
 				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			} else {
 				res, err := grpcmgr.SendGetSystemPropertyRpc(req)
+				if err != nil {
+					status, _ := status.FromError(err)
+					switch status.Code() {
+					case codes.ResourceExhausted:
+						fmt.Println("PoseidonOS may be processing a command. Please try after a while.")
+						return
+					}
+				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)

@@ -6,9 +6,12 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"fmt"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -50,6 +53,14 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			} else {
 				res, err := grpcmgr.SendSetSystemPropertyRpc(req)
+				if err != nil {
+					status, _ := status.FromError(err)
+					switch status.Code() {
+					case codes.ResourceExhausted:
+						fmt.Println("PoseidonOS may be processing a command. Please try after a while.")
+						return
+					}
+				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
