@@ -271,7 +271,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
 
         if (!_IsRangeOverlapConflicted(pendingIoReq))
         {
-            if (MetaStorageType::NVRAM == pendingIoReq->targetMediaType)
+            if (MetaStorageType::SSD != pendingIoReq->targetMediaType)
             {
                 if (!_ExecutePendedIo(pendingIoReq))
                     break;
