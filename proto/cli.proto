@@ -28,6 +28,16 @@ service PosCli {
       		get: "/v1/set_system_property/{level}"
     	};
 	}
+	rpc StartTelemetry (StartTelemetryRequest) returns (StartTelemetryResponse) {
+		option (google.api.http) = {
+      		get: "/v1/start_telemetry"
+    	};
+	}
+	rpc StopTelemetry (StopTelemetryRequest) returns (StopTelemetryResponse) {
+		option (google.api.http) = {
+      		get: "/v1/stop_telemetry"
+    	};
+	}
 }
 
 message Status {
@@ -109,6 +119,38 @@ message SetSystemPropertyRequest {
 }
 
 message SetSystemPropertyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message StartTelemetryRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message StartTelemetryResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message StopTelemetryRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message StopTelemetryResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

@@ -50,6 +50,24 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+    grpc::Status
+  StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
+                  StartTelemetryResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteStartTelemetryCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
+                  StopTelemetryResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {
