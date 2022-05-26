@@ -135,7 +135,7 @@ CreateSubsystemCommand::_SetDefaultOptions(json& doc)
 {
     string key("subsystem");
     string number;
-
+    serialNumber = DEFAULT_SERIAL_NUMBER;
     size_t found = subnqn.rfind(key);
     if (found != string::npos)
     {
