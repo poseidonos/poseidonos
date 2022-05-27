@@ -46,6 +46,7 @@
 #include "src/rebuild/array_rebuilder.h"
 #include "src/rebuild/interface/i_rebuild_notification.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/cli/command_processor.h"
 
 using namespace std;
 
@@ -64,6 +65,7 @@ class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNoti
     friend class GcWbtCommand;
     friend class ParityLocationWbtCommand;
     friend class ::pos_cli::StopRebuildingCommand;
+    friend class ::CommandProcessor;
 
 public:
     ArrayManager();

@@ -51,11 +51,37 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
-    grpc::Status
+  grpc::Status
   StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
                   StartTelemetryResponse* reply) override
   {
     grpc::Status status = pc->ExecuteStartTelemetryCommand(request, reply);
+    return status;
+  }
+
+  grpc::Status
+  ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
+                  ResetEventWrrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteResetEventWrrCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  ResetMbr(ServerContext* context, const ResetMbrRequest* request,
+                  ResetMbrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteResetMbrCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  StopRebuilding(ServerContext* context, const StopRebuildingRequest* request,
+                  StopRebuildingResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteStopRebuildingCommand(request, reply);
     
     return status;
   }
@@ -65,6 +91,13 @@ class PosCliServiceImpl final : public PosCli::Service {
                   StopTelemetryResponse* reply) override
   {
     grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
+    return status;
+  }
+  grpc::Status
+  UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
+                  UpdateEventWrrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
     
     return status;
   }

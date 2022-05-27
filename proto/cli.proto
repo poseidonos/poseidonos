@@ -38,6 +38,11 @@ service PosCli {
       		get: "/v1/stop_telemetry"
     	};
 	}
+
+	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
+	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
+	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
+	rpc UpdateEventWrr (UpdateEventWrrRequest) returns (UpdateEventWrrResponse);
 }
 
 message Status {
@@ -151,6 +156,79 @@ message StopTelemetryRequest {
 }
 
 message StopTelemetryResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ResetEventWrrRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ResetEventWrrResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ResetMbrRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ResetMbrResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message StopRebuildingRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+	}
+	Param param = 4;
+}
+
+message StopRebuildingResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message UpdateEventWrrRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+			int64 weight = 2;
+	}
+	Param param = 4;
+}
+
+message UpdateEventWrrResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
