@@ -68,6 +68,15 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  StopRebuilding(ServerContext* context, const StopRebuildingRequest* request,
+                  StopRebuildingResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteStopRebuildingCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {

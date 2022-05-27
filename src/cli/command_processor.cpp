@@ -4,6 +4,7 @@
 #include "src/cli/cli_event_code.h"
 #include "src/cli/command_processor.h"
 
+#include "src/array/array.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/request_handler.h"
 #include "src/cli/cli_server.h"
@@ -193,6 +194,23 @@ CommandProcessor::ExecuteResetMbrCommand(const ResetMbrRequest* request,
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteStopRebuildingCommand(const StopRebuildingRequest* request,
+    StopRebuildingResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).name();
+    IArrayRebuilder* rebuilder = ArrayManagerSingleton::Instance()->arrayRebuilder;
+    rebuilder->StopRebuild(arrayName);
+    rebuilder->WaitRebuildDone(arrayName);
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
