@@ -160,6 +160,26 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
         return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request,
+    ResetEventWrrResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
+    reply->mutable_info()->set_version(version);
+
+    for ( int eventId = BackendEvent_Start; eventId != BackendEvent_Unknown; eventId++ )
+    {
+        BackendEvent event = static_cast<BackendEvent>(eventId);
+        QosManagerSingleton::Instance()->SetEventWeightWRR(event, RESET_EVENT_WRR_DEFAULT_WEIGHT);
+    }
+
+    reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
+    reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
+    return grpc::Status::OK;
+}
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {

@@ -25,23 +25,36 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "RESETEVENTWRRPOLICY"
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReq(command, uuid)
-
-		reqJSON, err := json.Marshal(req)
+		req := &pb.SystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli"}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendResetEventWrrPolicyRpc(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-		}
 	},
 }
 

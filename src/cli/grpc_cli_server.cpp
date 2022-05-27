@@ -50,6 +50,15 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
+                  ResetEventWrrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteResetEventWrrCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {

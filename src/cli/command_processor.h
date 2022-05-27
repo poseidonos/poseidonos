@@ -36,6 +36,8 @@
 #include "proto/generated/cpp/cli.pb.h"
 #include <string>
 
+#define RESET_EVENT_WRR_DEFAULT_WEIGHT 20
+
 using grpc::Status;
 using grpc::StatusCode;
 using grpc_cli::PosInfo;
@@ -47,6 +49,8 @@ using grpc_cli::GetSystemPropertyRequest;
 using grpc_cli::GetSystemPropertyResponse;
 using grpc_cli::SetSystemPropertyRequest;
 using grpc_cli::SetSystemPropertyResponse;
+using grpc_cli::ResetEventWrrRequest;
+using grpc_cli::ResetEventWrrResponse;
 
 class CommandProcessor
 {
@@ -58,6 +62,7 @@ public:
     grpc::Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
     grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
+    grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
 
 private:
     bool _isPosTerminating;
