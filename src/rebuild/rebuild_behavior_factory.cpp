@@ -48,13 +48,6 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
     if (ctx->part == PartitionType::JOURNAL_SSD)
     {
-        if (ctx->isWT == false)
-        {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Since it is not in the write-through mode, the {} partition is excluded from the rebuild",
-                PARTITION_TYPE_STR[ctx->part]);
-            return nullptr;
-        }
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild for {} partition is created",
             PARTITION_TYPE_STR[ctx->part]);
         return new StripeBasedRaceRebuild(move(ctx));
