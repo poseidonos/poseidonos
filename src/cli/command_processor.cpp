@@ -198,7 +198,7 @@ StopTelemetryResponse* reply)
     reply->set_rid(request->rid());
 
     TelemetryClient* tc = TelemetryClientSingleton::Instance();
-    bool result = tc->StartAllPublisher();
+    bool result = tc->StopAllPublisher();
     if (!result)
     {
         _SetEventStatus(EID(TELEMETRY_STOP_FAILURE), reply->mutable_result()->mutable_status());

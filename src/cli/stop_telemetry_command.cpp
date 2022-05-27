@@ -72,7 +72,7 @@ StopTelemetryCommand::Execute(json& doc, string rid)
     TelemetryConfig* config = TelemetryConfigSingleton::Instance();
     if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", false, true))
     {
-        return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
+        return jFormat.MakeResponse("STOPTELEMETRY", rid, result,
             "The config for telemetry client could not be set as false", data, GetPosInfo());
     }
 
