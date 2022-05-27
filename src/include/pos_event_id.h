@@ -1078,6 +1078,10 @@ enum class POS_EVENT_ID
     // --------------Telemetry (9500)----------------
     TELEMETRY_DEBUG_MSG = 9500,
     TELEMETRY_DISABLED = 9501,
+    TELEMETRY_START_FAILURE,
+    TELEMETRY_START_FAILURE_CONFIG_ERROR,
+    TELEMETRY_STOP_FAILURE,
+    TELEMETRY_STOP_FAILURE_CONFIG_ERROR,
 
     TELEMETRY_ERROR_MSG = 9600,
     TELEMETRY_CONFIG_BAD_FILE,
@@ -1542,4 +1546,18 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
             new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
                 "failed to delete volumes", "a timeout has occured", "Please report the errors")},
+
+        {(int)POS_EVENT_ID::TELEMETRY_START_FAILURE,
+            new PosEventInfoEntry("TELEMETRY_START_FAILURE",
+                "Failed to start telemetry.", "", "")},
+        {(int)POS_EVENT_ID::TELEMETRY_START_FAILURE_CONFIG_ERROR,
+            new PosEventInfoEntry("TELEMETRY_START_FAILURE_CONFIG_ERROR",
+                "Failed to start telemetry.", "Failed to update config.", "")},
+        {(int)POS_EVENT_ID::TELEMETRY_STOP_FAILURE,
+            new PosEventInfoEntry("TELEMETRY_STOP_FAILURE",
+                "Failed to stop telemetry.", "", "")},
+        {(int)POS_EVENT_ID::TELEMETRY_STOP_FAILURE_CONFIG_ERROR,
+            new PosEventInfoEntry("TELEMETRY_STOP_FAILURE_CONFIG_ERROR",
+                "Failed to stop telemetry.", "Failed to update config.", "")},
+        
     };

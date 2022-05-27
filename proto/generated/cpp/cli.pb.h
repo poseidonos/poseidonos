@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[17]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[23]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -83,9 +83,27 @@ extern SetSystemPropertyResponseDefaultTypeInternal _SetSystemPropertyResponse_d
 class SetSystemPropertyResponse_Result;
 struct SetSystemPropertyResponse_ResultDefaultTypeInternal;
 extern SetSystemPropertyResponse_ResultDefaultTypeInternal _SetSystemPropertyResponse_Result_default_instance_;
+class StartTelemetryRequest;
+struct StartTelemetryRequestDefaultTypeInternal;
+extern StartTelemetryRequestDefaultTypeInternal _StartTelemetryRequest_default_instance_;
+class StartTelemetryResponse;
+struct StartTelemetryResponseDefaultTypeInternal;
+extern StartTelemetryResponseDefaultTypeInternal _StartTelemetryResponse_default_instance_;
+class StartTelemetryResponse_Result;
+struct StartTelemetryResponse_ResultDefaultTypeInternal;
+extern StartTelemetryResponse_ResultDefaultTypeInternal _StartTelemetryResponse_Result_default_instance_;
 class Status;
 struct StatusDefaultTypeInternal;
 extern StatusDefaultTypeInternal _Status_default_instance_;
+class StopTelemetryRequest;
+struct StopTelemetryRequestDefaultTypeInternal;
+extern StopTelemetryRequestDefaultTypeInternal _StopTelemetryRequest_default_instance_;
+class StopTelemetryResponse;
+struct StopTelemetryResponseDefaultTypeInternal;
+extern StopTelemetryResponseDefaultTypeInternal _StopTelemetryResponse_default_instance_;
+class StopTelemetryResponse_Result;
+struct StopTelemetryResponse_ResultDefaultTypeInternal;
+extern StopTelemetryResponse_ResultDefaultTypeInternal _StopTelemetryResponse_Result_default_instance_;
 class SystemInfoRequest;
 struct SystemInfoRequestDefaultTypeInternal;
 extern SystemInfoRequestDefaultTypeInternal _SystemInfoRequest_default_instance_;
@@ -118,7 +136,13 @@ template<> ::grpc_cli::SetSystemPropertyRequest* Arena::CreateMaybeMessage<::grp
 template<> ::grpc_cli::SetSystemPropertyRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::SetSystemPropertyRequest_Param>(Arena*);
 template<> ::grpc_cli::SetSystemPropertyResponse* Arena::CreateMaybeMessage<::grpc_cli::SetSystemPropertyResponse>(Arena*);
 template<> ::grpc_cli::SetSystemPropertyResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::SetSystemPropertyResponse_Result>(Arena*);
+template<> ::grpc_cli::StartTelemetryRequest* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryRequest>(Arena*);
+template<> ::grpc_cli::StartTelemetryResponse* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryResponse>(Arena*);
+template<> ::grpc_cli::StartTelemetryResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryResponse_Result>(Arena*);
 template<> ::grpc_cli::Status* Arena::CreateMaybeMessage<::grpc_cli::Status>(Arena*);
+template<> ::grpc_cli::StopTelemetryRequest* Arena::CreateMaybeMessage<::grpc_cli::StopTelemetryRequest>(Arena*);
+template<> ::grpc_cli::StopTelemetryResponse* Arena::CreateMaybeMessage<::grpc_cli::StopTelemetryResponse>(Arena*);
+template<> ::grpc_cli::StopTelemetryResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::StopTelemetryResponse_Result>(Arena*);
 template<> ::grpc_cli::SystemInfoRequest* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoRequest>(Arena*);
 template<> ::grpc_cli::SystemInfoResponse* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoResponse>(Arena*);
 template<> ::grpc_cli::SystemInfoResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoResponse_Result>(Arena*);
@@ -3117,6 +3141,1066 @@ class SetSystemPropertyResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
   ::grpc_cli::SetSystemPropertyResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartTelemetryRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartTelemetryRequest) */ {
+ public:
+  inline StartTelemetryRequest() : StartTelemetryRequest(nullptr) {}
+  virtual ~StartTelemetryRequest();
+  explicit constexpr StartTelemetryRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartTelemetryRequest(const StartTelemetryRequest& from);
+  StartTelemetryRequest(StartTelemetryRequest&& from) noexcept
+    : StartTelemetryRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline StartTelemetryRequest& operator=(const StartTelemetryRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartTelemetryRequest& operator=(StartTelemetryRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartTelemetryRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartTelemetryRequest* internal_default_instance() {
+    return reinterpret_cast<const StartTelemetryRequest*>(
+               &_StartTelemetryRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    17;
+
+  friend void swap(StartTelemetryRequest& a, StartTelemetryRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartTelemetryRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartTelemetryRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartTelemetryRequest* New() const final {
+    return CreateMaybeMessage<StartTelemetryRequest>(nullptr);
+  }
+
+  StartTelemetryRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartTelemetryRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartTelemetryRequest& from);
+  void MergeFrom(const StartTelemetryRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartTelemetryRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartTelemetryRequest";
+  }
+  protected:
+  explicit StartTelemetryRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartTelemetryRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartTelemetryResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartTelemetryResponse.Result) */ {
+ public:
+  inline StartTelemetryResponse_Result() : StartTelemetryResponse_Result(nullptr) {}
+  virtual ~StartTelemetryResponse_Result();
+  explicit constexpr StartTelemetryResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartTelemetryResponse_Result(const StartTelemetryResponse_Result& from);
+  StartTelemetryResponse_Result(StartTelemetryResponse_Result&& from) noexcept
+    : StartTelemetryResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline StartTelemetryResponse_Result& operator=(const StartTelemetryResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartTelemetryResponse_Result& operator=(StartTelemetryResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartTelemetryResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartTelemetryResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const StartTelemetryResponse_Result*>(
+               &_StartTelemetryResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    18;
+
+  friend void swap(StartTelemetryResponse_Result& a, StartTelemetryResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartTelemetryResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartTelemetryResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartTelemetryResponse_Result* New() const final {
+    return CreateMaybeMessage<StartTelemetryResponse_Result>(nullptr);
+  }
+
+  StartTelemetryResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartTelemetryResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartTelemetryResponse_Result& from);
+  void MergeFrom(const StartTelemetryResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartTelemetryResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartTelemetryResponse.Result";
+  }
+  protected:
+  explicit StartTelemetryResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartTelemetryResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartTelemetryResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartTelemetryResponse) */ {
+ public:
+  inline StartTelemetryResponse() : StartTelemetryResponse(nullptr) {}
+  virtual ~StartTelemetryResponse();
+  explicit constexpr StartTelemetryResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartTelemetryResponse(const StartTelemetryResponse& from);
+  StartTelemetryResponse(StartTelemetryResponse&& from) noexcept
+    : StartTelemetryResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline StartTelemetryResponse& operator=(const StartTelemetryResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartTelemetryResponse& operator=(StartTelemetryResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartTelemetryResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartTelemetryResponse* internal_default_instance() {
+    return reinterpret_cast<const StartTelemetryResponse*>(
+               &_StartTelemetryResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    19;
+
+  friend void swap(StartTelemetryResponse& a, StartTelemetryResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartTelemetryResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartTelemetryResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartTelemetryResponse* New() const final {
+    return CreateMaybeMessage<StartTelemetryResponse>(nullptr);
+  }
+
+  StartTelemetryResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartTelemetryResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartTelemetryResponse& from);
+  void MergeFrom(const StartTelemetryResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartTelemetryResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartTelemetryResponse";
+  }
+  protected:
+  explicit StartTelemetryResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef StartTelemetryResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.StartTelemetryResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::StartTelemetryResponse_Result& result() const;
+  ::grpc_cli::StartTelemetryResponse_Result* release_result();
+  ::grpc_cli::StartTelemetryResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::StartTelemetryResponse_Result* result);
+  private:
+  const ::grpc_cli::StartTelemetryResponse_Result& _internal_result() const;
+  ::grpc_cli::StartTelemetryResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::StartTelemetryResponse_Result* result);
+  ::grpc_cli::StartTelemetryResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartTelemetryResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::StartTelemetryResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StopTelemetryRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StopTelemetryRequest) */ {
+ public:
+  inline StopTelemetryRequest() : StopTelemetryRequest(nullptr) {}
+  virtual ~StopTelemetryRequest();
+  explicit constexpr StopTelemetryRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StopTelemetryRequest(const StopTelemetryRequest& from);
+  StopTelemetryRequest(StopTelemetryRequest&& from) noexcept
+    : StopTelemetryRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline StopTelemetryRequest& operator=(const StopTelemetryRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StopTelemetryRequest& operator=(StopTelemetryRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StopTelemetryRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StopTelemetryRequest* internal_default_instance() {
+    return reinterpret_cast<const StopTelemetryRequest*>(
+               &_StopTelemetryRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    20;
+
+  friend void swap(StopTelemetryRequest& a, StopTelemetryRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StopTelemetryRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StopTelemetryRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StopTelemetryRequest* New() const final {
+    return CreateMaybeMessage<StopTelemetryRequest>(nullptr);
+  }
+
+  StopTelemetryRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StopTelemetryRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StopTelemetryRequest& from);
+  void MergeFrom(const StopTelemetryRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StopTelemetryRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StopTelemetryRequest";
+  }
+  protected:
+  explicit StopTelemetryRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StopTelemetryRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StopTelemetryResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StopTelemetryResponse.Result) */ {
+ public:
+  inline StopTelemetryResponse_Result() : StopTelemetryResponse_Result(nullptr) {}
+  virtual ~StopTelemetryResponse_Result();
+  explicit constexpr StopTelemetryResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StopTelemetryResponse_Result(const StopTelemetryResponse_Result& from);
+  StopTelemetryResponse_Result(StopTelemetryResponse_Result&& from) noexcept
+    : StopTelemetryResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline StopTelemetryResponse_Result& operator=(const StopTelemetryResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StopTelemetryResponse_Result& operator=(StopTelemetryResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StopTelemetryResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StopTelemetryResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const StopTelemetryResponse_Result*>(
+               &_StopTelemetryResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    21;
+
+  friend void swap(StopTelemetryResponse_Result& a, StopTelemetryResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StopTelemetryResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StopTelemetryResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StopTelemetryResponse_Result* New() const final {
+    return CreateMaybeMessage<StopTelemetryResponse_Result>(nullptr);
+  }
+
+  StopTelemetryResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StopTelemetryResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StopTelemetryResponse_Result& from);
+  void MergeFrom(const StopTelemetryResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StopTelemetryResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StopTelemetryResponse.Result";
+  }
+  protected:
+  explicit StopTelemetryResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StopTelemetryResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StopTelemetryResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StopTelemetryResponse) */ {
+ public:
+  inline StopTelemetryResponse() : StopTelemetryResponse(nullptr) {}
+  virtual ~StopTelemetryResponse();
+  explicit constexpr StopTelemetryResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StopTelemetryResponse(const StopTelemetryResponse& from);
+  StopTelemetryResponse(StopTelemetryResponse&& from) noexcept
+    : StopTelemetryResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline StopTelemetryResponse& operator=(const StopTelemetryResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StopTelemetryResponse& operator=(StopTelemetryResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StopTelemetryResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StopTelemetryResponse* internal_default_instance() {
+    return reinterpret_cast<const StopTelemetryResponse*>(
+               &_StopTelemetryResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    22;
+
+  friend void swap(StopTelemetryResponse& a, StopTelemetryResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StopTelemetryResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StopTelemetryResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StopTelemetryResponse* New() const final {
+    return CreateMaybeMessage<StopTelemetryResponse>(nullptr);
+  }
+
+  StopTelemetryResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StopTelemetryResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StopTelemetryResponse& from);
+  void MergeFrom(const StopTelemetryResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StopTelemetryResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StopTelemetryResponse";
+  }
+  protected:
+  explicit StopTelemetryResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef StopTelemetryResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.StopTelemetryResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::StopTelemetryResponse_Result& result() const;
+  ::grpc_cli::StopTelemetryResponse_Result* release_result();
+  ::grpc_cli::StopTelemetryResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::StopTelemetryResponse_Result* result);
+  private:
+  const ::grpc_cli::StopTelemetryResponse_Result& _internal_result() const;
+  ::grpc_cli::StopTelemetryResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::StopTelemetryResponse_Result* result);
+  ::grpc_cli::StopTelemetryResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StopTelemetryResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::StopTelemetryResponse_Result* result_;
   ::grpc_cli::PosInfo* info_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
@@ -6225,9 +7309,1153 @@ inline void SetSystemPropertyResponse::set_allocated_info(::grpc_cli::PosInfo* i
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SetSystemPropertyResponse.info)
 }
 
+// -------------------------------------------------------------------
+
+// StartTelemetryRequest
+
+// string command = 1;
+inline void StartTelemetryRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StartTelemetryRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryRequest.command)
+  return _internal_command();
+}
+inline void StartTelemetryRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartTelemetryRequest.command)
+}
+inline std::string* StartTelemetryRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StartTelemetryRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void StartTelemetryRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartTelemetryRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartTelemetryRequest.command)
+}
+inline void StartTelemetryRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartTelemetryRequest.command)
+}
+inline void StartTelemetryRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartTelemetryRequest.command)
+}
+inline std::string* StartTelemetryRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartTelemetryRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartTelemetryRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryRequest.command)
+}
+
+// string rid = 2;
+inline void StartTelemetryRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StartTelemetryRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryRequest.rid)
+  return _internal_rid();
+}
+inline void StartTelemetryRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartTelemetryRequest.rid)
+}
+inline std::string* StartTelemetryRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StartTelemetryRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StartTelemetryRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartTelemetryRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartTelemetryRequest.rid)
+}
+inline void StartTelemetryRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartTelemetryRequest.rid)
+}
+inline void StartTelemetryRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartTelemetryRequest.rid)
+}
+inline std::string* StartTelemetryRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartTelemetryRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartTelemetryRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryRequest.rid)
+}
+
+// string requestor = 3;
+inline void StartTelemetryRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& StartTelemetryRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryRequest.requestor)
+  return _internal_requestor();
+}
+inline void StartTelemetryRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartTelemetryRequest.requestor)
+}
+inline std::string* StartTelemetryRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& StartTelemetryRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void StartTelemetryRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartTelemetryRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartTelemetryRequest.requestor)
+}
+inline void StartTelemetryRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartTelemetryRequest.requestor)
+}
+inline void StartTelemetryRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartTelemetryRequest.requestor)
+}
+inline std::string* StartTelemetryRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartTelemetryRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartTelemetryRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryRequest.requestor)
+}
+
+// -------------------------------------------------------------------
+
+// StartTelemetryResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool StartTelemetryResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool StartTelemetryResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void StartTelemetryResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& StartTelemetryResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& StartTelemetryResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryResponse.Result.status)
+  return _internal_status();
+}
+inline void StartTelemetryResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartTelemetryResponse.Result.status)
+}
+inline ::grpc_cli::Status* StartTelemetryResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* StartTelemetryResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* StartTelemetryResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* StartTelemetryResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void StartTelemetryResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// StartTelemetryResponse
+
+// string command = 1;
+inline void StartTelemetryResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StartTelemetryResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryResponse.command)
+  return _internal_command();
+}
+inline void StartTelemetryResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartTelemetryResponse.command)
+}
+inline std::string* StartTelemetryResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StartTelemetryResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void StartTelemetryResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartTelemetryResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartTelemetryResponse.command)
+}
+inline void StartTelemetryResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartTelemetryResponse.command)
+}
+inline void StartTelemetryResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartTelemetryResponse.command)
+}
+inline std::string* StartTelemetryResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartTelemetryResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartTelemetryResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryResponse.command)
+}
+
+// string rid = 2;
+inline void StartTelemetryResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StartTelemetryResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryResponse.rid)
+  return _internal_rid();
+}
+inline void StartTelemetryResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartTelemetryResponse.rid)
+}
+inline std::string* StartTelemetryResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StartTelemetryResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StartTelemetryResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartTelemetryResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartTelemetryResponse.rid)
+}
+inline void StartTelemetryResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartTelemetryResponse.rid)
+}
+inline void StartTelemetryResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartTelemetryResponse.rid)
+}
+inline std::string* StartTelemetryResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartTelemetryResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartTelemetryResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryResponse.rid)
+}
+
+// .grpc_cli.StartTelemetryResponse.Result result = 3;
+inline bool StartTelemetryResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool StartTelemetryResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void StartTelemetryResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::StartTelemetryResponse_Result& StartTelemetryResponse::_internal_result() const {
+  const ::grpc_cli::StartTelemetryResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::StartTelemetryResponse_Result&>(
+      ::grpc_cli::_StartTelemetryResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::StartTelemetryResponse_Result& StartTelemetryResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryResponse.result)
+  return _internal_result();
+}
+inline void StartTelemetryResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::StartTelemetryResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartTelemetryResponse.result)
+}
+inline ::grpc_cli::StartTelemetryResponse_Result* StartTelemetryResponse::release_result() {
+  
+  ::grpc_cli::StartTelemetryResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::StartTelemetryResponse_Result* StartTelemetryResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryResponse.result)
+  
+  ::grpc_cli::StartTelemetryResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::StartTelemetryResponse_Result* StartTelemetryResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::StartTelemetryResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::StartTelemetryResponse_Result* StartTelemetryResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryResponse.result)
+  return _internal_mutable_result();
+}
+inline void StartTelemetryResponse::set_allocated_result(::grpc_cli::StartTelemetryResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool StartTelemetryResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool StartTelemetryResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void StartTelemetryResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& StartTelemetryResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& StartTelemetryResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartTelemetryResponse.info)
+  return _internal_info();
+}
+inline void StartTelemetryResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartTelemetryResponse.info)
+}
+inline ::grpc_cli::PosInfo* StartTelemetryResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StartTelemetryResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartTelemetryResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StartTelemetryResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* StartTelemetryResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartTelemetryResponse.info)
+  return _internal_mutable_info();
+}
+inline void StartTelemetryResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartTelemetryResponse.info)
+}
+
+// -------------------------------------------------------------------
+
+// StopTelemetryRequest
+
+// string command = 1;
+inline void StopTelemetryRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StopTelemetryRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryRequest.command)
+  return _internal_command();
+}
+inline void StopTelemetryRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StopTelemetryRequest.command)
+}
+inline std::string* StopTelemetryRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StopTelemetryRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void StopTelemetryRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StopTelemetryRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StopTelemetryRequest.command)
+}
+inline void StopTelemetryRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StopTelemetryRequest.command)
+}
+inline void StopTelemetryRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StopTelemetryRequest.command)
+}
+inline std::string* StopTelemetryRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StopTelemetryRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StopTelemetryRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryRequest.command)
+}
+
+// string rid = 2;
+inline void StopTelemetryRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StopTelemetryRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryRequest.rid)
+  return _internal_rid();
+}
+inline void StopTelemetryRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StopTelemetryRequest.rid)
+}
+inline std::string* StopTelemetryRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StopTelemetryRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StopTelemetryRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StopTelemetryRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StopTelemetryRequest.rid)
+}
+inline void StopTelemetryRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StopTelemetryRequest.rid)
+}
+inline void StopTelemetryRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StopTelemetryRequest.rid)
+}
+inline std::string* StopTelemetryRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StopTelemetryRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StopTelemetryRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryRequest.rid)
+}
+
+// string requestor = 3;
+inline void StopTelemetryRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& StopTelemetryRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryRequest.requestor)
+  return _internal_requestor();
+}
+inline void StopTelemetryRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StopTelemetryRequest.requestor)
+}
+inline std::string* StopTelemetryRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& StopTelemetryRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void StopTelemetryRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StopTelemetryRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StopTelemetryRequest.requestor)
+}
+inline void StopTelemetryRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StopTelemetryRequest.requestor)
+}
+inline void StopTelemetryRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StopTelemetryRequest.requestor)
+}
+inline std::string* StopTelemetryRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StopTelemetryRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StopTelemetryRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryRequest.requestor)
+}
+
+// -------------------------------------------------------------------
+
+// StopTelemetryResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool StopTelemetryResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool StopTelemetryResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void StopTelemetryResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& StopTelemetryResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& StopTelemetryResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryResponse.Result.status)
+  return _internal_status();
+}
+inline void StopTelemetryResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StopTelemetryResponse.Result.status)
+}
+inline ::grpc_cli::Status* StopTelemetryResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* StopTelemetryResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* StopTelemetryResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* StopTelemetryResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void StopTelemetryResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// StopTelemetryResponse
+
+// string command = 1;
+inline void StopTelemetryResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StopTelemetryResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryResponse.command)
+  return _internal_command();
+}
+inline void StopTelemetryResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StopTelemetryResponse.command)
+}
+inline std::string* StopTelemetryResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StopTelemetryResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void StopTelemetryResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StopTelemetryResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StopTelemetryResponse.command)
+}
+inline void StopTelemetryResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StopTelemetryResponse.command)
+}
+inline void StopTelemetryResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StopTelemetryResponse.command)
+}
+inline std::string* StopTelemetryResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StopTelemetryResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StopTelemetryResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryResponse.command)
+}
+
+// string rid = 2;
+inline void StopTelemetryResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StopTelemetryResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryResponse.rid)
+  return _internal_rid();
+}
+inline void StopTelemetryResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StopTelemetryResponse.rid)
+}
+inline std::string* StopTelemetryResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StopTelemetryResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StopTelemetryResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StopTelemetryResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StopTelemetryResponse.rid)
+}
+inline void StopTelemetryResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StopTelemetryResponse.rid)
+}
+inline void StopTelemetryResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StopTelemetryResponse.rid)
+}
+inline std::string* StopTelemetryResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StopTelemetryResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StopTelemetryResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryResponse.rid)
+}
+
+// .grpc_cli.StopTelemetryResponse.Result result = 3;
+inline bool StopTelemetryResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool StopTelemetryResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void StopTelemetryResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::StopTelemetryResponse_Result& StopTelemetryResponse::_internal_result() const {
+  const ::grpc_cli::StopTelemetryResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::StopTelemetryResponse_Result&>(
+      ::grpc_cli::_StopTelemetryResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::StopTelemetryResponse_Result& StopTelemetryResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryResponse.result)
+  return _internal_result();
+}
+inline void StopTelemetryResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::StopTelemetryResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StopTelemetryResponse.result)
+}
+inline ::grpc_cli::StopTelemetryResponse_Result* StopTelemetryResponse::release_result() {
+  
+  ::grpc_cli::StopTelemetryResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::StopTelemetryResponse_Result* StopTelemetryResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryResponse.result)
+  
+  ::grpc_cli::StopTelemetryResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::StopTelemetryResponse_Result* StopTelemetryResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::StopTelemetryResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::StopTelemetryResponse_Result* StopTelemetryResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryResponse.result)
+  return _internal_mutable_result();
+}
+inline void StopTelemetryResponse::set_allocated_result(::grpc_cli::StopTelemetryResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool StopTelemetryResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool StopTelemetryResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void StopTelemetryResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& StopTelemetryResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& StopTelemetryResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StopTelemetryResponse.info)
+  return _internal_info();
+}
+inline void StopTelemetryResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StopTelemetryResponse.info)
+}
+inline ::grpc_cli::PosInfo* StopTelemetryResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StopTelemetryResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StopTelemetryResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StopTelemetryResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* StopTelemetryResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StopTelemetryResponse.info)
+  return _internal_mutable_info();
+}
+inline void StopTelemetryResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StopTelemetryResponse.info)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

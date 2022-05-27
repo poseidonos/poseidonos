@@ -64,6 +64,20 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>> PrepareAsyncSetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>>(PrepareAsyncSetSystemPropertyRaw(context, request, cq));
     }
+    virtual ::grpc::Status StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc_cli::StartTelemetryResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>> AsyncStartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>>(AsyncStartTelemetryRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>> PrepareAsyncStartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>>(PrepareAsyncStartTelemetryRaw(context, request, cq));
+    }
+    virtual ::grpc::Status StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc_cli::StopTelemetryResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>> AsyncStopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>>(AsyncStopTelemetryRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>> PrepareAsyncStopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>>(PrepareAsyncStopTelemetryRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -91,6 +105,18 @@ class PosCli final {
       #else
       virtual void SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -108,6 +134,10 @@ class PosCli final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>* PrepareAsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>* AsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StartTelemetryResponse>* PrepareAsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>* AsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopTelemetryResponse>* PrepareAsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -140,6 +170,20 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>> PrepareAsyncSetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>>(PrepareAsyncSetSystemPropertyRaw(context, request, cq));
     }
+    ::grpc::Status StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc_cli::StartTelemetryResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>> AsyncStartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>>(AsyncStartTelemetryRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>> PrepareAsyncStartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>>(PrepareAsyncStartTelemetryRaw(context, request, cq));
+    }
+    ::grpc::Status StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc_cli::StopTelemetryResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>> AsyncStopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>>(AsyncStopTelemetryRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>> PrepareAsyncStopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>>(PrepareAsyncStopTelemetryRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
@@ -167,6 +211,18 @@ class PosCli final {
       #else
       void SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -186,10 +242,16 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* PrepareAsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>* AsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>* PrepareAsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>* AsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>* PrepareAsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SystemInfo_;
     const ::grpc::internal::RpcMethod rpcmethod_SystemStop_;
     const ::grpc::internal::RpcMethod rpcmethod_GetSystemProperty_;
     const ::grpc::internal::RpcMethod rpcmethod_SetSystemProperty_;
+    const ::grpc::internal::RpcMethod rpcmethod_StartTelemetry_;
+    const ::grpc::internal::RpcMethod rpcmethod_StopTelemetry_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -201,6 +263,8 @@ class PosCli final {
     virtual ::grpc::Status SystemStop(::grpc::ServerContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response);
     virtual ::grpc::Status GetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response);
     virtual ::grpc::Status SetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response);
+    virtual ::grpc::Status StartTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response);
+    virtual ::grpc::Status StopTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_SystemInfo : public BaseClass {
@@ -282,7 +346,47 @@ class PosCli final {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<Service > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_StartTelemetry() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStartTelemetry(::grpc::ServerContext* context, ::grpc_cli::StartTelemetryRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::StartTelemetryResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_StopTelemetry() {
+      ::grpc::Service::MarkMethodAsync(5);
+    }
+    ~WithAsyncMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStopTelemetry(::grpc::ServerContext* context, ::grpc_cli::StopTelemetryRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::StopTelemetryResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<Service > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -471,11 +575,105 @@ class PosCli final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_StartTelemetry() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response) { return this->StartTelemetry(context, request, response); }));}
+    void SetMessageAllocatorFor_StartTelemetry(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StartTelemetry(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StartTelemetry(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_StopTelemetry() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response) { return this->StopTelemetry(context, request, response); }));}
+    void SetMessageAllocatorFor_StopTelemetry(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StopTelemetry(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StopTelemetry(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<Service > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<Service > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<Service > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<Service > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -540,6 +738,40 @@ class PosCli final {
     }
     // disable synchronous version of this method
     ::grpc::Status SetSystemProperty(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetSystemPropertyRequest* /*request*/, ::grpc_cli::SetSystemPropertyResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_StartTelemetry() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_StopTelemetry() {
+      ::grpc::Service::MarkMethodGeneric(5);
+    }
+    ~WithGenericMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -622,6 +854,46 @@ class PosCli final {
     }
     void RequestSetSystemProperty(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_StartTelemetry() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStartTelemetry(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_StopTelemetry() {
+      ::grpc::Service::MarkMethodRaw(5);
+    }
+    ~WithRawMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStopTelemetry(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -777,6 +1049,82 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_StartTelemetry() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StartTelemetry(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StartTelemetry(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StartTelemetry(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_StopTelemetry() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StopTelemetry(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StopTelemetry(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StopTelemetry(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_SystemInfo : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -884,9 +1232,63 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetSystemProperty(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SetSystemPropertyRequest,::grpc_cli::SetSystemPropertyResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<Service > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_StartTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_StartTelemetry() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse>* streamer) {
+                       return this->StreamedStartTelemetry(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_StartTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status StartTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StartTelemetryRequest* /*request*/, ::grpc_cli::StartTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedStartTelemetry(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::StartTelemetryRequest,::grpc_cli::StartTelemetryResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_StopTelemetry : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_StopTelemetry() {
+      ::grpc::Service::MarkMethodStreamed(5,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse>* streamer) {
+                       return this->StreamedStopTelemetry(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_StopTelemetry() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status StopTelemetry(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopTelemetryRequest* /*request*/, ::grpc_cli::StopTelemetryResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedStopTelemetry(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::StopTelemetryRequest,::grpc_cli::StopTelemetryResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<Service > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<Service > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<Service > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli

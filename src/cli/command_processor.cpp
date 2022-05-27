@@ -160,6 +160,66 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
         return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteStartTelemetryCommand(const StartTelemetryRequest* request,
+StartTelemetryResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+    bool result = tc->StartAllPublisher();
+    if (!result)
+    {
+        _SetEventStatus(EID(TELEMETRY_START_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());                    
+        return Status(StatusCode::FAILED_PRECONDITION, "");
+    }
+
+    TelemetryConfig* config = TelemetryConfigSingleton::Instance();
+    if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", true, true))
+    {
+        _SetEventStatus(EID(TELEMETRY_START_FAILURE_CONFIG_ERROR), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());                    
+        return Status(StatusCode::FAILED_PRECONDITION, "");
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteStopTelemetryCommand(const StopTelemetryRequest* request,
+StopTelemetryResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+    bool result = tc->StopAllPublisher();
+    if (!result)
+    {
+        _SetEventStatus(EID(TELEMETRY_STOP_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());                    
+        return Status(StatusCode::FAILED_PRECONDITION, "");
+    }
+
+    TelemetryConfig* config = TelemetryConfigSingleton::Instance();
+    if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", true, true))
+    {
+        _SetEventStatus(EID(TELEMETRY_STOP_FAILURE_CONFIG_ERROR), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());                    
+        return Status(StatusCode::FAILED_PRECONDITION, "");
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    
+    return grpc::Status::OK;
+}
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {

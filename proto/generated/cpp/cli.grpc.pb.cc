@@ -26,6 +26,8 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/SystemStop",
   "/grpc_cli.PosCli/GetSystemProperty",
   "/grpc_cli.PosCli/SetSystemProperty",
+  "/grpc_cli.PosCli/StartTelemetry",
+  "/grpc_cli.PosCli/StopTelemetry",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -39,6 +41,8 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_SystemStop_(PosCli_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetSystemProperty_(PosCli_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetSystemProperty_(PosCli_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_StartTelemetry_(PosCli_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_StopTelemetry_(PosCli_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -133,6 +137,52 @@ void PosCli::Stub::experimental_async::SetSystemProperty(::grpc::ClientContext* 
   return result;
 }
 
+::grpc::Status PosCli::Stub::StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc_cli::StartTelemetryResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_StartTelemetry_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StartTelemetry_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::StartTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StartTelemetry_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>* PosCli::Stub::PrepareAsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::StartTelemetryResponse, ::grpc_cli::StartTelemetryRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_StartTelemetry_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::StartTelemetryResponse>* PosCli::Stub::AsyncStartTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StartTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncStartTelemetryRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc_cli::StopTelemetryResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_StopTelemetry_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StopTelemetry_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::StopTelemetry(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StopTelemetry_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>* PosCli::Stub::PrepareAsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::StopTelemetryResponse, ::grpc_cli::StopTelemetryRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_StopTelemetry_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>* PosCli::Stub::AsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncStopTelemetryRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -174,6 +224,26 @@ PosCli::Service::Service() {
              ::grpc_cli::SetSystemPropertyResponse* resp) {
                return service->SetSystemProperty(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::StartTelemetryRequest, ::grpc_cli::StartTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::StartTelemetryRequest* req,
+             ::grpc_cli::StartTelemetryResponse* resp) {
+               return service->StartTelemetry(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[5],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::StopTelemetryRequest, ::grpc_cli::StopTelemetryResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::StopTelemetryRequest* req,
+             ::grpc_cli::StopTelemetryResponse* resp) {
+               return service->StopTelemetry(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -201,6 +271,20 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::SetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::StartTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::StopTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response) {
   (void) context;
   (void) request;
   (void) response;

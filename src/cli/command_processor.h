@@ -47,6 +47,10 @@ using grpc_cli::GetSystemPropertyRequest;
 using grpc_cli::GetSystemPropertyResponse;
 using grpc_cli::SetSystemPropertyRequest;
 using grpc_cli::SetSystemPropertyResponse;
+using grpc_cli::StartTelemetryRequest;
+using grpc_cli::StartTelemetryResponse;
+using grpc_cli::StopTelemetryRequest;
+using grpc_cli::StopTelemetryResponse;
 
 class CommandProcessor
 {
@@ -58,7 +62,9 @@ public:
     grpc::Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
     grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
-
+    grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
+    grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
+    
 private:
     bool _isPosTerminating;
     bool _IsPosTerminating(void) { return _isPosTerminating; }
