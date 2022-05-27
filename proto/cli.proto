@@ -179,7 +179,7 @@ message UpdateEventWrrRequest {
 	string requestor = 3;
 	message Param {
 			string name = 1;
-			int32 weight = 2;
+			int64 weight = 2;
 	}
 	Param param = 4;
 }

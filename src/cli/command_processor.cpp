@@ -14,6 +14,7 @@
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
+#include "src/qos/qos_manager.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -215,6 +216,69 @@ CommandProcessor::ExecuteStopRebuildingCommand(const StopRebuildingRequest* requ
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request,
+    UpdateEventWrrResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    int eventId = EID(SUCCESS);
+    string eventName = (request->param()).name();
+    int weight = (request->param()).weight();
+
+    if (eventName == "")
+    {
+        eventId = EID(CLI_UPDATE_EVENT_WRR_FAILURE_NO_EVENT_NAME);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return Status::OK;
+    }
+    
+    if ((weight < 1) || (3 < weight))
+    {
+        eventId = EID(CLI_UPDATE_EVENT_WRR_FAILURE_WEIGHT_VALUE_RANGE_VIOLATION);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return Status::OK;
+    }
+
+    BackendEvent event = CommandProcessor::_GetEventId(eventName);
+    if (event == pos::BackendEvent_Unknown)
+    {
+        eventId = EID(CLI_UPDATE_EVENT_WRR_FAILURE_UNKNOWN_EVENT);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return Status::OK;
+    }
+
+    QosManagerSingleton::Instance()->SetEventWeightWRR(event, weight);
+    
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+pos::BackendEvent
+CommandProcessor::_GetEventId(std::string eventName)
+{
+    map<string, pos::BackendEvent> eventDict = {
+        {"flush", pos::BackendEvent_Flush},
+        {"gc", pos::BackendEvent_GC},
+        {"rebuild", pos::BackendEvent_UserdataRebuild},
+        {"meta_rebuild", pos::BackendEvent_MetadataRebuild},
+        {"metaio", pos::BackendEvent_MetaIO},
+        {"fe_rebuild", pos::BackendEvent_FrontendIO}
+    };
+    
+    auto search = eventDict.find(eventName);
+    if (search != eventDict.end())
+    {
+        return (search->second);
+    }
+    return (pos::BackendEvent_Unknown);
 }
 
 std::string

@@ -159,3 +159,24 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 
 	return res, err
 }
+
+func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error("cannot send a request to cli server: not connected")
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	res, err := c.UpdateEventWrr(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}

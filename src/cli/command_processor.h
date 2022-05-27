@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/include/backend_event.h"
 #include "proto/generated/cpp/cli.grpc.pb.h"
 #include "proto/generated/cpp/cli.pb.h"
 #include <string>
@@ -55,6 +56,8 @@ using grpc_cli::ResetMbrRequest;
 using grpc_cli::ResetMbrResponse;
 using grpc_cli::StopRebuildingRequest;
 using grpc_cli::StopRebuildingResponse;
+using grpc_cli::UpdateEventWrrRequest;
+using grpc_cli::UpdateEventWrrResponse;
 
 class CommandProcessor
 {
@@ -69,6 +72,7 @@ public:
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
     grpc::Status ExecuteResetMbrCommand(const ResetMbrRequest* request,ResetMbrResponse* reply);
     grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
+    grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
 
 private:
     bool _isPosTerminating;
@@ -77,4 +81,5 @@ private:
     void _SetEventStatus(int eventId, grpc_cli::Status *status);
     void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
+    pos::BackendEvent _GetEventId(std::string eventName);
 };

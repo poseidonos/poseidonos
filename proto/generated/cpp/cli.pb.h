@@ -5067,13 +5067,13 @@ class UpdateEventWrrRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_name();
   public:
 
-  // int32 weight = 2;
+  // int64 weight = 2;
   void clear_weight();
-  ::PROTOBUF_NAMESPACE_ID::int32 weight() const;
-  void set_weight(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 weight() const;
+  void set_weight(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_weight() const;
-  void _internal_set_weight(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_weight() const;
+  void _internal_set_weight(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:grpc_cli.UpdateEventWrrRequest.Param)
@@ -5084,7 +5084,7 @@ class UpdateEventWrrRequest_Param PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
-  ::PROTOBUF_NAMESPACE_ID::int32 weight_;
+  ::PROTOBUF_NAMESPACE_ID::int64 weight_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -10655,22 +10655,22 @@ inline void UpdateEventWrrRequest_Param::set_allocated_name(std::string* name) {
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.UpdateEventWrrRequest.Param.name)
 }
 
-// int32 weight = 2;
+// int64 weight = 2;
 inline void UpdateEventWrrRequest_Param::clear_weight() {
-  weight_ = 0;
+  weight_ = PROTOBUF_LONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 UpdateEventWrrRequest_Param::_internal_weight() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 UpdateEventWrrRequest_Param::_internal_weight() const {
   return weight_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 UpdateEventWrrRequest_Param::weight() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 UpdateEventWrrRequest_Param::weight() const {
   // @@protoc_insertion_point(field_get:grpc_cli.UpdateEventWrrRequest.Param.weight)
   return _internal_weight();
 }
-inline void UpdateEventWrrRequest_Param::_internal_set_weight(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void UpdateEventWrrRequest_Param::_internal_set_weight(::PROTOBUF_NAMESPACE_ID::int64 value) {
   
   weight_ = value;
 }
-inline void UpdateEventWrrRequest_Param::set_weight(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void UpdateEventWrrRequest_Param::set_weight(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_weight(value);
   // @@protoc_insertion_point(field_set:grpc_cli.UpdateEventWrrRequest.Param.weight)
 }

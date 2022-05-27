@@ -387,7 +387,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT StopRebuildingResponseDefaultTy
 constexpr UpdateEventWrrRequest_Param::UpdateEventWrrRequest_Param(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , weight_(0){}
+  , weight_(PROTOBUF_LONGLONG(0)){}
 struct UpdateEventWrrRequest_ParamDefaultTypeInternal {
   constexpr UpdateEventWrrRequest_ParamDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -820,7 +820,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "equest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\t"
   "requestor\030\003 \001(\t\0224\n\005param\030\004 \001(\0132%.grpc_cl"
   "i.UpdateEventWrrRequest.Param\032%\n\005Param\022\014"
-  "\n\004name\030\001 \001(\t\022\016\n\006weight\030\002 \001(\005\"\274\001\n\026UpdateE"
+  "\n\004name\030\001 \001(\t\022\016\n\006weight\030\002 \001(\003\"\274\001\n\026UpdateE"
   "ventWrrResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
   "\002 \001(\t\0227\n\006result\030\003 \001(\0132\'.grpc_cli.UpdateE"
   "ventWrrResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
@@ -8110,7 +8110,7 @@ UpdateEventWrrRequest_Param::UpdateEventWrrRequest_Param(const UpdateEventWrrReq
 
 void UpdateEventWrrRequest_Param::SharedCtor() {
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-weight_ = 0;
+weight_ = PROTOBUF_LONGLONG(0);
 }
 
 UpdateEventWrrRequest_Param::~UpdateEventWrrRequest_Param() {
@@ -8141,7 +8141,7 @@ void UpdateEventWrrRequest_Param::Clear() {
   (void) cached_has_bits;
 
   name_.ClearToEmpty();
-  weight_ = 0;
+  weight_ = PROTOBUF_LONGLONG(0);
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -8161,7 +8161,7 @@ const char* UpdateEventWrrRequest_Param::_InternalParse(const char* ptr, ::PROTO
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // int32 weight = 2;
+      // int64 weight = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           weight_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
@@ -8206,10 +8206,10 @@ failure:
         1, this->_internal_name(), target);
   }
 
-  // int32 weight = 2;
+  // int64 weight = 2;
   if (this->weight() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_weight(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(2, this->_internal_weight(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -8235,10 +8235,10 @@ size_t UpdateEventWrrRequest_Param::ByteSizeLong() const {
         this->_internal_name());
   }
 
-  // int32 weight = 2;
+  // int64 weight = 2;
   if (this->weight() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
         this->_internal_weight());
   }
 

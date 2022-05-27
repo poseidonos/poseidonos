@@ -77,6 +77,15 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
+                  UpdateEventWrrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {
