@@ -45,6 +45,9 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
+
+    int eventId = EID(SUCCESS);
+    Status status = grpc::Status::OK;
     
     int ret = 0;
     std::vector<ArrayBootRecord> abrList;
@@ -54,7 +57,7 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     {
         if (!abrList.empty())
         {
-            int eventId = EID(MBR_ABR_LIST_SUCCESS);
+            eventId = EID(MBR_ABR_LIST_SUCCESS);
             POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
             for (const auto& abr : abrList)
             {
@@ -73,10 +76,10 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
                         "array:{}, state:{}",
                         abr.arrayName, arrayInfo->GetState().ToString());
 
-                    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+                    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
                     _SetPosInfo(reply->mutable_info());
                     
-                    return grpc::Status::OK;
+                    return status;
                 }
             }
         }
@@ -86,16 +89,16 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     {
         _SetPosTerminating(true);
         pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
-        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
+        eventId = EID(SUCCESS);
     }
     else
     {
-        _SetEventStatus(EID(POS_STOP_REJECTED_BEING_TERMINATED), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
+        eventId = EID(POS_STOP_REJECTED_BEING_TERMINATED);
     }
 
-    return grpc::Status::OK;
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return status;
 }
 
 grpc::Status
@@ -104,15 +107,13 @@ CommandProcessor::ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
-    reply->mutable_info()->set_version(version);
 
     qos_backend_policy backendPolicy = QosManagerSingleton::Instance()->GetBackendPolicy(BackendEvent_UserdataRebuild);
     string impact = _GetRebuildImpactString(backendPolicy.priorityImpact);
-
     reply->mutable_result()->mutable_data()->set_rebuild_policy(impact);
-    reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
-    reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
 
@@ -122,8 +123,9 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
-    reply->mutable_info()->set_version(version);
+
+    int eventId = EID(SUCCESS);
+    Status status = grpc::Status::OK;
 
     qos_backend_policy newBackendPolicy;
 
@@ -141,23 +143,21 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
         }
         else
         {
-            _SetEventStatus(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED), reply->mutable_result()->mutable_status());
-            _SetPosInfo(reply->mutable_info());
-            return grpc::Status::OK;
+            eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
+            status = grpc::Status::OK;
         }
 
         newBackendPolicy.policyChange = true;
         int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
         if (retVal != SUCCESS)
         {
-            _SetEventStatus(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED), reply->mutable_result()->mutable_status());
-            _SetPosInfo(reply->mutable_info());
-            return grpc::Status::OK;
+            eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
+            status = grpc::Status::OK;
         }
 
-        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
+        return status;
 }
 
 grpc::Status
@@ -166,8 +166,6 @@ CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* reques
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
-    reply->mutable_info()->set_version(version);
 
     for ( int eventId = BackendEvent_Start; eventId != BackendEvent_Unknown; eventId++ )
     {
@@ -175,8 +173,8 @@ CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* reques
         QosManagerSingleton::Instance()->SetEventWeightWRR(event, RESET_EVENT_WRR_DEFAULT_WEIGHT);
     }
 
-    reply->mutable_result()->mutable_status()->set_code(EID(SUCCESS));
-    reply->mutable_result()->mutable_status()->set_event_name("SUCCESS");
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
 
@@ -186,8 +184,6 @@ CommandProcessor::ExecuteResetMbrCommand(const ResetMbrRequest* request,
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
-    reply->mutable_info()->set_version(version);
 
     int result = ArrayManagerSingleton::Instance()->ResetMbr();
 
@@ -225,26 +221,28 @@ CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 void
 CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status *status)
 {
+    std::string eventName = "";
+    std::string message = "";
+    std::string cause = "";
+    std::string solution = "";
+
     std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
         PosEventInfo.find(eventId);
-        
-    if (it == PosEventInfo.end())
-    {
-        status->set_code(eventId);
-        status->set_event_name("");
-        status->set_description("");
-        status->set_cause("");
-        status->set_solution("");
-    }
-    else
+       
+    if (it != PosEventInfo.end())
     {
         PosEventInfoEntry* entry = it->second;
-        status->set_code(eventId);
-        status->set_event_name(entry->GetEventName());
-        status->set_description(entry->GetMessage());
-        status->set_cause(entry->GetCause());
-        status->set_solution(entry->GetSolution());
+        eventName = entry->GetEventName();
+        message = entry->GetMessage();
+        cause = entry->GetCause();
+        solution = entry->GetSolution();
     }
+    
+    status->set_code(eventId);
+    status->set_event_name(eventName);
+    status->set_description(message);
+    status->set_cause(cause);
+    status->set_solution(solution);
 }
 
 void
