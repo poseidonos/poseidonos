@@ -35,6 +35,7 @@
 
 #include <list>
 #include <mutex>
+#include <string>
 
 #include "buffer_info.h"
 #include "src/dpdk_wrapper/hugepage_allocator.h"
@@ -56,6 +57,8 @@ public:
     virtual void* TryGetBuffer(void);
     virtual void ReturnBuffer(void*);
     virtual bool IsFull(void) { return freeBufferSize == initSize; }
+    virtual bool IsAllocated(void) { return isAllocated; }
+    std::string GetOwner(void) { return BUFFER_INFO.owner; }
 private:
     bool _Alloc(void);
     void _Clear(void);
@@ -68,6 +71,7 @@ private:
     std::list<void*> allocatedHugepages;
     uint32_t freeBufferSize = 0;
     uint32_t initSize = 0;
+    bool isAllocated = false;
     HugepageAllocator* hugepageAllocator;
 };
 

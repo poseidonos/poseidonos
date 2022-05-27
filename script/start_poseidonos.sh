@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ROOT_DIR=$(readlink -f $(dirname $0))/../
-logfile=pos.log
 binary_name=poseidonos
 
 setup_environment()
@@ -15,7 +14,7 @@ execute_ibofos()
     if [ -f ${ROOT_DIR}/bin/$binary_name ];
     then
         echo "Execute poseidonos"
-        nohup ${ROOT_DIR}/bin/$binary_name &>> ${ROOT_DIR}/script/${logfile} &
+        nohup ${ROOT_DIR}/bin/$binary_name > /dev/null 2>&1 &
     else
         echo "No executable poseidonos file"
         exit -1
@@ -59,4 +58,4 @@ setup_environment
 execute_ibofos
 wait_started
 
-echo "poseidonos is running in background...logfile=${logfile}"
+echo "poseidonos is running in background..."

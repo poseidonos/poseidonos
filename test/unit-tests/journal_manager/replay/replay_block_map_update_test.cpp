@@ -175,7 +175,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsInvalidated)
                 .stripeId = 200,
                 .offset = startVsa.offset + offset},
             .numBlks = 1};
-        EXPECT_CALL(segmentCtx, InvalidateBlks(blksToInvalidate, false)).Times(1);
+        EXPECT_CALL(segmentCtx, InvalidateBlks(blksToInvalidate, true)).Times(1);
     }
     EXPECT_CALL(stripeReplayStatus, BlockInvalidated).Times(numBlks);
 

@@ -5,8 +5,12 @@ import subprocess
 import argparse
 import psutil
 import sys
-import paramiko
 import time
+
+current_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.dirname(current_path) + "/lib"
+sys.path.insert(1, lib_path)
+import remote_procedure
 
 default_fabric_ip = "10.100.4.5"
 default_initiator_ip = "10.1.4.25"
@@ -17,27 +21,7 @@ cli = "bin/poseidonos-cli qos create"
 default_ibofos_root = "/home/ibof/ibofos"
 config_dir = "/etc/pos/"
 
-
-def remote_execute(ip, id, pw, command, stderr_report=False):
-    cli = paramiko.SSHClient()
-    cli.load_system_host_keys()
-    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    cli.connect(ip, port=22, username=id, password=pw)
-    stdin, stdout, stderr = cli.exec_command(command)
-    result = ""
-    if (stderr_report == True):
-        for line in iter(stderr.readline, ""):
-            print(line, end="")
-            result += line
-    for line in iter(stdout.readline, ""):
-        print(line, end="")
-        result += line
-    cli.close()
-    return result
-
-
 ibofos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
-
 
 def bring_up_ibofos_target():
     global args
@@ -77,7 +61,7 @@ def get_performance_bandwith_MiB():
     global args
     initiator_script = args.ibofos_root + \
         "/test/system/qos/initiator_parse_fio_result.py"
-    result = remote_execute(
+    result = remote_procedure.execute(
         args.initiator_ip, args.initiator_id, args.initiator_pw, initiator_script)
     print("result : %s " % result.rstrip("\n") + "MiB/s")
     return result.rstrip("\n")
@@ -93,13 +77,13 @@ def execute_fio_in_initiator(readwrite, block_size, qd):
     num_jobs = "31"
     # initiator's result file
     result_file = "/tmp/fio.qos.result"
-    remote_execute(args.initiator_ip, args.initiator_id,
+    remote_procedure.execute(args.initiator_ip, args.initiator_id,
                    args.initiator_pw, "rm -rf " + result_file)
     initiator_script = args.ibofos_root + "/test/system/io_path/fio_bench.py -i " + args.fabric_ip + " --readwrite=" + readwrite +\
         " --ramp_time=" + ramp_time + " --bs=" + block_size + " --run_time=" + run_time + " --time_based=1 " + " --file_num=" + file_num + " --verify=" + "false" +\
         " --iodepth=" + qd + " --numjobs=" + num_jobs + " --io_size=8g > " + result_file
     print(initiator_script)
-    remote_execute(args.initiator_ip, args.initiator_id,
+    remote_procedure.execute(args.initiator_ip, args.initiator_id,
                    args.initiator_pw, initiator_script)
     return get_performance_bandwith_MiB()
 

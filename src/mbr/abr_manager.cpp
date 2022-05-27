@@ -265,4 +265,10 @@ AbrManager::FindArrayWithDeviceSN(string devSN)
     return arrayName;
 }
 
+void
+AbrManager::InitDisk(UblockSharedPtr dev)
+{
+    mbrManager->InitDisk(dev);
+}
+
 } // namespace pos

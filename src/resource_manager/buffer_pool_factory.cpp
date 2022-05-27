@@ -48,5 +48,10 @@ BufferPool*
 BufferPoolFactory::Create(BufferInfo& info, uint32_t socket)
 {
     BufferPool* pool = new BufferPool(info, socket);
+    if (pool->IsAllocated() == false)
+    {
+        delete pool;
+        return nullptr;
+    }
     return pool;
 }

@@ -431,9 +431,9 @@ DeviceManager::AttachDevice(UblockSharedPtr dev)
         _PrepareDevice(dev);
         deviceEvent->DeviceAttached(dev);
         devices.push_back(dev);
-        POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_ATTACH,
-            "AttachDevice - add a new device to the system: {}",
-            dev->GetName());
+        POS_TRACE_TRACE(EID(POS_TRACE_DEVICE_ATTACHED),
+            "device_name:{}, device_mn:{}, device_sn:{}",
+            dev->GetName(), dev->GetMN(), dev->GetSN());
     }
 }
 
@@ -472,8 +472,8 @@ DeviceManager::DetachDevice(DevUid uid)
 int
 DeviceManager::_DetachDeviceImpl(UblockSharedPtr dev)
 {
-    POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_DETACH,
-        "DetachDevice: {}", dev->GetName());
+    POS_TRACE_TRACE(EID(POS_TRACE_DEVICE_DETACHED),
+        "device_name:{}, device_mn:{}, device_sn:{}", dev->GetName(), dev->GetMN(), dev->GetSN());
     if (dev->GetClass() == DeviceClass::ARRAY)
     {
         if (deviceEvent != nullptr)

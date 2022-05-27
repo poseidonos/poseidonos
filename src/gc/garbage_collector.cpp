@@ -188,10 +188,13 @@ GarbageCollector::DisableThresholdCheck(void)
 {
     if (false == copierPtr->IsEnableThresholdCheck())
     {
+        POS_TRACE_INFO(EID(GC_THRESHOLD_CHECK_DISABLE), "threshold check is already disabled");
+
         return -1;
     }
 
     copierPtr->DisableThresholdCheck();
+    POS_TRACE_INFO(EID(GC_THRESHOLD_CHECK_DISABLE), "threshold check is disabled");
     return 0;
 }
 

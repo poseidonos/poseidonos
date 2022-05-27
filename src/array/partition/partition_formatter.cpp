@@ -73,6 +73,8 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
         {
             if (devs[i]->GetState() == ArrayDeviceState::FAULT)
             {
+                POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG_MSG),
+                    "The trim of the fault device has been skipped.");
                 continue;
             }
 
@@ -88,8 +90,9 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
 
             if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
             {
-                POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
-                    "Trim Failed on {}", devs[i]->GetUblock()->GetName());
+                POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG),
+                    "Trim Failed on {}, res:{}, error:{}",
+                    devs[i]->GetUblock()->GetName(), result, ubio->GetError());
                 trimResult = 1;
             }
         }
@@ -109,7 +112,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
         }
         else
         {
-            POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
+            POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG),
                 "Trim Succeeded with wrong value from {}", startLba);
             return result;
             // To Do : Write All Zeroes
@@ -118,7 +121,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
     }
     else
     {
-        POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG), "Trim Failed on some devices");
+        POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG), "Trim Failed on some devices");
         // To Do : Write All Zeroes
         return trimResult;
     }

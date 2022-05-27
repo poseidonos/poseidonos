@@ -60,7 +60,7 @@ VersionedSegmentInfo::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 void
-VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced)
+VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
 {
     changedValidBlockCount[segId] -= cnt;
 }

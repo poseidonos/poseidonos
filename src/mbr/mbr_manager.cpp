@@ -184,6 +184,20 @@ MbrManager::ResetMbr(void)
     return result;
 }
 
+void
+MbrManager::InitDisk(UblockSharedPtr dev)
+{
+    pthread_rwlock_wrlock(&mbrLock);
+    _AllocMem();
+    memcpy(mbrBuffer, &systeminfo, MBR_SIZE);
+    _SetParity(mbrBuffer);
+    struct DiskIoContext diskIoCtxt = {UbioDir::Write, mbrBuffer};
+    _DiskIo(dev, &diskIoCtxt);
+    POS_TRACE_INFO(EID(MBR_WRITE_DONE), "the mbr of {} has been initialized to version {}.",
+        dev->GetName(), systeminfo.mbrVersion);
+    pthread_rwlock_unlock(&mbrLock);
+}
+
 bool
 MbrManager::_AllocMem(void)
 {

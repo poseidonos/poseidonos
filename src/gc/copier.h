@@ -126,6 +126,7 @@ private:
     bool _Stop(void);
     bool _IsSynchronized(void);
     bool _IsAllVictimSegmentCopyDone(void);
+    void _CleanUpVictimSegments(void);
     void
     _ChangeEventState(CopierStateType state)
     {

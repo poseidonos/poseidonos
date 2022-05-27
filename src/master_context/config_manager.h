@@ -68,9 +68,11 @@ public:
 
     virtual int ReadFile(void);
     virtual int GetValue(string module, string key, void* value, ConfigType type);
+    string RawData() { return configData; }
 
 private:
     bool read = false;
+    string configData = "";
     rapidjson::Document doc;
     DefaultConfiguration defaultConfig;
     std::recursive_mutex configManagerMutex;

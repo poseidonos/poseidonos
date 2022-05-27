@@ -38,6 +38,7 @@ public:
     MOCK_METHOD(int, SetRebuildCompleted, (SegmentId segId), (override));
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetNvramSegmentList, (), (override));
+    MOCK_METHOD(std::set<SegmentId>, GetVictimSegmentList, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetRebuildSegmentList, (), (override));
@@ -45,7 +46,7 @@ public:
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
-    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool isForced), (override));
+    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
 };
 

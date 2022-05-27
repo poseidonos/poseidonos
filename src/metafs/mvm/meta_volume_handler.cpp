@@ -88,7 +88,7 @@ MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileCon
 POS_EVENT_ID
 MetaVolumeHandler::HandleCheckFileExist(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (!volContainer->IsGivenFileCreated(*reqMsg.fileName))
+    if (!volContainer->IsGivenFileCreated(volType, *reqMsg.fileName))
     {
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "{} file was not found. fd: {}, arrayId: {}, volumeType: {}",
@@ -308,7 +308,7 @@ MetaVolumeHandler::HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqM
 bool
 MetaVolumeHandler::_CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (volContainer->IsGivenFileCreated(*reqMsg.fileName))
+    if (volContainer->IsGivenFileCreated(volType, *reqMsg.fileName))
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "{} file is already existed. arrayId: {}",

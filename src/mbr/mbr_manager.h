@@ -69,6 +69,7 @@ public:
     virtual int SaveMbr(void);
     int LoadMbr(void);
     int ResetMbr(void);
+    void InitDisk(UblockSharedPtr dev);
     int GetAbrList(std::vector<ArrayBootRecord>& abrList);
     virtual struct masterBootRecord& GetMbr(void);
     virtual int GetMbrVersionInMemory(void);

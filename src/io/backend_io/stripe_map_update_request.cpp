@@ -131,6 +131,10 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
+    eventId = POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, "Stripe Map Update Request : stripe.vsid : {}",
+        stripe->GetVsid());
+
     int result = iMetaUpdater->UpdateStripeMap(stripe, completionEvent);
     if (unlikely(EID(SUCCESS) != result))
     {
@@ -144,10 +148,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
 
         return false;
     }
-
-    eventId = POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, "Stripe Map Update Request : stripe.vsid : {}",
-        stripe->GetVsid());
 
     return true;
 }

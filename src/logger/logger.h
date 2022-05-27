@@ -152,7 +152,7 @@ public:
     string GetLevel(void);
 
     int SetStrLogging(bool input); // Note (mj): need ApplyPreference to apply the JSON setting.
-    bool IsStrLogginGEnabled(void)
+    bool IsStrLoggingEnabled(void)
     {
         return preferences.IsStrLoggingEnabled();
     }

@@ -400,5 +400,11 @@ UBlockDevice::GetProperty(void)
 void
 UBlockDevice::SetClass(DeviceClass cls)
 {
-    property->cls = cls;
+    if (property->cls != cls)
+    {
+        POS_TRACE_INFO(EID(DEVICE_DEBUG_MSG),
+            "{}({})'s class is changed:{}->{}(0-SYSTEM, 1-ARRAY)",
+                GetName(), GetSN(), property->cls, cls);
+        property->cls = cls;
+    }
 }

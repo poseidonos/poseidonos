@@ -5,7 +5,9 @@ List volumes of an array or display information of a volume.
 ### Synopsis
 
 
-List volumes of an array or display information of a volume.
+List volumes of an array or display information of a volume. Please note that the 'Remaining' field in the output 
+shows an internal state that represents how many block addresses of the given volume are yet to be mapped. It
+should not be interpreted as the file system free space.
 
 Syntax:
 	poseidonos-cli volume list (--array-name | -a) ArrayName [(--volume-name | -v) VolumeName]

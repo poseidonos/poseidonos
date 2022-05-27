@@ -39,9 +39,10 @@
 #include "pending_stripe.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/mapper/i_stripemap.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/statistics/stripe_info.h"
+#include "src/mapper/i_stripemap.h"
 
 namespace pos
 {
@@ -53,7 +54,7 @@ class ActiveWBStripeReplayer
 public:
     explicit ActiveWBStripeReplayer(PendingStripeList& pendingStripeList);
     ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator,
-        IStripeMap* stripeMap, PendingStripeList& pendingStripeList);
+        IStripeMap* stripeMap, PendingStripeList& pendingStripeList, IArrayInfo* aInfo);
     virtual ~ActiveWBStripeReplayer(void);
 
     virtual int Replay(void);
@@ -65,12 +66,21 @@ protected:
 
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);
-    void _ResetWbufTail(int index);
-    void _UpdateWbufTail(int index, ActiveStripeAddr addr);
+    void _AddResetTailToFoundList(int index);
+    void _AddWbufTailToFoundList(int index, ActiveStripeAddr addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
-    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
 
-    void _RestorePendingStripes(void);
+    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
+    int _RestoreActiveStripes(void);
+    int _RestorePendingStripes(void);
+
+    void _AddActiveStripeToRestore(int index);
+    void _SetActiveStripeTail(int index, ActiveStripeAddr addr);
+    void _ResetActiveStripeTail(int index);
+
+    // TODO(meta): This is same with BlockManager::_IsStripeFull, call block manager instead of this function
+    bool _IsStripeFull(VirtualBlkAddr vsa);
+    uint32_t _GetNumBlksPerStripe(void);
 
     const int INDEX_NOT_FOUND = -1;
 
@@ -85,6 +95,8 @@ private:
     IContextReplayer* contextReplayer;
     IWBStripeAllocator* wbStripeAllocator;
     IStripeMap* stripeMap;
+
+    IArrayInfo* arrayInfo;
 };
 
 } // namespace pos

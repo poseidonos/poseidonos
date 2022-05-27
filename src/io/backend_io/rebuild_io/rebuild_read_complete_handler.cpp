@@ -65,6 +65,7 @@ RebuildReadCompleteHandler::_DoSpecificJob(void)
 
     if (_GetErrorCount() > 0)
     {
+        POS_TRACE_WARN(EID(IO_RECOVER_DEBUG_MSG), "RebuildRead completed with errors");
         goto end;
     }
 

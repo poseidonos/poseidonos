@@ -46,11 +46,9 @@ BufferPool::BufferPool(const BufferInfo info,
   SOCKET(socket),
   hugepageAllocator(hugepageAllocator)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-        "BufferPool Construct");
     if (hugepageAllocator == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_ERROR(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Faild to get hugepageAllocator");
         return;
     }
@@ -58,6 +56,10 @@ BufferPool::BufferPool(const BufferInfo info,
     if (_Alloc() == false)
     {
         _Clear();
+    }
+    else
+    {
+        isAllocated = true;
     }
 }
 
@@ -69,6 +71,10 @@ BufferPool::~BufferPool(void)
 void
 BufferPool::_Clear()
 {
+    unique_lock<mutex> lock(freeBufferLock);
+    freeBuffers.clear();
+    freeBufferSize = 0;
+    initSize = 0;
     while (allocatedHugepages.size() != 0)
     {
         void* mem = allocatedHugepages.front();
@@ -78,11 +84,13 @@ BufferPool::_Clear()
         }
         allocatedHugepages.pop_front();
     }
+    isAllocated = false;
 }
 
 bool
 BufferPool::_Alloc(void)
 {
+    unique_lock<mutex> lock(freeBufferLock);
     uint32_t remainBufferCount = 0;
     uint8_t* buffer = 0;
     // 2MB allocation for avoiding buddy allocation overhead
@@ -92,8 +100,6 @@ BufferPool::_Alloc(void)
     {
         allocCount = BUFFER_INFO.size / allocSize + 1;
     }
-    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-        "AllocBuffers allocSize={}", allocSize);
     for (uint32_t i = 0; i < BUFFER_INFO.count; i++)
     {
         if (remainBufferCount == 0)
@@ -103,10 +109,8 @@ BufferPool::_Alloc(void)
 
             if (buffer == nullptr)
             {
-                POS_EVENT_ID eventId =
-                    POS_EVENT_ID::FREEBUFPOOL_FAIL_TO_ALLOCATE_MEMORY;
-                POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-                    "Fail to allocate memory");
+                POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+                    "Failed to allocated buffer for {}", BUFFER_INFO.owner);
                 return false;
             }
             remainBufferCount = allocSize * allocCount / BUFFER_INFO.size;
@@ -118,8 +122,6 @@ BufferPool::_Alloc(void)
         remainBufferCount--;
     }
     freeBufferSize = initSize = freeBuffers.size();
-    POS_TRACE_INFO(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-            "{} buffers are allocated in {}", initSize, BUFFER_INFO.owner);
     return true;
 }
 
@@ -130,8 +132,6 @@ BufferPool::TryGetBuffer(void)
 
     if (freeBuffers.empty())
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_BUFFER_POOL_EMPTY,
-            "Failed to get buffer. {} Pool is empty", BUFFER_INFO.owner);
         return nullptr;
     }
 
@@ -139,9 +139,6 @@ BufferPool::TryGetBuffer(void)
     buffer = freeBuffers.front();
     freeBuffers.pop_front();
     freeBufferSize--;
-    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-            "A Buffer is issued, {}/{} buffers in {}",
-            freeBufferSize, initSize, BUFFER_INFO.owner);
     return buffer;
 }
 
@@ -158,7 +155,4 @@ BufferPool::ReturnBuffer(void* buffer)
     unique_lock<mutex> lock(freeBufferLock);
     freeBuffers.push_back(buffer);
     freeBufferSize++;
-    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-            "A Buffer is retrieved, {}/{} buffers in {}",
-            freeBufferSize, initSize, BUFFER_INFO.owner);
 }

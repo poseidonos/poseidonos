@@ -12,6 +12,7 @@ class MockStripeBasedRaceRebuild : public StripeBasedRaceRebuild
 {
 public:
     using StripeBasedRaceRebuild::StripeBasedRaceRebuild;
+    MOCK_METHOD(bool, Init, (), (override));
     MOCK_METHOD(bool, Read, (), (override));
     MOCK_METHOD(bool, Write, (uint32_t targetId, UbioSmartPtr ubio), (override));
     MOCK_METHOD(bool, Complete, (uint32_t targetId, UbioSmartPtr ubio), (override));

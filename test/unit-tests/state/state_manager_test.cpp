@@ -14,7 +14,7 @@ TEST(StateManager, CreateStateControl_testIfStateControlForNewArrayIsCreated)
 {
     // Given
     string existingArray = "array1";
-    StateControl existingStateControl;
+    StateControl existingStateControl("array");
     map<string, StateControl*> stateMap =
     {
         {
@@ -40,7 +40,7 @@ TEST(StateManager, CreateStateControl_testIfStateControlForExistingArrayIsReturn
 {
     // Given
     string existingArray = "array1";
-    StateControl existingStateControl;
+    StateControl existingStateControl("array");
     map<string, StateControl*> stateMap =
     {
         {
@@ -62,7 +62,7 @@ TEST(StateManager, RemoveStateControl_testIfEmptyArrayNameRemovesStateFromStateM
 {
     // Given
     string arrayName = "array1";
-    StateControl* existingStateControl = new StateControl;
+    StateControl* existingStateControl = new StateControl("array");
     map<string, StateControl*> stateMap =
     {
         {
@@ -83,7 +83,7 @@ TEST(StateManager, RemoveStateControl_testIfEmptyArrayNameDoesntRemoveStateFromS
 {
     // Given
     string array1 = "array1", array2 = "array2";
-    StateControl sCtrl1, sCtrl2;
+    StateControl sCtrl1("array1"), sCtrl2("array2");
     map<string, StateControl*> stateMap =
     {
         {
@@ -107,8 +107,8 @@ TEST(StateManager, RemoveStateControl_testIfExistingStateControlIsDeleted)
 {
     // Given
     string array1 = "array1", array2 = "array2";
-    StateControl* sCtrl1 = new StateControl;
-    StateControl sCtrl2;  // allocate on heap since prod code performs "delete" on this
+    StateControl* sCtrl1 = new StateControl("array1");
+    StateControl sCtrl2("array2");  // allocate on heap since prod code performs "delete" on this
 
     map<string, StateControl*> stateMap =
     {
@@ -135,7 +135,7 @@ TEST(StateManager, RemoveStateControl_testIfWrongArrayNameIsIgnored)
 {
     // Given
     string array1 = "array1";
-    StateControl sCtrl1;
+    StateControl sCtrl1("array");
     map<string, StateControl*> stateMap =
     {
         {

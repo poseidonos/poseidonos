@@ -385,8 +385,6 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
     if (!iBlockAllocator->TryRdLock(volumeId))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_LOCK;
-        POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
         return;
     }
 

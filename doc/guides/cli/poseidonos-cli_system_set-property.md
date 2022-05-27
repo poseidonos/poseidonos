@@ -5,7 +5,9 @@ Set the property of PoseidonOS.
 ### Synopsis
 
 
-Set the property of PoseidonOS. 
+Set the property of PoseidonOS.
+(Note: this command is not officially supported yet.
+ It might be  possible this command cause an error.)
 
 Syntax:
 	poseidonos-cli system set-property [--rebuild-impact (highest | medium | lowest)]

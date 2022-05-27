@@ -117,7 +117,7 @@ ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
         VirtualBlks blksToInvalidate = {
             .startVsa = read,
             .numBlks = 1};
-        bool allowVictimSegRelease = false;
+        bool allowVictimSegRelease = true;
         segmentCtx->InvalidateBlks(blksToInvalidate, allowVictimSegRelease);
         status->BlockInvalidated(blksToInvalidate.numBlks);
     }

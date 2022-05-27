@@ -86,6 +86,7 @@ public:
     virtual int DetachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
+    virtual string Serialize(void);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
