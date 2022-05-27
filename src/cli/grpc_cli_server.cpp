@@ -59,6 +59,15 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  ResetMbr(ServerContext* context, const ResetMbrRequest* request,
+                  ResetMbrResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteResetMbrCommand(request, reply);
+    
+    return status;
+  }
 };
 
 void RunGrpcServer() {

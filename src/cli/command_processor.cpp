@@ -180,6 +180,29 @@ CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* reques
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteResetMbrCommand(const ResetMbrRequest* request,
+    ResetMbrResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+    std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
+    reply->mutable_info()->set_version(version);
+
+    int result = ArrayManagerSingleton::Instance()->ResetMbr();
+
+    if (result != 0)
+    {
+        _SetEventStatus(result, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {

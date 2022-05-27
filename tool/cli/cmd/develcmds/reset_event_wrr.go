@@ -1,15 +1,16 @@
 package develcmds
 
 import (
-	"encoding/json"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"log"
 
-	"github.com/labstack/gommon/log"
+	pb "cli/api"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 //TODO(mj): function for --detail flag needs to be implemented.
@@ -27,7 +28,7 @@ Syntax:
 		var command = "RESETEVENTWRRPOLICY"
 		uuid := globals.GenerateUUID()
 
-		req := &pb.SystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli"}
+		req := &pb.ResetEventWrrRequest{Command: command, Rid: uuid, Requestor: "cli"}
 		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
@@ -55,6 +56,7 @@ Syntax:
 			}
 
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		}
 	},
 }
 

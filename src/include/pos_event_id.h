@@ -87,6 +87,8 @@ enum class POS_EVENT_ID
     CLI_AUTOCREATE_ARRAY_SUCCESS,
     CLI_COMMAND_FAILURE_ARRAY_BROKEN,
     CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED,
+    CLI_DEVEL_RESET_MBR_FAILURE,
+    CLI_DEVEL_RESET_MBR_SUCCESS,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1233,6 +1235,13 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
             new PosEventInfoEntry("CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED",
                 "Failed to set rebuild performance impact.", "The specified level is not supported.",
                 "Check the supported levels using the --help option.")},
+        {(int)POS_EVENT_ID::CLI_DEVEL_RESET_MBR_SUCCESS,
+            new PosEventInfoEntry("CLI_DEVEL_RESET_MBR_SUCCESS",
+                "MBR has been reset.", "", "")},
+        {(int)POS_EVENT_ID::CLI_DEVEL_RESET_MBR_FAILURE,
+            new PosEventInfoEntry("CLI_DEVEL_RESET_MBR_FAILURE",
+                "Failed to reset MBR.", "",
+                "")},
 
         {(int)POS_EVENT_ID::CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS,
             new PosEventInfoEntry("CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS",
@@ -1482,4 +1491,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
             new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
                 "failed to delete volumes", "a timeout has occured", "Please report the errors")},
+        {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
+            new PosEventInfoEntry("MBR_DEVICE_NOT_FOUND",
+                "Could not find a device.", "", "")},
     };

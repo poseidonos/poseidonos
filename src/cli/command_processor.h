@@ -51,6 +51,8 @@ using grpc_cli::SetSystemPropertyRequest;
 using grpc_cli::SetSystemPropertyResponse;
 using grpc_cli::ResetEventWrrRequest;
 using grpc_cli::ResetEventWrrResponse;
+using grpc_cli::ResetMbrRequest;
+using grpc_cli::ResetMbrResponse;
 
 class CommandProcessor
 {
@@ -63,6 +65,7 @@ public:
     grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
+    grpc::Status ExecuteResetMbrCommand(const ResetMbrRequest* request,ResetMbrResponse* reply);
 
 private:
     bool _isPosTerminating;
