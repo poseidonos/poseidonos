@@ -57,13 +57,13 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         if (ctx && factory != nullptr)
         {
             ctx->isWT = isWT;
+            ctx->array = arrayName;
+            ctx->arrayIndex = arrayId;
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
-                bhvr->GetContext()->array = arrayName;
-                bhvr->GetContext()->arrayIndex = arrayId;
                 bhvr->GetContext()->prog = prog;
                 bhvr->GetContext()->logger = rLogger;
                 bhvr->UpdateProgress(0);

@@ -60,8 +60,6 @@ SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextM
   allocatorSvc(allocatorSvc)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "SegmentBasedRebuild");
-    bool ret = _InitBuffers();
-    assert(ret);
 }
 
 SegmentBasedRebuild::~SegmentBasedRebuild(void)
@@ -92,8 +90,30 @@ SegmentBasedRebuild::_NextSegment(void)
 }
 
 bool
+SegmentBasedRebuild::Init(void)
+{
+    if (isInitialized == false)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild try init, {}", PARTITION_TYPE_STR[ctx->part]);
+        bool ret = _InitBuffers();
+        if (ret == false)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Initialization retry because sufficient buffer for rebuild is not secured, {}",
+                PARTITION_TYPE_STR[ctx->part]);
+            return false;
+        }
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
+        isInitialized = true;
+    }
+
+    return Read();
+}
+
+bool
 SegmentBasedRebuild::Read(void)
 {
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+        "Trying to read in rebuild, {}", PARTITION_TYPE_STR[ctx->part]);
     uint32_t strCnt = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint64_t key = (((uint64_t)strCnt) << 32) + blkCnt;
@@ -141,8 +161,8 @@ SegmentBasedRebuild::Read(void)
 
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "SegmentBasedRebuild - segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "Trying to recover in rebuild, segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;

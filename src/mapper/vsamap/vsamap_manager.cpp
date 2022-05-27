@@ -79,6 +79,8 @@ VSAMapManager::VSAMapManager(TelemetryPublisher* tp_, MapperAddressInfo* info)
     eventScheduler = EventSchedulerSingleton::Instance();
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
+        // TODO (meta): map load state should be initialized to NOT_LOADED
+        // as it will be loaded later by request
         vsaMaps[volId] = nullptr;
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         mapLoadState[volId] = MapLoadState::LOAD_DONE;

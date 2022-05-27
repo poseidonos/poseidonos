@@ -61,7 +61,7 @@ CreateTransportCommand::Execute(json& doc, string rid)
     if (ret != SUCCESS)
     {
         return jFormat.MakeResponse(
-            "CREATETRANSPORT", rid, FAIL,
+            "CREATETRANSPORT", rid, ret,
             errorMessage, GetPosInfo());
     }
 

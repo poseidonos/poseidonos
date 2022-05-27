@@ -50,7 +50,7 @@ void
 MapperTestFixture::SetUp(void)
 {
     mockArrayInfo = new MockArrayInfo;
-    StateControl is;
+    StateControl is("array");
     addrInfo = new MapperAddressInfo(mockArrayInfo);
     volManager = new VolumeManager(mockArrayInfo, &is);
     vsaMapManagerSUT = new VSAMapManager(nullptr, nullptr, addrInfo);

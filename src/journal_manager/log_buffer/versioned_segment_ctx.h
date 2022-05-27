@@ -52,7 +52,7 @@ public:
     virtual void Dispose(void);
 
     virtual void IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt);
-    virtual void DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool isForced);
+    virtual void DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease);
     virtual void IncreaseOccupiedStripeCount(uint32_t logGroupId, SegmentId segId);
     virtual void UpdateSegmentContext(uint32_t logGroupId);
 

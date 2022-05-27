@@ -109,7 +109,8 @@ DataBuffer::GetAddress(uint64_t blockIndex, uint64_t sectorOffset) const
     if (unlikely(size <= shiftSize))
     {
         POS_TRACE_ERROR(POS_EVENT_ID::UBIO_REQUEST_OUT_RANGE,
-            "Requested buffer of Ubio is out of range");
+            "Requested buffer of Ubio is out of range, size:{}, shift:{}, blkIdx:{}, offset:{}",
+            size, shiftSize, blockIndex, sectorOffset);
         return baseAddress;
     }
 

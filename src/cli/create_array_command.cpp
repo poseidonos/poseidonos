@@ -109,7 +109,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     else
     {
         return jFormat.MakeResponse("CREATEARRAY", rid, SUCCESS,
-            "array " + arrayName + " has been created successfully", GetPosInfo());
+            arrayName + " has been created successfully", GetPosInfo());
     }
 }
 }; // namespace pos_cli

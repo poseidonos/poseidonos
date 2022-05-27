@@ -33,6 +33,7 @@
 #include "array.h"
 
 #include <string>
+#include <sstream>
 
 #include "src/array/array_name_policy.h"
 #include "src/array/interface/i_abr_control.h"
@@ -103,7 +104,7 @@ Array::Load(void)
     }
     else
     {
-        POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Array({}) loaded successfully", name_);
+        POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_LOADED), "{}", Serialize());
     }
     return ret;
 }
@@ -224,13 +225,13 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Array({}) is created successfully", name_);
+    POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_CREATED), "{}", Serialize());
     return 0;
 
 error:
     devMgr_->Clear();
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_ERROR(ret, "Unable to create array({})", name_);
+    POS_TRACE_TRACE(ret, "Unable to create array({})", name_);
     return ret;
 }
 
@@ -273,7 +274,7 @@ Array::Dispose(void)
     _UnregisterService();
     state->SetUnmount();
     isWTEnabled = false;
-    POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Array({}) is unmounted successfully", name_);
+    POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_UNMOUNTED), "array_name:{}", name_);
     // pthread_rwlock_unlock(&stateLock);
 }
 
@@ -284,7 +285,7 @@ Array::Shutdown(void)
     _UnregisterService();
     state->SetShutdown();
     isWTEnabled = false;
-    POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Broken array({}) shuts down successfully", name_);
+    POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_SHUTDOWN), "array_name:{}", name_);
 }
 
 void
@@ -331,7 +332,7 @@ Array::Delete(void)
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Array({}) is deleted successfully", name_);
+    POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_DELETED), "array_name:{}", name_);
     return 0;
 
 error:
@@ -367,9 +368,9 @@ Array::AddSpare(string devName)
     if (dev == nullptr)
     {
         pthread_rwlock_unlock(&stateLock);
-        int eid = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
-        POS_TRACE_WARN(eid, "devName: {}", devName);
-        return eid;
+        ret = EID(ADD_SPARE_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(ret, "devName: {}", devName);
+        return ret;
     }
 
     string spareSN = dev->GetSN();
@@ -659,11 +660,22 @@ void
 Array::SetPreferences(bool isWT)
 {
     isWTEnabled = isWT;
+    if (isWTEnabled == true)
+    {
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "WT of Array {} is enabled",
+            name_);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "WT of Array {} is disabled",
+            name_);
+    }
 }
 
 void
 Array::MountDone(void)
 {
+    POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_MOUNTED), "{}", Serialize());
     _CheckRebuildNecessity();
     int ret = _Flush();
     assert(ret == 0);
@@ -673,6 +685,115 @@ int
 Array::CheckUnmountable(void)
 {
     return state->IsUnmountable();
+}
+
+string
+Array::Serialize(void)
+{
+    vector<string> arrayinfo;
+    arrayinfo.push_back("name:" + name_);
+    arrayinfo.push_back("index:" + to_string(index_));
+    arrayinfo.push_back("uuid:" + to_string(uniqueId));
+    arrayinfo.push_back("raidtype_meta:" + GetMetaRaidType());
+    arrayinfo.push_back("raidtype_data:" + GetDataRaidType());
+    arrayinfo.push_back("date_created:" + GetCreateDatetime());
+    StateContext* stateCtx = GetStateCtx();
+    if (stateCtx != nullptr)
+    {
+        arrayinfo.push_back("state:" + stateCtx->ToStateType().ToString());
+        arrayinfo.push_back("situation:" + stateCtx->GetSituation().ToString());
+    }
+    string wt = IsWriteThroughEnabled() == true ? "true" : "false";
+    arrayinfo.push_back("wt_enabled:" + wt);
+    DeviceSet<string> nameSet = GetDevNames();
+    {
+        string devs = "buffer_devs:";
+        int cnt = 0;
+        for (string name : nameSet.nvm)
+        {
+            if (cnt != 0)
+            {
+                devs += ",";
+            }
+            devs += name;
+            cnt++;
+        }
+        arrayinfo.push_back(devs);
+    }
+    {
+        string devs = "data_devs:";
+        int cnt = 0;
+        for (string name : nameSet.data)
+        {
+            if (cnt != 0)
+            {
+                devs += ",";
+            }
+            devs += name;
+            cnt++;
+        }
+        arrayinfo.push_back(devs);
+    }
+    {
+        string devs = "spare_devs:";
+        int cnt = 0;
+        for (string name : nameSet.spares)
+        {
+            if (cnt != 0)
+            {
+                devs += ",";
+            }
+            devs += name;
+            cnt++;
+        }
+        arrayinfo.push_back(devs);
+    }
+    {
+        const PartitionLogicalSize* lSize = GetSizeInfo(PartitionType::JOURNAL_SSD);
+        if (lSize != nullptr)
+        {
+            arrayinfo.push_back("part_journal_ssd_segments:" + to_string(lSize->totalSegments));
+        }
+        const PartitionPhysicalSize* pSize = ptnMgr->GetPhysicalSize(PartitionType::JOURNAL_SSD);
+        if (pSize != nullptr)
+        {
+            arrayinfo.push_back("part_journal_ssd_start_lba:" + to_string(pSize->startLba));
+            arrayinfo.push_back("part_journal_ssd_last_lba:" + to_string(pSize->lastLba));
+        }
+    }
+    {
+        const PartitionLogicalSize* lSize = GetSizeInfo(PartitionType::META_SSD);
+        if (lSize != nullptr)
+        {
+            arrayinfo.push_back("part_meta_ssd_segments:" + to_string(lSize->totalSegments));
+        }
+        const PartitionPhysicalSize* pSize = ptnMgr->GetPhysicalSize(PartitionType::META_SSD);
+        if (pSize != nullptr)
+        {
+            arrayinfo.push_back("part_meta_ssd_start_lba:" + to_string(pSize->startLba));
+            arrayinfo.push_back("part_meta_ssd_last_lba:" + to_string(pSize->lastLba));
+        }
+    }
+    {
+        const PartitionLogicalSize* lSize = GetSizeInfo(PartitionType::USER_DATA);
+        if (lSize != nullptr)
+        {
+            arrayinfo.push_back("part_user_data_segments:" + to_string(lSize->totalSegments));
+        }
+        const PartitionPhysicalSize* pSize = ptnMgr->GetPhysicalSize(PartitionType::USER_DATA);
+        if (pSize != nullptr)
+        {
+            arrayinfo.push_back("part_user_data_start_lba:" + to_string(pSize->startLba));
+            arrayinfo.push_back("part_user_data_last_lba:" + to_string(pSize->lastLba));
+        }
+    }
+
+    stringstream ss;
+    for (string str : arrayinfo)
+    {
+        ss << str << ", ";
+    }
+    return ss.str();
 }
 
 void

@@ -172,7 +172,20 @@ SegmentCtx::MoveToFreeState(SegmentId segId)
 
     if (true == removed)
     {
-        _SegmentFreed(segId);
+        bool segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+        if (segmentFreed == true)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_DEBUG),
+            "Segment is freed by Copier, segmentId: {}, removed from the list: {}",
+            segId, removed);
+            _SegmentFreed(segId);
+        }
+        else
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_DEBUG),
+            "Valid count was not zero, segmentId: {}", segId);
+            assert(false);
+        }
     }
     else
     {
@@ -202,16 +215,16 @@ SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 bool
-SegmentCtx::InvalidateBlks(VirtualBlks blks, bool isForced)
+SegmentCtx::InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    return _DecreaseValidBlockCount(segId, blks.numBlks, isForced);
+    return _DecreaseValidBlockCount(segId, blks.numBlks, allowVictimSegRelease);
 }
 
 bool
-SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced)
+SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
 {
-    auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, isForced);
+    auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
     bool segmentFreed = result.first;
     if (segmentFreed == true)
@@ -680,6 +693,12 @@ std::set<SegmentId>
 SegmentCtx::GetNvramSegmentList(void)
 {
     return segmentList[SegmentState::NVRAM]->GetList();
+}
+
+std::set<SegmentId>
+SegmentCtx::GetVictimSegmentList(void)
+{
+    return segmentList[SegmentState::VICTIM]->GetList();
 }
 
 void

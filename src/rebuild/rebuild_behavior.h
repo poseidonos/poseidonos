@@ -49,6 +49,7 @@ public:
     virtual ~RebuildBehavior(void);
     virtual void StopRebuilding(void);
     virtual RebuildContext* GetContext(void);
+    virtual bool Init(void) = 0;
     virtual bool Read(void) = 0;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;
@@ -60,6 +61,7 @@ protected:
     bool _InitRebuildReadBuffers(string owner, int totalChunksToRead);
     int _GetTotalReadChunksForRecovery(void);
     virtual string _GetClassName(void) = 0;
+    bool isInitialized = false;
 
     unique_ptr<RebuildContext> ctx = nullptr;
     MemoryManager* mm = nullptr;

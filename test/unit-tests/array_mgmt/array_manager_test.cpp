@@ -384,10 +384,12 @@ TEST(ArrayManager, DeviceDetached_testIfZeroIsReturnedWhenNoArrayFoundForGivenSe
 {
     // Given
     string existingArray = "array1";
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    MockDeviceManager mockDevMgr(&mockAffinityMgr);
     auto mockAbrMgr = BuildMockAbrManager();
     EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(""));
     auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), &mockDevMgr, nullptr, nullptr);
 
     // When
     int actual = arrayMgr->DeviceDetached(mockUBlockSharedPtr);
@@ -558,7 +560,7 @@ TEST(ArrayManager, GetInfo_testIfTargetArrayCallsGetArray)
     string arrayName = "array1";
     auto mockArrayComp = BuildMockArrayComponents(arrayName);
     auto mockArray = BuildMockArray(arrayName);
-    auto mockStateControl = new MockStateControl();
+    auto mockStateControl = new MockStateControl("array");
     auto mockGc = new MockGarbageCollector(mockArray.get(), mockStateControl);
     MockComponentsInfo* mockCompInfo = new MockComponentsInfo(mockArray.get(), mockGc);
     auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp.get());
@@ -580,7 +582,7 @@ TEST(ArrayManager, GetInfo_testIfTargetArrayCallsGetArrayWithIndex)
     unsigned int arrayIndex = 0;
     auto mockArrayComp = BuildMockArrayComponents(arrayName);
     auto mockArray = BuildMockArray(arrayName);
-    auto mockStateControl = new MockStateControl();
+    auto mockStateControl = new MockStateControl("array");
     auto mockGc = new MockGarbageCollector(mockArray.get(), mockStateControl);
     MockComponentsInfo* mockCompInfo = new MockComponentsInfo(mockArray.get(), mockGc);
     auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp.get());

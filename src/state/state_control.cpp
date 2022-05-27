@@ -40,8 +40,9 @@
 
 namespace pos
 {
-StateControl::StateControl(void)
+StateControl::StateControl(string array)
 : StateControl(
+    array,
     new StatePublisher(),
     new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1, placeholders::_2))
     )
@@ -49,8 +50,9 @@ StateControl::StateControl(void)
     // delegated to other constructor
 }
 
-StateControl::StateControl(StatePublisher* publisher, StateList* stateList)
-: publisher(publisher),
+StateControl::StateControl(string array, StatePublisher* publisher, StateList* stateList)
+: arrayName(array),
+  publisher(publisher),
   stateList(stateList)
 {
 }
@@ -111,8 +113,8 @@ StateControl::_ListUpdated(StateContext* prev, StateContext* next)
     {
         string currSitu = prev->GetSituation().ToString();
         string nextSitu = next->GetSituation().ToString();
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CHANGED,
-            "STATE_CHANGED[{}] -> [{}]", currSitu, nextSitu);
+        POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_STATE_CHANGED),
+            "[{}] -> [{}], array_name:{}", currSitu, nextSitu, arrayName);
         _NotifyState(prev, next);
     }
 }

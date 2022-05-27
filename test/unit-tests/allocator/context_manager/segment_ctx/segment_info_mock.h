@@ -14,7 +14,7 @@ public:
     MOCK_METHOD(uint32_t, GetValidBlockCount, (), (override));
     MOCK_METHOD(void, SetValidBlockCount, (int cnt), (override));
     MOCK_METHOD(uint32_t, IncreaseValidBlockCount, (uint32_t inc), (override));
-    MOCK_METHOD((std::pair<bool, SegmentState>), DecreaseValidBlockCount, (uint32_t dec, bool isForced), (override));
+    MOCK_METHOD((std::pair<bool, SegmentState>), DecreaseValidBlockCount, (uint32_t dec, bool allowVictimSegRelease), (override));
     MOCK_METHOD(void, SetOccupiedStripeCount, (uint32_t cnt), (override));
     MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (), (override));
     MOCK_METHOD(uint32_t, IncreaseOccupiedStripeCount, (), (override));

@@ -215,7 +215,7 @@ TEST_F(SegmentCtxTestFixture, InvalidateBlks_TestDecreaseValueWhenValidCountZero
 {
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(1024));
     EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(std::make_pair(true, SegmentState::SSD)));
-    EXPECT_CALL(segmentList[SegmentState::SSD], RemoveFromList).Times(1);
+    EXPECT_CALL(segmentList[SegmentState::SSD], RemoveFromList).WillOnce(Return(true));
     EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(1);
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(false));
 
@@ -232,7 +232,7 @@ TEST_F(SegmentCtxTestFixture, InvalidateBlks_testIfSegmentFreedAndRemovedFromThe
 {
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(1024));
     EXPECT_CALL(segInfos, DecreaseValidBlockCount).WillOnce(Return(std::make_pair(true, SegmentState::SSD)));
-    EXPECT_CALL(segmentList[SegmentState::SSD], RemoveFromList).Times(1);
+    EXPECT_CALL(segmentList[SegmentState::SSD], RemoveFromList).WillOnce(Return(true));
     EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(1);
     EXPECT_CALL(rebuildSegmentList, RemoveFromList).WillOnce(Return(true));
     EXPECT_CALL(rebuildCtx, FlushRebuildSegmentList).Times(1);

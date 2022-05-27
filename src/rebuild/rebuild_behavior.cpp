@@ -116,16 +116,36 @@ RebuildBehavior::_InitRebuildReadBuffers(string owner, int totalChunksToRead)
 bool
 RebuildBehavior::_InitBuffers(void)
 {
-    string owner = _GetClassName() + to_string(ctx->arrayIndex);
+    string owner = _GetClassName() + "_" + ctx->array;
     bool ret = _InitRecoverBuffers(owner);
     if (ret == false)
     {
+        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(recover) BufferPool, owner:{}, array:{}, part:{}",
+            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
         return ret;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "BufferPool for rebuild(recover) allocation has been successful, owner:{}, array:{}, part:{}",
+            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
     }
 
     int totalChunks = _GetTotalReadChunksForRecovery();
     ret = _InitRebuildReadBuffers(owner, totalChunks);
-    return ret;
+    if (ret == false)
+    {
+        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(read) BufferPool, owner:{}, array:{}, part:{}",
+            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
+        mm->DeleteBufferPool(recoverBuffers);
+        recoverBuffers = nullptr;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "BufferPool for rebuild(read) allocation has been successful, owner:{}, array:{}, part:{}",
+            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
+    }
+
+    return true;
 }
 
 int

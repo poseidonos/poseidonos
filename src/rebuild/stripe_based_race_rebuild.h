@@ -46,6 +46,7 @@ public:
     explicit StripeBasedRaceRebuild(unique_ptr<RebuildContext> c);
     ~StripeBasedRaceRebuild(void);
 
+    virtual bool Init(void) override;
     virtual bool Read(void) override;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;

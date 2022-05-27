@@ -4,9 +4,13 @@ import os
 import subprocess
 import sys
 import psutil
-import paramiko
 import argparse
 import time
+
+current_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.dirname(current_path) + "/../../lib"
+sys.path.insert(1, lib_path)
+import remote_procedure
 
 default_pos_root = "/home/ibof/ibofos/"
 default_pos_config_filename = "ibofos_for_perf_ci.conf"
@@ -50,32 +54,11 @@ spdk_version="spdk-20.10"
 default_ioat_qd="44,128"
 default_non_ioat_qd="128,128"
 
-def remote_execute(ip, id, pw, command):
-    cli = paramiko.SSHClient()
-    cli.load_system_host_keys()
-    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    cli.connect(ip, port=22, username=id, password=pw)
-    stdin, stdout, stderr = cli.exec_command(command)
-    
-    result=""
-    for line in iter(stdout.readline, ""):
-        print(line, end="")
-        result += line
-    while not stdout.channel.exit_status_ready:
-        time.sleep(0.5)
-    exit_status = stdout.channel.recv_exit_status()
-
-    cli.close()
-    
-    if (exit_status != 0):
-        raise Exception(ip, command)
-    return result
-
 def set_performance_config():
     print ("Copy pos_for_perf_ci.conf to pos.conf")
     copy_perf_cofig_script = "sudo cp " + args.pos_root + "config/" + args.config_filename + " " + args.config_path 
     print(copy_perf_cofig_script)
-    remote_execute(args.target_ip, args.target_id, args.target_pw, copy_perf_cofig_script)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, copy_perf_cofig_script)
     print("Copied pos_for_perf_ci.conf to pos.conf successfully")
 
 def check_request_volume_mounted(result):
@@ -95,14 +78,14 @@ def bring_up_ibofos():
     print ("start poseidon os")
     start_pos_script = "cd " + args.pos_root +  "; sudo ./test/regression/start_poseidonos.sh"
     print(start_pos_script)
-    remote_execute(args.target_ip, args.target_id, args.target_pw, start_pos_script)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, start_pos_script)
     print("Pos started successfully")
     bring_up_script = "cd " + args.pos_root + "; sudo ./test/system/io_path/setup_ibofos_nvmf_volume.sh -a " + \
             args.fabric_ip + " -i " + irq_dedication_enable + " -w " + write_buffer_size_in_mb + " -u " + \
             args.userdata_device_list +" -p " + spare_device_list + " -s " + \
             args.subsystem_count + " -v " + args.volume_count + " -n " + args.target_nic + " -q " + args.net_irq_cpulist
     print(bring_up_script)
-    result = remote_execute(args.target_ip, args.target_id, args.target_pw, bring_up_script)
+    result = remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, bring_up_script)
     print("Pos bring up success")
 
     time.sleep(10)
@@ -119,12 +102,12 @@ def execute_performance_test():
             " -b 4k -s " + args.io_size + " -n " + num_jobs + " -t " + args.time_based + " -p " + args.transport + \
             " -i " + args.fabric_ip + " -x " + args.qd_4k + " -y " + args.qd_4k
     print(perf_4k_test_script)
-    remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, perf_4k_test_script)
+    remote_procedure.execute(args.initiator_ip, args.initiator_id, args.initiator_pw, perf_4k_test_script)
 
     perf_128k_test_script = "cd " + args.pos_root + "; sudo " + test_dir + "perf.py -r " + args.runtime + \
             " -b 128k -s " + args.io_size + " -n " + num_jobs + " -t " + args.time_based + " -p " + args.transport + \
             " -i " + args.fabric_ip + " -x " + args.qd_128k + " -y " + args.qd_128k
-    remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, perf_128k_test_script)
+    remote_procedure.execute(args.initiator_ip, args.initiator_id, args.initiator_pw, perf_128k_test_script)
 
     print ("perf test done")
 
@@ -134,14 +117,14 @@ def convert_result_to_csv():
             " -sw " + args.sw_limit + " -sr " + args.sr_limit + " -rw " + args.rw_limit + " -rr " + args.rr_limit +\
             " -t " + args.test_name
     print(convert_csv_script)
-    remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, convert_csv_script)
+    remote_procedure.execute(args.initiator_ip, args.initiator_id, args.initiator_pw, convert_csv_script)
     
     print("convert performace result to csv file done")
 
 def terminate_pos():
     exit_pos_command = "pkill -9 pos"
     print(exit_pos_command)
-    remote_execute(args.target_ip, args.target_id, args.target_pw, exit_pos_command)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, exit_pos_command)
 
 def parse_argument():
     parser = argparse.ArgumentParser(description='Performance Test')
