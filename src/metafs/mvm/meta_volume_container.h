@@ -84,7 +84,7 @@ public:
     virtual size_t GetAvailableSpace(const MetaVolumeType volumeType);
     virtual bool CheckFileInActive(const MetaVolumeType volumeType, const FileDescriptorType fd);
     virtual POS_EVENT_ID AddFileInActiveList(const MetaVolumeType volumeType, const FileDescriptorType fd);
-    virtual bool IsGivenFileCreated(std::string& fileName);
+    virtual bool IsGivenFileCreated(const MetaVolumeType volumeType, const std::string& fileName);
     virtual void RemoveFileFromActiveList(const MetaVolumeType volumeType, const FileDescriptorType fd);
     virtual FileSizeType GetFileSize(const MetaVolumeType volumeType, const FileDescriptorType fd);
     virtual FileSizeType GetDataChunkSize(const MetaVolumeType volumeType, const FileDescriptorType fd);

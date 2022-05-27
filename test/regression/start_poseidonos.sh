@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ROOT_DIR=$(readlink -f $(dirname $0))/../../
-logfile=pos.log
 binary_name=poseidonos
 
 execute_pos()
@@ -9,7 +8,7 @@ execute_pos()
     if [ -f ${ROOT_DIR}/bin/$binary_name ];
     then
         echo "Execute poseidonOS"
-        nohup ${ROOT_DIR}/bin/$binary_name &>> ${ROOT_DIR}/script/${logfile} &
+        nohup ${ROOT_DIR}/bin/$binary_name > /dev/null 2>&1 &
     else
         echo "No executable poseidonOS file"
         exit -1
@@ -49,4 +48,4 @@ execute_pos
 wait_started
 
 echo "PoseidonOS version =" ${result}
-echo "poseidonOS is running in background...logfile=${logfile}"
+echo "poseidonOS is running in background..."

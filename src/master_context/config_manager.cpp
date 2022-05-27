@@ -82,7 +82,7 @@ ConfigManager::ReadFile(void)
     std::stringstream strStream;
 
     strStream << openFile.rdbuf();
-    string configData = strStream.str();
+    configData = strStream.str();
     openFile.close();
 
     rapidjson::ParseResult result = doc.Parse(configData.c_str());

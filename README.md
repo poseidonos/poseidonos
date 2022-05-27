@@ -235,7 +235,7 @@ Execute poseidonos
 Wait poseidonos
 Wait poseidonos
 Wait poseidonos
-poseidonos is running in background...logfile=pos.log
+poseidonos is running in background...
 root@R2U14-PSD-3:/poseidonos/script#
 ```
 
@@ -251,12 +251,12 @@ root@R2U14-PSD-3:/poseidonos/script# fdisk -l | grep nvme
 ### Step 2. Create Write Buffer within DRAM
 Create a write buffer within DRAM using the device create command. This write buffer will be included to a POS array later. 
  
-This command will create write buffer with the total size of 8192 MB, the block size of 512 B, and the name of "uram0". The command will request a SPDK server to create a SPDK block device called "malloc bdev", which is a userspace ramdisk.
+This command will create write buffer with the total size of 4096MB, the block size of 512B, and the name of "uram0". The command will request a SPDK server to create a SPDK block device called "malloc bdev", which is a userspace ramdisk.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 8388608 --block-size 512
 ```
 
-- Note: the recommended size of uram0 may differ by environment. Please refer to "bdev" section in Learning POS Environment for further details.
+- Note: The recommended size of uram0 may differ by environment. If the size of uram0 exceeds 4096MB, it may not be possible to restore by journal in SPO.
 
 
 ### Step 3. Check POS version
@@ -565,6 +565,9 @@ Name      |ID    |TotalCapacity                |RemainingCapacity            |Re
 --------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
 vol1      |0     |50T                          |50T                          |100        |Mounted    |0                |0
 ```
+- Note 1: the RemainingCapacity of a newly created volume is set to the TotalCapacity when the volume is mounted for the first time. 
+  Once every block of the volume is touched/written, the RemainingCapacity would remain at 0 until the volume gets deleted.
+  The RemainingCapacity captures the internal state of block mappings and should not be interpreted as user's file system free space.
 
 #### Retrieve NVM subsystem information
 Using the subsystem list command, you can see that the NVM namespace has been added to the NVM subsystem with its bdev_name.

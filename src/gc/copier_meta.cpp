@@ -270,14 +270,14 @@ CopierMeta::GetGcStripeManager(void)
 void
 CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
 {
-    BufferInfo info = {
-        .owner = typeid(this).name(),
-        .size = bufferSize,
-        .count = maxBufferCount
-    };
     gcBufferPool = new std::vector<BufferPool*>;
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
+        BufferInfo info = {
+            .owner = typeid(this).name() + to_string(index),
+            .size = bufferSize,
+            .count = maxBufferCount
+        };
         gcBufferPool->push_back(memoryManager->CreateBufferPool(info));
     }
 }

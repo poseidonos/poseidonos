@@ -59,10 +59,8 @@ AddListenerCommand::Execute(json& doc, string rid)
     ret = _AddListener(doc);
     if (ret != SUCCESS)
     {
-        int event = EID(CLI_ADD_LISTENER_FAILURE);
-        POS_TRACE_WARN(event, "");
         return jFormat.MakeResponse(
-            "ADDLISTENER", rid, event, errorMessage, GetPosInfo());
+            "ADDLISTENER", rid, ret, errorMessage, GetPosInfo());
     }
 
     int event = EID(CLI_ADD_LISTENER_SUCCESS);

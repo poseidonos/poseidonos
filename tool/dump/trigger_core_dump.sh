@@ -23,7 +23,6 @@ LOG_SUFFIX="log"
 IN_MEMORY_LOG_FILE=""
 CALLSTACK_INFO=""
 PENDINGIO_INFO=""
-TRIGGER_LOG=trigger.log
 
 CRASH=-1
 mkdir -p $DUMP_PATH
@@ -43,7 +42,7 @@ check_free_space(){
 get_first_core_information(){
     rm -rf poseidonos.inmemory.log call_stack.info pending_io.info
     #If we cannot get information within 5 minutes, we just skip first core information.
-    timeout 300s ./get_first_info_from_dump.sh 1>$TRIGGER_LOG 2>$TRIGGER_LOG
+    sudo ./get_first_info_from_dump.sh
     if [ ${?} -ne 0 ];then
         log_error "Timeout happend during get_first_info_from_dump.sh"
     fi
@@ -59,13 +58,6 @@ get_first_core_information(){
     else
         echo "call_stack info cannot be retrived"
     fi
-    if [ -f "pending_io.info" ];then
-        PENDINGIO_INFO="pending_io.info"
-        log_normal "pending io information successfully retrived"
-    else
-        echo "pending io info cannot be retrived"
-    fi
-
 }
 
 LOG_ONLY=0

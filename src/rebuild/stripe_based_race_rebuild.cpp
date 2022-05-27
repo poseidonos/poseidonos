@@ -56,17 +56,14 @@ namespace pos
 StripeBasedRaceRebuild::StripeBasedRaceRebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "StripeBasedRaceRebuild");
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild");
     locker = ArrayService::Instance()->Getter()->GetIOLocker(ctx->part);
     assert(locker != nullptr);
-
-    bool ret = _InitBuffers();
-    assert(ret);
 }
 
 StripeBasedRaceRebuild::~StripeBasedRaceRebuild(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~StripeBasedRaceRebuild");
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "~StripeBasedRaceRebuild");
 }
 
 string
@@ -76,9 +73,29 @@ StripeBasedRaceRebuild::_GetClassName(void)
 }
 
 bool
+StripeBasedRaceRebuild::Init(void)
+{
+    if (isInitialized == false)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild try init, {}", PARTITION_TYPE_STR[ctx->part]);
+        bool ret = _InitBuffers();
+        if (ret == false)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Initialization retry because sufficient buffer for rebuild is not secured, {}",
+                PARTITION_TYPE_STR[ctx->part]);
+            return false;
+        }
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild Initialized successfully {}", PARTITION_TYPE_STR[ctx->part]);
+        isInitialized = true;
+    }
+    return Read();
+}
+
+bool
 StripeBasedRaceRebuild::Read(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "StripeBasedRaceRebuild Read {}", PARTITION_TYPE_STR[ctx->part]);
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+        "Trying to read in rebuild, {}", PARTITION_TYPE_STR[ctx->part]);
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
@@ -138,8 +155,8 @@ StripeBasedRaceRebuild::Read(void)
     }
 
     ctx->taskCnt = currWorkload;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "StripeBasedRaceRebuild - from:{}, to:{}", from, to);
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "Trying to recover in rebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -173,7 +190,6 @@ StripeBasedRaceRebuild::Read(void)
 
 bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
-    POS_TRACE_DEBUG(2831, "StripeBasedRaceRebuild::Write, target stripe:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_MetadataRebuild);

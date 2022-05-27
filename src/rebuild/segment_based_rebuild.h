@@ -47,6 +47,7 @@ public:
     SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc);
     ~SegmentBasedRebuild(void);
 
+    virtual bool Init(void) override;
     virtual bool Read(void) override;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;

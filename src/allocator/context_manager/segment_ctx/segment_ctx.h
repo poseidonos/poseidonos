@@ -98,6 +98,7 @@ public:
     virtual int SetRebuildCompleted(SegmentId segId);
     virtual int MakeRebuildTarget(void);
     virtual std::set<SegmentId> GetNvramSegmentList(void);
+    virtual std::set<SegmentId> GetVictimSegmentList(void);
     virtual int StopRebuilding(void);
     virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual std::set<SegmentId> GetRebuildSegmentList(void);
@@ -107,7 +108,7 @@ public:
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
     virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
@@ -127,7 +128,7 @@ private:
     void _UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment);
 
     void _IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    bool _DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool isForced);
+    bool _DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease);
     bool _IncreaseOccupiedStripeCount(SegmentId segId);
 
     int _OnNumFreeSegmentChanged(void);

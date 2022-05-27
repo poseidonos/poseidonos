@@ -68,6 +68,7 @@ ArrayDevice::GetUblockPtr(void)
 void
 ArrayDevice::SetUblock(UblockSharedPtr uBlock)
 {
+    _UpdateTrace(this->uBlock);
     this->uBlock = uBlock;
 }
 
@@ -89,6 +90,17 @@ ArrayDevice::SetState(ArrayDeviceState input)
     state = input;
     POS_TRACE_INFO(EID(ARRAY_EVENT_DEV_STATE_CHANGED),
         "Array device [" + devName + "]'s state is changed to {} (0=normal, 1=fault, 2=rebuild)", input);
+}
+
+void
+ArrayDevice::_UpdateTrace(UblockSharedPtr uBlock)
+{
+    if (uBlock != nullptr)
+    {
+        string name = uBlock->GetName();
+        string sn = uBlock->GetSN();
+        prevUblockInfo = name + "(" + sn + ")";
+    }
 }
 
 } // namespace pos

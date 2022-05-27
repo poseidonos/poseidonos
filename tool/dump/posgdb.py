@@ -23,6 +23,8 @@ import pending_ubio
 import backend_io
 import volume_io
 import rba_info
+import report
+
 
 class PosGdbCmd(gdb.Command):
 
@@ -45,6 +47,7 @@ class PosGdbCmd(gdb.Command):
         gdb.execute("set print pretty", to_string=True)
         gdb.execute("set print elements 0", to_string=True)
         gdb.execute("set height unlimited", to_string=True)
+        gdb.execute("set max-value-size unlimited", to_string=True)
         print("Args Passed: %s" % args)
 
         gdb_lib.switch_to_pos_stack()
@@ -80,22 +83,32 @@ class PosGdbCmd(gdb.Command):
         elif ('callback' in args):
             split_args = args.split()[1]
             gdb_lib.show_callback_list(split_args)
+
         elif ('pending object' in args):
             split_args = args.split()[2]
             pending_object.show_pending_object(split_args)
+
         elif ('log memory' == args):
             log_memory.get_in_memory_log()
+
         elif ('backend io' == args):
             backend_io.backend_io()
+
         elif ('volume io' == args):
             volume_io.pending_volume_io()
+
         elif ('volume info' == args):
             volume_io.bdev_information()
+
         elif ('rba info' in args):
             array_id = args.split()[2]
             volume_id = args.split()[3]
             rba = args.split()[4]
             rba_info.rba_info(array_id, volume_id, rba)
+
+        elif ('make report' in args):
+            report.make_report()
+
         else:
             print("Help : ")
             help_f = open(current_path + '/README_POS_GDB')

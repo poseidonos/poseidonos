@@ -115,7 +115,7 @@ StripePartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
     {
         int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
-            PARTITION_TYPE_STR[type], raidType, le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+            PARTITION_TYPE_STR[type], RaidType(raidType).ToString(), le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
 
@@ -208,17 +208,16 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     }
     else if (raidType == RaidTypeEnum::RAID5)
     {
-        Raid5* raid5 = new Raid5(&physicalSize);
         uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
         uint64_t maxGcStripes = 2048;
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Alloc parity pool, size:{}", totalNvmStripes + maxGcStripes);
-        if (raid5->AllocParityPools(totalNvmStripes + maxGcStripes) == false)
+        uint64_t reqBuffersPerNuma = totalNvmStripes + maxGcStripes;
+        Raid5* raid5 = new Raid5(&physicalSize, reqBuffersPerNuma);
+        bool result = raid5->AllocParityPools(reqBuffersPerNuma);
+        if (result == false)
         {
-            delete raid5;
-            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
-            POS_TRACE_WARN(eventId, "required number of buffers:{}", totalNvmStripes + maxGcStripes);
-            return eventId;
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+                "Failed to alloc ParityPools for RAID5, request:{}", reqBuffersPerNuma);
         }
         method = raid5;
     }
@@ -455,7 +454,6 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
     else
     {
         int eid = EID(RECOVER_INVALID_LBA);
-        POS_TRACE_INFO(eid, "part:{}, req_lba:{}", PARTITION_TYPE_STR[type], lba);
         return eid;
     }
 }

@@ -279,7 +279,8 @@ StripeMapManager::GetLSAandReferLsid(StripeId vsid)
 StripeId
 StripeMapManager::GetRandomLsid(StripeId vsid)
 {
-    return vsid + addrInfo->GetNumWbStripes();
+    // To read only in user ssd area.
+    return (vsid + addrInfo->GetNumWbStripes()) % addrInfo->GetMaxVSID();
 }
 
 int

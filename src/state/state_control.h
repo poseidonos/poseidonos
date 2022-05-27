@@ -47,8 +47,8 @@ class StateList;
 class StateControl : public IStateControl
 {
 public:
-    StateControl(void);
-    StateControl(StatePublisher* publisher, StateList* stateList);
+    explicit StateControl(string array);
+    StateControl(string array, StatePublisher* publisher, StateList* stateList);
     virtual ~StateControl(void);
     void Subscribe(IStateObserver* sub, string name) override;
     void Unsubscribe(IStateObserver* sub) override;
@@ -64,6 +64,7 @@ private:
     void _ListUpdated(StateContext* prev, StateContext* next);
     void _NotifyState(StateContext* prev, StateContext* next);
 
+    string arrayName = "";
     StatePublisher* publisher = nullptr;
     StateList* stateList = nullptr;
     future<void> async_future;

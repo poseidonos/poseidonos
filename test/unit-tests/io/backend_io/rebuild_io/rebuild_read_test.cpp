@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/bio/ubio_mock.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::Return;
 namespace pos
@@ -30,7 +31,7 @@ TEST(RebuildRead, RebuildRead_Recover_IsRetry)
     auto actual = rebuildRead.Recover(ubio, nullptr);
 
     // Then : Check return value
-    EXPECT_EQ(actual, 9999);
+    EXPECT_EQ(actual, EID(IO_RECOVER_DEBUG_MSG));
 }
 
 } // namespace pos

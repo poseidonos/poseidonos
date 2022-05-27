@@ -64,10 +64,10 @@ ArrayDeviceList::ExportNames()
 
     for_each(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev)
     {
-        const string faultyDevName = "Faulty Device";
         if (ArrayDeviceState::FAULT == dev->GetState())
         {
-            devices.data.push_back(faultyDevName);
+            string oldName = "[REMOVED]" + dev->PrevUblockInfo();
+            devices.data.push_back(oldName);
         }
         else
         {
@@ -292,20 +292,29 @@ int
 ArrayDeviceList::SpareToData(ArrayDevice* target)
 {
     unique_lock<mutex> lock(*mtx);
+    int noSpareToReplace = EID(NO_SPARE_SSD_TO_REPLACE);
     if (devSet_.spares.size() == 0)
     {
-        int eid = EID(NO_SPARE_SSD_TO_REPLACE);
-        POS_TRACE_WARN(eid, "No remaining spare device");
-        return eid;
+        POS_TRACE_WARN(noSpareToReplace, "No remaining spare device");
+        return noSpareToReplace;
     }
 
     ArrayDevice* spare = devSet_.spares.back();
-    POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
-        "Faulty device is replaced to the spare {}", spare->GetUblock()->GetName());
-    target->SetUblock(spare->GetUblock());
-    devSet_.spares.pop_back();
-
-    return 0;
+    UblockSharedPtr ublock = spare->GetUblock();
+    if (ublock != nullptr)
+    {
+        POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
+            "{} is replaced to the spare {}({})",
+            target->PrevUblockInfo(), ublock->GetName(), ublock->GetSN());
+        target->SetUblock(ublock);
+        devSet_.spares.pop_back();
+        return 0;
+    }
+    else
+    {
+        POS_TRACE_WARN(noSpareToReplace, "There is a spare device, but the ublock is invalid");
+        return noSpareToReplace;
+    }
 }
 
 } // namespace pos

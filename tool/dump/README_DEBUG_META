@@ -7,5 +7,26 @@ custom gdb command for utilizing debugging.
 source debug_meta.py
 meta [command] [subcommand]
 
-1) meta metafs
-   show debug info and simple report about metafs
+1) meta debuginfo
+   show some info for debugging
+
+2) meta status
+   show status of arrays
+
+3) meta metafs
+   show simple report about metafs
+
+4) lastlog
+   show log
+
+5) mem addr bytesize
+   dump memory you want
+
+6) search keyword
+   search the keyword from pos log
+
+7) logpath path
+   set log path for pos.log
+
+8) logfile file
+   set log files to search

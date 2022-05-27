@@ -82,7 +82,6 @@ SmartLogMetaIo::Dispose(void)
         return;
     }
     _StoreLogData();
-    SmartLogMgrSingleton::ResetInstance();
 }
 int
 SmartLogMetaIo::_CreateSmartLogFile(void)

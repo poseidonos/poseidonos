@@ -74,7 +74,6 @@ IoRecoveryEvent::Execute(void)
         case UbioDir::Read:
         {
             ubio->ResetError();
-            ubio->SetEventType(BackendEvent_FrontendIO);
             RebuildRead rebuildRead;
             int ret = rebuildRead.Recover(ubio);
             if (unlikely(0 != ret))

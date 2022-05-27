@@ -6,7 +6,6 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, current_path)
 sys.path.insert(1, current_path + "/../")
 import core_dump_lib
-import gdb_lib
 
 
 def get_spdk_value(inp_str):
@@ -102,3 +101,13 @@ def switch_to_c_stack():
     print("We move thread %d frame %d" % (thread_num, callstack_num))
     gdb.execute("thread %d" % (thread_num), to_string=True)
     gdb.execute("f %d" % (callstack_num), to_string=True)
+
+
+def advance_ptr(parent_str, child_str):
+    return_str = "(" + parent_str + "->" + child_str + ")"
+    return return_str
+
+
+def make_gdb_cmd_p(class_name, memory_addr):
+    cmd = "p *" + "(" + class_name + "*" + ")" + str(memory_addr)
+    return cmd

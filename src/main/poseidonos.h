@@ -46,7 +46,7 @@ class SignalHandler;
 class Poseidonos
 {
 public:
-    void Init(int argc, char** argv);
+    int Init(int argc, char** argv);
     void Run(void);
     void Terminate(void);
 
@@ -63,7 +63,7 @@ private:
     void _InitMemoryChecker(void);
 
     void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
+    int _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;

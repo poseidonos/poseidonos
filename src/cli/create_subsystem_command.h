@@ -56,7 +56,6 @@ private:
     std::string serialNumber = DEFAULT_SERIAL_NUMBER;
     std::string modelNumber = DEFAULT_MODEL_NUMBER;
     uint32_t maxNamespaces = DEFAULT_MAX_NAMESPACES;
-    const int ERROR_CODE = static_cast<int>(POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_SUBSYSTEM);
     bool allowAnyHost = false;
     bool anaReporting = false;
     string errorMessage;

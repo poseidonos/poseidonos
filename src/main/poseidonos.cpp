@@ -67,20 +67,29 @@
 
 namespace pos
 {
-void
+int
 Poseidonos::Init(int argc, char** argv)
 {
-    _InitSignalHandler();
-    _LoadConfiguration();
-    _LoadVersion();
-    _InitSpdk(argc, argv);
-    _InitAffinity();
-    _SetupThreadModel();
-    _SetPerfImpact();
-    _InitDebugInfo();
-    _InitAIR();
-    _InitIOInterface();
-    _InitMemoryChecker();
+    POS_TRACE_TRACE(EID(POS_TRACE_STARTED), "");
+    int ret = _LoadConfiguration();
+    if (ret == 0)
+    {
+        _InitSignalHandler();
+        _LoadVersion();
+        _InitSpdk(argc, argv);
+        _InitAffinity();
+        _SetupThreadModel();
+        _SetPerfImpact();
+        _InitDebugInfo();
+        _InitAIR();
+        _InitIOInterface();
+        _InitMemoryChecker();
+    }
+    else
+    {
+        POS_TRACE_TRACE(EID(POS_TRACE_INIT_FAIL), "{}", ConfigManagerSingleton::Instance()->RawData());
+    }
+    return ret;
 }
 
 void
@@ -98,12 +107,14 @@ void
 Poseidonos::Run(void)
 {
     _RunCLIService();
+    POS_TRACE_TRACE(EID(POS_TRACE_INIT_SUCCESS), "{}", ConfigManagerSingleton::Instance()->RawData());
     pos_cli::Wait();
 }
 
 void
 Poseidonos::Terminate(void)
 {
+    POS_TRACE_TRACE(EID(POS_TRACE_TERMINATING), "");
     MemoryChecker::Enable(false);
     EventSchedulerSingleton::Instance()->SetTerminate(true);
     NvmfTargetSingleton::ResetInstance();
@@ -113,6 +124,7 @@ Poseidonos::Terminate(void)
     QosManagerSingleton::Instance()->FinalizeSpdkManager();
     QosManagerSingleton::ResetInstance();
     FlushCmdManagerSingleton::ResetInstance();
+    SmartLogMgrSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler* submitHandler = static_cast<IOSubmitHandler*>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
@@ -144,6 +156,7 @@ Poseidonos::Terminate(void)
         UserSignalInterface::Enable(false);
     }
     SignalHandlerSingleton::ResetInstance();
+    POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
 
 void
@@ -297,10 +310,15 @@ Poseidonos::_InitMemoryChecker(void)
     }
 }
 
-void
+int
 Poseidonos::_LoadConfiguration(void)
 {
-    ConfigManagerSingleton::Instance()->ReadFile();
+    int ret = ConfigManagerSingleton::Instance()->ReadFile();
+    if (ret == EID(CONFIG_FILE_READ_DONE))
+    {
+        return 0;
+    }
+    return ret;
 }
 
 void
