@@ -93,7 +93,7 @@ func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPr
 		log.Error("error: ", err.Error())
 		return nil, err
 	}
-
+  
 	return res, err
 }
 
