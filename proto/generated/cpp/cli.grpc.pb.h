@@ -64,6 +64,34 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>> PrepareAsyncSetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>>(PrepareAsyncSetSystemPropertyRaw(context, request, cq));
     }
+    virtual ::grpc::Status ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc_cli::ResetEventWrrResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>> AsyncResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>>(AsyncResetEventWrrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>> PrepareAsyncResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>>(PrepareAsyncResetEventWrrRaw(context, request, cq));
+    }
+    virtual ::grpc::Status ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc_cli::ResetMbrResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>> AsyncResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>>(AsyncResetMbrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>> PrepareAsyncResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>>(PrepareAsyncResetMbrRaw(context, request, cq));
+    }
+    virtual ::grpc::Status StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc_cli::StopRebuildingResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>> AsyncStopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>>(AsyncStopRebuildingRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>> PrepareAsyncStopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>>(PrepareAsyncStopRebuildingRaw(context, request, cq));
+    }
+    virtual ::grpc::Status UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc_cli::UpdateEventWrrResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>> AsyncUpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>>(AsyncUpdateEventWrrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>> PrepareAsyncUpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>>(PrepareAsyncUpdateEventWrrRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -91,6 +119,30 @@ class PosCli final {
       #else
       virtual void SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -108,6 +160,14 @@ class PosCli final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>* PrepareAsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>* AsyncResetEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetEventWrrResponse>* PrepareAsyncResetEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>* AsyncResetMbrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ResetMbrResponse>* PrepareAsyncResetMbrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>* AsyncStopRebuildingRaw(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopRebuildingResponse>* PrepareAsyncStopRebuildingRaw(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>* AsyncUpdateEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UpdateEventWrrResponse>* PrepareAsyncUpdateEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -140,6 +200,34 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>> PrepareAsyncSetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>>(PrepareAsyncSetSystemPropertyRaw(context, request, cq));
     }
+    ::grpc::Status ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc_cli::ResetEventWrrResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>> AsyncResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>>(AsyncResetEventWrrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>> PrepareAsyncResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>>(PrepareAsyncResetEventWrrRaw(context, request, cq));
+    }
+    ::grpc::Status ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc_cli::ResetMbrResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>> AsyncResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>>(AsyncResetMbrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>> PrepareAsyncResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>>(PrepareAsyncResetMbrRaw(context, request, cq));
+    }
+    ::grpc::Status StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc_cli::StopRebuildingResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>> AsyncStopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>>(AsyncStopRebuildingRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>> PrepareAsyncStopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>>(PrepareAsyncStopRebuildingRaw(context, request, cq));
+    }
+    ::grpc::Status UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc_cli::UpdateEventWrrResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>> AsyncUpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>>(AsyncUpdateEventWrrRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>> PrepareAsyncUpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>>(PrepareAsyncUpdateEventWrrRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
@@ -167,6 +255,30 @@ class PosCli final {
       #else
       void SetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ResetEventWrr(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ResetMbr(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void StopRebuilding(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void UpdateEventWrr(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -186,10 +298,22 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* PrepareAsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>* AsyncResetEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetEventWrrResponse>* PrepareAsyncResetEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetEventWrrRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>* AsyncResetMbrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ResetMbrResponse>* PrepareAsyncResetMbrRaw(::grpc::ClientContext* context, const ::grpc_cli::ResetMbrRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>* AsyncStopRebuildingRaw(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopRebuildingResponse>* PrepareAsyncStopRebuildingRaw(::grpc::ClientContext* context, const ::grpc_cli::StopRebuildingRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>* AsyncUpdateEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::UpdateEventWrrResponse>* PrepareAsyncUpdateEventWrrRaw(::grpc::ClientContext* context, const ::grpc_cli::UpdateEventWrrRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SystemInfo_;
     const ::grpc::internal::RpcMethod rpcmethod_SystemStop_;
     const ::grpc::internal::RpcMethod rpcmethod_GetSystemProperty_;
     const ::grpc::internal::RpcMethod rpcmethod_SetSystemProperty_;
+    const ::grpc::internal::RpcMethod rpcmethod_ResetEventWrr_;
+    const ::grpc::internal::RpcMethod rpcmethod_ResetMbr_;
+    const ::grpc::internal::RpcMethod rpcmethod_StopRebuilding_;
+    const ::grpc::internal::RpcMethod rpcmethod_UpdateEventWrr_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -201,6 +325,10 @@ class PosCli final {
     virtual ::grpc::Status SystemStop(::grpc::ServerContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response);
     virtual ::grpc::Status GetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response);
     virtual ::grpc::Status SetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response);
+    virtual ::grpc::Status ResetEventWrr(::grpc::ServerContext* context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response);
+    virtual ::grpc::Status ResetMbr(::grpc::ServerContext* context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response);
+    virtual ::grpc::Status StopRebuilding(::grpc::ServerContext* context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response);
+    virtual ::grpc::Status UpdateEventWrr(::grpc::ServerContext* context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_SystemInfo : public BaseClass {
@@ -282,7 +410,87 @@ class PosCli final {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<Service > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ResetEventWrr() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResetEventWrr(::grpc::ServerContext* context, ::grpc_cli::ResetEventWrrRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::ResetEventWrrResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ResetMbr() {
+      ::grpc::Service::MarkMethodAsync(5);
+    }
+    ~WithAsyncMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResetMbr(::grpc::ServerContext* context, ::grpc_cli::ResetMbrRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::ResetMbrResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_StopRebuilding() {
+      ::grpc::Service::MarkMethodAsync(6);
+    }
+    ~WithAsyncMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStopRebuilding(::grpc::ServerContext* context, ::grpc_cli::StopRebuildingRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::StopRebuildingResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_UpdateEventWrr() {
+      ::grpc::Service::MarkMethodAsync(7);
+    }
+    ~WithAsyncMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateEventWrr(::grpc::ServerContext* context, ::grpc_cli::UpdateEventWrrRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::UpdateEventWrrResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<Service > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -471,11 +679,199 @@ class PosCli final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ResetEventWrr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::ResetEventWrrRequest* request, ::grpc_cli::ResetEventWrrResponse* response) { return this->ResetEventWrr(context, request, response); }));}
+    void SetMessageAllocatorFor_ResetEventWrr(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ResetEventWrr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ResetEventWrr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ResetMbr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::ResetMbrRequest* request, ::grpc_cli::ResetMbrResponse* response) { return this->ResetMbr(context, request, response); }));}
+    void SetMessageAllocatorFor_ResetMbr(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ResetMbr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ResetMbr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_StopRebuilding() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::StopRebuildingRequest* request, ::grpc_cli::StopRebuildingResponse* response) { return this->StopRebuilding(context, request, response); }));}
+    void SetMessageAllocatorFor_StopRebuilding(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StopRebuilding(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StopRebuilding(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_UpdateEventWrr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::UpdateEventWrrRequest* request, ::grpc_cli::UpdateEventWrrResponse* response) { return this->UpdateEventWrr(context, request, response); }));}
+    void SetMessageAllocatorFor_UpdateEventWrr(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateEventWrr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateEventWrr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<Service > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<Service > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<Service > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<Service > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -540,6 +936,74 @@ class PosCli final {
     }
     // disable synchronous version of this method
     ::grpc::Status SetSystemProperty(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetSystemPropertyRequest* /*request*/, ::grpc_cli::SetSystemPropertyResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ResetEventWrr() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ResetMbr() {
+      ::grpc::Service::MarkMethodGeneric(5);
+    }
+    ~WithGenericMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_StopRebuilding() {
+      ::grpc::Service::MarkMethodGeneric(6);
+    }
+    ~WithGenericMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_UpdateEventWrr() {
+      ::grpc::Service::MarkMethodGeneric(7);
+    }
+    ~WithGenericMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -622,6 +1086,86 @@ class PosCli final {
     }
     void RequestSetSystemProperty(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ResetEventWrr() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResetEventWrr(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ResetMbr() {
+      ::grpc::Service::MarkMethodRaw(5);
+    }
+    ~WithRawMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResetMbr(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_StopRebuilding() {
+      ::grpc::Service::MarkMethodRaw(6);
+    }
+    ~WithRawMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestStopRebuilding(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_UpdateEventWrr() {
+      ::grpc::Service::MarkMethodRaw(7);
+    }
+    ~WithRawMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateEventWrr(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -777,6 +1321,158 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ResetEventWrr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ResetEventWrr(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ResetEventWrr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ResetEventWrr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ResetMbr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ResetMbr(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ResetMbr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ResetMbr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_StopRebuilding() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StopRebuilding(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* StopRebuilding(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* StopRebuilding(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_UpdateEventWrr() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateEventWrr(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateEventWrr(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateEventWrr(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_SystemInfo : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -884,9 +1580,117 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetSystemProperty(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SetSystemPropertyRequest,::grpc_cli::SetSystemPropertyResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<Service > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ResetEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ResetEventWrr() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse>* streamer) {
+                       return this->StreamedResetEventWrr(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ResetEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ResetEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetEventWrrRequest* /*request*/, ::grpc_cli::ResetEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedResetEventWrr(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ResetEventWrrRequest,::grpc_cli::ResetEventWrrResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ResetMbr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ResetMbr() {
+      ::grpc::Service::MarkMethodStreamed(5,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse>* streamer) {
+                       return this->StreamedResetMbr(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ResetMbr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ResetMbr(::grpc::ServerContext* /*context*/, const ::grpc_cli::ResetMbrRequest* /*request*/, ::grpc_cli::ResetMbrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedResetMbr(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ResetMbrRequest,::grpc_cli::ResetMbrResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_StopRebuilding : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_StopRebuilding() {
+      ::grpc::Service::MarkMethodStreamed(6,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse>* streamer) {
+                       return this->StreamedStopRebuilding(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_StopRebuilding() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status StopRebuilding(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopRebuildingRequest* /*request*/, ::grpc_cli::StopRebuildingResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedStopRebuilding(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::StopRebuildingRequest,::grpc_cli::StopRebuildingResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_UpdateEventWrr : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_UpdateEventWrr() {
+      ::grpc::Service::MarkMethodStreamed(7,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse>* streamer) {
+                       return this->StreamedUpdateEventWrr(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_UpdateEventWrr() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status UpdateEventWrr(::grpc::ServerContext* /*context*/, const ::grpc_cli::UpdateEventWrrRequest* /*request*/, ::grpc_cli::UpdateEventWrrResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedUpdateEventWrr(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::UpdateEventWrrRequest,::grpc_cli::UpdateEventWrrResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<Service > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<Service > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<Service > > > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli
