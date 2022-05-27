@@ -4,6 +4,8 @@
 
 #include "src/cli/grpc_cli_server.h"
 
+#define MAX_NUM_CONCURRENT_CLIENTS 1
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
@@ -59,6 +61,10 @@ void RunGrpcServer() {
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
   ServerBuilder builder;
+  grpc::ResourceQuota rq;
+  
+  rq.SetMaxThreads(MAX_NUM_CONCURRENT_CLIENTS + 1);
+  builder.SetResourceQuota(rq);
   // Listen on the given address without any authentication mechanism.
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   // Register "service" as the instance through which we'll communicate with

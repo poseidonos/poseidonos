@@ -50,6 +50,10 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			} else {
 				res, err := grpcmgr.SendSetSystemPropertyRpc(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)

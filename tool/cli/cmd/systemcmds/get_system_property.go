@@ -48,6 +48,10 @@ Example:
 				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			} else {
 				res, err := grpcmgr.SendGetSystemPropertyRpc(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)

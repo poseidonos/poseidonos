@@ -24,6 +24,10 @@ func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error
 	defer cancel()
 
 	res, err := c.SystemInfo(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
 	return res, err
 }
@@ -42,6 +46,11 @@ func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error
 
 	res, err := c.SystemStop(ctx, req)
 
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
 	return res, err
 }
 
@@ -59,6 +68,11 @@ func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPr
 
 	res, err := c.GetSystemProperty(ctx, req)
 
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
 	return res, err
 }
 
@@ -75,6 +89,10 @@ func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPr
 	defer cancel()
 
 	res, err := c.SetSystemProperty(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
 	return res, err
 }
