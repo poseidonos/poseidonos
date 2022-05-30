@@ -32,9 +32,12 @@
 
 #pragma once
 
+#include "src/include/backend_event.h"
 #include "proto/generated/cpp/cli.grpc.pb.h"
 #include "proto/generated/cpp/cli.pb.h"
 #include <string>
+
+#define RESET_EVENT_WRR_DEFAULT_WEIGHT 20
 
 using grpc::Status;
 using grpc::StatusCode;
@@ -51,6 +54,14 @@ using grpc_cli::StartTelemetryRequest;
 using grpc_cli::StartTelemetryResponse;
 using grpc_cli::StopTelemetryRequest;
 using grpc_cli::StopTelemetryResponse;
+using grpc_cli::ResetEventWrrRequest;
+using grpc_cli::ResetEventWrrResponse;
+using grpc_cli::ResetMbrRequest;
+using grpc_cli::ResetMbrResponse;
+using grpc_cli::StopRebuildingRequest;
+using grpc_cli::StopRebuildingResponse;
+using grpc_cli::UpdateEventWrrRequest;
+using grpc_cli::UpdateEventWrrResponse;
 
 class CommandProcessor
 {
@@ -64,7 +75,11 @@ public:
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
     grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
     grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
-    
+    grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
+    grpc::Status ExecuteResetMbrCommand(const ResetMbrRequest* request,ResetMbrResponse* reply);
+    grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
+    grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
+
 private:
     bool _isPosTerminating;
     bool _IsPosTerminating(void) { return _isPosTerminating; }
@@ -72,4 +87,5 @@ private:
     void _SetEventStatus(int eventId, grpc_cli::Status *status);
     void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
+    pos::BackendEvent _GetEventId(std::string eventName);
 };
