@@ -210,6 +210,20 @@ VolumeManager::Mount(std::string name, std::string subnqn)
 }
 
 int
+VolumeManager::Unmount(int volId)
+{
+    string name;
+    int ret = GetVolumeName(volId, name);
+
+    if (ret != EID(SUCCESS))
+    {
+        return ret;
+    }
+
+    return Unmount(name);
+}
+
+int
 VolumeManager::Unmount(std::string name)
 {
     int ret = _CheckPrerequisite();

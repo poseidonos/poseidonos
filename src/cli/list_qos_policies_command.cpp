@@ -113,7 +113,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     rebuildImpact.AddElement(rebuild);
     data.SetArray(rebuildImpact);
 
-    IVolumeManager* volMgr =
+    IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
@@ -128,8 +128,8 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         }
         for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
         {
-            validVol = volMgr->GetVolumeID(*vol);
-            if (-1 == validVol)
+            validVol = volMgr->CheckVolumeValidity(*vol);
+            if (EID(SUCCESS) != validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
                 return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());

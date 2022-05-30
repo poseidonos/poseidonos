@@ -71,6 +71,7 @@ public:
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;
     int Unmount(std::string name) override;
+    int Unmount(int volId) override;
     int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) override;
     int Rename(std::string oldname, std::string newname) override;
     int CheckVolumeValidity(std::string name) override;
