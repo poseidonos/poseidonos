@@ -74,6 +74,7 @@ VolumeManager::Init(void)
     int result = 0;
 
     initialized = true;
+    _ClearLock();
     _LoadVolumes();
 
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
@@ -98,8 +99,7 @@ VolumeManager::Dispose(void)
 {
     initialized = false;
     volumes.Clear();
-
-    volumeExceptionLock.unlock();
+    _ClearLock();
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
 }
@@ -489,6 +489,16 @@ VolumeManager::_CheckPrerequisite(void)
     }
 
     return EID(SUCCESS);
+}
+
+int
+VolumeManager::_ClearLock(void)
+{
+    volumeEventLock.try_lock();
+    volumeEventLock.unlock();
+
+    volumeExceptionLock.try_lock();
+    volumeExceptionLock.unlock();
 }
 
 std::string
