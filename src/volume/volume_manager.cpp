@@ -491,7 +491,7 @@ VolumeManager::_CheckPrerequisite(void)
     return EID(SUCCESS);
 }
 
-int
+void
 VolumeManager::_ClearLock(void)
 {
     volumeEventLock.try_lock();

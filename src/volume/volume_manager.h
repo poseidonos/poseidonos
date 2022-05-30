@@ -100,7 +100,7 @@ public:
 private:
     int _LoadVolumes(void);
     int _CheckPrerequisite(void);
-    int _ClearLock(void);
+    void _ClearLock(void);
 
     bool initialized = false;
     bool stopped = false;
