@@ -166,14 +166,16 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(CREATE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
 
     VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
@@ -197,14 +199,16 @@ VolumeManager::Delete(std::string name)
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(DELETE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
     VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeDeleter.Do(name);
@@ -233,14 +237,16 @@ VolumeManager::Mount(std::string name, std::string subnqn)
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(MOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
     VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeMounter.Do(name, subnqn);
@@ -259,14 +265,16 @@ VolumeManager::Unmount(std::string name)
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(UNMOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
     VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeUnmounter.Do(name);
@@ -285,14 +293,16 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
     VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
@@ -311,14 +321,16 @@ VolumeManager::Rename(std::string oldName, std::string newName)
     eventLock = unique_lock<mutex>(volumeEventLock, std::defer_lock);
     detachLock = unique_lock<mutex>(volumeDetachLock, std::defer_lock);
 
-    ret = std::try_lock(volumeEventLock, volumeDetachLock);
+    ret = volumeDetachLock.try_lock();
 
-    if (ret != -1)
+    if (ret != true)
     {
         POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, oldName);
         
         return EID(VOL_MGR_BUSY);
     }
+
+    volumeEventLock.lock();
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeRenamer.Do(oldName, newName);
