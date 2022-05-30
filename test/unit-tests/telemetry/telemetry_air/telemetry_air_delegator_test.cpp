@@ -94,14 +94,16 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
     // Given: TelemetryAirDelegator, air_data
     TelemetryAirDelegator telAirDelegator {nullptr};
     auto& air_data = air::json("air_data");
+    auto copier = air::json_copy("air_data");
     int actual, expected = 0;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
     air::json_clear();
+    delete copier;
 }
 
 TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
@@ -111,14 +113,16 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
     auto& air_data = air::json("air_data");
     auto& empty_node = air::json("empty_node");
     air_data["PERF_ARR_VOL"] = {empty_node};
+    auto copier = air::json_copy("air_data");
     int actual, expected = 2;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns two(unexpected stop, err_data, exception path), Clear AIR data
     EXPECT_EQ(actual, expected);
     air::json_clear();
+    delete copier;
 }
 
 TEST(TelemetryAirDelegator, dataHandler_EndState)
@@ -127,14 +131,16 @@ TEST(TelemetryAirDelegator, dataHandler_EndState)
     TelemetryAirDelegator telAirDelegator {nullptr};
     auto& air_data = air::json("air_data");
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
+    auto copier = air::json_copy("air_data");
     int actual, expected = 1;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns one(normal stop, skip logic), Clear AIR data
     EXPECT_EQ(actual, expected);
     air::json_clear();
+    delete copier;
 }
 
 TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
@@ -173,10 +179,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     obj_write["target_name"] = {"reactor_0"};
     perf_arr_vol["objs"] = {obj_read, obj_write};
     air_data["PERF_ARR_VOL"] = {perf_arr_vol};
+    auto copier = air::json_copy("air_data");
     int actual, expected = 0;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
@@ -211,6 +218,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("interval"), "3");
     delete posMetricVector;
     air::json_clear();
+    delete copier;
 }
 
 TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
@@ -237,10 +245,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
     obj["period"] = {obj_period};
     lat_arr_vol_read["objs"] += {obj};
     air_data["LAT_ARR_VOL_READ"] = {lat_arr_vol_read};
+    auto copier = air::json_copy("air_data");
     int actual, expected = 0;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
@@ -259,6 +268,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
     delete posMetricVector;
     air::json_clear();
+    delete copier;
 }
 
 TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
@@ -285,10 +295,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
     obj["period"] = {obj_period};
     lat_arr_vol_write["objs"] += {obj};
     air_data["LAT_ARR_VOL_WRITE"] = {lat_arr_vol_write};
+    auto copier = air::json_copy("air_data");
     int actual, expected = 0;
 
     // When: Call dataHandler
-    actual = telAirDelegator.dataHandler(air_data);
+    actual = telAirDelegator.dataHandler(std::move(*copier));
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
@@ -307,6 +318,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
     delete posMetricVector;
     air::json_clear();
+    delete copier;
 }
 
 } // namespace pos
