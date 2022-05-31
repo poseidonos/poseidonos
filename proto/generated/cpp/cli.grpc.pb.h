@@ -152,6 +152,13 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ListArrayResponse>> PrepareAsyncListArray(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ListArrayResponse>>(PrepareAsyncListArrayRaw(context, request, cq));
     }
+    virtual ::grpc::Status ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc_cli::ArrayInfoResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>> AsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>>(AsyncArrayInfoRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>> PrepareAsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>>(PrepareAsyncArrayInfoRaw(context, request, cq));
+    }
     virtual ::grpc::Status MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc_cli::MountArrayResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::MountArrayResponse>> AsyncMountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::MountArrayResponse>>(AsyncMountArrayRaw(context, request, cq));
@@ -269,6 +276,12 @@ class PosCli final {
       #else
       virtual void ListArray(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest* request, ::grpc_cli::ListArrayResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest* request, ::grpc_cli::MountArrayResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest* request, ::grpc_cli::MountArrayResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -322,6 +335,8 @@ class PosCli final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::DeleteArrayResponse>* PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ListArrayResponse>* AsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ListArrayResponse>* PrepareAsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>* AsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>* PrepareAsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::MountArrayResponse>* AsyncMountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::MountArrayResponse>* PrepareAsyncMountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountArrayResponse>* AsyncUnmountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -442,6 +457,13 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ListArrayResponse>> PrepareAsyncListArray(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ListArrayResponse>>(PrepareAsyncListArrayRaw(context, request, cq));
     }
+    ::grpc::Status ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc_cli::ArrayInfoResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>> AsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>>(AsyncArrayInfoRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>> PrepareAsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>>(PrepareAsyncArrayInfoRaw(context, request, cq));
+    }
     ::grpc::Status MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc_cli::MountArrayResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::MountArrayResponse>> AsyncMountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::MountArrayResponse>>(AsyncMountArrayRaw(context, request, cq));
@@ -555,6 +577,12 @@ class PosCli final {
       #else
       void ListArray(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest* request, ::grpc_cli::ListArrayResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest* request, ::grpc_cli::MountArrayResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest* request, ::grpc_cli::MountArrayResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
@@ -610,6 +638,8 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteArrayResponse>* PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::ListArrayResponse>* AsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::ListArrayResponse>* PrepareAsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* AsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* PrepareAsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::MountArrayResponse>* AsyncMountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::MountArrayResponse>* PrepareAsyncMountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountArrayResponse>* AsyncUnmountArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountArrayRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -630,6 +660,7 @@ class PosCli final {
     const ::grpc::internal::RpcMethod rpcmethod_CreateArray_;
     const ::grpc::internal::RpcMethod rpcmethod_DeleteArray_;
     const ::grpc::internal::RpcMethod rpcmethod_ListArray_;
+    const ::grpc::internal::RpcMethod rpcmethod_ArrayInfo_;
     const ::grpc::internal::RpcMethod rpcmethod_MountArray_;
     const ::grpc::internal::RpcMethod rpcmethod_UnmountArray_;
   };
@@ -659,6 +690,7 @@ class PosCli final {
     virtual ::grpc::Status CreateArray(::grpc::ServerContext* context, const ::grpc_cli::CreateArrayRequest* request, ::grpc_cli::CreateArrayResponse* response);
     virtual ::grpc::Status DeleteArray(::grpc::ServerContext* context, const ::grpc_cli::DeleteArrayRequest* request, ::grpc_cli::DeleteArrayResponse* response);
     virtual ::grpc::Status ListArray(::grpc::ServerContext* context, const ::grpc_cli::ListArrayRequest* request, ::grpc_cli::ListArrayResponse* response);
+    virtual ::grpc::Status ArrayInfo(::grpc::ServerContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response);
     virtual ::grpc::Status MountArray(::grpc::ServerContext* context, const ::grpc_cli::MountArrayRequest* request, ::grpc_cli::MountArrayResponse* response);
     virtual ::grpc::Status UnmountArray(::grpc::ServerContext* context, const ::grpc_cli::UnmountArrayRequest* request, ::grpc_cli::UnmountArrayResponse* response);
   };
@@ -983,12 +1015,32 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ArrayInfo() {
+      ::grpc::Service::MarkMethodAsync(16);
+    }
+    ~WithAsyncMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestArrayInfo(::grpc::ServerContext* context, ::grpc_cli::ArrayInfoRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::ArrayInfoResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_MountArray() {
-      ::grpc::Service::MarkMethodAsync(16);
+      ::grpc::Service::MarkMethodAsync(17);
     }
     ~WithAsyncMethod_MountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -999,7 +1051,7 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestMountArray(::grpc::ServerContext* context, ::grpc_cli::MountArrayRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::MountArrayResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1008,7 +1060,7 @@ class PosCli final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_UnmountArray() {
-      ::grpc::Service::MarkMethodAsync(17);
+      ::grpc::Service::MarkMethodAsync(18);
     }
     ~WithAsyncMethod_UnmountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1019,10 +1071,10 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestUnmountArray(::grpc::ServerContext* context, ::grpc_cli::UnmountArrayRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::UnmountArrayResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_AutocreateArray<WithAsyncMethod_CreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_ListArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > AsyncService;
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_AutocreateArray<WithAsyncMethod_CreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -1776,6 +1828,53 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ArrayInfo() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response) { return this->ArrayInfo(context, request, response); }));}
+    void SetMessageAllocatorFor_ArrayInfo(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ArrayInfo(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ArrayInfo(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithCallbackMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1786,7 +1885,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(16,
+        MarkMethodCallback(17,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1798,9 +1897,9 @@ class PosCli final {
     void SetMessageAllocatorFor_MountArray(
         ::grpc::experimental::MessageAllocator< ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1833,7 +1932,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(17,
+        MarkMethodCallback(18,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1845,9 +1944,9 @@ class PosCli final {
     void SetMessageAllocatorFor_UnmountArray(
         ::grpc::experimental::MessageAllocator< ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(18);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(18);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1870,10 +1969,10 @@ class PosCli final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -2147,12 +2246,29 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ArrayInfo() {
+      ::grpc::Service::MarkMethodGeneric(16);
+    }
+    ~WithGenericMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_MountArray() {
-      ::grpc::Service::MarkMethodGeneric(16);
+      ::grpc::Service::MarkMethodGeneric(17);
     }
     ~WithGenericMethod_MountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2169,7 +2285,7 @@ class PosCli final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_UnmountArray() {
-      ::grpc::Service::MarkMethodGeneric(17);
+      ::grpc::Service::MarkMethodGeneric(18);
     }
     ~WithGenericMethod_UnmountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2501,12 +2617,32 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ArrayInfo() {
+      ::grpc::Service::MarkMethodRaw(16);
+    }
+    ~WithRawMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestArrayInfo(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_MountArray() {
-      ::grpc::Service::MarkMethodRaw(16);
+      ::grpc::Service::MarkMethodRaw(17);
     }
     ~WithRawMethod_MountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2517,7 +2653,7 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestMountArray(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -2526,7 +2662,7 @@ class PosCli final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_UnmountArray() {
-      ::grpc::Service::MarkMethodRaw(17);
+      ::grpc::Service::MarkMethodRaw(18);
     }
     ~WithRawMethod_UnmountArray() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2537,7 +2673,7 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestUnmountArray(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3149,6 +3285,44 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ArrayInfo() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ArrayInfo(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ArrayInfo(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ArrayInfo(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -3159,7 +3333,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(16,
+        MarkMethodRawCallback(17,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3197,7 +3371,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(17,
+        MarkMethodRawCallback(18,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3657,12 +3831,39 @@ class PosCli final {
     virtual ::grpc::Status StreamedListArray(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ListArrayRequest,::grpc_cli::ListArrayResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_ArrayInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ArrayInfo() {
+      ::grpc::Service::MarkMethodStreamed(16,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse>* streamer) {
+                       return this->StreamedArrayInfo(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ArrayInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedArrayInfo(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ArrayInfoRequest,::grpc_cli::ArrayInfoResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_MountArray : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_MountArray() {
-      ::grpc::Service::MarkMethodStreamed(16,
+      ::grpc::Service::MarkMethodStreamed(17,
         new ::grpc::internal::StreamedUnaryHandler<
           ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse>(
             [this](::grpc::ServerContext* context,
@@ -3689,7 +3890,7 @@ class PosCli final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_UnmountArray() {
-      ::grpc::Service::MarkMethodStreamed(17,
+      ::grpc::Service::MarkMethodStreamed(18,
         new ::grpc::internal::StreamedUnaryHandler<
           ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse>(
             [this](::grpc::ServerContext* context,
@@ -3710,9 +3911,9 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedUnmountArray(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::UnmountArrayRequest,::grpc_cli::UnmountArrayResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<Service > > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli

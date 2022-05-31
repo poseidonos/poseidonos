@@ -38,6 +38,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/CreateArray",
   "/grpc_cli.PosCli/DeleteArray",
   "/grpc_cli.PosCli/ListArray",
+  "/grpc_cli.PosCli/ArrayInfo",
   "/grpc_cli.PosCli/MountArray",
   "/grpc_cli.PosCli/UnmountArray",
 };
@@ -65,8 +66,9 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_CreateArray_(PosCli_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_DeleteArray_(PosCli_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ListArray_(PosCli_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MountArray_(PosCli_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UnmountArray_(PosCli_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ArrayInfo_(PosCli_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_MountArray_(PosCli_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UnmountArray_(PosCli_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -437,6 +439,29 @@ void PosCli::Stub::experimental_async::ListArray(::grpc::ClientContext* context,
   return result;
 }
 
+::grpc::Status PosCli::Stub::ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc_cli::ArrayInfoResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ArrayInfo_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ArrayInfo_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ArrayInfo_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* PosCli::Stub::PrepareAsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::ArrayInfoResponse, ::grpc_cli::ArrayInfoRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ArrayInfo_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* PosCli::Stub::AsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncArrayInfoRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status PosCli::Stub::MountArray(::grpc::ClientContext* context, const ::grpc_cli::MountArrayRequest& request, ::grpc_cli::MountArrayResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_MountArray_, context, request, response);
 }
@@ -647,6 +672,16 @@ PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[16],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::ArrayInfoRequest* req,
+             ::grpc_cli::ArrayInfoResponse* resp) {
+               return service->ArrayInfo(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[17],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
              ::grpc::ServerContext* ctx,
@@ -655,7 +690,7 @@ PosCli::Service::Service() {
                return service->MountArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[17],
+      PosCli_method_names[18],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -775,6 +810,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::ListArray(::grpc::ServerContext* context, const ::grpc_cli::ListArrayRequest* request, ::grpc_cli::ListArrayResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::ArrayInfo(::grpc::ServerContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response) {
   (void) context;
   (void) request;
   (void) response;

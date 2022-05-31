@@ -153,6 +153,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  ArrayInfo(ServerContext* context, const ArrayInfoRequest* request,
+                  ArrayInfoResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
   MountArray(ServerContext* context, const MountArrayRequest* request,
                   MountArrayResponse* reply) override
   {

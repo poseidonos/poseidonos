@@ -554,10 +554,11 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
             }
 
             IArrayInfo* info = CompInfo->arrayInfo;
+            grpc_cli::Array* array = reply->mutable_result()->add_data();
             if (info == nullptr)
             {
                 arrayStatus = "Fault";
-                reply->mutable_result()->mutable_data()->set_index(ARRAY_ERROR_INDEX);
+                array->set_index(ARRAY_ERROR_INDEX);
             }
             else
             {
@@ -565,24 +566,106 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
                 {
                     arrayStatus = "Mounted";
                 }
-                reply->mutable_result()->mutable_data()->set_index(info->GetIndex());
-                reply->mutable_result()->mutable_data()->set_dataraid(info->GetDataRaidType());
-                reply->mutable_result()->mutable_data()->set_write_through_enabled(info->IsWriteThroughEnabled());   
+                array->set_index(info->GetIndex());
+                array->set_dataraid(info->GetDataRaidType());
+                array->set_writethroughenabled(info->IsWriteThroughEnabled());   
             }
 
-            reply->mutable_result()->mutable_data()->set_name(arrayName);
-            reply->mutable_result()->mutable_data()->set_status(arrayStatus);
-            reply->mutable_result()->mutable_data()->set_createdatetime(createDatetime);
-            reply->mutable_result()->mutable_data()->set_updatedatetime(updateDatetime);
-            reply->mutable_result()->mutable_data()->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
-            reply->mutable_result()->mutable_data()->set_used(to_string(SpaceInfo::Used(arrayName)));
+            array->set_name(arrayName);
+            array->set_status(arrayStatus);
+            array->set_createdatetime(createDatetime);
+            array->set_updatedatetime(updateDatetime);
+            array->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
+            array->set_used(to_string(SpaceInfo::Used(arrayName)));
         }
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
+}
 
+grpc::Status
+CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, ArrayInfoResponse* reply)
+{
+    string arrayName = (request->param()).name();
+
+    if (arrayName == "")
+    {   
+        int event = EID(CLI_ARRAY_INFO_NO_ARRAY_NAME);
+        POS_TRACE_WARN(event, "");
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayInfo* arrayInfo = info->arrayInfo;
+    pos::IGCInfo* gc = info->gcInfo;
+
+    string state = arrayInfo->GetStateCtx()->ToStateType().ToString();
+    string situ = arrayInfo->GetStateCtx()->GetSituation().ToString();
+
+    grpc_cli::Array* array = reply->mutable_result()->mutable_data();
+    array->set_index(arrayInfo->GetIndex());
+    array->set_unique_id(arrayInfo->GetUniqueId());
+    array->set_name(arrayName);
+    array->set_state(state);
+    array->set_situation(situ);
+    array->set_createdatetime(arrayInfo->GetCreateDatetime());
+    array->set_updatedatetime(arrayInfo->GetUpdateDatetime());
+    array->set_rebuildingprogress(to_string(arrayInfo->GetRebuildingProgress()));
+    array->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
+    array->set_used(to_string(SpaceInfo::Used(arrayName)));
+    array->set_metaraid(arrayInfo->GetMetaRaidType());
+    array->set_dataraid(arrayInfo->GetDataRaidType());
+    array->set_writethroughenabled(arrayInfo->IsWriteThroughEnabled());
+
+    if (arrayInfo->GetState() >= ArrayStateEnum::NORMAL)
+    {
+        array->set_gcmode(_GetGCMode(gc, arrayName));
+    }
+
+    DeviceSet<string> nameSet = arrayInfo->GetDevNames();
+
+    if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    for (string name : nameSet.nvm)
+    {
+        grpc_cli::Device* device = array->add_devicelist();
+        device->set_type("BUFFER");
+        device->set_name(name);
+    }
+    for (string name : nameSet.data)
+    {
+        grpc_cli::Device* device = array->add_devicelist();
+        device->set_type("DATA");
+        device->set_name(name);
+    }
+    for (string name : nameSet.spares)
+    {
+        grpc_cli::Device* device = array->add_devicelist();
+        device->set_type("SPARE");
+        device->set_name(name);
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
 }
 
 grpc::Status
@@ -746,4 +829,49 @@ CommandProcessor::_SetPosInfo(grpc_cli::PosInfo *posInfo)
 {
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
     posInfo->set_version(version);
+}
+
+std::string
+CommandProcessor::_GetGCMode(pos::IGCInfo* gc, std::string arrayName)
+{
+    if (arrayName == "")
+    {
+        return "N/A";
+    }
+
+    int isEnabled = gc->IsEnabled();
+    if (0 != isEnabled)
+    {
+        return "N/A";
+    }
+
+    IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
+    GcCtx* gcCtx = iContextManager->GetGcCtx();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        return "N/A";
+    }
+
+    GcMode gcMode = gcCtx->GetCurrentGcMode();
+
+    std::string strGCMode;
+
+    if (gcMode == GcMode::MODE_URGENT_GC)
+    {
+        strGCMode = "urgent";
+    }
+    else if (gcMode == GcMode::MODE_NORMAL_GC)
+    {
+        strGCMode = "normal";
+    }
+    else
+    {
+        strGCMode = "none";
+    }
+
+    return strGCMode;
 }

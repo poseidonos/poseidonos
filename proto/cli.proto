@@ -70,12 +70,17 @@ service PosCli {
 	}
 	rpc DeleteArray (DeleteArrayRequest) returns (DeleteArrayResponse) {
 		option (google.api.http) = {
-      		post: "/v1/deletearray"
+      		post: "/v1/deletearray/"
     	};
 	}
 	rpc ListArray (ListArrayRequest) returns (ListArrayResponse) {
 		option (google.api.http) = {
       		post: "/v1/listarray"
+    	};
+	}
+	rpc ArrayInfo (ArrayInfoRequest) returns (ArrayInfoResponse) {
+		option (google.api.http) = {
+      		post: "/v1/arrayinfo"
     	};
 	}
 	rpc MountArray (MountArrayRequest) returns (MountArrayResponse) {
@@ -428,11 +433,28 @@ message Array {
 	string gcMode = 12;
 	string metaRaid = 13;
 	string dataRaid = 14;
-	bool write_through_enabled = 15;
+	bool writeThroughEnabled = 15;
 	repeated Device devicelist = 16;
 }
 
 message ListArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		repeated Array data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ArrayInfoRequest {
 	string command = 1;
 	string rid = 2;
 	string requestor = 3;
@@ -442,7 +464,7 @@ message ListArrayRequest {
 	Param param = 4;
 }
 
-message ListArrayResponse {
+message ArrayInfoResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
