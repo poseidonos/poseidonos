@@ -82,7 +82,7 @@ ListVolumeCommand::Execute(json& doc, string rid)
              "failed to list volume", GetPosInfo());
     }
 
-    IVolumeManager* volMgr =
+    IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
     int vol_cnt = 0;

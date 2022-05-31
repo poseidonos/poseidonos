@@ -50,6 +50,7 @@ public:
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
+    virtual int Unmount(int volId) = 0;
     virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
 

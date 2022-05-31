@@ -81,13 +81,13 @@ VolumeInfoCommand::Execute(json& doc, string rid)
                 GetPosInfo());
     }
 
-    IVolumeManager* volMgr =
+    IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
     if (volMgr == nullptr)
     {
         POS_TRACE_WARN(EID(VOL_NOT_FOUND),
-            "Failed to get an IVolumeManager instance."
+            "Failed to get an IVolumeInfoManager instance."
                 " array name: " + arrayName +
                 " volume name: "+ volumeName);
 
