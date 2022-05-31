@@ -169,7 +169,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(CREATE_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -199,7 +199,7 @@ VolumeManager::Delete(std::string name)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(DELETE_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(DELETE_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -234,7 +234,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(MOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(MOUNT_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -259,7 +259,7 @@ VolumeManager::Unmount(std::string name)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(UNMOUNT_VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(UNMOUNT_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -284,12 +284,10 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
-
-    volumeEventLock.lock();
 
     VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
@@ -311,7 +309,7 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(VOL_DEBUG_MSG), "fail try lock index : {} fail vol name: {}", ret, oldName);
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, oldName);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -419,7 +417,14 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
 void
 VolumeManager::DetachVolumes(void)
 {
-    volumeExceptionLock.lock();
+    while(true)
+    {
+        if (volumeExceptionLock.try_lock() == true)
+        {
+            break;
+        }
+        usleep(1000);
+    }
 
     VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     volumeDetacher.DoAll();
@@ -494,9 +499,6 @@ VolumeManager::_CheckPrerequisite(void)
 void
 VolumeManager::_ClearLock(void)
 {
-    volumeEventLock.try_lock();
-    volumeEventLock.unlock();
-
     volumeExceptionLock.try_lock();
     volumeExceptionLock.unlock();
 }
