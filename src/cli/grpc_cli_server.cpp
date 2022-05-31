@@ -15,6 +15,7 @@ using grpc_cli::PosCli;
 CommandProcessor* pc;
 
 class PosCliServiceImpl final : public PosCli::Service {
+  // System Commands
   grpc::Status
   SystemInfo(ServerContext* context, const SystemInfoRequest* request,
                   SystemInfoResponse* reply) override
@@ -51,6 +52,7 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  // Telemetry Commands
   grpc::Status
   StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
                   StartTelemetryResponse* reply) override
@@ -59,6 +61,15 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  grpc::Status
+  StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
+                  StopTelemetryResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
+    return status;
+  }
+
+  // Devel Commands
   grpc::Status
   ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
                   ResetEventWrrResponse* reply) override
@@ -87,17 +98,83 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
-  StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
-                  StopTelemetryResponse* reply) override
-  {
-    grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
-    return status;
-  }
-  grpc::Status
   UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
                   UpdateEventWrrResponse* reply) override
   {
     grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
+    
+    return status;
+  }
+
+  // Array Commands
+  grpc::Status
+  AddSpare(ServerContext* context, const AddSpareRequest* request,
+                  AddSpareResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteAddSpareCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  AutocreateArray(ServerContext* context, const AutocreateArrayRequest* request,
+                  AutocreateArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteAutocreateArrayCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  CreateArray(ServerContext* context, const CreateArrayRequest* request,
+                  CreateArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteCreateArrayCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
+                  DeleteArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteDeleteArrayCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  ListArray(ServerContext* context, const ListArrayRequest* request,
+                  ListArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteListArrayCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  MountArray(ServerContext* context, const MountArrayRequest* request,
+                  MountArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  RemoveSpare(ServerContext* context, const RemoveSpareRequest* request,
+                  RemoveSpareResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteRemoveSpareCommand(request, reply);
+    
+    return status;
+  }
+
+  grpc::Status
+  UnmountArray(ServerContext* context, const UnmountArrayRequest* request,
+                  UnmountArrayResponse* reply) override
+  {
+    grpc::Status status = pc->ExecuteUnmountArrayCommand(request, reply);
     
     return status;
   }

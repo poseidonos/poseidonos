@@ -5,7 +5,10 @@
 #include "src/cli/command_processor.h"
 
 #include "src/array/array.h"
+#include "src/array_mgmt/numa_awared_array_creation.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/mbr/mbr_info.h"
+#include "src/sys_info/space_info.h"
 #include "src/cli/request_handler.h"
 #include "src/cli/cli_server.h"
 #include "src/logger/logger.h"
@@ -14,6 +17,7 @@
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
+#include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
 
 CommandProcessor::CommandProcessor(void)
@@ -320,6 +324,356 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
+
+grpc::Status
+CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).array();
+    string devName = (request->param()).spare().at(0).devicename();
+
+    if (devName == "")
+    {
+        int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
+        POS_TRACE_WARN(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->AddDevice(arrayName, devName);
+    if (ret == 0)
+    {
+        int eventId = EID(CLI_ADD_DEVICE_SUCCESS);
+        POS_TRACE_INFO(eventId, "device_name:{}, array_name:{}", devName, arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
+CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* request, AutocreateArrayResponse* reply)
+{
+    vector<string> buffers;
+    string arrayName = (request->param()).name();
+    
+    string dataFt = (request->param()).raidtype();
+    if (dataFt == "")
+    {
+        dataFt = "RAID5";
+    }
+
+    string metaFt = "RAID10";
+    if (dataFt == "RAID0" || dataFt == "NONE")
+    {
+        metaFt = dataFt;
+    }
+
+    for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
+    {
+        buffers.push_back(buffer.devicename());
+    }
+
+    int dataCnt = 0;
+    dataCnt = (request->param()).numdata();
+    
+    int spareCnt = 0;
+    spareCnt = (request->param()).numspare();
+
+    NumaAwaredArrayCreation creationDelegate(buffers, dataCnt, spareCnt, DeviceManagerSingleton::Instance());
+    NumaAwaredArrayCreationResult res = creationDelegate.GetResult();
+
+    if (res.code != 0)
+    {
+        _SetEventStatus(res.code, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    // TODO(SRM): interactive cli to select from multiple-options.
+    int ret = array->Create(arrayName, res.options.front().devs, metaFt, dataFt);
+
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
+        int event = EID(CLI_AUTOCREATE_ARRAY_SUCCESS);
+        POS_TRACE_INFO(event, "");
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
+CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
+{
+    DeviceSet<string> nameSet;
+    string arrayName = (request->param()).name();
+    
+    string dataFt = (request->param()).raidtype();
+    if (dataFt == "")
+    {
+        dataFt = "RAID5";
+    }
+
+    string metaFt = "RAID10";
+    if (dataFt == "RAID0" || dataFt == "NONE")
+    {
+        metaFt = dataFt;
+    }
+
+    for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
+    {
+        nameSet.nvm.push_back(buffer.devicename());
+    }
+
+    for (const grpc_cli::DeviceNameList& data : (request->param()).data())
+    {
+        nameSet.data.push_back(data.devicename());
+    }
+
+    for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
+    {
+        nameSet.spares.push_back(spare.devicename());
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Create(arrayName, nameSet, metaFt, dataFt);
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
+CommandProcessor::ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply)
+{
+    NvmfTarget* nvmfTarget = NvmfTargetSingleton::Instance();
+    string arrayName = (request->param()).name();
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Delete(arrayName);
+
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    bool deleteDone = nvmfTarget->DeletePosBdevAll(arrayName);
+
+    if (false == deleteDone)
+    {
+        _SetEventStatus(EID(IONVMF_VOL_DELETE_TIMEOUT),
+            reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply)
+{
+    std::vector<ArrayBootRecord> abrList;
+    int result = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
+
+    if (result != 0)
+    {
+        if (result == EID(MBR_DATA_NOT_FOUND))
+        {
+            result = EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS);
+            _SetEventStatus(result, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int result = EID(CLI_LIST_ARRAY_FAILURE);
+            POS_TRACE_WARN(result, "");
+            _SetEventStatus(result, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    if (abrList.empty())
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        JsonArray jsonArrayList("arrayList");
+        for (const auto& abr : abrList)
+        {
+            string arrayName(abr.arrayName);
+            string createDatetime(abr.createDatetime);
+            string updateDatetime(abr.updateDatetime);
+            string arrayStatus(DEFAULT_ARRAY_STATUS);
+
+            ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
+            if (CompInfo == nullptr)
+            {
+                POS_TRACE_ERROR(EID(ARRAY_MGR_DEBUG_MSG),
+                    "Failed to list array"
+                    " because of failing to get componentsInfo"
+                    " with given array name. ArrayName: {}", arrayName);
+                _SetEventStatus(EID(ARRAY_MGR_DEBUG_MSG), reply->mutable_result()->mutable_status());
+                _SetPosInfo(reply->mutable_info());
+                continue;
+            }
+
+            IArrayInfo* info = CompInfo->arrayInfo;
+            if (info == nullptr)
+            {
+                arrayStatus = "Fault";
+                reply->mutable_result()->mutable_data()->set_index(ARRAY_ERROR_INDEX);
+            }
+            else
+            {
+                if (info->GetState() >= ArrayStateEnum::NORMAL)
+                {
+                    arrayStatus = "Mounted";
+                }
+                reply->mutable_result()->mutable_data()->set_index(info->GetIndex());
+                reply->mutable_result()->mutable_data()->set_dataraid(info->GetDataRaidType());
+                reply->mutable_result()->mutable_data()->set_write_through_enabled(info->IsWriteThroughEnabled());   
+            }
+
+            reply->mutable_result()->mutable_data()->set_name(arrayName);
+            reply->mutable_result()->mutable_data()->set_status(arrayStatus);
+            reply->mutable_result()->mutable_data()->set_createdatetime(createDatetime);
+            reply->mutable_result()->mutable_data()->set_updatedatetime(updateDatetime);
+            reply->mutable_result()->mutable_data()->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
+            reply->mutable_result()->mutable_data()->set_used(to_string(SpaceInfo::Used(arrayName)));
+        }
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+
+}
+
+grpc::Status
+CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply)
+{
+    string arrayName = (request->param()).name();
+    bool isWTenabled = (request->param()).enable_write_through();
+    
+    if (isWTenabled == false)
+    {
+        bool isWTenabledAtConfig = false;
+        int ret = ConfigManagerSingleton::Instance()->GetValue("write_through", "enable",
+            &isWTenabledAtConfig, ConfigType::CONFIG_TYPE_BOOL);
+        if (ret == SUCCESS)
+        {
+            if (isWTenabledAtConfig == true)
+            {
+                isWTenabled = true;
+                POS_TRACE_WARN(EID(MOUNT_ARRAY_DEBUG_MSG), "Write through mode is forcibly activated by config");
+            }
+        }
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Mount(arrayName, isWTenabled);
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, RemoveSpareResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).array();
+    string devName = (request->param()).spare().at(0).devicename();
+
+    if (devName == "")
+    {
+        int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
+        POS_TRACE_WARN(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->RemoveDevice(arrayName, devName);
+    if (ret == 0)
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
+CommandProcessor::ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply)
+{
+    string arrayName = (request->param()).name();
+
+    IArrayMgmt* array =  ArrayMgr();
+    int ret = array->Unmount(arrayName);
+    if (ret != 0)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 
 pos::BackendEvent
 CommandProcessor::_GetEventId(std::string eventName)

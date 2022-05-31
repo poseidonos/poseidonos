@@ -38,6 +38,8 @@
 #include <string>
 
 #define RESET_EVENT_WRR_DEFAULT_WEIGHT 20
+#define DEFAULT_ARRAY_STATUS "Unmounted"
+#define ARRAY_ERROR_INDEX -1
 
 using grpc::Status;
 using grpc::StatusCode;
@@ -62,6 +64,22 @@ using grpc_cli::StopRebuildingRequest;
 using grpc_cli::StopRebuildingResponse;
 using grpc_cli::UpdateEventWrrRequest;
 using grpc_cli::UpdateEventWrrResponse;
+using grpc_cli::AddSpareRequest;
+using grpc_cli::AddSpareResponse;
+using grpc_cli::AutocreateArrayRequest;
+using grpc_cli::AutocreateArrayResponse;
+using grpc_cli::CreateArrayRequest;
+using grpc_cli::CreateArrayResponse;
+using grpc_cli::DeleteArrayRequest;
+using grpc_cli::DeleteArrayResponse;
+using grpc_cli::ListArrayRequest;
+using grpc_cli::ListArrayResponse;
+using grpc_cli::MountArrayRequest;
+using grpc_cli::MountArrayResponse;
+using grpc_cli::RemoveSpareRequest;
+using grpc_cli::RemoveSpareResponse;
+using grpc_cli::UnmountArrayRequest;
+using grpc_cli::UnmountArrayResponse;
 
 class CommandProcessor
 {
@@ -69,16 +87,32 @@ public:
     CommandProcessor(void);
     ~CommandProcessor(void);
     void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
+
+    // System Commands
     grpc::Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
     grpc::Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
     grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
+    
+    // Telemetry Commands
     grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
     grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
+    
+    // Devel Commands
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
     grpc::Status ExecuteResetMbrCommand(const ResetMbrRequest* request,ResetMbrResponse* reply);
     grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
     grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
+
+    // Array Commands
+    grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
+    grpc::Status ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* request, AutocreateArrayResponse* reply);
+    grpc::Status ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply);
+    grpc::Status ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply);
+    grpc::Status ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply);
+    grpc::Status ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply);
+    grpc::Status ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, RemoveSpareResponse* reply);
+    grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
 
 private:
     bool _isPosTerminating;
