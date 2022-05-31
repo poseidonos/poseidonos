@@ -34,6 +34,7 @@
 
 #include <string>
 
+#include "src/volume/i_volume_checker.h"
 #include "src/volume/volume_list.h"
 #include "src/volume/volume_base.h"
 #include "src/qos/qos_common.h"
@@ -42,7 +43,7 @@ namespace pos
 {
 class VolumeBase;
 
-class IVolumeInfoManager
+class IVolumeInfoManager : public IVolumeChecker
 {
 public:
     virtual int GetVolumeName(int volId, std::string& volName) = 0;
@@ -50,7 +51,6 @@ public:
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
     virtual int GetVolumeReplicationMode(int volId) = 0;
-    virtual int CheckVolumeValidity(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;
     virtual VolumeList* GetVolumeList(void) = 0;
@@ -60,6 +60,9 @@ public:
     virtual VolumeBase* GetVolume(int volId) = 0;
 
     virtual std::string GetArrayName(void) = 0;
+
+    virtual int CheckVolumeValidity(std::string name) = 0;
+    virtual int CheckVolumeValidity(int volId) = 0;
 };
 
 } // namespace pos
