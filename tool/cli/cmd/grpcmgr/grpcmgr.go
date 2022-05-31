@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+const timeout = 10
+
 func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -20,7 +22,7 @@ func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.SystemInfo(ctx, req)
@@ -41,7 +43,7 @@ func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.SystemStop(ctx, req)
@@ -63,7 +65,7 @@ func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPr
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.GetSystemProperty(ctx, req)
@@ -85,7 +87,7 @@ func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPr
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.SetSystemProperty(ctx, req)
@@ -106,7 +108,7 @@ func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.StartTelemetry(ctx, req)
@@ -128,7 +130,7 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.StopTelemetry(ctx, req)
@@ -150,7 +152,7 @@ func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrr
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.ResetEventWrr(ctx, req)
@@ -171,7 +173,7 @@ func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.ResetMbr(ctx, req)
@@ -192,7 +194,7 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.StopRebuilding(ctx, req)
@@ -213,7 +215,7 @@ func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrRespons
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.UpdateEventWrr(ctx, req)
@@ -234,7 +236,7 @@ func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.AddSpare(ctx, req)
@@ -255,7 +257,7 @@ func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.AutocreateArray(ctx, req)
@@ -276,7 +278,7 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.CreateArray(ctx, req)
@@ -297,7 +299,7 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.DeleteArray(ctx, req)
@@ -318,7 +320,7 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.ListArray(ctx, req)
@@ -339,7 +341,7 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.MountArray(ctx, req)
@@ -360,7 +362,7 @@ func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.RemoveSpare(ctx, req)
@@ -381,7 +383,7 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.UnmountArray(ctx, req)
@@ -402,7 +404,7 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
 	defer cancel()
 
 	res, err := c.ArrayInfo(ctx, req)
