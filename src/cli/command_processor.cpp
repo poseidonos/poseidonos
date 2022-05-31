@@ -22,6 +22,8 @@
 
 CommandProcessor::CommandProcessor(void)
 {
+    google::protobuf::util::JsonPrintOptions options;
+    options.always_print_primitive_fields = true;
 }
 
 // Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
@@ -554,7 +556,8 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
             }
 
             IArrayInfo* info = CompInfo->arrayInfo;
-            grpc_cli::Array* array = reply->mutable_result()->add_data();
+            grpc_cli::Array* array =
+                reply->mutable_result()->mutable_data()->add_arraylist();
             if (info == nullptr)
             {
                 arrayStatus = "Fault";
