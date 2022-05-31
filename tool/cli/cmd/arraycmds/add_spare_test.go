@@ -29,8 +29,7 @@ func TestAddSpareCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"command":"ADDDEVICE","rid":"fromCLI","param":{"array":"Array0",` +
-		`"spare":[{"deviceName":"device0"}]}}`
+	expected := `{"Request": {"command":"ADDDEVICE", "rid":"8b989ad0-e083-11ec-a2a8-b42e99ff989b", "requestor":"cli", "param":{"array":"Array0", "spare":[{"deviceName":"device0"}]}} }`
 
 	if expected != string(out) {
 		t.Errorf("Expected: %q Output: %q\n", expected, string(out))
