@@ -54,7 +54,7 @@ public:
     virtual ~TelemetryAirDelegator(void);
     void SetState(State state);
     void RegisterAirEvent(void);
-    std::function<int(const air::JSONdoc& data)> dataHandler;
+    std::function<int(const air::JSONdoc&& data)> dataHandler;
 
 private:
     TelemetryPublisher* telPub{nullptr};
