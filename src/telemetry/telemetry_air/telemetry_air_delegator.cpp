@@ -127,7 +127,7 @@ AddLatencyMetric(POSMetricVector* posMetricVector,
 TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
 : telPub(telPub)
 {
-    dataHandler = [this](const air::JSONdoc& data) -> int {
+    dataHandler = [this](const air::JSONdoc&& data) -> int {
         const std::lock_guard<std::mutex> lock(this->mutex);
         POSMetricVector* posMetricVector{nullptr};
         try
