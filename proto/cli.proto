@@ -484,7 +484,7 @@ message MountArrayRequest {
 	string requestor = 3;
 	message Param {
 			string name = 1;
-			optional bool enable_write_through = 2;
+			optional bool enableWriteThrough = 2;
 	}
 	Param param = 4;
 }

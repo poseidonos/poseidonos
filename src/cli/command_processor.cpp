@@ -675,7 +675,7 @@ grpc::Status
 CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply)
 {
     string arrayName = (request->param()).name();
-    bool isWTenabled = (request->param()).enable_write_through();
+    bool isWTenabled = (request->param()).enablewritethrough();
     
     if (isWTenabled == false)
     {

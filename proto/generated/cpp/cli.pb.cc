@@ -994,7 +994,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArrayInfoResponseDefaultTypeInt
 constexpr MountArrayRequest_Param::MountArrayRequest_Param(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , enable_write_through_(false){}
+  , enablewritethrough_(false){}
 struct MountArrayRequest_ParamDefaultTypeInternal {
   constexpr MountArrayRequest_ParamDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1671,7 +1671,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::MountArrayRequest_Param, name_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::MountArrayRequest_Param, enable_write_through_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::MountArrayRequest_Param, enablewritethrough_),
   ~0u,
   0,
   ~0u,  // no _has_bits_
@@ -2057,80 +2057,80 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "ponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Po"
   "sInfo\032I\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_c"
   "li.Status\022\035\n\004data\030\002 \001(\0132\017.grpc_cli.Array"
-  "\"\311\001\n\021MountArrayRequest\022\017\n\007command\030\001 \001(\t\022"
+  "\"\305\001\n\021MountArrayRequest\022\017\n\007command\030\001 \001(\t\022"
   "\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0220\n\005param"
   "\030\004 \001(\0132!.grpc_cli.MountArrayRequest.Para"
-  "m\032Q\n\005Param\022\014\n\004name\030\001 \001(\t\022!\n\024enable_write"
-  "_through\030\002 \001(\010H\000\210\001\001B\027\n\025_enable_write_thr"
-  "ough\"\264\001\n\022MountArrayResponse\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc"
-  "_cli.MountArrayResponse.Result\022\037\n\004info\030\004"
-  " \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006sta"
-  "tus\030\001 \001(\0132\020.grpc_cli.Status\"\221\001\n\023UnmountA"
-  "rrayRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001("
-  "\t\022\021\n\trequestor\030\003 \001(\t\0222\n\005param\030\004 \001(\0132#.gr"
-  "pc_cli.UnmountArrayRequest.Param\032\025\n\005Para"
-  "m\022\014\n\004name\030\001 \001(\t\"\270\001\n\024UnmountArrayResponse"
-  "\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result"
-  "\030\003 \001(\0132%.grpc_cli.UnmountArrayResponse.R"
-  "esult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*"
-  "\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Stat"
-  "us2\362\016\n\006PosCli\022_\n\nSystemInfo\022\033.grpc_cli.S"
-  "ystemInfoRequest\032\034.grpc_cli.SystemInfoRe"
-  "sponse\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSystem"
-  "Stop\022\033.grpc_cli.SystemStopRequest\032\034.grpc"
-  "_cli.SystemStopResponse\"\026\202\323\344\223\002\020\022\016/v1/sys"
-  "temstop\022}\n\021GetSystemProperty\022\".grpc_cli."
-  "GetSystemPropertyRequest\032#.grpc_cli.GetS"
-  "ystemPropertyResponse\"\037\202\323\344\223\002\031\022\027/v1/get_s"
-  "ystem_property\022\205\001\n\021SetSystemProperty\022\".g"
-  "rpc_cli.SetSystemPropertyRequest\032#.grpc_"
-  "cli.SetSystemPropertyResponse\"\'\202\323\344\223\002!\022\037/"
-  "v1/set_system_property/{level}\022p\n\016StartT"
-  "elemetry\022\037.grpc_cli.StartTelemetryReques"
-  "t\032 .grpc_cli.StartTelemetryResponse\"\033\202\323\344"
-  "\223\002\025\022\023/v1/start_telemetry\022l\n\rStopTelemetr"
-  "y\022\036.grpc_cli.StopTelemetryRequest\032\037.grpc"
-  "_cli.StopTelemetryResponse\"\032\202\323\344\223\002\024\022\022/v1/"
-  "stop_telemetry\022P\n\rResetEventWrr\022\036.grpc_c"
-  "li.ResetEventWrrRequest\032\037.grpc_cli.Reset"
-  "EventWrrResponse\022A\n\010ResetMbr\022\031.grpc_cli."
-  "ResetMbrRequest\032\032.grpc_cli.ResetMbrRespo"
-  "nse\022S\n\016StopRebuilding\022\037.grpc_cli.StopReb"
-  "uildingRequest\032 .grpc_cli.StopRebuilding"
-  "Response\022S\n\016UpdateEventWrr\022\037.grpc_cli.Up"
-  "dateEventWrrRequest\032 .grpc_cli.UpdateEve"
-  "ntWrrResponse\022W\n\010AddSpare\022\031.grpc_cli.Add"
-  "SpareRequest\032\032.grpc_cli.AddSpareResponse"
-  "\"\024\202\323\344\223\002\016\"\014/v1/addspare\022c\n\013RemoveSpare\022\034."
-  "grpc_cli.RemoveSpareRequest\032\035.grpc_cli.R"
-  "emoveSpareResponse\"\027\202\323\344\223\002\021\"\017/v1/removesp"
-  "are\022s\n\017AutocreateArray\022 .grpc_cli.Autocr"
-  "eateArrayRequest\032!.grpc_cli.AutocreateAr"
-  "rayResponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray"
-  "\022c\n\013CreateArray\022\034.grpc_cli.CreateArrayRe"
-  "quest\032\035.grpc_cli.CreateArrayResponse\"\027\202\323"
-  "\344\223\002\021\"\017/v1/createarray\022d\n\013DeleteArray\022\034.g"
-  "rpc_cli.DeleteArrayRequest\032\035.grpc_cli.De"
-  "leteArrayResponse\"\030\202\323\344\223\002\022\"\020/v1/deletearr"
-  "ay/\022[\n\tListArray\022\032.grpc_cli.ListArrayReq"
-  "uest\032\033.grpc_cli.ListArrayResponse\"\025\202\323\344\223\002"
-  "\017\"\r/v1/listarray\022[\n\tArrayInfo\022\032.grpc_cli"
-  ".ArrayInfoRequest\032\033.grpc_cli.ArrayInfoRe"
-  "sponse\"\025\202\323\344\223\002\017\"\r/v1/arrayinfo\022_\n\nMountAr"
-  "ray\022\033.grpc_cli.MountArrayRequest\032\034.grpc_"
-  "cli.MountArrayResponse\"\026\202\323\344\223\002\020\"\016/v1/moun"
-  "tarray\022g\n\014UnmountArray\022\035.grpc_cli.Unmoun"
-  "tArrayRequest\032\036.grpc_cli.UnmountArrayRes"
-  "ponse\"\030\202\323\344\223\002\022\"\020/v1/unmountarrayB\tZ\007cli/a"
-  "pib\006proto3"
+  "m\032M\n\005Param\022\014\n\004name\030\001 \001(\t\022\037\n\022enableWriteT"
+  "hrough\030\002 \001(\010H\000\210\001\001B\025\n\023_enableWriteThrough"
+  "\"\264\001\n\022MountArrayResponse\022\017\n\007command\030\001 \001(\t"
+  "\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli"
+  ".MountArrayResponse.Result\022\037\n\004info\030\004 \001(\013"
+  "2\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030"
+  "\001 \001(\0132\020.grpc_cli.Status\"\221\001\n\023UnmountArray"
+  "Request\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n"
+  "\trequestor\030\003 \001(\t\0222\n\005param\030\004 \001(\0132#.grpc_c"
+  "li.UnmountArrayRequest.Param\032\025\n\005Param\022\014\n"
+  "\004name\030\001 \001(\t\"\270\001\n\024UnmountArrayResponse\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030\003 \001"
+  "(\0132%.grpc_cli.UnmountArrayResponse.Resul"
+  "t\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Re"
+  "sult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status2\362"
+  "\016\n\006PosCli\022_\n\nSystemInfo\022\033.grpc_cli.Syste"
+  "mInfoRequest\032\034.grpc_cli.SystemInfoRespon"
+  "se\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSystemStop"
+  "\022\033.grpc_cli.SystemStopRequest\032\034.grpc_cli"
+  ".SystemStopResponse\"\026\202\323\344\223\002\020\022\016/v1/systems"
+  "top\022}\n\021GetSystemProperty\022\".grpc_cli.GetS"
+  "ystemPropertyRequest\032#.grpc_cli.GetSyste"
+  "mPropertyResponse\"\037\202\323\344\223\002\031\022\027/v1/get_syste"
+  "m_property\022\205\001\n\021SetSystemProperty\022\".grpc_"
+  "cli.SetSystemPropertyRequest\032#.grpc_cli."
+  "SetSystemPropertyResponse\"\'\202\323\344\223\002!\022\037/v1/s"
+  "et_system_property/{level}\022p\n\016StartTelem"
+  "etry\022\037.grpc_cli.StartTelemetryRequest\032 ."
+  "grpc_cli.StartTelemetryResponse\"\033\202\323\344\223\002\025\022"
+  "\023/v1/start_telemetry\022l\n\rStopTelemetry\022\036."
+  "grpc_cli.StopTelemetryRequest\032\037.grpc_cli"
+  ".StopTelemetryResponse\"\032\202\323\344\223\002\024\022\022/v1/stop"
+  "_telemetry\022P\n\rResetEventWrr\022\036.grpc_cli.R"
+  "esetEventWrrRequest\032\037.grpc_cli.ResetEven"
+  "tWrrResponse\022A\n\010ResetMbr\022\031.grpc_cli.Rese"
+  "tMbrRequest\032\032.grpc_cli.ResetMbrResponse\022"
+  "S\n\016StopRebuilding\022\037.grpc_cli.StopRebuild"
+  "ingRequest\032 .grpc_cli.StopRebuildingResp"
+  "onse\022S\n\016UpdateEventWrr\022\037.grpc_cli.Update"
+  "EventWrrRequest\032 .grpc_cli.UpdateEventWr"
+  "rResponse\022W\n\010AddSpare\022\031.grpc_cli.AddSpar"
+  "eRequest\032\032.grpc_cli.AddSpareResponse\"\024\202\323"
+  "\344\223\002\016\"\014/v1/addspare\022c\n\013RemoveSpare\022\034.grpc"
+  "_cli.RemoveSpareRequest\032\035.grpc_cli.Remov"
+  "eSpareResponse\"\027\202\323\344\223\002\021\"\017/v1/removespare\022"
+  "s\n\017AutocreateArray\022 .grpc_cli.Autocreate"
+  "ArrayRequest\032!.grpc_cli.AutocreateArrayR"
+  "esponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray\022c\n\013"
+  "CreateArray\022\034.grpc_cli.CreateArrayReques"
+  "t\032\035.grpc_cli.CreateArrayResponse\"\027\202\323\344\223\002\021"
+  "\"\017/v1/createarray\022d\n\013DeleteArray\022\034.grpc_"
+  "cli.DeleteArrayRequest\032\035.grpc_cli.Delete"
+  "ArrayResponse\"\030\202\323\344\223\002\022\"\020/v1/deletearray/\022"
+  "[\n\tListArray\022\032.grpc_cli.ListArrayRequest"
+  "\032\033.grpc_cli.ListArrayResponse\"\025\202\323\344\223\002\017\"\r/"
+  "v1/listarray\022[\n\tArrayInfo\022\032.grpc_cli.Arr"
+  "ayInfoRequest\032\033.grpc_cli.ArrayInfoRespon"
+  "se\"\025\202\323\344\223\002\017\"\r/v1/arrayinfo\022_\n\nMountArray\022"
+  "\033.grpc_cli.MountArrayRequest\032\034.grpc_cli."
+  "MountArrayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarr"
+  "ay\022g\n\014UnmountArray\022\035.grpc_cli.UnmountArr"
+  "ayRequest\032\036.grpc_cli.UnmountArrayRespons"
+  "e\"\030\202\323\344\223\002\022\"\020/v1/unmountarrayB\tZ\007cli/apib\006"
+  "proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 9250, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  false, false, 9246, descriptor_table_protodef_cli_2eproto, "cli.proto", 
   &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 78,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
@@ -21519,7 +21519,7 @@ void ArrayInfoResponse::InternalSwap(ArrayInfoResponse* other) {
 class MountArrayRequest_Param::_Internal {
  public:
   using HasBits = decltype(std::declval<MountArrayRequest_Param>()._has_bits_);
-  static void set_has_enable_write_through(HasBits* has_bits) {
+  static void set_has_enablewritethrough(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
@@ -21539,13 +21539,13 @@ MountArrayRequest_Param::MountArrayRequest_Param(const MountArrayRequest_Param& 
     name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
       GetArena());
   }
-  enable_write_through_ = from.enable_write_through_;
+  enablewritethrough_ = from.enablewritethrough_;
   // @@protoc_insertion_point(copy_constructor:grpc_cli.MountArrayRequest.Param)
 }
 
 void MountArrayRequest_Param::SharedCtor() {
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-enable_write_through_ = false;
+enablewritethrough_ = false;
 }
 
 MountArrayRequest_Param::~MountArrayRequest_Param() {
@@ -21576,7 +21576,7 @@ void MountArrayRequest_Param::Clear() {
   (void) cached_has_bits;
 
   name_.ClearToEmpty();
-  enable_write_through_ = false;
+  enablewritethrough_ = false;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -21598,11 +21598,11 @@ const char* MountArrayRequest_Param::_InternalParse(const char* ptr, ::PROTOBUF_
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool enable_write_through = 2;
+      // bool enableWriteThrough = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_enable_write_through(&has_bits);
-          enable_write_through_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _Internal::set_has_enablewritethrough(&has_bits);
+          enablewritethrough_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -21645,10 +21645,10 @@ failure:
         1, this->_internal_name(), target);
   }
 
-  // bool enable_write_through = 2;
-  if (_internal_has_enable_write_through()) {
+  // bool enableWriteThrough = 2;
+  if (_internal_has_enablewritethrough()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_enable_write_through(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_enablewritethrough(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -21674,7 +21674,7 @@ size_t MountArrayRequest_Param::ByteSizeLong() const {
         this->_internal_name());
   }
 
-  // bool enable_write_through = 2;
+  // bool enableWriteThrough = 2;
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     total_size += 1 + 1;
@@ -21714,8 +21714,8 @@ void MountArrayRequest_Param::MergeFrom(const MountArrayRequest_Param& from) {
   if (from.name().size() > 0) {
     _internal_set_name(from._internal_name());
   }
-  if (from._internal_has_enable_write_through()) {
-    _internal_set_enable_write_through(from._internal_enable_write_through());
+  if (from._internal_has_enablewritethrough()) {
+    _internal_set_enablewritethrough(from._internal_enablewritethrough());
   }
 }
 
@@ -21742,7 +21742,7 @@ void MountArrayRequest_Param::InternalSwap(MountArrayRequest_Param* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(enable_write_through_, other->enable_write_through_);
+  swap(enablewritethrough_, other->enablewritethrough_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata MountArrayRequest_Param::GetMetadata() const {
