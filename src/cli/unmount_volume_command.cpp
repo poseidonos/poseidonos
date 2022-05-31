@@ -74,18 +74,6 @@ UnmountVolumeCommand::Execute(json& doc, string rid)
                  "failed to unmount volume: " + volName, GetPosInfo());
         }
 
-        IArrayInfo* array = info->arrayInfo;
-        ArrayStateType arrayState = array->GetState();
-        if (arrayState == ArrayStateEnum::BROKEN)
-        {
-            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
-            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
-                arrayName, arrayState.ToString());
-
-            return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
-                 "failed to unmount volume: " + volName, GetPosInfo());
-        }
-
         if (volMgr != nullptr)
         {
             ret = volMgr->Unmount(volName);
