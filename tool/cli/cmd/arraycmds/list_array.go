@@ -1,16 +1,17 @@
 package arraycmds
 
 import (
-	"encoding/json"
 	"fmt"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 //TODO(mj): function for --detail flag needs to be implemented.
@@ -38,42 +39,42 @@ Example 2 (listing a specific array):
 		// TODO(mj): Currently, ARRAYLIST command sends ARRAYINFO command to the server
 		// when an array is specified.
 		// Those commands will be merged later.
-		var (
-			command = ""
-			req     = messages.Request{}
-		)
 
+		// TODO(mj): ArrayInfo command will be implemented.
 		if list_array_arrayName != "" {
-
-			command = "ARRAYINFO"
-
-			param := messages.ListArrayParam{
-				ARRAYNAME: list_array_arrayName,
-			}
-
-			req = messages.BuildReqWithParam(command, globals.GenerateUUID(), param)
-
-		} else {
-			command = "LISTARRAY"
-
-			req = messages.Request{
-				RID:       globals.GenerateUUID(),
-				COMMAND:   command,
-				REQUESTOR: "cli",
-			}
-
 		}
 
-		reqJSON, err := json.Marshal(req)
+		command := "LISTARRAY"
+
+		uuid := globals.GenerateUUID()
+		req := &pb.ListArrayRequest{Command: command, Rid: uuid, Requestor: "cli"}
+
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendListArray(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
