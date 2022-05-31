@@ -103,11 +103,12 @@ type SetSystemPropReqParam struct {
 
 // Volume request params
 type CreateVolumeParam struct {
-	VOLUMENAME   string `json:"name"`
-	ARRAYNAME    string `json:"array"`
-	VOLUMESIZE   uint64 `json:"size"`
-	MAXIOPS      int    `json:"maxiops,omitempty"`
-	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
+	VOLUMENAME    string `json:"name"`
+	ARRAYNAME     string `json:"array"`
+	VOLUMESIZE    uint64 `json:"size"`
+	MAXIOPS       int    `json:"maxiops,omitempty"`
+	MAXBANDWIDTH  int    `json:"maxbw,omitempty"`
+	CHECKWALVOL   bool   `json:"checkwalvol"`
 }
 
 type DeleteVolumeParam struct {

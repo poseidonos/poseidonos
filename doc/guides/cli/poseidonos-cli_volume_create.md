@@ -9,11 +9,11 @@ Create a volume from an array in PoseidonOS.
 
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName 
-	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth]
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--checkwalvol]
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
-	--size 1024GB --maxiops 1000 --maxbw 100GB/s
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s --checkwalvol
           
 
 ```
@@ -24,6 +24,7 @@ poseidonos-cli volume create [flags]
 
 ```
   -a, --array-name string    The name of the array where the volume is created from.
+      --checkwalvol          Create user data volume.
   -h, --help                 help for create
       --maxbw int            The maximum bandwidth for the volume in MB/s.
       --maxiops int          The maximum IOPS for the volume in Kilo.

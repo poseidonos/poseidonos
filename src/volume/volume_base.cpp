@@ -41,26 +41,28 @@
 namespace pos
 {
 
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte)
+VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
+    VolumeAttribute volumeAttribute)
 {
     array = arrayName;
     arrayId = arrayIdx;
     name = volName;
     uuid = "";
-    attribute = VolumeAttribute::UserData;
+    attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", name, totalSize);
 }
 
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
+VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
+    uint64_t _maxiops, uint64_t _maxbw, VolumeAttribute volumeAttribute)
 {
     array = arrayName;
     arrayId = arrayIdx;
     name = volName;
     uuid = inputUuid;
-    attribute = VolumeAttribute::UserData;
+    attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     maxiops = _maxiops;

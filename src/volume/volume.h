@@ -42,12 +42,14 @@ namespace pos
 class Volume : public VolumeBase
 {
 public:
-    Volume(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte)
-    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte)
+    Volume(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
+        VolumeAttribute volumeAttribute = VolumeAttribute::UserData)
+    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte, volumeAttribute)
     {
     }
-    Volume(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
-    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, maxbw)
+    Volume(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte,
+        uint64_t maxiops, uint64_t maxbw, VolumeAttribute volumeAttribute = VolumeAttribute::UserData)
+    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, maxbw, volumeAttribute)
     {
     }
     ~Volume(void) override
