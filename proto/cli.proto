@@ -7,6 +7,7 @@ package grpc_cli;
 option go_package = "cli/api";
 
 service PosCli {
+	// System Commands
 	rpc SystemInfo (SystemInfoRequest) returns (SystemInfoResponse) {
 		option (google.api.http) = {
       		get: "/v1/systeminfo"
@@ -22,12 +23,13 @@ service PosCli {
       		get: "/v1/get_system_property"
     	};
 	}
-
 	rpc SetSystemProperty (SetSystemPropertyRequest) returns (SetSystemPropertyResponse) {
 		option (google.api.http) = {
       		get: "/v1/set_system_property/{level}"
     	};
 	}
+
+	// Telemetry Commands
 	rpc StartTelemetry (StartTelemetryRequest) returns (StartTelemetryResponse) {
 		option (google.api.http) = {
       		get: "/v1/start_telemetry"
@@ -39,10 +41,53 @@ service PosCli {
     	};
 	}
 
+	// Devel Commands
 	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
 	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
 	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
 	rpc UpdateEventWrr (UpdateEventWrrRequest) returns (UpdateEventWrrResponse);
+
+	// Array Commands
+	rpc AddSpare (AddSpareRequest) returns (AddSpareResponse) {
+		option (google.api.http) = {
+      		post: "/v1/addspare"
+    	};
+	}
+	rpc RemoveSpare (RemoveSpareRequest) returns (RemoveSpareResponse) {
+		option (google.api.http) = {
+      		post: "/v1/removespare"
+    	};
+	}
+	rpc AutocreateArray (AutocreateArrayRequest) returns (AutocreateArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/autocreatearray"
+    	};
+	}
+	rpc CreateArray (CreateArrayRequest) returns (CreateArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/createarray"
+    	};
+	}
+	rpc DeleteArray (DeleteArrayRequest) returns (DeleteArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/deletearray"
+    	};
+	}
+	rpc ListArray (ListArrayRequest) returns (ListArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listarray"
+    	};
+	}
+	rpc MountArray (MountArrayRequest) returns (MountArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/mountarray"
+    	};
+	}
+	rpc UnmountArray (UnmountArrayRequest) returns (UnmountArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/unmountarray"
+    	};
+	}
 }
 
 message Status {
@@ -223,12 +268,223 @@ message UpdateEventWrrRequest {
 	string requestor = 3;
 	message Param {
 			string name = 1;
-			int64 weight = 2;
+			int32 weight = 2;
 	}
 	Param param = 4;
 }
 
 message UpdateEventWrrResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message AddSpareRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message SpareDeviceName {
+		string deviceName = 1;
+	}
+	message Param {
+			string array = 1;
+			repeated SpareDeviceName spare = 2;
+	}
+	Param param = 4;
+}
+
+message AddSpareResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message RemoveSpareRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message SpareDeviceName {
+		string deviceName = 1;
+	}
+	message Param {
+			string array = 1;
+			repeated SpareDeviceName spare = 2;
+	}
+	Param param = 4;
+}
+
+message RemoveSpareResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DeviceNameList {
+	string deviceName = 1;
+}
+
+message AutocreateArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+			repeated DeviceNameList buffer = 2;
+			int32 numData = 3;
+			int32 numSpare = 4;
+			string raidtype = 5;
+	}
+	Param param = 4;
+}
+
+message AutocreateArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message CreateArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+			repeated DeviceNameList buffer = 2;
+			repeated DeviceNameList data = 3;
+			repeated DeviceNameList spare = 4;			
+			string raidtype = 5;
+	}
+	Param param = 4;
+}
+
+message CreateArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DeleteArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message DeleteArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Device {
+	string name = 1;
+	string type = 2;
+	string address = 3;
+	string class = 4;
+	string mn = 5;
+	string numa = 6;
+	string serial = 7;
+}
+
+message Array {
+	int32 index = 1;
+	int32 unique_id = 2;
+	string name = 3;
+	string status = 4;
+	string state = 5;
+	string situation = 6;
+	string createDatetime = 7;
+	string updateDatetime = 8;
+	string rebuildingProgress = 9;
+	string capacity = 10;
+	string used = 11;
+	string gcMode = 12;
+	string metaRaid = 13;
+	string dataRaid = 14;
+	bool write_through_enabled = 15;
+	repeated Device devicelist = 16;
+}
+
+message ListArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message ListArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		Array data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message MountArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+			optional bool enable_write_through = 2;
+	}
+	Param param = 4;
+}
+
+message MountArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message UnmountArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message UnmountArrayResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
