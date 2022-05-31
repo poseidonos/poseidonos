@@ -27,7 +27,7 @@ Syntax:
 		var command = "UPDATEEVENTWRRPOLICY"
 		uuid := globals.GenerateUUID()
 
-		param := &pb.UpdateEventWrrRequest_Param{Name: update_event_wrr_name, Weight: update_event_wrr_weight}
+		param := &pb.UpdateEventWrrRequest_Param{Name: update_event_wrr_name, Weight: int32(update_event_wrr_weight)}
 		req := &pb.UpdateEventWrrRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
@@ -61,9 +61,9 @@ Syntax:
 }
 
 var (
-	default_weight          int64  = 20
+	default_weight                 = 20
 	update_event_wrr_name   string = ""
-	update_event_wrr_weight int64  = default_weight
+	update_event_wrr_weight        = default_weight
 )
 
 func init() {
@@ -71,7 +71,7 @@ func init() {
 		"name", "", "", "Event name.")
 	UpdateEventWrrCmd.MarkFlagRequired("name")
 
-	UpdateEventWrrCmd.Flags().Int64VarP(&update_event_wrr_weight,
+	UpdateEventWrrCmd.Flags().IntVarP(&update_event_wrr_weight,
 		"weight", "", default_weight, "Weight.")
 	UpdateEventWrrCmd.MarkFlagRequired("weight")
 }
