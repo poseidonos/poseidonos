@@ -575,8 +575,8 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
             array->set_status(arrayStatus);
             array->set_createdatetime(createDatetime);
             array->set_updatedatetime(updateDatetime);
-            array->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
-            array->set_used(to_string(SpaceInfo::Used(arrayName)));
+            array->set_capacity(SpaceInfo::SystemCapacity(arrayName));
+            array->set_used(SpaceInfo::Used(arrayName));
         }
     }
 
@@ -624,8 +624,8 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
     array->set_createdatetime(arrayInfo->GetCreateDatetime());
     array->set_updatedatetime(arrayInfo->GetUpdateDatetime());
     array->set_rebuildingprogress(to_string(arrayInfo->GetRebuildingProgress()));
-    array->set_capacity(to_string(SpaceInfo::SystemCapacity(arrayName)));
-    array->set_used(to_string(SpaceInfo::Used(arrayName)));
+    array->set_capacity(SpaceInfo::SystemCapacity(arrayName));
+    array->set_used(SpaceInfo::Used(arrayName));
     array->set_metaraid(arrayInfo->GetMetaRaidType());
     array->set_dataraid(arrayInfo->GetDataRaidType());
     array->set_writethroughenabled(arrayInfo->IsWriteThroughEnabled());

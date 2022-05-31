@@ -428,8 +428,8 @@ message Array {
 	string createDatetime = 7;
 	string updateDatetime = 8;
 	string rebuildingProgress = 9;
-	string capacity = 10;
-	string used = 11;
+	uint64 capacity = 10;
+	uint64 used = 11;
 	string gcMode = 12;
 	string metaRaid = 13;
 	string dataRaid = 14;
@@ -448,7 +448,10 @@ message ListArrayResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
-		repeated Array data = 2;
+		message ArrayList {
+			repeated Array arrayList = 1;
+		}
+		ArrayList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
