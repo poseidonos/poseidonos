@@ -13,13 +13,12 @@ TEST(MetaFsIoRequest, ConstructorAndDestructor)
 TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromUserThread)
 {
     MockMetaFsIoRequest* reqOrigin = new MockMetaFsIoRequest();
-    MetaFsIoRequest* req = new MetaFsIoRequest();
 
     EXPECT_CALL(*reqOrigin, GetError).Times(1);
     reqOrigin->ioMode = MetaIoMode::Sync;
     reqOrigin->originalMsg = nullptr;
 
-    req->CopyUserReqMsg(*reqOrigin);
+    MetaFsIoRequest* req = new MetaFsIoRequest(*reqOrigin);
 
     EXPECT_EQ(reqOrigin->reqType, req->reqType);
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);
@@ -47,13 +46,12 @@ TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromUserThread)
 TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromScheduler)
 {
     MockMetaFsIoRequest* reqOrigin = new MockMetaFsIoRequest();
-    MetaFsIoRequest* req = new MetaFsIoRequest();
 
     EXPECT_CALL(*reqOrigin, GetError).Times(1);
     reqOrigin->ioMode = MetaIoMode::Sync;
     reqOrigin->originalMsg = reqOrigin;
 
-    req->CopyUserReqMsg(*reqOrigin);
+    MetaFsIoRequest* req = new MetaFsIoRequest(*reqOrigin);
 
     EXPECT_EQ(reqOrigin->reqType, req->reqType);
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);
@@ -81,12 +79,11 @@ TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromScheduler)
 TEST(MetaFsIoRequest, CopyMsg_AsyncRequest)
 {
     MockMetaFsIoRequest* reqOrigin = new MockMetaFsIoRequest();
-    MetaFsIoRequest* req = new MetaFsIoRequest();
 
     EXPECT_CALL(*reqOrigin, GetError).Times(1);
     reqOrigin->ioMode = MetaIoMode::Async;
 
-    req->CopyUserReqMsg(*reqOrigin);
+    MetaFsIoRequest* req = new MetaFsIoRequest(*reqOrigin);
 
     EXPECT_EQ(reqOrigin->reqType, req->reqType);
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);

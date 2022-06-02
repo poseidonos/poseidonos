@@ -46,7 +46,6 @@ enum class MetaFsConfigType
 {
     MioPoolCapacity,
     MpioPoolCapacity,
-    WriteMpioCacheEnabled,
     WriteMpioCacheCapacity,
     DirectAccessForJournalEnabled,
     TimeIntervalInMillisecondsForMetric
@@ -66,10 +65,6 @@ public:
     virtual size_t GetMpioPoolCapacity(void) const
     {
         return mpioPoolCapacity_;
-    }
-    virtual bool IsWriteMpioCacheEnabled(void) const
-    {
-        return writeMpioEnabled_;
     }
     virtual size_t GetWriteMpioCacheCapacity(void) const
     {
@@ -103,7 +98,6 @@ private:
     void _BuildConfigMap(void);
     size_t _GetMioPoolCapacity(void);
     size_t _GetMpioPoolCapacity(void);
-    bool _IsWriteMpioCacheEnabled(void);
     size_t _GetWriteMpioCacheCapacity(void);
     bool _IsDirectAccessEnabled(void);
     size_t _GetTimeIntervalInMillisecondsForMetric(void);
@@ -112,7 +106,6 @@ private:
     ConfigManager* configManager_;
     size_t mioPoolCapacity_;
     size_t mpioPoolCapacity_;
-    bool writeMpioEnabled_;
     size_t writeMpioCapacity_;
     bool directAccessEnabled_;
     size_t timeIntervalInMillisecondsForMetric_;

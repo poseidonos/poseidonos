@@ -12,7 +12,6 @@ class MockMetaFsIoRequest : public MetaFsIoRequest
 {
 public:
     using MetaFsIoRequest::MetaFsIoRequest;
-    MOCK_METHOD(void, CopyUserReqMsg, (const MetaFsIoRequest& req), (override));
     MOCK_METHOD(bool, IsValid, (), (override));
     MOCK_METHOD(bool, IsSyncIO, (), (override));
     MOCK_METHOD(bool, IsIoCompleted, (), (override));
