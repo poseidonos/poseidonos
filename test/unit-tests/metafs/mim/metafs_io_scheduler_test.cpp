@@ -110,7 +110,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->byteSize = 4032;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -128,7 +128,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->byteSize = 4032;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -146,7 +146,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->byteSize = 2016;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -183,7 +183,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->byteSize = 4032 + 2016;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -201,7 +201,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->byteSize = 4032;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -219,7 +219,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->byteSize = 4032 + 2016;
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -256,7 +256,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfABigAlignedRequestCreatesManyRequests
     req->byteSize = 4032 * 1048; // 1048 lpns
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1048);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1048);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495);
@@ -297,7 +297,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032; // lpn 6
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 6);
@@ -315,7 +315,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032 * 6; // lpn 7,8,9,20,21,22
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 6);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 6);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 7);
@@ -333,7 +333,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032 * 12; // lpn 9,20...29,40
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 12);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 12);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 9);
@@ -374,7 +374,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032;         // to 2nd lpn (43082495 + 1)
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495 + 1);
@@ -392,7 +392,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032 * 1024;      // to 1026th lpn (43082495 + 1025)
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495 + 2);
@@ -410,7 +410,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032 * 1024;         // to 1002nd of next extent (43085111 + 1001)
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43083521);
@@ -428,7 +428,7 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->byteSize = 4032 * 1024;         // to 2026th of the extent (43085111 + 2025)
 
     // then
-    scheduler.IssueRequest(req);
+    scheduler.IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43085111 + 1002);

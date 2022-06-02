@@ -80,7 +80,12 @@ MetaFsIoRangeOverlapChker::FreeLockContext(uint64_t startLpn, bool isRead)
 
     if (true != isRead)
     {
-        assert(outstandingIoMap->IsSetBit(startLpn) == true);
+        if (!outstandingIoMap->IsSetBit(startLpn))
+        {
+            POS_TRACE_ERROR(POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "The bit is already cleared, startLpn: {}", startLpn);
+            assert(false);
+        }
         outstandingIoMap->ClearBit(startLpn);
     }
 }
@@ -92,7 +97,12 @@ MetaFsIoRangeOverlapChker::PushReqToRangeLockMap(MetaFsIoRequest* newReq)
     {
         if (newReq->reqType == MetaIoRequestType::Write)
         {
-            assert(outstandingIoMap->IsSetBit(newReq->baseMetaLpn) == false);
+            if (outstandingIoMap->IsSetBit(newReq->baseMetaLpn))
+            {
+                POS_TRACE_ERROR(POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                    "The bit is already set, baseMetaLpn: {}", newReq->baseMetaLpn);
+                assert(false);
+            }
             outstandingIoMap->SetBit(newReq->baseMetaLpn);
         }
     }

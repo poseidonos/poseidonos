@@ -90,7 +90,7 @@ MetaFsIoScheduler::ExitThread(void)
 }
 
 void
-MetaFsIoScheduler::_SetRequestCount(int count)
+MetaFsIoScheduler::_SetRequestCountOrCallbackCountOfCurrentRequest(int count)
 {
     if (MetaIoMode::Async == currentReqMsg_->ioMode)
     {
@@ -103,7 +103,7 @@ MetaFsIoScheduler::_SetRequestCount(int count)
 }
 
 void
-MetaFsIoScheduler::_SetCurrentContext(MetaFsIoRequest* reqMsg)
+MetaFsIoScheduler::_SetCurrentContextFrom(MetaFsIoRequest* reqMsg)
 {
     currentReqMsg_ = reqMsg;
 
@@ -117,7 +117,7 @@ MetaFsIoScheduler::_SetCurrentContext(MetaFsIoRequest* reqMsg)
     extents_ = currentReqMsg_->fileCtx->extents;
 
     // set the request count to process the callback count
-    _SetRequestCount(requestCount_);
+    _SetRequestCountOrCallbackCountOfCurrentRequest(requestCount_);
 }
 
 void
@@ -146,7 +146,7 @@ MetaFsIoScheduler::_UpdateCurrentLpnToNextExtent(void)
 }
 
 void
-MetaFsIoScheduler::_UpdateCurrentExtent(void)
+MetaFsIoScheduler::_UpdateCurrentLpnToNextExtentConditionally(void)
 {
     while (currentExtent_ < extentsCount_)
     {
@@ -159,13 +159,13 @@ MetaFsIoScheduler::_UpdateCurrentExtent(void)
 }
 
 void
-MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
+MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 {
     uint64_t byteOffset = 0;
     bool isFirstLpn = true;
 
-    _SetCurrentContext(reqMsg);
-    _UpdateCurrentExtent();
+    _SetCurrentContextFrom(reqMsg);
+    _UpdateCurrentLpnToNextExtentConditionally();
 
     while (remainCount_)
     {
@@ -331,7 +331,7 @@ MetaFsIoScheduler::Execute(void)
         }
         cpuStallCnt_ = 0;
 
-        IssueRequest(reqMsg);
+        IssueRequestAndDelete(reqMsg);
     }
 }
 
