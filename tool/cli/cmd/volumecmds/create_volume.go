@@ -80,7 +80,7 @@ func formCreateVolumeReq(command string) messages.Request {
 		MAXIOPS:       create_volume_maxIOPS,
 		MAXBANDWIDTH:  create_volume_maxBandwidth,
 		ARRAYNAME:     create_volume_arrayName,
-		CHECKWALVOL:   create_volume_checkWalVoluem,
+		ISWALVOL:      create_volume_iswalvol,
 	}
 
 	uuid := globals.GenerateUUID()
@@ -98,7 +98,7 @@ var create_volume_arrayName = ""
 var create_volume_volumeSize = ""
 var create_volume_maxIOPS = 0
 var create_volume_maxBandwidth = 0
-var create_volume_checkWalVoluem = false
+var create_volume_iswalvol = false
 
 func init() {
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName,
@@ -124,7 +124,7 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 		"maxbw", "", 0,
 		"The maximum bandwidth for the volume in MB/s.")
 
-	CreateVolumeCmd.Flags().BoolVarP(&create_volume_checkWalVoluem,
+	CreateVolumeCmd.Flags().BoolVarP(&create_volume_iswalvol,
 		"iswalvol", "", false,
 		"Check user data volume or WAL volume for HA. (default : user data volume)")
 }
