@@ -69,6 +69,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
     StoreTimestamp(IoRequestStage::Create);
 }
 
+// copy except retryFlag, ioDone and error
 MetaFsIoRequest::MetaFsIoRequest(const MetaFsIoRequest& req)
 : reqType(req.reqType),
   ioMode(req.ioMode),
