@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
-    MOCK_METHOD(int, Create, (std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw), (override));
+    MOCK_METHOD(int, Create, (std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume), (override));
     MOCK_METHOD(int, Delete, (std::string name), (override));
     MOCK_METHOD(int, Mount, (std::string name, std::string subnqn), (override));
     MOCK_METHOD(int, Unmount, (std::string name), (override));

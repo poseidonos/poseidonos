@@ -69,6 +69,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         uint64_t size = doc["param"]["size"].get<uint64_t>();
         uint64_t maxiops = 0;
         uint64_t maxbw = 0;
+        bool checkWalVol = doc["param"]["iswalvol"].get<bool>();
 
         if (doc["param"].contains("maxiops") &&
             doc["param"]["maxiops"].is_number_unsigned() == true)
@@ -102,7 +103,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
 
         if (volMgr != nullptr)
         {
-            ret = volMgr->Create(volName, size, maxiops, maxbw);
+            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol);
         }
 
         if (ret == SUCCESS)
