@@ -69,7 +69,7 @@ void
 VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw, bool checkWalVolume)
 {
-   VolumeAttribute volumeAttribute = (checkWalVolume ? VolumeAttribute::HAJournalData : VolumeAttribute::UserData);
+    VolumeAttribute volumeAttribute = (checkWalVolume ? VolumeAttribute::HAJournalData : VolumeAttribute::UserData);
 
     vol = new Volume(arrayName, arrayID, name, size, volumeAttribute);
     if (vol == nullptr)

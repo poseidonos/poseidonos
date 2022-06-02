@@ -108,7 +108,7 @@ type CreateVolumeParam struct {
 	VOLUMESIZE    uint64 `json:"size"`
 	MAXIOPS       int    `json:"maxiops,omitempty"`
 	MAXBANDWIDTH  int    `json:"maxbw,omitempty"`
-	CHECKWALVOL   bool   `json:"checkwalvol"`
+	CHECKWALVOL   bool   `json:"iswalvol"`
 }
 
 type DeleteVolumeParam struct {

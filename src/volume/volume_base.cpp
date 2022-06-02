@@ -70,8 +70,8 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     miniops = 0;
     minbw = 0;
     ID = INVALID_VOL_ID;
-    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} uuid:{} size:{} iops:{} bw:{} created",
-        name, uuid, totalSize, maxiops, maxbw);
+    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} uuid:{} size:{} iops:{} bw:{} attribute:{}, (0:User 1:WAL) created",
+        name, uuid, totalSize, maxiops, maxbw, attribute);
 }
 
 VolumeBase::~VolumeBase(void)

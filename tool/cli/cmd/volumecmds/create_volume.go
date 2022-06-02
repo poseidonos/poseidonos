@@ -24,11 +24,11 @@ Create a volume from an array in PoseidonOS.
 
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName 
-	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--checkwalvol]
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--iswalvol]
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
-	--size 1024GB --maxiops 1000 --maxbw 100GB/s --checkwalvol
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -125,6 +125,6 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 		"The maximum bandwidth for the volume in MB/s.")
 
 	CreateVolumeCmd.Flags().BoolVarP(&create_volume_checkWalVoluem,
-		"checkwalvol", "", false,
-		"Create user data volume.")
+		"iswalvol", "", false,
+		"Check user data volume or WAL volume for HA. (default : user data volume)")
 }
