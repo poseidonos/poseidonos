@@ -410,6 +410,11 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
                 POS_EVENT_ID eventId =
                     POS_EVENT_ID::WRHDLR_FAIL_BY_SYSTEM_STOP;
                 POS_TRACE_ERROR(eventId, "System Stop incurs write fail");
+                if (!iBlockAllocator->Unlock(volumeId))
+                {
+                    POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_UNLOCK;
+                    POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
+                }
                 throw eventId;
             }
             break;
