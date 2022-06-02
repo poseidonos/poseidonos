@@ -52,7 +52,7 @@ public:
         TelemetryPublisher* tp);
     virtual ~MetaFsIoScheduler(void);
 
-    void IssueRequest(MetaFsIoRequest* reqMsg);
+    void IssueRequestAndDelete(MetaFsIoRequest* reqMsg);
     virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
     virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) override;
@@ -67,11 +67,11 @@ public:
 private:
     MetaFsIoRequest* _FetchPendingNewReq(void);
     void _CreateMioThread(void);
-    void _SetRequestCount(int count);
-    void _SetCurrentContext(MetaFsIoRequest* reqMsg);
+    void _SetRequestCountOrCallbackCountOfCurrentRequest(int count);
+    void _SetCurrentContextFrom(MetaFsIoRequest* reqMsg);
     void _ClearCurrentContext(void);
     void _UpdateCurrentLpnToNextExtent(void);
-    void _UpdateCurrentExtent(void);
+    void _UpdateCurrentLpnToNextExtentConditionally(void);
 
     std::vector<ScalableMetaIoWorker*> metaIoWorkerList_;
     const size_t TOTAL_CORE_COUNT;
