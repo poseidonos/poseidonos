@@ -24,7 +24,7 @@ TEST(VolumeBase, VolumeBase_)
     uint64_t expectedvalue;
 
     // When
-    VolumeBase* vol = new VolumeBase(arrayName, arrayID, name, size);
+    VolumeBase* vol = new VolumeBase(arrayName, arrayID, name, size, VolumeAttribute::UserData);
     vol->SetUuid(uuid);
     vol->SetMaxIOPS(maxBw);
     vol->SetMaxBW(maxIops);

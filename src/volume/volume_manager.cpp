@@ -154,7 +154,7 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
 }
 
 int
-VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw)
+VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -174,12 +174,11 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
         return EID(VOL_MGR_BUSY);
     }
 
-
     VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     // setting default values for miniops and minbw
     uint64_t defaultMinIops = 0;
     uint64_t defaultMinBw = 0;
-    return volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw);
+    return volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, checkWalVolume);
 }
 
 int

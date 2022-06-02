@@ -96,7 +96,8 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
                     uint64_t total = doc["volumes"][i]["total"].GetUint64();
                     uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
-                    VolumeBase* volume = new Volume(arrayName, arrayID, name, uuid, total, maxiops, maxbw);
+                    VolumeAttribute volumeAttribute = ((VolumeAttribute)doc["volumes"][i]["attribute"].GetInt());
+                    VolumeBase* volume = new Volume(arrayName, arrayID, name, uuid, total, maxiops, maxbw, volumeAttribute);
                     volList.Add(volume, id);
                 }
             }
@@ -144,6 +145,7 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
                 elem.SetAttribute(JsonAttribute("total", std::to_string(vol->TotalSize())));
                 elem.SetAttribute(JsonAttribute("maxiops", std::to_string(vol->MaxIOPS())));
                 elem.SetAttribute(JsonAttribute("maxbw", std::to_string(vol->MaxBW())));
+                elem.SetAttribute(JsonAttribute("attribute", std::to_string(vol->GetAttribute())));
                 array.AddElement(elem);
             }
         }
