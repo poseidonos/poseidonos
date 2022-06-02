@@ -94,6 +94,7 @@ class MetaFsIoRequest : public MetaFsRequestBase, public MetaFsStopwatch<IoReque
 {
 public:
     MetaFsIoRequest(void);
+    // copy except retryFlag, ioDone and error
     MetaFsIoRequest(const MetaFsIoRequest& req);
     virtual ~MetaFsIoRequest(void);
 
