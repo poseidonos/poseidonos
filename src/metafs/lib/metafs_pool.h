@@ -37,6 +37,7 @@
 #include <list>
 #include <memory>
 #include <stdexcept>
+#include <unordered_set>
 #include <vector>
 
 namespace pos
@@ -48,7 +49,8 @@ class MetaFsPool
 public:
     MetaFsPool(void) = delete;
     explicit MetaFsPool(const size_t poolSize)
-    : CAPACITY(poolSize)
+    : CAPACITY(poolSize),
+      usedCount_(0)
     {
         all_.reserve(CAPACITY);
     }
@@ -73,11 +75,15 @@ public:
             return nullptr;
         auto item = free_.front();
         free_.pop_front();
+        used_.emplace(item);
+        usedCount_++;
         return item;
     }
     virtual void Release(T item)
     {
         free_.emplace_back(item);
+        used_.erase(item);
+        usedCount_--;
     }
     virtual size_t GetCapacity(void) const
     {
@@ -96,5 +102,7 @@ private:
     const size_t CAPACITY;
     std::list<T> free_;
     std::vector<T> all_;
+    std::unordered_set<T> used_;
+    std::size_t usedCount_;
 };
 } // namespace pos
