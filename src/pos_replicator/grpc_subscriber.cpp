@@ -49,13 +49,13 @@ GrpcSubscriber::GrpcSubscriber(void)
     string address("0.0.0.0:50051");
 
     new std::thread(&GrpcSubscriber::RunServer, this, address);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been initialized. Server address : {}", address);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "posIo GrpcServer has been initialized. Server address : {}", address);
 }
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
-    poseReplicatorGrpcServer->Shutdown();
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been destructed");
+    posIoGrpcServer->Shutdown();
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "posIo GrpcServer has been destructed");
 }
 
 
@@ -66,8 +66,8 @@ GrpcSubscriber::RunServer(std::string address)
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(this);
 
-    poseReplicatorGrpcServer = builder.BuildAndStart();
-    poseReplicatorGrpcServer->Wait();
+    posIoGrpcServer = builder.BuildAndStart();
+    posIoGrpcServer->Wait();
 }
 
 ::grpc::Status

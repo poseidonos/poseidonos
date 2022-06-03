@@ -28,6 +28,7 @@ service PosManagement {
     rpc DeleteVolume (DeleteVolumeRequest) returns (PosResponse) {}
     rpc MountVolume (MountVolumeRequest) returns (PosResponse) {}
     rpc UnmountVolume (UnmountVolumeRequest) returns (PosResponse) {}
+    rpc UpdateVoluemMeta (UpdateVoluemMetaRequest) returns (PosResponse) {}
 
     rpc GetArrayList (GetArrayListRequest) returns (ArrayListResponse) {}
     rpc GetVolumeList (GetVolumeListRequest) returns (VolumeListResponse) {}
@@ -61,6 +62,10 @@ message MountVolumeRequest {
 message UnmountVolumeRequest {
     string array_name = 1;
     string volume_name = 2;
+}
+
+message UpdateVoluemMetaRequest {
+    string array_name = 1;
 }
 
 enum PosResult {

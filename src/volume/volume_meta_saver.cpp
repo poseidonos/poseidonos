@@ -30,56 +30,38 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/volume/volume_meta_saver.h"
 
-#pragma once
-
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
-#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
-#include "proto/generated/cpp/pos_rpc.pb.h"
-
-#include <list>
-#include <map>
 #include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
+
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/volume/volume_name_policy.h"
+#include "src/volume/volume_list.h"
 
 namespace pos
 {
-class GrpcSubscriber final : public pos_rpc::PosIo::Service
+
+VolumeMetaSaver::VolumeMetaSaver(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
-public:
-    GrpcSubscriber(void);
-    ~GrpcSubscriber(void);
-
-    virtual ::grpc::Status WriteBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteBlocksRequest* request, 
-        pos_rpc::WriteBlocksResponse* response) override;
-
-    virtual ::grpc::Status WriteHostBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteHostBlocksRequest* request, 
-        pos_rpc::WriteHostBlocksResponse* response) override;
-
-    virtual ::grpc::Status ReadBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::ReadBlocksRequest* request, 
-        pos_rpc::ReadBlocksResponse* response) override;
-
-    virtual ::grpc::Status CompleteHostWrite(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::CompleteHostWriteRequest* request, 
-        pos_rpc::CompleteHostWriteResponse* response) override;
-
-    void RunServer(std::string address);
-
-private:
-    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
-            std::pair<std::string, int> volumeSet);
-
-    std::unique_ptr<::grpc::Server> posIoGrpcServer;
-};
 }
+
+VolumeMetaSaver::~VolumeMetaSaver(void)
+{
+}
+
+int
+VolumeMetaSaver::Do(void)
+{
+    int ret = _SaveVolumes();
+    if (ret != EID(SUCCESS))
+    {
+        POS_TRACE_WARN(EID(VOL_UPDATE_META_SAVE_FAIL), "Array {} VolumeMeta Update Fail", arrayName);
+        return ret;
+    }
+
+    return EID(SUCCESS);
+}
+
+} // namespace pos

@@ -52,6 +52,8 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/i_volume_info_manager.h"
 #include "src/volume/volume_base.h"
+#include "src/pos_replicator/grpc_volume_management.h"
+#include "src/pos_replicator/replicator_volume_subscriber.h"
 
 namespace pos
 {
@@ -65,6 +67,10 @@ public:
     void Init(void);
     void Dispose(void);
     void Clear(void);
+
+    int Register(int arrayId, ReplicatorVolumeSubscriber* volumeSubscriber);
+    void Unregister(int arrayId);
+    ReplicatorVolumeSubscriber* GetReplicatorVolumeSubscriber(int arrayId);
 
     int NotifyNewUserIORequest(pos_io io);
     int CompleteUserIO(uint64_t lsn, int arrayId, int volumeId);
@@ -99,12 +105,14 @@ private:
     std::unordered_map<uint64_t, VolumeIoSmartPtr> donePosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
 
     int volumeSubscriberCnt;
+    ReplicatorVolumeSubscriber* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
     std::mutex listMutex;
 
     vector<std::pair<int, string>> arrayConvertTable;
 
     GrpcPublisher* grpcPublisher;
     GrpcSubscriber* grpcSubscriber;
+    GrpcVolumeManagement* grpcVolumeManagement;
 };
 
 class PosReplicatorIOCompletion : public Callback, public std::enable_shared_from_this<PosReplicatorIOCompletion>
