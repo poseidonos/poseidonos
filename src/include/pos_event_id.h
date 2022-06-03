@@ -1074,6 +1074,7 @@ enum class POS_EVENT_ID
     HA_COMPLETION_FAIL,
     HA_DEBUG_MSG,
     HA_COUNT,
+    HA_VOLUME_SUBSCRIBER_REGISTER_FAIL,
 
     // --------------Smart Log (8500)----------------
     SMART_LOG_INVALID_BUFFER = 8500,

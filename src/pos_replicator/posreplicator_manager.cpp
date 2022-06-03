@@ -99,7 +99,7 @@ PosReplicatorManager::Register(int arrayId, ReplicatorVolumeSubscriber* volumeSu
 {
     if (arrayId < 0)
     {
-        POS_TRACE_ERROR(9999, "Fail to Register Volume Manager for Array {}", volumeSubscriber->GetArrayName());
+        POS_TRACE_ERROR(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Fail to Register Volume Manager for Array {}", volumeSubscriber->GetArrayName());
         return -1;
     }
 
@@ -107,13 +107,13 @@ PosReplicatorManager::Register(int arrayId, ReplicatorVolumeSubscriber* volumeSu
 
     if (items[arrayId] != nullptr)
     {
-        POS_TRACE_ERROR(9999, "Volume manager for array {} already exists", volumeSubscriber->GetArrayName());
+        POS_TRACE_ERROR(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Volume manager for array {} already exists", volumeSubscriber->GetArrayName());
         return -1;
     }
 
     items[arrayId] = volumeSubscriber;
     volumeSubscriberCnt++;
-    POS_TRACE_DEBUG(9999, "Volume manager for array {} is registered", volumeSubscriber->GetArrayName());
+    POS_TRACE_DEBUG(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Volume manager for array {} is registered", volumeSubscriber->GetArrayName());
 
     arrayConvertTable.push_back(std::pair<int, string>(arrayId, volumeSubscriber->GetArrayName()));
 
