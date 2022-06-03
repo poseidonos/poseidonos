@@ -119,7 +119,7 @@ GrpcVolumeManagement::UpdateVoluemMeta(::grpc::ServerContext* context,
 {
     string arrayName = request->array_name();
 
-    int ret = volEventManger->UpdateVolumeMeta();
+    int ret = volEventManger->SaveVolumeMeta();
 
     if (ret != EID(SUCCESS))
     {

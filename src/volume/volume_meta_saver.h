@@ -38,11 +38,11 @@
 
 namespace pos
 {
-class VolumeMetaUpdater : public VolumeInterface
+class VolumeMetaSaver : public VolumeInterface
 {
 public:
-    explicit VolumeMetaUpdater(VolumeList& volumeList, std::string arrayName, int arrayID);
-    ~VolumeMetaUpdater(void) override;
+    explicit VolumeMetaSaver(VolumeList& volumeList, std::string arrayName, int arrayID);
+    ~VolumeMetaSaver(void) override;
 
     int Do(void);
 };

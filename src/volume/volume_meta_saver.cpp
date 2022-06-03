@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/volume/volume_meta_updater.h"
+#include "src/volume/volume_meta_saver.h"
 
 #include <string>
 
@@ -42,17 +42,17 @@
 namespace pos
 {
 
-VolumeMetaUpdater::VolumeMetaUpdater(VolumeList& volumeList, std::string arrayName, int arrayID)
+VolumeMetaSaver::VolumeMetaSaver(VolumeList& volumeList, std::string arrayName, int arrayID)
 : VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 
-VolumeMetaUpdater::~VolumeMetaUpdater(void)
+VolumeMetaSaver::~VolumeMetaSaver(void)
 {
 }
 
 int
-VolumeMetaUpdater::Do(void)
+VolumeMetaSaver::Do(void)
 {
     int ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
