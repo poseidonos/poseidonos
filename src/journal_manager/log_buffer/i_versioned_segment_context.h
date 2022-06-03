@@ -32,30 +32,23 @@
 
 #pragma once
 
-#include <atomic>
-#include <unordered_map>
-
 #include "src/include/address_type.h"
 
 namespace pos
 {
-class VersionedSegmentInfo
+class JournalConfiguration;
+class SegmentInfo;
+
+class IVersionedSegmentContext
 {
 public:
-    VersionedSegmentInfo(void);
-    virtual ~VersionedSegmentInfo(void);
+    virtual ~IVersionedSegmentContext(void) = default;
 
-    virtual void Reset(void);
-    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual void IncreaseOccupiedStripeCount(SegmentId segId);
-
-    virtual std::unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
-    virtual std::unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
-
-private:
-    std::unordered_map<SegmentId, int> changedValidBlockCount;
-    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, int numSegments) = 0;
+    virtual void Dispose(void) = 0;
+    virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
+    virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
+    virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
 };
 
 } // namespace pos

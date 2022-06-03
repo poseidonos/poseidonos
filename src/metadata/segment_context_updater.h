@@ -32,50 +32,29 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/allocator/i_segment_ctx.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 
 namespace pos
 {
-class Mapper;
-class Allocator;
-class JournalManager;
-class MetaFsFileControlApi;
+class PartitionLogicalSize;
 
-class MetaUpdater;
-class SegmentContextUpdater;
-class MetaEventFactory;
-class MetaVolumeEventHandler;
-class MetaService;
-
-class Metadata : public IMountSequence
+class SegmentContextUpdater : public ISegmentCtx
 {
 public:
-    Metadata(IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaFsFileControlApi* metaFsCtrl, MetaService* service);
-    virtual ~Metadata(void);
+    SegmentContextUpdater(ISegmentCtx* context_, IVersionedSegmentContext* versionedContext_, const PartitionLogicalSize* addrInfo_);
+    virtual ~SegmentContextUpdater(void) = default;
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
-
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
 private:
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
-    MetaFsFileControlApi* metaFsCtrl;
-    MetaVolumeEventHandler* volumeEventHandler;
-    MetaService* metaService;
+    const PartitionLogicalSize* addrInfo;
 
-    MetaUpdater* metaUpdater;
-    SegmentContextUpdater* segmentContextUpdater;
-    MetaEventFactory* metaEventFactory;
+    int logGroupId; // TODO (VSC) find log group ID for this update.....
+    ISegmentCtx* activeContext;
+    IVersionedSegmentContext* versionedContext;
 };
+
 } // namespace pos

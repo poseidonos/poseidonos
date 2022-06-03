@@ -35,6 +35,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
@@ -53,7 +54,11 @@ TEST(VersionedSegmentCtx, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
     int numLogGroups = 2;
     NiceMock<MockJournalConfiguration> config;
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-    versionedSegCtx.Init(&config);
+
+    SegmentInfo* segmentInfos = new SegmentInfo[3]();
+    versionedSegCtx.Init(&config, segmentInfos, 3);
+
+    delete[] segmentInfos;
 }
 
 TEST(VersionedSegmentCtx, Dispose_testIfContextIsDeleted)
@@ -70,79 +75,11 @@ TEST(VersionedSegmentCtx, Dispose_testIfContextIsDeleted)
     versionedSegCtx.Dispose();
 
     // When : Init and Dispose
-    versionedSegCtx.Init(&config);
+    SegmentInfo* segmentInfos = new SegmentInfo[3]();
+    versionedSegCtx.Init(&config, segmentInfos, 3);
     versionedSegCtx.Dispose();
-}
 
-TEST(VersionedSegmentCtx, GetSegmentContext_testIfExecutedWithCorrectLogGroupId)
-{
-    // Given
-    NiceMock<MockJournalConfiguration> config;
-    VersionedSegmentCtx versionedSegCtx;
-
-    // When
-    int numLogGroups = 2;
-    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-
-    VersionedSegmentInfo** versionedSegmentInfo;
-    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
-    for (int index = 0; index < numLogGroups; index++)
-    {
-        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
-    }
-    versionedSegCtx.Init(&config, versionedSegmentInfo);
-
-    // Then
-    uint32_t targetLogGroup = 0;
-    EXPECT_EQ(versionedSegmentInfo[targetLogGroup], versionedSegCtx.GetSegmentInfo(targetLogGroup));
-}
-
-TEST(VersionedSegmentCtx, GetSegmentContext_testIfExecutedWithIncorrectLogGroupId)
-{
-    // Given
-    int numLogGroups = 2;
-    NiceMock<MockJournalConfiguration> config;
-    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-    VersionedSegmentCtx versionedSegCtx;
-    versionedSegCtx.Init(&config);
-
-    // When, Then
-    uint32_t targetLogGroup = 5;
-    EXPECT_TRUE(versionedSegCtx.GetSegmentInfo(targetLogGroup) == nullptr);
-}
-
-TEST(VersionedSegmentCtx, UpdateSegmentContext_testIfOnlyOneOfTwoLogGroupsUpdated)
-{
-    // Given
-    VersionedSegmentCtx versionedSegCtx;
-
-    // When
-    int numLogGroups = 2;
-    NiceMock<MockJournalConfiguration> config;
-    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-
-    VersionedSegmentInfo** versionedSegmentInfo;
-    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
-    for (int index = 0; index < numLogGroups; index++)
-    {
-        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
-    }
-    versionedSegCtx.Init(&config, versionedSegmentInfo);
-
-    std::unordered_map<uint32_t, int> expectValidCount;
-    expectValidCount[1] = 2;
-    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[0]), GetChangedValidBlockCount).WillOnce(Return(expectValidCount));
-
-    std::unordered_map<uint32_t, uint32_t> expectOccupiedCount;
-    expectOccupiedCount[3] = 1;
-    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[0]), GetChangedOccupiedStripeCount).WillOnce(Return(expectOccupiedCount));
-
-    // Then
-    uint32_t targetLogGroup = 0;
-    versionedSegCtx.UpdateSegmentContext(targetLogGroup);
-
-    // TODO (cheolho.kang): Get latest segment context
-    // TODO (cheolho.kang): Compare the expected segment context with returned segment context
+    delete[] segmentInfos;
 }
 
 TEST(VersionedSegmentCtx, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedAndDecreased)
@@ -153,23 +90,27 @@ TEST(VersionedSegmentCtx, IncreaseValidBlockCount_testIfValidBlockCountIsIncreas
     NiceMock<MockJournalConfiguration> config;
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
 
+    SegmentInfo* segmentInfos = new SegmentInfo[3]();
+
     VersionedSegmentInfo** versionedSegmentInfo;
     versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
     for (int index = 0; index < numLogGroups; index++)
     {
         versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
     }
-    versionedSegCtx.Init(&config, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     // When, Then
     uint32_t targetLogGroup = 0;
     EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), IncreaseValidBlockCount(2, 3)).Times(1);
-    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), DecreaseValidBlockCount(2, 1, false)).Times(1);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), DecreaseValidBlockCount(2, 1)).Times(1);
     EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), IncreaseValidBlockCount(1, 4)).Times(1);
 
     versionedSegCtx.IncreaseValidBlockCount(targetLogGroup, 2, 3);
-    versionedSegCtx.DecreaseValidBlockCount(targetLogGroup, 2, 1, false);
+    versionedSegCtx.DecreaseValidBlockCount(targetLogGroup, 2, 1);
     versionedSegCtx.IncreaseValidBlockCount(targetLogGroup, 1, 4);
+
+    delete[] segmentInfos;
 }
 
 TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountIsIncreased)
@@ -180,13 +121,15 @@ TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountI
     NiceMock<MockJournalConfiguration> config;
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
 
+    SegmentInfo* segmentInfos = new SegmentInfo[3]();
+
     VersionedSegmentInfo** versionedSegmentInfo;
     versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
     for (int index = 0; index < numLogGroups; index++)
     {
         versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
     }
-    versionedSegCtx.Init(&config, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     // When, Then
     uint32_t targetLogGroup = 0;
@@ -195,5 +138,200 @@ TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountI
 
     versionedSegCtx.IncreaseOccupiedStripeCount(targetLogGroup, 2);
     versionedSegCtx.IncreaseOccupiedStripeCount(targetLogGroup, 1);
+
+    delete[] segmentInfos;
 }
+
+TEST(VersionedSegmentCtx, GetVersionedSegmentInfoToFlush_testIfChangedValueIsReturned)
+{
+    // Given
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+    VersionedSegmentInfo** versionedSegmentInfo;
+    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
+    }
+    versionedSegCtx.Init(&config, segmentInfos, numSegments, versionedSegmentInfo);
+
+    // When
+    int targetLogGroup = 0;
+
+    std::unordered_map<SegmentId, int> changedValidBlkCount;
+    changedValidBlkCount.emplace(0, 10);
+    changedValidBlkCount.emplace(1, 2);
+    changedValidBlkCount.emplace(2, 40);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
+
+    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    changedOccupiedStripeCount.emplace(0, 1);
+    changedOccupiedStripeCount.emplace(1, 1);
+    changedOccupiedStripeCount.emplace(2, 0);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
+    
+    SegmentInfo* result = versionedSegCtx.GetVersionedSegmentInfoToFlush(targetLogGroup);
+
+    // Then
+    EXPECT_EQ(result[0].GetValidBlockCount(), 10);
+    EXPECT_EQ(result[1].GetValidBlockCount(), 2);
+    EXPECT_EQ(result[2].GetValidBlockCount(), 40);
+
+    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 1);
+    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 1);
+    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0);
+
+    delete[] segmentInfos;
+}
+
+TEST(VersionedSegmentCtx, GetVersionedSegmentInfoToFlush_testIfChangedValueIsApplied)
+{
+    // Given
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+    segmentInfos[0].SetValidBlockCount(10);
+    segmentInfos[1].SetValidBlockCount(9);
+    segmentInfos[2].SetValidBlockCount(1);
+
+    segmentInfos[0].SetOccupiedStripeCount(100);
+    segmentInfos[1].SetOccupiedStripeCount(12);
+    segmentInfos[2].SetOccupiedStripeCount(0);
+
+    VersionedSegmentInfo** versionedSegmentInfo;
+    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
+    }
+    versionedSegCtx.Init(&config, segmentInfos, numSegments, versionedSegmentInfo);
+
+    // When
+    int targetLogGroup = 0;
+    std::unordered_map<SegmentId, int> changedValidBlkCount;
+    changedValidBlkCount.emplace(0, -5);
+    changedValidBlkCount.emplace(1, 2);
+    changedValidBlkCount.emplace(2, 40);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
+
+    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    changedOccupiedStripeCount.emplace(0, 2);
+    changedOccupiedStripeCount.emplace(1, 1);
+    changedOccupiedStripeCount.emplace(2, 0);
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
+
+    SegmentInfo* result = versionedSegCtx.GetVersionedSegmentInfoToFlush(targetLogGroup);
+    
+    // Then
+    EXPECT_EQ(result[0].GetValidBlockCount(), 10 - 5);
+    EXPECT_EQ(result[1].GetValidBlockCount(), 9 + 2);
+    EXPECT_EQ(result[2].GetValidBlockCount(), 1 + 40);
+
+    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 100 + 2);
+    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12 + 1);
+    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0 + 0);
+
+    delete[] segmentInfos;
+}
+
+TEST(VersionedSegmentCtx, GetVersionedSegmentInfoToFlush_testIfFailsWhenInvalidLogGroupIdIsProvided)
+{
+    // Given
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+
+    VersionedSegmentInfo** versionedSegmentInfo;
+    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
+    }
+    versionedSegCtx.Init(&config, segmentInfos, numSegments, versionedSegmentInfo);
+
+    // When
+    SegmentInfo* result = versionedSegCtx.GetVersionedSegmentInfoToFlush(5);
+    EXPECT_EQ(result, nullptr);
+
+    delete[] segmentInfos;
+}
+
+TEST(VersionedSegmentCtx, GetVersionedSegmentInfoToFlush_testIfFailsWhenRequestedTwice)
+{
+    // Given
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+
+    VersionedSegmentInfo** versionedSegmentInfo;
+    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
+    }
+    versionedSegCtx.Init(&config, segmentInfos, numSegments, versionedSegmentInfo);
+
+    // When
+    int targetLogGroupId = 0;
+    SegmentInfo* result = versionedSegCtx.GetVersionedSegmentInfoToFlush(targetLogGroupId);
+    EXPECT_NE(result, nullptr);
+
+    result = versionedSegCtx.GetVersionedSegmentInfoToFlush(targetLogGroupId);
+    EXPECT_EQ(result, nullptr);
+
+    delete[] segmentInfos;
+}
+
+TEST(VersionedSegmentCtx, SetVersionedSegmentInfoFlushed_testIfInfoIsResetted)
+{
+    // Given
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+
+    VersionedSegmentInfo** versionedSegmentInfo;
+    versionedSegmentInfo = new VersionedSegmentInfo*[numLogGroups];
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        versionedSegmentInfo[index] = new NiceMock<MockVersionedSegmentInfo>;
+    }
+    versionedSegCtx.Init(&config, segmentInfos, numSegments, versionedSegmentInfo);
+
+    int targetLogGroup = 0;
+    std::unordered_map<SegmentId, int> changedValidBlkCount;
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
+
+    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
+
+    SegmentInfo* result = versionedSegCtx.GetVersionedSegmentInfoToFlush(targetLogGroup);
+
+    // When
+    EXPECT_CALL(*static_cast<MockVersionedSegmentInfo*>(versionedSegmentInfo[targetLogGroup]), Reset).Times(1);
+    versionedSegCtx.SetVersionedSegmentInfoFlushed(targetLogGroup);
+
+    delete[] segmentInfos;
+}
+
 } // namespace pos

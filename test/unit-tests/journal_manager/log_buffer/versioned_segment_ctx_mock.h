@@ -38,17 +38,28 @@
 
 namespace pos
 {
+class MockDummyVersionedSegmentCtx : public DummyVersionedSegmentCtx
+{
+public:
+    using DummyVersionedSegmentCtx::DummyVersionedSegmentCtx;
+    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, SegmentInfo* loadedSegmentInfos, int numSegments), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(void, DecreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(void, IncreaseOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
+};
+
 class MockVersionedSegmentCtx : public VersionedSegmentCtx
 {
 public:
     using VersionedSegmentCtx::VersionedSegmentCtx;
-    MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration), (override));
+    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, SegmentInfo* loadedSegmentInfos, int numSegments), (override));
     MOCK_METHOD(void, Dispose, (), (override));
-    MOCK_METHOD(void, IncreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(void, DecreaseValidBlockCount, (uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease), (override));
-    MOCK_METHOD(void, IncreaseOccupiedStripeCount, (uint32_t logGroupId, SegmentId segId), (override));
-    MOCK_METHOD(void, UpdateSegmentContext, (uint32_t logGroupId), (override));
-    MOCK_METHOD(VersionedSegmentInfo*, GetSegmentInfo, (uint32_t logGroupId), (override));
+    MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(void, DecreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(void, IncreaseOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
+    MOCK_METHOD(SegmentInfo*, GetVersionedSegmentInfoToFlush, (int logGroupId), (override));
+    MOCK_METHOD(void, SetVersionedSegmentInfoFlushed, (int logGroupId), (override));
 };
 
 } // namespace pos

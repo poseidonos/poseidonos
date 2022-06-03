@@ -43,6 +43,7 @@
 #include "src/metadata/meta_event_factory.h"
 #include "src/metadata/meta_updater.h"
 #include "src/metadata/meta_volume_event_handler.h"
+#include "src/metadata/segment_context_updater.h"
 #include "src/volume/volume_service.h"
 
 namespace pos
@@ -67,6 +68,7 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
   volumeEventHandler(nullptr),
   metaService(service),
   metaUpdater(nullptr),
+  segmentContextUpdater(nullptr),
   metaEventFactory(nullptr)
 {
     volumeEventHandler = new MetaVolumeEventHandler(arrayInfo,
@@ -74,10 +76,13 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
         allocator,
         (journal->IsEnabled() ? journal->GetVolumeEventHandler() : nullptr));
 
+    auto sizeInfo = info->GetSizeInfo(PartitionType::USER_DATA);
+    segmentContextUpdater = new SegmentContextUpdater(allocator->GetISegmentCtx(), journal->GetVersionedSegmentContext(), sizeInfo);
+
     metaEventFactory = new MetaEventFactory(
         mapper->GetIVSAMap(),
         mapper->GetIStripeMap(),
-        allocator->GetISegmentCtx(),
+        segmentContextUpdater,
         allocator->GetIWBStripeAllocator(),
         allocator->GetIContextManager(),
         arrayInfo);
@@ -121,6 +126,12 @@ Metadata::~Metadata(void)
     {
         delete metaEventFactory;
         metaEventFactory = nullptr;
+    }
+
+    if (segmentContextUpdater != nullptr)
+    {
+        delete segmentContextUpdater;
+        segmentContextUpdater = nullptr;
     }
 
     if (metaUpdater != nullptr)
