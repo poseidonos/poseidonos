@@ -443,17 +443,26 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
 
     for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
     {
-        nameSet.nvm.push_back(buffer.devicename());
+        if (buffer.devicename() != "")
+        {
+            nameSet.nvm.push_back(buffer.devicename());
+        }
     }
 
     for (const grpc_cli::DeviceNameList& data : (request->param()).data())
     {
-        nameSet.data.push_back(data.devicename());
+        if (data.devicename() != "")
+        {
+            nameSet.data.push_back(data.devicename());
+        }
     }
-
+    
     for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
     {
-        nameSet.spares.push_back(spare.devicename());
+        if (spare.devicename() != "")
+        {
+            nameSet.spares.push_back(spare.devicename());
+        }
     }
 
     IArrayMgmt* array = ArrayMgr();
