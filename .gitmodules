@@ -1,3 +1,4 @@
 [submodule "tool/arion"]
 	path = tool/arion
 	url = ../arion.git
+	branch = main
