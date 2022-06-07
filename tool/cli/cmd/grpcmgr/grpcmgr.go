@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const timeout = 10
+const timeout = 30
 
 func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
