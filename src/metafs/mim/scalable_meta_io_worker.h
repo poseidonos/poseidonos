@@ -46,8 +46,9 @@ class MetaFsConfigManager;
 class ScalableMetaIoWorker : public MetaFsIoHandlerBase
 {
 public:
-    ScalableMetaIoWorker(void) = delete;
-    explicit ScalableMetaIoWorker(const int threadId, const int coreId,
+    // for test
+    ScalableMetaIoWorker(void);
+    ScalableMetaIoWorker(const int threadId, const int coreId,
         const std::string& threadName, MetaFsConfigManager* configManager,
         TelemetryPublisher* tp = nullptr);
     virtual ~ScalableMetaIoWorker(void);
@@ -56,7 +57,7 @@ public:
     virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) override;
     virtual bool RemoveArrayInfo(const int arrayId) override;
     void Execute(void);
-    void EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
 private:
     MioHandler* topHalf_;

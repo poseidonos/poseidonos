@@ -89,6 +89,7 @@ static const char* PosManagement_method_names[] = {
   "/pos_rpc.PosManagement/DeleteVolume",
   "/pos_rpc.PosManagement/MountVolume",
   "/pos_rpc.PosManagement/UnmountVolume",
+  "/pos_rpc.PosManagement/UpdateVoluemMeta",
   "/pos_rpc.PosManagement/GetArrayList",
   "/pos_rpc.PosManagement/GetVolumeList",
 };
@@ -106,8 +107,9 @@ PosManagement::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_DeleteVolume_(PosManagement_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_MountVolume_(PosManagement_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_UnmountVolume_(PosManagement_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetArrayList_(PosManagement_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetVolumeList_(PosManagement_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UpdateVoluemMeta_(PosManagement_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetArrayList_(PosManagement_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetVolumeList_(PosManagement_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosManagement::Stub::CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::pos_rpc::PosResponse* response) {
@@ -248,6 +250,29 @@ void PosManagement::Stub::experimental_async::UnmountVolume(::grpc::ClientContex
   return result;
 }
 
+::grpc::Status PosManagement::Stub::UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UpdateVoluemMeta_, context, request, response);
+}
+
+void PosManagement::Stub::experimental_async::UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateVoluemMeta_, context, request, response, std::move(f));
+}
+
+void PosManagement::Stub::experimental_async::UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateVoluemMeta_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::UpdateVoluemMetaRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_UpdateVoluemMeta_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncUpdateVoluemMetaRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status PosManagement::Stub::GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetArrayList_, context, request, response);
 }
@@ -358,6 +383,16 @@ PosManagement::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosManagement_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosManagement::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::pos_rpc::UpdateVoluemMetaRequest* req,
+             ::pos_rpc::PosResponse* resp) {
+               return service->UpdateVoluemMeta(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosManagement_method_names[7],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosManagement::Service* service,
              ::grpc::ServerContext* ctx,
@@ -366,7 +401,7 @@ PosManagement::Service::Service() {
                return service->GetArrayList(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[7],
+      PosManagement_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosManagement::Service* service,
@@ -416,6 +451,13 @@ PosManagement::Service::~Service() {
 }
 
 ::grpc::Status PosManagement::Service::UnmountVolume(::grpc::ServerContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosManagement::Service::UpdateVoluemMeta(::grpc::ServerContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response) {
   (void) context;
   (void) request;
   (void) response;

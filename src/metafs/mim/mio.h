@@ -137,7 +137,6 @@ protected:
     Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
     void _HandleMpioDone(void* data);
     MpioType _LookupMpioType(MetaIoRequestType type);
-    MetaLpnType _GetCalculateStartLpn(MetaFsIoRequest* ioReq);
 
     MetaFsIoRequest* originReq;
     MetaIoOpcode opCode;

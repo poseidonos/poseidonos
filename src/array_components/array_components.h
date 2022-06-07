@@ -45,6 +45,7 @@
 #include "src/metafs/metafs.h"
 #include "src/network/nvmf.h"
 #include "src/admin/smart_log_meta_io.h"
+#include "src/pos_replicator/replicator_volume_subscriber.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 using namespace std;
@@ -70,6 +71,7 @@ public:
         IStateControl* state,
         Array* array,
         VolumeManager* volMgr,
+        ReplicatorVolumeSubscriber* replicatorVolumeSubscriber,
         GarbageCollector* gc,
         Metadata* meta,
         RBAStateManager* rbaStateMgr,
@@ -106,6 +108,7 @@ private:
     GarbageCollector* gc = nullptr;
     Metadata* meta = nullptr;
     VolumeManager* volMgr = nullptr;
+    ReplicatorVolumeSubscriber* replicatorVolumeSubscriber = nullptr;
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
     Nvmf* nvmf = nullptr;

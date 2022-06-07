@@ -25,7 +25,7 @@ def play(tgts, inits, scenario, timestamp, data):
 
         grapher = graph.manager.Grapher(scenario, timestamp)
         result_fmt = rsfmt.manager.Formatter(scenario, timestamp)
-        result_fmt.add_test_cases(test_case_list)
+        result_fmt.add_test_cases([tc['name'] for tc in test_case_list])
     except Exception as e:
         lib.printer.red(traceback.format_exc())
         return data
@@ -43,7 +43,7 @@ def play(tgts, inits, scenario, timestamp, data):
             # run fio
             lib.printer.green(f" run -> {timestamp} {test_case['name']}")
             result_fmt.start_test(test_case["name"])
-            lib.subproc.parallel_run(fio_cmd_list)
+            lib.subproc.sync_parallel_run(fio_cmd_list)
 
             # copy output
             for key in initiators:

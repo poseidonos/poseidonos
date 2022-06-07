@@ -69,6 +69,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         uint64_t size = doc["param"]["size"].get<uint64_t>();
         uint64_t maxiops = 0;
         uint64_t maxbw = 0;
+        bool checkWalVol = doc["param"]["iswalvol"].get<bool>();
 
         if (doc["param"].contains("maxiops") &&
             doc["param"]["maxiops"].is_number_unsigned() == true)
@@ -89,17 +90,6 @@ CreateVolumeCommand::Execute(json& doc, string rid)
             return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
                 "failed to create volume: " + volName, GetPosInfo());
         }
-        IArrayInfo* array = info->arrayInfo;
-        ArrayStateType arrayState = array->GetState();
-        if (arrayState == ArrayStateEnum::BROKEN)
-        {
-            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
-            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
-                arrayName, arrayState.ToString());
-
-            return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
-                "failed to create volume: " + volName, GetPosInfo());
-        }
 
         if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
         {
@@ -113,7 +103,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
 
         if (volMgr != nullptr)
         {
-            ret = volMgr->Create(volName, size, maxiops, maxbw);
+            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol);
         }
 
         if (ret == SUCCESS)

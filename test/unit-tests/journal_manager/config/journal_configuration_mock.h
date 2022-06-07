@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(bool, IsEnabled, (), (override));
     MOCK_METHOD(bool, IsDebugEnabled, (), (override));
     MOCK_METHOD(bool, AreReplayWbStripesInUserArea, (), (override));
+    MOCK_METHOD(bool, IsRocksdbEnabled, (), (override));
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(uint64_t, GetLogBufferSize, (), (override));
     MOCK_METHOD(uint64_t, GetLogGroupSize, (), (override));

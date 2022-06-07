@@ -34,17 +34,19 @@
 
 #include <unordered_map>
 
-#include "versioned_segment_info.h"
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/logger/logger.h"
+#include "versioned_segment_info.h"
 
 namespace pos
 {
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
-  versionedSegInfo(nullptr),
-  numLogGroups(0)
+  numSegments(0),
+  segmentInfosInFlush(INVALID_SEGMENT_CONTEXT),
+  segmentInfos(nullptr)
 {
 }
 
@@ -54,105 +56,139 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
 {
-    config = journalConfiguration;
-    numLogGroups = config->GetNumLogGroups();
-    versionedSegInfo = new VersionedSegmentInfo*[numLogGroups];
-    for (uint32_t index = 0; index < numLogGroups; index++)
+    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+
+    for (int index = 0; index < config->GetNumLogGroups(); index++)
     {
-        versionedSegInfo[index] = new VersionedSegmentInfo;
+        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
+        segmentInfoDiffs.push_back(segmentInfo);
     }
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG,
+        "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
+        config->GetNumLogGroups(), numSegments);
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, VersionedSegmentInfo** inputVersionedSegmentInfo)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_,
+    std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo)
+{
+    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+
+    assert((int)inputVersionedSegmentInfo.size() == config->GetNumLogGroups());
+    segmentInfoDiffs = inputVersionedSegmentInfo;
+}
+
+void
+VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
 {
     config = journalConfiguration;
-    numLogGroups = config->GetNumLogGroups();
-    versionedSegInfo = inputVersionedSegmentInfo;
+
+    numSegments = numSegments_;
+    segmentInfos = new SegmentInfo[numSegments]();
+    for (uint32_t segId = 0; segId < numSegments; segId++)
+    {
+        // TODO (VSC) to keep on-disk data only
+        segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
+        segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+    }
 }
 
 void
 VersionedSegmentCtx::Dispose(void)
 {
-    if (versionedSegInfo != nullptr)
+    if (segmentInfos != nullptr)
     {
-        for (uint32_t index = 0; index < numLogGroups; index++)
-        {
-            if (versionedSegInfo[index] != nullptr)
-            {
-                delete versionedSegInfo[index];
-            }
-        }
-        delete[] versionedSegInfo;
-        versionedSegInfo = nullptr;
+        delete[] segmentInfos;
+        segmentInfos = nullptr;
     }
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG, "Disposed versioned segment context");
 }
 
 void
-VersionedSegmentCtx::IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt)
+VersionedSegmentCtx::IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
-    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
-    targetSegInfo->IncreaseValidBlockCount(segId, cnt);
-    // TODO (cheolho.kang): Add ISegmentContext method after introduced
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
+    segmentInfoDiffs[logGroupId]->IncreaseValidBlockCount(segId, cnt);
 }
 
 void
-VersionedSegmentCtx::DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
+VersionedSegmentCtx::DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
-    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
-    targetSegInfo->DecreaseValidBlockCount(segId, cnt, allowVictimSegRelease);
-    // TODO (cheolho.kang): Add ISegmentContext method after introduced
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
+    segmentInfoDiffs[logGroupId]->DecreaseValidBlockCount(segId, cnt);
 }
 
 void
-VersionedSegmentCtx::IncreaseOccupiedStripeCount(uint32_t logGroupId, SegmentId segId)
+VersionedSegmentCtx::IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId)
 {
-    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
-    targetSegInfo->IncreaseOccupiedStripeCount(segId);
-    // TODO (cheolho.kang): Add ISegmentContext method after introduced
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
+    segmentInfoDiffs[logGroupId]->IncreaseOccupiedStripeCount(segId);
 }
 
 void
-VersionedSegmentCtx::UpdateSegmentContext(uint32_t logGroupId)
+VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 {
-    VersionedSegmentInfo* targetSegInfo = versionedSegInfo[logGroupId];
-    std::unordered_map<uint32_t, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    assert(logGroupId < config->GetNumLogGroups());
+
+    shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
+    std::unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
-        if (it->second > 0)
-        {
-            // TODO (cheolho.kang): Add ISegmentContext method after introduced
-        }
-        if (it->second < 0)
-        {
-            // TODO (cheolho.kang): Add ISegmentContext method after introduced
-        }
+        auto segmentId = it->first;
+        auto validBlockCountDiff = it->second;
+
+        segmentInfos[segmentId].SetValidBlockCount(segmentInfos[segmentId].GetValidBlockCount() + validBlockCountDiff);
     }
 
     std::unordered_map<uint32_t, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
-        if (it->second > 0)
-        {
-            // TODO (cheolho.kang): Add ISegmentContext method after introduced
-        }
+        auto segmentId = it->first;
+        auto occupiedStripeCountDiff = it->second;
+
+        segmentInfos[segmentId].SetOccupiedStripeCount(segmentInfos[segmentId].GetOccupiedStripeCount() + occupiedStripeCountDiff);
     }
-    targetSegInfo->Reset();
 }
 
-// TODO (cheolho.kang): Change return type to ISegmentContext
-VersionedSegmentInfo*
-VersionedSegmentCtx::GetSegmentInfo(uint32_t logGroupId)
+SegmentInfo*
+VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
 {
-    if (logGroupId >= numLogGroups)
+    assert(logGroupId < config->GetNumLogGroups());
+
+    if (segmentInfosInFlush == logGroupId)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
-            "Failed to get buffered segment context, Invalid log gorup ID: {}, Maximun log group ID: {}", logGroupId, numLogGroups);
+            "Failed to get buffered segment context, log group {} is already in use", logGroupId);
         return nullptr;
     }
-    return versionedSegInfo[logGroupId];
+
+    segmentInfosInFlush = logGroupId;
+    _UpdateSegmentContext(logGroupId);
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+
+    return segmentInfos;
+}
+
+void
+VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
+{
+    assert(segmentInfosInFlush == logGroupId);
+    segmentInfoDiffs[logGroupId]->Reset();
+
+    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 } // namespace pos

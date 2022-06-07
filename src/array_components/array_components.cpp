@@ -51,6 +51,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*state*/,
     nullptr /*array*/,
     nullptr /*volMgr*/,
+    nullptr /*replicatorVolumeSubscriber*/,
     nullptr /*gc*/,
     nullptr /*metadata*/,
     nullptr /*rbaStateMgr*/,
@@ -85,6 +86,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     IStateControl* state,
     Array* array,
     VolumeManager* volMgr,
+    ReplicatorVolumeSubscriber* replicatorVolumeSubscriber,
     GarbageCollector* gc,
     Metadata* meta,
     RBAStateManager* rbaStateMgr,
@@ -101,6 +103,7 @@ ArrayComponents::ArrayComponents(string arrayName,
   gc(gc),
   meta(meta),
   volMgr(volMgr),
+  replicatorVolumeSubscriber(replicatorVolumeSubscriber),
   rbaStateMgr(rbaStateMgr),
   nvmf(nvmf),
   smartLogMetaIo(smartLogMetaIo),
@@ -269,6 +272,7 @@ ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(nvmf);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
+    mountSequence.push_back(replicatorVolumeSubscriber);
     mountSequence.push_back(meta);
     mountSequence.push_back(rbaStateMgr);
     mountSequence.push_back(flowControl);
@@ -287,6 +291,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
 {
     if (metafs != nullptr
         || volMgr != nullptr
+        || replicatorVolumeSubscriber != nullptr
         || nvmf != nullptr
         || meta != nullptr
         || rbaStateMgr != nullptr
@@ -302,6 +307,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     // Please note that the order of creation should be like the following:
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
+    replicatorVolumeSubscriber = new ReplicatorVolumeSubscriber(array);
     nvmf = new Nvmf(array->GetName(), array->GetIndex());
     meta = new Metadata(array, state);
     rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());

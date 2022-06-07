@@ -338,6 +338,13 @@ class PosManagement final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
     }
+    virtual ::grpc::Status UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncUpdateVoluemMetaRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncUpdateVoluemMetaRaw(context, request, cq));
+    }
     virtual ::grpc::Status GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>> AsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>>(AsyncGetArrayListRaw(context, request, cq));
@@ -391,6 +398,12 @@ class PosManagement final {
       #else
       virtual void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -424,6 +437,8 @@ class PosManagement final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>* AsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>* PrepareAsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::VolumeListResponse>* AsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -473,6 +488,13 @@ class PosManagement final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
+    }
+    ::grpc::Status UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncUpdateVoluemMetaRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncUpdateVoluemMetaRaw(context, request, cq));
     }
     ::grpc::Status GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>> AsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
@@ -527,6 +549,12 @@ class PosManagement final {
       #else
       void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
@@ -562,6 +590,8 @@ class PosManagement final {
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* AsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* PrepareAsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::VolumeListResponse>* AsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -572,6 +602,7 @@ class PosManagement final {
     const ::grpc::internal::RpcMethod rpcmethod_DeleteVolume_;
     const ::grpc::internal::RpcMethod rpcmethod_MountVolume_;
     const ::grpc::internal::RpcMethod rpcmethod_UnmountVolume_;
+    const ::grpc::internal::RpcMethod rpcmethod_UpdateVoluemMeta_;
     const ::grpc::internal::RpcMethod rpcmethod_GetArrayList_;
     const ::grpc::internal::RpcMethod rpcmethod_GetVolumeList_;
   };
@@ -587,6 +618,7 @@ class PosManagement final {
     virtual ::grpc::Status DeleteVolume(::grpc::ServerContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response);
     virtual ::grpc::Status MountVolume(::grpc::ServerContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response);
     virtual ::grpc::Status UnmountVolume(::grpc::ServerContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response);
+    virtual ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response);
     virtual ::grpc::Status GetArrayList(::grpc::ServerContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response);
     virtual ::grpc::Status GetVolumeList(::grpc::ServerContext* context, const ::pos_rpc::GetVolumeListRequest* request, ::pos_rpc::VolumeListResponse* response);
   };
@@ -711,12 +743,32 @@ class PosManagement final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_UpdateVoluemMeta() {
+      ::grpc::Service::MarkMethodAsync(6);
+    }
+    ~WithAsyncMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateVoluemMeta(::grpc::ServerContext* context, ::pos_rpc::UpdateVoluemMetaRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodAsync(6);
+      ::grpc::Service::MarkMethodAsync(7);
     }
     ~WithAsyncMethod_GetArrayList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -727,7 +779,7 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetArrayList(::grpc::ServerContext* context, ::pos_rpc::GetArrayListRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::ArrayListResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -736,7 +788,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodAsync(7);
+      ::grpc::Service::MarkMethodAsync(8);
     }
     ~WithAsyncMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -747,10 +799,10 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetVolumeList(::grpc::ServerContext* context, ::pos_rpc::GetVolumeListRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::VolumeListResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_CreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_CreateVolume<WithAsyncMethod_DeleteVolume<WithAsyncMethod_MountVolume<WithAsyncMethod_UnmountVolume<WithAsyncMethod_GetArrayList<WithAsyncMethod_GetVolumeList<Service > > > > > > > > AsyncService;
+  typedef WithAsyncMethod_CreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_CreateVolume<WithAsyncMethod_DeleteVolume<WithAsyncMethod_MountVolume<WithAsyncMethod_UnmountVolume<WithAsyncMethod_UpdateVoluemMeta<WithAsyncMethod_GetArrayList<WithAsyncMethod_GetVolumeList<Service > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_CreateArray : public BaseClass {
    private:
@@ -1034,6 +1086,53 @@ class PosManagement final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithCallbackMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_UpdateVoluemMeta() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response) { return this->UpdateVoluemMeta(context, request, response); }));}
+    void SetMessageAllocatorFor_UpdateVoluemMeta(
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateVoluemMeta(
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateVoluemMeta(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithCallbackMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1044,7 +1143,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(6,
+        MarkMethodCallback(7,
           new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1056,9 +1155,9 @@ class PosManagement final {
     void SetMessageAllocatorFor_GetArrayList(
         ::grpc::experimental::MessageAllocator< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1091,7 +1190,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(7,
+        MarkMethodCallback(8,
           new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1103,9 +1202,9 @@ class PosManagement final {
     void SetMessageAllocatorFor_GetVolumeList(
         ::grpc::experimental::MessageAllocator< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(8);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1128,10 +1227,10 @@ class PosManagement final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_CreateArray : public BaseClass {
    private:
@@ -1235,12 +1334,29 @@ class PosManagement final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_UpdateVoluemMeta() {
+      ::grpc::Service::MarkMethodGeneric(6);
+    }
+    ~WithGenericMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodGeneric(6);
+      ::grpc::Service::MarkMethodGeneric(7);
     }
     ~WithGenericMethod_GetArrayList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1257,7 +1373,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodGeneric(7);
+      ::grpc::Service::MarkMethodGeneric(8);
     }
     ~WithGenericMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1389,12 +1505,32 @@ class PosManagement final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_UpdateVoluemMeta() {
+      ::grpc::Service::MarkMethodRaw(6);
+    }
+    ~WithRawMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateVoluemMeta(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodRaw(6);
+      ::grpc::Service::MarkMethodRaw(7);
     }
     ~WithRawMethod_GetArrayList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1405,7 +1541,7 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetArrayList(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1414,7 +1550,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodRaw(7);
+      ::grpc::Service::MarkMethodRaw(8);
     }
     ~WithRawMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1425,7 +1561,7 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetVolumeList(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1657,6 +1793,44 @@ class PosManagement final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_UpdateVoluemMeta() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateVoluemMeta(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateVoluemMeta(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateVoluemMeta(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1667,7 +1841,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(6,
+        MarkMethodRawCallback(7,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1705,7 +1879,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(7,
+        MarkMethodRawCallback(8,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1895,12 +2069,39 @@ class PosManagement final {
     virtual ::grpc::Status StreamedUnmountVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::UnmountVolumeRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_UpdateVoluemMeta : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_UpdateVoluemMeta() {
+      ::grpc::Service::MarkMethodStreamed(6,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>* streamer) {
+                       return this->StreamedUpdateVoluemMeta(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_UpdateVoluemMeta() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* /*context*/, const ::pos_rpc::UpdateVoluemMetaRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedUpdateVoluemMeta(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::UpdateVoluemMetaRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_GetArrayList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodStreamed(6,
+      ::grpc::Service::MarkMethodStreamed(7,
         new ::grpc::internal::StreamedUnaryHandler<
           ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>(
             [this](::grpc::ServerContext* context,
@@ -1927,7 +2128,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodStreamed(7,
+      ::grpc::Service::MarkMethodStreamed(8,
         new ::grpc::internal::StreamedUnaryHandler<
           ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>(
             [this](::grpc::ServerContext* context,
@@ -1948,9 +2149,9 @@ class PosManagement final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetVolumeList(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::GetVolumeListRequest,::pos_rpc::VolumeListResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > > StreamedService;
 };
 
 // /////////////////////////////////////////////////////////////////////////////////

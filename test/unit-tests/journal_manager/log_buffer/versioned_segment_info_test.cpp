@@ -48,7 +48,7 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
 
     // When
     versionedSegInfo.IncreaseValidBlockCount(2, 3);
-    versionedSegInfo.DecreaseValidBlockCount(2, 1, false);
+    versionedSegInfo.DecreaseValidBlockCount(2, 1);
     versionedSegInfo.IncreaseValidBlockCount(1, 4);
 
     // Then

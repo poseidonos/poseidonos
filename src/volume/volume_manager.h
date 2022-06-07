@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 
 #include "src/volume/i_volume_manager.h"
@@ -67,12 +68,14 @@ public:
     void Shutdown(void) override;
     void Flush(void) override;
 
-    int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) override;
+    int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume) override;
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;
     int Unmount(std::string name) override;
+    int Unmount(int volId) override;
     int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) override;
     int Rename(std::string oldname, std::string newname) override;
+    int SaveVolumeMeta(void) override;
     int CheckVolumeValidity(std::string name) override;
 
     void DetachVolumes(void) override;
@@ -99,6 +102,8 @@ public:
 private:
     int _LoadVolumes(void);
     int _CheckPrerequisite(void);
+    void _ClearLock(void);
+
     bool initialized = false;
     bool stopped = false;
 
@@ -109,6 +114,9 @@ private:
 
     IArrayInfo* arrayInfo;
     IStateControl* state;
+
+    std::mutex volumeEventLock;
+    std::mutex volumeExceptionLock;
 };
 
 } // namespace pos

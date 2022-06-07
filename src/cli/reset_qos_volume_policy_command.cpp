@@ -95,7 +95,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
              "failed to reset qos policy for volumes", GetPosInfo());
     }
 
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
         return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
@@ -109,8 +109,8 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         }
         for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
         {
-            validVol = volMgr->GetVolumeID(*vol);
-            if (-1 == validVol)
+            validVol = volMgr->CheckVolumeValidity(*vol);
+            if (EID(SUCCESS) != validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
                 return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());

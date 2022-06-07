@@ -44,7 +44,6 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
 : configManager_(configManager),
   mioPoolCapacity_(0),
   mpioPoolCapacity_(0),
-  writeMpioEnabled_(false),
   writeMpioCapacity_(0),
   directAccessEnabled_(false),
   timeIntervalInMillisecondsForMetric_(0)
@@ -61,7 +60,6 @@ MetaFsConfigManager::Init(void)
 {
     mioPoolCapacity_ = _GetMioPoolCapacity();
     mpioPoolCapacity_ = _GetMpioPoolCapacity();
-    writeMpioEnabled_ = _IsWriteMpioCacheEnabled();
     writeMpioCapacity_ = _GetWriteMpioCacheCapacity();
     directAccessEnabled_ = _IsDirectAccessEnabled();
     timeIntervalInMillisecondsForMetric_ = _GetTimeIntervalInMillisecondsForMetric();
@@ -83,8 +81,6 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"mio_pool_capacity", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::MpioPoolCapacity,
         {"mpio_pool_capacity", CONFIG_TYPE_UINT64}});
-    configMap_.insert({MetaFsConfigType::WriteMpioCacheEnabled,
-        {"write_mpio_cache_enable", CONFIG_TYPE_BOOL}});
     configMap_.insert({MetaFsConfigType::WriteMpioCacheCapacity,
         {"write_mpio_cache_capacity", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::DirectAccessForJournalEnabled,
@@ -132,19 +128,6 @@ MetaFsConfigManager::_GetMpioPoolCapacity(void)
         configMap_[MetaFsConfigType::MpioPoolCapacity].first + ": " + std::to_string(count));
 
     return count;
-}
-
-bool
-MetaFsConfigManager::_IsWriteMpioCacheEnabled(void)
-{
-    bool enabled = false;
-    if (_ReadConfiguration<bool>(MetaFsConfigType::WriteMpioCacheEnabled, &enabled))
-        return false;
-
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
-        configMap_[MetaFsConfigType::WriteMpioCacheEnabled].first + (enabled ? " is enabled" : " is disabled"));
-
-    return enabled;
 }
 
 size_t

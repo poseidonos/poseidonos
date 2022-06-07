@@ -189,6 +189,7 @@ MioHandler::_HandleIoSQ(void)
 
     if (_IsRangeOverlapConflicted(reqMsg) || _IsPendedRange(reqMsg))
     {
+        reqMsg->StoreTimestamp(IoRequestStage::EnqueueToRetryQ);
         _PushToRetry(reqMsg);
         return;
     }
@@ -271,7 +272,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
 
         if (!_IsRangeOverlapConflicted(pendingIoReq))
         {
-            if (MetaStorageType::NVRAM == pendingIoReq->targetMediaType)
+            if (MetaStorageType::SSD != pendingIoReq->targetMediaType)
             {
                 if (!_ExecutePendedIo(pendingIoReq))
                     break;
@@ -291,6 +292,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
                     pendingIoRetryQ.size());
 
                 _RegisterRangeLockInfo(pendingIoReq);
+                pendingIoReq->StoreTimestamp(IoRequestStage::DequeueToRetryQ);
                 ExecuteMio(*mio);
             }
         }
@@ -317,6 +319,7 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
         if (reqMsg->arrayId == msg->arrayId)
         {
             reqList->push_back(msg);
+            msg->StoreTimestamp(IoRequestStage::DequeueToRetryQ);
             pendingIoRetryQ.erase(it++);
         }
         else

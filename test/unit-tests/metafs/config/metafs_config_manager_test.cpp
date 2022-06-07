@@ -96,9 +96,8 @@ public:
 
 protected:
     void _CreateConfigManager(const size_t mioPoolCapacity,
-        const size_t mpioPoolCapacity, const bool writeMpioCacheEnabled,
-        const size_t writeMpioCacheCapacity, const bool directAccessEnabled,
-        const size_t timeIntervalInMillisecondsForMetric)
+        const size_t mpioPoolCapacity, const size_t writeMpioCacheCapacity,
+        const bool directAccessEnabled, const size_t timeIntervalInMillisecondsForMetric)
     {
         config = new NiceMock<MockConfigManager>;
 
@@ -106,8 +105,6 @@ protected:
             .WillByDefault(SetArg2ToLongAndReturn0(mioPoolCapacity));
         ON_CALL(*config, GetValue("metafs", "mpio_pool_capacity", _, _))
             .WillByDefault(SetArg2ToLongAndReturn0(mpioPoolCapacity));
-        ON_CALL(*config, GetValue("metafs", "write_mpio_cache_enable", _, _))
-            .WillByDefault(SetArg2ToBoolAndReturn0(writeMpioCacheEnabled));
         ON_CALL(*config, GetValue("metafs", "write_mpio_cache_capacity", _, _))
             .WillByDefault(SetArg2ToLongAndReturn0(writeMpioCacheCapacity));
         ON_CALL(*config, GetValue("metafs", "direct_access_for_journal_enable", _, _))
@@ -125,20 +122,18 @@ protected:
 TEST_F(MetaFsConfigManagerFixture, _ValidateConfig_testIfTheConfigIsInvalid)
 {
     const size_t CAPACITY = 0;
-    _CreateConfigManager(CAPACITY, CAPACITY, false, CAPACITY, false, 50);
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, 50);
     EXPECT_FALSE(manager->ValidateConfig());
 }
 
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
 {
     const size_t CAPACITY = 32;
-    _CreateConfigManager(CAPACITY, CAPACITY + 1, true, CAPACITY + 2,
-        true, CAPACITY + 3);
+    _CreateConfigManager(CAPACITY, CAPACITY + 1, CAPACITY + 2, true, CAPACITY + 3);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
     EXPECT_EQ(manager->GetMpioPoolCapacity(), CAPACITY + 1);
-    EXPECT_TRUE(manager->IsWriteMpioCacheEnabled());
     EXPECT_EQ(manager->GetWriteMpioCacheCapacity(), CAPACITY + 2);
     EXPECT_TRUE(manager->IsDirectAccessEnabled());
     EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY + 3);
@@ -147,13 +142,11 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse)
 {
     const size_t CAPACITY = 0;
-    _CreateConfigManager(CAPACITY, CAPACITY, false, CAPACITY,
-        false, CAPACITY);
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
     EXPECT_EQ(manager->GetMpioPoolCapacity(), CAPACITY);
-    EXPECT_FALSE(manager->IsWriteMpioCacheEnabled());
     EXPECT_EQ(manager->GetWriteMpioCacheCapacity(), CAPACITY);
     EXPECT_FALSE(manager->IsDirectAccessEnabled());
     EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY);

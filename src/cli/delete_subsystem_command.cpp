@@ -97,7 +97,7 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
     for (auto& volList : volListPerArray)
     {
         string arrayName = volList.first;
-        IVolumeManager* volMgr =
+        IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
         for (auto& volId : volList.second)
@@ -106,14 +106,13 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
             if (volMgr != nullptr)
             {
                 string volName;
-                ret = volMgr->GetVolumeName(volId, volName);
-                if (ret != SUCCESS)
+                ret = volMgr->Unmount(volId);
+                if (ret == EID(VOL_NOT_FOUND))
                 {
                     errorMessage = "Failed to delete subsystem. Failed to find volume name. Only some of volumes are unmounted.";
                     return ret;
                 }
-                ret = volMgr->Unmount(volName);
-                if (ret != SUCCESS)
+                else if (ret != SUCCESS)
                 {
                     errorMessage = "Failed to delete subsystem. Failed to unmount volume. Only some of volumes are unmounted.";
                     return ret;

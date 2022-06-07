@@ -44,6 +44,7 @@ class JournalManager;
 class MetaFsFileControlApi;
 
 class MetaUpdater;
+class SegmentContextUpdater;
 class MetaEventFactory;
 class MetaVolumeEventHandler;
 class MetaService;
@@ -74,6 +75,7 @@ private:
     MetaService* metaService;
 
     MetaUpdater* metaUpdater;
+    SegmentContextUpdater* segmentContextUpdater;
     MetaEventFactory* metaEventFactory;
 };
 } // namespace pos
