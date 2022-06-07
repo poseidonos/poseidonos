@@ -366,7 +366,7 @@ enum class POS_EVENT_ID
     JOURNAL_ALREADY_EXIST = 3004,
     JOURNAL_INVALID = 3005,
 
-    // Journal log buffer (3010)
+    // --------------Journal log buffer (3010)---------
     JOURNAL_LOG_BUFFER_CREATED = 3010,
     JOURNAL_LOG_BUFFER_CREATE_FAILED = 3011,
     JOURNAL_LOG_BUFFER_LOADED = 3012,
@@ -377,14 +377,14 @@ enum class POS_EVENT_ID
     JOURNAL_LOG_BUFFER_READ_FAILED = 3017,
     JOURNAL_LOG_BUFFER_INITIATED = 3018,
 
-    // Write logs (3020)
+    // --------------Write logs (3020)-----------------
     JOURNAL_LOG_WRITE_FAILED = 3020,
     JOURNAL_INVALID_SIZE_LOG_REQUESTED = 3021,
     ADD_TO_JOURNAL_WAITING_LIST = 3022,
     JOURNAL_CALLBACK_FAILED = 3023,
     JOURNAL_NO_LOG_BUFFER_AVAILABLE = 3024,
 
-    // Checkpoint (3030)
+    // --------------Checkpoint (3030)-----------------
     JOURNAL_LOG_GROUP_FULL = 3030,
     JOURNAL_FLUSH_LOG_GROUP = 3031,
     JOURNAL_CHECKPOINT_STARTED = 3032,
@@ -394,10 +394,10 @@ enum class POS_EVENT_ID
     JOUNRAL_WRITE_LOG_GROUP_FOOTER = 3036,
     JOURNAL_CHECKPOINT_IN_PROGRESS = 3037,
 
-    // Journaling system events (3040)
+    // --------------Journaling system events (3040)---
     JOURNAL_HANDLE_VOLUME_DELETION = 3040,
 
-    // Replay journal (3050)
+    // --------------Replay journal (3050)-------------
     JOURNAL_REPLAY_STARTED = 3050,
     JOURNAL_REPLAY_STATUS = 3051,
     JOURNAL_REPLAY_STOPPED = 3052,
