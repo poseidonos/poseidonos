@@ -41,8 +41,8 @@
 #include "src/journal_manager/i_journal_status_provider.h"
 #include "src/journal_manager/i_journal_writer.h"
 #include "src/journal_manager/journaling_status.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
-#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos
 {
@@ -104,7 +104,7 @@ public:
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
         CheckpointManager* checkpointManager,
-        VersionedSegmentCtx* versionedSegCtx_,
+        IVersionedSegmentContext* versionedSegCtx_,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
@@ -134,8 +134,11 @@ public:
     IJournalWriter* GetJournalWriter(void);
     IJournalVolumeEventHandler* GetVolumeEventHandler(void);
     IJournalStatusProvider* GetJournalStatusProvider(void);
+    IVersionedSegmentContext* GetVersionedSegmentContext(void);
 
 protected:
+    IVersionedSegmentContext* _CreateVersionedSegmentCtx(void);
+
     void _InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
@@ -172,7 +175,7 @@ protected:
     LogGroupReleaser* logGroupReleaser;
 
     CheckpointManager* checkpointManager;
-    VersionedSegmentCtx* versionedSegCtx;
+    IVersionedSegmentContext* versionedSegCtx;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;
