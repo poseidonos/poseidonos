@@ -126,6 +126,8 @@ FlowControl::Init(void)
         }
     }
 
+    InitDistributer();
+
     for (uint32_t i = 0; i < FlowControlType::MAX_FLOW_CONTROL_TYPE; i++)
     {
         bucket[i] = 0;
