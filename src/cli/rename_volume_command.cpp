@@ -76,17 +76,6 @@ RenameVolumeCommand::Execute(json& doc, string rid)
                  "failed to rename volume " + oldName + "to " + newName, GetPosInfo());
         }
 
-        IArrayInfo* array = info->arrayInfo;
-        ArrayStateType arrayState = array->GetState();
-        if (arrayState == ArrayStateEnum::BROKEN)
-        {
-            int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
-            POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}",
-                arrayName, arrayState.ToString());
-
-            return jFormat.MakeResponse("RENAMEVOLUME", rid, ret,
-                 "failed to rename volume " + oldName + "to " + newName, GetPosInfo());
-        }
         if (volMgr != nullptr)
         {
             ret = volMgr->Rename(oldName, newName);

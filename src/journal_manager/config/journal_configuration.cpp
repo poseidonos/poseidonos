@@ -119,6 +119,12 @@ JournalConfiguration::AreReplayWbStripesInUserArea(void)
     return areReplayWbStripesInUserArea;
 }
 
+bool
+JournalConfiguration::IsRocksdbEnabled(void)
+{
+    return rocksdbEnabled;
+}
+
 int
 JournalConfiguration::GetNumLogGroups(void)
 {
@@ -171,6 +177,7 @@ JournalConfiguration::_ReadConfiguration(void)
 
         debugEnabled = _IsDebugEnabled();
         logBufferSizeInConfig = _ReadLogBufferSize();
+        rocksdbEnabled = _IsRocksdbEnabled();
     }
     else
     {
@@ -233,6 +240,25 @@ JournalConfiguration::_ReadLogBufferSize(void)
     return size;
 }
 
+bool
+JournalConfiguration::_IsRocksdbEnabled(void)
+{
+    bool enabled = false;
+    int ret = configManager->GetValue("journal", "use_rocksdb",
+        &enabled, ConfigType::CONFIG_TYPE_BOOL);
+
+    if (ret == 0)
+    {
+        if (enabled == true)
+        {
+            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+                "Journal RocksDB Interface enabled");
+            return true;
+        }
+    }
+    return false;
+}
+
 void
 JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
 {
@@ -252,7 +278,7 @@ JournalConfiguration::_ConfigureLogBufferSize(uint64_t& size)
 
     if (maxPartitionSize <= metaPageSize)
     {
-        POS_TRACE_DEBUG(eventId, "No enugh space to create new log buffer");
+        POS_TRACE_DEBUG(eventId, "No enough space to create new log buffer");
         return -1 * eventId;
     }
 

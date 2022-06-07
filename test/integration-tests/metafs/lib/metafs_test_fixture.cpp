@@ -55,7 +55,6 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     EXPECT_CALL(*config, Init).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetMioPoolCapacity).WillRepeatedly(Return(32 * 1024));
     EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(32 * 1024));
-    EXPECT_CALL(*config, IsWriteMpioCacheEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(32));
     EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(5000));

@@ -47,11 +47,21 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
     TelemetryPublisher* tp)
 : MetaFsIoHandlerBase(threadId, coreId, threadName),
   TOTAL_CORE_COUNT(totalCoreCount),
-  MIO_CORE_COUNT(CPU_COUNT(&mioCoreSet)),
   MIO_CORE_SET(mioCoreSet),
+  mioCoreCount_(CPU_COUNT(&mioCoreSet)),
   config_(config),
   tp_(tp),
-  cpuStallCnt_(0)
+  cpuStallCnt_(0),
+  currentReqMsg_(nullptr),
+  chunkSize_(0),
+  fileBaseLpn_(0),
+  startLpn_(0),
+  currentLpn_(0),
+  requestCount_(0),
+  remainCount_(0),
+  extentsCount_(0),
+  currentExtent_(0),
+  extents_(nullptr)
 {
 }
 
@@ -80,74 +90,139 @@ MetaFsIoScheduler::ExitThread(void)
 }
 
 void
-MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
+MetaFsIoScheduler::_SetRequestCountOrCallbackCountOfCurrentRequest(int count)
 {
-    FileSizeType chunkSize = reqMsg->fileCtx->chunkSize;
-    uint64_t byteOffset = 0;
-    MetaLpnType fileBaseLpn = reqMsg->fileCtx->fileBaseLpn;
-    MetaLpnType startLpn = fileBaseLpn + (reqMsg->byteOffsetInFile / chunkSize);
-    MetaLpnType endLpn = fileBaseLpn + ((reqMsg->byteOffsetInFile + reqMsg->byteSize - 1) / chunkSize);
-
-    // set the request count to process the callback count
-    if (MetaIoMode::Async == reqMsg->ioMode)
+    if (MetaIoMode::Async == currentReqMsg_->ioMode)
     {
-        ((MetaFsAioCbCxt*)reqMsg->aiocb)->SetCallbackCount(endLpn - startLpn + 1);
+        ((MetaFsAioCbCxt*)currentReqMsg_->aiocb)->SetCallbackCount(count);
     }
     else
     {
-        reqMsg->originalMsg->requestCount = endLpn - startLpn + 1;
+        currentReqMsg_->originalMsg->requestCount = count;
     }
+}
 
-    for (MetaLpnType idx = startLpn; idx <= endLpn; idx++)
+void
+MetaFsIoScheduler::_SetCurrentContextFrom(MetaFsIoRequest* reqMsg)
+{
+    currentReqMsg_ = reqMsg;
+
+    chunkSize_ = currentReqMsg_->fileCtx->chunkSize;
+    fileBaseLpn_ = currentReqMsg_->fileCtx->fileBaseLpn;
+    startLpn_ = reqMsg->GetStartLpn();
+    currentLpn_ = startLpn_;
+    requestCount_ = reqMsg->GetRequestLpnCount();
+    remainCount_ = requestCount_;
+    extentsCount_ = currentReqMsg_->fileCtx->extentsCount;
+    extents_ = currentReqMsg_->fileCtx->extents;
+
+    // set the request count to process the callback count
+    _SetRequestCountOrCallbackCountOfCurrentRequest(requestCount_);
+}
+
+void
+MetaFsIoScheduler::_ClearCurrentContext(void)
+{
+    currentReqMsg_ = nullptr;
+    chunkSize_ = 0;
+    fileBaseLpn_ = 0;
+    startLpn_ = 0;
+    currentLpn_ = 0;
+    requestCount_ = 0;
+    remainCount_ = 0;
+    extentsCount_ = 0;
+    currentExtent_ = 0;
+    extents_ = nullptr;
+}
+
+void
+MetaFsIoScheduler::_UpdateCurrentLpnToNextExtent(void)
+{
+    if (currentLpn_ > extents_[currentExtent_].GetLast())
+    {
+        ++currentExtent_;
+        currentLpn_ = extents_[currentExtent_].GetStartLpn();
+    }
+}
+
+void
+MetaFsIoScheduler::_UpdateCurrentLpnToNextExtentConditionally(void)
+{
+    while (currentExtent_ < extentsCount_)
+    {
+        if (currentLpn_ <= extents_[currentExtent_].GetLast())
+        {
+            break;
+        }
+        ++currentExtent_;
+    }
+}
+
+void
+MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
+{
+    uint64_t byteOffset = 0;
+    bool isFirstLpn = true;
+
+    _SetCurrentContextFrom(reqMsg);
+    _UpdateCurrentLpnToNextExtentConditionally();
+
+    while (remainCount_)
     {
         // reqMsg     : only for meta scheduler, not meta handler thread
         // cloneReqMsg: new copy, sent to meta handler thread by scheduler
         // reqMsg->originalMsg: from a user thread
-        MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest();
-        cloneReqMsg->CopyUserReqMsg(*reqMsg);
+        MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest(*currentReqMsg_);
 
         // 1st
-        if (idx == startLpn)
+        if (isFirstLpn)
         {
-            cloneReqMsg->buf = reqMsg->buf;
-            cloneReqMsg->byteOffsetInFile = reqMsg->byteOffsetInFile;
-            if (chunkSize < (reqMsg->byteSize + (reqMsg->byteOffsetInFile % chunkSize)))
+            isFirstLpn = false;
+            cloneReqMsg->buf = currentReqMsg_->buf;
+            cloneReqMsg->byteOffsetInFile = currentReqMsg_->byteOffsetInFile;
+            if (chunkSize_ < (currentReqMsg_->byteSize + (currentReqMsg_->byteOffsetInFile % chunkSize_)))
             {
-                cloneReqMsg->byteSize = chunkSize - (reqMsg->byteOffsetInFile % chunkSize);
+                cloneReqMsg->byteSize = chunkSize_ - (currentReqMsg_->byteOffsetInFile % chunkSize_);
             }
             else
             {
-                cloneReqMsg->byteSize = reqMsg->byteSize;
+                cloneReqMsg->byteSize = currentReqMsg_->byteSize;
             }
         }
         // last
-        else if (idx == endLpn)
+        else if (remainCount_ == 1)
         {
-            cloneReqMsg->buf = (FileBufType)((uint64_t)reqMsg->buf + byteOffset);
-            cloneReqMsg->byteOffsetInFile = reqMsg->byteOffsetInFile + byteOffset;
-            cloneReqMsg->byteSize = reqMsg->byteSize - byteOffset;
+            cloneReqMsg->buf = (FileBufType)((uint64_t)currentReqMsg_->buf + byteOffset);
+            cloneReqMsg->byteOffsetInFile = currentReqMsg_->byteOffsetInFile + byteOffset;
+            cloneReqMsg->byteSize = currentReqMsg_->byteSize - byteOffset;
         }
         else
         {
-            cloneReqMsg->buf = (FileBufType)((uint64_t)reqMsg->buf + byteOffset);
-            cloneReqMsg->byteOffsetInFile = reqMsg->byteOffsetInFile + byteOffset;
-            cloneReqMsg->byteSize = chunkSize;
+            cloneReqMsg->buf = (FileBufType)((uint64_t)currentReqMsg_->buf + byteOffset);
+            cloneReqMsg->byteOffsetInFile = currentReqMsg_->byteOffsetInFile + byteOffset;
+            cloneReqMsg->byteSize = chunkSize_;
         }
 
         byteOffset += cloneReqMsg->byteSize;
-        cloneReqMsg->baseMetaLpn = idx;
+        cloneReqMsg->baseMetaLpn = currentLpn_;
 
-        metaIoWorkerList_[idx % MIO_CORE_COUNT]->EnqueueNewReq(cloneReqMsg);
+        metaIoWorkerList_[currentLpn_ % mioCoreCount_]->EnqueueNewReq(cloneReqMsg);
+
+        ++currentLpn_;
+        --remainCount_;
+        _UpdateCurrentLpnToNextExtent();
     }
 
     // delete msg instance, this instance was only for meta scheduler
     delete reqMsg;
+
+    _ClearCurrentContext();
 }
 
 void
 MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    ioMultiQ.Enqueue(reqMsg, reqMsg->priority);
+    ioMultiQ_.Enqueue(reqMsg, reqMsg->priority);
 }
 
 bool
@@ -200,7 +275,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
 {
     const std::string fileName = "MioHandler";
     uint32_t handlerId = 0;
-    int availableMioCoreCnt = MIO_CORE_COUNT;
+    int availableMioCoreCnt = CPU_COUNT(&MIO_CORE_SET);
     for (uint32_t coreId = 0; coreId < TOTAL_CORE_COUNT; ++coreId)
     {
         if (CPU_ISSET(coreId, &MIO_CORE_SET))
@@ -225,8 +300,15 @@ MetaFsIoScheduler::_CreateMioThread(void)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
             "The Count of created MioHandler: {}, expected count: {}",
-            MIO_CORE_COUNT - availableMioCoreCnt, MIO_CORE_COUNT);
+            mioCoreCount_ - availableMioCoreCnt, mioCoreCount_);
     }
+}
+
+void
+MetaFsIoScheduler::RegisterMetaIoWorkerForTest(ScalableMetaIoWorker* metaIoWorker)
+{
+    metaIoWorkerList_.emplace_back(metaIoWorker);
+    mioCoreCount_ = metaIoWorkerList_.size();
 }
 
 void
@@ -249,13 +331,13 @@ MetaFsIoScheduler::Execute(void)
         }
         cpuStallCnt_ = 0;
 
-        IssueRequest(reqMsg);
+        IssueRequestAndDelete(reqMsg);
     }
 }
 
 MetaFsIoRequest*
 MetaFsIoScheduler::_FetchPendingNewReq(void)
 {
-    return ioMultiQ.Dequeue();
+    return ioMultiQ_.Dequeue();
 }
 } // namespace pos

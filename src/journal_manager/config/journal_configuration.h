@@ -57,6 +57,7 @@ public:
     virtual bool IsEnabled(void);
     virtual bool IsDebugEnabled(void);
     virtual bool AreReplayWbStripesInUserArea(void);
+    virtual bool IsRocksdbEnabled(void);
 
     virtual int GetNumLogGroups(void);
     virtual uint64_t GetLogBufferSize(void);
@@ -89,11 +90,13 @@ private:
     bool _IsJournalEnabled(void);
     bool _IsDebugEnabled(void);
     uint64_t _ReadLogBufferSize(void);
+    bool _IsRocksdbEnabled(void);
 
     void _ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl);
 
     bool areReplayWbStripesInUserArea;
     bool debugEnabled;
+    bool rocksdbEnabled;
 
     ConfigManager* configManager;
     int numLogGroups;

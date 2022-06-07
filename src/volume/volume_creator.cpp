@@ -67,9 +67,11 @@ VolumeCreator::_CheckRequestValidity(string name, uint64_t size)
 
 void
 VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
-        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw, bool checkWalVolume)
 {
-    vol = new Volume(arrayName, arrayID, name, size);
+    VolumeAttribute volumeAttribute = (checkWalVolume ? VolumeAttribute::HAJournalData : VolumeAttribute::UserData);
+
+    vol = new Volume(arrayName, arrayID, name, size, volumeAttribute);
     if (vol == nullptr)
     {
         POS_TRACE_ERROR(EID(CREATE_VOL_MEM_ALLOC_FAIL), "Fail to allocate memory");
@@ -133,13 +135,13 @@ VolumeCreator::_RollbackCreatedVolume(int exceptionEvent)
 }
 
 int
-VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
-        uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw,
+        uint64_t minIops, uint64_t minBw, bool checkWalVolume)
 {
     try
     {
         _CheckRequestValidity(name, size);
-        _CreateVolume(name, size, maxIops, maxBw, minIops, minBw);
+        _CreateVolume(name, size, maxIops, maxBw, minIops, minBw, checkWalVolume);
 
         _NotificationVolumeEvent();
 

@@ -13,31 +13,27 @@ Poseidon Unit/Integration/System Tests
     cd test/
     cmake .
     ```
-3. Generate/sync mocks and test skeletons
-    ```bash
-    make gen_ut    
-    ```
-4. Build them all (in parallel if you'd like)
+3. Build them all (in parallel if you'd like)
     ```bash
     make -j 4
     ```
-5. Run unit tests
+4. Run unit tests
     ```bash
     make run_ut
     ```
 
-6. Run integration tests
+5. Run integration tests
     ```bash
     make run_it
     ```
 
-7. Generate a code coverage report under build/coverage-html
+6. Generate a code coverage report under build/coverage-html
     ```bash
     make run_cov
     # Please check out build/coverage-html/index.html with your browser 
     ```
 
-8. Clean up existing code coverage profiles
+7. Clean up existing code coverage profiles
     ```bash
     make clean_cov
     ```

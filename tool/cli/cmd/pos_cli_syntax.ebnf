@@ -131,7 +131,7 @@ VolumeCmd = "volume" ,
 VolumeCreateCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
-  [ "--maxbw" , Bandwidth ] ;
+  [ "--maxbw" , Bandwidth ], [ "--iswalvol" ] ;
 
 VolumeDeleteCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,

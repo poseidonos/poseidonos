@@ -45,12 +45,12 @@ public:
     explicit VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeCreator(void) override;
 
-    int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw);
+    int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw, bool checkWalVolume);
 
 private:
     void _CheckRequestValidity(string name, uint64_t size);
-    void _CreateVolume(string name, uint64_t size, uint64_t maxIops,
-        uint64_t maxBw, uint64_t minIops, uint64_t minBw);
+    void _CreateVolume(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw,
+            uint64_t minIops, uint64_t minBw, bool checkWalVolume);
     void _NotificationVolumeEvent();
     void _SetUuid();
     void _RollbackCreatedVolume(int exceptionEvent);

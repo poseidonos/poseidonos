@@ -33,37 +33,63 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
+#include <vector>
 
+#include "i_versioned_segment_context.h"
 #include "src/include/address_type.h"
 
 namespace pos
 {
 class VersionedSegmentInfo;
 class JournalConfiguration;
-class VersionedSegmentCtx
+class SegmentInfo;
+
+class DummyVersionedSegmentCtx : public IVersionedSegmentContext
+{
+public:
+    DummyVersionedSegmentCtx(void) = default;
+    virtual ~DummyVersionedSegmentCtx(void) = default;
+
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override {}
+    virtual void Dispose(void) override {}
+    virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
+    virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
+    virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
+};
+
+class VersionedSegmentCtx : public IVersionedSegmentContext
 {
 public:
     VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration);
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override;
+    virtual void Dispose(void) override;
+
     // For UT
-    void Init(JournalConfiguration* journalConfiguration, VersionedSegmentInfo** inputVersionedSegmentInfo);
-    virtual void Dispose(void);
+    void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
 
-    virtual void IncreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt);
-    virtual void DecreaseValidBlockCount(uint32_t logGroupId, SegmentId segId, uint32_t cnt, bool allowVictimSegRelease);
-    virtual void IncreaseOccupiedStripeCount(uint32_t logGroupId, SegmentId segId);
-    virtual void UpdateSegmentContext(uint32_t logGroupId);
+    virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
+    virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
+    virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
-    // TODO (cheolho.kang): Add method to get latest segment context
-
-    virtual VersionedSegmentInfo* GetSegmentInfo(uint32_t logGroupId);
+    virtual SegmentInfo* GetUpdatedVersionedSegmentInfoToFlush(int logGroupId);
+    virtual void ResetFlushedVersionedSegmentInfo(int logGroupId);
 
 private:
+    void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
+    void _UpdateSegmentContext(int logGroupId);
+
+    const int INVALID_SEGMENT_CONTEXT = -1;
     JournalConfiguration* config;
-    VersionedSegmentInfo** versionedSegInfo;
-    uint32_t numLogGroups;
+    uint32_t numSegments;
+
+    std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
+
+    int segmentInfosInFlush;
+    SegmentInfo* segmentInfos;
 };
 
 } // namespace pos

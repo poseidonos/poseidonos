@@ -24,11 +24,11 @@ Create a volume from an array in PoseidonOS.
 
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName 
-	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth]
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--iswalvol]
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
-	--size 1024GB --maxiops 1000 --maxbw 100GB/s
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -75,11 +75,12 @@ func formCreateVolumeReq(command string) messages.Request {
 	}
 
 	param := messages.CreateVolumeParam{
-		VOLUMENAME:   create_volume_volumeName,
-		VOLUMESIZE:   volumeSizeInByte,
-		MAXIOPS:      create_volume_maxIOPS,
-		MAXBANDWIDTH: create_volume_maxBandwidth,
-		ARRAYNAME:    create_volume_arrayName,
+		VOLUMENAME:    create_volume_volumeName,
+		VOLUMESIZE:    volumeSizeInByte,
+		MAXIOPS:       create_volume_maxIOPS,
+		MAXBANDWIDTH:  create_volume_maxBandwidth,
+		ARRAYNAME:     create_volume_arrayName,
+		ISWALVOL:      create_volume_iswalvol,
 	}
 
 	uuid := globals.GenerateUUID()
@@ -97,10 +98,11 @@ var create_volume_arrayName = ""
 var create_volume_volumeSize = ""
 var create_volume_maxIOPS = 0
 var create_volume_maxBandwidth = 0
+var create_volume_iswalvol = false
 
 func init() {
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName,
-		"volume-name", "v", "",
+		"volume-name", "v", "",		
 		"The name of the volume to create.")
 	CreateVolumeCmd.MarkFlagRequired("volume-name")
 
@@ -121,4 +123,8 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth,
 		"maxbw", "", 0,
 		"The maximum bandwidth for the volume in MB/s.")
+
+	CreateVolumeCmd.Flags().BoolVarP(&create_volume_iswalvol,
+		"iswalvol", "", false,
+		"Check user data volume or WAL volume for HA. (default : user data volume)")
 }

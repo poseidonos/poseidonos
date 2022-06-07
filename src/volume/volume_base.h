@@ -76,8 +76,10 @@ const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 class VolumeBase
 {
 public:
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte);
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
+        VolumeAttribute volumeAttribute);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid,
+        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, VolumeAttribute volumeAttribute);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);

@@ -65,26 +65,6 @@ Mio::~Mio(void)
 {
 }
 
-MetaLpnType
-Mio::_GetCalculateStartLpn(MetaFsIoRequest* ioReq)
-{
-    MetaLpnType start = 0;
-    MetaLpnType offsetInLpn = ioReq->byteOffsetInFile / fileDataChunkSize;
-
-    for (int i = 0; i < ioReq->extentsCount; ++i)
-    {
-        int64_t result = offsetInLpn - ioReq->extents[i].GetCount();
-        if (result < 0)
-        {
-            start = ioReq->extents[i].GetStartLpn() + offsetInLpn;
-            break;
-        }
-        offsetInLpn -= ioReq->extents[i].GetCount();
-    }
-
-    return start;
-}
-
 void
 Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage)
 {
@@ -97,7 +77,7 @@ Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* me
 
     fileDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
-    startLpn = _GetCalculateStartLpn(ioReq);
+    startLpn = ioReq->GetStartLpn();
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mio ][SetupMio   ] type={}, req.tagId={}, fileOffset={}, baseLpn={}, startLpn={}",

@@ -46,12 +46,15 @@ class IVolumeManager : public IVolumeEventManager, public IVolumeInfoManager, pu
 {
 public:
     public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) = 0;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume) = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
+    virtual int Unmount(int volId) = 0;
     virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
+    virtual int SaveVolumeMeta(void) = 0;
+
     virtual void DetachVolumes(void) = 0;
 
     virtual int GetVolumeName(int volId, std::string& volName) = 0;
