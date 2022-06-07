@@ -68,6 +68,8 @@ if [ -f /etc/debian_version ]; then
     name=$(uname -r); apt-get install -y linux-modules-extra-${name}
     # for tcmalloc
     apt install -y libgoogle-perftools-dev
+    # for rocksdb
+    apt install -y librocksdb-dev
 
 
 else
