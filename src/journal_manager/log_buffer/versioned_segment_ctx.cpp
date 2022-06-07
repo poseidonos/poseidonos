@@ -44,6 +44,7 @@ namespace pos
 {
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
+  numSegments(0),
   segmentInfosInFlush(INVALID_SEGMENT_CONTEXT),
   segmentInfos(nullptr)
 {
@@ -55,33 +56,39 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, int numSegments)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
 {
-    Init(journalConfiguration, loadedSegmentInfo, numSegments, nullptr);
+    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+
+    for (int index = 0; index < config->GetNumLogGroups(); index++)
+    {
+        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
+        segmentInfoDiffs.push_back(segmentInfo);
+    }
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG,
+        "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
+        config->GetNumLogGroups(), numSegments);
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, int numSegments, VersionedSegmentInfo** inputVersionedSegmentInfo)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_,
+    std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo)
+{
+    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+
+    assert((int)inputVersionedSegmentInfo.size() == config->GetNumLogGroups());
+    segmentInfoDiffs = inputVersionedSegmentInfo;
+}
+
+void
+VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
 {
     config = journalConfiguration;
 
-    if (inputVersionedSegmentInfo == nullptr)
-    {
-        for (int index = 0; index < config->GetNumLogGroups(); index++)
-        {
-            segmentInfoDiffs.push_back(new VersionedSegmentInfo());
-        }
-    }
-    else
-    {
-        for (int index = 0; index < config->GetNumLogGroups(); index++)
-        {
-            segmentInfoDiffs.push_back(inputVersionedSegmentInfo[index]);
-        }
-    }
-
+    numSegments = numSegments_;
     segmentInfos = new SegmentInfo[numSegments]();
-    for (auto segId = 0; segId < numSegments; segId++)
+    for (uint32_t segId = 0; segId < numSegments; segId++)
     {
         // TODO (VSC) to keep on-disk data only
         segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
@@ -92,38 +99,48 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
 void
 VersionedSegmentCtx::Dispose(void)
 {
-    for (auto it = segmentInfoDiffs.begin(); it != segmentInfoDiffs.end();)
+    if (segmentInfos != nullptr)
     {
-        delete *it;
-        it = segmentInfoDiffs.erase(it);
+        delete[] segmentInfos;
+        segmentInfos = nullptr;
     }
 
-    delete[] segmentInfos;
-    segmentInfos = nullptr;
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG, "Disposed versioned segment context");
 }
 
 void
 VersionedSegmentCtx::IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
     segmentInfoDiffs[logGroupId]->IncreaseValidBlockCount(segId, cnt);
 }
 
 void
 VersionedSegmentCtx::DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
     segmentInfoDiffs[logGroupId]->DecreaseValidBlockCount(segId, cnt);
 }
 
 void
 VersionedSegmentCtx::IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId)
 {
+    assert(segId < numSegments);
+    assert(logGroupId < config->GetNumLogGroups());
+
     segmentInfoDiffs[logGroupId]->IncreaseOccupiedStripeCount(segId);
 }
 
 void
 VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 {
-    VersionedSegmentInfo* targetSegInfo = segmentInfoDiffs[logGroupId];
+    assert(logGroupId < config->GetNumLogGroups());
+
+    shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
     std::unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
@@ -144,14 +161,9 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 }
 
 SegmentInfo*
-VersionedSegmentCtx::GetVersionedSegmentInfoToFlush(int logGroupId)
+VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
 {
-    if (logGroupId >= config->GetNumLogGroups())
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
-            "Failed to get buffered segment context, Invalid log gorup ID: {}, Maximun log group ID: {}", logGroupId, config->GetNumLogGroups());
-        return nullptr;
-    }
+    assert(logGroupId < config->GetNumLogGroups());
 
     if (segmentInfosInFlush == logGroupId)
     {
@@ -163,16 +175,20 @@ VersionedSegmentCtx::GetVersionedSegmentInfoToFlush(int logGroupId)
     segmentInfosInFlush = logGroupId;
     _UpdateSegmentContext(logGroupId);
 
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+
     return segmentInfos;
 }
 
 void
-VersionedSegmentCtx::SetVersionedSegmentInfoFlushed(int logGroupId)
+VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
 {
     assert(segmentInfosInFlush == logGroupId);
     segmentInfoDiffs[logGroupId]->Reset();
 
     segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 } // namespace pos
