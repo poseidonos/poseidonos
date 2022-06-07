@@ -47,10 +47,10 @@ public:
     using VersionedSegmentInfo::VersionedSegmentInfo;
     MOCK_METHOD(void, Reset, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt, bool allowVictimSegRelease), (override));
+    MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD((std::unordered_map<uint32_t, int>), GetChangedValidBlockCount, (), (override));
-    MOCK_METHOD((std::unordered_map<uint32_t, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
+    MOCK_METHOD((std::unordered_map<SegmentId, int>), GetChangedValidBlockCount, (), (override));
+    MOCK_METHOD((std::unordered_map<SegmentId, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
 };
 
 } // namespace pos

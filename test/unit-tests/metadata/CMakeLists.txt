@@ -1,6 +1,7 @@
 POS_ADD_UNIT_TEST(meta_event_factory_ut meta_event_factory_test.cpp)
 POS_ADD_UNIT_TEST(stripe_map_update_ut stripe_map_update_test.cpp)
 POS_ADD_UNIT_TEST(metadata_ut metadata_test.cpp)
+POS_ADD_UNIT_TEST(segment_context_updater_ut segment_context_updater_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_event_handler_ut meta_volume_event_handler_test.cpp)
 POS_ADD_UNIT_TEST(meta_updater_ut meta_updater_test.cpp)
 POS_ADD_UNIT_TEST(block_map_update_ut block_map_update_test.cpp)

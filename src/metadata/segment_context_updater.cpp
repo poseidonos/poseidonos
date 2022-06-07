@@ -30,52 +30,48 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/metadata/segment_context_updater.h"
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/array_models/dto/partition_logical_size.h"
 
 namespace pos
 {
-class Mapper;
-class Allocator;
-class JournalManager;
-class MetaFsFileControlApi;
-
-class MetaUpdater;
-class SegmentContextUpdater;
-class MetaEventFactory;
-class MetaVolumeEventHandler;
-class MetaService;
-
-class Metadata : public IMountSequence
+SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* context_, IVersionedSegmentContext* versionedContext_, const PartitionLogicalSize* sizeInfo)
+: addrInfo(sizeInfo),
+  logGroupId(0),
+  activeContext(context_),
+  versionedContext(versionedContext_)
 {
-public:
-    Metadata(IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaFsFileControlApi* metaFsCtrl, MetaService* service);
-    virtual ~Metadata(void);
+}
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
+void
+SegmentContextUpdater::ValidateBlks(VirtualBlks blks)
+{
+    activeContext->ValidateBlks(blks);
 
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
+    versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+}
 
-private:
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
-    MetaFsFileControlApi* metaFsCtrl;
-    MetaVolumeEventHandler* volumeEventHandler;
-    MetaService* metaService;
+bool
+SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    bool ret = activeContext->InvalidateBlks(blks, isForced);
 
-    MetaUpdater* metaUpdater;
-    SegmentContextUpdater* segmentContextUpdater;
-    MetaEventFactory* metaEventFactory;
-};
+    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
+    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+
+    return ret;
+}
+
+bool
+SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    bool ret = activeContext->UpdateOccupiedStripeCount(lsid);
+
+    SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
+    versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
+
+    return ret;
+}
 } // namespace pos

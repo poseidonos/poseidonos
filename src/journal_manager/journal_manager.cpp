@@ -49,6 +49,7 @@
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_event_factory.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
@@ -96,7 +97,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
     CheckpointManager* cpManager,
-    VersionedSegmentCtx* versionedSegCtx_,
+    IVersionedSegmentContext* versionedSegCtx_,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
@@ -120,7 +121,6 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     logGroupReleaser = groupReleaser;
 
     checkpointManager = cpManager;
-    versionedSegCtx = versionedSegCtx_;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
     sequenceController = callbackSequenceController;
@@ -129,6 +129,17 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     arrayInfo = info;
 
     telemetryPublisher = tp_;
+    
+    if (versionedSegCtx_ == nullptr)
+    {
+        // In product code, create object
+        versionedSegCtx = _CreateVersionedSegmentCtx();
+    }
+    else
+    {
+        // In UT, inject mock module
+        versionedSegCtx = versionedSegCtx_;
+    }
 }
 
 // Constructor for injecting dependencies in integration tests
@@ -144,7 +155,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       new BufferOffsetAllocator(),
       new LogGroupReleaser(),
       new CheckpointManager(),
-      new VersionedSegmentCtx(),
+      nullptr,
       new DirtyMapManager(),
       new LogBufferWriteDoneNotifier(),
       new CallbackSequenceController(),
@@ -196,6 +207,20 @@ JournalManager::~JournalManager(void)
     delete versionedSegCtx;
     delete statusProvider;
     delete config;
+}
+
+IVersionedSegmentContext*
+JournalManager::_CreateVersionedSegmentCtx(void)
+{
+    if (config->IsEnabled() == true)
+    {
+        // TODO (VSC) return new VersionedSegmentCtx()
+        return new DummyVersionedSegmentCtx();
+    }
+    else
+    {
+        return new DummyVersionedSegmentCtx();
+    }
 }
 
 int
@@ -368,6 +393,12 @@ JournalManager::GetJournalStatusProvider(void)
     return statusProvider;
 }
 
+IVersionedSegmentContext*
+JournalManager::GetVersionedSegmentContext(void)
+{
+    return versionedSegCtx;
+}
+
 int
 JournalManager::_Reset(void)
 {
@@ -399,7 +430,8 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
-    versionedSegCtx->Init(config);
+
+    versionedSegCtx->Init(config, nullptr, 0); // TODO (VSC) Temporarly use invalid values TODO (huijeong.kim) fix this
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(eventScheduler, logWriteHandler);

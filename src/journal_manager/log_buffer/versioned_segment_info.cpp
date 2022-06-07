@@ -60,7 +60,7 @@ VersionedSegmentInfo::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 void
-VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
+VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
     changedValidBlockCount[segId] -= cnt;
 }
@@ -71,13 +71,13 @@ VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
     changedOccupiedStripeCount[segId]++;
 }
 
-std::unordered_map<uint32_t, int>
+std::unordered_map<SegmentId, int>
 VersionedSegmentInfo::GetChangedValidBlockCount(void)
 {
     return this->changedValidBlockCount;
 }
 
-std::unordered_map<uint32_t, uint32_t>
+std::unordered_map<SegmentId, uint32_t>
 VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;
