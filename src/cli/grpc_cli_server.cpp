@@ -20,16 +20,24 @@ class PosCliServiceImpl final : public PosCli::Service {
   SystemInfo(ServerContext* context, const SystemInfoRequest* request,
                   SystemInfoResponse* reply) override
   {
+      POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
       grpc::Status status = pc->ExecuteSystemInfoCommand(request, reply);
+
+      POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
     
       return status;
-    }
+  }
 
   grpc::Status
   SystemStop(ServerContext* context, const SystemStopRequest* request,
                   SystemStopResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteSystemStopCommand(request, reply);
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
     
     return status;
   }
@@ -38,8 +46,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   GetSystemProperty(ServerContext* context, const GetSystemPropertyRequest* request,
                   GetSystemPropertyResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteGetSystemPropertyCommand(request, reply);
-    
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -47,8 +59,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
                   SetSystemPropertyResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
-    
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -57,7 +73,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
                   StartTelemetryResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteStartTelemetryCommand(request, reply);
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -65,7 +86,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
                   StopTelemetryResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -74,8 +100,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
                   ResetEventWrrResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteResetEventWrrCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -83,8 +113,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   ResetMbr(ServerContext* context, const ResetMbrRequest* request,
                   ResetMbrResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteResetMbrCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -92,8 +126,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   StopRebuilding(ServerContext* context, const StopRebuildingRequest* request,
                   StopRebuildingResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteStopRebuildingCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -101,8 +139,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
                   UpdateEventWrrResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -111,8 +153,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   AddSpare(ServerContext* context, const AddSpareRequest* request,
                   AddSpareResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteAddSpareCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -120,8 +166,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   AutocreateArray(ServerContext* context, const AutocreateArrayRequest* request,
                   AutocreateArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteAutocreateArrayCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -129,8 +179,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   CreateArray(ServerContext* context, const CreateArrayRequest* request,
                   CreateArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteCreateArrayCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -138,8 +192,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
                   DeleteArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteDeleteArrayCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -147,8 +205,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   ListArray(ServerContext* context, const ListArrayRequest* request,
                   ListArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteListArrayCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -156,8 +218,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   ArrayInfo(ServerContext* context, const ArrayInfoRequest* request,
                   ArrayInfoResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -165,8 +231,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   MountArray(ServerContext* context, const MountArrayRequest* request,
                   MountArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -174,8 +244,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   RemoveSpare(ServerContext* context, const RemoveSpareRequest* request,
                   RemoveSpareResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteRemoveSpareCommand(request, reply);
     
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
     return status;
   }
 
@@ -183,7 +257,11 @@ class PosCliServiceImpl final : public PosCli::Service {
   UnmountArray(ServerContext* context, const UnmountArrayRequest* request,
                   UnmountArrayResponse* reply) override
   {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
     grpc::Status status = pc->ExecuteUnmountArrayCommand(request, reply);
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
     
     return status;
   }
