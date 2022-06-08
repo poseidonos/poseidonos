@@ -1,19 +1,20 @@
 package arraycmds
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var CreateArrayCmd = &cobra.Command{
@@ -42,57 +43,81 @@ Example:
 			return
 		}
 
-		reqJSON, err := json.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error(err)
-			return
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
+		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendCreateArray(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildCreateArrayReq(command string) (messages.Request, error) {
+func buildCreateArrayReq(command string) (*pb.CreateArrayRequest, error) {
 
-	req := messages.Request{}
-
-	// Split a string (comma separate) that contains comma-separated device names into strings
-	// and add them to a string array.
-	dataDevs := parseDevList(create_array_dataDevsList)
-	spareDevs := parseDevList(create_array_spareDevsList)
-	bufferDevs := parseDevList(create_array_bufferList)
+	dataDevs := strings.Split(create_array_dataDevsList, ",")
+	spareDevs := strings.Split(create_array_spareDevsList, ",")
+	bufferDevs := strings.Split(create_array_bufferList, ",")
 
 	if create_array_isNoRaid == true {
 		if len(dataDevs) > maxNumDataDevsNoRaid {
 			err := errors.New(`array with no RAID can have maximum ` +
 				strconv.Itoa(maxNumDataDevsNoRaid) + ` data device(s).`)
-			return req, err
+			return nil, err
 		}
 		create_array_raid = "NONE"
 	}
 
 	if isRAIDConstMet(len(dataDevs), create_array_raid) == false {
 		err := errors.New(`RAID10 only supports even number of data devices.`)
-		return req, err
+		return nil, err
 	}
 
-	param := messages.CreateArrayParam{
-		ARRAYNAME: create_array_arrayName,
-		RAID:      strings.ToUpper(create_array_raid),
-		BUFFER:    bufferDevs,
-		DATA:      dataDevs,
-		SPARE:     spareDevs,
+	param := &pb.CreateArrayRequest_Param{Name: create_array_arrayName, Raidtype: create_array_raid}
+
+	if create_array_dataDevsList != "" {
+		for _, dataDev := range dataDevs {
+			param.Data = append(param.Data, &pb.DeviceNameList{DeviceName: dataDev})
+		}
+	}
+
+	if create_array_spareDevsList != "" {
+		for _, spare := range spareDevs {
+			param.Spare = append(param.Spare, &pb.DeviceNameList{DeviceName: spare})
+		}
+	}
+
+	if create_array_bufferList != "" {
+		for _, buffer := range bufferDevs {
+			param.Buffer = append(param.Buffer, &pb.DeviceNameList{DeviceName: buffer})
+		}
 	}
 
 	uuid := globals.GenerateUUID()
 
-	req = messages.BuildReqWithParam(command, uuid, param)
+	req := &pb.CreateArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	return req, nil
 }
