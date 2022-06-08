@@ -268,3 +268,45 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 
 	return res, err
 }
+
+func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error("cannot send a request to cli server: not connected")
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	defer cancel()
+
+	res, err := c.MountArray(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error("cannot send a request to cli server: not connected")
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	defer cancel()
+
+	res, err := c.UnmountArray(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}

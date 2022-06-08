@@ -55,6 +55,17 @@ service PosCli {
       		post: "/v1/createarray"
     	};
 	}
+
+	rpc MountArray (MountArrayRequest) returns (MountArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/mountarray"
+    	};
+	}
+	rpc UnmountArray (UnmountArrayRequest) returns (UnmountArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/unmountarray"
+    	};
+	}
 }
 
 message Status {
@@ -293,6 +304,46 @@ message CreateArrayRequest {
 }
 
 message CreateArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message MountArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+			optional bool enableWriteThrough = 2;
+	}
+	Param param = 4;
+}
+
+message MountArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+message UnmountArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message UnmountArrayResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

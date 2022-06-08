@@ -167,6 +167,38 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  grpc::Status
+  MountArray(ServerContext* context, const MountArrayRequest* request,
+                  MountArrayResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+    }
+    
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    return status;
+  }
+
+  grpc::Status
+  UnmountArray(ServerContext* context, const UnmountArrayRequest* request,
+                  UnmountArrayResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteUnmountArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+    }
+
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+    
+    return status;
+  }
+
 };
 
 void RunGrpcServer() {
