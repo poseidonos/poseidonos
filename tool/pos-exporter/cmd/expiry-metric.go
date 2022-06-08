@@ -19,6 +19,11 @@ const (
 
 func touchExpiryVec(name *string, labels *map[string]string) {
 
+	// Only performance-related metrics(publisher_name=air_delegator) will be expiration object.
+	if (*labels)["publisher_name"] != "air_delegator" {
+		return
+	}
+
 	keys := getLabelKeys(labels)
 
 	sort.Strings(*keys)
@@ -49,6 +54,12 @@ func runExpiryManager() {
 
 func _runExpiryManager() {
 	for name := range expiryVec {
+
+		if name == "array_status" {
+			// array_status metrics will never be expired
+			continue
+		}
+
 		for key, _ := range expiryVec[name] {
 
 			if (time.Now().Unix() - expiryVec[name][key]) >= valid_duration_second {
