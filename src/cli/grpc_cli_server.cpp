@@ -101,6 +101,19 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  AddSpare(ServerContext* context, const AddSpareRequest* request,
+                  AddSpareResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteAddSpareCommand(request, reply);
+    
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    return status;
+  }
 };
 
 void RunGrpcServer() {
