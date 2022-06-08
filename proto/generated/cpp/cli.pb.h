@@ -9638,9 +9638,11 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
   enum : int {
     kBufferFieldNumber = 2,
     kDataFieldNumber = 3,
-    kSpareFieldNumber = 4,
+    kSpareFieldNumber = 5,
     kNameFieldNumber = 1,
-    kRaidtypeFieldNumber = 5,
+    kRaidtypeFieldNumber = 7,
+    kIsSpareFieldNumber = 4,
+    kIsRaidTypeFieldNumber = 6,
   };
   // repeated .grpc_cli.DeviceNameList buffer = 2;
   int buffer_size() const;
@@ -9678,7 +9680,7 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::DeviceNameList >&
       data() const;
 
-  // repeated .grpc_cli.DeviceNameList spare = 4;
+  // repeated .grpc_cli.DeviceNameList spare = 5;
   int spare_size() const;
   private:
   int _internal_spare_size() const;
@@ -9712,7 +9714,7 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_name();
   public:
 
-  // string raidtype = 5;
+  // string raidtype = 7;
   void clear_raidtype();
   const std::string& raidtype() const;
   void set_raidtype(const std::string& value);
@@ -9728,6 +9730,24 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_raidtype();
   public:
 
+  // bool isSpare = 4;
+  void clear_isspare();
+  bool isspare() const;
+  void set_isspare(bool value);
+  private:
+  bool _internal_isspare() const;
+  void _internal_set_isspare(bool value);
+  public:
+
+  // bool isRaidType = 6;
+  void clear_israidtype();
+  bool israidtype() const;
+  void set_israidtype(bool value);
+  private:
+  bool _internal_israidtype() const;
+  void _internal_set_israidtype(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.CreateArrayRequest.Param)
  private:
   class _Internal;
@@ -9740,6 +9760,8 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::DeviceNameList > spare_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr raidtype_;
+  bool isspare_;
+  bool israidtype_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -23980,7 +24002,27 @@ CreateArrayRequest_Param::data() const {
   return data_;
 }
 
-// repeated .grpc_cli.DeviceNameList spare = 4;
+// bool isSpare = 4;
+inline void CreateArrayRequest_Param::clear_isspare() {
+  isspare_ = false;
+}
+inline bool CreateArrayRequest_Param::_internal_isspare() const {
+  return isspare_;
+}
+inline bool CreateArrayRequest_Param::isspare() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateArrayRequest.Param.isSpare)
+  return _internal_isspare();
+}
+inline void CreateArrayRequest_Param::_internal_set_isspare(bool value) {
+  
+  isspare_ = value;
+}
+inline void CreateArrayRequest_Param::set_isspare(bool value) {
+  _internal_set_isspare(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateArrayRequest.Param.isSpare)
+}
+
+// repeated .grpc_cli.DeviceNameList spare = 5;
 inline int CreateArrayRequest_Param::_internal_spare_size() const {
   return spare_.size();
 }
@@ -24019,7 +24061,27 @@ CreateArrayRequest_Param::spare() const {
   return spare_;
 }
 
-// string raidtype = 5;
+// bool isRaidType = 6;
+inline void CreateArrayRequest_Param::clear_israidtype() {
+  israidtype_ = false;
+}
+inline bool CreateArrayRequest_Param::_internal_israidtype() const {
+  return israidtype_;
+}
+inline bool CreateArrayRequest_Param::israidtype() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateArrayRequest.Param.isRaidType)
+  return _internal_israidtype();
+}
+inline void CreateArrayRequest_Param::_internal_set_israidtype(bool value) {
+  
+  israidtype_ = value;
+}
+inline void CreateArrayRequest_Param::set_israidtype(bool value) {
+  _internal_set_israidtype(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateArrayRequest.Param.isRaidType)
+}
+
+// string raidtype = 7;
 inline void CreateArrayRequest_Param::clear_raidtype() {
   raidtype_.ClearToEmpty();
 }

@@ -428,15 +428,17 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
 grpc::Status
 CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
 {
-    DeviceSet<string> nameSet;
-    string arrayName = (request->param()).name();
+    grpc_cli::CreateArrayRequest_Param param = request->param();
     
-    string dataFt = (request->param()).raidtype();
-    if (dataFt == "")
+    DeviceSet<string> nameSet;
+    string arrayName = param.name();
+    
+    string dataFt = "RAID5";
+    if (param.israidtype())
     {
-        dataFt = "RAID5";
+        dataFt = param.raidtype();
     }
-
+    
     string metaFt = "RAID10";
     if (dataFt == "RAID0" || dataFt == "NONE")
     {
@@ -445,23 +447,17 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
 
     for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
     {
-        if (buffer.devicename() != "")
-        {
-            nameSet.nvm.push_back(buffer.devicename());
-        }
+        nameSet.nvm.push_back(buffer.devicename());
     }
 
     for (const grpc_cli::DeviceNameList& data : (request->param()).data())
     {
-        if (data.devicename() != "")
-        {
-            nameSet.data.push_back(data.devicename());
-        }
+        nameSet.data.push_back(data.devicename());
     }
     
-    for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
+    if (param.isspare())
     {
-        if (spare.devicename() != "")
+        for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
         {
             nameSet.spares.push_back(spare.devicename());
         }

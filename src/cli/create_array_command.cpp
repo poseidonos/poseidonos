@@ -61,7 +61,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
     }
 
     string dataFt = "RAID5";
-    if (doc["param"].contains("raidtype") == true)
+    if (doc["param"]["isRaidType"] == true)
     {
         dataFt = doc["param"]["raidtype"].get<std::string>();
     }
@@ -90,7 +90,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
         }
     }
 
-    if (doc["param"].contains("spare"))
+    if (doc["param"]["IsSpare"])
     {
         for (unsigned int i = 0; i < doc["param"]["spare"].size(); i++)
         {

@@ -373,8 +373,10 @@ message CreateArrayRequest {
 			string name = 1;
 			repeated DeviceNameList buffer = 2;
 			repeated DeviceNameList data = 3;
-			repeated DeviceNameList spare = 4;			
-			string raidtype = 5;
+			bool isSpare = 4;
+			repeated DeviceNameList spare = 5;
+			bool isRaidType = 6;
+			string raidtype = 7;
 	}
 	Param param = 4;
 }

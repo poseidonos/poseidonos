@@ -43,8 +43,7 @@ Example:
 			return
 		}
 
-		m := protojson.MarshalOptions{EmitUnpopulated: true}
-		reqJSON, err := m.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
@@ -96,15 +95,23 @@ func buildCreateArrayReq(command string) (*pb.CreateArrayRequest, error) {
 		return nil, err
 	}
 
-	param := &pb.CreateArrayRequest_Param{Name: create_array_arrayName, Raidtype: create_array_raid}
+	isSpare := create_array_spareDevsList != ""
+	isRaidType := create_array_raid != ""
+	param := &pb.CreateArrayRequest_Param{Name: create_array_arrayName, IsSpare: isSpare, IsRaidType: isRaidType, Raidtype: create_array_raid}
 	for _, dataDev := range dataDevs {
 		param.Data = append(param.Data, &pb.DeviceNameList{DeviceName: dataDev})
 	}
-	for _, spare := range spareDevs {
-		param.Spare = append(param.Spare, &pb.DeviceNameList{DeviceName: spare})
+
+	if isSpare {
+		for _, spare := range spareDevs {
+			param.Spare = append(param.Spare, &pb.DeviceNameList{DeviceName: spare})
+		}
 	}
-	for _, buffer := range bufferDevs {
-		param.Buffer = append(param.Buffer, &pb.DeviceNameList{DeviceName: buffer})
+
+	if isRaidType {
+		for _, buffer := range bufferDevs {
+			param.Buffer = append(param.Buffer, &pb.DeviceNameList{DeviceName: buffer})
+		}
 	}
 
 	uuid := globals.GenerateUUID()
