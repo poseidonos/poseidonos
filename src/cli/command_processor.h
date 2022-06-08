@@ -64,11 +64,8 @@ using grpc_cli::UpdateEventWrrRequest;
 using grpc_cli::UpdateEventWrrResponse;
 using grpc_cli::AddSpareRequest;
 using grpc_cli::AddSpareResponse;
-<<<<<<< HEAD
-=======
 using grpc_cli::CreateArrayRequest;
 using grpc_cli::CreateArrayResponse;
->>>>>>> feature/AWIBOF-AWIBOF-6248-change-createarray-to-grpc
 
 class CommandProcessor
 {

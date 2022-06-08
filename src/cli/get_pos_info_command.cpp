@@ -51,7 +51,7 @@ string
 GetPosInfoCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-    return jFormat.MakeResponse("GETPOSINFO", rid, SUCCESS, "DONE",
+    return jFormat.MakeResponse("SYSTEMINFO", rid, SUCCESS, "DONE",
         GetPosInfo("data"), GetPosInfo());
 }
 }; // namespace pos_cli
