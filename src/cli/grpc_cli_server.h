@@ -8,6 +8,7 @@
 #include "proto/generated/cpp/cli.pb.h"
 
 #include "src/cli/command_processor.h"
+#include "src/logger/logger.h"
 
 #define GRPC_SERVER_ADDRESS "0.0.0.0:50055"
 
