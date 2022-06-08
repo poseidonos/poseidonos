@@ -36,3 +36,30 @@ func TestAddSpareCommandReq(t *testing.T) {
 		t.Errorf("Expected: %q Output: %q\n", expected, string(out))
 	}
 }
+
+func TestAddSpareCommandReqWihtoutSpare(t *testing.T) {
+
+	// Command creation
+	rootCmd := cmd.RootCmd
+
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	globals.IsTestingReqBld = true
+	// Execute the command to test with argument
+	testmgr.ExecuteCommand(rootCmd, "array", "addspare", "--array-name", "Array0", "--json-req")
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"command":"ADDDEVICE","rid":"fromCLI","param":{"array":"Array0",` +
+		`"spare":[{"deviceName":"device0"}]}}`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q\n", expected, string(out))
+	}
+}

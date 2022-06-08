@@ -359,6 +359,66 @@ CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpar
     }
 }
 
+grpc::Status
+CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
+{
+    grpc_cli::CreateArrayRequest_Param param = request->param();
+    
+    DeviceSet<string> nameSet;
+    string arrayName = param.name();
+    
+    string dataFt = "RAID5";
+    if (param.raidtype().empty() == false)
+    {
+        dataFt = param.raidtype();
+    }
+    
+    string metaFt = "RAID10";
+    if (dataFt == "RAID0" || dataFt == "NONE")
+    {
+        metaFt = dataFt;
+    }
+
+    if (param.buffer_size() != 0)
+    {
+        for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
+        {
+            nameSet.nvm.push_back(buffer.devicename());
+        }
+    }
+
+    if (param.data_size() != 0)
+    {
+        for (const grpc_cli::DeviceNameList& data : (request->param()).data())
+        {
+            nameSet.data.push_back(data.devicename());
+        }
+    }
+    
+    if (param.spare_size() != 0)
+    {
+        for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
+        {
+            nameSet.spares.push_back(spare.devicename());
+        }
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Create(arrayName, nameSet, metaFt, dataFt);
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
 pos::BackendEvent
 CommandProcessor::_GetEventId(std::string eventName)
 {
