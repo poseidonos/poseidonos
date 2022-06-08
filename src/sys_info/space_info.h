@@ -40,11 +40,11 @@ namespace pos
 class SpaceInfo
 {
 public:
-    static bool IsEnough(std::string& arrayName, uint64_t size);
-    static uint64_t OPSize(std::string& arrayName);
-    static uint64_t TotalCapacity(std::string& arrayName);
-    static uint64_t SystemCapacity(std::string& arrayName);
-    static uint64_t Used(std::string& arrayName);
-    static uint64_t Remaining(std::string& arrayName);
+    static bool IsEnough(uint32_t arrayId, uint64_t size);
+    static uint64_t OPSize(uint32_t arrayId);
+    static uint64_t TotalCapacity(uint32_t arrayId);
+    static uint64_t SystemCapacity(uint32_t arrayId);
+    static uint64_t Used(uint32_t arrayId);
+    static uint64_t Remaining(uint32_t arrayId);
 };
 } // namespace pos

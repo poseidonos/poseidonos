@@ -106,6 +106,7 @@ private:
     void _ClearLock(void);
     void _PublishTelemetryVolumeIdInfo(std::string id, std::string name);
     void _PublishTelemetryVolumeIdInfo(std::string id, int volId);
+    void _PublishTelemetryArrayUsage(void);
 
     bool initialized = false;
     bool stopped = false;

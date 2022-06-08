@@ -76,7 +76,7 @@ VolumeInterface::_CheckVolumeSize(uint64_t volumeSize)
         throw EID(CREATE_VOL_SIZE_NOT_ALIGNED);
     }
 
-    if (SpaceInfo::IsEnough(arrayName, volumeSize) == false)
+    if (SpaceInfo::IsEnough(arrayID, volumeSize) == false)
     {
         POS_TRACE_WARN(EID(CREATE_VOL_SIZE_EXCEEDED),
             "The requested volume size is larger than the remaining space");
