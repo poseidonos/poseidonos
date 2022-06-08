@@ -1,15 +1,15 @@
 package arraycmds
 
 import (
-	"encoding/json"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var AddSpareCmd = &cobra.Command{
@@ -30,29 +30,41 @@ Example:
 
 		var command = "ADDDEVICE"
 
-		// Build a param for request
-		var spareName [1]messages.SpareDeviceName
-		spareName[0].SPARENAME = add_spare_spareDev
-
-		param := messages.SpareParam{
-			ARRAYNAME: add_spare_arrayName,
-			SPARENAME: spareName,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
+		param := &pb.AddSpareRequest_Param{Array: add_spare_arrayName}
 
-		reqJSON, err := json.Marshal(req)
+		if add_spare_spareDev != "" {
+			param.Spare = append(param.Spare, &pb.AddSpareRequest_SpareDeviceName{DeviceName: add_spare_spareDev})
+		}
+
+		req := &pb.AddSpareRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendAddSpare(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},

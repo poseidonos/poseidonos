@@ -39,6 +39,13 @@ service PosCli {
     	};
 	}
 
+	// Array Commands
+	rpc AddSpare (AddSpareRequest) returns (AddSpareResponse) {
+		option (google.api.http) = {
+      		post: "/v1/addspare"
+    	};
+	}
+
 	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
 	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
 	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
@@ -229,6 +236,30 @@ message UpdateEventWrrRequest {
 }
 
 message UpdateEventWrrResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message AddSpareRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message SpareDeviceName {
+		string deviceName = 1;
+	}
+	message Param {
+			string array = 1;
+			repeated SpareDeviceName spare = 3;
+	}
+	Param param = 4;
+}
+
+message AddSpareResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

@@ -321,6 +321,44 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    grpc_cli::AddSpareRequest_Param param = request->param();
+    
+    string arrayName = param.array();
+
+    if (param.spare_size() == 0)
+    {
+        int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
+        POS_TRACE_WARN(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    string devName = param.spare().at(0).devicename();
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->AddDevice(arrayName, devName);
+    if (ret == EID(SUCCESS))
+    {
+        int eventId = EID(SUCCESS);
+        POS_TRACE_INFO(eventId, "device_name:{}, array_name:{}", devName, arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
 pos::BackendEvent
 CommandProcessor::_GetEventId(std::string eventName)
 {

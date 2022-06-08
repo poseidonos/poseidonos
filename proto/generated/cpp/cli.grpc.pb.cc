@@ -28,6 +28,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/SetSystemProperty",
   "/grpc_cli.PosCli/StartTelemetry",
   "/grpc_cli.PosCli/StopTelemetry",
+  "/grpc_cli.PosCli/AddSpare",
   "/grpc_cli.PosCli/ResetEventWrr",
   "/grpc_cli.PosCli/ResetMbr",
   "/grpc_cli.PosCli/StopRebuilding",
@@ -47,10 +48,11 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_SetSystemProperty_(PosCli_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_StartTelemetry_(PosCli_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_StopTelemetry_(PosCli_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ResetEventWrr_(PosCli_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ResetMbr_(PosCli_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_StopRebuilding_(PosCli_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UpdateEventWrr_(PosCli_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddSpare_(PosCli_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResetEventWrr_(PosCli_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResetMbr_(PosCli_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_StopRebuilding_(PosCli_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UpdateEventWrr_(PosCli_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -187,6 +189,29 @@ void PosCli::Stub::experimental_async::StopTelemetry(::grpc::ClientContext* cont
 ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopTelemetryResponse>* PosCli::Stub::AsyncStopTelemetryRaw(::grpc::ClientContext* context, const ::grpc_cli::StopTelemetryRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncStopTelemetryRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::AddSpare(::grpc::ClientContext* context, const ::grpc_cli::AddSpareRequest& request, ::grpc_cli::AddSpareResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::AddSpareRequest, ::grpc_cli::AddSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddSpare_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::AddSpare(::grpc::ClientContext* context, const ::grpc_cli::AddSpareRequest* request, ::grpc_cli::AddSpareResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::AddSpareRequest, ::grpc_cli::AddSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddSpare_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::AddSpare(::grpc::ClientContext* context, const ::grpc_cli::AddSpareRequest* request, ::grpc_cli::AddSpareResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddSpare_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::AddSpareResponse>* PosCli::Stub::PrepareAsyncAddSpareRaw(::grpc::ClientContext* context, const ::grpc_cli::AddSpareRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::AddSpareResponse, ::grpc_cli::AddSpareRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddSpare_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::AddSpareResponse>* PosCli::Stub::AsyncAddSpareRaw(::grpc::ClientContext* context, const ::grpc_cli::AddSpareRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddSpareRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -347,6 +372,16 @@ PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::AddSpareRequest, ::grpc_cli::AddSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::AddSpareRequest* req,
+             ::grpc_cli::AddSpareResponse* resp) {
+               return service->AddSpare(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[7],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ResetEventWrrRequest, ::grpc_cli::ResetEventWrrResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
              ::grpc::ServerContext* ctx,
@@ -355,7 +390,7 @@ PosCli::Service::Service() {
                return service->ResetEventWrr(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[7],
+      PosCli_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ResetMbrRequest, ::grpc_cli::ResetMbrResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -365,7 +400,7 @@ PosCli::Service::Service() {
                return service->ResetMbr(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[8],
+      PosCli_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::StopRebuildingRequest, ::grpc_cli::StopRebuildingResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -375,7 +410,7 @@ PosCli::Service::Service() {
                return service->StopRebuilding(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[9],
+      PosCli_method_names[10],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::UpdateEventWrrRequest, ::grpc_cli::UpdateEventWrrResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -425,6 +460,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::StopTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StopTelemetryRequest* request, ::grpc_cli::StopTelemetryResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::AddSpare(::grpc::ServerContext* context, const ::grpc_cli::AddSpareRequest* request, ::grpc_cli::AddSpareResponse* response) {
   (void) context;
   (void) request;
   (void) response;
