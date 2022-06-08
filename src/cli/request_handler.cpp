@@ -116,7 +116,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
     cmdDictionary["VOLUMEINFO"] = new VolumeInfoCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
-    cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
+    cmdDictionary["SYSTEMINFO"] = new GetPosInfoCommand();
     cmdDictionary["STOPPOS"] = new StopPosCommand();
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();
