@@ -39,17 +39,22 @@ service PosCli {
     	};
 	}
 
+	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
+	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
+	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
+	rpc UpdateEventWrr (UpdateEventWrrRequest) returns (UpdateEventWrrResponse);
+
 	// Array Commands
 	rpc AddSpare (AddSpareRequest) returns (AddSpareResponse) {
 		option (google.api.http) = {
       		post: "/v1/addspare"
     	};
 	}
-
-	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
-	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
-	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
-	rpc UpdateEventWrr (UpdateEventWrrRequest) returns (UpdateEventWrrResponse);
+	rpc CreateArray (CreateArrayRequest) returns (CreateArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/createarray"
+    	};
+	}
 }
 
 message Status {
@@ -260,6 +265,34 @@ message AddSpareRequest {
 }
 
 message AddSpareResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DeviceNameList {
+	string deviceName = 1;
+}
+
+message CreateArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		repeated DeviceNameList buffer = 2;
+		repeated DeviceNameList data = 3;
+		repeated DeviceNameList spare = 4;
+		string raidtype = 5;
+	}
+	Param param = 4;
+}
+
+message CreateArrayResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

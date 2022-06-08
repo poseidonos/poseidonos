@@ -114,6 +114,20 @@ class PosCliServiceImpl final : public PosCli::Service {
 
     return status;
   }
+
+  grpc::Status
+  CreateArray(ServerContext* context, const CreateArrayRequest* request,
+                  CreateArrayResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteCreateArrayCommand(request, reply);
+    
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    return status;
+  }
+
 };
 
 void RunGrpcServer() {
