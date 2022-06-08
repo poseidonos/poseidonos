@@ -329,11 +329,11 @@ MetaFsIoApi::_SendPeriodicMetrics(MetaIoRequestType ioType, FileDescriptorType f
     std::string array_id = std::to_string(arrayId);
     std::string file_descriptor = std::to_string(fd);
     std::string key_string = thread_name + ":" + io_type + " : " + array_id + ":" + file_descriptor;
-    MetaFsTokenizer metaFsTokenizer;
-    POSMetricVector* metricList = new POSMetricVector();
 
     if (concurrentMetaFsTimeInterval->CheckInterval())
     {
+        MetaFsTokenizer metaFsTokenizer;
+        POSMetricVector* metricList = new POSMetricVector();
         std::string labels[4];
         for (auto it = collectedMetricsMap.begin(); it != collectedMetricsMap.end(); ++it)
         {
