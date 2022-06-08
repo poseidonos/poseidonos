@@ -64,6 +64,8 @@ using grpc_cli::UpdateEventWrrRequest;
 using grpc_cli::UpdateEventWrrResponse;
 using grpc_cli::AddSpareRequest;
 using grpc_cli::AddSpareResponse;
+using grpc_cli::CreateArrayRequest;
+using grpc_cli::CreateArrayResponse;
 
 class CommandProcessor
 {
@@ -82,6 +84,7 @@ public:
     grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
     grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
     grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
+    grpc::Status ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply);
 
 private:
     bool _isPosTerminating;
