@@ -32,7 +32,8 @@ Example:
 
 		uuid := globals.GenerateUUID()
 
-		param := &pb.AddSpareRequest_Param{Array: add_spare_arrayName}
+		isSpare := add_spare_spareDev != ""
+		param := &pb.AddSpareRequest_Param{IsSpare: isSpare, Array: add_spare_arrayName}
 		param.Spare = append(param.Spare, &pb.AddSpareRequest_SpareDeviceName{DeviceName: add_spare_spareDev})
 
 		req := &pb.AddSpareRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}

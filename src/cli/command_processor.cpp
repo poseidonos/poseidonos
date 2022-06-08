@@ -333,10 +333,11 @@ CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpar
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    string arrayName = (request->param()).array();
-    string devName = (request->param()).spare().at(0).devicename();
+    grpc_cli::AddSpareRequest_Param param = request->param();
+    
+    string arrayName = param.array();
 
-    if (devName == "")
+    if (param.isspare() == false)
     {
         int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
         POS_TRACE_WARN(eventId, "");
@@ -345,6 +346,7 @@ CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpar
         return grpc::Status::OK;
     }
 
+    string devName = param.spare().at(0).devicename();
     IArrayMgmt* array = ArrayMgr();
     int ret = array->AddDevice(arrayName, devName);
     if (ret == 0)

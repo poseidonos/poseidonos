@@ -43,7 +43,8 @@ Example:
 			return
 		}
 
-		reqJSON, err := protojson.Marshal(req)
+		m := protojson.MarshalOptions{EmitUnpopulated: true}
+		reqJSON, err := m.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}

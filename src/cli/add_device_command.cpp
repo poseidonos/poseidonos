@@ -52,13 +52,13 @@ string
 AddDeviceCommand::Execute(json& doc, string rid)
 {
     string arrayName = DEFAULT_ARRAY_NAME;
-    if (doc["param"].contains("array") == true)
+    if (doc["param"]["arrayExist"] == true)
     {
         arrayName = doc["param"]["array"].get<std::string>();
     }
 
     JsonFormat jFormat;
-    if (doc["param"].contains("spare"))
+    if (doc["param"]["spareExist"] == true)
     {
         string devName = doc["param"]["spare"][0]["deviceName"];
         IArrayMgmt* array = ArrayMgr();

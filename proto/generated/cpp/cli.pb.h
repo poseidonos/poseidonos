@@ -7147,10 +7147,11 @@ class AddSpareRequest_Param PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSpareFieldNumber = 2,
+    kSpareFieldNumber = 3,
     kArrayFieldNumber = 1,
+    kIsSpareFieldNumber = 2,
   };
-  // repeated .grpc_cli.AddSpareRequest.SpareDeviceName spare = 2;
+  // repeated .grpc_cli.AddSpareRequest.SpareDeviceName spare = 3;
   int spare_size() const;
   private:
   int _internal_spare_size() const;
@@ -7184,6 +7185,15 @@ class AddSpareRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_array();
   public:
 
+  // bool isSpare = 2;
+  void clear_isspare();
+  bool isspare() const;
+  void set_isspare(bool value);
+  private:
+  bool _internal_isspare() const;
+  void _internal_set_isspare(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.AddSpareRequest.Param)
  private:
   class _Internal;
@@ -7193,6 +7203,7 @@ class AddSpareRequest_Param PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::AddSpareRequest_SpareDeviceName > spare_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
+  bool isspare_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -21381,7 +21392,27 @@ inline void AddSpareRequest_Param::set_allocated_array(std::string* array) {
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.AddSpareRequest.Param.array)
 }
 
-// repeated .grpc_cli.AddSpareRequest.SpareDeviceName spare = 2;
+// bool isSpare = 2;
+inline void AddSpareRequest_Param::clear_isspare() {
+  isspare_ = false;
+}
+inline bool AddSpareRequest_Param::_internal_isspare() const {
+  return isspare_;
+}
+inline bool AddSpareRequest_Param::isspare() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.AddSpareRequest.Param.isSpare)
+  return _internal_isspare();
+}
+inline void AddSpareRequest_Param::_internal_set_isspare(bool value) {
+  
+  isspare_ = value;
+}
+inline void AddSpareRequest_Param::set_isspare(bool value) {
+  _internal_set_isspare(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.AddSpareRequest.Param.isSpare)
+}
+
+// repeated .grpc_cli.AddSpareRequest.SpareDeviceName spare = 3;
 inline int AddSpareRequest_Param::_internal_spare_size() const {
   return spare_.size();
 }

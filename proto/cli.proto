@@ -297,7 +297,8 @@ message AddSpareRequest {
 	}
 	message Param {
 			string array = 1;
-			repeated SpareDeviceName spare = 2;
+			bool isSpare = 2;
+			repeated SpareDeviceName spare = 3;
 	}
 	Param param = 4;
 }
