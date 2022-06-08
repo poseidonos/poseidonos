@@ -126,6 +126,8 @@ FlowControl::Init(void)
         }
     }
 
+    InitDistributer();
+
     for (uint32_t i = 0; i < FlowControlType::MAX_FLOW_CONTROL_TYPE; i++)
     {
         bucket[i] = 0;
@@ -225,7 +227,17 @@ FlowControl::ReturnToken(FlowControlType type, int token)
 void
 FlowControl::InitDistributer(void)
 {
-    tokenDistributer->Init();
+    POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_INIT), "IN InitDistributer");
+
+    if (nullptr != tokenDistributer)
+    {
+        tokenDistributer->Init();
+        POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_TRY_INIT), "try to distributer init");
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_SKIP_INIT), "skip to distributer init");
+    }
 }
 
 bool
