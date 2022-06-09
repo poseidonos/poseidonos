@@ -66,6 +66,10 @@ using grpc_cli::AddSpareRequest;
 using grpc_cli::AddSpareResponse;
 using grpc_cli::CreateArrayRequest;
 using grpc_cli::CreateArrayResponse;
+using grpc_cli::MountArrayRequest;
+using grpc_cli::MountArrayResponse;
+using grpc_cli::UnmountArrayRequest;
+using grpc_cli::UnmountArrayResponse;
 
 class CommandProcessor
 {
@@ -85,6 +89,8 @@ public:
     grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
     grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
     grpc::Status ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply);
+    grpc::Status ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply);
+    grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
 
 private:
     bool _isPosTerminating;

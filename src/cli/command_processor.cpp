@@ -419,6 +419,61 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
     }
 }
 
+grpc::Status
+CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply)
+{
+    string arrayName = (request->param()).name();
+    bool isWTenabled = (request->param()).enablewritethrough();
+    
+    if (isWTenabled == false)
+    {
+        bool isWTenabledAtConfig = false;
+        int ret = ConfigManagerSingleton::Instance()->GetValue("write_through", "enable",
+            &isWTenabledAtConfig, ConfigType::CONFIG_TYPE_BOOL);
+        if (ret == SUCCESS)
+        {
+            if (isWTenabledAtConfig == true)
+            {
+                isWTenabled = true;
+                POS_TRACE_WARN(EID(MOUNT_ARRAY_DEBUG_MSG), "Write through mode is forcibly activated by config");
+            }
+        }
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Mount(arrayName, isWTenabled);
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply)
+{
+    string arrayName = (request->param()).name();
+
+    IArrayMgmt* array =  ArrayMgr();
+    int ret = array->Unmount(arrayName);
+    if (ret != 0)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 pos::BackendEvent
 CommandProcessor::_GetEventId(std::string eventName)
 {
