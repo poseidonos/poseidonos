@@ -62,6 +62,8 @@ RaidType =
   | "raid0"
   | "RAID10"
   | "raid10"
+  | "RAID6"
+  | "raid6"
   ] ;
 
 SubsystemNQN = Letter , { Letter | Digit | "-" | "_" } ;
