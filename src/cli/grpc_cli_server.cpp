@@ -196,6 +196,23 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  RemoveSpare(ServerContext* context, const RemoveSpareRequest* request,
+                  RemoveSpareResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteRemoveSpareCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   CreateArray(ServerContext* context, const CreateArrayRequest* request,
                   CreateArrayResponse* reply) override
   {
@@ -213,11 +230,27 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
+                  DeleteArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteDeleteArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   MountArray(ServerContext* context, const MountArrayRequest* request,
                   MountArrayResponse* reply) override
   {
     _LogCliRequest(request);
-
 
     grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
     if (context->IsCancelled()) {
