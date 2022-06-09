@@ -10,7 +10,6 @@ PoseidonOS (POS) is a lightweight storage OS that offers the best performance an
 - [Run POS](#run-pos)
 - [Learn POS Commands](#learn-pos-commands)
 
-a
 ## Download the Source Code
 
 ```bash
@@ -533,7 +532,7 @@ In this step, we will create a POS volume, a logical entry point from the target
 
 #### Create a volume
 
-Let's create a 50TB volume using the followoing command:
+Let's create a 50TB volume using the following command:
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume create --volume-name vol1 --array-name POSArray --size 50TB --maxiops 0 --maxbw 0
 ```
