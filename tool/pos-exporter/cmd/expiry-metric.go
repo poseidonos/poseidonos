@@ -19,6 +19,11 @@ const (
 
 func touchExpiryVec(name *string, labels *map[string]string) {
 
+	// Only performance-related metrics(publisher_name=air_delegator) will be expiration object.
+	if (*labels)["publisher_name"] != "air_delegator" {
+		return
+	}
+
 	keys := getLabelKeys(labels)
 
 	sort.Strings(*keys)
