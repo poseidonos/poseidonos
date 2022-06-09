@@ -54,12 +54,6 @@ func runExpiryManager() {
 
 func _runExpiryManager() {
 	for name := range expiryVec {
-
-		if name == "array_status" {
-			// array_status metrics will never be expired
-			continue
-		}
-
 		for key, _ := range expiryVec[name] {
 
 			if (time.Now().Unix() - expiryVec[name][key]) >= valid_duration_second {
