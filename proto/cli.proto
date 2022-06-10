@@ -50,9 +50,22 @@ service PosCli {
       		post: "/v1/addspare"
     	};
 	}
+
+	rpc RemoveSpare (RemoveSpareRequest) returns (RemoveSpareResponse) {
+		option (google.api.http) = {
+      		post: "/v1/removespare"
+    	};
+	}
+
 	rpc CreateArray (CreateArrayRequest) returns (CreateArrayResponse) {
 		option (google.api.http) = {
       		post: "/v1/createarray"
+    	};
+	}
+
+	rpc DeleteArray (DeleteArrayRequest) returns (DeleteArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/deletearray/"
     	};
 	}
 
@@ -289,6 +302,30 @@ message DeviceNameList {
 	string deviceName = 1;
 }
 
+message RemoveSpareRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message SpareDeviceName {
+		string deviceName = 1;
+	}
+	message Param {
+			string array = 1;
+			repeated SpareDeviceName spare = 2;
+	}
+	Param param = 4;
+}
+
+message RemoveSpareResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
 message CreateArrayRequest {
 	string command = 1;
 	string rid = 2;
@@ -304,6 +341,26 @@ message CreateArrayRequest {
 }
 
 message CreateArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DeleteArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message DeleteArrayResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

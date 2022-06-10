@@ -1,16 +1,17 @@
 package arraycmds
 
 import (
-	"encoding/json"
 	"os"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var DeleteArrayCmd = &cobra.Command{
@@ -28,9 +29,9 @@ Example:
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var warningMsg = "WARNING: After deleting array" + " " +
+		var warningMsg = "WARNING: You are deleting array" + " " +
 			delete_array_arrayName + "," + " " +
-			"you cannot recover the data of the volumes in the array.\n\n" +
+			"you will not be able to recover the data and the volumes in the array.\n" +
 			"Are you sure you want to delete array" + " " +
 			delete_array_arrayName + "?"
 
@@ -43,24 +44,37 @@ Example:
 
 		var command = "DELETEARRAY"
 
-		param := messages.DeleteArrayParam{
-			ARRAYNAME: delete_array_arrayName,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
+		param := &pb.DeleteArrayRequest_Param{Name: delete_array_arrayName}
+		req := &pb.DeleteArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		reqJSON, err := json.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendDeleteArray(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
