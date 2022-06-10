@@ -26,11 +26,12 @@ create an array with the devices in the same NUMA.
 
 Syntax: 
 	poseidonos-cli array autocreate (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
-	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RAID0 | RAID5 | RAID10 | RAID6] 
+	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [(--raid | -r) RAID0 | RAID5 | RAID10 | RAID6] 
 	[--no-raid] [--no-buffer]
 
 Example: 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1 --raid RAID5
+	poseidonos-cli array autocreate -a Array1 -b uram0 -d 4 -s 1 -r RAID6
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
