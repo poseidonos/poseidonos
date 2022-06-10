@@ -89,6 +89,7 @@ static const std::string TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT = "map_vsa_load_pen
 static const std::string TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT = "map_vsa_flush_pendio_cnt";
 static const std::string TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT = "map_stripe_flush_pendio_cnt";
 static const std::string TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT = "map_vsa_flushed_dirtypg_cnt";
+static const std::string TEL33011_MAP_REVERSE_FLUSH_PENDINGIO_CNT = "map_reverse_flush_pendio_cnt";
 
 static const std::string TEL36000_JRN_ = "j_test";
 static const std::string TEL39999_JRN_ = "j_test_end";

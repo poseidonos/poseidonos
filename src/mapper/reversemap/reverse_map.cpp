@@ -41,6 +41,7 @@
 #include "src/include/meta_const.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -54,7 +55,9 @@ ReverseMapPack::ReverseMapPack(void)
   numMpagesPerStripe(0),
   ioError(0),
   ioDirection(0),
-  callback(nullptr)
+  callback(nullptr),
+  telemetryPublisher(nullptr),
+  pendIoCnt(0)
 {
 }
 
@@ -76,7 +79,7 @@ ReverseMapPack::~ReverseMapPack(void)
 // LCOV_EXCL_STOP
 
 void
-ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
+ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_, TelemetryPublisher* tp)
 {
     mapFlushState = MapFlushState::FLUSH_DONE;
     revMapfile = file;
@@ -84,6 +87,7 @@ ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint3
     vsid = vsid_;
     mpageSize = mpageSize_;
     numMpagesPerStripe = numMpagesPerStripe_;
+    telemetryPublisher = tp;
     for (uint64_t mpage = 0; mpage < numMpagesPerStripe; ++mpage)
     {
         RevMap* revMap = new RevMap();
@@ -171,7 +175,16 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
             callback = nullptr;
             break;
         }
+        pendIoCnt++;
     }
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33011_MAP_REVERSE_FLUSH_PENDINGIO_CNT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(pendIoCnt);
+        telemetryPublisher->PublishMetric(metric);
+    }
+
     return ioError;
 }
 
@@ -233,6 +246,8 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
     }
 
+    pendIoCnt--;
+
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
     if ((res + 1) == numMpagesPerStripe)
     {
@@ -267,6 +282,13 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     }
 
     delete ctx;
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33011_MAP_REVERSE_FLUSH_PENDINGIO_CNT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(pendIoCnt);
+        telemetryPublisher->PublishMetric(metric);
+    }
 }
 
 std::tuple<uint32_t, uint32_t, uint32_t>
