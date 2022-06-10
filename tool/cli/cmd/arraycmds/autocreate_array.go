@@ -31,6 +31,7 @@ Syntax:
 
 Example: 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
+	poseidonos-cli array autocreate -a Array1 -b uram0 -d 4 -s 1 -r RAID6
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {

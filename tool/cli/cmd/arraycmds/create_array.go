@@ -31,6 +31,8 @@ Syntax:
 Example: 
 	poseidonos-cli array create --array-name Array0 --buffer device0 
 	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID5
+	poseidonos-cli array create -a Array0 -buffer device0 
+	-d nvme-device0,nvme-device1,nvme-device2,nvme-device3 -s nvme-device4 -r RAID6
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
