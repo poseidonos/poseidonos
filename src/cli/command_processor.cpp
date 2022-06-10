@@ -360,6 +360,40 @@ CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpar
 }
 
 grpc::Status
+CommandProcessor::ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, RemoveSpareResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).array();
+    string devName = (request->param()).spare().at(0).devicename();
+
+    if (devName == "")
+    {
+        int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
+        POS_TRACE_WARN(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->RemoveDevice(arrayName, devName);
+    if (ret == 0)
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
 CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
 {
     grpc_cli::CreateArrayRequest_Param param = request->param();
@@ -417,6 +451,36 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
+}
+
+grpc::Status
+CommandProcessor::ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply)
+{
+    NvmfTarget* nvmfTarget = NvmfTargetSingleton::Instance();
+    string arrayName = (request->param()).name();
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->Delete(arrayName);
+
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    bool deleteDone = nvmfTarget->DeletePosBdevAll(arrayName);
+
+    if (false == deleteDone)
+    {
+        _SetEventStatus(EID(IONVMF_VOL_DELETE_TIMEOUT),
+            reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
 }
 
 grpc::Status

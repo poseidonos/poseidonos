@@ -64,8 +64,12 @@ using grpc_cli::UpdateEventWrrRequest;
 using grpc_cli::UpdateEventWrrResponse;
 using grpc_cli::AddSpareRequest;
 using grpc_cli::AddSpareResponse;
+using grpc_cli::RemoveSpareRequest;
+using grpc_cli::RemoveSpareResponse;
 using grpc_cli::CreateArrayRequest;
 using grpc_cli::CreateArrayResponse;
+using grpc_cli::DeleteArrayRequest;
+using grpc_cli::DeleteArrayResponse;
 using grpc_cli::MountArrayRequest;
 using grpc_cli::MountArrayResponse;
 using grpc_cli::UnmountArrayRequest;
@@ -88,7 +92,9 @@ public:
     grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
     grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
     grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
+    grpc::Status ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, RemoveSpareResponse* reply);
     grpc::Status ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply);
+    grpc::Status ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply);
     grpc::Status ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply);
     grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
 
