@@ -11,5 +11,17 @@
 #include "src/logger/logger.h"
 
 #define GRPC_SERVER_ADDRESS "0.0.0.0:50055"
+#define GRPC_TIMEOUT_MESSAGE "Deadline exceeded or client cancelled."
+
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::Status;
+using grpc_cli::PosCli;
+
+using namespace google::protobuf;
 
 void RunGrpcServer();
+void _LogCliRequest(const google::protobuf::Message* request);
+void _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status);
+void _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf::Message* reply);

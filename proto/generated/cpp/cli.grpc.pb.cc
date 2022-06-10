@@ -33,7 +33,9 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/StopRebuilding",
   "/grpc_cli.PosCli/UpdateEventWrr",
   "/grpc_cli.PosCli/AddSpare",
+  "/grpc_cli.PosCli/RemoveSpare",
   "/grpc_cli.PosCli/CreateArray",
+  "/grpc_cli.PosCli/DeleteArray",
   "/grpc_cli.PosCli/MountArray",
   "/grpc_cli.PosCli/UnmountArray",
 };
@@ -56,9 +58,11 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_StopRebuilding_(PosCli_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_UpdateEventWrr_(PosCli_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_AddSpare_(PosCli_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateArray_(PosCli_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MountArray_(PosCli_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UnmountArray_(PosCli_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_RemoveSpare_(PosCli_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateArray_(PosCli_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_DeleteArray_(PosCli_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_MountArray_(PosCli_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UnmountArray_(PosCli_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -314,6 +318,29 @@ void PosCli::Stub::experimental_async::AddSpare(::grpc::ClientContext* context, 
   return result;
 }
 
+::grpc::Status PosCli::Stub::RemoveSpare(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest& request, ::grpc_cli::RemoveSpareResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::RemoveSpareRequest, ::grpc_cli::RemoveSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_RemoveSpare_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::RemoveSpare(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest* request, ::grpc_cli::RemoveSpareResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::RemoveSpareRequest, ::grpc_cli::RemoveSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveSpare_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::RemoveSpare(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest* request, ::grpc_cli::RemoveSpareResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveSpare_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::RemoveSpareResponse>* PosCli::Stub::PrepareAsyncRemoveSpareRaw(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::RemoveSpareResponse, ::grpc_cli::RemoveSpareRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_RemoveSpare_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::RemoveSpareResponse>* PosCli::Stub::AsyncRemoveSpareRaw(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncRemoveSpareRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status PosCli::Stub::CreateArray(::grpc::ClientContext* context, const ::grpc_cli::CreateArrayRequest& request, ::grpc_cli::CreateArrayResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::CreateArrayRequest, ::grpc_cli::CreateArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateArray_, context, request, response);
 }
@@ -333,6 +360,29 @@ void PosCli::Stub::experimental_async::CreateArray(::grpc::ClientContext* contex
 ::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateArrayResponse>* PosCli::Stub::AsyncCreateArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncCreateArrayRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::DeleteArray(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest& request, ::grpc_cli::DeleteArrayResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::DeleteArrayRequest, ::grpc_cli::DeleteArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_DeleteArray_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::DeleteArray(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest* request, ::grpc_cli::DeleteArrayResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::DeleteArrayRequest, ::grpc_cli::DeleteArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteArray_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::DeleteArray(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest* request, ::grpc_cli::DeleteArrayResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteArray_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteArrayResponse>* PosCli::Stub::PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::DeleteArrayResponse, ::grpc_cli::DeleteArrayRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_DeleteArray_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteArrayResponse>* PosCli::Stub::AsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncDeleteArrayRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -497,6 +547,16 @@ PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[11],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::RemoveSpareRequest, ::grpc_cli::RemoveSpareResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::RemoveSpareRequest* req,
+             ::grpc_cli::RemoveSpareResponse* resp) {
+               return service->RemoveSpare(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[12],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateArrayRequest, ::grpc_cli::CreateArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
              ::grpc::ServerContext* ctx,
@@ -505,7 +565,17 @@ PosCli::Service::Service() {
                return service->CreateArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[12],
+      PosCli_method_names[13],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::DeleteArrayRequest, ::grpc_cli::DeleteArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::DeleteArrayRequest* req,
+             ::grpc_cli::DeleteArrayResponse* resp) {
+               return service->DeleteArray(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -515,7 +585,7 @@ PosCli::Service::Service() {
                return service->MountArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[13],
+      PosCli_method_names[15],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -606,7 +676,21 @@ PosCli::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
+::grpc::Status PosCli::Service::RemoveSpare(::grpc::ServerContext* context, const ::grpc_cli::RemoveSpareRequest* request, ::grpc_cli::RemoveSpareResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
 ::grpc::Status PosCli::Service::CreateArray(::grpc::ServerContext* context, const ::grpc_cli::CreateArrayRequest* request, ::grpc_cli::CreateArrayResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::DeleteArray(::grpc::ServerContext* context, const ::grpc_cli::DeleteArrayRequest* request, ::grpc_cli::DeleteArrayResponse* response) {
   (void) context;
   (void) request;
   (void) response;

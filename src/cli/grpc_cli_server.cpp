@@ -6,12 +6,6 @@
 
 #define MAX_NUM_CONCURRENT_CLIENTS 1
 
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::Status;
-using grpc_cli::PosCli;
-
 CommandProcessor* pc;
 
 class PosCliServiceImpl final : public PosCli::Service {
@@ -19,23 +13,31 @@ class PosCliServiceImpl final : public PosCli::Service {
   SystemInfo(ServerContext* context, const SystemInfoRequest* request,
                   SystemInfoResponse* reply) override
   {
-      grpc::Status status = pc->ExecuteSystemInfoCommand(request, reply);
-      
-      if (context->IsCancelled()) {
-        return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
-      }
-      
-      return status;
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSystemInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
   }
 
   grpc::Status
   SystemStop(ServerContext* context, const SystemStopRequest* request,
                   SystemStopResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteSystemStopCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -44,10 +46,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   GetSystemProperty(ServerContext* context, const GetSystemPropertyRequest* request,
                   GetSystemPropertyResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteGetSystemPropertyCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -56,10 +63,16 @@ class PosCliServiceImpl final : public PosCli::Service {
   SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
                   SetSystemPropertyResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
+
     return status;
   }
 
@@ -67,10 +80,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
                   StartTelemetryResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteStartTelemetryCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -79,10 +97,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
                   ResetEventWrrResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteResetEventWrrCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
     
     return status;
   }
@@ -91,10 +114,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   ResetMbr(ServerContext* context, const ResetMbrRequest* request,
                   ResetMbrResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteResetMbrCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
     
     return status;
   }
@@ -103,10 +131,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   StopRebuilding(ServerContext* context, const StopRebuildingRequest* request,
                   StopRebuildingResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteStopRebuildingCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
     
     return status;
   }
@@ -115,10 +148,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
                   StopTelemetryResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -127,11 +165,16 @@ class PosCliServiceImpl final : public PosCli::Service {
   UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
                   UpdateEventWrrResponse* reply) override
   {
+    _LogCliRequest(request);
+
     grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    
+
+    _LogCliResponse(reply, status);
+
     return status;
   }
 
@@ -139,14 +182,32 @@ class PosCliServiceImpl final : public PosCli::Service {
   AddSpare(ServerContext* context, const AddSpareRequest* request,
                   AddSpareResponse* reply) override
   {
-    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+    _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteAddSpareCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    
-    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  RemoveSpare(ServerContext* context, const RemoveSpareRequest* request,
+                  RemoveSpareResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteRemoveSpareCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -155,14 +216,32 @@ class PosCliServiceImpl final : public PosCli::Service {
   CreateArray(ServerContext* context, const CreateArrayRequest* request,
                   CreateArrayResponse* reply) override
   {
-    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+    _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteCreateArrayCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    
-    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
+                  DeleteArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteDeleteArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -171,14 +250,15 @@ class PosCliServiceImpl final : public PosCli::Service {
   MountArray(ServerContext* context, const MountArrayRequest* request,
                   MountArrayResponse* reply) override
   {
-    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+    _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    
-    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    _LogCliResponse(reply, status);
 
     return status;
   }
@@ -187,21 +267,44 @@ class PosCliServiceImpl final : public PosCli::Service {
   UnmountArray(ServerContext* context, const UnmountArrayRequest* request,
                   UnmountArrayResponse* reply) override
   {
-    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+    _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteUnmountArrayCommand(request, reply);
     if (context->IsCancelled()) {
-      return Status(StatusCode::CANCELLED, "Deadline exceeded or Client cancelled, abandoning.");
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
 
-    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+    _LogCliResponse(reply, status);
     
     return status;
   }
 
 };
 
-void RunGrpcServer() {
+void
+_LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf::Message* reply)
+{
+  POS_TRACE_INFO(EID(CLI_TIMEOUT_OR_CANCELLED), "request: {}, reply: {}",
+  request->ShortDebugString(), reply->ShortDebugString());
+}
+
+void
+_LogCliRequest(const google::protobuf::Message* request)
+{
+  POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
+}
+
+void
+_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status)
+{
+  POS_TRACE_INFO(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
+      reply->ShortDebugString(), status.error_code(), status.error_details(), status.error_message());
+}
+
+void
+RunGrpcServer()
+{
   pc = new CommandProcessor();
 
   std::string server_address(GRPC_SERVER_ADDRESS);

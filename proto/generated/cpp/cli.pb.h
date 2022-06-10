@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[55]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[64]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -83,6 +83,18 @@ extern CreateArrayResponseDefaultTypeInternal _CreateArrayResponse_default_insta
 class CreateArrayResponse_Result;
 struct CreateArrayResponse_ResultDefaultTypeInternal;
 extern CreateArrayResponse_ResultDefaultTypeInternal _CreateArrayResponse_Result_default_instance_;
+class DeleteArrayRequest;
+struct DeleteArrayRequestDefaultTypeInternal;
+extern DeleteArrayRequestDefaultTypeInternal _DeleteArrayRequest_default_instance_;
+class DeleteArrayRequest_Param;
+struct DeleteArrayRequest_ParamDefaultTypeInternal;
+extern DeleteArrayRequest_ParamDefaultTypeInternal _DeleteArrayRequest_Param_default_instance_;
+class DeleteArrayResponse;
+struct DeleteArrayResponseDefaultTypeInternal;
+extern DeleteArrayResponseDefaultTypeInternal _DeleteArrayResponse_default_instance_;
+class DeleteArrayResponse_Result;
+struct DeleteArrayResponse_ResultDefaultTypeInternal;
+extern DeleteArrayResponse_ResultDefaultTypeInternal _DeleteArrayResponse_Result_default_instance_;
 class DeviceNameList;
 struct DeviceNameListDefaultTypeInternal;
 extern DeviceNameListDefaultTypeInternal _DeviceNameList_default_instance_;
@@ -113,6 +125,21 @@ extern MountArrayResponse_ResultDefaultTypeInternal _MountArrayResponse_Result_d
 class PosInfo;
 struct PosInfoDefaultTypeInternal;
 extern PosInfoDefaultTypeInternal _PosInfo_default_instance_;
+class RemoveSpareRequest;
+struct RemoveSpareRequestDefaultTypeInternal;
+extern RemoveSpareRequestDefaultTypeInternal _RemoveSpareRequest_default_instance_;
+class RemoveSpareRequest_Param;
+struct RemoveSpareRequest_ParamDefaultTypeInternal;
+extern RemoveSpareRequest_ParamDefaultTypeInternal _RemoveSpareRequest_Param_default_instance_;
+class RemoveSpareRequest_SpareDeviceName;
+struct RemoveSpareRequest_SpareDeviceNameDefaultTypeInternal;
+extern RemoveSpareRequest_SpareDeviceNameDefaultTypeInternal _RemoveSpareRequest_SpareDeviceName_default_instance_;
+class RemoveSpareResponse;
+struct RemoveSpareResponseDefaultTypeInternal;
+extern RemoveSpareResponseDefaultTypeInternal _RemoveSpareResponse_default_instance_;
+class RemoveSpareResponse_Result;
+struct RemoveSpareResponse_ResultDefaultTypeInternal;
+extern RemoveSpareResponse_ResultDefaultTypeInternal _RemoveSpareResponse_Result_default_instance_;
 class ResetEventWrrRequest;
 struct ResetEventWrrRequestDefaultTypeInternal;
 extern ResetEventWrrRequestDefaultTypeInternal _ResetEventWrrRequest_default_instance_;
@@ -232,6 +259,10 @@ template<> ::grpc_cli::CreateArrayRequest* Arena::CreateMaybeMessage<::grpc_cli:
 template<> ::grpc_cli::CreateArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::CreateArrayRequest_Param>(Arena*);
 template<> ::grpc_cli::CreateArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::CreateArrayResponse>(Arena*);
 template<> ::grpc_cli::CreateArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::CreateArrayResponse_Result>(Arena*);
+template<> ::grpc_cli::DeleteArrayRequest* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayRequest>(Arena*);
+template<> ::grpc_cli::DeleteArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayRequest_Param>(Arena*);
+template<> ::grpc_cli::DeleteArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayResponse>(Arena*);
+template<> ::grpc_cli::DeleteArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayResponse_Result>(Arena*);
 template<> ::grpc_cli::DeviceNameList* Arena::CreateMaybeMessage<::grpc_cli::DeviceNameList>(Arena*);
 template<> ::grpc_cli::GetSystemPropertyRequest* Arena::CreateMaybeMessage<::grpc_cli::GetSystemPropertyRequest>(Arena*);
 template<> ::grpc_cli::GetSystemPropertyResponse* Arena::CreateMaybeMessage<::grpc_cli::GetSystemPropertyResponse>(Arena*);
@@ -242,6 +273,11 @@ template<> ::grpc_cli::MountArrayRequest_Param* Arena::CreateMaybeMessage<::grpc
 template<> ::grpc_cli::MountArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::MountArrayResponse>(Arena*);
 template<> ::grpc_cli::MountArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::MountArrayResponse_Result>(Arena*);
 template<> ::grpc_cli::PosInfo* Arena::CreateMaybeMessage<::grpc_cli::PosInfo>(Arena*);
+template<> ::grpc_cli::RemoveSpareRequest* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest>(Arena*);
+template<> ::grpc_cli::RemoveSpareRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest_Param>(Arena*);
+template<> ::grpc_cli::RemoveSpareRequest_SpareDeviceName* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest_SpareDeviceName>(Arena*);
+template<> ::grpc_cli::RemoveSpareResponse* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareResponse>(Arena*);
+template<> ::grpc_cli::RemoveSpareResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareResponse_Result>(Arena*);
 template<> ::grpc_cli::ResetEventWrrRequest* Arena::CreateMaybeMessage<::grpc_cli::ResetEventWrrRequest>(Arena*);
 template<> ::grpc_cli::ResetEventWrrResponse* Arena::CreateMaybeMessage<::grpc_cli::ResetEventWrrResponse>(Arena*);
 template<> ::grpc_cli::ResetEventWrrResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ResetEventWrrResponse_Result>(Arena*);
@@ -7803,6 +7839,867 @@ class DeviceNameList PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class RemoveSpareRequest_SpareDeviceName PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RemoveSpareRequest.SpareDeviceName) */ {
+ public:
+  inline RemoveSpareRequest_SpareDeviceName() : RemoveSpareRequest_SpareDeviceName(nullptr) {}
+  virtual ~RemoveSpareRequest_SpareDeviceName();
+  explicit constexpr RemoveSpareRequest_SpareDeviceName(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveSpareRequest_SpareDeviceName(const RemoveSpareRequest_SpareDeviceName& from);
+  RemoveSpareRequest_SpareDeviceName(RemoveSpareRequest_SpareDeviceName&& from) noexcept
+    : RemoveSpareRequest_SpareDeviceName() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveSpareRequest_SpareDeviceName& operator=(const RemoveSpareRequest_SpareDeviceName& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveSpareRequest_SpareDeviceName& operator=(RemoveSpareRequest_SpareDeviceName&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RemoveSpareRequest_SpareDeviceName& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveSpareRequest_SpareDeviceName* internal_default_instance() {
+    return reinterpret_cast<const RemoveSpareRequest_SpareDeviceName*>(
+               &_RemoveSpareRequest_SpareDeviceName_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    43;
+
+  friend void swap(RemoveSpareRequest_SpareDeviceName& a, RemoveSpareRequest_SpareDeviceName& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveSpareRequest_SpareDeviceName* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveSpareRequest_SpareDeviceName* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RemoveSpareRequest_SpareDeviceName* New() const final {
+    return CreateMaybeMessage<RemoveSpareRequest_SpareDeviceName>(nullptr);
+  }
+
+  RemoveSpareRequest_SpareDeviceName* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RemoveSpareRequest_SpareDeviceName>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RemoveSpareRequest_SpareDeviceName& from);
+  void MergeFrom(const RemoveSpareRequest_SpareDeviceName& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveSpareRequest_SpareDeviceName* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RemoveSpareRequest.SpareDeviceName";
+  }
+  protected:
+  explicit RemoveSpareRequest_SpareDeviceName(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDeviceNameFieldNumber = 1,
+  };
+  // string deviceName = 1;
+  void clear_devicename();
+  const std::string& devicename() const;
+  void set_devicename(const std::string& value);
+  void set_devicename(std::string&& value);
+  void set_devicename(const char* value);
+  void set_devicename(const char* value, size_t size);
+  std::string* mutable_devicename();
+  std::string* release_devicename();
+  void set_allocated_devicename(std::string* devicename);
+  private:
+  const std::string& _internal_devicename() const;
+  void _internal_set_devicename(const std::string& value);
+  std::string* _internal_mutable_devicename();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RemoveSpareRequest.SpareDeviceName)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr devicename_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RemoveSpareRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RemoveSpareRequest.Param) */ {
+ public:
+  inline RemoveSpareRequest_Param() : RemoveSpareRequest_Param(nullptr) {}
+  virtual ~RemoveSpareRequest_Param();
+  explicit constexpr RemoveSpareRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveSpareRequest_Param(const RemoveSpareRequest_Param& from);
+  RemoveSpareRequest_Param(RemoveSpareRequest_Param&& from) noexcept
+    : RemoveSpareRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveSpareRequest_Param& operator=(const RemoveSpareRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveSpareRequest_Param& operator=(RemoveSpareRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RemoveSpareRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveSpareRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const RemoveSpareRequest_Param*>(
+               &_RemoveSpareRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    44;
+
+  friend void swap(RemoveSpareRequest_Param& a, RemoveSpareRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveSpareRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveSpareRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RemoveSpareRequest_Param* New() const final {
+    return CreateMaybeMessage<RemoveSpareRequest_Param>(nullptr);
+  }
+
+  RemoveSpareRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RemoveSpareRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RemoveSpareRequest_Param& from);
+  void MergeFrom(const RemoveSpareRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveSpareRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RemoveSpareRequest.Param";
+  }
+  protected:
+  explicit RemoveSpareRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSpareFieldNumber = 2,
+    kArrayFieldNumber = 1,
+  };
+  // repeated .grpc_cli.RemoveSpareRequest.SpareDeviceName spare = 2;
+  int spare_size() const;
+  private:
+  int _internal_spare_size() const;
+  public:
+  void clear_spare();
+  ::grpc_cli::RemoveSpareRequest_SpareDeviceName* mutable_spare(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::RemoveSpareRequest_SpareDeviceName >*
+      mutable_spare();
+  private:
+  const ::grpc_cli::RemoveSpareRequest_SpareDeviceName& _internal_spare(int index) const;
+  ::grpc_cli::RemoveSpareRequest_SpareDeviceName* _internal_add_spare();
+  public:
+  const ::grpc_cli::RemoveSpareRequest_SpareDeviceName& spare(int index) const;
+  ::grpc_cli::RemoveSpareRequest_SpareDeviceName* add_spare();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::RemoveSpareRequest_SpareDeviceName >&
+      spare() const;
+
+  // string array = 1;
+  void clear_array();
+  const std::string& array() const;
+  void set_array(const std::string& value);
+  void set_array(std::string&& value);
+  void set_array(const char* value);
+  void set_array(const char* value, size_t size);
+  std::string* mutable_array();
+  std::string* release_array();
+  void set_allocated_array(std::string* array);
+  private:
+  const std::string& _internal_array() const;
+  void _internal_set_array(const std::string& value);
+  std::string* _internal_mutable_array();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RemoveSpareRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::RemoveSpareRequest_SpareDeviceName > spare_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RemoveSpareRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RemoveSpareRequest) */ {
+ public:
+  inline RemoveSpareRequest() : RemoveSpareRequest(nullptr) {}
+  virtual ~RemoveSpareRequest();
+  explicit constexpr RemoveSpareRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveSpareRequest(const RemoveSpareRequest& from);
+  RemoveSpareRequest(RemoveSpareRequest&& from) noexcept
+    : RemoveSpareRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveSpareRequest& operator=(const RemoveSpareRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveSpareRequest& operator=(RemoveSpareRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RemoveSpareRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveSpareRequest* internal_default_instance() {
+    return reinterpret_cast<const RemoveSpareRequest*>(
+               &_RemoveSpareRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    45;
+
+  friend void swap(RemoveSpareRequest& a, RemoveSpareRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveSpareRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveSpareRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RemoveSpareRequest* New() const final {
+    return CreateMaybeMessage<RemoveSpareRequest>(nullptr);
+  }
+
+  RemoveSpareRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RemoveSpareRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RemoveSpareRequest& from);
+  void MergeFrom(const RemoveSpareRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveSpareRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RemoveSpareRequest";
+  }
+  protected:
+  explicit RemoveSpareRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef RemoveSpareRequest_SpareDeviceName SpareDeviceName;
+  typedef RemoveSpareRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.RemoveSpareRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::RemoveSpareRequest_Param& param() const;
+  ::grpc_cli::RemoveSpareRequest_Param* release_param();
+  ::grpc_cli::RemoveSpareRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::RemoveSpareRequest_Param* param);
+  private:
+  const ::grpc_cli::RemoveSpareRequest_Param& _internal_param() const;
+  ::grpc_cli::RemoveSpareRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::RemoveSpareRequest_Param* param);
+  ::grpc_cli::RemoveSpareRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RemoveSpareRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::RemoveSpareRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RemoveSpareResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RemoveSpareResponse.Result) */ {
+ public:
+  inline RemoveSpareResponse_Result() : RemoveSpareResponse_Result(nullptr) {}
+  virtual ~RemoveSpareResponse_Result();
+  explicit constexpr RemoveSpareResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveSpareResponse_Result(const RemoveSpareResponse_Result& from);
+  RemoveSpareResponse_Result(RemoveSpareResponse_Result&& from) noexcept
+    : RemoveSpareResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveSpareResponse_Result& operator=(const RemoveSpareResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveSpareResponse_Result& operator=(RemoveSpareResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RemoveSpareResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveSpareResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const RemoveSpareResponse_Result*>(
+               &_RemoveSpareResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    46;
+
+  friend void swap(RemoveSpareResponse_Result& a, RemoveSpareResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveSpareResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveSpareResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RemoveSpareResponse_Result* New() const final {
+    return CreateMaybeMessage<RemoveSpareResponse_Result>(nullptr);
+  }
+
+  RemoveSpareResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RemoveSpareResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RemoveSpareResponse_Result& from);
+  void MergeFrom(const RemoveSpareResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveSpareResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RemoveSpareResponse.Result";
+  }
+  protected:
+  explicit RemoveSpareResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RemoveSpareResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RemoveSpareResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RemoveSpareResponse) */ {
+ public:
+  inline RemoveSpareResponse() : RemoveSpareResponse(nullptr) {}
+  virtual ~RemoveSpareResponse();
+  explicit constexpr RemoveSpareResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveSpareResponse(const RemoveSpareResponse& from);
+  RemoveSpareResponse(RemoveSpareResponse&& from) noexcept
+    : RemoveSpareResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveSpareResponse& operator=(const RemoveSpareResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveSpareResponse& operator=(RemoveSpareResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RemoveSpareResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveSpareResponse* internal_default_instance() {
+    return reinterpret_cast<const RemoveSpareResponse*>(
+               &_RemoveSpareResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    47;
+
+  friend void swap(RemoveSpareResponse& a, RemoveSpareResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveSpareResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveSpareResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RemoveSpareResponse* New() const final {
+    return CreateMaybeMessage<RemoveSpareResponse>(nullptr);
+  }
+
+  RemoveSpareResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RemoveSpareResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RemoveSpareResponse& from);
+  void MergeFrom(const RemoveSpareResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveSpareResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RemoveSpareResponse";
+  }
+  protected:
+  explicit RemoveSpareResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef RemoveSpareResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.RemoveSpareResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::RemoveSpareResponse_Result& result() const;
+  ::grpc_cli::RemoveSpareResponse_Result* release_result();
+  ::grpc_cli::RemoveSpareResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::RemoveSpareResponse_Result* result);
+  private:
+  const ::grpc_cli::RemoveSpareResponse_Result& _internal_result() const;
+  ::grpc_cli::RemoveSpareResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::RemoveSpareResponse_Result* result);
+  ::grpc_cli::RemoveSpareResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RemoveSpareResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::RemoveSpareResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CreateArrayRequest_Param PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateArrayRequest.Param) */ {
  public:
@@ -7846,7 +8743,7 @@ class CreateArrayRequest_Param PROTOBUF_FINAL :
                &_CreateArrayRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    48;
 
   friend void swap(CreateArrayRequest_Param& a, CreateArrayRequest_Param& b) {
     a.Swap(&b);
@@ -8068,7 +8965,7 @@ class CreateArrayRequest PROTOBUF_FINAL :
                &_CreateArrayRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    49;
 
   friend void swap(CreateArrayRequest& a, CreateArrayRequest& b) {
     a.Swap(&b);
@@ -8270,7 +9167,7 @@ class CreateArrayResponse_Result PROTOBUF_FINAL :
                &_CreateArrayResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    50;
 
   friend void swap(CreateArrayResponse_Result& a, CreateArrayResponse_Result& b) {
     a.Swap(&b);
@@ -8416,7 +9313,7 @@ class CreateArrayResponse PROTOBUF_FINAL :
                &_CreateArrayResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    51;
 
   friend void swap(CreateArrayResponse& a, CreateArrayResponse& b) {
     a.Swap(&b);
@@ -8577,6 +9474,702 @@ class CreateArrayResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DeleteArrayRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.DeleteArrayRequest.Param) */ {
+ public:
+  inline DeleteArrayRequest_Param() : DeleteArrayRequest_Param(nullptr) {}
+  virtual ~DeleteArrayRequest_Param();
+  explicit constexpr DeleteArrayRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeleteArrayRequest_Param(const DeleteArrayRequest_Param& from);
+  DeleteArrayRequest_Param(DeleteArrayRequest_Param&& from) noexcept
+    : DeleteArrayRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline DeleteArrayRequest_Param& operator=(const DeleteArrayRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeleteArrayRequest_Param& operator=(DeleteArrayRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeleteArrayRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeleteArrayRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const DeleteArrayRequest_Param*>(
+               &_DeleteArrayRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    52;
+
+  friend void swap(DeleteArrayRequest_Param& a, DeleteArrayRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeleteArrayRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeleteArrayRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeleteArrayRequest_Param* New() const final {
+    return CreateMaybeMessage<DeleteArrayRequest_Param>(nullptr);
+  }
+
+  DeleteArrayRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeleteArrayRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeleteArrayRequest_Param& from);
+  void MergeFrom(const DeleteArrayRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeleteArrayRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.DeleteArrayRequest.Param";
+  }
+  protected:
+  explicit DeleteArrayRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name();
+  const std::string& name() const;
+  void set_name(const std::string& value);
+  void set_name(std::string&& value);
+  void set_name(const char* value);
+  void set_name(const char* value, size_t size);
+  std::string* mutable_name();
+  std::string* release_name();
+  void set_allocated_name(std::string* name);
+  private:
+  const std::string& _internal_name() const;
+  void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.DeleteArrayRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DeleteArrayRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.DeleteArrayRequest) */ {
+ public:
+  inline DeleteArrayRequest() : DeleteArrayRequest(nullptr) {}
+  virtual ~DeleteArrayRequest();
+  explicit constexpr DeleteArrayRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeleteArrayRequest(const DeleteArrayRequest& from);
+  DeleteArrayRequest(DeleteArrayRequest&& from) noexcept
+    : DeleteArrayRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline DeleteArrayRequest& operator=(const DeleteArrayRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeleteArrayRequest& operator=(DeleteArrayRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeleteArrayRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeleteArrayRequest* internal_default_instance() {
+    return reinterpret_cast<const DeleteArrayRequest*>(
+               &_DeleteArrayRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    53;
+
+  friend void swap(DeleteArrayRequest& a, DeleteArrayRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeleteArrayRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeleteArrayRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeleteArrayRequest* New() const final {
+    return CreateMaybeMessage<DeleteArrayRequest>(nullptr);
+  }
+
+  DeleteArrayRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeleteArrayRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeleteArrayRequest& from);
+  void MergeFrom(const DeleteArrayRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeleteArrayRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.DeleteArrayRequest";
+  }
+  protected:
+  explicit DeleteArrayRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef DeleteArrayRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.DeleteArrayRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::DeleteArrayRequest_Param& param() const;
+  ::grpc_cli::DeleteArrayRequest_Param* release_param();
+  ::grpc_cli::DeleteArrayRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::DeleteArrayRequest_Param* param);
+  private:
+  const ::grpc_cli::DeleteArrayRequest_Param& _internal_param() const;
+  ::grpc_cli::DeleteArrayRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::DeleteArrayRequest_Param* param);
+  ::grpc_cli::DeleteArrayRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.DeleteArrayRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::DeleteArrayRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DeleteArrayResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.DeleteArrayResponse.Result) */ {
+ public:
+  inline DeleteArrayResponse_Result() : DeleteArrayResponse_Result(nullptr) {}
+  virtual ~DeleteArrayResponse_Result();
+  explicit constexpr DeleteArrayResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeleteArrayResponse_Result(const DeleteArrayResponse_Result& from);
+  DeleteArrayResponse_Result(DeleteArrayResponse_Result&& from) noexcept
+    : DeleteArrayResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline DeleteArrayResponse_Result& operator=(const DeleteArrayResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeleteArrayResponse_Result& operator=(DeleteArrayResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeleteArrayResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeleteArrayResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const DeleteArrayResponse_Result*>(
+               &_DeleteArrayResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    54;
+
+  friend void swap(DeleteArrayResponse_Result& a, DeleteArrayResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeleteArrayResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeleteArrayResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeleteArrayResponse_Result* New() const final {
+    return CreateMaybeMessage<DeleteArrayResponse_Result>(nullptr);
+  }
+
+  DeleteArrayResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeleteArrayResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeleteArrayResponse_Result& from);
+  void MergeFrom(const DeleteArrayResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeleteArrayResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.DeleteArrayResponse.Result";
+  }
+  protected:
+  explicit DeleteArrayResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.DeleteArrayResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DeleteArrayResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.DeleteArrayResponse) */ {
+ public:
+  inline DeleteArrayResponse() : DeleteArrayResponse(nullptr) {}
+  virtual ~DeleteArrayResponse();
+  explicit constexpr DeleteArrayResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeleteArrayResponse(const DeleteArrayResponse& from);
+  DeleteArrayResponse(DeleteArrayResponse&& from) noexcept
+    : DeleteArrayResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline DeleteArrayResponse& operator=(const DeleteArrayResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeleteArrayResponse& operator=(DeleteArrayResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeleteArrayResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeleteArrayResponse* internal_default_instance() {
+    return reinterpret_cast<const DeleteArrayResponse*>(
+               &_DeleteArrayResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    55;
+
+  friend void swap(DeleteArrayResponse& a, DeleteArrayResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeleteArrayResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeleteArrayResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeleteArrayResponse* New() const final {
+    return CreateMaybeMessage<DeleteArrayResponse>(nullptr);
+  }
+
+  DeleteArrayResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeleteArrayResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeleteArrayResponse& from);
+  void MergeFrom(const DeleteArrayResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeleteArrayResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.DeleteArrayResponse";
+  }
+  protected:
+  explicit DeleteArrayResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef DeleteArrayResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.DeleteArrayResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::DeleteArrayResponse_Result& result() const;
+  ::grpc_cli::DeleteArrayResponse_Result* release_result();
+  ::grpc_cli::DeleteArrayResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::DeleteArrayResponse_Result* result);
+  private:
+  const ::grpc_cli::DeleteArrayResponse_Result& _internal_result() const;
+  ::grpc_cli::DeleteArrayResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::DeleteArrayResponse_Result* result);
+  ::grpc_cli::DeleteArrayResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.DeleteArrayResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::DeleteArrayResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class MountArrayRequest_Param PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.MountArrayRequest.Param) */ {
  public:
@@ -8620,7 +10213,7 @@ class MountArrayRequest_Param PROTOBUF_FINAL :
                &_MountArrayRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    56;
 
   friend void swap(MountArrayRequest_Param& a, MountArrayRequest_Param& b) {
     a.Swap(&b);
@@ -8780,7 +10373,7 @@ class MountArrayRequest PROTOBUF_FINAL :
                &_MountArrayRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    57;
 
   friend void swap(MountArrayRequest& a, MountArrayRequest& b) {
     a.Swap(&b);
@@ -8982,7 +10575,7 @@ class MountArrayResponse_Result PROTOBUF_FINAL :
                &_MountArrayResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    58;
 
   friend void swap(MountArrayResponse_Result& a, MountArrayResponse_Result& b) {
     a.Swap(&b);
@@ -9128,7 +10721,7 @@ class MountArrayResponse PROTOBUF_FINAL :
                &_MountArrayResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    59;
 
   friend void swap(MountArrayResponse& a, MountArrayResponse& b) {
     a.Swap(&b);
@@ -9332,7 +10925,7 @@ class UnmountArrayRequest_Param PROTOBUF_FINAL :
                &_UnmountArrayRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    60;
 
   friend void swap(UnmountArrayRequest_Param& a, UnmountArrayRequest_Param& b) {
     a.Swap(&b);
@@ -9476,7 +11069,7 @@ class UnmountArrayRequest PROTOBUF_FINAL :
                &_UnmountArrayRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    61;
 
   friend void swap(UnmountArrayRequest& a, UnmountArrayRequest& b) {
     a.Swap(&b);
@@ -9678,7 +11271,7 @@ class UnmountArrayResponse_Result PROTOBUF_FINAL :
                &_UnmountArrayResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    62;
 
   friend void swap(UnmountArrayResponse_Result& a, UnmountArrayResponse_Result& b) {
     a.Swap(&b);
@@ -9824,7 +11417,7 @@ class UnmountArrayResponse PROTOBUF_FINAL :
                &_UnmountArrayResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    63;
 
   friend void swap(UnmountArrayResponse& a, UnmountArrayResponse& b) {
     a.Swap(&b);
@@ -17684,6 +19277,824 @@ inline void DeviceNameList::set_allocated_devicename(std::string* devicename) {
 
 // -------------------------------------------------------------------
 
+// RemoveSpareRequest_SpareDeviceName
+
+// string deviceName = 1;
+inline void RemoveSpareRequest_SpareDeviceName::clear_devicename() {
+  devicename_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareRequest_SpareDeviceName::devicename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+  return _internal_devicename();
+}
+inline void RemoveSpareRequest_SpareDeviceName::set_devicename(const std::string& value) {
+  _internal_set_devicename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+}
+inline std::string* RemoveSpareRequest_SpareDeviceName::mutable_devicename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+  return _internal_mutable_devicename();
+}
+inline const std::string& RemoveSpareRequest_SpareDeviceName::_internal_devicename() const {
+  return devicename_.Get();
+}
+inline void RemoveSpareRequest_SpareDeviceName::_internal_set_devicename(const std::string& value) {
+  
+  devicename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareRequest_SpareDeviceName::set_devicename(std::string&& value) {
+  
+  devicename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+}
+inline void RemoveSpareRequest_SpareDeviceName::set_devicename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  devicename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+}
+inline void RemoveSpareRequest_SpareDeviceName::set_devicename(const char* value,
+    size_t size) {
+  
+  devicename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+}
+inline std::string* RemoveSpareRequest_SpareDeviceName::_internal_mutable_devicename() {
+  
+  return devicename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareRequest_SpareDeviceName::release_devicename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+  return devicename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareRequest_SpareDeviceName::set_allocated_devicename(std::string* devicename) {
+  if (devicename != nullptr) {
+    
+  } else {
+    
+  }
+  devicename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), devicename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.SpareDeviceName.deviceName)
+}
+
+// -------------------------------------------------------------------
+
+// RemoveSpareRequest_Param
+
+// string array = 1;
+inline void RemoveSpareRequest_Param::clear_array() {
+  array_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareRequest_Param::array() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.Param.array)
+  return _internal_array();
+}
+inline void RemoveSpareRequest_Param::set_array(const std::string& value) {
+  _internal_set_array(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareRequest.Param.array)
+}
+inline std::string* RemoveSpareRequest_Param::mutable_array() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.Param.array)
+  return _internal_mutable_array();
+}
+inline const std::string& RemoveSpareRequest_Param::_internal_array() const {
+  return array_.Get();
+}
+inline void RemoveSpareRequest_Param::_internal_set_array(const std::string& value) {
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareRequest_Param::set_array(std::string&& value) {
+  
+  array_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareRequest.Param.array)
+}
+inline void RemoveSpareRequest_Param::set_array(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareRequest.Param.array)
+}
+inline void RemoveSpareRequest_Param::set_array(const char* value,
+    size_t size) {
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareRequest.Param.array)
+}
+inline std::string* RemoveSpareRequest_Param::_internal_mutable_array() {
+  
+  return array_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareRequest_Param::release_array() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.Param.array)
+  return array_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareRequest_Param::set_allocated_array(std::string* array) {
+  if (array != nullptr) {
+    
+  } else {
+    
+  }
+  array_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.Param.array)
+}
+
+// repeated .grpc_cli.RemoveSpareRequest.SpareDeviceName spare = 2;
+inline int RemoveSpareRequest_Param::_internal_spare_size() const {
+  return spare_.size();
+}
+inline int RemoveSpareRequest_Param::spare_size() const {
+  return _internal_spare_size();
+}
+inline void RemoveSpareRequest_Param::clear_spare() {
+  spare_.Clear();
+}
+inline ::grpc_cli::RemoveSpareRequest_SpareDeviceName* RemoveSpareRequest_Param::mutable_spare(int index) {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.Param.spare)
+  return spare_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::RemoveSpareRequest_SpareDeviceName >*
+RemoveSpareRequest_Param::mutable_spare() {
+  // @@protoc_insertion_point(field_mutable_list:grpc_cli.RemoveSpareRequest.Param.spare)
+  return &spare_;
+}
+inline const ::grpc_cli::RemoveSpareRequest_SpareDeviceName& RemoveSpareRequest_Param::_internal_spare(int index) const {
+  return spare_.Get(index);
+}
+inline const ::grpc_cli::RemoveSpareRequest_SpareDeviceName& RemoveSpareRequest_Param::spare(int index) const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.Param.spare)
+  return _internal_spare(index);
+}
+inline ::grpc_cli::RemoveSpareRequest_SpareDeviceName* RemoveSpareRequest_Param::_internal_add_spare() {
+  return spare_.Add();
+}
+inline ::grpc_cli::RemoveSpareRequest_SpareDeviceName* RemoveSpareRequest_Param::add_spare() {
+  // @@protoc_insertion_point(field_add:grpc_cli.RemoveSpareRequest.Param.spare)
+  return _internal_add_spare();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::RemoveSpareRequest_SpareDeviceName >&
+RemoveSpareRequest_Param::spare() const {
+  // @@protoc_insertion_point(field_list:grpc_cli.RemoveSpareRequest.Param.spare)
+  return spare_;
+}
+
+// -------------------------------------------------------------------
+
+// RemoveSpareRequest
+
+// string command = 1;
+inline void RemoveSpareRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.command)
+  return _internal_command();
+}
+inline void RemoveSpareRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareRequest.command)
+}
+inline std::string* RemoveSpareRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& RemoveSpareRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void RemoveSpareRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareRequest.command)
+}
+inline void RemoveSpareRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareRequest.command)
+}
+inline void RemoveSpareRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareRequest.command)
+}
+inline std::string* RemoveSpareRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.command)
+}
+
+// string rid = 2;
+inline void RemoveSpareRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.rid)
+  return _internal_rid();
+}
+inline void RemoveSpareRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareRequest.rid)
+}
+inline std::string* RemoveSpareRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& RemoveSpareRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void RemoveSpareRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareRequest.rid)
+}
+inline void RemoveSpareRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareRequest.rid)
+}
+inline void RemoveSpareRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareRequest.rid)
+}
+inline std::string* RemoveSpareRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.rid)
+}
+
+// string requestor = 3;
+inline void RemoveSpareRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.requestor)
+  return _internal_requestor();
+}
+inline void RemoveSpareRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareRequest.requestor)
+}
+inline std::string* RemoveSpareRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& RemoveSpareRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void RemoveSpareRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareRequest.requestor)
+}
+inline void RemoveSpareRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareRequest.requestor)
+}
+inline void RemoveSpareRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareRequest.requestor)
+}
+inline std::string* RemoveSpareRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.requestor)
+}
+
+// .grpc_cli.RemoveSpareRequest.Param param = 4;
+inline bool RemoveSpareRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool RemoveSpareRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void RemoveSpareRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::RemoveSpareRequest_Param& RemoveSpareRequest::_internal_param() const {
+  const ::grpc_cli::RemoveSpareRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::RemoveSpareRequest_Param&>(
+      ::grpc_cli::_RemoveSpareRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::RemoveSpareRequest_Param& RemoveSpareRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareRequest.param)
+  return _internal_param();
+}
+inline void RemoveSpareRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::RemoveSpareRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RemoveSpareRequest.param)
+}
+inline ::grpc_cli::RemoveSpareRequest_Param* RemoveSpareRequest::release_param() {
+  
+  ::grpc_cli::RemoveSpareRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::RemoveSpareRequest_Param* RemoveSpareRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareRequest.param)
+  
+  ::grpc_cli::RemoveSpareRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::RemoveSpareRequest_Param* RemoveSpareRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::RemoveSpareRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::RemoveSpareRequest_Param* RemoveSpareRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareRequest.param)
+  return _internal_mutable_param();
+}
+inline void RemoveSpareRequest::set_allocated_param(::grpc_cli::RemoveSpareRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// RemoveSpareResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool RemoveSpareResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool RemoveSpareResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void RemoveSpareResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& RemoveSpareResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& RemoveSpareResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareResponse.Result.status)
+  return _internal_status();
+}
+inline void RemoveSpareResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RemoveSpareResponse.Result.status)
+}
+inline ::grpc_cli::Status* RemoveSpareResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* RemoveSpareResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* RemoveSpareResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* RemoveSpareResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void RemoveSpareResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// RemoveSpareResponse
+
+// string command = 1;
+inline void RemoveSpareResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareResponse.command)
+  return _internal_command();
+}
+inline void RemoveSpareResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareResponse.command)
+}
+inline std::string* RemoveSpareResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& RemoveSpareResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void RemoveSpareResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareResponse.command)
+}
+inline void RemoveSpareResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareResponse.command)
+}
+inline void RemoveSpareResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareResponse.command)
+}
+inline std::string* RemoveSpareResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareResponse.command)
+}
+
+// string rid = 2;
+inline void RemoveSpareResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& RemoveSpareResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareResponse.rid)
+  return _internal_rid();
+}
+inline void RemoveSpareResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RemoveSpareResponse.rid)
+}
+inline std::string* RemoveSpareResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& RemoveSpareResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void RemoveSpareResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RemoveSpareResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RemoveSpareResponse.rid)
+}
+inline void RemoveSpareResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RemoveSpareResponse.rid)
+}
+inline void RemoveSpareResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RemoveSpareResponse.rid)
+}
+inline std::string* RemoveSpareResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RemoveSpareResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RemoveSpareResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareResponse.rid)
+}
+
+// .grpc_cli.RemoveSpareResponse.Result result = 3;
+inline bool RemoveSpareResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool RemoveSpareResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void RemoveSpareResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::RemoveSpareResponse_Result& RemoveSpareResponse::_internal_result() const {
+  const ::grpc_cli::RemoveSpareResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::RemoveSpareResponse_Result&>(
+      ::grpc_cli::_RemoveSpareResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::RemoveSpareResponse_Result& RemoveSpareResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareResponse.result)
+  return _internal_result();
+}
+inline void RemoveSpareResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::RemoveSpareResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RemoveSpareResponse.result)
+}
+inline ::grpc_cli::RemoveSpareResponse_Result* RemoveSpareResponse::release_result() {
+  
+  ::grpc_cli::RemoveSpareResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::RemoveSpareResponse_Result* RemoveSpareResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareResponse.result)
+  
+  ::grpc_cli::RemoveSpareResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::RemoveSpareResponse_Result* RemoveSpareResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::RemoveSpareResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::RemoveSpareResponse_Result* RemoveSpareResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareResponse.result)
+  return _internal_mutable_result();
+}
+inline void RemoveSpareResponse::set_allocated_result(::grpc_cli::RemoveSpareResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool RemoveSpareResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool RemoveSpareResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void RemoveSpareResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& RemoveSpareResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& RemoveSpareResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RemoveSpareResponse.info)
+  return _internal_info();
+}
+inline void RemoveSpareResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RemoveSpareResponse.info)
+}
+inline ::grpc_cli::PosInfo* RemoveSpareResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* RemoveSpareResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RemoveSpareResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* RemoveSpareResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* RemoveSpareResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RemoveSpareResponse.info)
+  return _internal_mutable_info();
+}
+inline void RemoveSpareResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RemoveSpareResponse.info)
+}
+
+// -------------------------------------------------------------------
+
 // CreateArrayRequest_Param
 
 // string name = 1;
@@ -18572,6 +20983,720 @@ inline void CreateArrayResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
   }
   info_ = info;
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateArrayResponse.info)
+}
+
+// -------------------------------------------------------------------
+
+// DeleteArrayRequest_Param
+
+// string name = 1;
+inline void DeleteArrayRequest_Param::clear_name() {
+  name_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayRequest_Param::name() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayRequest.Param.name)
+  return _internal_name();
+}
+inline void DeleteArrayRequest_Param::set_name(const std::string& value) {
+  _internal_set_name(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayRequest.Param.name)
+}
+inline std::string* DeleteArrayRequest_Param::mutable_name() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayRequest.Param.name)
+  return _internal_mutable_name();
+}
+inline const std::string& DeleteArrayRequest_Param::_internal_name() const {
+  return name_.Get();
+}
+inline void DeleteArrayRequest_Param::_internal_set_name(const std::string& value) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayRequest_Param::set_name(std::string&& value) {
+  
+  name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayRequest.Param.name)
+}
+inline void DeleteArrayRequest_Param::set_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayRequest.Param.name)
+}
+inline void DeleteArrayRequest_Param::set_name(const char* value,
+    size_t size) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayRequest.Param.name)
+}
+inline std::string* DeleteArrayRequest_Param::_internal_mutable_name() {
+  
+  return name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayRequest_Param::release_name() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayRequest.Param.name)
+  return name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayRequest_Param::set_allocated_name(std::string* name) {
+  if (name != nullptr) {
+    
+  } else {
+    
+  }
+  name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayRequest.Param.name)
+}
+
+// -------------------------------------------------------------------
+
+// DeleteArrayRequest
+
+// string command = 1;
+inline void DeleteArrayRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayRequest.command)
+  return _internal_command();
+}
+inline void DeleteArrayRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayRequest.command)
+}
+inline std::string* DeleteArrayRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& DeleteArrayRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void DeleteArrayRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayRequest.command)
+}
+inline void DeleteArrayRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayRequest.command)
+}
+inline void DeleteArrayRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayRequest.command)
+}
+inline std::string* DeleteArrayRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayRequest.command)
+}
+
+// string rid = 2;
+inline void DeleteArrayRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayRequest.rid)
+  return _internal_rid();
+}
+inline void DeleteArrayRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayRequest.rid)
+}
+inline std::string* DeleteArrayRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& DeleteArrayRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void DeleteArrayRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayRequest.rid)
+}
+inline void DeleteArrayRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayRequest.rid)
+}
+inline void DeleteArrayRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayRequest.rid)
+}
+inline std::string* DeleteArrayRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayRequest.rid)
+}
+
+// string requestor = 3;
+inline void DeleteArrayRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayRequest.requestor)
+  return _internal_requestor();
+}
+inline void DeleteArrayRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayRequest.requestor)
+}
+inline std::string* DeleteArrayRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& DeleteArrayRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void DeleteArrayRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayRequest.requestor)
+}
+inline void DeleteArrayRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayRequest.requestor)
+}
+inline void DeleteArrayRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayRequest.requestor)
+}
+inline std::string* DeleteArrayRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayRequest.requestor)
+}
+
+// .grpc_cli.DeleteArrayRequest.Param param = 4;
+inline bool DeleteArrayRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool DeleteArrayRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void DeleteArrayRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::DeleteArrayRequest_Param& DeleteArrayRequest::_internal_param() const {
+  const ::grpc_cli::DeleteArrayRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::DeleteArrayRequest_Param&>(
+      ::grpc_cli::_DeleteArrayRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::DeleteArrayRequest_Param& DeleteArrayRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayRequest.param)
+  return _internal_param();
+}
+inline void DeleteArrayRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::DeleteArrayRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.DeleteArrayRequest.param)
+}
+inline ::grpc_cli::DeleteArrayRequest_Param* DeleteArrayRequest::release_param() {
+  
+  ::grpc_cli::DeleteArrayRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::DeleteArrayRequest_Param* DeleteArrayRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayRequest.param)
+  
+  ::grpc_cli::DeleteArrayRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::DeleteArrayRequest_Param* DeleteArrayRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::DeleteArrayRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::DeleteArrayRequest_Param* DeleteArrayRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayRequest.param)
+  return _internal_mutable_param();
+}
+inline void DeleteArrayRequest::set_allocated_param(::grpc_cli::DeleteArrayRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// DeleteArrayResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool DeleteArrayResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool DeleteArrayResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void DeleteArrayResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& DeleteArrayResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& DeleteArrayResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayResponse.Result.status)
+  return _internal_status();
+}
+inline void DeleteArrayResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.DeleteArrayResponse.Result.status)
+}
+inline ::grpc_cli::Status* DeleteArrayResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* DeleteArrayResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* DeleteArrayResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* DeleteArrayResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void DeleteArrayResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// DeleteArrayResponse
+
+// string command = 1;
+inline void DeleteArrayResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayResponse.command)
+  return _internal_command();
+}
+inline void DeleteArrayResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayResponse.command)
+}
+inline std::string* DeleteArrayResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& DeleteArrayResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void DeleteArrayResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayResponse.command)
+}
+inline void DeleteArrayResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayResponse.command)
+}
+inline void DeleteArrayResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayResponse.command)
+}
+inline std::string* DeleteArrayResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayResponse.command)
+}
+
+// string rid = 2;
+inline void DeleteArrayResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& DeleteArrayResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayResponse.rid)
+  return _internal_rid();
+}
+inline void DeleteArrayResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.DeleteArrayResponse.rid)
+}
+inline std::string* DeleteArrayResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& DeleteArrayResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void DeleteArrayResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeleteArrayResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.DeleteArrayResponse.rid)
+}
+inline void DeleteArrayResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.DeleteArrayResponse.rid)
+}
+inline void DeleteArrayResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.DeleteArrayResponse.rid)
+}
+inline std::string* DeleteArrayResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeleteArrayResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeleteArrayResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayResponse.rid)
+}
+
+// .grpc_cli.DeleteArrayResponse.Result result = 3;
+inline bool DeleteArrayResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool DeleteArrayResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void DeleteArrayResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::DeleteArrayResponse_Result& DeleteArrayResponse::_internal_result() const {
+  const ::grpc_cli::DeleteArrayResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::DeleteArrayResponse_Result&>(
+      ::grpc_cli::_DeleteArrayResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::DeleteArrayResponse_Result& DeleteArrayResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayResponse.result)
+  return _internal_result();
+}
+inline void DeleteArrayResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::DeleteArrayResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.DeleteArrayResponse.result)
+}
+inline ::grpc_cli::DeleteArrayResponse_Result* DeleteArrayResponse::release_result() {
+  
+  ::grpc_cli::DeleteArrayResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::DeleteArrayResponse_Result* DeleteArrayResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayResponse.result)
+  
+  ::grpc_cli::DeleteArrayResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::DeleteArrayResponse_Result* DeleteArrayResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::DeleteArrayResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::DeleteArrayResponse_Result* DeleteArrayResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayResponse.result)
+  return _internal_mutable_result();
+}
+inline void DeleteArrayResponse::set_allocated_result(::grpc_cli::DeleteArrayResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool DeleteArrayResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool DeleteArrayResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void DeleteArrayResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& DeleteArrayResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& DeleteArrayResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.DeleteArrayResponse.info)
+  return _internal_info();
+}
+inline void DeleteArrayResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.DeleteArrayResponse.info)
+}
+inline ::grpc_cli::PosInfo* DeleteArrayResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* DeleteArrayResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.DeleteArrayResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* DeleteArrayResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* DeleteArrayResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.DeleteArrayResponse.info)
+  return _internal_mutable_info();
+}
+inline void DeleteArrayResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.DeleteArrayResponse.info)
 }
 
 // -------------------------------------------------------------------
@@ -20033,6 +23158,24 @@ inline void UnmountArrayResponse::set_allocated_info(::grpc_cli::PosInfo* info) 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
