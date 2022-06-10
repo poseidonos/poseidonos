@@ -100,8 +100,8 @@ type Array struct {
 	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
 	UPDATEDATETIME     string   `json:"updateDatetime,omitempty"`
 	REBUILDINGPROGRESS uint32   `json:"rebuildingProgress,omitempty"`
-	CAPACITY           uint64   `json:"capacity,omitempty"`
-	USED               uint64   `json:"used,omitempty"`
+	CAPACITY           string   `json:"capacity,omitempty"`
+	USED               string   `json:"used,omitempty"`
 	GCMODE             string   `json:"gcMode,omitempty"`
 	METARAID           string   `json:"metaRaid,omitempty"`
 	DATARAID           string   `json:"dataRaid,omitempty"`

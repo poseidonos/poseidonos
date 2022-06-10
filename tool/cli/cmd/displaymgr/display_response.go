@@ -102,14 +102,16 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		// Data
 		for _, array := range res.RESULT.DATA.ARRAYLIST {
+			total, _ := strconv.ParseUint(array.CAPACITY, 10, 64)
+			used, _ := strconv.ParseUint(array.USED, 10, 64)
 			fmt.Fprint(w,
 				strconv.Itoa(array.ARRAYINDEX)+"\t"+
 					globals.FieldSeparator+array.ARRAYNAME+"\t"+
 					globals.FieldSeparator+array.STATUS+"\t"+
 					globals.FieldSeparator+array.CREATEDATETIME+"\t"+
 					globals.FieldSeparator+array.UPDATEDATETIME+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, array.CAPACITY)+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, array.USED)+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, total)+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, used)+"\t"+
 					globals.FieldSeparator+strconv.FormatBool(array.WRITETHROUGH)+"\t"+
 					globals.FieldSeparator+array.DATARAID)
 
@@ -139,8 +141,10 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "CreateDatetime\t: "+array.CREATEDATETIME)
 		fmt.Fprintln(w, "UpdateDatetime\t: "+array.UPDATEDATETIME)
 		fmt.Fprintln(w, "RebuildingProgress\t:", array.REBUILDINGPROGRESS)
-		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, array.CAPACITY))
-		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, array.USED))
+		total, _ := strconv.ParseUint(array.CAPACITY, 10, 64)
+		used, _ := strconv.ParseUint(array.USED, 10, 64)
+		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, total))
+		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, used))
 		fmt.Fprintln(w, "GCMode\t: "+array.GCMODE)
 		fmt.Fprintln(w, "MetaRAID\t: "+array.METARAID)
 		fmt.Fprintln(w, "DataRAID\t: "+array.DATARAID)
