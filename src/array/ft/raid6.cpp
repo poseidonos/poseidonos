@@ -59,50 +59,90 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
 list<FtEntry>
 Raid6::Translate(const LogicalEntry& le)
 {
-   vector<uint32_t> pOffset = GetParityOffset(le.addr.stripeId);
+   vector<uint32_t> parityOffset = GetParityOffset(le.addr.stripeId);
    uint32_t paritySize = ftSize_.blksPerChunk;
-   assert (pOffset.size() == 2);
-   uint32_t pIndex = pOffset.front();
-   uint32_t qIndex = pOffset.back();
- 
+
+   assert (parityOffset.size() == 2);
+   uint32_t pParityIndex = parityOffset.front();
+   uint32_t qParityIndex = parityOffset.back();
+
+   BlkOffset pParityOffset = (uint64_t)pParityIndex * (uint64_t)ftSize_.blksPerChunk;
+   BlkOffset qParityOffset = (uint64_t)qParityIndex * (uint64_t)ftSize_.blksPerChunk;
+
    BlkOffset startOffset = le.addr.offset;
    BlkOffset lastOffset = startOffset + le.blkCnt - 1;
    uint32_t firstIndex = startOffset / ftSize_.blksPerChunk;
    uint32_t lastIndex = lastOffset / ftSize_.blksPerChunk;
- 
+
    list<FtEntry> feList;
    FtEntry fe;
    fe.addr.stripeId = le.addr.stripeId;
    fe.addr.offset = le.addr.offset;
    fe.blkCnt = le.blkCnt;
-   
-   // TODO JH 0123 -> 01 45 이런식으로 되도록 재배치
-   // fe.addr.offset += paritySize;
-   
  
-   // if (parityIndex <= firstIndex)
-   // {
-   //     fe.addr.offset += paritySize;
-   //     feList.push_back(fe);
-   // }
-   // else if (firstIndex < parityIndex && parityIndex <= lastIndex)
-   // {
-   //     fe.blkCnt = parityOffset - startOffset;
-   //     feList.push_back(fe);
-   //     FtEntry feSecond;
-   //     feSecond.addr.stripeId = le.addr.stripeId;
-   //     feSecond.addr.offset = parityOffset + paritySize;
-   //     feSecond.blkCnt = le.blkCnt - fe.blkCnt;
-   //     feList.push_back(feSecond);
-   // }
-   // else
-   // {
-   //     feList.push_back(fe);
-   // }
- 
+   if(lastIndex<pParityIndex && pParityIndex<qParityIndex){
+        feList.push_back(fe);
+   }else if(lastIndex<pParityIndex && qParityIndex<pParityIndex){
+        fe.addr.offset = qParityOffset+paritySize;
+        feList.push_back(fe);
+   }else if(firstIndex <=pParityIndex && pParityIndex<qParityIndex){
+        fe.addr.offset = qParityOffset+paritySize;
+        feList.push_back(fe);
+   }else {
+        fe.blkCnt = pParityOffset - startOffset;
+        feList.push_back(fe);
+        
+        FtEntry feSecond;
+        feSecond.addr.stripeId = le.addr.stripeId;
+        feSecond.addr.offset = qParityOffset + paritySize;
+        feSecond.blkCnt = le.blkCnt - fe.blkCnt;
+        feList.push_back(feSecond);  
+   }
    return feList;
 }
+
  
+vector<uint32_t>
+Raid6::GetParityOffset(StripeId lsid)
+{
+    vector<uint32_t> raid6ParityIndex;
+
+    uint32_t devCnt = ftSize_.chunksPerStripe;
+    uint32_t raid6ParityChunkCnt =2;
+    uint32_t dataChunkCnt = devCnt-raid6ParityChunkCnt;
+
+    uint32_t pParityOffset = lsid + dataChunkCnt;
+    uint32_t qParityOffset = pParityOffset +1;
+
+    uint32_t pParityIndex = pParityOffset%devCnt;
+    uint32_t qParityIndex = qParityOffset%devCnt;
+
+    raid6ParityIndex.push_back(pParityIndex);
+    raid6ParityIndex.push_back(qParityIndex);
+   
+    return raid6ParityIndex;
+}
+
+ 
+int
+Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
+{
+   // TODO: jh34.hong 
+   uint32_t parityIndex = GetParityOffset(src.addr.stripeId).front();
+   FtWriteEntry fwe;
+   fwe.addr.stripeId = src.addr.stripeId;
+   fwe.addr.offset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
+   fwe.blkCnt = ftSize_.blksPerChunk;
+   BufferEntry parity = _AllocChunk();
+   _ComputeParityChunk(parity, *(src.buffers));
+   fwe.buffers.push_back(parity);
+   ftl.clear();
+   ftl.push_back(fwe);
+ 
+   return 0;
+}
+ 
+
 list<FtBlkAddr>
 Raid6::GetRebuildGroup(FtBlkAddr fba)
 {
@@ -141,26 +181,7 @@ Raid6::GetRaidState(vector<ArrayDeviceState> devs)
    }
    return RaidState::FAILURE;
 }
- 
-int
-Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
-{
-   // TODO JH 0123 -> 01 45 배치되었으니 PARITY는 2 3으로 배치되도록 해야함
-   
-   uint32_t parityIndex = GetParityOffset(src.addr.stripeId).front();
-   FtWriteEntry fwe;
-   fwe.addr.stripeId = src.addr.stripeId;
-   fwe.addr.offset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
-   fwe.blkCnt = ftSize_.blksPerChunk;
-   BufferEntry parity = _AllocChunk();
-   _ComputeParityChunk(parity, *(src.buffers));
-   fwe.buffers.push_back(parity);
-   ftl.clear();
-   ftl.push_back(fwe);
- 
-   return 0;
-}
- 
+
 bool
 Raid6::CheckNumofDevsToConfigure(uint32_t numofDevs)
 {
@@ -198,6 +219,7 @@ Raid6::_AllocChunk()
 void
 Raid6::_ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src)
 {
+    // TODO: jh34.hong 
    uint32_t memSize = ftSize_.blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE;
    void* src1 = nullptr;
    void* src2 = nullptr;
@@ -224,6 +246,7 @@ Raid6::_ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src)
 void
 Raid6::_XorBlocks(void* dst, const void* src, uint32_t memSize)
 {
+   // TODO: jh34.hong 
    uint64_t* dstElement = (uint64_t*)dst;
    uint64_t* srcElement = (uint64_t*)src;
  
@@ -236,6 +259,7 @@ Raid6::_XorBlocks(void* dst, const void* src, uint32_t memSize)
 void
 Raid6::_XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize)
 {
+    // TODO: jh34.hong 
    uint64_t* dstElement = (uint64_t*)dst;
    uint64_t* srcElement1 = (uint64_t*)src1;
    uint64_t* srcElement2 = (uint64_t*)src2;
@@ -244,22 +268,6 @@ Raid6::_XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize)
    {
        dstElement[i] = (srcElement1[i] ^ srcElement2[i]);
    }
-}
- 
-vector<uint32_t>
-Raid6::GetParityOffset(StripeId lsid)
-{
-    uint32_t devCnt = ftSize_.chunksPerStripe;
-  
-    uint32_t pIndex = (lsid+(devCnt-2))%devCnt;
-    uint32_t qIndex = (lsid+(devCnt-2)+1)%devCnt;
-
-    vector<uint32_t> parityIndex;
-    
-    parityIndex.push_back(pIndex);
-    parityIndex.push_back(qIndex);
-   
-    return parityIndex;
 }
  
 void
@@ -272,6 +280,7 @@ Raid6::_BindRecoverFunc(void)
 void
 Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize)
 {
+    // TODO: jh34.hong 
    using BlockData = char[dstSize];
    memset(dst, 0, dstSize);
    for (uint32_t i = 0; i < ftSize_.chunksPerStripe - 1; i++)
