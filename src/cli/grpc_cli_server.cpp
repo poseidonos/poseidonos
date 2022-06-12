@@ -280,6 +280,40 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  grpc::Status
+  ListArray(ServerContext* context, const ListArrayRequest* request,
+                  ListArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteListArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  ArrayInfo(ServerContext* context, const ArrayInfoRequest* request,
+                  ArrayInfoResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
 };
 
 void

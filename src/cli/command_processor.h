@@ -38,6 +38,13 @@
 #include <string>
 
 #define RESET_EVENT_WRR_DEFAULT_WEIGHT 20
+#define DEFAULT_ARRAY_STATUS "Unmounted"
+#define ARRAY_ERROR_INDEX -1
+
+namespace pos
+{
+class IGCInfo;
+} // namespace pos
 
 using grpc::Status;
 using grpc::StatusCode;
@@ -74,6 +81,10 @@ using grpc_cli::MountArrayRequest;
 using grpc_cli::MountArrayResponse;
 using grpc_cli::UnmountArrayRequest;
 using grpc_cli::UnmountArrayResponse;
+using grpc_cli::ListArrayRequest;
+using grpc_cli::ListArrayResponse;
+using grpc_cli::ArrayInfoRequest;
+using grpc_cli::ArrayInfoResponse;
 
 class CommandProcessor
 {
@@ -97,6 +108,8 @@ public:
     grpc::Status ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply);
     grpc::Status ExecuteMountArrayCommand(const MountArrayRequest* request, MountArrayResponse* reply);
     grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
+    grpc::Status ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply);
+    grpc::Status ExecuteArrayInfoCommand(const ArrayInfoRequest* request, ArrayInfoResponse* reply);
 
 private:
     bool _isPosTerminating;
@@ -106,4 +119,5 @@ private:
     void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
     pos::BackendEvent _GetEventId(std::string eventName);
+    std::string _GetGCMode(pos::IGCInfo* gc, std::string arrayName);
 };

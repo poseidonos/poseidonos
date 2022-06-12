@@ -92,20 +92,20 @@ type ArrayInfoResult struct {
 // The commands will be merged and this should be revised.
 type Array struct {
 	ARRAYINDEX         int      `json:"index"`
-	UNIQUEID           int      `json:"unique_id"`
+	UNIQUEID           int      `json:"uniqueId"`
 	ARRAYNAME          string   `json:"name"`
 	STATUS             string   `json:"status,omitempty"`
 	STATE              string   `json:"state,omitempty"`
 	SITUATION          string   `json:"situation,omitempty"`
-	CREATEDATETIME     string   `json:"create_datetime,omitempty"`
-	UPDATEDATETIME     string   `json:"update_datetime,omitempty"`
-	REBUILDINGPROGRESS uint32   `json:"rebuilding_progress,omitempty"`
-	CAPACITY           uint64   `json:"capacity,omitempty"`
-	USED               uint64   `json:"used,omitempty"`
-	GCMODE             string   `json:"gc_mode,omitempty"`
-	METARAID           string   `json:"meta_raid,omitempty"`
-	DATARAID           string   `json:"data_raid,omitempty"`
-	WRITETHROUGH       bool     `json:"write_through_enabled,omitempty"`
+	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
+	UPDATEDATETIME     string   `json:"updateDatetime,omitempty"`
+	REBUILDINGPROGRESS uint32   `json:"rebuildingProgress,omitempty"`
+	CAPACITY           string   `json:"capacity,omitempty"`
+	USED               string   `json:"used,omitempty"`
+	GCMODE             string   `json:"gcMode,omitempty"`
+	METARAID           string   `json:"metaRaid,omitempty"`
+	DATARAID           string   `json:"dataRaid,omitempty"`
+	WRITETHROUGH       bool     `json:"writeThroughEnabled,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
 }
 

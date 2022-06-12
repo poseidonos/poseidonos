@@ -12,11 +12,13 @@ service PosCli {
       		get: "/v1/systeminfo"
     	};
 	}
+
 	rpc SystemStop (SystemStopRequest) returns (SystemStopResponse) {
 		option (google.api.http) = {
       		get: "/v1/systemstop"
     	};
 	}
+
 	rpc GetSystemProperty (GetSystemPropertyRequest) returns (GetSystemPropertyResponse) {
 		option (google.api.http) = {
       		get: "/v1/get_system_property"
@@ -28,11 +30,13 @@ service PosCli {
       		get: "/v1/set_system_property/{level}"
     	};
 	}
+
 	rpc StartTelemetry (StartTelemetryRequest) returns (StartTelemetryResponse) {
 		option (google.api.http) = {
       		get: "/v1/start_telemetry"
     	};
 	}
+
 	rpc StopTelemetry (StopTelemetryRequest) returns (StopTelemetryResponse) {
 		option (google.api.http) = {
       		get: "/v1/stop_telemetry"
@@ -74,9 +78,22 @@ service PosCli {
       		post: "/v1/mountarray"
     	};
 	}
+
 	rpc UnmountArray (UnmountArrayRequest) returns (UnmountArrayResponse) {
 		option (google.api.http) = {
       		post: "/v1/unmountarray"
+    	};
+	}
+
+	rpc ListArray (ListArrayRequest) returns (ListArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listarray"
+    	};
+	}
+	
+	rpc ArrayInfo (ArrayInfoRequest) returns (ArrayInfoResponse) {
+		option (google.api.http) = {
+      		post: "/v1/arrayinfo"
     	};
 	}
 }
@@ -405,6 +422,76 @@ message UnmountArrayResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Device {
+	string name = 1;
+	string type = 2;
+	string address = 3;
+	string class = 4;
+	string mn = 5;
+	string numa = 6;
+	string serial = 7;
+}
+
+message Array {
+	int32 index = 1;
+	int32 unique_id = 2;
+	string name = 3;
+	string status = 4;
+	string state = 5;
+	string situation = 6;
+	string createDatetime = 7;
+	string updateDatetime = 8;
+	string rebuildingProgress = 9;
+	uint64 capacity = 10;
+	uint64 used = 11;
+	string gcMode = 12;
+	string metaRaid = 13;
+	string dataRaid = 14;
+	bool writeThroughEnabled = 15;
+	repeated Device devicelist = 16;
+}
+
+message ListArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message ArrayList {
+			repeated Array arrayList = 1;
+		}
+		ArrayList data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ArrayInfoRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message ArrayInfoResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		Array data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
