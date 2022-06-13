@@ -378,11 +378,11 @@ message AutocreateArrayRequest {
 	string rid = 2;
 	string requestor = 3;
 	message Param {
-			string name = 1;
-			repeated DeviceNameList buffer = 2;
-			int32 numData = 3;
-			int32 numSpare = 4;
-			string raidtype = 5;
+		string name = 1;
+		repeated DeviceNameList buffer = 2;
+		int32 numData = 3;
+		int32 numSpare = 4;
+		string raidtype = 5;
 	}
 	Param param = 4;
 }
