@@ -39,12 +39,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/bio/ubio.h"
 #include "device_property.h"
+#include "src/bio/ubio.h"
 
 namespace pos
 {
-
 class IOWorker;
 class DeviceContext;
 class DeviceDriver;
@@ -74,7 +73,6 @@ public:
     virtual int GetNuma(void);
     virtual DeviceProperty GetProperty(void);
     virtual void SetClass(DeviceClass cls);
-    virtual void ProfilePendingIoCount(uint32_t pendingIOCount);
 
     virtual void AddPendingErrorCount(uint32_t errorsToAdd = 1);
     virtual void SubtractPendingErrorCount(uint32_t errorsToSubtract = 1);

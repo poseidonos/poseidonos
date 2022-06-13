@@ -58,6 +58,7 @@ AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     SpdkBdevCaller* spdkBdevCaller = ioCtx->GetBdevCaller();
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     devCtx->ioCompleCnt++;
+    uint64_t ramId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
 
     if (nullptr != bdev_io)
     {
@@ -73,6 +74,7 @@ AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     }
 
     devCtx->DecreasePendingIO();
+    airlog("CNT_PendingIO", "AIR_NVRAM", ramId, -1);
     ioCtx->CompleteIo(IOErrorType);
 
     delete ioCtx;
@@ -109,8 +111,8 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
     uint32_t addedDeviceCount = 0;
 
     for (struct spdk_bdev* bdev = spdkBdevCaller->SpdkBdevFirst();
-        bdev != nullptr;
-        bdev = spdkBdevCaller->SpdkBdevNext(bdev))
+         bdev != nullptr;
+         bdev = spdkBdevCaller->SpdkBdevNext(bdev))
     {
         if (bdev->product_name != URAM_PRODUCT_NAME)
         {
@@ -148,11 +150,10 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     spdk_bdev_event_cb_t cb =
         [](enum spdk_bdev_event_type type,
             struct spdk_bdev* bdev,
-            void* event_ctx) -> void
-        {
-            POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
-                "Unsupported bdev event: type {}", type);
-        };
+            void* event_ctx) -> void {
+        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
+            "Unsupported bdev event: type {}", type);
+    };
 
     int rc = spdkBdevCaller->SpdkBdevOpenExt(
         devCtx->name, true, cb, NULL, &bdev_desc);
@@ -245,8 +246,10 @@ UramDrv::SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio)
     UramDeviceContext* devCtx =
         static_cast<UramDeviceContext*>(deviceContext);
     UramIOContext* ioCtx = new UramIOContext(devCtx, bio);
+    uint64_t ramId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
 
     devCtx->IncreasePendingIO();
+    airlog("CNT_PendingIO", "AIR_NVRAM", ramId, 1);
 
     completions = SubmitIO(ioCtx);
     return completions;
@@ -269,8 +272,7 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
     callbackFunc = &AsyncIOComplete;
 
     retValue = _RequestIO(devCtx, callbackFunc, ioCtx);
-    spdk_bdev_io_wait_cb retryFunc = [](void* arg) -> void
-    {
+    spdk_bdev_io_wait_cb retryFunc = [](void* arg) -> void {
         UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);
         UramDrvSingleton::Instance()->SubmitIO(ioCtx);
     };

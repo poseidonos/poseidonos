@@ -82,10 +82,12 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
 {
     UnvmeIOContext* ioCtx = static_cast<UnvmeIOContext*>(ctx);
     UnvmeDeviceContext* devCtx = ioCtx->GetDeviceContext();
+    uint64_t ssdId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
 
     if (likely(!ioCtx->IsAsyncIOCompleted()))
     {
         devCtx->DecreasePendingIO();
+        airlog("CNT_PendingIO", "AIR_SSD", ssdId, -1);
         if (unlikely(ioCtx->IsAdminCommand()))
         {
             devCtx->DecAdminCommandCount();
@@ -124,8 +126,6 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
         {
             auto dir = ioCtx->GetOpcode();
             uint64_t size = ioCtx->GetByteCount();
-            uint64_t ssdId =
-                reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
             if (UbioDir::Read == dir)
             {
                 airlog("PERF_SSD", "AIR_READ", ssdId, size);
@@ -304,9 +304,11 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
 {
     int retValue = 0, retValueComplete = 0;
     int completions = 0;
+    uint64_t ssdId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
 
     ioCtx->ClearAsyncIOCompleted();
     deviceContext->IncreasePendingIO();
+    airlog("CNT_PendingIO", "AIR_SSD", ssdId, 1);
 
     retValue = unvmeCmd->RequestIO(deviceContext, AsyncIOComplete, ioCtx);
     if (unlikely(-ENOMEM == retValue)) // Usually ENOMEM means the submissuion queue is full
