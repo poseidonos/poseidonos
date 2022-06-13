@@ -34,6 +34,7 @@
 
 #include "src/helper/json/json_helper.h"
 #include "src/logger/logger.h"
+#include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
 #include "src/volume/i_volume_event_manager.h"
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
