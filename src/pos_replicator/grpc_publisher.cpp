@@ -46,7 +46,7 @@ namespace pos
 GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_)
 {
     // new grpc server setting
-    string serverAddr(GRPC_HA_PUB_SERVER_IP);
+    string serverAddr(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
     std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {
