@@ -15,6 +15,7 @@
 #include "src/volume/volume_manager.h"
 #include "src/qos/qos_manager.h"
 #include "src/sys_info/space_info.h"
+#include "src/array_mgmt/numa_awared_array_creation.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -448,6 +449,66 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
     else
     {
         _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status
+CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* request, AutocreateArrayResponse* reply)
+{
+    vector<string> buffers;
+    string arrayName = (request->param()).name();
+    
+    string dataFt = (request->param()).raidtype();
+    if (dataFt == "")
+    {
+        dataFt = "RAID5";
+    }
+
+    string metaFt = "RAID10";
+    if (dataFt == "RAID0" || dataFt == "NONE")
+    {
+        metaFt = dataFt;
+    }
+
+    for (const grpc_cli::DeviceNameList& buffer : (request->param()).buffer())
+    {
+        buffers.push_back(buffer.devicename());
+    }
+
+    int dataCnt = 0;
+    dataCnt = (request->param()).numdata();
+    
+    int spareCnt = 0;
+    spareCnt = (request->param()).numspare();
+
+    NumaAwaredArrayCreation creationDelegate(buffers, dataCnt, spareCnt, DeviceManagerSingleton::Instance());
+    NumaAwaredArrayCreationResult res = creationDelegate.GetResult();
+
+    if (res.code != 0)
+    {
+        _SetEventStatus(res.code, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    // TODO(SRM): interactive cli to select from multiple-options.
+    int ret = array->Create(arrayName, res.options.front().devs, metaFt, dataFt);
+
+    if (0 != ret)
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
+        int event = EID(CLI_AUTOCREATE_ARRAY_SUCCESS);
+        POS_TRACE_INFO(event, "");
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
