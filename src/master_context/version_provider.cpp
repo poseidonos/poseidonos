@@ -31,6 +31,7 @@
  */
 
 #include "src/master_context/version_provider.h"
+#include "src/logger/logger.h"
 
 #include <string>
 
@@ -48,6 +49,11 @@ VersionProvider::~VersionProvider(void)
 const std::string
 VersionProvider::GetVersion(void)
 {
+    std::string version = VERSION;
+    if (version != "")
+    {
+        POS_TRACE_INFO(EID(POS_SYSTEMINFO_GET_VERSION), "version:{}", VERSION);
+    }
     return VERSION;
 }
 
