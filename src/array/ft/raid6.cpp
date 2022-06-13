@@ -82,13 +82,10 @@ Raid6::Translate(const LogicalEntry& le)
  
    if(lastIndex<pParityIndex && pParityIndex<qParityIndex){
         feList.push_back(fe);
-   }else if(lastIndex<pParityIndex && qParityIndex<pParityIndex){
+   }else if(qParityIndex == firstIndex || pParityIndex == firstIndex){
         fe.addr.offset = qParityOffset+paritySize;
         feList.push_back(fe);
-   }else if(firstIndex <=pParityIndex && pParityIndex<qParityIndex){
-        fe.addr.offset = qParityOffset+paritySize;
-        feList.push_back(fe);
-   }else {
+   }else{
         fe.blkCnt = pParityOffset - startOffset;
         feList.push_back(fe);
         

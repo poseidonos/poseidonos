@@ -81,8 +81,8 @@ private:
         "NONE",
         "RAID0",
         "RAID5",
-        "RAID6",
         "RAID10",
+        "RAID6",
     };
 };
 
