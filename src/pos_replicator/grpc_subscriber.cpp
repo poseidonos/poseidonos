@@ -46,7 +46,7 @@ namespace pos
 GrpcSubscriber::GrpcSubscriber(void)
 {
     // new grpc server setting
-    string address("0.0.0.0:50051");
+    string address(GRPC_HA_SUB_SERVER_IP);
 
     new std::thread(&GrpcSubscriber::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "posIo GrpcServer has been initialized. Server address : {}", address);

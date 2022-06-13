@@ -35,6 +35,7 @@
 #include "src/helper/json/json_helper.h"
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
+#include "proto/grpc_server_ip.h"
 #include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
 #include "proto/generated/cpp/replicator_rpc.pb.h"
 

@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/telemetry/telemetry_client/pos_metric.h"
+#include "proto/grpc_server_ip.h"
 #include <string>
 #include <vector>
 

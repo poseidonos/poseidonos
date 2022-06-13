@@ -36,6 +36,7 @@
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
 #include "src/volume/i_volume_event_manager.h"
+#include "proto/grpc_server_ip.h"
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
 #include "proto/generated/cpp/pos_rpc.pb.h"
 
