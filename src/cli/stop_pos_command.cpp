@@ -83,13 +83,10 @@ StopPosCommand::Execute(json& doc, string rid)
                 {
                     eventId = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
                     POS_TRACE_ERROR(eventId,
-                        "Failed to exit system. Array '{}' is still mounted with state '{}'",
+                        "array:{}, state:{}",
                         abr.arrayName, arrayInfo->GetState().ToString());
 
-                    return jFormat.MakeResponse(
-                        "STOPPOS", rid, eventId,
-                        "failed to terminate POS (code:" + to_string(eventId) + ")",
-                        GetPosInfo());
+                    return jFormat.MakeResponse("STOPPOS", rid, eventId, "", GetPosInfo());
                 }
             }
         }
