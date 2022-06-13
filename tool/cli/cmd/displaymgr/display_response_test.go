@@ -10,7 +10,18 @@ import (
 // This testing tests if the response is parsed and displayed well in human readable form for LISTARRAY command
 func TestListArrayResHumanReadable(t *testing.T) {
 	var command = "LISTARRAY"
-	var resJSON = `{"command":"LISTARRAY","rid":"3a181557-e88e-11ec-8a04-005056adcaa2","result":{"status":{"code":0,"eventName":"SUCCESS","description":"","cause":"","solution":""},"data":{"arrayList":[{"name":"POSArray","status":"Unmounted","createDatetime":"2022-06-08 07:24:43 +0000","updateDatetime":"2022-06-08 07:25:12 +0000","capacity":"119829587559","dataRaid":"RAID5"}]}},"info":{"version":"v0.11.0-rc6"}}`
+	var resJSON = `{"command":"LISTARRAY","rid":"fromCLI",
+	"result":{"status":{"code":0,"description":"DONE"},
+	"data":{"arrayList": [{"createDatetime": "2021-04-16 15:52:14 +0900",
+	"devicelist": [{"sn": "uram0","type": "BUFFER"},
+	{"sn": "S4H2NE0M600736","type": "DATA"},
+	{"sn": "S4H2NE0M600745","type": "DATA"},
+	{"sn": "S4H2NE0M600763","type": "DATA"}],
+	"index": 0,"name": "ARRAY0","status":"Mounted","updateDatetime": "2021-04-16 15:52:14 +0900"},
+	{"createDatetime": "2021-04-16 15:52:14 +0900","devicelist": [{"sn": "uram1","type": "BUFFER"},
+	{"sn": "S4H2NE0M600744","type": "DATA"},{"sn": "S4H2NE0M600743","type": "DATA"},
+	{"sn": "S4H2NE0M600746","type": "DATA"}],"index": 1,"name": "ARRAY1","status":"Unmounted",
+	"updateDatetime": "2021-04-16 15:52:14 +0900"}]}}}`
 
 	expected := `Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
 ----- |---------- |---------------------     |---------------------     |----------
@@ -21,7 +32,7 @@ func TestListArrayResHumanReadable(t *testing.T) {
 	output := hookResponse(command, resJSON, false, false)
 
 	if output != expected {
-		t.Errorf("Expected: %q Output: %s", expected, output)
+		t.Errorf("Expected: %q Output: %q", expected, output)
 	}
 }
 
