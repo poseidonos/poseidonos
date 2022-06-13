@@ -32,56 +32,15 @@
 
 #pragma once
 
-#pragma once
-
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/grpc_server_socket_address.h"
-#include "src/include/pos_event_id.h"
-
-#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
-#include "proto/generated/cpp/pos_rpc.pb.h"
-
-#include <list>
-#include <map>
 #include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
+
+// To do - remove pos conf
 
 namespace pos
 {
-class GrpcSubscriber final : public pos_rpc::PosIo::Service
-{
-public:
-    GrpcSubscriber(void);
-    ~GrpcSubscriber(void);
-
-    virtual ::grpc::Status WriteBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteBlocksRequest* request, 
-        pos_rpc::WriteBlocksResponse* response) override;
-
-    virtual ::grpc::Status WriteHostBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteHostBlocksRequest* request, 
-        pos_rpc::WriteHostBlocksResponse* response) override;
-
-    virtual ::grpc::Status ReadBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::ReadBlocksRequest* request, 
-        pos_rpc::ReadBlocksResponse* response) override;
-
-    virtual ::grpc::Status CompleteHostWrite(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::CompleteHostWriteRequest* request, 
-        pos_rpc::CompleteHostWriteResponse* response) override;
-
-    void RunServer(std::string address);
-
-private:
-    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
-            std::pair<std::string, int> volumeSet);
-
-    std::unique_ptr<::grpc::Server> posIoGrpcServer;
-};
+#define GRPC_TEL_SERVER_SOCKET_ADDRESS "0.0.0.0:50051"
+#define GRPC_HA_PUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50052"
+#define GRPC_HA_SUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50053"
+#define GRPC_HA_VOL_SERVER_SOCKET_ADDRESS "0.0.0.0:50054"
+#define GRPC_CLI_SERVER_SOCKET_ADDRESS "0.0.0.0:50055"
 }

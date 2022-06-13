@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 
 #include "src/device/uram/uram_device_context.h"
+#include "test/unit-tests/device/uram/uram_io_context_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_bdev_caller_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
-#include "test/unit-tests/device/uram/uram_io_context_mock.h"
 
 using testing::_;
 using testing::NiceMock;
@@ -161,7 +161,7 @@ TEST(UramDrv, Open_testIfGetIoChannelFailed)
                       struct spdk_bdev_desc** desc) -> int {
             *desc = reinterpret_cast<struct spdk_bdev_desc*>(&bdev_desc);
             return 0;
-    });
+        });
     EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevGetIoChannel)
         .WillOnce(Return(nullptr));
 
@@ -227,7 +227,7 @@ TEST(UramDrv, SubmitIO_testIfSubmssionAbortDirToUramAndIoChannelIsNullptr)
     devCtx.bdev_io_channel = nullptr;
     NiceMock<MockUramIOContext>* mockIoCtx = new NiceMock<MockUramIOContext>();
     EXPECT_CALL(*mockIoCtx, GetDeviceContext)
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(&devCtx));
     EXPECT_CALL(*mockIoCtx, GetOpcode).WillOnce(Return(UbioDir::Abort));
     EXPECT_CALL(*mockIoCtx, GetStartByteOffset).WillOnce(Return(0));
@@ -287,7 +287,7 @@ TEST(UramDrv, SubmitIO_testIfRequestRetryFailed)
     devCtx.bdev_io_channel = &channel;
     NiceMock<MockUramIOContext>* mockIoCtx = new NiceMock<MockUramIOContext>();
     EXPECT_CALL(*mockIoCtx, GetDeviceContext)
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(&devCtx));
     EXPECT_CALL(*mockIoCtx, GetOpcode).WillOnce(Return(UbioDir::Read));
     EXPECT_CALL(*mockIoCtx, GetStartByteOffset).WillOnce(Return(0));
@@ -317,7 +317,7 @@ TEST(UramDrv, SubmitIO_testIfRetryCountIsExceeded)
     devCtx.bdev_io_channel = &channel;
     NiceMock<MockUramIOContext>* mockIoCtx = new NiceMock<MockUramIOContext>();
     EXPECT_CALL(*mockIoCtx, GetDeviceContext)
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(&devCtx));
     EXPECT_CALL(*mockIoCtx, GetOpcode).WillOnce(Return(UbioDir::Read));
     EXPECT_CALL(*mockIoCtx, GetStartByteOffset).WillOnce(Return(0));
@@ -364,13 +364,10 @@ TEST(UramDrv, SubmitIO_testIfRetryCallbackTriggerdProperly)
     EXPECT_CALL(mockIoCtx, GetByteCount).WillOnce(Return(0));
     EXPECT_CALL(mockIoCtx, GetBuffer).WillOnce(nullptr);
     EXPECT_CALL(mockIoCtx, GetRetryCount).WillOnce(Return(0));
-    EXPECT_CALL(mockIoCtx, RequestRetry).WillOnce(
-        [](spdk_bdev_io_wait_cb callbackFunc)
-        {
-            callbackFunc(nullptr);
-            return true;
-        }
-    );
+    EXPECT_CALL(mockIoCtx, RequestRetry).WillOnce([](spdk_bdev_io_wait_cb callbackFunc) {
+        callbackFunc(nullptr);
+        return true;
+    });
     NiceMock<MockSpdkBdevCaller>* mockBdevCaller =
         new NiceMock<MockSpdkBdevCaller>();
     EXPECT_CALL(*mockBdevCaller, SpdkBdevRead)
@@ -396,18 +393,11 @@ TEST(UramDrv, Open_testIfSpdkBdevOpenExtFailedAndCallbackTriggeredProperly)
         new NiceMock<MockSpdkBdevCaller>();
     EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevGetByName)
         .WillOnce(Return(&bdev));
-    EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevOpenExt).WillOnce(
-        [](const char* bdev_name,
-            bool write,
-            spdk_bdev_event_cb_t event_cb,
-            void* event_ctx,
-            struct spdk_bdev_desc** desc) -> int
-        {
-            event_cb(spdk_bdev_event_type::SPDK_BDEV_EVENT_REMOVE,
-                nullptr, nullptr);
-            return -1;
-        }
-    );
+    EXPECT_CALL(*mockSpdkBdevCaller, SpdkBdevOpenExt).WillOnce([](const char* bdev_name, bool write, spdk_bdev_event_cb_t event_cb, void* event_ctx, struct spdk_bdev_desc** desc) -> int {
+        event_cb(spdk_bdev_event_type::SPDK_BDEV_EVENT_REMOVE,
+            nullptr, nullptr);
+        return -1;
+    });
 
     UramDrv uramDrv(mockSpdkBdevCaller, nullptr, &eventFrameworkApi);
     UramDeviceContext devCtx("UtDevCtx");
@@ -418,5 +408,4 @@ TEST(UramDrv, Open_testIfSpdkBdevOpenExtFailedAndCallbackTriggeredProperly)
 
     // Then
     EXPECT_FALSE(ret);
-
 }

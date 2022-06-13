@@ -47,7 +47,7 @@ namespace pos
 GrpcVolumeManagement::GrpcVolumeManagement(std::shared_ptr<grpc::Channel> channel_, IVolumeEventManager* volMgr)
 {
     // new grpc server setting
-    string address("0.0.0.0:50051");
+    string address(GRPC_HA_VOL_SERVER_SOCKET_ADDRESS);
 
     new std::thread(&GrpcVolumeManagement::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been initialized. Server address : {}", address);
