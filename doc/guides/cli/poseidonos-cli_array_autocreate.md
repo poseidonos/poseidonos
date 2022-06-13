@@ -15,11 +15,11 @@ Syntax:
 	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType]
 	[--no-raid] [--no-buffer]
 
-Example 1 (full flags): 
+Example 1 (without specifying RAID - default RAID level is used): 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
 
-Example 2 (abbreviated flags): 	
-	poseidonos-cli array autocreate -a Array1 -b uram0 -d 4 -s 1 -r RAID6
+Example 2 (creating an array using RAID6): 	
+	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1 --raid RAID6
           
 
 ```

@@ -12,14 +12,14 @@ Syntax:
 	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10 | RAID6] 
 	[--no-raid]
 
-Example 1 (full flags):  
+Example 1 (creating an array with RAID5):  
 	poseidonos-cli array create --array-name Array0 --buffer device0 
 	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID5
 	
-Eample 2 (abbreviated flags): 	
-	poseidonos-cli array create -a Array0 -buffer device0 
-	-d nvme-device0,nvme-device1,nvme-device2,nvme-device3 -s nvme-device4 -r RAID6
-          
+Eample 2 (creating an array with RAID6): 	
+	poseidonos-cli array create --array-name Array0 --buffer device0 
+	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID6
+
 
 ```
 poseidonos-cli array create [flags]
