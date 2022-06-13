@@ -92,6 +92,9 @@ static const std::string TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT = "map_vsa_flush
 static const std::string TEL33011_MAP_REVERSE_FLUSH_PENDINGIO_CNT = "map_reverse_flush_pendio_cnt";
 
 static const std::string TEL36000_JRN_ = "j_test";
+static const std::string TEL36001_JRN_CHECKPOINT = "jrn_checkpoint";
+static const std::string TEL36002_JRN_RESET_LOG_GROUP = "jrn_reset_log_group";
+static const std::string TEL36003_JRN_LOAD_LOG_GROUP = "jrn_load_log_group";
 static const std::string TEL39999_JRN_ = "j_test_end";
 
 static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";

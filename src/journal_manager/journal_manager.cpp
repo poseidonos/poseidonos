@@ -265,7 +265,7 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
 
     // TODO (meta) : Move init sequence to proper location
     config->Init(arrayInfo->IsWriteThroughEnabled());
-    logBuffer->Init(config, logFactory, arrayInfo->GetIndex());
+    logBuffer->Init(config, logFactory, arrayInfo->GetIndex(), telemetryPublisher);
 
     bool logBufferExist = logBuffer->DoesLogFileExist();
     if (logBufferExist == true)
@@ -429,7 +429,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
-    checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
+    checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager, telemetryPublisher);
 
     versionedSegCtx->Init(config, nullptr, 0); // TODO (VSC) Temporarly use invalid values TODO (huijeong.kim) fix this
 
