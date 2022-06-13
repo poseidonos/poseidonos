@@ -230,6 +230,19 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  AutocreateArray(ServerContext* context, const AutocreateArrayRequest* request,
+                  AutocreateArrayResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteAutocreateArrayCommand(request, reply);
+    
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    return status;
+  }
+
+  grpc::Status
   DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
                   DeleteArrayResponse* reply) override
   {

@@ -85,15 +85,15 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     }
 
     int dataCnt = 0;
-    if (doc["param"].contains("num_data"))
+    if (doc["param"].contains("numData"))
     {
-        dataCnt = doc["param"]["num_data"].get<int>();
+        dataCnt = doc["param"]["numData"].get<int>();
     }
 
     int spareCnt = 0;
-    if (doc["param"].contains("num_spare"))
+    if (doc["param"].contains("numSpare"))
     {
-        spareCnt = doc["param"]["num_spare"].get<int>();
+        spareCnt = doc["param"]["numSpare"].get<int>();
     }
 
     NumaAwaredArrayCreation creationDelegate(buffers, dataCnt, spareCnt, DeviceManagerSingleton::Instance());
