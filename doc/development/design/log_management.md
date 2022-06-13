@@ -74,7 +74,7 @@ PoseidonOS event log message consists of three field: ***message***, and ***caus
   - "cause": ""
   - "solution": ""
   - "variables": [{"volume_name":"volume1","size":1024MB,"array_name":"array1"}]
-- **Example 3 (Wrong)**
+- **Example 3 (Bad example)**
   - "message": "failed to create an array" - **The sentence does not start with lower case neither end with period.**
   - "cause": ""
   - "solution": ""
