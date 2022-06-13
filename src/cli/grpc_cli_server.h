@@ -4,11 +4,11 @@
 
 #include <grpc/support/log.h>
 
-#include "proto/grpc_server_ip.h"
 #include "proto/generated/cpp/cli.grpc.pb.h"
 #include "proto/generated/cpp/cli.pb.h"
 
 #include "src/cli/command_processor.h"
+#include "src/include/grpc_server_socket_address.h"
 #include "src/logger/logger.h"
 
 #define GRPC_TIMEOUT_MESSAGE "Deadline exceeded or client cancelled."

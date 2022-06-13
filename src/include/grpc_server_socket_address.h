@@ -34,6 +34,8 @@
 
 #include <string>
 
+// To do - remove pos conf
+
 namespace pos
 {
 #define GRPC_TEL_SERVER_SOCKET_ADDRESS "0.0.0.0:50051"
