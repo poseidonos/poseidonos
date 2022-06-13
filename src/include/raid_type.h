@@ -45,6 +45,7 @@ enum class RaidTypeEnum
     RAID0,
     RAID5,
     RAID10,
+    RAID6,
     TYPE_COUNT,
 };
 
