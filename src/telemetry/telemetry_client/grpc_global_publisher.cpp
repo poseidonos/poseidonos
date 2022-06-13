@@ -38,7 +38,7 @@ namespace pos
 {
 GrpcGlobalPublisher::GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_)
 {
-    std::string serverAddr = TEL_SERVER_IP; // TODO: temporary
+    std::string serverAddr = GRPC_TEL_SERVER_SOCKET_ADDRESS; // TODO: temporary
     std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {

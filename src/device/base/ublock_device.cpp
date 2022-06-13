@@ -34,7 +34,6 @@
 
 #include <sched.h>
 
-#include "Air.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_context.h"
 #include "src/device/base/device_driver.h"
@@ -213,7 +212,6 @@ UBlockDevice::SubmitAsyncIO(UbioSmartPtr bio)
         return completions;
     }
     completions = driver->SubmitAsyncIO(deviceContext, bio);
-    ProfilePendingIoCount(deviceContext->GetPendingIOCount());
     return completions;
 }
 
@@ -265,35 +263,6 @@ UBlockDevice::_Empty(DeviceContext* deviceContext)
 }
 
 void
-UBlockDevice::ProfilePendingIoCount(uint32_t pendingIOCount)
-{
-    if (GetType() == DeviceType::NVRAM)
-    {
-        if (EventFrameworkApiSingleton::Instance()->IsReactorNow() == true)
-        {
-            uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-            airlog("CNT_PendingIO", "AIR_NVRAM", reactor_id, pendingIOCount);
-        }
-        else
-        {
-            airlog("CNT_PendingIO", "AIR_NVRAM", IO_WORKER_AID, pendingIOCount);
-        }
-    }
-    else if (GetType() == DeviceType::SSD)
-    {
-        if (EventFrameworkApiSingleton::Instance()->IsReactorNow() == true)
-        {
-            uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-            airlog("CNT_PendingIO", "AIR_SSD", reactor_id, pendingIOCount);
-        }
-        else
-        {
-            airlog("CNT_PendingIO", "AIR_SSD", IO_WORKER_AID, pendingIOCount);
-        }
-    }
-}
-
-void
 UBlockDevice::AddPendingErrorCount(uint32_t errorsToAdd)
 {
     uint32_t oldPendingErrorCount = pendingErrorCount.fetch_add(errorsToAdd);
@@ -328,7 +297,7 @@ UBlockDevice::SetDedicatedIOWorker(IOWorker* ioWorker)
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::DEVICE_OVERLAPPED_SET_IOWORKER;
-            POS_TRACE_WARN(static_cast<int>(eventId),
+        POS_TRACE_WARN(static_cast<int>(eventId),
             "Overlapped setting for ioworker for single device: {} ",
             GetName());
     }
@@ -404,7 +373,7 @@ UBlockDevice::SetClass(DeviceClass cls)
     {
         POS_TRACE_INFO(EID(DEVICE_DEBUG_MSG),
             "{}({})'s class is changed:{}->{}(0-SYSTEM, 1-ARRAY)",
-                GetName(), GetSN(), property->cls, cls);
+            GetName(), GetSN(), property->cls, cls);
         property->cls = cls;
     }
 }

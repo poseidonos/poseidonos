@@ -8,9 +8,9 @@
 #include "proto/generated/cpp/cli.pb.h"
 
 #include "src/cli/command_processor.h"
+#include "src/include/grpc_server_socket_address.h"
 #include "src/logger/logger.h"
 
-#define GRPC_SERVER_ADDRESS "0.0.0.0:50055"
 #define GRPC_TIMEOUT_MESSAGE "Deadline exceeded or client cancelled."
 
 using grpc::Server;

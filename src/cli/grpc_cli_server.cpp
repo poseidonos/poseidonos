@@ -230,6 +230,19 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  AutocreateArray(ServerContext* context, const AutocreateArrayRequest* request,
+                  AutocreateArrayResponse* reply) override
+  {
+    POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "message: {}", request->ShortDebugString());
+
+    grpc::Status status = pc->ExecuteAutocreateArrayCommand(request, reply);
+    
+    POS_TRACE_INFO(EID(CLI_MSG_SENT), "message: {}", reply->ShortDebugString());
+
+    return status;
+  }
+
+  grpc::Status
   DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
                   DeleteArrayResponse* reply) override
   {
@@ -280,6 +293,40 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  grpc::Status
+  ListArray(ServerContext* context, const ListArrayRequest* request,
+                  ListArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteListArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  ArrayInfo(ServerContext* context, const ArrayInfoRequest* request,
+                  ArrayInfoResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
 };
 
 void
@@ -307,7 +354,7 @@ RunGrpcServer()
 {
   pc = new CommandProcessor();
 
-  std::string server_address(GRPC_SERVER_ADDRESS);
+  std::string server_address(GRPC_CLI_SERVER_SOCKET_ADDRESS);
   PosCliServiceImpl service;
 
   grpc::EnableDefaultHealthCheckService(true);
