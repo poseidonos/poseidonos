@@ -43,12 +43,13 @@
 
 namespace pos
 {
+class TelemetryPublisher;
 
 class ReverseMapManager : public IReverseMap
 {
 public:
     ReverseMapManager(void) = default;
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_);
+    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_, TelemetryPublisher* tp);
     virtual ~ReverseMapManager(void);
 
     virtual void Init(void);
@@ -85,6 +86,7 @@ private:
     IStripeMap* iStripeMap;
     IVolumeInfoManager* volumeManager;
     MapperAddressInfo* addrInfo;
+    TelemetryPublisher* telemetryPublisher;
 };
 
 } // namespace pos

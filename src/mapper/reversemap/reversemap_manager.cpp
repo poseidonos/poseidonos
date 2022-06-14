@@ -36,12 +36,13 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/include/meta_const.h"
 #include "src/metafs/metafs_file_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 #include <string>
 
 namespace pos
 {
-ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_)
+ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IVolumeInfoManager* vol, MapperAddressInfo* addrInfo_, TelemetryPublisher* tp)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
@@ -51,7 +52,8 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, I
   iVSAMap(ivsaMap),
   iStripeMap(istripeMap),
   volumeManager(vol),
-  addrInfo(addrInfo_)
+  addrInfo(addrInfo_),
+  telemetryPublisher(tp)
 {
 }
 // LCOV_EXCL_START
@@ -111,7 +113,7 @@ ReverseMapManager::Init(void)
     revMapPacks = new ReverseMapPack[numWbStripes]();
     for (StripeId wbLsid = 0; wbLsid < numWbStripes; ++wbLsid)
     {
-        revMapPacks[wbLsid].Init(revMapWholefile, wbLsid, UINT32_MAX, mpageSize, numMpagesPerStripe);
+        revMapPacks[wbLsid].Init(revMapWholefile, wbLsid, UINT32_MAX, mpageSize, numMpagesPerStripe, telemetryPublisher);
     }
 }
 
@@ -199,7 +201,7 @@ ReverseMapPack*
 ReverseMapManager::AllocReverseMapPack(uint32_t vsid)
 {
     ReverseMapPack* revPack = new ReverseMapPack();
-    revPack->Init(revMapWholefile, UNMAP_STRIPE, vsid, mpageSize, numMpagesPerStripe);
+    revPack->Init(revMapWholefile, UNMAP_STRIPE, vsid, mpageSize, numMpagesPerStripe, telemetryPublisher);
     revPack->Assign(vsid);
     return revPack;
 }

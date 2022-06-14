@@ -89,8 +89,14 @@ static const std::string TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT = "map_vsa_load_pen
 static const std::string TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT = "map_vsa_flush_pendio_cnt";
 static const std::string TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT = "map_stripe_flush_pendio_cnt";
 static const std::string TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT = "map_vsa_flushed_dirtypg_cnt";
+static const std::string TEL33011_MAP_REVERSE_FLUSH_IO_ISSUED_CNT = "map_reverse_flush_io_issued_cnt";
+static const std::string TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT = "map_reverse_flush_io_done_cnt";
 
 static const std::string TEL36000_JRN_ = "j_test";
+static const std::string TEL36001_JRN_CHECKPOINT = "jrn_checkpoint";
+static const std::string TEL36002_JRN_LOG_GROUP_RESET_CNT = "jrn_log_group_reset_cnt";
+static const std::string TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT = "jrn_log_group_reset_done_cnt";
+static const std::string TEL36004_JRN_LOAD_LOG_GROUP = "jrn_load_log_group";
 static const std::string TEL39999_JRN_ = "j_test_end";
 
 static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";

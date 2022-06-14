@@ -42,6 +42,8 @@
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/journal_rocks_intf/journal_rocks_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+
 namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
@@ -51,7 +53,8 @@ JournalLogBuffer::JournalLogBuffer(void)
   logBufferReadDone(0),
   logFile(nullptr),
   initializedDataBuffer(nullptr),
-  journalRocks(nullptr)
+  journalRocks(nullptr),
+  telemetryPublisher(nullptr)
 {
 }
 
@@ -83,10 +86,12 @@ JournalLogBuffer::~JournalLogBuffer(void)
 }
 
 int
-JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId)
+JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+    int arrayId, TelemetryPublisher* tp)
 {
     config = journalConfiguration;
     logFactory = logWriteContextFactory;
+    telemetryPublisher = tp;
 
     //TODO(sang7.park) : connect conditional statement with creating MetaFsFileIntf case when journalRocks API codes are written
     if (config->IsRocksdbEnabled())
@@ -218,6 +223,14 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 {
     uint64_t groupSize = config->GetLogGroupSize();
 
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        metric.AddLabel("group_id", std::to_string(groupId));
+        metric.SetGaugeValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
+
     AsyncMetaFileIoCtx* logBufferReadReq = new AsyncMetaFileIoCtx();
     logBufferReadReq->opcode = MetaFsIoOpcode::Read;
     logBufferReadReq->fd = logFile->GetFd();
@@ -240,6 +253,14 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     while (logBufferReadDone == false)
     {
         usleep(1);
+    }
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        metric.AddLabel("group_id", std::to_string(groupId));
+        metric.SetGaugeValue(0);
+        telemetryPublisher->PublishMetric(metric);
     }
 
     return ret;
@@ -293,6 +314,14 @@ JournalLogBuffer::SyncResetAll(void)
 int
 JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36002_JRN_LOG_GROUP_RESET_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("group_id", std::to_string(id));
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
+
     uint64_t offset = _GetFileOffset(id, 0);
     uint64_t groupSize = config->GetLogGroupSize();
     LogGroupResetContext* resetRequest = logFactory->CreateLogGroupResetContext(offset, id, groupSize, callbackEvent, initializedDataBuffer);
@@ -345,6 +374,13 @@ void
 JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
 {
     numInitializedLogGroup++;
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("group_id", std::to_string(logGroupId));
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
 }
 
 bool
