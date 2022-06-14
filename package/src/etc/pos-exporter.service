@@ -1,0 +1,10 @@
+[Unit]
+Description=pos-exporter
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/pos-exporter
+
+[Install]
+WantedBy=multi-user.target
+Alias=pos-exporter
