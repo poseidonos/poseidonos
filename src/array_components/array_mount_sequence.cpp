@@ -92,7 +92,13 @@ ArrayMountSequence::Mount(void)
     if (currState->ToStateType() >= StateEnum::NORMAL)
     {
         ret = EID(MOUNT_ARRAY_ALREADY_MOUNTED);
-        POS_TRACE_WARN(ret, "curr_state: {}", currState->ToStateType().ToString());
+        POS_TRACE_WARN(ret, "array_name:{}, curr_state:{}", arrayName, currState->ToStateType().ToString());
+        return ret;
+    }
+    else if (currState->ToStateType() == StateEnum::STOP)
+    {
+        ret = EID(MOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_MOUNTED);
+        POS_TRACE_WARN(ret, "array_name:{}", arrayName);
         return ret;
     }
 
@@ -101,7 +107,7 @@ ArrayMountSequence::Mount(void)
     if (res == false)
     {
         ret = EID(MOUNT_ARRAY_UNABLE_TO_INVOKE_MOUNT_STATE);
-        POS_TRACE_WARN(ret, "curr_state: {}", currState->ToStateType().ToString());
+        POS_TRACE_WARN(ret, "array_name:{}, curr_state: {}", arrayName, currState->ToStateType().ToString());
         goto error;
     }
 
@@ -155,10 +161,16 @@ ArrayMountSequence::Unmount(void)
 {
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Entering ArrayMountSequence.Unmount for {}", arrayName);
     StateContext* currState = state->GetState();
-    if (currState->ToStateType() < StateEnum::NORMAL)
+    if (currState->ToStateType() == StateEnum::STOP)
+    {
+        int eventId = EID(UNMOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_UNMOUNTED);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        return eventId;
+    }
+    else if (currState->ToStateType() < StateEnum::NORMAL)
     {
         int eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
-        POS_TRACE_WARN(eventId, "curr_state: {}", currState->ToStateType().ToString());
+        POS_TRACE_WARN(eventId, "array_name:{}, curr_state:{}", arrayName, currState->ToStateType().ToString());
         return eventId;
     }
 
@@ -168,7 +180,7 @@ ArrayMountSequence::Unmount(void)
     {
         state->Remove(unmountState);
         int eventId = EID(UNMOUNT_ARRAY_UNABLE_TO_INVOKE_UNMOUNT_STATE);
-        POS_TRACE_WARN(eventId, "curr_state: {}", currState->ToStateType().ToString());
+        POS_TRACE_WARN(eventId, "array_name:{}, curr_state:{}", arrayName, currState->ToStateType().ToString());
         return eventId;
     }
 

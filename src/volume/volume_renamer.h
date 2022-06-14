@@ -35,10 +35,11 @@
 #include <string>
 
 #include "src/volume/volume_interface.h"
+#include "src/volume/volume_name_policy.h"
 
 namespace pos
 {
-class VolumeRenamer : public VolumeInterface
+class VolumeRenamer : public VolumeInterface, public VolumeNamePolicy
 {
 public:
     explicit VolumeRenamer(VolumeList& volumeList, std::string arrayName, int arrayID);
