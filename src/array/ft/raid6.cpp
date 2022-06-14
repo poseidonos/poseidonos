@@ -39,13 +39,16 @@
 #include "src/helper/enumerable/query.h"
  
 #include <string>
- 
+#include <isa-l.h> 
 namespace pos
 {
 Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
 : Method(RaidTypeEnum::RAID6),
  parityBufferCntPerNuma(bufferCntPerNuma)
 {
+   m = 0;
+   p = 0;
+   sources= nullptr;
    ftSize_ = {
        .minWriteBlkCnt = 0,
        .backupBlkCnt = pSize->blksPerChunk,
@@ -126,7 +129,8 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
     vector<uint32_t> parityOffset = GetParityOffset(src.addr.stripeId);
     assert (parityOffset.size() == 2);
-    
+    p = parityOffset.size();
+    m = ftSize_.blksPerChunk;
     uint32_t pParityIndex = parityOffset.front();
     uint32_t qParityIndex = parityOffset.back();
     
@@ -147,9 +151,10 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
     list<BufferEntry> parities;
 
     parities.push_back(pParity);
-    parities.push_back(qParity); 
-    //To Do: Compute Parity based of src
-    _ComputeParityChunk(parities, *(src.buffers));
+    parities.push_back(qParity);
+
+    _GenCauchyMatrixandTableforRaid6();
+    _ComputePQParitiesforChunk(parities, *(src.buffers));
    
     pParity = parities.front();
     qParity = parities.back();
@@ -163,7 +168,6 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
     
     return 0;
 }
- 
 
 list<FtBlkAddr>
 Raid6::GetRebuildGroup(FtBlkAddr fba)
@@ -237,14 +241,49 @@ Raid6::_AllocChunk()
    buffer.SetBufferPool(bufferPool);
    return buffer;
 }
- 
+
 void
-Raid6::_ComputeParityChunk(list<BufferEntry>& dst, const list<BufferEntry>& src)
+Raid6::_GenCauchyMatrixandTableforRaid6( )
 {
-    // TODO: jh34.hong with ISA-L
- 
+    uint32_t k = m-p;
+    gf_gen_cauchy1_matrix(encodeMatrixforRaid6.data(),m,k);
+    ec_init_tables(k,p, &encodeMatrixforRaid6[k * k], encodeTableforRaid6.data());
 }
- 
+
+void
+Raid6::_ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry>& src)
+{ 
+    uint32_t len = ArrayConfig::BLOCK_SIZE_BYTE;
+    uint32_t k = m-p;
+    uint32_t i;
+    
+    uint64_t* src_ptr=nullptr;
+    uint64_t* dst_ptr=nullptr;
+
+    sources= new uint8_t*[m];
+    for (i = 0; i < m; i++) {
+       sources[i] = new uint8_t[len];
+    }
+
+    for (const BufferEntry& src_buffer : src)
+    {
+        src_ptr = (uint64_t*) src_buffer.GetBufferPtr();    
+        for(i=0;i<k;i++){
+			memcpy(sources[i], src_ptr+i,len);
+        }   
+    } 
+       
+    ec_encode_data(len, k, p, encodeTableforRaid6.data(), (uint8_t**)sources, (uint8_t**)&sources[k]);
+
+    for (const BufferEntry& dst_buffer : dst)
+    {
+        dst_ptr = (uint64_t*)dst_buffer.GetBufferPtr();    
+        for(i=0;i<p;i++){
+			memcpy(dst_ptr+i,sources[m-(i+1)],len);
+        }   
+    } 
+} 
+
 void
 Raid6::_BindRecoverFunc(void)
 {
@@ -315,6 +354,10 @@ Raid6::ClearParityPools()
 Raid6::~Raid6()
 {
    ClearParityPools();
+    for (uint32_t i = 0; i < m; i++) {
+		delete []sources[i];
+	}
+	delete []sources;
 }
  
 int

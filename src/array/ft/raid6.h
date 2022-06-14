@@ -68,11 +68,17 @@ private:
    void _BindRecoverFunc(void);
    void _RebuildData(void* dst, void* src, uint32_t size);
    BufferEntry _AllocChunk();
-   void _ComputeParityChunk(list<BufferEntry>& dst, const list<BufferEntry>& src);
+   void _GenCauchyMatrixandTableforRaid6();
+   void _ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry>& src);
    vector<BufferPool*> parityPools;
    AffinityManager* affinityManager = nullptr;
    MemoryManager* memoryManager = nullptr;
    uint64_t parityBufferCntPerNuma = 0;
+   vector<uint8_t> encodeMatrixforRaid6;
+   vector<uint8_t> encodeTableforRaid6;
+   uint8_t** sources;
+   uint32_t m; 
+   uint32_t p;
 };
  
 } // namespace pos

@@ -73,6 +73,14 @@ endif
 #	$(SPDK_LIB_LINKER_ARGS) $(ENV_LINKER_ARGS)
 
 #################################################
+# Intel ISA-L libraries
+incdir = $(shell pkg-config --variable=includedir libisal)
+
+CPPFLAGS += -include $(incdir)/isa-l.h # Add standard header
+CPPFLAGS += -I $(incdir)/isa-l # Add path to remove error
+LDFLAGS = $(shell pkg-config --libs libisal)
+
+#################################################
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 APP = $(BINDIR)/ibofos_library
 else
