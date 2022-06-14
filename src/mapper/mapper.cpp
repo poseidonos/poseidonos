@@ -81,7 +81,7 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
     }
     if (reverseMapManager == nullptr)
     {
-        reverseMapManager = new ReverseMapManager(this, stripeMapManager, nullptr, addrInfo);
+        reverseMapManager = new ReverseMapManager(this, stripeMapManager, nullptr, addrInfo, tp);
     }
     if (mapperWbt == nullptr)
     {

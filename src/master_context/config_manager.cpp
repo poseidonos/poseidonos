@@ -43,6 +43,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <regex>
 
 #include "src/helper/json/json_helper.h"
 #include "src/include/pos_event_id.h"
@@ -83,6 +84,9 @@ ConfigManager::ReadFile(void)
 
     strStream << openFile.rdbuf();
     configData = strStream.str();
+    configData = std::regex_replace(configData,
+                        std::regex("\\s|\\t|\\r\\n|\\r|\\n"),
+                        "");
     openFile.close();
 
     rapidjson::ParseResult result = doc.Parse(configData.c_str());
