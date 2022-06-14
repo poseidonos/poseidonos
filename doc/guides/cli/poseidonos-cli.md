@@ -37,6 +37,7 @@ poseidonos-cli [flags]
 ### SEE ALSO
 
 * [poseidonos-cli array](poseidonos-cli_array.md)	 - Array command for PoseidonOS.
+* [poseidonos-cli cluster](poseidonos-cli_cluster.md)	 - Cluster commands for PoseidonOS.
 * [poseidonos-cli completion](poseidonos-cli_completion.md)	 - Generate completion script
 * [poseidonos-cli devel](poseidonos-cli_devel.md)	 - Commands for PoseidonOS developers.
 * [poseidonos-cli device](poseidonos-cli_device.md)	 - Device commands for PoseidonOS.
