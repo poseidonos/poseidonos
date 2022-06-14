@@ -67,7 +67,7 @@ StopPosCommand::Execute(json& doc, string rid)
     {
         if (!abrList.empty())
         {
-            int eventId = EID(MBR_ABR_LIST_SUCCESS);
+            int eventId = EID(MBR_ABR_GET_LIST_SUCCESS);
             POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
             for (const auto& abr : abrList)
             {
@@ -81,15 +81,12 @@ StopPosCommand::Execute(json& doc, string rid)
 
                 if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
                 {
-                    eventId = EID(STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS);
+                    eventId = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
                     POS_TRACE_ERROR(eventId,
-                        "Failed to exit system. Array '{}' is still mounted with state '{}'",
+                        "array:{}, state:{}",
                         abr.arrayName, arrayInfo->GetState().ToString());
 
-                    return jFormat.MakeResponse(
-                        "STOPPOS", rid, eventId,
-                        "failed to terminate POS (code:" + to_string(eventId) + ")",
-                        GetPosInfo());
+                    return jFormat.MakeResponse("STOPPOS", rid, eventId, "", GetPosInfo());
                 }
             }
         }
