@@ -58,6 +58,7 @@ const int NUM_ENTRIES = REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE; // 21
 class MetaFileIntf;
 class Stripe;
 class IVolumeInfoManager;
+class TelemetryPublisher;
 
 // The first page can have 21 * (16 - 1) == 315 entries
 // since the second page, it has 21 * 16 = 336 entries
@@ -144,7 +145,7 @@ public:
     ReverseMapPack(void);
     virtual ~ReverseMapPack(void);
 
-    virtual void Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_);
+    virtual void Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_, TelemetryPublisher* tp);
     virtual void Assign(StripeId vsid);
 
     virtual int Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid);
@@ -172,6 +173,8 @@ private:
     int ioError; // indicates if there is an Async-IO error among mpages
     int ioDirection;
     EventSmartPtr callback;
+    TelemetryPublisher* telemetryPublisher;
+    std::atomic<uint64_t> issuedIoCnt;
 };
 
 } // namespace pos

@@ -254,7 +254,7 @@ TEST(Stripe, GetReverseMapEntry_TestSimpleGetter)
 TEST(Stripe, UpdateVictimVsa_TestSimpleSetter)
 {
     // given
-    NiceMock<MockReverseMapManager>* revMap = new NiceMock<MockReverseMapManager>(nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockReverseMapManager>* revMap = new NiceMock<MockReverseMapManager>(nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
     Stripe stripe(revMap, false, 10);
 

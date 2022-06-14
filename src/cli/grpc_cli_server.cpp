@@ -354,7 +354,7 @@ RunGrpcServer()
 {
   pc = new CommandProcessor();
 
-  std::string server_address(GRPC_SERVER_ADDRESS);
+  std::string server_address(GRPC_CLI_SERVER_SOCKET_ADDRESS);
   PosCliServiceImpl service;
 
   grpc::EnableDefaultHealthCheckService(true);

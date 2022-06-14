@@ -49,7 +49,6 @@
 
 namespace pos
 {
-#define TEL_SERVER_IP "0.0.0.0:50051"
 
 class GrpcGlobalPublisher : public IGlobalPublisher
 {

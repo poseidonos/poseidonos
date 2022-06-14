@@ -38,7 +38,7 @@ namespace pos
 {
 GrpcGlobalPublisher::GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_)
 {
-    std::string serverAddr = TEL_SERVER_IP; // TODO: temporary
+    std::string serverAddr = GRPC_TEL_SERVER_SOCKET_ADDRESS; // TODO: temporary
     std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {
@@ -61,11 +61,7 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
     for (auto& mit : (*metricList))
     {
         cnt++;
-        if (cnt > MAX_NUM_METRICLIST)
-        {
-            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add MetricList, numMetric overflowed!!!, name:{}, numMetric:{}", mit.GetName(), metricList->size());
-            break;
-        }
+
         // set values
         Metric* metric = request->add_metrics();
         metric->set_name(mit.GetName());
@@ -93,7 +89,7 @@ GrpcGlobalPublisher::PublishToServer(MetricLabelMap* defaultLabelList, POSMetric
             }
             histValue->set_sum(mit.GetHistogramValue()->GetSum());
             histValue->set_totalcount(mit.GetHistogramValue()->GetTotalCount());
-            
+
             /**
              newly created HistogramValue will be removed by gRPC
              ref : https://developers.google.com/protocol-buffers/docs/reference/cpp-generated  , void set_allocated_foo(string* value

@@ -8,7 +8,6 @@ namespace pos
 TEST(GrpcSubscriber, GrpcSubscriber_WriteBlocks)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     GrpcSubscriber *posServer = new GrpcSubscriber();
     usleep(1000);
     // client
@@ -32,7 +31,6 @@ TEST(GrpcSubscriber, GrpcSubscriber_WriteBlocks)
 TEST(GrpcSubscriber, GrpcSubscriber_WriteHostBlocks)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     GrpcSubscriber *posServer = new GrpcSubscriber();
     usleep(1000);
     // client
@@ -55,7 +53,6 @@ TEST(GrpcSubscriber, GrpcSubscriber_WriteHostBlocks)
 TEST(GrpcSubscriber, GrpcSubscriber_ReadBlocks)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     GrpcSubscriber *posServer = new GrpcSubscriber();
     usleep(1000);
     // client
@@ -79,7 +76,6 @@ TEST(GrpcSubscriber, GrpcSubscriber_ReadBlocks)
 TEST(GrpcSubscriber, GrpcSubscriber_CompleteHostWrite)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     GrpcSubscriber *posServer = new GrpcSubscriber();
     usleep(1000);
     // client
