@@ -43,6 +43,7 @@ namespace pos
 class VolumeNamePolicy
 {
 public:
+    explicit VolumeNamePolicy(int eid_special, int eid_space, int eid_toolong, int eid_tooshort);
     void CheckVolumeName(string name);
     // StringChecker
 private:
@@ -50,6 +51,10 @@ private:
     const size_t MAX_LEN = 255;
     const char SPACE = ' ';
     const char* ALLOWED_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_- ";
+    int eidSpecialChar;
+    int eidStartOrEndWSpace;
+    int eidTooLong;
+    int eidTooShort;
 };
 
 } // namespace pos

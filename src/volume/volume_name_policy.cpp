@@ -37,6 +37,11 @@
 
 namespace pos
 {
+VolumeNamePolicy::VolumeNamePolicy(int eid_special, int eid_space, int eid_toolong, int eid_tooshort)
+: eidSpecialChar(eid_special), eidStartOrEndWSpace(eid_space), eidTooLong(eid_toolong), eidTooShort(eid_tooshort)
+{
+}
+
 void
 VolumeNamePolicy::CheckVolumeName(string name)
 {
@@ -45,30 +50,27 @@ VolumeNamePolicy::CheckVolumeName(string name)
 
     if (len < MIN_LEN)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_TOO_SHORT),
-            "len: {}, min: {}", len, MIN_LEN);
+        POS_TRACE_WARN(eidTooShort, "len: {}, min: {}", len, MIN_LEN);
 
-        throw EID(CREATE_VOL_NAME_TOO_SHORT);
+        throw eidTooShort;
     }
     else if (len > MAX_LEN)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_TOO_LONG),
-            "len: {}, max: {}", len, MAX_LEN);
-        throw EID(CREATE_VOL_NAME_TOO_LONG);
+        POS_TRACE_WARN(eidTooLong, "len: {}, max: {}", len, MAX_LEN);
+        throw eidTooLong;
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE),
-            "vol_name: {}", name);
-        throw EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE);
+        POS_TRACE_WARN(eidStartOrEndWSpace, "vol_name: {}", name);
+        throw eidStartOrEndWSpace;
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR),
+        POS_TRACE_WARN(eidSpecialChar,
             "vol_name: {}, allowed_char: {}", name, ALLOWED_CHAR);
-        throw EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR);
+        throw eidSpecialChar;
     }
 }
 

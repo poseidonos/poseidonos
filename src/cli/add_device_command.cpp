@@ -65,8 +65,6 @@ AddDeviceCommand::Execute(json& doc, string rid)
         int ret = array->AddDevice(arrayName, devName);
         if (ret == 0)
         {
-            int event = EID(CLI_ADD_DEVICE_SUCCESS);
-            POS_TRACE_INFO(event, "device_name:{}, array_name:{}", devName, arrayName);
             return jFormat.MakeResponse("ADDDEVICE", rid, SUCCESS,
                 devName + " has been added to " + arrayName + " successfully", GetPosInfo());
         }
