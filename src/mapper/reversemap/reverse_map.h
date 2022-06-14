@@ -174,7 +174,7 @@ private:
     int ioDirection;
     EventSmartPtr callback;
     TelemetryPublisher* telemetryPublisher;
-    std::atomic<uint32_t> pendIoCnt;
+    std::atomic<uint64_t> issuedIoCnt;
 };
 
 } // namespace pos

@@ -225,7 +225,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 
     if (telemetryPublisher)
     {
-        POSMetric metric(TEL36003_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
         metric.SetGaugeValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -256,7 +256,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 
     if (telemetryPublisher)
     {
-        POSMetric metric(TEL36003_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
         metric.SetGaugeValue(0);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -314,8 +314,8 @@ JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
     if (telemetryPublisher)
     {
-        POSMetric metric(TEL36002_JRN_RESET_LOG_GROUP, POSMetricTypes::MT_GAUGE);
-        metric.SetGaugeValue(1);
+        POSMetric metric(TEL36002_JRN_LOG_GROUP_RESET_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
 
@@ -349,15 +349,6 @@ JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
     if (context != nullptr)
     {
         context->IoDone();
-        if (telemetryPublisher)
-        {
-            if (context->length == config->GetLogGroupSize())
-            {
-                POSMetric metric(TEL36002_JRN_RESET_LOG_GROUP, POSMetricTypes::MT_GAUGE);
-                metric.SetGaugeValue(0);
-                telemetryPublisher->PublishMetric(metric);
-            }
-        }
         delete context;
     }
 }
@@ -380,6 +371,12 @@ void
 JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
 {
     numInitializedLogGroup++;
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
 }
 
 bool
