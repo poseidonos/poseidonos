@@ -226,6 +226,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     if (telemetryPublisher)
     {
         POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        metric.AddLabel("group_id", std::to_string(groupId));
         metric.SetGaugeValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -257,6 +258,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     if (telemetryPublisher)
     {
         POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
+        metric.AddLabel("group_id", std::to_string(groupId));
         metric.SetGaugeValue(0);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -315,6 +317,7 @@ JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
     if (telemetryPublisher)
     {
         POSMetric metric(TEL36002_JRN_LOG_GROUP_RESET_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("group_id", std::to_string(id));
         metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -374,6 +377,7 @@ JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
     if (telemetryPublisher)
     {
         POSMetric metric(TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.AddLabel("group_id", std::to_string(logGroupId));
         metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
