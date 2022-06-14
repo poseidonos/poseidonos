@@ -1,18 +1,19 @@
 package arraycmds
 
 import (
-	"encoding/json"
+	pb "cli/api"
+	"cli/cmd/displaymgr"
+	"cli/cmd/globals"
+	"cli/cmd/grpcmgr"
+	"cli/cmd/socketmgr"
 	"errors"
 	"fmt"
 	"strconv"
-
-	"cli/cmd/displaymgr"
-	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+	"strings"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var AutocreateArrayCmd = &cobra.Command{
@@ -29,8 +30,11 @@ Syntax:
 	(--num-data-devs | -d) Number [(--num-spare | -s) Number] [--raid RaidType]
 	[--no-raid] [--no-buffer]
 
-Example: 
+Example 1 (without specifying RAID - default RAID level is used): 
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1
+
+Example 2 (creating an array using RAID6): 	
+	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1 --raid RAID6
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,52 +47,64 @@ Example:
 			return
 		}
 
-		reqJSON, err := json.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
+		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendAutocreateArray(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }
 
-// Build a CreateArrayReq using flag values from commandline and return it
-func buildAutoCreateArrayReq(command string) (messages.Request, error) {
-
-	req := messages.Request{}
+func buildAutoCreateArrayReq(command string) (*pb.AutocreateArrayRequest, error) {
 
 	if autocreate_array_isNoRaid == true {
 		if autocreate_array_numDataDevs > maxNumDataDevsNoRaid {
 			err := errors.New(`array with no RAID can have maximum ` +
 				strconv.Itoa(maxNumDataDevsNoRaid) + ` data device(s).`)
-			return req, err
+			return nil, err
 		}
 		autocreate_array_raid = "NONE"
 	}
 
 	if isRAIDConstMet(autocreate_array_numDataDevs, autocreate_array_raid) == false {
 		err := errors.New(`RAID10 only supports even number of data devices.`)
-		return req, err
+		return nil, err
 	}
 
-	bufferList := parseDevList(autocreate_array_bufferDevsList)
+	param := &pb.AutocreateArrayRequest_Param{Name: autocreate_array_arrayName,
+		NumData: int32(autocreate_array_numDataDevs), NumSpare: int32(autocreate_array_numSpareDevs),
+		Raidtype: autocreate_array_raid}
 
-	param := messages.AutocreateArrayParam{
-		ARRAYNAME:    autocreate_array_arrayName,
-		RAID:         autocreate_array_raid,
-		BUFFER:       bufferList,
-		NUMDATADEVS:  autocreate_array_numDataDevs,
-		NUMSPAREDEVS: autocreate_array_numSpareDevs,
+	bufferList := strings.Split(autocreate_array_bufferDevsList, ",")
+	for _, buffer := range bufferList {
+		param.Buffer = append(param.Buffer, &pb.DeviceNameList{DeviceName: buffer})
 	}
 
 	uuid := globals.GenerateUUID()
-
-	req = messages.BuildReqWithParam(command, uuid, param)
+	req := &pb.AutocreateArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	return req, nil
 }

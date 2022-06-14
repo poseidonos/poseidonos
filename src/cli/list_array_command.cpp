@@ -115,16 +115,16 @@ ListArrayCommand::Execute(json& doc, string rid)
                     arrayStatus = "Mounted";
                 }
                 arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
-                arrayElement.SetAttribute(JsonAttribute("data_raid", "\"" + info->GetDataRaidType() + "\""));
-                arrayElement.SetAttribute(JsonAttribute("write_through_enabled", info->IsWriteThroughEnabled() ? "true" : "false"));
+                arrayElement.SetAttribute(JsonAttribute("dataRaid", "\"" + info->GetDataRaidType() + "\""));
+                arrayElement.SetAttribute(JsonAttribute("writeThroughEnabled", info->IsWriteThroughEnabled() ? "true" : "false"));
             }
 
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
-            arrayElement.SetAttribute(JsonAttribute("create_datetime", "\"" + createDatetime + "\""));
-            arrayElement.SetAttribute(JsonAttribute("update_datetime", "\"" + updateDatetime + "\""));
-            arrayElement.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
-            arrayElement.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
+            arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
+            arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
+            arrayElement.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::SystemCapacity(arrayName)) + "\""));
+            arrayElement.SetAttribute(JsonAttribute("used", "\"" + to_string(SpaceInfo::Used(arrayName)) + "\""));
             jsonArrayList.AddElement(arrayElement);
         }
         data.SetArray(jsonArrayList);

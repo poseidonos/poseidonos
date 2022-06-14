@@ -81,11 +81,11 @@ AddPerformanceMetric(POSMetricVector* posMetricVector,
     const air::JSONdoc& data, const std::string& interval, bool getSSDId = false)
 {
     POSMetric posMetric{name, type};
-    if (POSMetricTypes::MT_GAUGE)
+    if (POSMetricTypes::MT_GAUGE == type)
     {
         posMetric.SetGaugeValue(value);
     }
-    if(getSSDId)
+    if (getSSDId)
     {
         AddSSDIdInterval(posMetric, data, interval);
     }
@@ -110,7 +110,7 @@ AddLatencyMetric(POSMetricVector* posMetricVector,
     const air::JSONdoc& data, const std::string& interval)
 {
     POSMetric posMetric{name, type};
-    if (POSMetricTypes::MT_GAUGE)
+    if (POSMetricTypes::MT_GAUGE == type)
     {
         posMetric.SetGaugeValue(value);
     }
@@ -120,6 +120,37 @@ AddLatencyMetric(POSMetricVector* posMetricVector,
     std::stringstream stream_sample_count;
     stream_sample_count << data["period"]["sample_cnt"];
     posMetric.AddLabel("sample_count", stream_sample_count.str());
+
+    posMetricVector->push_back(posMetric);
+}
+
+template<typename T>
+void
+AddCommonMetric(POSMetricVector* posMetricVector,
+    const std::string& name, const POSMetricTypes type, const T value,
+    const air::JSONdoc& data, const std::string& interval)
+{
+    POSMetric posMetric{name, type};
+    if (POSMetricTypes::MT_GAUGE == type)
+    {
+        posMetric.SetGaugeValue(value);
+    }
+
+    std::stringstream stream_thread_id;
+    stream_thread_id << data["target_id"];
+    posMetric.AddLabel("thread_id", stream_thread_id.str());
+
+    std::stringstream stream_thread_name;
+    stream_thread_name << data["target_name"];
+    posMetric.AddLabel("thread_name", stream_thread_name.str());
+
+    std::stringstream stream_filter;
+    stream_filter << data["filter"];
+    posMetric.AddLabel("filter", stream_filter.str());
+
+    std::stringstream stream_index;
+    stream_index << data["index"];
+    posMetric.AddLabel("index", stream_index.str());
 
     posMetricVector->push_back(posMetric);
 }
@@ -181,7 +212,7 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                             bwMetricId = TEL50011_WRITE_RATE_BYTES_PER_SECOND;
                         }
                         AddPerformanceMetric(posMetricVector, iopsMetricId,
-                                POSMetricTypes::MT_GAUGE, iops, obj, interval);
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval);
                         AddPerformanceMetric(posMetricVector, bwMetricId,
                             POSMetricTypes::MT_GAUGE, bw, obj, interval);
                     }
@@ -359,6 +390,40 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                     }
                 }
 
+                if (data.HasKey("UTIL_REACTOR"))
+                {
+                    auto& objs = data["UTIL_REACTOR"]["objs"];
+                    for (auto& obj_it : objs)
+                    {
+                        auto& obj = objs[obj_it.first];
+
+                        std::stringstream stream_usage;
+                        stream_usage << obj["period"]["usage"];
+                        uint64_t usage{0};
+                        stream_usage >> usage;
+
+                        AddCommonMetric(posMetricVector, TEL70000_SPDK_REACTOR_UTILIZATION,
+                            POSMetricTypes::MT_GAUGE, usage, obj, interval);
+                    }
+                }
+
+                if (data.HasKey("CNT_PendingIO"))
+                {
+                    auto& objs = data["CNT_PendingIO"]["objs"];
+                    for (auto& obj_it : objs)
+                    {
+                        auto& obj = objs[obj_it.first];
+
+                        std::stringstream stream_count;
+                        stream_count << obj["period"]["count"];
+                        int64_t count{0};
+                        stream_count >> count;
+
+                        AddCommonMetric(posMetricVector, TEL80000_DEVICE_PENDING_IO_COUNT,
+                            POSMetricTypes::MT_GAUGE, count, obj, interval);
+                    }
+                }
+
                 if (!posMetricVector->empty())
                 {
                     this->telPub->PublishMetricList(posMetricVector);
@@ -398,7 +463,10 @@ TelemetryAirDelegator::SetState(State state)
 void
 TelemetryAirDelegator::RegisterAirEvent(void)
 {
-    air_request_data({"PERF_ARR_VOL", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read", "PERF_SSD_Write"}, std::move(dataHandler));
+    air_request_data(
+        {"PERF_ARR_VOL", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
+            "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO"},
+        std::move(dataHandler));
 }
 
 } // namespace pos

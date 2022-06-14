@@ -37,6 +37,7 @@
 #include "Air.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
+#include "src/cli/grpc_cli_server.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/cpu_affinity/affinity_viewer.h"
 #include "src/device/device_manager.h"
@@ -57,13 +58,12 @@
 #include "src/network/nvmf_target.h"
 #include "src/network/transport_configuration.h"
 #include "src/qos/qos_manager.h"
-#include "src/signal_handler/user_signal_interface.h"
 #include "src/signal_handler/signal_handler.h"
+#include "src/signal_handler/user_signal_interface.h"
 #include "src/spdk_wrapper/spdk.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/cli/grpc_cli_server.h"
 
 namespace pos
 {
@@ -134,6 +134,7 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
+    SpdkSingleton::ResetInstance();
 
     air_deactivate();
     air_finalize();
@@ -185,7 +186,7 @@ Poseidonos::_InitAIR(void)
     }
     if (nullptr == telemetryAirDelegator)
     {
-        telemetryAirDelegator = new TelemetryAirDelegator {telemtryPublisherForAir};
+        telemetryAirDelegator = new TelemetryAirDelegator{telemtryPublisherForAir};
         telemetryAirDelegator->RegisterAirEvent();
     }
 }
