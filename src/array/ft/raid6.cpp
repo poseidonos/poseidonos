@@ -124,19 +124,44 @@ Raid6::GetParityOffset(StripeId lsid)
 int
 Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 {
-   // TODO: jh34.hong 
-   uint32_t parityIndex = GetParityOffset(src.addr.stripeId).front();
-   FtWriteEntry fwe;
-   fwe.addr.stripeId = src.addr.stripeId;
-   fwe.addr.offset = (uint64_t)parityIndex * (uint64_t)ftSize_.blksPerChunk;
-   fwe.blkCnt = ftSize_.blksPerChunk;
-   BufferEntry parity = _AllocChunk();
-   _ComputeParityChunk(parity, *(src.buffers));
-   fwe.buffers.push_back(parity);
-   ftl.clear();
-   ftl.push_back(fwe);
- 
-   return 0;
+    vector<uint32_t> parityOffset = GetParityOffset(src.addr.stripeId);
+    assert (parityOffset.size() == 2);
+    
+    uint32_t pParityIndex = parityOffset.front();
+    uint32_t qParityIndex = parityOffset.back();
+    
+    FtWriteEntry fwe_pParity;
+    FtWriteEntry fwe_qParity;
+
+    fwe_pParity.addr.stripeId = src.addr.stripeId;
+    fwe_pParity.addr.offset = (uint64_t)pParityIndex * (uint64_t)ftSize_.blksPerChunk;
+    fwe_pParity.blkCnt = ftSize_.blksPerChunk;
+  
+    fwe_qParity.addr.stripeId = src.addr.stripeId;
+    fwe_qParity.addr.offset = (uint64_t)qParityIndex * (uint64_t)ftSize_.blksPerChunk;
+    fwe_qParity.blkCnt = ftSize_.blksPerChunk;
+
+    BufferEntry pParity = _AllocChunk();
+    BufferEntry qParity = _AllocChunk();
+
+    list<BufferEntry> parities;
+
+    parities.push_back(pParity);
+    parities.push_back(qParity); 
+    //To Do: Compute Parity based of src
+    _ComputeParityChunk(parities, *(src.buffers));
+   
+    pParity = parities.front();
+    qParity = parities.back();
+
+    fwe_pParity.buffers.push_back(pParity);
+    fwe_qParity.buffers.push_back(qParity);
+
+    ftl.clear();
+    ftl.push_back(fwe_pParity);
+    ftl.push_back(fwe_qParity);
+    
+    return 0;
 }
  
 
@@ -214,57 +239,10 @@ Raid6::_AllocChunk()
 }
  
 void
-Raid6::_ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src)
+Raid6::_ComputeParityChunk(list<BufferEntry>& dst, const list<BufferEntry>& src)
 {
-    // TODO: jh34.hong 
-   uint32_t memSize = ftSize_.blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE;
-   void* src1 = nullptr;
-   void* src2 = nullptr;
+    // TODO: jh34.hong with ISA-L
  
-   for (const BufferEntry& buffer : src)
-   {
-       if (nullptr == src1)
-       {
-           src1 = buffer.GetBufferPtr();
-           continue;
-       }
- 
-       if (nullptr == src2)
-       {
-           src2 = buffer.GetBufferPtr();
-           _XorBlocks(dst.GetBufferPtr(), src1, src2, memSize);
-           continue;
-       }
- 
-       _XorBlocks(dst.GetBufferPtr(), buffer.GetBufferPtr(), memSize);
-   }
-}
- 
-void
-Raid6::_XorBlocks(void* dst, const void* src, uint32_t memSize)
-{
-   // TODO: jh34.hong 
-   uint64_t* dstElement = (uint64_t*)dst;
-   uint64_t* srcElement = (uint64_t*)src;
- 
-   for (uint32_t i = 0; i < memSize / sizeof(uint64_t); i++)
-   {
-       dstElement[i] ^= srcElement[i];
-   }
-}
- 
-void
-Raid6::_XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize)
-{
-    // TODO: jh34.hong 
-   uint64_t* dstElement = (uint64_t*)dst;
-   uint64_t* srcElement1 = (uint64_t*)src1;
-   uint64_t* srcElement2 = (uint64_t*)src2;
- 
-   for (uint32_t i = 0; i < memSize / sizeof(uint64_t); i++)
-   {
-       dstElement[i] = (srcElement1[i] ^ srcElement2[i]);
-   }
 }
  
 void
@@ -278,12 +256,13 @@ void
 Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize)
 {
     // TODO: jh34.hong 
-   using BlockData = char[dstSize];
+   /*using BlockData = char[dstSize];
    memset(dst, 0, dstSize);
    for (uint32_t i = 0; i < ftSize_.chunksPerStripe - 1; i++)
    {
+       
        _XorBlocks(dst, reinterpret_cast<BlockData*>(src) + i, dstSize);
-   }
+   }*/
 }
  
 bool

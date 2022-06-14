@@ -68,9 +68,7 @@ private:
    void _BindRecoverFunc(void);
    void _RebuildData(void* dst, void* src, uint32_t size);
    BufferEntry _AllocChunk();
-   void _ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src);
-   void _XorBlocks(void* dst, const void* src, uint32_t memSize);
-   void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
+   void _ComputeParityChunk(list<BufferEntry>& dst, const list<BufferEntry>& src);
    vector<BufferPool*> parityPools;
    AffinityManager* affinityManager = nullptr;
    MemoryManager* memoryManager = nullptr;
