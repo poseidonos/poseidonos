@@ -8,7 +8,7 @@ Cluster commands for PoseidonOS.
 Cluster commands for PoseidonOS. Use this command category to manage high-availability clusters.
 
 Note: before using this command, you need to set the database information about high-availability 
-clusters (IP address, port number, username, password, database and name) as environmental variables.
+clusters (IP address, port number, username, password, and database name) as environmental variables.
 
 The variables to set are:
   POS_HA_DB_IP_ADDRESS POS_HA_DB_NAME POS_HA_DB_USERNAME POS_HA_DB_PASSWORD POS_HA_DB_NAME
