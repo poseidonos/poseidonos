@@ -29,59 +29,59 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef RAID6_H_
 #define RAID6_H_
- 
+
+#include "method.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/resource_manager/memory_manager.h"
+
 #include <list>
 #include <vector>
- 
-#include "method.h"
-#include "src/resource_manager/memory_manager.h"
-#include "src/cpu_affinity/affinity_manager.h"
- 
 namespace pos
 {
 class PartitionPhysicalSize;
 class RebuildBehavior;
 class BufferPool;
- 
+
 class Raid6 : public Method
 {
 public:
-   explicit Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
-   virtual ~Raid6();
-   virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
-       AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
-       MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
-   virtual void ClearParityPools();
-   virtual list<FtEntry> Translate(const LogicalEntry& le) override;
-   virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
-   virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
-   virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
-   vector<uint32_t> GetParityOffset(StripeId lsid) override;
-   bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
- 
-   // This function is for unit testing only
-   virtual int GetParityPoolSize();
+    explicit Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
+    virtual ~Raid6();
+    virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
+        AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
+        MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
+    virtual void ClearParityPools();
+    virtual list<FtEntry> Translate(const LogicalEntry& le) override;
+    virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    vector<uint32_t> GetParityOffset(StripeId lsid) override;
+    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
+
+    // This function is for unit testing only
+    virtual int GetParityPoolSize();
+
 private:
-   void _BindRecoverFunc(void);
-   void _RebuildData(void* dst, void* src, uint32_t size);
-   BufferEntry _AllocChunk();
-   void _GenCauchyMatrixandTableforRaid6();
-   void _ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry>& src);
-   vector<BufferPool*> parityPools;
-   AffinityManager* affinityManager = nullptr;
-   MemoryManager* memoryManager = nullptr;
-   uint64_t parityBufferCntPerNuma = 0;
-   vector<uint8_t> encodeMatrixforRaid6;
-   vector<uint8_t> encodeTableforRaid6;
-   uint8_t** rsCodeSrc; 
-   uint32_t raid6BufferSize;
-   uint32_t raid6BufferCnt;
-   uint32_t srcBufferCnt;
-   uint32_t parityBufferCnt;
+    void _BindRecoverFunc(void);
+    void _RebuildData(void* dst, void* src, uint32_t size);
+    BufferEntry _AllocChunk();
+    void _GenCauchyMatrixandTableforRaid6();
+    void _ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry>& src);
+    vector<BufferPool*> parityPools;
+    AffinityManager* affinityManager = nullptr;
+    MemoryManager* memoryManager = nullptr;
+    uint64_t parityBufferCntPerNuma = 0;
+    vector<uint8_t> encodeMatrixforRaid6;
+    vector<uint8_t> encodeTableforRaid6;
+    uint8_t** rsCodeSrc;
+    uint32_t raid6BufferSize;
+    uint32_t raid6BufferCnt;
+    uint32_t srcBufferCnt;
+    uint32_t parityBufferCnt;
 };
- 
+
 } // namespace pos
 #endif // RAID6_H_

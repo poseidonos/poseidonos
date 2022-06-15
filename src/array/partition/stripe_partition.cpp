@@ -30,28 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/array/ft/raid0.h"
+#include "src/array/ft/raid10.h"
+#include "src/array/ft/raid5.h"
+#include "src/array/ft/raid6.h"
+#include "src/array/ft/raid_none.h"
+#include "src/bio/ubio.h"
+#include "src/device/base/ublock_device.h"
+#include "src/helper/calc/calc.h"
+#include "src/helper/enumerable/query.h"
+#include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
+#include "src/lib/block_alignment.h"
+#include "src/logger/logger.h"
+#include "stripe_partition.h"
+
 #include <cassert>
 #include <iostream>
 #include <memory>
-
-#include "stripe_partition.h"
-#include "src/helper/enumerable/query.h"
-#include "src/bio/ubio.h"
-#include "src/device/base/ublock_device.h"
-#include "src/include/pos_event_id.h"
-#include "src/include/array_config.h"
-#include "src/lib/block_alignment.h"
-#include "src/logger/logger.h"
-#include "src/array/ft/raid10.h"
-#include "src/array/ft/raid5.h"
-#include "src/array/ft/raid0.h"
-#include "src/array/ft/raid_none.h"
-#include "src/array/ft/raid6.h"
-#include "src/helper/calc/calc.h"
-
 namespace pos
 {
-
 StripePartition::StripePartition(
     PartitionType type,
     vector<ArrayDevice*> devs,
@@ -158,8 +156,8 @@ StripePartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src
 }
 
 int
-StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
-    const LogicalByteWriteEntry &src)
+StripePartition::ByteConvert(list<PhysicalByteWriteEntry>& dst,
+    const LogicalByteWriteEntry& src)
 {
     return -1;
 }
@@ -223,15 +221,15 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         method = raid5;
     }
     else if (raidType == RaidTypeEnum::RAID6)
-   {
-       uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
-       uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
-       uint64_t maxGcStripes = 2048;
-       uint64_t parityCnt = 2;
-       uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
-       Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
-       method = raid6;
-   }
+    {
+        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
+        uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
+        uint64_t maxGcStripes = 2048;
+        uint64_t parityCnt = 2;
+        uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
+        Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
+        method = raid6;
+    }
     else if (raidType == RaidTypeEnum::NONE)
     {
         RaidNone* raidNone = new RaidNone(&physicalSize);
@@ -281,7 +279,7 @@ StripePartition::_F2PTranslate(const list<FtEntry>& fel)
             PhysicalEntry physicalEntry;
             physicalEntry.addr = {
                 .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
-                .arrayDev = devs.at(i) };
+                .arrayDev = devs.at(i)};
             if (i != chunkEnd)
             {
                 physicalEntry.blkCnt = chunkSize - startOffset;
@@ -319,7 +317,7 @@ StripePartition::_F2PTranslate(const list<FtWriteEntry>& fwel)
             PhysicalWriteEntry pwe;
             pwe.addr = {
                 .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
-                .arrayDev = devs.at(i) };
+                .arrayDev = devs.at(i)};
             if (i != chunkEnd)
             {
                 pwe.blkCnt = chunkSize - startOffset;
@@ -389,7 +387,6 @@ StripePartition::_GetRebuildGroup(FtBlkAddr fba)
     }
     return ret;
 }
-
 
 list<BufferEntry>
 StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t remain)
