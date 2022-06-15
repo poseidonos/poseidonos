@@ -10,7 +10,7 @@ class MockJournalLogBuffer : public JournalLogBuffer
 {
 public:
     using JournalLogBuffer::JournalLogBuffer;
-    MOCK_METHOD(int, Init, (JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId), (override));
+    MOCK_METHOD(int, Init, (JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId, TelemetryPublisher* tp), (override));
     MOCK_METHOD(void, InitDataBuffer, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, Create, (uint64_t logBufferSize), (override));

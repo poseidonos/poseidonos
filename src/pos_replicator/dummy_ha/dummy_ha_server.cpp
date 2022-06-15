@@ -47,7 +47,7 @@ namespace pos
 DummyHaServer::DummyHaServer(void)
 {
     // new grpc server setting
-    string address("0.0.0.0:50051");
+    string address(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
 
     new std::thread(&DummyHaServer::RunServer, this, address);
 }

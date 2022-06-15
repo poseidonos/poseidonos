@@ -174,7 +174,7 @@ ArrayManager::Mount(string name, bool isWTEnabled)
             }
         }
         return ret;
-    }, name);
+    }, name, EID(MOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
 int
@@ -191,7 +191,7 @@ ArrayManager::Unmount(string name)
             }
         }
         return ret;
-    }, name);
+    }, name, EID(UNMOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
 int
@@ -200,7 +200,7 @@ ArrayManager::AddDevice(string name, string dev)
     return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
     {
         return array->GetArray()->AddSpare(dev);
-    }, name);
+    }, name, EID(ADD_SPARE_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
 int
@@ -209,11 +209,11 @@ ArrayManager::RemoveDevice(string name, string dev)
     return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
     {
         return array->GetArray()->RemoveSpare(dev);
-    }, name);
+    }, name, EID(ADD_SPARE_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
 int
-ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, string name)
+ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, string name, int eid)
 {
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
@@ -222,7 +222,8 @@ ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, str
     }
     else
     {
-        return EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME);
+        POS_TRACE_WARN(eid, "array_name:{}", name);
+        return eid;
     }
 }
 

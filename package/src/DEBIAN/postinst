@@ -6,5 +6,7 @@ makewhatis
 
 # register poseidonos.service
 mv /etc/poseidonos.service /lib/systemd/system/poseidonos.service
+mv /etc/pos-exporter.service /lib/systemd/system/pos-exporter.service
 systemctl daemon-reload
 systemctl enable poseidonos.service
+systemctl enable pos-exporter.service

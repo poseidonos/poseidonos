@@ -1,3 +1,25 @@
+diff --git .gitignore .gitignore
+index 59c9c6305..c9c85b925 100644
+--- .gitignore
++++ .gitignore
+@@ -2,17 +2,12 @@
+ *.a
+ *.cmd
+ *.d
+-*.dll
+-*.exe
+ *.gcda
+ *.gcno
+ *.kdev4
+ *.ko
+-*.lib
+ *.log
+ *.o
+-*.obj
+-*.pdb
+ *.pyc
+ *.so
+ *.so.*
 diff --git CONFIG CONFIG
 index 8c49c7d2b..fb6bf0eb3 100644
 --- CONFIG
@@ -667,10 +689,19 @@ index 000000000..38ef38560
 +	setrlimit(RLIMIT_NOFILE, &limits);
 +}
 diff --git lib/event/reactor.c lib/event/reactor.c
-index 4b058ab32..0cac0a658 100644
+index 4b058ab32..4912cdca0 100644
 --- lib/event/reactor.c
 +++ lib/event/reactor.c
-@@ -52,7 +52,7 @@
+@@ -43,6 +43,8 @@
+ #include "spdk/string.h"
+ #include "spdk/fd_group.h"
+ 
++#include <air/Air_c.h>
++
+ #ifdef __linux__
+ #include <sys/prctl.h>
+ #include <sys/eventfd.h>
+@@ -52,7 +54,7 @@
  #include <pthread_np.h>
  #endif
  
@@ -679,6 +710,36 @@ index 4b058ab32..0cac0a658 100644
  
  static struct spdk_reactor *g_reactors;
  static uint32_t g_reactor_count;
+@@ -925,6 +927,9 @@ reactor_run(void *arg)
+ 	struct spdk_lw_thread	*lw_thread, *tmp;
+ 	char			thread_name[32];
+ 	uint64_t		last_sched = 0;
++	uint32_t		lcore = reactor->lcore;
++	uint64_t		prev_busy_tsc = 0xFFFFFFFFFFFFFFFF;
++	uint64_t		prev_idle_tsc = 0xFFFFFFFFFFFFFFFF;
+ 
+ 	SPDK_NOTICELOG("Reactor started on core %u\n", reactor->lcore);
+ 
+@@ -968,6 +973,19 @@ reactor_run(void *arg)
+ 			}
+ 		}
+ 
++		if (reactor->busy_tsc > prev_busy_tsc)
++		{
++			uint64_t busy_tsc = reactor->busy_tsc - prev_busy_tsc;
++			AIRLOG(UTIL_REACTOR, AIR_BUSY, lcore, busy_tsc);
++		}
++		prev_busy_tsc = reactor->busy_tsc;
++		if (reactor->idle_tsc > prev_idle_tsc)
++		{
++			uint64_t idle_tsc = reactor->idle_tsc - prev_idle_tsc;
++			AIRLOG(UTIL_REACTOR, AIR_IDLE, lcore, idle_tsc);
++		}
++		prev_idle_tsc = reactor->idle_tsc;
++
+ 		if (g_reactor_state != SPDK_REACTOR_STATE_RUNNING) {
+ 			break;
+ 		}
 diff --git lib/nvme/nvme_ctrlr.c lib/nvme/nvme_ctrlr.c
 index d15ebdd73..ffc7d4c61 100644
 --- lib/nvme/nvme_ctrlr.c

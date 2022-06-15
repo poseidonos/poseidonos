@@ -30,65 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/volume/volume_renamer.h"
+#pragma once
 
 #include <string>
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/volume/volume_name_policy.h"
-#include "src/volume/volume_list.h"
+// To do - remove pos conf
 
 namespace pos
 {
-
-VolumeRenamer::VolumeRenamer(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID),
-  VolumeNamePolicy(EID(RENAME_VOL_NAME_INCLUDES_SPECIAL_CHAR), EID(RENAME_VOL_NAME_START_OR_END_WITH_SPACE),
-    EID(RENAME_VOL_NAME_TOO_LONG), EID(RENAME_VOL_NAME_TOO_SHORT))
-{
+#define GRPC_TEL_SERVER_SOCKET_ADDRESS "0.0.0.0:50051"
+#define GRPC_HA_PUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50052"
+#define GRPC_HA_SUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50053"
+#define GRPC_HA_VOL_SERVER_SOCKET_ADDRESS "0.0.0.0:50054"
+#define GRPC_CLI_SERVER_SOCKET_ADDRESS "0.0.0.0:50055"
 }
-
-VolumeRenamer::~VolumeRenamer(void)
-{
-}
-
-int
-VolumeRenamer::Do(string oldname, string newname)
-{
-    VolumeBase* vol = volumeList.GetVolume(oldname);
-    if (vol == nullptr)
-    {
-        POS_TRACE_WARN(EID(RENAME_VOL_NAME_DOES_NOT_EXIST), "vol_name:{}", oldname);
-        return EID(RENAME_VOL_NAME_DOES_NOT_EXIST);
-    }
-
-    if (volumeList.GetID(newname) >= 0)
-    {
-        POS_TRACE_WARN(EID(RENAME_VOL_SAME_VOL_NAME_EXISTS), "vol_name:{}", newname);
-        return EID(RENAME_VOL_SAME_VOL_NAME_EXISTS);
-    }
-
-    int ret;
-    try
-    {
-        CheckVolumeName(newname);
-    }
-    catch(int& exceptionEvent)
-    {
-        return exceptionEvent;
-    }
-
-    vol->Rename(newname);
-
-    ret = _SaveVolumes();
-    if (ret != EID(SUCCESS))
-    {
-        vol->Rename(oldname);
-        return ret;
-    }
-
-    return EID(SUCCESS);
-}
-
-} // namespace pos

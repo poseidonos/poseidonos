@@ -43,7 +43,9 @@ namespace pos
 {
 
 VolumeCreator::VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
-: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher),
+  VolumeNamePolicy(EID(CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR), EID(CREATE_VOL_NAME_START_OR_END_WITH_SPACE),
+    EID(CREATE_VOL_NAME_TOO_LONG), EID(CREATE_VOL_NAME_TOO_SHORT))
 {
     vol = nullptr;
 }

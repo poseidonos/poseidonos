@@ -12,7 +12,6 @@ namespace pos
 TEST(GrpcPublisher, GrpcPublisher_PushHostWrite)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     DummyHaServer *haServer = new DummyHaServer();
     usleep(1000);
     // client
@@ -35,7 +34,6 @@ TEST(GrpcPublisher, GrpcPublisher_PushHostWrite)
 TEST(GrpcPublisher, GrpcPublisher_CompleteUserWrite)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     DummyHaServer *haServer = new DummyHaServer();
     usleep(1000);
     // client
@@ -54,7 +52,6 @@ TEST(GrpcPublisher, GrpcPublisher_CompleteUserWrite)
 TEST(GrpcPublisher, GrpcPublisher_CompleteWrite)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     DummyHaServer *haServer = new DummyHaServer();
     usleep(1000);
     // client
@@ -73,7 +70,6 @@ TEST(GrpcPublisher, GrpcPublisher_CompleteWrite)
 TEST(GrpcPublisher, GrpcPublisher_CompleteRead)
 {
     // Given
-    // server_address("0.0.0.0:50051");
     DummyHaServer *haServer = new DummyHaServer();
     usleep(1000);
     // client

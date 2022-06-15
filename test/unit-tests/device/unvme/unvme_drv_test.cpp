@@ -67,7 +67,9 @@ TEST(UnvmeDrv,
     mockDevCtx.ioCompletionCount = 0;
     EXPECT_CALL(mockDevCtx, GetPendingError).WillOnce(Return(&mockIoCtx));
 
-    EXPECT_CALL(mockIoCtx, GetDeviceContext).WillOnce(Return(&mockDevCtx));
+    EXPECT_CALL(mockIoCtx, GetDeviceContext)
+        .Times(3)
+        .WillRepeatedly(Return(&mockDevCtx));
 
     UnvmeDrv unvmeDrv(mockUnvmeCmd, mockSpdkNvmeCaller);
 

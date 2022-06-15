@@ -60,8 +60,8 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     {
         if (!abrList.empty())
         {
-            eventId = EID(MBR_ABR_LIST_SUCCESS);
-            POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
+            eventId = EID(MBR_ABR_GET_LIST_SUCCESS);
+            POS_TRACE_DEBUG(eventId, "abr_list_size:{}", abrList.size());
             for (const auto& abr : abrList)
             {
                 ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(abr.arrayName);
@@ -74,7 +74,7 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
 
                 if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
                 {
-                    eventId = EID(STOP_POS_REJECTED_DUE_TO_MOUNTED_ARRAY_EXISTS);
+                    eventId = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
                     POS_TRACE_ERROR(eventId,
                         "array:{}, state:{}",
                         abr.arrayName, arrayInfo->GetState().ToString());
@@ -96,7 +96,7 @@ CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, Sys
     }
     else
     {
-        eventId = EID(POS_STOP_REJECTED_BEING_TERMINATED);
+        eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
     }
 
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
@@ -132,29 +132,35 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
 
     qos_backend_policy newBackendPolicy;
 
-    if (request->param().level().compare("highest") == 0)
+    std::string level = request->param().level();
+
+    if (level.compare("highest") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
         }
-        else if (request->param().level().compare("medium") == 0)
+        else if (level.compare("medium") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
-        else if (request->param().level().compare("lowest") == 0)
+        else if (level.compare("lowest") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_LOWEST;
         }
         else
         {
             eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
-            status = grpc::Status::OK;
+            POS_TRACE_WARN(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED), "priority_level:{}", level);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return status;
         }
 
         newBackendPolicy.policyChange = true;
         int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
         if (retVal != SUCCESS)
         {
-            eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
+            eventId = EID(CLI_SET_SYSTEM_PROPERTY_FAILURE);
+            POS_TRACE_WARN(eventId, "update_backend_policy_return_value:{}", retVal);
             status = grpc::Status::OK;
         }
 

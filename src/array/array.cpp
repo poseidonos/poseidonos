@@ -378,8 +378,8 @@ Array::AddSpare(string devName)
     if (involvedArray != "")
     {
         pthread_rwlock_unlock(&stateLock);
-        ret = EID(MBR_DEVICE_ALREADY_IN_ARRAY);
-        POS_TRACE_ERROR(ret, "Unable to add spare device to array({}), it's already in other array({})", name_, involvedArray);
+        ret = EID(ADD_SPARE_DEVICE_ALREADY_OCCUPIED);
+        POS_TRACE_ERROR(ret, "dev_name:{}, occupier:{}", name_, involvedArray);
         return ret;
     }
 

@@ -102,7 +102,7 @@ private:
     ArrayComponents* _FindArray(string name);
     ArrayComponents* _FindArrayWithDevSN(string devName);
     int _Load(string name);
-    int _ExecuteOrHandleErrors(std::function<int(ArrayComponents* array)> f, string name);
+    int _ExecuteOrHandleErrors(std::function<int(ArrayComponents* array)> f, string name, int eid);
     int _DeleteFaultArray(string arrayName);
     map<string, ArrayComponents*> arrayList;
     ArrayRebuilder* arrayRebuilder = nullptr;

@@ -218,7 +218,7 @@ ArrayComponents::Unmount(void)
     }
     else
     {
-        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "Array {} is not unmountable", arrayName);
+        POS_TRACE_WARN(ret, "array_name:{}, array_state:{}", arrayName, array->GetState().ToString());
     }
     return ret;
 }

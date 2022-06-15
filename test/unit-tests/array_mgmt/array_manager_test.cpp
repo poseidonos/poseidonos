@@ -271,7 +271,7 @@ TEST(ArrayManager, Mount_testIfLoadFailureIsReturnedWhenTargetArrayHasArrayBootR
     int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
+    ASSERT_EQ(EID(MOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST), actual);
 }
 
 TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
@@ -288,7 +288,7 @@ TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
     int actual = arrayMgr->Mount(arrayName, false);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
+    ASSERT_EQ(EID(MOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST), actual);
 }
 
 TEST(ArrayManager, Unmount_testIfTargetArrayCallsUnmount)
