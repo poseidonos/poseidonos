@@ -416,7 +416,7 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 	return res, err
 }
 
-func SendLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreferenceResponse, error) {
+func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreferenceResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Error("cannot send a request to cli server: not connected")

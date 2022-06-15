@@ -359,40 +359,41 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 
 	case "GETLOGLEVEL":
-		res := messages.GetLogLevelResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.GetLogLevelResponse{}
+		json.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
+			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
+				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
+				res.GetResult().GetStatus().GetSolution())
 			return
 		}
 
-		fmt.Println("Log level: " + res.RESULT.DATA.LEVEL)
+		fmt.Println("Log level: " + res.GetResult().GetData().Level)
 
 	case "LOGGERINFO":
-		res := messages.LoggerInfoResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.LoggerInfoResponse{}
+		json.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
+			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
+				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
+				res.GetResult().GetStatus().GetSolution())
 			return
 		}
-
-		loggerInfo := res.RESULT.DATA
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "minor_log_path\t: "+loggerInfo.MINORLOGPATH)
-		fmt.Fprintln(w, "major_log_path\t: "+loggerInfo.MAJORLOGPATH)
-		fmt.Fprintln(w, "logfile_size_in_mb\t: "+loggerInfo.LOGFILESIZEINBM)
-		fmt.Fprintln(w, "logfile_rotation_count\t:", loggerInfo.LOGFILEROTATIONCOUNT)
-		fmt.Fprintln(w, "min_allowable_log_level\t: "+loggerInfo.MINALLOWABLELOGLEVEL)
-		fmt.Fprintln(w, "filter_enabled\t:", loggerInfo.FILTERENABLED == 1)
-		fmt.Fprintln(w, "filter_included\t: "+loggerInfo.FILTERINCLUDED)
-		fmt.Fprintln(w, "filter_excluded\t: "+loggerInfo.FILTEREXCLUDED)
-		fmt.Fprintln(w, "structured_logging\t: "+strconv.FormatBool(loggerInfo.STRUCTUREDLOGGING))
+		data := res.GetResult().GetData()
+		fmt.Fprintln(w, "minorLogPath\t: "+data.MinorLogPath)
+		fmt.Fprintln(w, "majorLogPath\t: "+data.MajorLogPath)
+		fmt.Fprintln(w, "logfileSizeInMb\t: "+data.LogfileSizeInMb)
+		fmt.Fprintln(w, "logfileRotationCount\t:", data.LogfileRotationCount)
+		fmt.Fprintln(w, "minAllowableLogLevel\t: "+data.MinAllowableLogLevel)
+		fmt.Fprintln(w, "filterEnabled\t:", data.FilterEnabled == 1)
+		fmt.Fprintln(w, "filterIncluded\t: "+data.FilterIncluded)
+		fmt.Fprintln(w, "filterExcluded\t: "+data.FilterExcluded)
+		fmt.Fprintln(w, "structuredLogging\t: "+strconv.FormatBool(data.StructuredLogging))
 
 		w.Flush()
 
