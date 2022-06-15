@@ -56,6 +56,7 @@ namespace pos
 {
 
 class VolumeBase;
+class TelemetryPublisher;
 
 class VolumeManager : public IVolumeManager, public IMountSequence, public IStateObserver
 {
@@ -103,6 +104,7 @@ private:
     int _LoadVolumes(void);
     int _CheckPrerequisite(void);
     void _ClearLock(void);
+    void _PublishTelemetryVolumeIdInfo(std::string id, std::string name);
 
     bool initialized = false;
     bool stopped = false;
@@ -114,6 +116,8 @@ private:
 
     IArrayInfo* arrayInfo;
     IStateControl* state;
+
+    TelemetryPublisher* tp;
 
     std::mutex volumeEventLock;
     std::mutex volumeExceptionLock;
