@@ -37,6 +37,7 @@
 
 #include "src/metafs/config/metafs_config_manager.h"
 #include "src/metafs/mim/metafs_io_scheduler.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -49,7 +50,8 @@ MetaFsService::MetaFsService(void)
 MetaFsService::MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager* configManager)
 : ioScheduler_(ioScheduler),
   configManager_(configManager),
-  needToRemoveConfig_(false)
+  needToRemoveConfig_(false),
+  tp_(nullptr)
 {
     fileSystems_.fill(nullptr);
 }
@@ -65,6 +67,12 @@ MetaFsService::~MetaFsService(void)
 
         delete ioScheduler_;
         ioScheduler_ = nullptr;
+    }
+
+    if (tp_)
+    {
+        tp_->StopPublishing();
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(tp_->GetName());
     }
 
     if (needToRemoveConfig_)
@@ -88,7 +96,14 @@ MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSe
         assert(false);
     }
 
-    _CreateScheduler(totalCoreCount, schedSet, mioSet, tp);
+    tp_ = tp;
+    if (!tp_)
+    {
+        tp_ = new TelemetryPublisher{"meta_scheduler"};
+        TelemetryClientSingleton::Instance()->RegisterPublisher(tp_);
+    }
+
+    _CreateScheduler(totalCoreCount, schedSet, mioSet);
 }
 
 void
@@ -137,7 +152,7 @@ MetaFsService::GetMetaFs(const int arrayId) const
 
 void
 MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
-    const cpu_set_t schedSet, const cpu_set_t mioSet, TelemetryPublisher* tp)
+    const cpu_set_t schedSet, const cpu_set_t mioSet)
 {
     const std::string threadName = "MetaScheduler";
     for (uint32_t coreId = 0; coreId < totalCoreCount; ++coreId)
@@ -149,7 +164,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
                 CPU_COUNT(&schedSet), coreId);
 
             ioScheduler_ = new MetaFsIoScheduler(0, coreId, totalCoreCount,
-                threadName, mioSet, configManager_, tp,
+                threadName, mioSet, configManager_, tp_,
                 new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()));
             ioScheduler_->StartThread();
             break;
