@@ -73,6 +73,8 @@ MetaFsService::~MetaFsService(void)
     {
         tp_->StopPublishing();
         TelemetryClientSingleton::Instance()->DeregisterPublisher(tp_->GetName());
+        delete tp_;
+        tp_ = nullptr;
     }
 
     if (needToRemoveConfig_)

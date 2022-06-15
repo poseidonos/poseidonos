@@ -304,7 +304,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
         if (CPU_ISSET(coreId, &MIO_CORE_SET))
         {
             ScalableMetaIoWorker* mioHandler =
-                new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, tp_);
+                new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, nullptr);
             mioHandler->StartThread();
             metaIoWorkerList_.emplace_back(mioHandler);
             availableMioCoreCnt--;
