@@ -548,3 +548,28 @@ message ListNodeResponse {
 	Result result = 3;
 	PosInfo info = 4;
 }
+
+message ListHaVolumeRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListHaVolumeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message Volume {
+			int32 id = 1;
+			string name = 2;
+			string nodeName = 3;
+			string arrayName = 4;
+			int64 size = 5;
+			string lastseen = 6;
+		}
+		repeated Volume data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
