@@ -76,9 +76,11 @@ private:
    uint64_t parityBufferCntPerNuma = 0;
    vector<uint8_t> encodeMatrixforRaid6;
    vector<uint8_t> encodeTableforRaid6;
-   uint8_t** sources;
-   uint32_t m; 
-   uint32_t p;
+   uint8_t** rsCodeSrc; 
+   uint32_t raid6BufferSize;
+   uint32_t raid6BufferCnt;
+   uint32_t srcBufferCnt;
+   uint32_t parityBufferCnt;
 };
  
 } // namespace pos
