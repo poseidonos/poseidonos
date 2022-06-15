@@ -121,7 +121,7 @@ private:
     TelemetryPublisher* telemetryPublisher = nullptr;
     int64_t sampledTimeSpentProcessingAllStages;
     int64_t sampledTimeSpentFromIssueToComplete;
-    int64_t totalProcessedMpioCount;
+    int64_t totalProcessedMioCount;
     int64_t sampledProcessedMioCount;
     MetaFsTimeInterval metaFsTimeInterval;
     size_t skipCount;

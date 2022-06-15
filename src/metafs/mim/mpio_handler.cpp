@@ -115,11 +115,7 @@ MpioHandler::_UpdateMetricsConditionally(Mpio* mpio)
 
     if (mpio->GetType() == MpioType::Write)
     {
-        if (skipCount != SAMPLING_SKIP_COUNT)
-        {
-            skipCount++;
-        }
-        else
+        if (skipCount++ % SAMPLING_SKIP_COUNT == 0)
         {
             sampledTimeSpentProcessingAllStages += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
             sampledTimeSpentFromWriteToRelease += mpio->GetElapsedInMilli(MpioTimestampStage::Write, MpioTimestampStage::Release).count();

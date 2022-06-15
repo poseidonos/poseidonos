@@ -64,7 +64,7 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   telemetryPublisher(tp),
   sampledTimeSpentProcessingAllStages(0),
   sampledTimeSpentFromIssueToComplete(0),
-  totalProcessedMpioCount(0),
+  totalProcessedMioCount(0),
   sampledProcessedMioCount(0),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
@@ -101,7 +101,7 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   telemetryPublisher(tp),
   sampledTimeSpentProcessingAllStages(0),
   sampledTimeSpentFromIssueToComplete(0),
-  totalProcessedMpioCount(0),
+  totalProcessedMioCount(0),
   sampledProcessedMioCount(0),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
@@ -217,13 +217,9 @@ MioHandler::_HandleIoSQ(void)
 void
 MioHandler::_UpdateMetricsConditionally(Mio* mio)
 {
-    totalProcessedMpioCount++;
+    totalProcessedMioCount++;
 
-    if (skipCount != SAMPLING_SKIP_COUNT)
-    {
-        skipCount++;
-    }
-    else
+    if (skipCount++ % SAMPLING_SKIP_COUNT == 0)
     {
         sampledTimeSpentProcessingAllStages += mio->GetElapsedInMilli(MioTimestampStage::Allocate, MioTimestampStage::Release).count();
         sampledTimeSpentFromIssueToComplete += mio->GetElapsedInMilli(MioTimestampStage::Issue, MioTimestampStage::Complete).count();
@@ -247,12 +243,12 @@ MioHandler::_PublishPeriodicMetrics(void)
         metricMioHandlerWorking.SetGaugeValue(GetCurrDateTimestamp());
         metricVector->emplace_back(metricMioHandlerWorking);
 
-        if (totalProcessedMpioCount)
+        if (totalProcessedMioCount)
         {
             POSMetric m(TEL40302_METAFS_PROCESSED_MIO_COUNT, POSMetricTypes::MT_GAUGE);
-            m.SetGaugeValue(totalProcessedMpioCount);
+            m.SetGaugeValue(totalProcessedMioCount);
             metricVector->emplace_back(m);
-            totalProcessedMpioCount = 0;
+            totalProcessedMioCount = 0;
         }
 
         if (sampledProcessedMioCount)
