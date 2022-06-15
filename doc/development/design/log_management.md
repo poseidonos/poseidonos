@@ -63,7 +63,7 @@ debug < info < trace < warning < error < critical
 # Log Message
 Log message is the body of an event log. It describes which and why an event occurs. For a better readability of PoseidonOS event log, we introduce a guideline to log message format as follows.
 
-PoseidonOS event log message consists of three field: ***message***, and ***cause***, ***solution***, and ***variable***. ***message*** field describes what the event is, ***cause*** field describes why it occured, ***solution*** field describes how it can be resolved. Note that only erroneous events will have values in ***cause*** and ***solution*** fields. **We strongly recommend to clearly write those fields in a sentence form (Subject + Verb + Object) as possible as you can**. Additional values that support log message should be recorded as **variables** field. An examples of event log message are as follows: 
+PoseidonOS event log message consists of three field: ***message***, and ***cause***, ***solution***, and ***variable***. ***message*** field describes what the event is, ***cause*** field describes why it occured, ***solution*** field describes how it can be resolved. Note that only erroneous events will have values in ***cause*** and ***solution*** fields. **We strongly recommend to clearly write those fields in a sentence form (Subject + Verb + Object) as possible as you can. A sentence must start with the upper case and end with a period.** Additional values that support log message should be recorded as **variables** field. An examples of event log message are as follows: 
 - **Example 1**
   - "message": "PoseidonOS failed to create an array." 
   - "cause": "The specified array name contains a special character."
@@ -71,6 +71,11 @@ PoseidonOS event log message consists of three field: ***message***, and ***caus
   - "variables": [{"array_name":"arr@y1"}]
 - **Example 2**
   - "message": "Volume has been created."
+  - "cause": ""
+  - "solution": ""
+  - "variables": [{"volume_name":"volume1","size":1024MB,"array_name":"array1"}]
+- **Example 3 (Bad example)**
+  - "message": "failed to create an array" - **The sentence does not start with lower case neither end with period.**
   - "cause": ""
   - "solution": ""
   - "variables": [{"volume_name":"volume1","size":1024MB,"array_name":"array1"}]

@@ -62,33 +62,46 @@ UnmountVolumeCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("name"))
     {
         string volName = doc["param"]["name"].get<std::string>();
-        IVolumeEventManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-
-        int ret = FAIL;
-
+        int ret = EID(UNMOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST);
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
         if (info == nullptr)
         {
+            POS_TRACE_WARN(ret, "array_name:{}", arrayName);
             return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
-                 "failed to unmount volume: " + volName, GetPosInfo());
+                "failed to unmount volume: " + volName, GetPosInfo());
         }
 
+        if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+        {
+            ret = EID(UNMOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+            POS_TRACE_WARN(ret, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+             return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
+                "failed to unmount volume: " + volName, GetPosInfo());
+        }
+
+        IVolumeEventManager* volMgr =
+            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+        ret = EID(UNMOUNT_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
             ret = volMgr->Unmount(volName);
-        }
-
-        if (ret == SUCCESS)
-        {
-            return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
-                volName + "is unmounted successfully", GetPosInfo());
+            if (ret == SUCCESS)
+            {
+                return jFormat.MakeResponse("UNMOUNTVOLUME", rid, SUCCESS,
+                    volName + " has been unmounted successfully.", GetPosInfo());
+            }
+            else
+            {
+                return jFormat.MakeResponse("UNMOUNTVOLUME", rid, ret,
+                    "failed to unmount " + volName, GetPosInfo());
+            }
         }
         else
         {
+            POS_TRACE_WARN(ret, "array_name:{}, vol_name:{}", arrayName, volName);
             return jFormat.MakeResponse(
                 "UNMOUNTVOLUME", rid, ret,
-                "failed to unmount " + volName + "(code:" + to_string(ret) + ")",
+                "failed to unmount " + volName,
                 GetPosInfo());
         }
     }

@@ -84,6 +84,7 @@ Cmd = ApplicationName ,
   ( ArrayCmd  | VolumeCmd    | DeviceCmd
   | SystemCmd | LoggerCmd    | SubsystemCmd
   | QosCmd    | TelemetryCmd | DevelCmd
+  | ClusterCmd
   ) ;
 
 ArrayCmd = "array" ,
@@ -303,3 +304,8 @@ UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
   ) , "--weight" , ( "1" | "2" | "3" ) ;
 
 ResetEventWrrCmd = "reset-event-wrr" ;
+
+ClusterCmd = "cluster" ,
+  ( ListNodeCmd ) ;
+
+ListNodeCmd = "ln" ;

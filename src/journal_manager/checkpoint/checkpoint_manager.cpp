@@ -40,6 +40,7 @@
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -55,7 +56,8 @@ CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler)
   checkpointHandler(cpHandler),
   checkpointInProgress(false),
   checkpointBlocked(false),
-  clientCallback(nullptr)
+  clientCallback(nullptr),
+  telemetryPublisher(nullptr)
 {
 }
 
@@ -69,12 +71,14 @@ CheckpointManager::~CheckpointManager(void)
 
 void
 CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
-    EventScheduler* scheduler, CallbackSequenceController* seqController, DirtyMapManager* dMapManager)
+    EventScheduler* scheduler, CallbackSequenceController* seqController,
+    DirtyMapManager* dMapManager, TelemetryPublisher* tp)
 {
     eventScheduler = scheduler;
 
     sequenceController = seqController;
     dirtyMapManager = dMapManager;
+    telemetryPublisher = tp;
 
     checkpointHandler->Init(mapFlush, ctxManager, scheduler);
 }
@@ -133,6 +137,13 @@ CheckpointManager::CheckpointCompleted(void)
 {
     _CompleteCheckpoint();
     _StartPendingRequests();
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36001_JRN_CHECKPOINT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(0);
+        telemetryPublisher->PublishMetric(metric);
+    }
 }
 
 void
@@ -227,6 +238,13 @@ int
 CheckpointManager::_StartCheckpoint(CheckpointRequest request)
 {
     assert(clientCallback == nullptr);
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL36001_JRN_CHECKPOINT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
 
     clientCallback = request.callback;
     EventSmartPtr completionEvent(new CheckpointCompletion(this));

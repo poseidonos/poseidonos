@@ -149,7 +149,7 @@ ArrayState::IsMountable(void)
         case ArrayStateEnum::BROKEN:
         {
             ret = EID(MOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_MOUNTED);
-            POS_TRACE_ERROR(ret, "Failed to mount array. Array is broken");
+            POS_TRACE_ERROR(ret, "");
             break;
         }
         case ArrayStateEnum::EXIST_NORMAL:
@@ -171,15 +171,17 @@ int
 ArrayState::IsUnmountable(void)
 {
     int eventId = 0;
-    if (IsMounted() == false)
+    if (state == ArrayStateEnum::BROKEN)
+    {
+        eventId = EID(UNMOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_UNMOUNTED);
+    }
+    else if (IsMounted() == false)
     {
         eventId = EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED);
-        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
     else if (state == ArrayStateEnum::REBUILD)
     {
         eventId = EID(UNMOUNT_ARRAY_REJECTED_DUE_TO_REBUILD_INPROGRESS);
-        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
     }
 
     return eventId;

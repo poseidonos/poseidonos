@@ -21,7 +21,7 @@ TEST(JournalLogBuffer, InitDataBuffer_testIfDataBufferInitialized)
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     NiceMock<MockJournalConfiguration> journalConfig;
-    journalLogBuffer.Init(&journalConfig, nullptr, 0);
+    journalLogBuffer.Init(&journalConfig, nullptr, 0, nullptr);
 
     // When
     uint64_t groupSize = 1024;
@@ -39,7 +39,7 @@ TEST(JournalLogBuffer, Dispose_testIfExecutedSuccessfully)
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     MockJournalConfiguration journalConfig;
-    journalLogBuffer.Init(&journalConfig, nullptr, 0);
+    journalLogBuffer.Init(&journalConfig, nullptr, 0, nullptr);
 
     // When, Then
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
@@ -195,7 +195,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfExecutedSuccessfully)
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, nullptr, 0);
+    journalLogBuffer.Init(&journalConfig, nullptr, 0, nullptr);
 
     // When
     uint64_t logGroupSize = 1024;
@@ -219,7 +219,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, nullptr, 0);
+    journalLogBuffer.Init(&journalConfig, nullptr, 0, nullptr);
 
     // When
     uint64_t logGroupSize = 1024;
@@ -280,7 +280,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
     NiceMock<MockJournalConfiguration> journalConfig;
     NiceMock<MockLogWriteContextFactory> logFactory;
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, &logFactory, 0);
+    journalLogBuffer.Init(&journalConfig, &logFactory, 0, nullptr);
 
     // When: Async reset request as much as number of log groups, and Reset completed successfully
     int numLogGroups = 2;
@@ -324,7 +324,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
     NiceMock<MockJournalConfiguration> journalConfig;
     NiceMock<MockLogWriteContextFactory> logFactory;
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, &logFactory, 0);
+    journalLogBuffer.Init(&journalConfig, &logFactory, 0, nullptr);
 
     // When: Async reset failed
     int numLogGroups = 2;
