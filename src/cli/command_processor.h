@@ -134,7 +134,7 @@ public:
     
     // Logger Commands
     grpc::Status ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply);
-    grpc::Status ExecuteSetLogPrerferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply);
+    grpc::Status ExecuteSetLogPreferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply);
     grpc::Status ExecuteLoggerInfoCommand(const LoggerInfoRequest* request, LoggerInfoResponse* reply);
     grpc::Status ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, GetLogLevelResponse* reply);
     grpc::Status ExecuteApplyLogFilterCommand(const ApplyLogFilterRequest* request, ApplyLogFilterResponse* reply);

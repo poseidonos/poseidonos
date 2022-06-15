@@ -807,7 +807,7 @@ CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, S
 }
 
 grpc::Status
-CommandProcessor::ExecuteSetLogPrerferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply)
+CommandProcessor::ExecuteSetLogPreferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
