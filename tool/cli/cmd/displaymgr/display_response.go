@@ -572,6 +572,49 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		}
 		w.Flush()
 
+	case "LISTHAVOLUME":
+		res := &pb.ListHaVolumeResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
+
+		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
+			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
+				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
+				res.GetResult().GetStatus().GetSolution())
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		// Header
+		fmt.Fprintln(w,
+			"Id\t"+
+				globals.FieldSeparator+"Name\t"+
+				globals.FieldSeparator+"NodeName\t"+
+				globals.FieldSeparator+"ArrayName\t"+
+				globals.FieldSeparator+"Size\t"+
+				globals.FieldSeparator+"Lastseen\t")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t")
+
+		// Data
+		for _, volume := range res.GetResult().GetData() {
+			fmt.Fprintln(w,
+				strconv.FormatInt(int64(volume.Id), 10)+"\t"+
+					globals.FieldSeparator+volume.Name+"\t"+
+					globals.FieldSeparator+volume.NodeName+"\t"+
+					globals.FieldSeparator+volume.ArrayName+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(volume.Size, 10)+"\t"+
+					globals.FieldSeparator+volume.Lastseen+"\t")
+		}
+		w.Flush()
+
 	case "SYSTEMINFO":
 		res := messages.POSInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
