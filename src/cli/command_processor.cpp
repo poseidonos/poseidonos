@@ -16,6 +16,7 @@
 #include "src/qos/qos_manager.h"
 #include "src/sys_info/space_info.h"
 #include "src/array_mgmt/numa_awared_array_creation.h"
+#include "preferences.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -776,6 +777,105 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string level = (request->param()).level();
+
+    if (level == "")
+    {
+        int eventId = EID(CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED);
+        POS_TRACE_INFO(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    
+    int ret = logger()->SetLevel(level);
+
+    POS_TRACE_INFO(ret, "");
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteSetLogPrerferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string structuredLogging = (request->param()).structuredlogging();
+
+    if (structuredLogging == "")
+    {
+        int eventId = EID(CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED);
+        POS_TRACE_INFO(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    
+    bool _structuredLogging = (strcasecmp("true", structuredLogging.c_str()) == 0);
+    int ret = logger()->SetStrLogging(_structuredLogging);
+    logger()->ApplyPreference();
+
+    POS_TRACE_INFO(ret, "");
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteLoggerInfoCommand(const LoggerInfoRequest* request, LoggerInfoResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    pos_logger::Preferences pref = logger()->GetPreferenceInstance();
+    
+    reply->mutable_result()->mutable_data()->set_minorlogpath(pref.MinorLogFilePath());
+    reply->mutable_result()->mutable_data()->set_majorlogpath(pref.MajorLogFilePath());
+    reply->mutable_result()->mutable_data()->set_logfilesizeinmb(to_string(pref.LogFileSize()));
+    reply->mutable_result()->mutable_data()->set_logfilerotationcount(pref.LogRotation());
+    reply->mutable_result()->mutable_data()->set_minallowableloglevel(pref.LogLevel());
+    reply->mutable_result()->mutable_data()->set_filterenabled(pref.IsFiltered());
+    reply->mutable_result()->mutable_data()->set_filterincluded(pref.IncludeRule());
+    reply->mutable_result()->mutable_data()->set_filterexcluded(pref.ExcludeRule());
+    reply->mutable_result()->mutable_data()->set_structuredlogging(pref.IsStrLoggingEnabled());
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, GetLogLevelResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+    
+    reply->mutable_result()->mutable_data()->set_level(logger()->GetLevel());
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteApplyLogFilterCommand(const ApplyLogFilterRequest* request, ApplyLogFilterResponse* reply)
+{
+    int ret = logger()->ApplyFilter();
+
+    POS_TRACE_INFO(ret, "");
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
