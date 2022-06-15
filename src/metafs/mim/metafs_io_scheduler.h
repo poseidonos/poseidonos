@@ -42,6 +42,9 @@
 
 namespace pos
 {
+class TelemetryPublisher;
+class MetaFsTimeInterval;
+
 class MetaFsIoScheduler : public MetaFsIoHandlerBase
 {
 public:
@@ -49,7 +52,7 @@ public:
     explicit MetaFsIoScheduler(const int threadId, const int coreId,
         const int totalCoreCount, const std::string& threadName,
         const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
-        TelemetryPublisher* tp);
+        TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval);
     virtual ~MetaFsIoScheduler(void);
 
     void IssueRequestAndDelete(MetaFsIoRequest* reqMsg);
@@ -63,6 +66,9 @@ public:
     void Execute(void);
 
     void RegisterMetaIoWorkerForTest(ScalableMetaIoWorker* metaIoWorker);
+
+    // for test
+    const int64_t* GetIssueCount(size_t& size /* output */) const;
 
 private:
     MetaFsIoRequest* _FetchPendingNewReq(void);
@@ -80,6 +86,7 @@ private:
     MetaFsConfigManager* config_;
     TelemetryPublisher* tp_;
     size_t cpuStallCnt_;
+    MetaFsTimeInterval* timeInterval_;
     const size_t MAX_CPU_STALL_COUNT = 1000;
 
     MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ_;
@@ -93,5 +100,9 @@ private:
     int extentsCount_;
     int currentExtent_;
     MetaFileExtent* extents_;
+
+    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
+    int64_t issueCount_[NUM_STORAGE];
+    std::string metricNameForStorage_[NUM_STORAGE];
 };
 } // namespace pos

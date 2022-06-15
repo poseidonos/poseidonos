@@ -153,7 +153,8 @@ private:
         {"mpio_pool_capacity", "32768"},
         {"write_mpio_cache_capacity", "32"},
         {"direct_access_for_journal_enable", "true"},
-        {"time_interval_in_milliseconds_for_metric", "5000"}
+        {"time_interval_in_milliseconds_for_metric", "1000"},
+        {"sampling_skip_count", "100"}
     };
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}

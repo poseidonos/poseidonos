@@ -409,7 +409,7 @@ Mio::Complete(MioState expNextState)
     StoreTimestamp(MioTimestampStage::Complete);
     SetNextState(expNextState);
 
-    StoreTimestamp(MioTimestampStage::Enqueue);
+    StoreTimestamp(MioTimestampStage::PushToCQ);
     ioCQ->Enqueue(this, originReq->priority);
 
     metaStorage = nullptr;
