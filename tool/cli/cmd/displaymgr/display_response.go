@@ -1,6 +1,7 @@
 package displaymgr
 
 import (
+	pb "cli/api"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"encoding/json"
@@ -11,6 +12,7 @@ import (
 	"text/tabwriter"
 
 	"code.cloudfoundry.org/bytefmt"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func toByte(displayUnit bool, size uint64) string {
@@ -535,6 +537,40 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 			}
 			w.Flush()
 		}
+
+	case "LISTNODE":
+		res := &pb.ListNodeResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
+
+		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
+			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
+				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
+				res.GetResult().GetStatus().GetSolution())
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		// Header
+		fmt.Fprintln(w,
+			"Name\t"+
+				globals.FieldSeparator+"IP\t"+
+				globals.FieldSeparator+"Lastseen\t")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-------------------\t")
+
+		// Data
+		for _, node := range res.GetResult().GetData() {
+			fmt.Fprintln(w,
+				node.Name+"\t"+
+					globals.FieldSeparator+node.Ip+"\t"+
+					globals.FieldSeparator+node.Lastseen+"\t")
+		}
+		w.Flush()
 
 	case "SYSTEMINFO":
 		res := messages.POSInfoResponse{}

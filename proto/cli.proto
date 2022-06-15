@@ -526,3 +526,25 @@ message ArrayInfoResponse {
 	Result result = 3;
 	PosInfo info = 4;
 }
+
+message ListNodeRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListNodeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message Node {
+			string name = 1;
+			string ip = 2;
+			string lastseen = 3;
+		}
+		repeated Node data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}

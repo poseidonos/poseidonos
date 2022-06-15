@@ -6,18 +6,22 @@ sys.path.append("../")
 sys.path.append("../../system/lib/")
 sys.path.append("../device_management/")
 
-import SCAN_DEV_BASIC
-
 import json_parser
 import pos
 import cli
 import api
+import CREATE_TWO_RAIDNONE_ARRAYS
+
+URAM1 = CREATE_TWO_RAIDNONE_ARRAYS.URAM1
+URAM2 = CREATE_TWO_RAIDNONE_ARRAYS.URAM2
+DATA1 = CREATE_TWO_RAIDNONE_ARRAYS.DATA1
+DATA2 = CREATE_TWO_RAIDNONE_ARRAYS.DATA2
+ARRAY1NAME = CREATE_TWO_RAIDNONE_ARRAYS.ARRAY1NAME
+ARRAY2NAME = CREATE_TWO_RAIDNONE_ARRAYS.ARRAY2NAME
 
 def execute():
-    SCAN_DEV_BASIC.execute()
-    cli.mbr_reset()
-    cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "", "POS1", "RAID5")
-    out = cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "", "POS2", "RAID5")
+    CREATE_TWO_RAIDNONE_ARRAYS.execute()
+    out = cli.create_array("uram3", "unvme-ns-2", "", "POSArray3", "NONE")
     return out
 
 if __name__ == "__main__":

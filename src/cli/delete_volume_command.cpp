@@ -63,33 +63,46 @@ DeleteVolumeCommand::Execute(json& doc, string rid)
     {
         string volName = doc["param"]["name"].get<std::string>();
 
-        int ret = FAIL;
-
+        int ret = EID(DELETE_VOL_ARRAY_NAME_DOES_NOT_EXIST);
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
         if (info == nullptr)
         {
+            POS_TRACE_WARN(ret, "array_name:{}", arrayName);
             return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
-                 "failed to delete volume: " + volName, GetPosInfo());
+                "failed to delete volume: " + volName, GetPosInfo());
+        }
+
+        if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+        {
+            ret = EID(DELETE_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+            POS_TRACE_WARN(ret, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+             return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
+                "failed to delete volume: " + volName, GetPosInfo());
         }
 
         IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-
+        ret = EID(DELETE_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
             ret = volMgr->Delete(volName);
-        }
-
-        if (SUCCESS == ret)
-        {
-            return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
-                volName + "is deleted successfully", GetPosInfo());
+            if (ret == SUCCESS)
+            {
+                return jFormat.MakeResponse("DELETEVOLUME", rid, SUCCESS,
+                    volName + " is deleted successfully.", GetPosInfo());
+            }
+            else
+            {
+                return jFormat.MakeResponse("DELETEVOLUME", rid, ret,
+                    "failed to delete " + volName, GetPosInfo());
+            }
         }
         else
         {
+            POS_TRACE_WARN(ret, "array_name:{}, vol_name:{}", arrayName, volName);
             return jFormat.MakeResponse(
                 "DELETEVOLUME", rid, ret,
-                "failed to delete " + volName + "(code:" + to_string(ret) + ")",
+                "failed to delete " + volName,
                 GetPosInfo());
         }
     }

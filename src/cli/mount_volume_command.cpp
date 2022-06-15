@@ -69,33 +69,46 @@ MountVolumeCommand::Execute(json& doc, string rid)
     {
         string volName = doc["param"]["name"].get<std::string>();
 
+        int ret = EID(MOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST);
         ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
         if (info == nullptr)
         {
+            POS_TRACE_WARN(ret, "array_name:{}", arrayName);
             return jFormat.MakeResponse("MOUNTVOLUME", rid, FAIL,
                  "failed to mount volume:" + volName, GetPosInfo());
         }
 
+        if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+        {
+            ret = EID(MOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+            POS_TRACE_WARN(ret, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+             return jFormat.MakeResponse("MOUNTVOLUME", rid, ret,
+                "failed to mount volume: " + volName, GetPosInfo());
+        }
+
         IVolumeEventManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-
-        int ret = FAIL;
-
+        ret = EID(MOUNT_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
             ret = volMgr->Mount(volName, subnqn);
-        }
-
-        if (ret == SUCCESS)
-        {
-            return jFormat.MakeResponse("MOUNTVOLUME", rid, ret,
-                volName + " is mounted successfully", GetPosInfo());
+            if (ret == SUCCESS)
+            {
+                return jFormat.MakeResponse("MOUNTVOLUME", rid, SUCCESS,
+                    volName + " has been mounted successfully.", GetPosInfo());
+            }
+            else
+            {
+                return jFormat.MakeResponse("MOUNTVOLUME", rid, ret,
+                    "failed to mount " + volName, GetPosInfo());
+            }
         }
         else
         {
+            POS_TRACE_WARN(ret, "array_name:{}, vol_name:{}", arrayName, volName);
             return jFormat.MakeResponse(
                 "MOUNTVOLUME", rid, ret,
-                "failed to mount " + volName + "(code:" + to_string(ret) + ")",
+                "failed to mount " + volName,
                 GetPosInfo());
         }
     }

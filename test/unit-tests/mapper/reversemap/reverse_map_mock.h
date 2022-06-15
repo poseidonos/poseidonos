@@ -36,7 +36,7 @@ class MockReverseMapPack : public ReverseMapPack
 {
 public:
     using ReverseMapPack::ReverseMapPack;
-    MOCK_METHOD(void, Init, (MetaFileIntf * file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_), (override));
+    MOCK_METHOD(void, Init, (MetaFileIntf * file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_, TelemetryPublisher* tp), (override));
     MOCK_METHOD(void, Assign, (StripeId vsid), (override));
     MOCK_METHOD(int, Load, (uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid), (override));
     MOCK_METHOD(int, Flush, (Stripe * stripe, uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid), (override));

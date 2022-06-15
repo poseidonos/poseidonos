@@ -462,7 +462,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
-    int expected = EID(MBR_DEVICE_ALREADY_IN_ARRAY);
+    int expected = EID(ADD_SPARE_DEVICE_ALREADY_OCCUPIED);
     string spareDevName = "spareDev";
     MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
     UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);

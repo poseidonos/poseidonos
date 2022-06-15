@@ -43,7 +43,9 @@ namespace pos
 {
 
 VolumeRenamer::VolumeRenamer(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID),
+  VolumeNamePolicy(EID(RENAME_VOL_NAME_INCLUDES_SPECIAL_CHAR), EID(RENAME_VOL_NAME_START_OR_END_WITH_SPACE),
+    EID(RENAME_VOL_NAME_TOO_LONG), EID(RENAME_VOL_NAME_TOO_SHORT))
 {
 }
 
@@ -57,21 +59,20 @@ VolumeRenamer::Do(string oldname, string newname)
     VolumeBase* vol = volumeList.GetVolume(oldname);
     if (vol == nullptr)
     {
-        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "null");
-        return EID(VOL_NOT_FOUND);
+        POS_TRACE_WARN(EID(RENAME_VOL_NAME_DOES_NOT_EXIST), "vol_name:{}", oldname);
+        return EID(RENAME_VOL_NAME_DOES_NOT_EXIST);
     }
 
     if (volumeList.GetID(newname) >= 0)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_SAME_VOL_NAME_EXISTS), "Volume name is duplicated");
-        return EID(CREATE_VOL_SAME_VOL_NAME_EXISTS);
+        POS_TRACE_WARN(EID(RENAME_VOL_SAME_VOL_NAME_EXISTS), "vol_name:{}", newname);
+        return EID(RENAME_VOL_SAME_VOL_NAME_EXISTS);
     }
 
     int ret;
     try
     {
-        VolumeNamePolicy namePolicy;
-        namePolicy.CheckVolumeName(newname);
+        CheckVolumeName(newname);
     }
     catch(int& exceptionEvent)
     {

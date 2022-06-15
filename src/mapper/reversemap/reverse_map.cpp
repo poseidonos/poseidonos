@@ -41,6 +41,7 @@
 #include "src/include/meta_const.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -54,7 +55,9 @@ ReverseMapPack::ReverseMapPack(void)
   numMpagesPerStripe(0),
   ioError(0),
   ioDirection(0),
-  callback(nullptr)
+  callback(nullptr),
+  telemetryPublisher(nullptr),
+  issuedIoCnt(0)
 {
 }
 
@@ -76,7 +79,7 @@ ReverseMapPack::~ReverseMapPack(void)
 // LCOV_EXCL_STOP
 
 void
-ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_)
+ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint32_t mpageSize_, uint32_t numMpagesPerStripe_, TelemetryPublisher* tp)
 {
     mapFlushState = MapFlushState::FLUSH_DONE;
     revMapfile = file;
@@ -84,6 +87,7 @@ ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint3
     vsid = vsid_;
     mpageSize = mpageSize_;
     numMpagesPerStripe = numMpagesPerStripe_;
+    telemetryPublisher = tp;
     for (uint64_t mpage = 0; mpage < numMpagesPerStripe; ++mpage)
     {
         RevMap* revMap = new RevMap();
@@ -171,7 +175,17 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
             callback = nullptr;
             break;
         }
+        issuedIoCnt++;
     }
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33011_MAP_REVERSE_FLUSH_IO_ISSUED_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(issuedIoCnt);
+        telemetryPublisher->PublishMetric(metric);
+        issuedIoCnt = 0;
+    }
+
     return ioError;
 }
 
@@ -267,6 +281,13 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     }
 
     delete ctx;
+
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
 }
 
 std::tuple<uint32_t, uint32_t, uint32_t>

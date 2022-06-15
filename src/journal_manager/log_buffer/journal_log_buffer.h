@@ -47,6 +47,7 @@ class LogWriteContext;
 class LogBufferIoContext;
 class LogGroupResetContext;
 class LogWriteContextFactory;
+class TelemetryPublisher;
 
 class JournalLogBuffer : public ILogGroupResetCompleted
 {
@@ -55,7 +56,8 @@ public:
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
-    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory, int arrayId);
+    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+        int arrayId, TelemetryPublisher* tp);
     virtual void InitDataBuffer(void);
     virtual void Dispose(void);
 
@@ -112,5 +114,6 @@ private:
     char* initializedDataBuffer;
 
     JournalRocksIntf* journalRocks;
+    TelemetryPublisher* telemetryPublisher;
 };
 } // namespace pos

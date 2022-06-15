@@ -12,6 +12,7 @@ import (
 	"github.com/zpatrick/go-bytesize"
 
 	"cli/cmd/arraycmds"
+	"cli/cmd/clustercmds"
 	"cli/cmd/develcmds"
 	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
@@ -140,6 +141,7 @@ func addCmd() {
 	RootCmd.AddCommand(qoscmds.QosCmd)
 	RootCmd.AddCommand(telemetrycmds.TelemetryCmd)
 	RootCmd.AddCommand(completionCmd)
+	RootCmd.AddCommand(clustercmds.ClusterCmd)
 }
 
 // TODO(mj): this function remains for wbt and file commands. This needs to be revised.
