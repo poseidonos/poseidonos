@@ -41,6 +41,11 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/UnmountArray",
   "/grpc_cli.PosCli/ListArray",
   "/grpc_cli.PosCli/ArrayInfo",
+  "/grpc_cli.PosCli/SetLogPreference",
+  "/grpc_cli.PosCli/SetLogLevel",
+  "/grpc_cli.PosCli/LoggerInfo",
+  "/grpc_cli.PosCli/GetLogLevel",
+  "/grpc_cli.PosCli/ApplyLogFilter",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -69,6 +74,11 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_UnmountArray_(PosCli_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ListArray_(PosCli_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ArrayInfo_(PosCli_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetLogPreference_(PosCli_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetLogLevel_(PosCli_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoggerInfo_(PosCli_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetLogLevel_(PosCli_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ApplyLogFilter_(PosCli_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -508,6 +518,121 @@ void PosCli::Stub::experimental_async::ArrayInfo(::grpc::ClientContext* context,
   return result;
 }
 
+::grpc::Status PosCli::Stub::SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc_cli::SetLogPreferenceResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetLogPreference_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetLogPreference_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetLogPreference_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>* PosCli::Stub::PrepareAsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::SetLogPreferenceResponse, ::grpc_cli::SetLogPreferenceRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetLogPreference_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>* PosCli::Stub::AsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetLogPreferenceRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc_cli::SetLogLevelResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetLogLevel_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetLogLevel_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetLogLevel_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>* PosCli::Stub::PrepareAsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::SetLogLevelResponse, ::grpc_cli::SetLogLevelRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetLogLevel_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>* PosCli::Stub::AsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetLogLevelRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc_cli::LoggerInfoResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_LoggerInfo_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoggerInfo_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoggerInfo_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>* PosCli::Stub::PrepareAsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::LoggerInfoResponse, ::grpc_cli::LoggerInfoRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_LoggerInfo_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>* PosCli::Stub::AsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncLoggerInfoRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc_cli::GetLogLevelResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetLogLevel_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetLogLevel_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetLogLevel_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>* PosCli::Stub::PrepareAsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::GetLogLevelResponse, ::grpc_cli::GetLogLevelRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetLogLevel_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>* PosCli::Stub::AsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetLogLevelRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc_cli::ApplyLogFilterResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ApplyLogFilter_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ApplyLogFilter_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ApplyLogFilter_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>* PosCli::Stub::PrepareAsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::ApplyLogFilterResponse, ::grpc_cli::ApplyLogFilterRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ApplyLogFilter_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>* PosCli::Stub::AsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncApplyLogFilterRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -699,6 +824,56 @@ PosCli::Service::Service() {
              ::grpc_cli::ArrayInfoResponse* resp) {
                return service->ArrayInfo(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[19],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::SetLogPreferenceRequest* req,
+             ::grpc_cli::SetLogPreferenceResponse* resp) {
+               return service->SetLogPreference(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[20],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::SetLogLevelRequest* req,
+             ::grpc_cli::SetLogLevelResponse* resp) {
+               return service->SetLogLevel(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[21],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::LoggerInfoRequest* req,
+             ::grpc_cli::LoggerInfoResponse* resp) {
+               return service->LoggerInfo(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[22],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::GetLogLevelRequest* req,
+             ::grpc_cli::GetLogLevelResponse* resp) {
+               return service->GetLogLevel(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[23],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::ApplyLogFilterRequest* req,
+             ::grpc_cli::ApplyLogFilterResponse* resp) {
+               return service->ApplyLogFilter(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -831,6 +1006,41 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::ArrayInfo(::grpc::ServerContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::SetLogPreference(::grpc::ServerContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::SetLogLevel(::grpc::ServerContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::LoggerInfo(::grpc::ServerContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::GetLogLevel(::grpc::ServerContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::ApplyLogFilter(::grpc::ServerContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response) {
   (void) context;
   (void) request;
   (void) response;

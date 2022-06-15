@@ -170,6 +170,41 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>> PrepareAsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>>(PrepareAsyncArrayInfoRaw(context, request, cq));
     }
+    virtual ::grpc::Status SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc_cli::SetLogPreferenceResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>> AsyncSetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>>(AsyncSetLogPreferenceRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>> PrepareAsyncSetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>>(PrepareAsyncSetLogPreferenceRaw(context, request, cq));
+    }
+    virtual ::grpc::Status SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc_cli::SetLogLevelResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>> AsyncSetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>>(AsyncSetLogLevelRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>> PrepareAsyncSetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>>(PrepareAsyncSetLogLevelRaw(context, request, cq));
+    }
+    virtual ::grpc::Status LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc_cli::LoggerInfoResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>> AsyncLoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>>(AsyncLoggerInfoRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>> PrepareAsyncLoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>>(PrepareAsyncLoggerInfoRaw(context, request, cq));
+    }
+    virtual ::grpc::Status GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc_cli::GetLogLevelResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>> AsyncGetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>>(AsyncGetLogLevelRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>> PrepareAsyncGetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>>(PrepareAsyncGetLogLevelRaw(context, request, cq));
+    }
+    virtual ::grpc::Status ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc_cli::ApplyLogFilterResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>> AsyncApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>>(AsyncApplyLogFilterRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>> PrepareAsyncApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>>(PrepareAsyncApplyLogFilterRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -288,6 +323,36 @@ class PosCli final {
       #else
       virtual void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -335,6 +400,16 @@ class PosCli final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ListArrayResponse>* PrepareAsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>* AsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ArrayInfoResponse>* PrepareAsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>* AsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogPreferenceResponse>* PrepareAsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>* AsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetLogLevelResponse>* PrepareAsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>* AsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::LoggerInfoResponse>* PrepareAsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>* AsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetLogLevelResponse>* PrepareAsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>* AsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::ApplyLogFilterResponse>* PrepareAsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -472,6 +547,41 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>> PrepareAsyncArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>>(PrepareAsyncArrayInfoRaw(context, request, cq));
     }
+    ::grpc::Status SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc_cli::SetLogPreferenceResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>> AsyncSetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>>(AsyncSetLogPreferenceRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>> PrepareAsyncSetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>>(PrepareAsyncSetLogPreferenceRaw(context, request, cq));
+    }
+    ::grpc::Status SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc_cli::SetLogLevelResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>> AsyncSetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>>(AsyncSetLogLevelRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>> PrepareAsyncSetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>>(PrepareAsyncSetLogLevelRaw(context, request, cq));
+    }
+    ::grpc::Status LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc_cli::LoggerInfoResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>> AsyncLoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>>(AsyncLoggerInfoRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>> PrepareAsyncLoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>>(PrepareAsyncLoggerInfoRaw(context, request, cq));
+    }
+    ::grpc::Status GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc_cli::GetLogLevelResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>> AsyncGetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>>(AsyncGetLogLevelRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>> PrepareAsyncGetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>>(PrepareAsyncGetLogLevelRaw(context, request, cq));
+    }
+    ::grpc::Status ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc_cli::ApplyLogFilterResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>> AsyncApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>>(AsyncApplyLogFilterRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>> PrepareAsyncApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>>(PrepareAsyncApplyLogFilterRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
@@ -589,6 +699,36 @@ class PosCli final {
       #else
       void ArrayInfo(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void SetLogPreference(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void SetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void LoggerInfo(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetLogLevel(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ApplyLogFilter(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -638,6 +778,16 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::ListArrayResponse>* PrepareAsyncListArrayRaw(::grpc::ClientContext* context, const ::grpc_cli::ListArrayRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* AsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::ArrayInfoResponse>* PrepareAsyncArrayInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::ArrayInfoRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>* AsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogPreferenceResponse>* PrepareAsyncSetLogPreferenceRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogPreferenceRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>* AsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetLogLevelResponse>* PrepareAsyncSetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::SetLogLevelRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>* AsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::LoggerInfoResponse>* PrepareAsyncLoggerInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::LoggerInfoRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>* AsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetLogLevelResponse>* PrepareAsyncGetLogLevelRaw(::grpc::ClientContext* context, const ::grpc_cli::GetLogLevelRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>* AsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::ApplyLogFilterResponse>* PrepareAsyncApplyLogFilterRaw(::grpc::ClientContext* context, const ::grpc_cli::ApplyLogFilterRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SystemInfo_;
     const ::grpc::internal::RpcMethod rpcmethod_SystemStop_;
     const ::grpc::internal::RpcMethod rpcmethod_GetSystemProperty_;
@@ -657,6 +807,11 @@ class PosCli final {
     const ::grpc::internal::RpcMethod rpcmethod_UnmountArray_;
     const ::grpc::internal::RpcMethod rpcmethod_ListArray_;
     const ::grpc::internal::RpcMethod rpcmethod_ArrayInfo_;
+    const ::grpc::internal::RpcMethod rpcmethod_SetLogPreference_;
+    const ::grpc::internal::RpcMethod rpcmethod_SetLogLevel_;
+    const ::grpc::internal::RpcMethod rpcmethod_LoggerInfo_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetLogLevel_;
+    const ::grpc::internal::RpcMethod rpcmethod_ApplyLogFilter_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -684,6 +839,11 @@ class PosCli final {
     virtual ::grpc::Status UnmountArray(::grpc::ServerContext* context, const ::grpc_cli::UnmountArrayRequest* request, ::grpc_cli::UnmountArrayResponse* response);
     virtual ::grpc::Status ListArray(::grpc::ServerContext* context, const ::grpc_cli::ListArrayRequest* request, ::grpc_cli::ListArrayResponse* response);
     virtual ::grpc::Status ArrayInfo(::grpc::ServerContext* context, const ::grpc_cli::ArrayInfoRequest* request, ::grpc_cli::ArrayInfoResponse* response);
+    virtual ::grpc::Status SetLogPreference(::grpc::ServerContext* context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response);
+    virtual ::grpc::Status SetLogLevel(::grpc::ServerContext* context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response);
+    virtual ::grpc::Status LoggerInfo(::grpc::ServerContext* context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response);
+    virtual ::grpc::Status GetLogLevel(::grpc::ServerContext* context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response);
+    virtual ::grpc::Status ApplyLogFilter(::grpc::ServerContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_SystemInfo : public BaseClass {
@@ -1065,7 +1225,107 @@ class PosCli final {
       ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<Service > > > > > > > > > > > > > > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_SetLogPreference() {
+      ::grpc::Service::MarkMethodAsync(19);
+    }
+    ~WithAsyncMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestSetLogPreference(::grpc::ServerContext* context, ::grpc_cli::SetLogPreferenceRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::SetLogPreferenceResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_SetLogLevel() {
+      ::grpc::Service::MarkMethodAsync(20);
+    }
+    ~WithAsyncMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestSetLogLevel(::grpc::ServerContext* context, ::grpc_cli::SetLogLevelRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::SetLogLevelResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_LoggerInfo() {
+      ::grpc::Service::MarkMethodAsync(21);
+    }
+    ~WithAsyncMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestLoggerInfo(::grpc::ServerContext* context, ::grpc_cli::LoggerInfoRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::LoggerInfoResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(21, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetLogLevel() {
+      ::grpc::Service::MarkMethodAsync(22);
+    }
+    ~WithAsyncMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetLogLevel(::grpc::ServerContext* context, ::grpc_cli::GetLogLevelRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::GetLogLevelResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(22, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ApplyLogFilter() {
+      ::grpc::Service::MarkMethodAsync(23);
+    }
+    ~WithAsyncMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestApplyLogFilter(::grpc::ServerContext* context, ::grpc_cli::ApplyLogFilterRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::ApplyLogFilterResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(23, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_SetLogPreference<WithAsyncMethod_SetLogLevel<WithAsyncMethod_LoggerInfo<WithAsyncMethod_GetLogLevel<WithAsyncMethod_ApplyLogFilter<Service > > > > > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -1959,11 +2219,246 @@ class PosCli final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_SetLogPreference() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::SetLogPreferenceRequest* request, ::grpc_cli::SetLogPreferenceResponse* response) { return this->SetLogPreference(context, request, response); }));}
+    void SetMessageAllocatorFor_SetLogPreference(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(19);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(19);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetLogPreference(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetLogPreference(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_SetLogLevel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(20,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::SetLogLevelRequest* request, ::grpc_cli::SetLogLevelResponse* response) { return this->SetLogLevel(context, request, response); }));}
+    void SetMessageAllocatorFor_SetLogLevel(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(20);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(20);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetLogLevel(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetLogLevel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_LoggerInfo() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(21,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::LoggerInfoRequest* request, ::grpc_cli::LoggerInfoResponse* response) { return this->LoggerInfo(context, request, response); }));}
+    void SetMessageAllocatorFor_LoggerInfo(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(21);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(21);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* LoggerInfo(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* LoggerInfo(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_GetLogLevel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(22,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::GetLogLevelRequest* request, ::grpc_cli::GetLogLevelResponse* response) { return this->GetLogLevel(context, request, response); }));}
+    void SetMessageAllocatorFor_GetLogLevel(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(22);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(22);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetLogLevel(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetLogLevel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ApplyLogFilter() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(23,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response) { return this->ApplyLogFilter(context, request, response); }));}
+    void SetMessageAllocatorFor_ApplyLogFilter(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(23);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(23);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ApplyLogFilter(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ApplyLogFilter(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<Service > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<Service > > > > > > > > > > > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<Service > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<Service > > > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -2283,6 +2778,91 @@ class PosCli final {
     }
     // disable synchronous version of this method
     ::grpc::Status ArrayInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::ArrayInfoRequest* /*request*/, ::grpc_cli::ArrayInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_SetLogPreference() {
+      ::grpc::Service::MarkMethodGeneric(19);
+    }
+    ~WithGenericMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_SetLogLevel() {
+      ::grpc::Service::MarkMethodGeneric(20);
+    }
+    ~WithGenericMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_LoggerInfo() {
+      ::grpc::Service::MarkMethodGeneric(21);
+    }
+    ~WithGenericMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetLogLevel() {
+      ::grpc::Service::MarkMethodGeneric(22);
+    }
+    ~WithGenericMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ApplyLogFilter() {
+      ::grpc::Service::MarkMethodGeneric(23);
+    }
+    ~WithGenericMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2665,6 +3245,106 @@ class PosCli final {
     }
     void RequestArrayInfo(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_SetLogPreference() {
+      ::grpc::Service::MarkMethodRaw(19);
+    }
+    ~WithRawMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestSetLogPreference(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_SetLogLevel() {
+      ::grpc::Service::MarkMethodRaw(20);
+    }
+    ~WithRawMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestSetLogLevel(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_LoggerInfo() {
+      ::grpc::Service::MarkMethodRaw(21);
+    }
+    ~WithRawMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestLoggerInfo(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(21, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetLogLevel() {
+      ::grpc::Service::MarkMethodRaw(22);
+    }
+    ~WithRawMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetLogLevel(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(22, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ApplyLogFilter() {
+      ::grpc::Service::MarkMethodRaw(23);
+    }
+    ~WithRawMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestApplyLogFilter(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(23, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3390,6 +4070,196 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_SetLogPreference() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetLogPreference(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetLogPreference(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetLogPreference(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_SetLogLevel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(20,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetLogLevel(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetLogLevel(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetLogLevel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_LoggerInfo() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(21,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->LoggerInfo(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* LoggerInfo(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* LoggerInfo(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_GetLogLevel() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(22,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetLogLevel(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetLogLevel(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetLogLevel(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ApplyLogFilter() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(23,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ApplyLogFilter(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ApplyLogFilter(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ApplyLogFilter(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_SystemInfo : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -3902,9 +4772,144 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedArrayInfo(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ArrayInfoRequest,::grpc_cli::ArrayInfoResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<Service > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_SetLogPreference : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_SetLogPreference() {
+      ::grpc::Service::MarkMethodStreamed(19,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse>* streamer) {
+                       return this->StreamedSetLogPreference(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_SetLogPreference() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status SetLogPreference(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogPreferenceRequest* /*request*/, ::grpc_cli::SetLogPreferenceResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedSetLogPreference(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SetLogPreferenceRequest,::grpc_cli::SetLogPreferenceResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_SetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_SetLogLevel() {
+      ::grpc::Service::MarkMethodStreamed(20,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse>* streamer) {
+                       return this->StreamedSetLogLevel(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_SetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status SetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::SetLogLevelRequest* /*request*/, ::grpc_cli::SetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedSetLogLevel(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SetLogLevelRequest,::grpc_cli::SetLogLevelResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_LoggerInfo : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_LoggerInfo() {
+      ::grpc::Service::MarkMethodStreamed(21,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse>* streamer) {
+                       return this->StreamedLoggerInfo(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_LoggerInfo() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status LoggerInfo(::grpc::ServerContext* /*context*/, const ::grpc_cli::LoggerInfoRequest* /*request*/, ::grpc_cli::LoggerInfoResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedLoggerInfo(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::LoggerInfoRequest,::grpc_cli::LoggerInfoResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetLogLevel : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetLogLevel() {
+      ::grpc::Service::MarkMethodStreamed(22,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse>* streamer) {
+                       return this->StreamedGetLogLevel(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetLogLevel() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetLogLevel(::grpc::ServerContext* /*context*/, const ::grpc_cli::GetLogLevelRequest* /*request*/, ::grpc_cli::GetLogLevelResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetLogLevel(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::GetLogLevelRequest,::grpc_cli::GetLogLevelResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ApplyLogFilter : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ApplyLogFilter() {
+      ::grpc::Service::MarkMethodStreamed(23,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse>* streamer) {
+                       return this->StreamedApplyLogFilter(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ApplyLogFilter() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ApplyLogFilter(::grpc::ServerContext* /*context*/, const ::grpc_cli::ApplyLogFilterRequest* /*request*/, ::grpc_cli::ApplyLogFilterResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedApplyLogFilter(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::ApplyLogFilterRequest,::grpc_cli::ApplyLogFilterResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<Service > > > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<Service > > > > > > > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<Service > > > > > > > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli
