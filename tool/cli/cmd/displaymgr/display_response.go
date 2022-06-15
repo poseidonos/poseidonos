@@ -362,10 +362,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		res := &pb.GetLogLevelResponse{}
 		json.Unmarshal([]byte(resJSON), res)
 
-		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
-			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
-				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
-				res.GetResult().GetStatus().GetSolution())
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -375,10 +374,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		res := &pb.LoggerInfoResponse{}
 		json.Unmarshal([]byte(resJSON), res)
 
-		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
-			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
-				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
-				res.GetResult().GetStatus().GetSolution())
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -543,10 +541,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		res := &pb.ListNodeResponse{}
 		protojson.Unmarshal([]byte(resJSON), res)
 
-		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
-			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
-				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
-				res.GetResult().GetStatus().GetSolution())
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -577,10 +574,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		res := &pb.ListHaVolumeResponse{}
 		protojson.Unmarshal([]byte(resJSON), res)
 
-		if int(res.GetResult().GetStatus().GetCode()) != globals.CliServerSuccessCode {
-			printEventInfo(int(res.GetResult().GetStatus().GetCode()), res.GetResult().GetStatus().GetEventName(),
-				res.GetResult().GetStatus().GetDescription(), res.GetResult().GetStatus().GetCause(),
-				res.GetResult().GetStatus().GetSolution())
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -671,6 +667,31 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		}
 
 	}
+}
+
+func isFailed(status pb.Status) bool {
+	return int(status.GetCode()) != globals.CliServerSuccessCode
+}
+
+func printEvent(status pb.Status) {
+	code := status.GetCode()
+	name := status.GetEventName()
+	desc := status.GetDescription()
+	cause := status.GetCause()
+	solution := status.GetSolution()
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	fmtStr := "%s (%d) - %s\n"
+
+	if cause != "" {
+		fmtStr += "Cause: " + cause + "\n"
+	}
+	if solution != "" {
+		fmtStr += "Solution: " + solution + "\n"
+	}
+
+	fmt.Fprintf(w, fmtStr, name, code, desc)
+	w.Flush()
 }
 
 func printEventInfo(code int, name string, desc string, cause string, solution string) {
