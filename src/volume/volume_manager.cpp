@@ -70,6 +70,10 @@ state(s)
 VolumeManager::~VolumeManager(void)
 {
     state->Unsubscribe(this);
+    if (tp != nullptr)
+    {
+        delete tp;
+    }
 }
 
 int
@@ -80,6 +84,11 @@ VolumeManager::Init(void)
     initialized = true;
     _ClearLock();
     _LoadVolumes();
+
+    if (tp != nullptr)
+    {
+        TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
+    }
 
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
 
@@ -104,6 +113,11 @@ VolumeManager::Dispose(void)
     initialized = false;
     volumes.Clear();
     _ClearLock();
+
+    if (tp != nullptr)
+    {
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+    }
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
 }
