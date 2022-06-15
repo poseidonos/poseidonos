@@ -57,14 +57,20 @@ public:
     virtual void BottomhalfMioProcessing(void);
 
 private:
-    void _SendPeriodicMetrics(void);
+    void _UpdateMetricsConditionally(Mpio* mpio);
+    void _PublishPeriodicMetrics(void);
 
     MetaFsIoMultilevelQ<Mpio*, RequestPriority>* partialMpioDoneQ;
     MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;
-    int64_t metricSumOfSpendTime;
-    int64_t metricSumOfMpioCount;
+    int64_t sampledTimeSpentProcessingAllStages;
+    int64_t sampledTimeSpentFromWriteToRelease;
+    int64_t sampledTimeSpentFromPushToPop;
+    int64_t totalProcessedMpioCount;
+    int64_t sampledProcessedMpioCount;
     MetaFsTimeInterval metaFsTimeInterval;
+    size_t skipCount;
+    const size_t SAMPLING_SKIP_COUNT;
 };
 } // namespace pos

@@ -151,6 +151,13 @@ Poseidonos::Terminate(void)
         delete telemtryPublisherForAir;
         telemtryPublisherForAir = nullptr;
     }
+    if (nullptr != telemtryPublisherForMeta)
+    {
+        telemtryPublisherForMeta->StopPublishing();
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemtryPublisherForMeta->GetName());
+        delete telemtryPublisherForMeta;
+        telemtryPublisherForMeta = nullptr;
+    }
     if (nullptr != signalHandler)
     {
         signalHandler->Deregister();
@@ -276,9 +283,15 @@ Poseidonos::_SetupThreadModel(void)
 
     coreCount = affinityManager->GetTotalCore();
     schedulerCPUSet = affinityManager->GetCpuSet(CoreType::META_SCHEDULER);
+    if (nullptr == telemtryPublisherForMeta)
+    {
+        telemtryPublisherForMeta = new TelemetryPublisher{"meta_scheduler"};
+        telemtryPublisherForMeta->StartPublishing();
+        TelemetryClientSingleton::Instance()->RegisterPublisher(telemtryPublisherForMeta);
+    }
     workerCPUSet = affinityManager->GetCpuSet(CoreType::META_IO);
     MetaFsServiceSingleton::Instance()->Initialize(coreCount,
-        schedulerCPUSet, workerCPUSet);
+        schedulerCPUSet, workerCPUSet, telemtryPublisherForMeta);
     FlushCmdManagerSingleton::Instance();
 }
 

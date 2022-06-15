@@ -92,7 +92,8 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
-    void _SendPeriodicMetrics(void);
+    void _UpdateMetricsConditionally(Mio* mio);
+    void _PublishPeriodicMetrics(void);
     void _CreateMioPool(void);
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 
@@ -118,8 +119,12 @@ private:
     int coreId;
 
     TelemetryPublisher* telemetryPublisher = nullptr;
-    int64_t metricSumOfSpendTime;
-    int64_t metricSumOfMioCount;
+    int64_t sampledTimeSpentProcessingAllStages;
+    int64_t sampledTimeSpentFromIssueToComplete;
+    int64_t totalProcessedMpioCount;
+    int64_t sampledProcessedMioCount;
     MetaFsTimeInterval metaFsTimeInterval;
+    size_t skipCount;
+    const size_t SAMPLING_SKIP_COUNT;
 };
 } // namespace pos

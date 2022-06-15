@@ -149,7 +149,8 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
                 CPU_COUNT(&schedSet), coreId);
 
             ioScheduler_ = new MetaFsIoScheduler(0, coreId, totalCoreCount,
-                threadName, mioSet, configManager_, tp);
+                threadName, mioSet, configManager_, tp,
+                new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()));
             ioScheduler_->StartThread();
             break;
         }

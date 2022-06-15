@@ -71,6 +71,7 @@ private:
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
     TelemetryAirDelegator* telemetryAirDelegator = nullptr;
     TelemetryPublisher* telemtryPublisherForAir = nullptr;
+    TelemetryPublisher* telemtryPublisherForMeta = nullptr;
     SignalHandler* signalHandler = nullptr;
 
     std::thread *GrpcCliServerThread;

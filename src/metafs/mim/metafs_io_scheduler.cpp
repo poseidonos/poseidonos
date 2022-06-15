@@ -36,15 +36,17 @@
 #include <thread>
 
 #include "src/metafs/include/metafs_aiocb_cxt.h"
+#include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
 #include "src/metafs/mvm/meta_volume_manager.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
     const int totalCoreCount, const std::string& threadName,
     const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
-    TelemetryPublisher* tp)
+    TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval)
 : MetaFsIoHandlerBase(threadId, coreId, threadName),
   TOTAL_CORE_COUNT(totalCoreCount),
   MIO_CORE_SET(mioCoreSet),
@@ -52,6 +54,7 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
   config_(config),
   tp_(tp),
   cpuStallCnt_(0),
+  timeInterval_(timeInterval),
   currentReqMsg_(nullptr),
   chunkSize_(0),
   fileBaseLpn_(0),
@@ -61,13 +64,24 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
   remainCount_(0),
   extentsCount_(0),
   currentExtent_(0),
-  extents_(nullptr)
+  extents_(nullptr),
+  issueCount_(),
+  metricNameForStorage_()
 {
+    metricNameForStorage_[0] = TEL40100_METAFS_SCHEDULER_ISSUE_COUNT_TO_SSD;
+    metricNameForStorage_[1] = TEL40101_METAFS_SCHEDULER_ISSUE_COUNT_TO_NVRAM;
+    metricNameForStorage_[2] = TEL40102_METAFS_SCHEDULER_ISSUE_COUNT_TO_JOURNAL_SSD;
 }
 
 MetaFsIoScheduler::~MetaFsIoScheduler(void)
 {
     threadExit_ = true;
+
+    if (timeInterval_)
+    {
+        delete timeInterval_;
+        timeInterval_ = nullptr;
+    }
 }
 
 void
@@ -158,6 +172,13 @@ MetaFsIoScheduler::_UpdateCurrentLpnToNextExtentConditionally(void)
     }
 }
 
+const int64_t*
+MetaFsIoScheduler::GetIssueCount(size_t& size /* output */) const
+{
+    size = NUM_STORAGE;
+    return issueCount_;
+}
+
 void
 MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 {
@@ -166,6 +187,8 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 
     _SetCurrentContextFrom(reqMsg);
     _UpdateCurrentLpnToNextExtentConditionally();
+
+    issueCount_[(int)currentReqMsg_->targetMediaType] += requestCount_;
 
     while (remainCount_)
     {
@@ -318,6 +341,19 @@ MetaFsIoScheduler::Execute(void)
 
     while (!threadExit_)
     {
+        if (tp_ && timeInterval_ && timeInterval_->CheckInterval())
+        {
+            POSMetricVector* metricList = new POSMetricVector();
+            for (uint32_t idx = 0; idx < NUM_STORAGE; ++idx)
+            {
+                POSMetric v(metricNameForStorage_[idx], POSMetricTypes::MT_GAUGE);
+                v.SetGaugeValue(issueCount_[idx]);
+                metricList->emplace_back(v);
+                issueCount_[idx] = 0;
+            }
+            tp_->PublishMetricList(metricList);
+        }
+
         MetaFsIoRequest* reqMsg = _FetchPendingNewReq();
 
         if (!reqMsg)

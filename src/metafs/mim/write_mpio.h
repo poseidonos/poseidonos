@@ -54,6 +54,7 @@ protected:
 private:
     bool _Init(MpAioState expNextState);
     bool _MakeReady(MpAioState expNextState);
+    bool _Write(const MpAioState expNextState);
     bool _MergeData(MpAioState expNextState);
     bool _PrepareWrite(MpAioState expNextState);
     bool _CompleteIO(MpAioState expNextState);
