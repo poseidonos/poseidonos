@@ -1338,7 +1338,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "A lisenter has been added.", "", "")},
         {(int)POS_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND,
             new PosEventInfoEntry("LOGGER_FILTER_POLICY_FILE_NOT_FOUND",
-                "Failed to find a logger filter policy file.", "", "")},
+                "Failed to find a logger filter policy file.", "", "Check out the instructions in the help message of the command.")},
         {(int)POS_EVENT_ID::LOGGER_FILTER_APPLY_SUCCESS,
             new PosEventInfoEntry("LOGGER_FILTER_APPLY_SUCCESS",
                 "Log filter has been applied.", "", "")},
