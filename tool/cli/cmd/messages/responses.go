@@ -134,15 +134,15 @@ type LoggerInfoResult struct {
 }
 
 type LoggerInfoResData struct {
-	MINORLOGPATH         string `json:"minor_log_path"`
-	MAJORLOGPATH         string `json:"major_log_path"`
-	LOGFILESIZEINBM      string `json:"logfile_size_in_mb"`
-	LOGFILEROTATIONCOUNT int    `json:"logfile_rotation_count"`
-	MINALLOWABLELOGLEVEL string `json:"min_allowable_log_level"`
-	FILTERENABLED        int    `json:"filter_enabled"`
-	FILTERINCLUDED       string `json:"filter_included"`
-	FILTEREXCLUDED       string `json:"filter_excluded"`
-	STRUCTUREDLOGGING    bool   `json:"structured_logging"`
+	MINORLOGPATH         string `json:"minorLogPath"`
+	MAJORLOGPATH         string `json:"majorLogPath"`
+	LOGFILESIZEINBM      string `json:"logfileSizeInMb"`
+	LOGFILEROTATIONCOUNT int    `json:"logfileRotationCount"`
+	MINALLOWABLELOGLEVEL string `json:"minAllowableLogLevel"`
+	FILTERENABLED        int    `json:"filterEnabled"`
+	FILTERINCLUDED       string `json:"filterIncluded"`
+	FILTEREXCLUDED       string `json:"filterExcluded"`
+	STRUCTUREDLOGGING    bool   `json:"structuredLogging"`
 }
 
 // Response for GETLOGLEVEL command
