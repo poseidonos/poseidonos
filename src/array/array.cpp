@@ -379,7 +379,7 @@ Array::AddSpare(string devName)
     {
         pthread_rwlock_unlock(&stateLock);
         ret = EID(ADD_SPARE_DEVICE_ALREADY_OCCUPIED);
-        POS_TRACE_ERROR(ret, "dev_name:{}, occupier:{}", name_, involvedArray);
+        POS_TRACE_WARN(ret, "dev_name:{}, occupier:{}", devName, involvedArray);
         return ret;
     }
 
@@ -387,7 +387,7 @@ Array::AddSpare(string devName)
     if (0 != ret)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
+        POS_TRACE_WARN(ret, "Unable to add spare device to array({})", name_);
         return ret;
     }
     ret = _Flush();
@@ -404,7 +404,7 @@ Array::AddSpare(string devName)
         eventScheduler->EnqueueEvent(event);
     }
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO(EID(ADD_SPARE_DEBUG_MSG), "Spare device was successfully added to array({})", name_);
+    POS_TRACE_INFO(EID(ADD_SPARE_DEBUG_MSG), "Spare device {} was successfully added to array({})", devName, name_);
 
     return 0;
 }
@@ -893,8 +893,8 @@ Array::_DetachData(ArrayDevice* target)
 void
 Array::_RebuildDone(RebuildResult result)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
-        "Array({}) rebuild done. result:{} (2-PASS, 3-CANCELLED, 4-FAIL)", name_, result.result);
+    POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG),
+        "Array({}) rebuild done. result:{}", name_, REBUILD_STATE_STR[(int)result.result]);
     rebuilder->RebuildDone(result);
     pthread_rwlock_wrlock(&stateLock);
     if (result.target->GetState() == ArrayDeviceState::REBUILD &&

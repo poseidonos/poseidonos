@@ -57,13 +57,14 @@ PartitionRebuild::~PartitionRebuild(void)
 
 void PartitionRebuild::Start(RebuildComplete cb)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "PartitionRebuild::Start");
     completeCb = cb;
     if (bhvr != nullptr)
     {
+        string partName = PARTITION_TYPE_STR[bhvr->GetContext()->part];
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "Partition rebuild started, part_name:{}", partName);
         bhvr->GetContext()->SetResult(RebuildState::REBUILDING);
-        bhvr->GetContext()->logger->SetPartitionRebuildStart(PARTITION_TYPE_STR[bhvr->GetContext()->part]);
+        bhvr->GetContext()->logger->SetPartitionRebuildStart(partName);
         bhvr->GetContext()->rebuildComplete =
             bind(&PartitionRebuild::_Complete, this, placeholders::_1);
         EventSmartPtr rebuilder(new Rebuilder(bhvr));
@@ -72,7 +73,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
     else
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "not a rebuild target partition");
+            "It's not a rebuild target partition");
         RebuildResult res;
         res.result = RebuildState::PASS;
         _Complete(res);
@@ -108,7 +109,7 @@ RebuildState PartitionRebuild::GetResult(void)
 void PartitionRebuild::_Complete(RebuildResult res)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "PartitionRebuild::_Complete, res {}", res.result);
+        "PartitionRebuild completed, array:{}, result:{}", res.array, REBUILD_STATE_STR[(int)res.result]);
     if (bhvr != nullptr)
     {
         res.target = bhvr->GetContext()->faultDev;
