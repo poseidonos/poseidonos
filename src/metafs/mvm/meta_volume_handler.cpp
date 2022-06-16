@@ -51,14 +51,14 @@ MetaVolumeHandler::~MetaVolumeHandler(void)
 POS_EVENT_ID
 MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (POS_EVENT_ID::SUCCESS != HandleCheckFileExist(volType, reqMsg))
+    POS_EVENT_ID rc = HandleCheckFileExist(volType, reqMsg);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
     }
 
     FileDescriptorType fd = volContainer->LookupFileDescByName(*reqMsg.fileName);
-    POS_EVENT_ID rc = volContainer->AddFileInActiveList(volType, fd);
-
+    rc = volContainer->AddFileInActiveList(volType, fd);
     if (POS_EVENT_ID::SUCCESS == rc)
     {
         reqMsg.completionData.openfd = fd;
@@ -88,6 +88,11 @@ MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileCon
 POS_EVENT_ID
 MetaVolumeHandler::HandleCheckFileExist(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
+    if (!volContainer->IsGivenVolumeExist(volType))
+    {
+        return POS_EVENT_ID::MFS_META_VOLUME_INVALID;
+    }
+
     if (!volContainer->IsGivenFileCreated(volType, *reqMsg.fileName))
     {
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
@@ -269,8 +274,7 @@ POS_EVENT_ID
 MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
 {
     MetaVolumeType volumeType = reqMsg.volType;
-    POS_EVENT_ID rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName,
-        volumeType);
+    POS_EVENT_ID rc = volContainer->LookupMetaVolumeType(*reqMsg.fileName, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
@@ -292,6 +296,8 @@ MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
             "The inodeInfo is not valid.");
 
         rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        delete inodeInfo;
+        inodeInfo = nullptr;
     }
 
     return rc;
