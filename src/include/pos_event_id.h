@@ -111,6 +111,8 @@ enum class POS_EVENT_ID
     CLI_UPDATE_EVENT_WRR_FAILURE_WEIGHT_VALUE_RANGE_VIOLATION,
     CLI_UPDATE_EVENT_WRR_FAILURE_NO_EVENT_NAME,
     CLI_UPDATE_EVENT_WRR_FAILURE_UNKNOWN_EVENT,
+    CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED,
+    CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1336,7 +1338,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "A lisenter has been added.", "", "")},
         {(int)POS_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND,
             new PosEventInfoEntry("LOGGER_FILTER_POLICY_FILE_NOT_FOUND",
-                "Failed to find a logger filter policy file.", "", "")},
+                "Failed to find a logger filter policy file.", "", "Check out the instructions in the help message of the command.")},
         {(int)POS_EVENT_ID::LOGGER_FILTER_APPLY_SUCCESS,
             new PosEventInfoEntry("LOGGER_FILTER_APPLY_SUCCESS",
                 "Log filter has been applied.", "", "")},
@@ -1382,7 +1384,14 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
             new PosEventInfoEntry("CLI_UPDATE_EVENT_WRR_FAILURE_UNKNOWN_EVENT",
                 "Failed to update event WRR.", "The input event does not exist.",
                 "Please check the event name.")},
-    
+        {(int)POS_EVENT_ID::CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED,
+            new PosEventInfoEntry("CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED",
+                "Failed to set log level.", "The log level is not specified.",
+                "Please input the log level to set.")},
+        {(int)POS_EVENT_ID::CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED,
+            new PosEventInfoEntry("CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED",
+                "Failed to set preference.", "The structured logging is not specified.",
+                "Please input the structured logging.")},
 
         {(int)POS_EVENT_ID::CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS,
             new PosEventInfoEntry("CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS",

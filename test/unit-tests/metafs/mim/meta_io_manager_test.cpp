@@ -79,7 +79,7 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenSyncIoIsEnabledAndIoHa
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -110,7 +110,7 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenReqTypeIsReadAndIoMode
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -141,7 +141,7 @@ TEST(MetaIoManager, CheckArray)
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(true));
 
