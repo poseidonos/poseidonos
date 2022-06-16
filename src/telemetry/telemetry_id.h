@@ -134,4 +134,11 @@ static const std::string TEL70000_SPDK_REACTOR_UTILIZATION = "spdk_reactor_utili
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
 
+static const std::string TEL90000_VOL_CREATE_VOLUME_ID = "create_volume_id";
+static const std::string TEL90001_VOL_DELETE_VOLUME_ID = "delete_volume_id";
+static const std::string TEL90002_VOL_MOUNT_VOLUME_ID = "mount_volume_id";
+static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
+static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
+static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
+
 } // namespace pos
