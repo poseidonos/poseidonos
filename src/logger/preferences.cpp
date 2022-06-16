@@ -89,18 +89,18 @@ JsonElement
 Preferences::ToJson()
 {
     JsonElement data("data");
-    data.SetAttribute(JsonAttribute("minor_log_path", "\"" + MinorLogFilePath() + "\""));
-    data.SetAttribute(JsonAttribute("major_log_path", "\"" + MajorLogFilePath() + "\""));
-    data.SetAttribute(JsonAttribute("logfile_size_in_mb", logfileSize));
-    data.SetAttribute(JsonAttribute("logfile_rotation_count", logRotation));
-    data.SetAttribute(JsonAttribute("min_allowable_log_level", "\"" + LogLevelToString(logLevel) + "\""));
-    data.SetAttribute(JsonAttribute("filter_enabled", filter.IsFiltered()));
+    data.SetAttribute(JsonAttribute("minorLogPath", "\"" + MinorLogFilePath() + "\""));
+    data.SetAttribute(JsonAttribute("majorLogPath", "\"" + MajorLogFilePath() + "\""));
+    data.SetAttribute(JsonAttribute("logfileSizeInMb", logfileSize));
+    data.SetAttribute(JsonAttribute("logfileRotationCount", logRotation));
+    data.SetAttribute(JsonAttribute("minAllowableLogLevel", "\"" + LogLevelToString(logLevel) + "\""));
+    data.SetAttribute(JsonAttribute("filterEnabled", filter.IsFiltered()));
     if (filter.IsFiltered() == true)
     {
-        data.SetAttribute(JsonAttribute("filter_included", "\"" + filter.IncludeRule() + "\""));
-        data.SetAttribute(JsonAttribute("filter_excluded", "\"" + filter.ExcludeRule() + "\""));
+        data.SetAttribute(JsonAttribute("filterIncluded", "\"" + filter.IncludeRule() + "\""));
+        data.SetAttribute(JsonAttribute("filterExcluded", "\"" + filter.ExcludeRule() + "\""));
     }
-    data.SetAttribute(JsonAttribute("structured_logging", EnableStructuredLogging ? "true" : "false"));
+    data.SetAttribute(JsonAttribute("structuredLogging", EnableStructuredLogging ? "true" : "false"));
 
     return data;
 }

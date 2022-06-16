@@ -327,6 +327,90 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
+  grpc::Status
+  SetLogLevel(ServerContext* context, const SetLogLevelRequest* request,
+                  SetLogLevelResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSetLogLevelCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  SetLogPreference(ServerContext* context, const SetLogPreferenceRequest* request,
+                  SetLogPreferenceResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSetLogPreferenceCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  LoggerInfo(ServerContext* context, const LoggerInfoRequest* request,
+                  LoggerInfoResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteLoggerInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  GetLogLevel(ServerContext* context, const GetLogLevelRequest* request,
+                  GetLogLevelResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteGetLogLevelCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  ApplyLogFilter(ServerContext* context, const ApplyLogFilterRequest* request,
+                  ApplyLogFilterResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteApplyLogFilterCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
 };
 
 void
