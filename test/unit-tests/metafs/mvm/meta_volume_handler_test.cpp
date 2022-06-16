@@ -142,7 +142,6 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCannotBeOpenedWh
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(true));
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName).WillOnce(Return(MetaFsCommonConst::INVALID_FD));
-    EXPECT_CALL(*container, AddFileInActiveList).WillOnce(Return(POS_EVENT_ID::SUCCESS));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_OPEN_FAILED);
@@ -178,12 +177,13 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCanBeCreated)
 TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheFilenameIsAlreadyOccupied)
 {
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(true));
+    EXPECT_CALL(*container, CreateFile).Times(0);
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
 }
 
-TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoseNotHaveEnoughSpaceToCreate)
+TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoesNotHaveEnoughSpaceToCreate)
 {
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace).WillOnce(Return(size));
@@ -192,7 +192,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreate
         POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
 }
 
-TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoseNotHaveEnoughSpaceToCreate2)
+TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoesNotHaveEnoughSpaceToCreate2)
 {
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace).WillOnce(Return(size + 1));
