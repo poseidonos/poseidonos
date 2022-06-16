@@ -60,20 +60,15 @@ namespace pos
 
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
-state(s)
+state(s),
+tp(nullptr)
 {
-    tp = new TelemetryPublisher(("Volume_Manager"));
-    tp->AddDefaultLabel("array_name", arrayInfo->GetName());
     state->Subscribe(this, typeid(*this).name());
 }
 
 VolumeManager::~VolumeManager(void)
 {
     state->Unsubscribe(this);
-    if (tp != nullptr)
-    {
-        delete tp;
-    }
 }
 
 int
@@ -84,6 +79,9 @@ VolumeManager::Init(void)
     initialized = true;
     _ClearLock();
     _LoadVolumes();
+
+    tp = new TelemetryPublisher(("Volume_Manager"));
+    tp->AddDefaultLabel("array_name", arrayInfo->GetName());
 
     if (tp != nullptr)
     {
@@ -117,6 +115,7 @@ VolumeManager::Dispose(void)
     if (tp != nullptr)
     {
         TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+        delete tp;
     }
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
@@ -175,10 +174,23 @@ void
 VolumeManager::_PublishTelemetryVolumeIdInfo(std::string id, string name)
 {
     VolumeBase* vol = volumes.GetVolume(name);
-
     POSMetricValue volumeInfo;
-    volumeInfo.gauge = vol->ID;
+
+    if (nullptr != vol)
+    {
+        volumeInfo.gauge = vol->ID;
+        tp->PublishData(id, volumeInfo, MT_GAUGE);
+    }
+}
+
+void
+VolumeManager::_PublishTelemetryVolumeIdInfo(std::string id, int volId)
+{
+    POSMetricValue volumeInfo;
+
+    volumeInfo.gauge = volId;
     tp->PublishData(id, volumeInfo, MT_GAUGE);
+    
 }
 
 int
@@ -241,11 +253,14 @@ VolumeManager::Delete(std::string name)
 
     VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
 
+    VolumeBase* vol = volumes.GetVolume(name);
+    int volId = vol->ID;
+
     ret = volumeDeleter.Do(name);
     
     if (EID(SUCCESS) == ret)
     {
-        _PublishTelemetryVolumeIdInfo(TEL90001_VOL_DELETE_VOLUME_ID, name);
+        _PublishTelemetryVolumeIdInfo(TEL90001_VOL_DELETE_VOLUME_ID, volId);
     }
 
     return ret;
