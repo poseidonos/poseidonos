@@ -296,32 +296,23 @@ Mio::_BuildMpioMap(void)
         mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
         mpio->SetPriority(originReq->priority);
 
-        if (MpioCacheState::FirstRead == mpio->GetCacheState())
+        if (mpio->IsMergeable())
         {
-            // pass, new mpio
-        }
-        else if (MpioCacheState::Mergeable == mpio->GetCacheState())
-        {
-            // copy data for merged requests
-            if (nullptr != mergedRequestList)
+            if (!mergedRequestList)
             {
-                for (std::vector<MetaFsIoRequest*>::iterator it = mergedRequestList->begin(); it != mergedRequestList->end(); ++it)
-                {
-                    FileSizeType size = (*it)->byteSize;
-                    FileBufType targetBuf = (uint8_t*)(mpio->GetMDPageDataBuf()) + ((*it)->byteOffsetInFile % fileDataChunkSize);
-                    FileBufType originBuf = (*it)->buf;
-                    memcpy(targetBuf, originBuf, size);
-                }
+                // when there is nothing to merge, just write own data
+                mpio->ChangeCacheStateTo(MpioCacheState::Merge);
             }
-            // copy data for single request
             else
             {
-                mpio->SetCacheState(MpioCacheState::MergeSingle);
+                // copy data for merged requests
+                for (auto& request : *mergedRequestList)
+                {
+                    FileBufType targetBuf = (uint8_t*)(mpio->GetMDPageDataBuf()) + (request->byteOffsetInFile % fileDataChunkSize);
+                    FileBufType originBuf = request->buf;
+                    memcpy(targetBuf, originBuf, request->byteSize);
+                }
             }
-        }
-        else if (MpioCacheState::MergeSingle == mpio->GetCacheState())
-        {
-            assert(0);
         }
 
         mpio->ExecuteAsyncState();

@@ -95,7 +95,7 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
     }
     else
     {
-        // At this point, all IOs must be "partial writes to NVRAM".
+        // At this point, all IOs must be "partial writes to NVRAM or Journal_SSD".
         // We check the corresponding cache entry first in the hope of reusing it.
         mpio = writeCache_->Find({arrayId, lpn});
         if (nullptr != mpio)
@@ -104,14 +104,17 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
             return mpio;
         }
 
+        // alloc new mpio, not cached
         mpio = _TryAlloc(mpioType);
         if (mpio)
         {
             if (writeCache_->IsFull())
                 _ReleaseCache();
 
-            mpio->SetCacheState(MpioCacheState::FirstRead);
-            assert(writeCache_->Push({arrayId, lpn}, mpio) == nullptr);
+            // cached now
+            mpio->ChangeCacheStateTo(MpioCacheState::Read);
+            auto victim = writeCache_->Push({arrayId, lpn}, mpio);
+            assert(victim == nullptr);
             mpio->PrintLog("[alloc-   new]", arrayId, lpn);
         }
         return mpio;
@@ -123,27 +126,27 @@ MpioAllocator::TryAlloc(const MpioType mpioType, const MetaStorageType storageTy
 void
 MpioAllocator::Release(Mpio* mpio)
 {
-    if (MpioCacheState::Init != mpio->GetCacheState())
+    if (mpio->IsCached())
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "[Mpio][Release    ] cached mpio, not released. type={}, req.tagId={}, mpio_id={}, fileOffset={}, buffer={}",
+            "[Mpio][Release    ] cached mpio, not released. type:{}, req.tagId:{}, mpio_id:{}, fileOffset:{}, buffer:{}",
             (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
             mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
 
         mpio->PrintLog("[release- cac]", mpio->io.arrayId, mpio->io.metaLpn);
-        mpio->Reset();
+    }
+    else
+    {
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "[Mpio][Release    ] type:{}, req.tagId:{}, mpio_id:{}, fileOffset:{}, buffer:{}",
+            (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
+            mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
 
-        return;
+        mpio->PrintLog("[release- del]", mpio->io.arrayId, mpio->io.metaLpn);
+        pool_[(uint32_t)mpio->GetType()]->Release(mpio);
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Mpio][Release    ] type={}, req.tagId={}, mpio_id={}, fileOffset={}, buffer={}",
-        (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
-        mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
-
-    mpio->PrintLog("[release- del]", mpio->io.arrayId, mpio->io.metaLpn);
     mpio->Reset();
-    pool_[(uint32_t)mpio->GetType()]->Release(mpio);
 }
 
 Mpio*
@@ -188,7 +191,7 @@ MpioAllocator::_ReleaseCache(void)
     if (!victim)
         return;
 
-    victim->SetCacheState(MpioCacheState::Init);
+    victim->ChangeCacheStateTo(MpioCacheState::Init);
     if (victim->GetCurrState() == MpAioState::First)
     {
         Release(victim);
