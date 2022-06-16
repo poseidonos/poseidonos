@@ -16,7 +16,7 @@
 #include "src/qos/qos_manager.h"
 #include "src/sys_info/space_info.h"
 #include "src/array_mgmt/numa_awared_array_creation.h"
-#include "preferences.h"
+#include "src/logger/preferences.h"
 
 CommandProcessor::CommandProcessor(void)
 {
