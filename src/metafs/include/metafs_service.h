@@ -47,13 +47,13 @@
 #include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
 #include "src/metafs/metafs.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 class ScalableMetaIoWorker;
 class MetaFsIoScheduler;
 class MetaFsConfigManager;
+class TelemetryPublisher;
 
 class MetaFsService
 {
@@ -78,13 +78,14 @@ public:
 
 private:
     void _CreateScheduler(const uint32_t totalCount, const cpu_set_t schedSet,
-        const cpu_set_t workSet, TelemetryPublisher* tp);
+        const cpu_set_t workSet);
 
     std::unordered_map<std::string, int> arrayNameToId_;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
     MetaFsIoScheduler* ioScheduler_;
     MetaFsConfigManager* configManager_;
     bool needToRemoveConfig_;
+    TelemetryPublisher* tp_;
 };
 
 using MetaFsServiceSingleton = Singleton<MetaFsService>;

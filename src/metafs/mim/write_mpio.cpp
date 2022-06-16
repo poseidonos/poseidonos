@@ -72,7 +72,7 @@ WriteMpio::_InitStateHandler(void)
     RegisterStateHandler(MpAioState::Error,
         new MpioStateExecuteEntry(MpAioState::Error, AsMpioStateEntryPoint(&WriteMpio::_HandleError, this), MpAioState::Complete));
     RegisterStateHandler(MpAioState::Write,
-        new MpioStateExecuteEntry(MpAioState::Write, AsMpioStateEntryPoint(&WriteMpio::DoIO, this), MpAioState::CheckWriteStatus));
+        new MpioStateExecuteEntry(MpAioState::Write, AsMpioStateEntryPoint(&WriteMpio::_Write, this), MpAioState::CheckWriteStatus));
     RegisterStateHandler(MpAioState::CheckWriteStatus,
         new MpioStateExecuteEntry(MpAioState::CheckWriteStatus, AsMpioStateEntryPoint(&WriteMpio::CheckWriteStatus, this), MpAioState::Complete));
     RegisterStateHandler(MpAioState::Complete,
@@ -102,7 +102,7 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             "[Mpio][_MakeReady  ] type={}, req.tagId={}, mpio_id={}, curLpn={}, prevLpn={}, curBufA={}, prevBufA={}",
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
-        if (MetaStorageType::NVRAM == io.targetMediaType)
+        if (MetaStorageType::SSD != io.targetMediaType)
         {
             switch (cacheState)
             {
@@ -144,6 +144,13 @@ WriteMpio::_MakeReady(MpAioState expNextState)
 }
 
 bool
+WriteMpio::_Write(const MpAioState expNextState)
+{
+    StoreTimestamp(MpioTimestampStage::Write);
+    return Mpio::DoIO(expNextState);
+}
+
+bool
 WriteMpio::_PrepareWrite(MpAioState expNextState)
 {
     BuildCompositeMDPage();
@@ -160,7 +167,7 @@ WriteMpio::_MergeData(MpAioState expNextState)
 
     SetNextState(expNextState); // WriteMpio::_PrepareWrite()
 
-    if (MetaStorageType::NVRAM == io.targetMediaType)
+    if (MetaStorageType::SSD != io.targetMediaType)
     {
         if (MpioCacheState::Init != cacheState)
         {
