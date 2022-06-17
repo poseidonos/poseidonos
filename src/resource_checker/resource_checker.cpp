@@ -186,7 +186,7 @@ ResourceChecker::Execute(void)
 
                 if (nullptr != publisher)
                 {
-                    POSMetric metric(TEL90000_RESOURCE_CHECKER_AVAILABLE_MEMORY, POSMetricTypes::MT_GAUGE);
+                    POSMetric metric(TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY, POSMetricTypes::MT_GAUGE);
                     metric.AddLabel("Node", "single");
                     metric.SetGaugeValue(static_cast<uint64_t>(availableMemorySizeInKByte));
                     publisher->PublishMetric(metric);
