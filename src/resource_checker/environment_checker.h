@@ -30,50 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef ENVIRONMENT_CHECKER_H_
+#define ENVIRONMENT_CHECKER_H_
 
 #include <cstdint>
-#include <thread>
-#include "src/debug/debug_info.h"
+#include <string>
+#include <vector>
+
+using namespace std;
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
-
-class Poseidonos
+class EnvironmentChecker
 {
 public:
-    int Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    EnvironmentChecker(void);
+    virtual ~EnvironmentChecker(void);
+
+    static uint32_t GetCpuNum(void);
+    static uint32_t GetCpuClock(void);
+    static bool IsMeetMinimumCore(void);
+
+    static uint32_t GetAvailableMemorySize(void);
+    static uint32_t GetTotalMemorySize(void);
+    static bool IsMeetMinimumMemory(void);
+
+    static uint32_t GetNvmeDeviceCnt(void);
+    static bool CheckSupportedOsVersion(void);
+    static bool CheckSupportedKernelVersion(void);
+    static bool CheckRulesFile(void);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
+    static const char SUPPORTED_OS_VERSION[20];
+    static const char SUPPORTED_KERNEL_VERSION[20];
+    static const char RULES_FILE_NAME[30];
+    static const uint32_t MINIMUM_NUM_CORE;
+    static const uint32_t MINIMUM_MEMORY_SIZE_IN_KBYTE;
 
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-    void _InitResourceChecker(void);
-
-    void _SetPerfImpact(void);
-    int _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread;
+    static std::vector<string> _GetcpuInfo(void);
+    static std::vector<string> _GetmemInfo(void);
+    static void _GetSystemMsg_string(string* outMsg, const char* cmd);
 };
 } // namespace pos
+
+#endif // ENVIRONMENT_CHECKER_H_

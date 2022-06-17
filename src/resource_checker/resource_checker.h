@@ -30,50 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef RESOURCE_CHECKER_H_
+#define RESOURCE_CHECKER_H_
 
-#include <cstdint>
+#include <string.h>
+
 #include <thread>
-#include "src/debug/debug_info.h"
+#include <vector>
+
+#include "src/lib/singleton.h"
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
+class AffinityManager;
 class TelemetryPublisher;
-class SignalHandler;
+class TelemetryClient;
+class EnvironmentChecker;
 
-class Poseidonos
+class ResourceChecker
 {
 public:
-    int Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    ResourceChecker(void);
+    virtual ~ResourceChecker(void);
+    void Execute(void);
+    uint64_t GetIterationCount(void);
+    void SetSleepTime(uint32_t time);
+    void Enable(void);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
+    bool enable;
+    uint64_t runningCnt;
+    uint32_t sleepSecTime;
+    std::thread* th = nullptr;
+    AffinityManager* affinityManager = nullptr; // Get singletone object
+    TelemetryClient* telemetryClient = nullptr; // Get singletone object
+    TelemetryPublisher* publisher = nullptr;    // new
+    EnvironmentChecker* envChecker = nullptr;   // new
 
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-    void _InitResourceChecker(void);
-
-    void _SetPerfImpact(void);
-    int _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread;
+    const int SLEEP_TIME_SEC = 60;
 };
+using ResourceCheckerSingleton = Singleton<ResourceChecker>;
 } // namespace pos
+
+#endif // RESOURCE_CHECKER_H_

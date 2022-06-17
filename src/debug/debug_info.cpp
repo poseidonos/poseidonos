@@ -65,6 +65,7 @@
 #include "src/telemetry/telemetry_config/telemetry_config.h"
 #include "src/volume/volume_service.h"
 #include "src/resource_manager/memory_manager.h"
+#include "src/resource_checker/resource_checker.h"
 
 namespace pos
 {
@@ -103,7 +104,8 @@ DebugInfo::DebugInfo(void)
   telemetryClient(nullptr),
   telemetryConfig(nullptr),
   memoryManager(nullptr),
-  posReplicatorManager(nullptr)
+  posReplicatorManager(nullptr),
+  resourceChecker(nullptr)
 {
 }
 
@@ -145,6 +147,7 @@ DebugInfo::Update(void)
     memoryManager = MemoryManagerSingleton::Instance();
     signalHandler = SignalHandlerSingleton::Instance();
     posReplicatorManager = PosReplicatorManagerSingleton::Instance();
+    resourceChecker = ResourceCheckerSingleton::Instance();
 }
 // LCOV_EXCL_STOP
 } // namespace pos

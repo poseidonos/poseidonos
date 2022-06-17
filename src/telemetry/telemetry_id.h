@@ -141,4 +141,5 @@ static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
 static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
 static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
+static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 } // namespace pos

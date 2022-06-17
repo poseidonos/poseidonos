@@ -6,6 +6,7 @@
 - [**MetaFs**](#metafs)
 - [**Volume**](#volume)
 - [**Array**](#array)
+- [**Resource Monitoring**](#resource)
 
 ---
 Rules for telemetry entry naming in "/src/telemetry/telemetry_id.h"
@@ -119,5 +120,12 @@ Volume ID Range : 50000 ~ 59999
 Array ID Range : 60000 ~ 70000
 
 60001 ArrayStatus
+
+---
+
+## **Resource monitoring**
+Array ID Range : 100000 ~ 100099
+
+100000 Available memory size
 
 ---
