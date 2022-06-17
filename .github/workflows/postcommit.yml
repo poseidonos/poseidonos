@@ -23,11 +23,6 @@ jobs:
      - name: Make Monitoring Dashboard Link
       uses: ./.github/actions/make-monitoring-dashboard-link
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
-
         GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
         ESTIMATED_EXECUTION_TIME: 36000
     - name: Upload Dashboard Link
@@ -55,10 +50,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "volume_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -119,10 +110,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "normal_io_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -184,10 +171,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "npor_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -249,10 +232,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "rebuild_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -314,10 +293,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "spor_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -379,10 +354,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "io_intensive_unmount_volume_array"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -444,10 +415,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "io_intensive_detach"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -509,10 +476,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "wbt_command_test"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
@@ -537,7 +500,6 @@ jobs:
       id: io_unit_build_and_test
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=${{github.action}} POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/io_unit_build/io_unit_build.sh
         .github/workflows/script/io_unit_build/io_unit_build.sh ${{github.workspace}} ${{github.sha}}
 
