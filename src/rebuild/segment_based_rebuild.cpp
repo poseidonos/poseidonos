@@ -64,7 +64,6 @@ SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextM
 
 SegmentBasedRebuild::~SegmentBasedRebuild(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~SegmentBasedRebuild");
 }
 
 string
@@ -94,15 +93,19 @@ SegmentBasedRebuild::Init(void)
 {
     if (isInitialized == false)
     {
-        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild try init, {}", PARTITION_TYPE_STR[ctx->part]);
         bool ret = _InitBuffers();
         if (ret == false)
         {
-            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Initialization retry because sufficient buffer for rebuild is not secured, {}",
-                PARTITION_TYPE_STR[ctx->part]);
+            if (initBufferRetryCnt >= INIT_REBUILD_BUFFER_MAX_RETRY)
+            {
+                POS_TRACE_ERROR(EID(REBUILD_INIT_FAILED), "part_type:{}, retried:{}",
+                    PARTITION_TYPE_STR[ctx->part], initBufferRetryCnt);
+                ctx->SetResult(RebuildState::FAIL);
+                return Read();
+            }
             return false;
         }
-        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
         isInitialized = true;
     }
 
@@ -112,8 +115,6 @@ SegmentBasedRebuild::Init(void)
 bool
 SegmentBasedRebuild::Read(void)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "Trying to read in rebuild, {}", PARTITION_TYPE_STR[ctx->part]);
     uint32_t strCnt = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint64_t key = (((uint64_t)strCnt) << 32) + blkCnt;
@@ -159,6 +160,8 @@ SegmentBasedRebuild::Read(void)
         return true;
     }
 
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+        "Trying to read in rebuild, {}", PARTITION_TYPE_STR[ctx->part]);
     ctx->taskCnt = strCnt;
     StripeId baseStripe = segId * strCnt;
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
@@ -244,7 +247,7 @@ void SegmentBasedRebuild::UpdateProgress(uint32_t val)
     uint32_t remainingStripe =
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "SegmentBasedRebuild::UpdateProgress, reamining:{}", remainingStripe);
+        "SegmentBasedRebuild::UpdateProgress, remainings:{}", remainingStripe);
     ctx->prog->Update(PARTITION_TYPE_STR[ctx->part], val, remainingStripe);
 }
 

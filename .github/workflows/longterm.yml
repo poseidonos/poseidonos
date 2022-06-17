@@ -20,16 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Make Dashboard Link for Workflow 
-      run: |
-        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GRAFANA_DASHBOARD="${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}" ESTIMATED_EXECUTION_TIME=$((10*60*60)) bash ${{github.workspace}}/.github/workflows/script/setup_dashboard.sh
-
-    - name: Upload Dashboard Link
-      uses: actions/upload-artifact@v3
+    
+    - name: Make Monitoring Dashboard Link 
+      uses: ./.github/actions/make-monitoring-dashboard-link
       with:
-        name: ${{github.workflow}}-Dashboard
-        path: |
-          ${{github.workspace}}/Dashboard.html
+        GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
+        ESTIMATED_EXECUTION_TIME: 36000
 
   longterm_test:
     runs-on: VM
@@ -47,11 +43,27 @@ jobs:
         chmod +x .github/workflows/script/build_setup.sh
         .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic
 
+    - name: Setup Monitoring Stack
+      uses: ./.github/actions/setup-monitoring-stack
+      with:
+        GA_DETAIL: "NULL"
+        
+        POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
+
+        AMP_REMOTE_WRITE_URL: ${{secrets.AMP_REMOTE_WRITE_URL}}
+        AMP_SIGV4_REGION: ${{secrets.AMP_SIGV4_REGION}}
+        AMP_SIGV4_ACCESS_KEY: ${{secrets.AMP_SIGV4_ACCESS_KEY}}
+        AMP_SIGV4_SECRET_KEY: ${{secrets.AMP_SIGV4_SECRET_KEY}}
+
+        LOGSTASH_PORT: ${{secrets.LOGSTASH_PORT}}
+
+        OS_DOMAIN_ENDPOINT: ${{secrets.OS_DOMAIN_ENDPOINT}}
+        OS_REGION: ${{secrets.OS_REGION}}
+
     - name: Long Term VM Test
       id: long_term
       working-directory: ${{github.workspace}}
       run: |
-        POS_WORKING_DIR=${{github.workspace}} GA_COMMIT_HASH=${{github.sha}} GA_WORKFLOW=${{github.workflow}} GA_DETAIL=NULL POS_EXPORTER_PORT=${{secrets.POS_EXPORTER_PORT}} AMP_REMOTE_WRITE_URL=${{secrets.AMP_REMOTE_WRITE_URL}} AMP_SIGV4_REGION=${{secrets.AMP_SIGV4_REGION}} AMP_SIGV4_ACCESS_KEY=${{secrets.AMP_SIGV4_ACCESS_KEY}} AMP_SIGV4_SECRET_KEY=${{secrets.AMP_SIGV4_SECRET_KEY}} LOGSTASH_PORT=${{secrets.LOGSTASH_PORT}} OS_DOMAIN_ENDPOINT=${{secrets.OS_DOMAIN_ENDPOINT}} OS_REGION=${{secrets.OS_REGION}} bash ${{github.workspace}}/.github/workflows/script/setup_monitoring.sh
         chmod +x .github/workflows/script/longterm.sh
         .github/workflows/script/longterm.sh ${{github.workspace}}
 

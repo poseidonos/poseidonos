@@ -48,7 +48,8 @@ enum class MetaFsConfigType
     MpioPoolCapacity,
     WriteMpioCacheCapacity,
     DirectAccessForJournalEnabled,
-    TimeIntervalInMillisecondsForMetric
+    TimeIntervalInMillisecondsForMetric,
+    SamplingSkipCount,
 };
 
 class MetaFsConfigManager
@@ -78,6 +79,10 @@ public:
     {
         return timeIntervalInMillisecondsForMetric_;
     }
+    virtual size_t GetSamplingSkipCount(void) const
+    {
+        return samplingSkipCount_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -101,6 +106,7 @@ private:
     size_t _GetWriteMpioCacheCapacity(void);
     bool _IsDirectAccessEnabled(void);
     size_t _GetTimeIntervalInMillisecondsForMetric(void);
+    size_t _GetSamplingSkipCount(void);
 
     std::unordered_map<MetaFsConfigType, std::pair<std::string, int>> configMap_;
     ConfigManager* configManager_;
@@ -109,6 +115,7 @@ private:
     size_t writeMpioCapacity_;
     bool directAccessEnabled_;
     size_t timeIntervalInMillisecondsForMetric_;
+    size_t samplingSkipCount_;
 };
 
 } // namespace pos

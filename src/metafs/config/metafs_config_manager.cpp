@@ -46,7 +46,8 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   mpioPoolCapacity_(0),
   writeMpioCapacity_(0),
   directAccessEnabled_(false),
-  timeIntervalInMillisecondsForMetric_(0)
+  timeIntervalInMillisecondsForMetric_(0),
+  samplingSkipCount_(0)
 {
     _BuildConfigMap();
 }
@@ -63,6 +64,7 @@ MetaFsConfigManager::Init(void)
     writeMpioCapacity_ = _GetWriteMpioCacheCapacity();
     directAccessEnabled_ = _IsDirectAccessEnabled();
     timeIntervalInMillisecondsForMetric_ = _GetTimeIntervalInMillisecondsForMetric();
+    samplingSkipCount_ = _GetSamplingSkipCount();
 
     if (!_ValidateConfig())
     {
@@ -87,6 +89,8 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"direct_access_for_journal_enable", CONFIG_TYPE_BOOL}});
     configMap_.insert({MetaFsConfigType::TimeIntervalInMillisecondsForMetric,
         {"time_interval_in_milliseconds_for_metric", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::SamplingSkipCount,
+        {"sampling_skip_count", CONFIG_TYPE_UINT64}});
 }
 
 bool
@@ -165,6 +169,19 @@ MetaFsConfigManager::_GetTimeIntervalInMillisecondsForMetric(void)
 
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
         configMap_[MetaFsConfigType::TimeIntervalInMillisecondsForMetric].first + ": " + std::to_string(count));
+
+    return count;
+}
+
+size_t
+MetaFsConfigManager::_GetSamplingSkipCount(void)
+{
+    size_t count = 0;
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::SamplingSkipCount, &count))
+        return 0;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::SamplingSkipCount].first + ": " + std::to_string(count));
 
     return count;
 }

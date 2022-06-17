@@ -79,6 +79,21 @@ public:
     {
         return LogLevelToString(logLevel);
     }
+    bool
+    IsFiltered()
+    {
+        return filter.IsFiltered();
+    }
+    string
+    IncludeRule()
+    {
+        return filter.IncludeRule();
+    }
+    string
+    ExcludeRule()
+    {
+        return filter.ExcludeRule();
+    }
 
     int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
     int SetStrLogging(bool input);

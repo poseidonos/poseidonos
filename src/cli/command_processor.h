@@ -87,6 +87,16 @@ using grpc_cli::ListArrayRequest;
 using grpc_cli::ListArrayResponse;
 using grpc_cli::ArrayInfoRequest;
 using grpc_cli::ArrayInfoResponse;
+using grpc_cli::SetLogLevelRequest;
+using grpc_cli::SetLogLevelResponse;
+using grpc_cli::SetLogPreferenceRequest;
+using grpc_cli::SetLogPreferenceResponse;
+using grpc_cli::LoggerInfoRequest;
+using grpc_cli::LoggerInfoResponse;
+using grpc_cli::GetLogLevelRequest;
+using grpc_cli::GetLogLevelResponse;
+using grpc_cli::ApplyLogFilterRequest;
+using grpc_cli::ApplyLogFilterResponse;
 
 class CommandProcessor
 {
@@ -121,6 +131,13 @@ public:
     grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
     grpc::Status ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply);
     grpc::Status ExecuteArrayInfoCommand(const ArrayInfoRequest* request, ArrayInfoResponse* reply);
+    
+    // Logger Commands
+    grpc::Status ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply);
+    grpc::Status ExecuteSetLogPreferenceCommand(const SetLogPreferenceRequest* request, SetLogPreferenceResponse* reply);
+    grpc::Status ExecuteLoggerInfoCommand(const LoggerInfoRequest* request, LoggerInfoResponse* reply);
+    grpc::Status ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, GetLogLevelResponse* reply);
+    grpc::Status ExecuteApplyLogFilterCommand(const ApplyLogFilterRequest* request, ApplyLogFilterResponse* reply);
 
 private:
     bool _isPosTerminating;

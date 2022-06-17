@@ -72,6 +72,16 @@ ArrayDevice::SetUblock(UblockSharedPtr uBlock)
     this->uBlock = uBlock;
 }
 
+string
+ArrayDevice::GetName(void)
+{
+    if (uBlock == nullptr)
+    {
+        return "null";
+    }
+    return uBlock->GetName();
+}
+
 ArrayDeviceState
 ArrayDevice::GetState(void)
 {

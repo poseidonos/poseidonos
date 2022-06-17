@@ -103,13 +103,21 @@ static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor
 static const std::string TEL40010_METAFS_USER_REQUEST = "user_request";
 static const std::string TEL40011_METAFS_USER_REQUEST_CNT = "user_request_cnt";
 static const std::string TEL40012_METAFS_USER_REQUEST_PUBLISH_CNT_PER_INTERVAL = "user_request_publish_cnt_per_interval";
-static const std::string TEL40102_METAFS_FREE_MIO_CNT = "free_mio_cnt";
-static const std::string TEL40103_METAFS_FREE_MPIO_CNT = "free_mpio_cnt";
-static const std::string TEL40104_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MPIO = "sum_of_all_the_time_spent_by_mpio";
-static const std::string TEL40105_METAFS_SUM_OF_MPIO_COUNT = "sum_of_mpio_count";
-static const std::string TEL40106_METAFS_SUM_OF_ALL_THE_TIME_SPENT_BY_MIO = "sum_of_all_the_time_spent_by_mio";
-static const std::string TEL40107_METAFS_SUM_OF_MIO_COUNT = "sum_of_mio_count";
-static const std::string TEL40108_METAFS_MIO_HANDLER_IS_WORKING = "mio_handler_is_working";
+static const std::string TEL40100_METAFS_SCHEDULER_ISSUE_COUNT_TO_SSD = "metafs_scheduler_issued_request_count_to_ssd";
+static const std::string TEL40101_METAFS_SCHEDULER_ISSUE_COUNT_TO_NVRAM = "metafs_scheduler_issued_request_count_to_nvram";
+static const std::string TEL40102_METAFS_SCHEDULER_ISSUE_COUNT_TO_JOURNAL_SSD = "metafs_scheduler_issued_request_count_to_journal_ssd";
+static const std::string TEL40200_METAFS_FREE_MIO_CNT = "free_mio_count";
+static const std::string TEL40201_METAFS_MPIO_TIME_SPENT_PROCESSING_ALL_STAGES = "sampled_mpio_time_spent_all_stages";
+static const std::string TEL40202_METAFS_PROCESSED_MPIO_COUNT = "processed_mpio_count";
+static const std::string TEL40203_METAFS_MIO_TIME_FROM_ISSUE_TO_COMPLETE = "sampled_mio_time_from_issue_to_complete";
+static const std::string TEL40204_METAFS_MIO_SAMPLED_COUNT = "sampled_mio_count";
+static const std::string TEL40205_METAFS_MIO_HANDLER_IS_WORKING = "mio_handler_is_working";
+static const std::string TEL40300_METAFS_FREE_MPIO_CNT = "free_mpio_count";
+static const std::string TEL40301_METAFS_MIO_TIME_SPENT_PROCESSING_ALL_STAGES = "sampled_mio_time_spent_all_stages";
+static const std::string TEL40302_METAFS_PROCESSED_MIO_COUNT = "processed_mio_count";
+static const std::string TEL40303_METAFS_MPIO_TIME_FROM_WRITE_TO_RELEASE = "sampled_mpio_time_from_write_to_release";
+static const std::string TEL40304_METAFS_MPIO_TIME_FROM_PUSH_TO_POP = "sampled_mpio_time_from_push_to_pop";
+static const std::string TEL40305_METAFS_MPIO_SAMPLED_COUNT = "sampled_mpio_count";
 
 static const std::string TEL50000_READ_IOPS = "read_iops";
 static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";
@@ -125,5 +133,12 @@ static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL70000_SPDK_REACTOR_UTILIZATION = "spdk_reactor_utilization";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
+
+static const std::string TEL90000_VOL_CREATE_VOLUME_ID = "create_volume_id";
+static const std::string TEL90001_VOL_DELETE_VOLUME_ID = "delete_volume_id";
+static const std::string TEL90002_VOL_MOUNT_VOLUME_ID = "mount_volume_id";
+static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
+static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
+static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
 } // namespace pos

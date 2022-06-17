@@ -105,7 +105,7 @@ uint32_t RebuildProgress::Current(void)
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
-        "array:{}, done:{}, total:{}", arrayName, done, total);
+        "rebuilding in progress, num_of_tasks:{}, array:{}, done:{}, total:{}", progress.size(), arrayName, done, total);
 
     if (total == 0)
     {

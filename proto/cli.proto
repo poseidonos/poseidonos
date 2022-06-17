@@ -102,6 +102,36 @@ service PosCli {
       		post: "/v1/arrayinfo"
     	};
 	}
+
+	rpc SetLogPreference (SetLogPreferenceRequest) returns (SetLogPreferenceResponse) {
+		option (google.api.http) = {
+      		post: "/v1/setlogpreference"
+    	};
+	}
+
+	rpc SetLogLevel (SetLogLevelRequest) returns (SetLogLevelResponse) {
+		option (google.api.http) = {
+      		post: "/v1/setloglevel"
+    	};
+	}
+
+	rpc LoggerInfo (LoggerInfoRequest) returns (LoggerInfoResponse) {
+		option (google.api.http) = {
+      		post: "/v1/loggerinfo"
+    	};
+	}
+
+	rpc GetLogLevel (GetLogLevelRequest) returns (GetLogLevelResponse) {
+		option (google.api.http) = {
+      		post: "/v1/getloglevel"
+    	};
+	}
+
+	rpc ApplyLogFilter (ApplyLogFilterRequest) returns (ApplyLogFilterResponse) {
+		option (google.api.http) = {
+      		post: "/v1/applyfilter"
+    	};
+	}
 }
 
 message Status {
@@ -569,6 +599,110 @@ message ListHaVolumeResponse {
 			string lastseen = 6;
 		}
 		repeated Volume data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetLogLevelRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string level = 1;
+	}
+	Param param = 4;
+}
+
+message SetLogLevelResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetLogPreferenceRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string structuredLogging = 1;
+	}
+	Param param = 4;
+}
+
+message SetLogPreferenceResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message LoggerInfoRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message LoggerInfoResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message LoggerInfo {
+			string minorLogPath = 1;
+			string majorLogPath = 2;
+			string logfileSizeInMb = 3;
+			int32 logfileRotationCount = 4;
+			string minAllowableLogLevel = 5;
+			int32 filterEnabled = 6;
+			string filterIncluded = 7;
+			string filterExcluded = 8;
+			bool structuredLogging = 9;
+		}
+		LoggerInfo data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message GetLogLevelRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message GetLogLevelResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message LogLevel {
+			string level = 1;
+		}
+		LogLevel data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ApplyLogFilterRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ApplyLogFilterResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
 	}
 	Result result = 3;
 	PosInfo info = 4;

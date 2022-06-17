@@ -58,6 +58,13 @@
   - [_**VSAMapFlushPendingIoCount**_](#vsamapflushpendingiocount)
   - [_**StripeMapFlushPendingIoCount**_](#stripemapflushpendingiocount)
   - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
+- [**Volume**](#Volume)
+  - [_**CreateVolumeId**_](#createvolumeid)
+  - [_**DeleteVolumeId**_](#deletevolumeid)
+  - [_**MountVolumeId**_](#mountvolumeid)
+  - [_**UnmountVolumeId**_](#unmountvolumeid)
+  - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
+  - [_**RenameVolumeId**_](#renamevolumeid)
 
 ---
 ## **Device**
@@ -960,3 +967,97 @@ VSAMap Flushed dirty page count
 ---
 
 
+## **Volume**
+
+
+---
+### _**CreateVolumeId**_
+
+**ID**: 90000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The created volume id
+
+---
+### _**DeleteVolumeId**_
+
+**ID**: 90001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The deleted volume id
+
+---
+### _**MountVolumeId**_
+
+**ID**: 90002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The mounted volume id
+
+---
+### _**UnmountVolumeId**_
+
+**ID**: 90003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The unmounted volume id
+
+---
+### _**QosUpdateVolumeId**_
+
+**ID**: 90004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The updated volume id
+
+---
+### _**RenameVolumeId**_
+
+**ID**: 90005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+The renamed Volume id
+
+---

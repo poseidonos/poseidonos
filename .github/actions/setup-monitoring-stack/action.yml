@@ -1,0 +1,149 @@
+name: "Setup Monitoring Stack"
+Description: "This action deploys monitoring stack(pos-exporter, prometheus, filebeat, logstash) for poseidonos"
+inputs:
+  GA_DETAIL:
+    required: true
+    
+  POS_EXPORTER_PORT:
+    required: true
+
+  AMP_REMOTE_WRITE_URL:
+    required: true
+  AMP_SIGV4_REGION:
+    required: true
+  AMP_SIGV4_ACCESS_KEY:
+    required: true
+  AMP_SIGV4_SECRET_KEY:
+    required: true
+  
+  LOGSTASH_PORT:
+    required: true
+  
+  OS_DOMAIN_ENDPOINT:
+    required: true
+  OS_REGION:
+    required: true
+  
+runs:
+  using: "composite"
+  steps:
+    - name: "Run Pos-exporter"
+      shell: bash
+      run: |
+        nohup ${{ github.workspace }}/bin/pos-exporter \
+            < /dev/null \
+            1> ${{ github.workspace }}/bin/pos-exporter_stdout.txt \
+            2> ${{ github.workspace }}/bin/pos-exporter_stderr.txt \
+            &
+  
+    - name: "Deploying Prometheus"
+      shell: bash
+      env:
+        PROMETHEUS_CONF_PATH: ${{ github.workspace }}/config/prometheus.yml
+      run: |
+        # Set Prometheus Config
+        cat > ${PROMETHEUS_CONF_PATH} <<-EOF
+        scrape_configs:
+          - job_name: "Github-Action"
+            scrape_interval: 1s
+            static_configs:
+              - targets: ["$(hostname -i):${{ inputs.POS_EXPORTER_PORT }}"]
+                labels:
+                  ga_commit_hash: "${{ github.sha }}"
+                  ga_workflow: "${{ github.workflow }}"
+                  ga_detail: "${{ inputs.GA_DETAIL }}"
+        remote_write:
+          - url: ${{ inputs.AMP_REMOTE_WRITE_URL }}
+            sigv4:
+              region: ${{ inputs.AMP_SIGV4_REGION }}
+              access_key: ${{ inputs.AMP_SIGV4_ACCESS_KEY }}
+              secret_key: ${{ inputs.AMP_SIGV4_SECRET_KEY }}
+        EOF
+        
+        # Run Prometheus
+        docker run \
+               -d \
+               -p 9090:9090 \
+               -v ${PROMETHEUS_CONF_PATH}:/etc/prometheus/prometheus.yml \
+               prom/prometheus
+
+    - name: "Deploying Logstash"
+      shell: bash
+      env:
+        LOGSTASH_CONF_PATH: ${{ github.workspace }}/config/logstash.conf
+      run: |
+        # Set Logstash Config
+        cat > ${LOGSTASH_CONF_PATH} <<-EOF
+        input {
+          beats {
+            port => 5045
+            type => "POS-Log-from-Github-Action"
+          }
+        }
+        
+        filter {
+          grok{
+        	  match => {
+              "message" => "\[%{TIMESTAMP_ISO8601:[@metadata][time]}\]\[%{INT:process_id}\]\[%{INT:thread_id}\]\[%{INT:pos_id}\]\[%{INT:event_id}\]\[\s*%{WORD:level}\s*\]\s*%{GREEDYDATA:inner_message}"
+            }
+            add_field => {
+              "ga_commit_hash" => "${{ github.sha }}"
+              "ga_workflow" => "${{ github.workflow }}"
+              "ga_detail" => "${{ inputs.GA_DETAIL }}"
+            }
+          }
+          
+          if "_grokparsefailure" in [tag] {
+            # Parsing fails, log is in "JSON (Structured)" format
+            json { source => "message" }
+          }
+          
+          date{
+            match => [ "[@metadata][time]", "yyyy-MM-dd HH:mm:ss.SSSSSSSSS" ]
+            timezone => "UTC"
+          }
+        }
+        
+        output {
+          opensearch {
+            hosts  => ["${{ inputs.OS_DOMAIN_ENDPOINT }}:443"]
+            auth_type => {
+              type => 'aws_iam'
+              aws_access_key_id => '${{ inputs.AMP_SIGV4_ACCESS_KEY }}'
+              aws_secret_access_key => '${{ inputs.AMP_SIGV4_SECRET_KEY }}'
+              region => '${{ inputs.OS_REGION }}'
+            }
+            index => "github-action-pos-log-$(echo ${{ github.sha }} | tr '[:upper:]' '[:lower:]')"
+          }
+        }
+        EOF
+        
+        # Run Logstash
+        docker run \
+               -d \
+               -p ${{ inputs.LOGSTASH_PORT }}:${{ inputs.LOGSTASH_PORT }} \
+               -v ${LOGSTASH_CONF_PATH}:/usr/share/logstash/pipeline/logstash.conf \
+               opensearchproject/logstash-oss-with-opensearch-output-plugin
+    
+    - name: "Deploying Filebeat"
+      shell: bash
+      env:
+        FILEBEAT_CONF_PATH: ${{ github.workspace }}/config/filebeat.yml
+      run: |
+        # Set Filebeat Config
+        cat > ${FILEBEAT_CONF_PATH} <<-EOF
+        filebeat.inputs:
+          - type: log
+            enabled: true
+            paths:
+              - /mnt/log/pos/pos.log
+        output.logstash:
+          hosts: ["$(hostname -i):${{ inputs.LOGSTASH_PORT }}"]
+        EOF
+        
+        # Run Filebeat
+        docker run \
+               -d \
+               -v ${FILEBEAT_CONF_PATH}:/usr/share/filebeat/filebeat.yml \
+               -v /var/log:/mnt/log \
+               docker.elastic.co/beats/filebeat-oss:8.2.0 -e --strict.perms=false

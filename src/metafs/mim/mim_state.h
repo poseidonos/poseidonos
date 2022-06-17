@@ -71,9 +71,9 @@ enum class MioTimestampStage
     Allocate,
     Initialize,
     Issue,
-    Enqueue,
-    Dequeue,
     Complete,
+    PushToCQ,
+    PopFromCQ,
     Release,
     Count
 };
@@ -91,8 +91,8 @@ enum class MpioTimestampStage
     Write,
 
     Complete,
-    Enqueue,
-    Dequeue,
+    PushToDoneQ,
+    PopFromDoneQ,
     Release,
     Count
 };

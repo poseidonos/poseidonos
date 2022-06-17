@@ -335,7 +335,14 @@ TEST(ArrayState, IsUnmountable_testIfErrorEventIsReturnedWhenArrayIsNotMountedYe
         int actual = arrayState.IsUnmountable();
 
         // Then
-        ASSERT_EQ(EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED), actual);
+        if (ArrayStateEnum::BROKEN == arrayStateEnum)
+        {
+            ASSERT_EQ(EID(UNMOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_UNMOUNTED), actual);
+        }
+        else
+        {
+            ASSERT_EQ(EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED), actual);
+        }
     }
 }
 

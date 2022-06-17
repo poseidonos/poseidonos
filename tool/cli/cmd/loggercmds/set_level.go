@@ -1,15 +1,16 @@
 package loggercmds
 
 import (
-	"encoding/json"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"log"
 
-	"github.com/labstack/gommon/log"
+	pb "cli/api"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var SetLevelCmd = &cobra.Command{
@@ -24,25 +25,36 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "SETLOGLEVEL"
-
-		param := messages.SetLevelReqParam{
-			LEVEL: set_level_loggerLevel,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		setLevelReq := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(setLevelReq)
+		param := &pb.SetLogLevelRequest_Param{Level: set_level_loggerLevel}
+		req := &pb.SetLogLevelRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendSetLogLevel(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
