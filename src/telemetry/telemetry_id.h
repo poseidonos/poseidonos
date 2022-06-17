@@ -129,6 +129,8 @@ static const std::string TEL50012_WRITE_LATENCY_MEAN_NS = "write_latency_mean_ns
 static const std::string TEL50013_WRITE_LATENCY_MAX_NS = "write_latency_max_ns";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
+static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
+static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
 
 static const std::string TEL70000_SPDK_REACTOR_UTILIZATION = "spdk_reactor_utilization";
 
@@ -141,4 +143,5 @@ static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
 static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
 static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
+static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 } // namespace pos

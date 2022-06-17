@@ -58,14 +58,17 @@
   - [_**VSAMapFlushPendingIoCount**_](#vsamapflushpendingiocount)
   - [_**StripeMapFlushPendingIoCount**_](#stripemapflushpendingiocount)
   - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
-- [**Volume**](#Volume)
+  - [_**ArrayUsageBlockCount**_](#arrayusageblockcount)
+  - [_**VolumeUsageBlockCount**_](#volumeusageblockcount)
+- [**Volume**](#volume-1)
   - [_**CreateVolumeId**_](#createvolumeid)
   - [_**DeleteVolumeId**_](#deletevolumeid)
   - [_**MountVolumeId**_](#mountvolumeid)
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-
+- [**ResourceMonitoring**](#resource)
+  - [_**AvailableMemorySize**_](#availableMemorySize)
 ---
 ## **Device**
 
@@ -967,6 +970,37 @@ VSAMap Flushed dirty page count
 ---
 
 
+### _**ArrayUsageBlockCount**_
+
+**ID**: 60002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id"}
+
+**Introduced**: v0.10.0
+
+Remain Storage Size(block count) In an Array
+
+---
+
+### _**VolumeUsageBlockCount**_
+
+**ID**: 60003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"publisher_name", "array_name", "run_id", "volume_id"}
+
+**Introduced**: v0.10.0
+
+Remain Storage Size(block count) In a Volume
+
+---
 ## **Volume**
 
 
@@ -1059,5 +1093,25 @@ The updated volume id
 **Introduced**: v0.10.0
 
 The renamed Volume id
+
+---
+## **ResourceMonitoring**
+
+Resource group contains the metrics of the pos resource.
+
+---
+### _**AvailableMemorySize**_
+
+**ID**: 100000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"node_name": String}
+
+**Introduced**: v0.10.0
+
+Available memory size
 
 ---

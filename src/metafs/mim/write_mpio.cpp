@@ -102,22 +102,22 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             "[Mpio][_MakeReady  ] type={}, req.tagId={}, mpio_id={}, curLpn={}, prevLpn={}, curBufA={}, prevBufA={}",
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
-        if (MetaStorageType::SSD != io.targetMediaType)
+        if (IsCacheableVolumeType())
         {
             switch (cacheState)
             {
-                case MpioCacheState::FirstRead:
+                case MpioCacheState::Read:
                     // read -> merge data
                     SetNextState(MpAioState::Read);
                     break;
 
-                case MpioCacheState::MergeSingle:
+                case MpioCacheState::Merge:
                     // merge data
                     SetNextState(expNextState);
                     break;
 
-                case MpioCacheState::Mergeable:
-                    // skip merge data, just write
+                case MpioCacheState::Write:
+                    // cached, skip reading & merging, just write
                     SetNextState(MpAioState::PrepareWrite);
                     break;
 
@@ -155,7 +155,8 @@ WriteMpio::_PrepareWrite(MpAioState expNextState)
 {
     BuildCompositeMDPage();
 
-    SetNextState(expNextState); // WriteMpio::Write()
+    // WriteMpio::Write()
+    SetNextState(expNextState);
 
     return true;
 }
@@ -165,14 +166,12 @@ WriteMpio::_MergeData(MpAioState expNextState)
 {
     int contd2NextRun = _MergeMDPage(io.userBuf, io.startByteOffset, io.byteSize, GetMDPageDataBuf());
 
-    SetNextState(expNextState); // WriteMpio::_PrepareWrite()
+    // WriteMpio::_PrepareWrite()
+    SetNextState(expNextState);
 
-    if (MetaStorageType::SSD != io.targetMediaType)
+    if (IsCacheableVolumeType() && IsCached())
     {
-        if (MpioCacheState::Init != cacheState)
-        {
-            cacheState = MpioCacheState::Mergeable;
-        }
+        ChangeCacheStateTo(MpioCacheState::Write);
     }
 
     return contd2NextRun;

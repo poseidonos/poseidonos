@@ -40,6 +40,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/sys_info/space_info.h"
 #include "src/qos/qos_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -54,6 +55,7 @@
 #include "src/volume/volume_meta_intf.h"
 #include "src/volume/volume_renamer.h"
 #include "src/volume/volume_qos_updater.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -83,13 +85,15 @@ VolumeManager::Init(void)
     tp = new TelemetryPublisher(("Volume_Manager"));
     tp->AddDefaultLabel("array_name", arrayInfo->GetName());
 
-    if (tp != nullptr)
+    if (tp == nullptr)
     {
+        tp = new TelemetryPublisher(("VolumeManager"));
+        tp->AddDefaultLabel("array_name", arrayInfo->GetName());
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
     }
-
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
 
+    _PublishTelemetryArrayUsage();
     return result;
 }
 
@@ -112,13 +116,13 @@ VolumeManager::Dispose(void)
     volumes.Clear();
     _ClearLock();
 
+    VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
     if (tp != nullptr)
     {
         TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
         delete tp;
+        tp = nullptr;
     }
-
-    VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
 }
 
 void
@@ -193,6 +197,19 @@ VolumeManager::_PublishTelemetryVolumeIdInfo(std::string id, int volId)
     
 }
 
+void
+VolumeManager::_PublishTelemetryArrayUsage(void)
+{
+    if (tp != nullptr)
+    {
+        uint64_t arrayUsage = SpaceInfo::Remaining(arrayInfo->GetIndex());
+        POSMetric metric(TEL60002_ARRAY_USAGE_BLK_CNT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(arrayUsage);
+        metric.AddLabel("array_id", to_string(arrayInfo->GetIndex()));
+        tp->PublishMetric(metric);
+    }
+}
+
 int
 VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume)
 {
@@ -224,6 +241,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     if (EID(SUCCESS) == ret)
     {
         _PublishTelemetryVolumeIdInfo(TEL90000_VOL_CREATE_VOLUME_ID, name);
+        _PublishTelemetryArrayUsage();
     }
 
     return ret;
@@ -261,6 +279,7 @@ VolumeManager::Delete(std::string name)
     if (EID(SUCCESS) == ret)
     {
         _PublishTelemetryVolumeIdInfo(TEL90001_VOL_DELETE_VOLUME_ID, volId);
+        _PublishTelemetryArrayUsage();
     }
 
     return ret;
