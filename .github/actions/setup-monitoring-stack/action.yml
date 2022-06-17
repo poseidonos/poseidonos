@@ -1,13 +1,6 @@
 name: "Setup Monitoring Stack"
 Description: "This action deploys monitoring stack(pos-exporter, prometheus, filebeat, logstash) for poseidonos"
 inputs:
-  POS_WORKING_DIR:
-    required: true
-
-  GA_COMMIT_HASH:
-    required: true
-  GA_WORKFLOW:
-    required: true
   GA_DETAIL:
     required: true
     
@@ -37,16 +30,16 @@ runs:
     - name: "Run Pos-exporter"
       shell: bash
       run: |
-        nohup ${{ inputs.POS_WORKING_DIR }}/bin/pos-exporter \
+        nohup ${{ github.workspace }}/bin/pos-exporter \
             < /dev/null \
-            1> ${{ inputs.POS_WORKING_DIR }}/bin/pos-exporter_stdout.txt \
-            2> ${{ inputs.POS_WORKING_DIR }}/bin/pos-exporter_stderr.txt \
+            1> ${{ github.workspace }}/bin/pos-exporter_stdout.txt \
+            2> ${{ github.workspace }}/bin/pos-exporter_stderr.txt \
             &
   
     - name: "Deploying Prometheus"
       shell: bash
       env:
-        PROMETHEUS_CONF_PATH: ${{ inputs.POS_WORKING_DIR }}/config/prometheus.yml
+        PROMETHEUS_CONF_PATH: ${{ github.workspace }}/config/prometheus.yml
       run: |
         # Set Prometheus Config
         cat > ${PROMETHEUS_CONF_PATH} <<-EOF
@@ -56,8 +49,8 @@ runs:
             static_configs:
               - targets: ["$(hostname -i):${{ inputs.POS_EXPORTER_PORT }}"]
                 labels:
-                  ga_commit_hash: "${{ inputs.GA_COMMIT_HASH }}"
-                  ga_workflow: "${{ inputs.GA_WORKFLOW }}"
+                  ga_commit_hash: "${{ github.sha }}"
+                  ga_workflow: "${{ github.workflow }}"
                   ga_detail: "${{ inputs.GA_DETAIL }}"
         remote_write:
           - url: ${{ inputs.AMP_REMOTE_WRITE_URL }}
@@ -77,7 +70,7 @@ runs:
     - name: "Deploying Logstash"
       shell: bash
       env:
-        LOGSTASH_CONF_PATH: ${{ inputs.POS_WORKING_DIR }}/config/logstash.conf
+        LOGSTASH_CONF_PATH: ${{ github.workspace }}/config/logstash.conf
       run: |
         # Set Logstash Config
         cat > ${LOGSTASH_CONF_PATH} <<-EOF
@@ -94,8 +87,8 @@ runs:
               "message" => "\[%{TIMESTAMP_ISO8601:[@metadata][time]}\]\[%{INT:process_id}\]\[%{INT:thread_id}\]\[%{INT:pos_id}\]\[%{INT:event_id}\]\[\s*%{WORD:level}\s*\]\s*%{GREEDYDATA:inner_message}"
             }
             add_field => {
-              "ga_commit_hash" => "${{ inputs.GA_COMMIT_HASH }}"
-              "ga_workflow" => "${{ inputs.GA_WORKFLOW }}"
+              "ga_commit_hash" => "${{ github.sha }}"
+              "ga_workflow" => "${{ github.workflow }}"
               "ga_detail" => "${{ inputs.GA_DETAIL }}"
             }
           }
@@ -120,7 +113,7 @@ runs:
               aws_secret_access_key => '${{ inputs.AMP_SIGV4_SECRET_KEY }}'
               region => '${{ inputs.OS_REGION }}'
             }
-            index => "github-action-pos-log-$(echo ${{ inputs.GA_COMMIT_HASH }} | tr '[:upper:]' '[:lower:]')"
+            index => "github-action-pos-log-$(echo ${{ github.sha }} | tr '[:upper:]' '[:lower:]')"
           }
         }
         EOF
@@ -135,7 +128,7 @@ runs:
     - name: "Deploying Filebeat"
       shell: bash
       env:
-        FILEBEAT_CONF_PATH: ${{ inputs.POS_WORKING_DIR }}/config/filebeat.yml
+        FILEBEAT_CONF_PATH: ${{ github.workspace }}/config/filebeat.yml
       run: |
         # Set Filebeat Config
         cat > ${FILEBEAT_CONF_PATH} <<-EOF

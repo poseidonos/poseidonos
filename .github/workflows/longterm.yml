@@ -24,13 +24,8 @@ jobs:
     - name: Make Monitoring Dashboard Link 
       uses: ./.github/actions/make-monitoring-dashboard-link
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-	
-	GA_COMMIT_HASH: ${{github.sha}}
-	GA_WORKFLOW: ${{github.workflow}}
-	
-	GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
-	ESTIMATED_EXECUTION_TIME: 36000
+        GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
+        ESTIMATED_EXECUTION_TIME: 36000
 
   longterm_test:
     runs-on: VM
@@ -51,23 +46,19 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-	
-	GA_COMMIT_HASH: ${{github.sha}}
-	GA_WORKFLOW: ${{github.workflow}}
-	GA_DETAIL: "NULL"
-	
-	POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
-	
-	AMP_REMOTE_WRITE_URL: ${{secrets.AMP_REMOTE_WRITE_URL}}
-	AMP_SIGV4_REGION: ${{secrets.AMP_SIGV4_REGION}}
-	AMP_SIGV4_ACCESS_KEY: ${{secrets.AMP_SIGV4_ACCESS_KEY}}
-	AMP_SIGV4_SECRET_KEY: ${{secrets.AMP_SIGV4_SECRET_KEY}}
-	
-	LOGSTASH_PORT: ${{secrets.LOGSTASH_PORT}}
-	
-	OS_DOMAIN_ENDPOINT: ${{secrets.OS_DOMAIN_ENDPOINT}}
-	OS_REGION: ${{secrets.OS_REGION}}
+        GA_DETAIL: "NULL"
+        
+        POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
+
+        AMP_REMOTE_WRITE_URL: ${{secrets.AMP_REMOTE_WRITE_URL}}
+        AMP_SIGV4_REGION: ${{secrets.AMP_SIGV4_REGION}}
+        AMP_SIGV4_ACCESS_KEY: ${{secrets.AMP_SIGV4_ACCESS_KEY}}
+        AMP_SIGV4_SECRET_KEY: ${{secrets.AMP_SIGV4_SECRET_KEY}}
+
+        LOGSTASH_PORT: ${{secrets.LOGSTASH_PORT}}
+
+        OS_DOMAIN_ENDPOINT: ${{secrets.OS_DOMAIN_ENDPOINT}}
+        OS_REGION: ${{secrets.OS_REGION}}
 
     - name: Long Term VM Test
       id: long_term

@@ -24,11 +24,6 @@ jobs:
     - name: Make Monitoring Dashboard Link
       uses: ./.github/actions/make-monitoring-dashboard-link
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
-
         GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
         ESTIMATED_EXECUTION_TIME: 259200
 
@@ -58,10 +53,6 @@ jobs:
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
       with:
-        POS_WORKING_DIR: ${{github.workspace}}
-
-        GA_COMMIT_HASH: ${{github.sha}}
-        GA_WORKFLOW: ${{github.workflow}}
         GA_DETAIL: "three_days"
 
         POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
