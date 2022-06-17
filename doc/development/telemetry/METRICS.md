@@ -65,7 +65,7 @@
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-- [**ResourceMonitoring**](#Resource)
+- [**ResourceMonitoring**](#resource)
   - [_**AvailableMemorySize**_](#availableMemorySize)
 ---
 ## **Device**
@@ -1069,7 +1069,7 @@ Resource group contains the metrics of the pos resource.
 ---
 ### _**AvailableMemorySize**_
 
-**ID**: 90000
+**ID**: 100000
 
 **Type**: Gauge
 

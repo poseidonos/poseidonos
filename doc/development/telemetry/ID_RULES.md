@@ -124,7 +124,7 @@ Array ID Range : 60000 ~ 70000
 ---
 
 ## **Resource monitoring**
-Array ID Range : 100000 ~ 100099
+Resource monitoring ID Range : 100000 ~ 100099
 
 100000 Available memory size
 
