@@ -128,9 +128,7 @@ ArrayRebuild::Start(void)
 void
 ArrayRebuild::Discard(void)
 {
-    POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-        "Array {} Rebuild discarded. Cannot start rebuild due to failure in preparation process",
-        arrayName);
+    POS_TRACE_ERROR(EID(REBUILD_DISCARDED), "Rebuild discarded, array_name:{}", arrayName);
     tasks.clear();
     RebuildResult res;
     res.array = arrayName;
@@ -181,7 +179,7 @@ void
 ArrayRebuild::_RebuildDone(RebuildResult res)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, res.result);
+        "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, REBUILD_STATE_STR[(int)res.result]);
     RebuildState taskResult = res.result;
     state = taskResult;
 
@@ -215,28 +213,20 @@ void
 ArrayRebuild::_RebuildCompleted(RebuildResult res)
 {
     state = res.result;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::_RebuildCompleted array {} rebuild completed with result {} ", arrayName, state);
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "ArrayRebuild completed, array:{}, result:{}", arrayName, REBUILD_STATE_STR[(int)state]);
     switch (state)
     {
         case RebuildState::PASS:
-            POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_RESULT_PASS,
-                "array {} rebuild completed sucessfully", arrayName);
             rebuildLogger->SetResult("PASS");
             break;
         case RebuildState::FAIL:
-            POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "array {} rebuild failure", arrayName);
             rebuildLogger->SetResult("FAIL");
             break;
         case RebuildState::CANCELLED:
-            POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_RESULT_CANCELLED,
-                "array {} rebuild cancelled", arrayName);
             rebuildLogger->SetResult("CANCELLED");
             break;
         default:
-            POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "array {} unhandled rebuild result", arrayName);
             break;
     }
     rebuildLogger->WriteLog();

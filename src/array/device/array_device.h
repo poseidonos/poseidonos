@@ -54,6 +54,7 @@ public:
     UblockSharedPtr GetUblock(void) override;
     UBlockDevice* GetUblockPtr(void) override;
     void SetUblock(UblockSharedPtr uBlock) override;
+    string GetName(void);
     string PrevUblockInfo() { return prevUblockInfo; }
 
 private:

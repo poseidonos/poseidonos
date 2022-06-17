@@ -116,21 +116,21 @@ TEST(Logger, ApplyFilter_testIfFilterIsAppliedWellByGetPreferencesAfterApplyingT
     json jsonDoc = json::parse(jsonString.c_str());
 
     string filterIncluded = "";
-    if (jsonDoc["data"].contains("filter_included"))
+    if (jsonDoc["data"].contains("filterIncluded"))
     {
-        filterIncluded = jsonDoc["data"]["filter_included"].get<string>();
+        filterIncluded = jsonDoc["data"]["filterIncluded"].get<string>();
     }
 
     string filterExcluded = "";
-    if (jsonDoc["data"].contains("filter_included"))
+    if (jsonDoc["data"].contains("filterExcluded"))
     {
-        filterExcluded = jsonDoc["data"]["filter_excluded"].get<string>();
+        filterExcluded = jsonDoc["data"]["filterExcluded"].get<string>();
     }
 
     int filterEnabled = 0;
-    if (jsonDoc["data"].contains("filter_enabled"))
+    if (jsonDoc["data"].contains("filterEnabled"))
     {
-        filterEnabled = jsonDoc["data"]["filter_enabled"].get<int>();
+        filterEnabled = jsonDoc["data"]["filterEnabled"].get<int>();
     }
 
     ASSERT_EQ(filterEnabled, 1);

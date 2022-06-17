@@ -108,7 +108,7 @@ TEST(ArrayMountSequence, Unmount_testIfFailsToUnmountWhenInFaultSituation)
     int actual = mntSeq.Unmount();
 
     // Then
-    ASSERT_EQ(EID(UNMOUNT_ARRAY_ALREADY_UNMOUNTED), actual);
+    ASSERT_EQ(EID(UNMOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_UNMOUNTED), actual);
 }
 
 TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)

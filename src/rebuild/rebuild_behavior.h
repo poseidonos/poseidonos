@@ -67,5 +67,7 @@ protected:
     MemoryManager* mm = nullptr;
     BufferPool* recoverBuffers = nullptr;
     BufferPool* rebuildReadBuffers = nullptr;
+    static const int INIT_REBUILD_BUFFER_MAX_RETRY = 100;
+    int initBufferRetryCnt = 0;
 };
 } // namespace pos
