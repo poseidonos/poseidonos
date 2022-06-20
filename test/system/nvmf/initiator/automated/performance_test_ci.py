@@ -92,7 +92,7 @@ def bring_up_ibofos():
     print("Start telemetry")
     start_telemetry_script = args.pos_root + "/bin/poseidonos-cli telemetry start"
     print(start_telemetry_script)
-    remote_execute(args.target_ip, args.target_id, args.target_pw, start_telemetry_script)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, start_telemetry_script)
     print("Telemetry is available")
     # check_request_volume_mounted(result)
 
