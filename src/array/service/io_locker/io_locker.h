@@ -59,6 +59,7 @@ public:
     bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;
     void Unlock(IArrayDevice* dev, StripeId val) override;
     void Unlock(set<IArrayDevice*>& devs, StripeId val) override;
+    void WriteBusyLog(IArrayDevice* dev) override;
 
 private:
     StripeLocker* _Find(IArrayDevice* dev);
