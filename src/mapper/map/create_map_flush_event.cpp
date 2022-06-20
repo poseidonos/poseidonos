@@ -30,61 +30,39 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "create_map_flush_event.h"
 
-#include <queue>
-
-#include "src/mapper/include/mpage_info.h"
-#include "src/lib/bitmap.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/mapper/map/map.h"
+#include "src/mapper/map/map_flush_event.h"
+#include "src/mapper/map/map_header.h"
 
 namespace pos
 {
-static const int MAX_MPAGES_PER_SET = 1024;
-
-struct MpageSet
+CreateMapFlushEvent::CreateMapFlushEvent(std::shared_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler)
+: Event(false, BackendEvent::BackendEvent_MetaIO),
+  info(info),
+  eventScheduler(eventScheduler)
 {
-    MpageNum startMpage;
-    int numMpages;
+}
 
-    bool
-    CanBeCoalesced(MpageNum page)
+// LCOV_EXCL_START
+CreateMapFlushEvent::~CreateMapFlushEvent(void)
+{
+}
+// LCOV_EXCL_STOP
+
+bool
+CreateMapFlushEvent::Execute(void)
+{
+    while (info->sequentialPages->IsRemaining())
     {
-        return (startMpage - 1 <= page &&
-            page <= startMpage + numMpages &&
-            numMpages < MAX_MPAGES_PER_SET);
+        MpageSet mpageSet = info->sequentialPages->PopNextMpageSet();
+        std::shared_ptr<FlushInfo> flushInfo = std::make_shared<FlushInfo>(info->file, mpageSet, info->map, info->mapHeader, info->callback);
+        EventSmartPtr event(new MapFlushEvent(flushInfo));
+        eventScheduler->EnqueueEvent(event);
     }
 
-    void
-    Coalesce(MpageNum page)
-    {
-        if (startMpage - 1 == page)
-        {
-            startMpage--;
-        }
-        else if (page == startMpage + numMpages)
-        {
-            numMpages++;
-        }
-    }
-};
-
-class SequentialPageFinder
-{
-public:
-    // for test
-    SequentialPageFinder(void) = default;
-    explicit SequentialPageFinder(MpageList& pages);
-    explicit SequentialPageFinder(BitMap* pages);
-    // LCOV_EXCL_START
-    virtual ~SequentialPageFinder(void);
-    // LCOV_EXCL_STOP
-
-    virtual MpageSet PopNextMpageSet(void);
-    virtual bool IsRemaining(void);
-
-private:
-    void _UpdateSequentialPageList(MpageList& pages);
-    std::queue<MpageSet> sequentialPages;
-};
-
+    return true;
+}
 } // namespace pos

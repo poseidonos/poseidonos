@@ -30,61 +30,55 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "map_flush_event.h"
 
-#include <queue>
-
-#include "src/mapper/include/mpage_info.h"
-#include "src/lib/bitmap.h"
+#include "src/mapper/map/map.h"
+#include "src/mapper/map/map_header.h"
+#include "src/mapper/map/map_io_handler.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-static const int MAX_MPAGES_PER_SET = 1024;
-
-struct MpageSet
+MapFlushEvent::MapFlushEvent(std::shared_ptr<FlushInfo> info)
+: Event(false, BackendEvent::BackendEvent_MetaIO),
+  info(info)
 {
-    MpageNum startMpage;
-    int numMpages;
+}
 
-    bool
-    CanBeCoalesced(MpageNum page)
+// LCOV_EXCL_START
+MapFlushEvent::~MapFlushEvent(void)
+{
+}
+// LCOV_EXCL_STOP
+
+bool
+MapFlushEvent::Execute(void)
+{
+    char* buffer = new char[info->map->GetSize() * info->mpageSet.numMpages];
+
+    for (int offset = 0; offset < info->mpageSet.numMpages; offset++)
     {
-        return (startMpage - 1 <= page &&
-            page <= startMpage + numMpages &&
-            numMpages < MAX_MPAGES_PER_SET);
+        char* dest = buffer + info->map->GetSize() * offset;
+        int pageNr = info->mpageSet.startMpage + offset;
+
+        info->map->GetMpageLock(pageNr);
+        memcpy(dest, (void*)info->map->GetMpage(pageNr), info->map->GetSize());
+        info->mapHeader->GetTouchedMpages()->ClearBit(pageNr);
+        info->map->ReleaseMpageLock(pageNr);
     }
 
-    void
-    Coalesce(MpageNum page)
-    {
-        if (startMpage - 1 == page)
-        {
-            startMpage--;
-        }
-        else if (page == startMpage + numMpages)
-        {
-            numMpages++;
-        }
-    }
-};
+    MapFlushIoContext* request = new MapFlushIoContext();
+    request->opcode = MetaFsIoOpcode::Write;
+    request->fd = info->file->GetFd();
+    request->fileOffset = info->mapHeader->GetSize() + info->mpageSet.startMpage * info->map->GetSize();
+    request->length = info->map->GetSize() * info->mpageSet.numMpages;
+    request->buffer = buffer;
+    request->callback = info->callback;
+    request->startMpage = info->mpageSet.startMpage;
+    request->numMpages = info->mpageSet.numMpages;
 
-class SequentialPageFinder
-{
-public:
-    // for test
-    SequentialPageFinder(void) = default;
-    explicit SequentialPageFinder(MpageList& pages);
-    explicit SequentialPageFinder(BitMap* pages);
-    // LCOV_EXCL_START
-    virtual ~SequentialPageFinder(void);
-    // LCOV_EXCL_STOP
+    info->file->AsyncIO(request);
 
-    virtual MpageSet PopNextMpageSet(void);
-    virtual bool IsRemaining(void);
-
-private:
-    void _UpdateSequentialPageList(MpageList& pages);
-    std::queue<MpageSet> sequentialPages;
-};
-
+    return true;
+}
 } // namespace pos

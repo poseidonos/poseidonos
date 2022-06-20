@@ -30,61 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/mapper/map/map_flush_event.h"
 
-#include <queue>
+#include <gtest/gtest.h>
 
-#include "src/mapper/include/mpage_info.h"
-#include "src/lib/bitmap.h"
+#include "test/unit-tests/mapper/map/map_header_mock.h"
+#include "test/unit-tests/mapper/map/map_mock.h"
+#include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+
+using ::testing::Return;
 
 namespace pos
 {
-static const int MAX_MPAGES_PER_SET = 1024;
-
-struct MpageSet
+TEST(MapFlushEvent, Execute_testIfTheEventCanCreateSingleRequest)
 {
-    MpageNum startMpage;
-    int numMpages;
+    // given
+    MpageSet mpageSet;
+    MockMetaFileIntf file;
+    MockMap map;
+    MockMapHeader header(0);
 
-    bool
-    CanBeCoalesced(MpageNum page)
-    {
-        return (startMpage - 1 <= page &&
-            page <= startMpage + numMpages &&
-            numMpages < MAX_MPAGES_PER_SET);
-    }
+    // when
+    mpageSet.numMpages = 0;
+    std::shared_ptr<FlushInfo> info = std::make_shared<FlushInfo>(&file, mpageSet, &map, &header, nullptr);
+    MapFlushEvent event(info);
 
-    void
-    Coalesce(MpageNum page)
-    {
-        if (startMpage - 1 == page)
-        {
-            startMpage--;
-        }
-        else if (page == startMpage + numMpages)
-        {
-            numMpages++;
-        }
-    }
-};
-
-class SequentialPageFinder
-{
-public:
-    // for test
-    SequentialPageFinder(void) = default;
-    explicit SequentialPageFinder(MpageList& pages);
-    explicit SequentialPageFinder(BitMap* pages);
-    // LCOV_EXCL_START
-    virtual ~SequentialPageFinder(void);
-    // LCOV_EXCL_STOP
-
-    virtual MpageSet PopNextMpageSet(void);
-    virtual bool IsRemaining(void);
-
-private:
-    void _UpdateSequentialPageList(MpageList& pages);
-    std::queue<MpageSet> sequentialPages;
-};
+    // then
+    EXPECT_CALL(file, GetFd).WillRepeatedly(Return(0));
+    EXPECT_CALL(map, GetSize).WillRepeatedly(Return(0));
+    EXPECT_CALL(header, GetSize).WillRepeatedly(Return(0));
+    EXPECT_CALL(file, AsyncIO).WillOnce(Return(0));
+    EXPECT_TRUE(event.Execute());
+}
 
 } // namespace pos
