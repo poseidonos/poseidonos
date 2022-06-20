@@ -181,7 +181,7 @@ TelemetryPublisher::AddDefaultLabel(std::string key, std::string value)
     if (defaultlabelList.size() == MAX_NUM_LABEL)
     {
         POS_TRACE_WARN(EID(TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION),
-            "key:{}, value:{}, defaultlibellist_size:{}, max_num_label:{}", 
+            "key:{}, value:{}, defaultlabellist_size:{}, max_num_label:{}", 
             key, value, defaultlabelList.size(), MAX_NUM_LABEL);
         return -1;
     }
