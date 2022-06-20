@@ -180,7 +180,9 @@ TelemetryPublisher::AddDefaultLabel(std::string key, std::string value)
 {
     if (defaultlabelList.size() == MAX_NUM_LABEL)
     {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add Default Label, numLabel is overflowed!!!!, key:{}, value:{}", key, value);
+        POS_TRACE_WARN(EID(TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION),
+            "key:{}, value:{}, defaultlibellist_size:{}, max_num_label:{}", 
+            key, value, defaultlabelList.size(), MAX_NUM_LABEL);
         return -1;
     }
     defaultlabelList.emplace(key, value);

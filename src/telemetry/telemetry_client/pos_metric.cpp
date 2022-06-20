@@ -85,7 +85,8 @@ POSMetric::AddLabel(std::string label, std::string key)
 {
     if (labelList.size() == MAX_NUM_LABEL)
     {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] Failed to add Label, numLabel is overflowed!!!!, label:{}, key:{}", label, key);
+        POS_TRACE_WARN(EID(TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION),
+            "label:{}, key:{}", label, key);
         return -1;
     }
     labelList.emplace(label, key);
