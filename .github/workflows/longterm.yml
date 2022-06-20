@@ -27,6 +27,13 @@ jobs:
         GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
         ESTIMATED_EXECUTION_TIME: 36000
 
+    - name: Upload Dashboard Link
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{github.workflow}}-Dashboard
+        path: |
+          ${{github.workspace}}/Dashboard.html
+
   longterm_test:
     runs-on: VM
     timeout-minutes: 5000

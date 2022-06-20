@@ -24,7 +24,8 @@ jobs:
       uses: ./.github/actions/make-monitoring-dashboard-link
       with:
         GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
-        ESTIMATED_EXECUTION_TIME: 36000
+        ESTIMATED_EXECUTION_TIME: 3600
+
     - name: Upload Dashboard Link
       uses: actions/upload-artifact@v3
       with:
