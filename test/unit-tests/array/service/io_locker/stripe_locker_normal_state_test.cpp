@@ -13,7 +13,7 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_testIfTryLockSuccess)
     StripeId sid = 10;
 
     // When
-    bool ret = slns.TryLock(sid);
+    bool ret = slns.TryLock(StripeLockInfo(sid));
 
     // Then
     ASSERT_TRUE(ret);
@@ -24,10 +24,10 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_testIfTryLockTwiceSuccess)
     // Given
     StripeLockerNormalState slns;
     StripeId sid = 10;
-    slns.TryLock(sid);
+    slns.TryLock(StripeLockInfo(sid));
 
     // When
-    bool ret = slns.TryLock(sid);
+    bool ret = slns.TryLock(StripeLockInfo(sid));
 
     // Then
     ASSERT_TRUE(ret);
@@ -38,10 +38,10 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_testIfTryLockAgainAfterUnl
     // Given
     StripeLockerNormalState slns;
     StripeId sid = 10;
-    slns.TryLock(sid);
+    slns.TryLock(StripeLockInfo(sid));
     slns.Unlock(sid);
     // When
-    bool ret = slns.TryLock(sid);
+    bool ret = slns.TryLock(StripeLockInfo(sid));
 
     // Then
     ASSERT_TRUE(ret);
@@ -55,7 +55,7 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_testIfTryLockAfterUnlockNo
     slns.Unlock(sid);
 
     // When
-    bool ret = slns.TryLock(sid);
+    bool ret = slns.TryLock(StripeLockInfo(sid));
 
     // Then
     ASSERT_TRUE(ret);
@@ -66,7 +66,7 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_TestForExistsItem)
     // Given
     StripeLockerNormalState slns;
     StripeId sid = 10;
-    slns.TryLock(sid);
+    slns.TryLock(StripeLockInfo(sid));
 
     // When
     bool ret = slns.Exists(sid);
@@ -93,7 +93,7 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_TestExistsAfterUnlock)
     // Given
     StripeLockerNormalState slns;
     StripeId sid = 10;
-    slns.TryLock(10);
+    slns.TryLock(StripeLockInfo(10));
     slns.Unlock(10);
 
     // When
@@ -109,12 +109,12 @@ TEST(StripeLockerNormalState, StripeLockerNormalState_Count)
     // Given
     StripeLockerNormalState slns;
     StripeId sid = 10;
-    slns.TryLock(10);
-    slns.TryLock(10);
-    slns.TryLock(20);
-    slns.TryLock(20);
-    slns.TryLock(30);
-    slns.TryLock(30);
+    slns.TryLock(StripeLockInfo(10));
+    slns.TryLock(StripeLockInfo(10));
+    slns.TryLock(StripeLockInfo(20));
+    slns.TryLock(StripeLockInfo(20));
+    slns.TryLock(StripeLockInfo(30));
+    slns.TryLock(StripeLockInfo(30));
 
     // When
     uint32_t ret = slns.Count();

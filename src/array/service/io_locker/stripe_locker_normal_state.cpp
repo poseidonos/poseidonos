@@ -38,10 +38,10 @@
 namespace pos
 {
 bool
-StripeLockerNormalState::TryLock(StripeId id)
+StripeLockerNormalState::TryLock(StripeLockInfo lockInfo)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    workingSet.insert(id);
+    workingSet.insert(lockInfo);
     return true;
 }
 
@@ -49,7 +49,7 @@ void
 StripeLockerNormalState::Unlock(StripeId id)
 {
     unique_lock<mutex> lock(mtx);
-    auto iter = workingSet.find(id);
+    auto iter = workingSet.find(StripeLockInfo(id));
     if (iter != workingSet.end())
     {
         workingSet.erase(iter);
@@ -59,7 +59,7 @@ StripeLockerNormalState::Unlock(StripeId id)
 bool
 StripeLockerNormalState::Exists(StripeId id)
 {
-    return workingSet.find(id) != workingSet.end();
+    return workingSet.find(StripeLockInfo(id)) != workingSet.end();
 }
 
 uint32_t

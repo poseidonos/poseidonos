@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(bool, TryLock, (set<IArrayDevice*>& devs, StripeId val), (override));
     MOCK_METHOD(void, Unlock, (IArrayDevice* dev, StripeId val), (override));
     MOCK_METHOD(void, Unlock, (set<IArrayDevice*>& devs, StripeId val), (override));
+    MOCK_METHOD(void, WriteBusyLog, (IArrayDevice* dev), (override));
 };
 
 } // namespace pos

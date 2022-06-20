@@ -12,7 +12,7 @@ class MockStripeLockerNormalState : public StripeLockerNormalState
 {
 public:
     using StripeLockerNormalState::StripeLockerNormalState;
-    MOCK_METHOD(bool, TryLock, (StripeId val), (override));
+    MOCK_METHOD(bool, TryLock, (StripeLockInfo val), (override));
     MOCK_METHOD(void, Unlock, (StripeId val), (override));
     MOCK_METHOD(bool, Exists, (StripeId val), (override));
     MOCK_METHOD(uint32_t, Count, (), (override));

@@ -49,5 +49,6 @@ public:
     virtual bool TryLock(set<IArrayDevice*>& devs, StripeId val) = 0;
     virtual void Unlock(IArrayDevice* dev, StripeId val) = 0;
     virtual void Unlock(set<IArrayDevice*>& devs, StripeId val) = 0;
+    virtual void WriteBusyLog(IArrayDevice* dev) = 0;
 };
 } // namespace pos
