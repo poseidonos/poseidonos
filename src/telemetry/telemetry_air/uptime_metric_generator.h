@@ -34,22 +34,24 @@
 
 #include <string>
 
-#include "src/lib/singleton.h"
+#include "src/master_context/version_provider.h"
 
 namespace pos
 {
-class VersionProvider
+class POSMetric;
+
+class UptimeMetricGenerator
 {
 public:
-    VersionProvider(void);
-    virtual ~VersionProvider(void);
-
-    virtual const std::string GetVersion(void);
-
+    UptimeMetricGenerator(
+        VersionProvider* vp = VersionProviderSingleton::Instance());
+    virtual ~UptimeMetricGenerator();
+    virtual int Generate(POSMetric* m);
 private:
-    const std::string VERSION;
-};
+    time_t getProcessStartTime(void);
 
-using VersionProviderSingleton = Singleton<VersionProvider>;
+    VersionProvider* vp;
+    time_t started;
+};
 
 } // namespace pos

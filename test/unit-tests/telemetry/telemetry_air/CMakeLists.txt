@@ -1,1 +1,2 @@
 POS_ADD_UNIT_TEST(telemetry_air_delegator_ut telemetry_air_delegator_test.cpp)
+POS_ADD_UNIT_TEST(uptime_metric_generator_ut uptime_metric_generator_test.cpp)

@@ -30,26 +30,68 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "uptime_metric_generator.h"
 
-#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "src/lib/singleton.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
-namespace pos
+using namespace pos;
+using namespace std;
+
+UptimeMetricGenerator::UptimeMetricGenerator(VersionProvider* vp)
+: vp(vp)
 {
-class VersionProvider
+    started = getProcessStartTime();
+}
+
+UptimeMetricGenerator::~UptimeMetricGenerator(void)
 {
-public:
-    VersionProvider(void);
-    virtual ~VersionProvider(void);
+}
 
-    virtual const std::string GetVersion(void);
 
-private:
-    const std::string VERSION;
-};
+int
+UptimeMetricGenerator::Generate(POSMetric* m)
+{
+    time_t current = time(nullptr);
+    time_t uptime = current - started;
+    string version = vp->GetVersion();
 
-using VersionProviderSingleton = Singleton<VersionProvider>;
+    if (uptime <= 0 || version == "")
+    {
+        return -1;
+    }
 
-} // namespace pos
+    if (m == nullptr)
+    {
+        return -1;
+    }
+    m->SetName(TEL05000_COMMON_PROCESS_UPTIME_SECOND);
+    m->SetType(POSMetricTypes::MT_COUNT);
+    m->SetCountValue(uptime);
+    m->AddLabel("version", version);
+
+    return 0;
+}
+
+time_t
+UptimeMetricGenerator::getProcessStartTime(void)
+{
+    const string PROC_PATH= "/proc/";
+    string pid = to_string(getpid());
+    string statPath = PROC_PATH + pid;
+
+    struct stat s;
+    int ret = stat(statPath.c_str(), &s);
+    if(ret != 0)
+    {
+        POS_TRACE_ERROR(EID(TELEMETRY_WARNING_MSG), "Faild to get process start time");
+        return 0;
+    }
+
+    return s.st_mtim.tv_sec;
+}

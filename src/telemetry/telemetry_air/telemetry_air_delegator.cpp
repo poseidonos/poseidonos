@@ -45,6 +45,7 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/telemetry/telemetry_id.h"
 #include "src/volume/volume_service.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
 namespace pos
 {
@@ -183,7 +184,7 @@ AddUsageMetric(POSMetricVector* posMetricVector,
 }
 
 void
-PublishTimeTriggeredMetric(POSMetricVector* posMetricVector)
+TelemetryAirDelegator::PublishTimeTriggeredMetric(POSMetricVector* posMetricVector)
 {
     for (uint32_t arrayId = 0; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
     {
@@ -202,10 +203,22 @@ PublishTimeTriggeredMetric(POSMetricVector* posMetricVector)
             }
         }
     }
+
+    if (uptimeMetricGenerator != nullptr) {
+        POSMetric uptimeMetric;
+        int ret = uptimeMetricGenerator->Generate(&uptimeMetric);
+        if (ret != -1 && posMetricVector != nullptr)
+        {
+            posMetricVector->push_back(uptimeMetric);
+        }
+    }
 }
 
-TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
-: telPub(telPub)
+TelemetryAirDelegator::TelemetryAirDelegator(
+    TelemetryPublisher* telPub,
+    UptimeMetricGenerator* g)
+: telPub(telPub),
+  uptimeMetricGenerator(g)
 {
     dataHandler = [this](const air::JSONdoc&& data) -> int {
         const std::lock_guard<std::mutex> lock(this->mutex);
@@ -473,7 +486,7 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                     }
                 }
 
-                PublishTimeTriggeredMetric(posMetricVector);
+                this->PublishTimeTriggeredMetric(posMetricVector);
 
                 if (!posMetricVector->empty())
                 {
@@ -502,6 +515,11 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
 
 TelemetryAirDelegator::~TelemetryAirDelegator(void)
 {
+    if (uptimeMetricGenerator != nullptr)
+    {
+        delete uptimeMetricGenerator;
+        uptimeMetricGenerator = nullptr;
+    }
 }
 
 void

@@ -30,26 +30,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <string>
-
-#include "src/lib/singleton.h"
+#include "src/telemetry/telemetry_air/uptime_metric_generator.h"
 
 namespace pos
 {
-class VersionProvider
+class MockUptimeMetricGenerator : public UptimeMetricGenerator
 {
 public:
-    VersionProvider(void);
-    virtual ~VersionProvider(void);
-
-    virtual const std::string GetVersion(void);
-
-private:
-    const std::string VERSION;
+    MOCK_METHOD(int, Generate, (POSMetric*), (override));
 };
-
-using VersionProviderSingleton = Singleton<VersionProvider>;
 
 } // namespace pos
