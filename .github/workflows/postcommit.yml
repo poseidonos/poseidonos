@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-     - name: Make Monitoring Dashboard Link
+    - name: Make Monitoring Dashboard Link
       uses: ./.github/actions/make-monitoring-dashboard-link
       with:
         GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
