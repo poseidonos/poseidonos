@@ -119,7 +119,7 @@ endif()
 # Build FIO conditionally
 ExternalProject_Add(fio
     GIT_REPOSITORY ${REPO_FIO}
-    GIT_TAG "fio-3.1"
+    GIT_TAG "fio-3.28"
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_FIO}
     BUILD_IN_SOURCE 1
     LOG_DOWNLOAD ON
@@ -130,7 +130,7 @@ ExternalProject_Add(fio
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/fio-3.1.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/fio-3.28.patch
     CONFIGURE_COMMAND "" 
     BUILD_COMMAND make -j ${NUM_BUILD_CORE})
 
