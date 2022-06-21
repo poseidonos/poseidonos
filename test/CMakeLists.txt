@@ -453,6 +453,7 @@ SET(DEP_LIBRARIES
     pmem
     rocksdb
     stdc++fs
+    isal
 )
 
 find_package(PkgConfig REQUIRED)
