@@ -36,10 +36,7 @@
 
 #include <memory>
 
-#include "test/unit-tests/mapper/map/map_header_mock.h"
 #include "test/unit-tests/mapper/map/map_io_handler_mock.h"
-#include "test/unit-tests/mapper/map/map_mock.h"
-#include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 
 using ::testing::Return;
 
@@ -49,17 +46,13 @@ TEST(MapFlushEvent, Execute_testIfTheEventCanCreateSingleRequest)
 {
     // given
     MpageSet mpageSet;
-    MockMetaFileIntf file;
-    MockMap map;
-    MockMapHeader header(0);
-    MockMapIoHandler handler(nullptr, nullptr, 0, nullptr, nullptr);
+    MockMapIoHandler handler(nullptr, nullptr, nullptr, 0, nullptr, nullptr);
 
     // when
-    MapFlushEvent event(&handler, mpageSet, nullptr);
+    MapFlushEvent event(&handler, mpageSet);
 
     // then
-    EXPECT_CALL(handler, CreateFlushRequestFor).WillOnce(Return(true));
+    EXPECT_CALL(handler, CreateFlushRequestFor).WillOnce(Return(0));
     EXPECT_TRUE(event.Execute());
 }
-
 } // namespace pos

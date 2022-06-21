@@ -401,32 +401,9 @@ MapIoHandler::_RemoveCleanPages(MpageList& pages)
 }
 
 int
-MapIoHandler::CreateFlushRequestFor(MpageNum startMpage, int numMpages, MetaIoCbPtr callback)
+MapIoHandler::CreateFlushRequestFor(const MpageSet& mpageSet)
 {
-    char* buffer = new char[map->GetSize() * numMpages];
-
-    for (int offset = 0; offset < numMpages; offset++)
-    {
-        char* dest = buffer + map->GetSize() * offset;
-        int pageNr = startMpage + offset;
-
-        map->GetMpageLock(pageNr);
-        memcpy(dest, (void*)map->GetMpage(pageNr), map->GetSize());
-        mapHeader->GetTouchedMpages()->ClearBit(pageNr);
-        map->ReleaseMpageLock(pageNr);
-    }
-
-    MapFlushIoContext* request = new MapFlushIoContext();
-    request->opcode = MetaFsIoOpcode::Write;
-    request->fd = file->GetFd();
-    request->fileOffset = mapHeader->GetSize() + startMpage * map->GetSize();
-    request->length = map->GetSize() * numMpages;
-    request->buffer = buffer;
-    request->callback = callback;
-    request->startMpage = startMpage;
-    request->numMpages = numMpages;
-
-    return file->AsyncIO(request);
+    return _FlushMpages(mpageSet.startMpage, mpageSet.numMpages);
 }
 
 void
@@ -435,8 +412,7 @@ MapIoHandler::CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequential
     while (sequentialPages->IsRemaining())
     {
         MpageSet mpageSet = sequentialPages->PopNextMpageSet();
-        MetaIoCbPtr callback = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
-        EventSmartPtr event(new MapFlushEvent(this, mpageSet, callback));
+        EventSmartPtr event(new MapFlushEvent(this, mpageSet));
         eventScheduler->EnqueueEvent(event);
     }
 }

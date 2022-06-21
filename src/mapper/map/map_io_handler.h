@@ -85,7 +85,7 @@ public:
     int LoadForWBT(MetaFileIntf* fileFromLoad);
     int StoreForWBT(MetaFileIntf* fileToStore);
 
-    virtual int CreateFlushRequestFor(MpageNum start, int numPages, MetaIoCbPtr callback);
+    virtual int CreateFlushRequestFor(const MpageSet& mpageSet);
     virtual void CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequentialPages);
 
 private:

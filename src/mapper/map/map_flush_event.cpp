@@ -39,11 +39,10 @@
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet, MetaIoCbPtr callback)
+MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
 : Event(false, BackendEvent::BackendEvent_MetaIO),
   handler(handler),
-  mpageSet(mpageSet),
-  callback(callback)
+  mpageSet(mpageSet)
 {
 }
 
@@ -56,6 +55,6 @@ MapFlushEvent::~MapFlushEvent(void)
 bool
 MapFlushEvent::Execute(void)
 {
-    return handler->CreateFlushRequestFor(mpageSet.startMpage, mpageSet.numMpages, callback);
+    return (0 == handler->CreateFlushRequestFor(mpageSet));
 }
 } // namespace pos

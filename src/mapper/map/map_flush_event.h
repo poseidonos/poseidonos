@@ -36,7 +36,6 @@
 
 #include "src/event_scheduler/event.h"
 #include "src/mapper/map/sequential_page_finder.h"
-#include "src/meta_file_intf/async_context.h"
 
 namespace pos
 {
@@ -45,14 +44,13 @@ class MapIoHandler;
 class MapFlushEvent : public Event
 {
 public:
-    MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet, MetaIoCbPtr callback);
+    MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet);
     virtual ~MapFlushEvent(void);
     bool Execute(void) override;
 
 private:
     MapIoHandler* handler;
     MpageSet mpageSet;
-    MetaIoCbPtr callback;
 };
 
 } // namespace pos
