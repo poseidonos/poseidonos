@@ -68,7 +68,8 @@ TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
     {
         publisher->StartPublishing();
     }
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}, turnOn:{}", name, publisherList.size(), defaultEnable);
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISHER_REGISTRATION_SUCCESS),
+        "publisher:{}, num_publishers:{}, turn_on:{}", name, publisherList.size(), defaultEnable);
     return 0;
 }
 
@@ -78,12 +79,13 @@ TelemetryClient::DeregisterPublisher(std::string name)
     auto ret = publisherList.erase(name);
     if (ret == 0)
     {
-        // activate logs after the official release of telemetry
-        // POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! tried to erase publisher:{}, but it's not registered", name);
+        POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_DEREGISTRATION_FAILURE),
+            "publisher:{}, earse():{}", name, ret);
     }
     else
     {
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] publisher:{} is removed, numPublishers:{}", name, publisherList.size());
+        POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_DEREGISTRATION_SUCCESS),
+            "publisher:{}, num_publishers:{}", name, publisherList.size());
     }
     return 0;
 }
@@ -92,7 +94,7 @@ bool
 TelemetryClient::StartPublisher(std::string name)
 {
     publisherList[name]->StartPublishing();
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start publisher:{}", name);
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_START), "publisher:{}", name);
     return true;
 }
 
@@ -100,7 +102,7 @@ bool
 TelemetryClient::StopPublisher(std::string name)
 {
     publisherList[name]->StopPublishing();
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop publisher:{}", name);
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP), "publisher:{}", name);
     return true;
 }
 
@@ -113,12 +115,12 @@ TelemetryClient::IsPublisherRunning(std::string name)
 bool
 TelemetryClient::StartAllPublisher(void)
 {
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start all publishers");
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_START_ALL), "");
     defaultEnable = true;
     for (auto &p : publisherList)
     {
         p.second->StartPublishing();
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start publisher:{}", p.first);
+        POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_START), "publisher:{}", p.first);
     }
     return true;
 }
@@ -126,12 +128,12 @@ TelemetryClient::StartAllPublisher(void)
 bool
 TelemetryClient::StopAllPublisher(void)
 {
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop all publishers");
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP_ALL), "");
     defaultEnable = false;
     for (auto &p : publisherList)
     {
         p.second->StopPublishing();
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop publisher:{}", p.first);
+        POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP), "publisher:{}", p.first);
     }
     return true;
 }
@@ -140,7 +142,7 @@ bool
 TelemetryClient::StartUsingDataPool(std::string name)
 {
     publisherList[name]->StartUsingDataPool();
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start Using DataPool Publisher:{}", name);
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_START_USING_DATA_POOL), "publisher:{}", name);
     return true;
 }
 
@@ -148,18 +150,18 @@ bool
 TelemetryClient::StopUsingDataPool(std::string name)
 {
     publisherList[name]->StopUsingDataPool();
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop Using DataPool Publisher:{}", name);
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_STOP_USING_DATA_POOL), "publisher:{}", name);
     return true;
 }
 
 bool
 TelemetryClient::StartUsingDataPoolForAllPublisher(void)
 {
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start using DataPool for all publishers");
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_START_USING_DATA_POOL_ALL), "");
     for (auto &p : publisherList)
     {
         p.second->StartUsingDataPool();
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start using DataPool for publisher:{}", p.first);
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_START_USING_DATA_POOL), "publisher:{}", p.first);
     }
     return true;
 }
@@ -167,11 +169,11 @@ TelemetryClient::StartUsingDataPoolForAllPublisher(void)
 bool
 TelemetryClient::StopUsingDataPoolForAllPublisher(void)
 {
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop using DataPool for all publishers");
+    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_STOP_USING_DATA_POOL_ALL), "");
     for (auto &p : publisherList)
     {
         p.second->StopUsingDataPool();
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop using DataPool for publisher:{}", p.first);
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_STOP_USING_DATA_POOL_ALL), "publisher:{}", p.first);
     }
     return true;
 }
