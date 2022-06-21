@@ -66,8 +66,12 @@ setJobNumber()
     elif [ $target_type == "VM" ]
     then
         job_number=12
+    elif [ $target_type == "GITHUB" ]
+    then
+        job_number=2
+	target_type="VM"
     else
-        echo "## ERROR: incorrect target type(VM/PM/PSD)"
+        echo "## ERROR: incorrect target type(VM/PM/PSD/GITHUB)"
         exit 1
     fi
 }
