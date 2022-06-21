@@ -40,6 +40,9 @@ namespace pos
 #define TEL_RUNID_LABEL_KEY "run_id"
 
 // ID = "modulecode_itemname_collectiontype(count/history)"
+
+static const std::string TEL05000_COMMON_PROCESS_UPTIME_SECOND = "common_process_uptime_second";
+
 static const std::string TEL20000_READ_UNKNOWN_IOPS_PER_SSD = "read_unknown_iops_per_ssd";
 static const std::string TEL20001_READ_META_IOPS_PER_SSD = "read_meta_iops_per_ssd";
 static const std::string TEL20002_READ_GC_IOPS_PER_SSD = "read_gc_iops_per_ssd";

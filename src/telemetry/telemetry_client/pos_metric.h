@@ -88,6 +88,7 @@ typedef std::unordered_map<std::string, std::string> MetricLabelMap;
 class POSMetric
 {
 public:
+    POSMetric(void) {};
     POSMetric(std::string name, POSMetricTypes type);
     virtual ~POSMetric(void) = default;
     virtual void SetName(std::string name_);

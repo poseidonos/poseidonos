@@ -36,6 +36,8 @@
 #include <mutex>
 
 #include "Air.h"
+#include "uptime_metric_generator.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
 namespace pos
 {
@@ -50,14 +52,19 @@ public:
         END,
         ERR_DATA
     };
-    explicit TelemetryAirDelegator(TelemetryPublisher* telPub);
+    explicit TelemetryAirDelegator(
+        TelemetryPublisher* telPub,
+        UptimeMetricGenerator* g = new UptimeMetricGenerator());
     virtual ~TelemetryAirDelegator(void);
     void SetState(State state);
     void RegisterAirEvent(void);
     std::function<int(const air::JSONdoc&& data)> dataHandler;
 
 private:
+    void PublishTimeTriggeredMetric(POSMetricVector* posMetricVector);
+
     TelemetryPublisher* telPub{nullptr};
+    UptimeMetricGenerator* uptimeMetricGenerator{nullptr};
     int returnState{State::RUN};
     std::mutex mutex;
 };

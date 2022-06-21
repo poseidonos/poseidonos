@@ -30,26 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/telemetry/telemetry_air/uptime_metric_generator.h"
 
-#include <string>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "src/lib/singleton.h"
+#include "test/unit-tests/master_context/version_provider_mock.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
-namespace pos
+using namespace pos;
+using namespace std;
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
+
+TEST(UptimeMetricGenerator, Generate_testIfUptimeGeneratedSuccessfully)
 {
-class VersionProvider
-{
-public:
-    VersionProvider(void);
-    virtual ~VersionProvider(void);
+    // Given
+    MockVersionProvider vp;
+    string version = "TestVersionString";
+    EXPECT_CALL(vp, GetVersion).WillOnce(Return(version));
+    UptimeMetricGenerator g(&vp);
+    POSMetric m;
 
-    virtual const std::string GetVersion(void);
+    // When
+    int ret = g.Generate(&m);
 
-private:
-    const std::string VERSION;
-};
-
-using VersionProviderSingleton = Singleton<VersionProvider>;
-
-} // namespace pos
+    // Then
+    sleep(1);
+    ASSERT_EQ(0, ret);
+    ASSERT_NE(0, m.GetCountValue());
+    ASSERT_TRUE(version == (*m.GetLabelList())["version"]);
+}
