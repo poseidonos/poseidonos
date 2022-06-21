@@ -57,6 +57,19 @@ index 3a785ce94..7649bdebb 100755
  		--)
  			break
  			;;
+diff --git examples/nvme/fio_plugin/fio_plugin.c examples/nvme/fio_plugin/fio_plugin.c
+index 14f5b9f10..07a0df7f2 100644
+--- examples/nvme/fio_plugin/fio_plugin.c
++++ examples/nvme/fio_plugin/fio_plugin.c
+@@ -1157,7 +1157,7 @@ spdk_fio_get_zoned_model(struct thread_data *td, struct fio_file *f, enum zbd_zo
+ 	struct spdk_fio_qpair *fio_qpair = NULL;
+ 	const struct spdk_nvme_zns_ns_data *zns_data = NULL;
+ 
+-	*model = ZBD_IGNORE;
++	*model = ZBD_NONE;
+ 
+ 	if (f->filetype != FIO_TYPE_FILE && \
+ 	    f->filetype != FIO_TYPE_BLOCK && \
 diff --git include/spdk/nvme.h include/spdk/nvme.h
 index f5a8f73c9..0a0b31893 100644
 --- include/spdk/nvme.h
