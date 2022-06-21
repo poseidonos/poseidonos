@@ -71,7 +71,7 @@ if [ -f /etc/debian_version ]; then
     # for rocksdb
     apt install -y librocksdb-dev
     # for isal
-    apt install -y autogen yasm nasm libboost-all-dev libisal-dev
+    apt install -y autogen yasm nasm libboost-all-dev libisal libisal-dev
 
 else
     echo "pkgdep: unknown system type."
