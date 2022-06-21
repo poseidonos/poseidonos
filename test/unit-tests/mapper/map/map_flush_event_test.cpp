@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 #include "test/unit-tests/mapper/map/map_header_mock.h"
 #include "test/unit-tests/mapper/map/map_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
@@ -52,8 +54,8 @@ TEST(MapFlushEvent, Execute_testIfTheEventCanCreateSingleRequest)
 
     // when
     mpageSet.numMpages = 0;
-    std::shared_ptr<FlushInfo> info = std::make_shared<FlushInfo>(&file, mpageSet, &map, &header, nullptr);
-    MapFlushEvent event(info);
+    std::unique_ptr<FlushInfo> info = std::make_unique<FlushInfo>(&file, mpageSet, &map, &header, nullptr);
+    MapFlushEvent event(std::move(info));
 
     // then
     EXPECT_CALL(file, GetFd).WillRepeatedly(Return(0));

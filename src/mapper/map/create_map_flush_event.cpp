@@ -39,9 +39,9 @@
 
 namespace pos
 {
-CreateMapFlushEvent::CreateMapFlushEvent(std::shared_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler)
+CreateMapFlushEvent::CreateMapFlushEvent(std::unique_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler)
 : Event(false, BackendEvent::BackendEvent_MetaIO),
-  info(info),
+  info(std::move(info)),
   eventScheduler(eventScheduler)
 {
 }
@@ -58,8 +58,8 @@ CreateMapFlushEvent::Execute(void)
     while (info->sequentialPages->IsRemaining())
     {
         MpageSet mpageSet = info->sequentialPages->PopNextMpageSet();
-        std::shared_ptr<FlushInfo> flushInfo = std::make_shared<FlushInfo>(info->file, mpageSet, info->map, info->mapHeader, info->callback);
-        EventSmartPtr event(new MapFlushEvent(flushInfo));
+        std::unique_ptr<FlushInfo> flushInfo = std::make_unique<FlushInfo>(info->file, mpageSet, info->map, info->mapHeader, info->callback);
+        EventSmartPtr event(new MapFlushEvent(std::move(flushInfo)));
         eventScheduler->EnqueueEvent(event);
     }
 

@@ -48,12 +48,12 @@ class EventScheduler;
 struct CreateMapFlushInfo
 {
     CreateMapFlushInfo(MetaFileIntf* file, Map* map, MapHeader* mapHeader,
-        MetaIoCbPtr callback, std::shared_ptr<SequentialPageFinder> sequentialPages)
+        MetaIoCbPtr callback, std::unique_ptr<SequentialPageFinder> sequentialPages)
     : file(file),
       map(map),
       mapHeader(mapHeader),
       callback(callback),
-      sequentialPages(sequentialPages)
+      sequentialPages(std::move(sequentialPages))
     {
     }
 
@@ -61,18 +61,18 @@ struct CreateMapFlushInfo
     Map* map;
     MapHeader* mapHeader;
     MetaIoCbPtr callback;
-    std::shared_ptr<SequentialPageFinder> sequentialPages;
+    std::unique_ptr<SequentialPageFinder> sequentialPages;
 };
 
 class CreateMapFlushEvent : public Event
 {
 public:
-    CreateMapFlushEvent(std::shared_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler);
+    CreateMapFlushEvent(std::unique_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler);
     virtual ~CreateMapFlushEvent(void);
     bool Execute(void) override;
 
 private:
-    std::shared_ptr<CreateMapFlushInfo> info;
+    std::unique_ptr<CreateMapFlushInfo> info;
     EventScheduler* eventScheduler;
 };
 

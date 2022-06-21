@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/map/sequential_page_finder_mock.h"
 
@@ -46,18 +48,18 @@ TEST(CreateMapFlushEvent, Execute_testIfTheEventCanCreateSingleEvent)
 {
     // given
     MockEventScheduler scheduler;
-    std::shared_ptr<MockSequentialPageFinder> sequentialPages = std::make_shared<MockSequentialPageFinder>();
+    std::unique_ptr<MockSequentialPageFinder> sequentialPages = std::make_unique<MockSequentialPageFinder>();
     MpageSet mpageSet;
 
     // when
-    std::shared_ptr<CreateMapFlushInfo> info = std::make_shared<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, sequentialPages);
-    CreateMapFlushEvent event(info, &scheduler);
-
-    // then
     EXPECT_CALL(*sequentialPages.get(), IsRemaining)
         .WillOnce(Return(true))
         .WillOnce(Return(false));
     EXPECT_CALL(*sequentialPages.get(), PopNextMpageSet).WillOnce(Return(mpageSet));
+    std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, std::move(sequentialPages));
+    CreateMapFlushEvent event(std::move(info), &scheduler);
+
+    // then
     EXPECT_CALL(scheduler, EnqueueEvent).WillOnce(Return());
     EXPECT_TRUE(event.Execute());
 }
@@ -66,14 +68,10 @@ TEST(CreateMapFlushEvent, Execute_testIfTheEventCanCreateThreeEvents)
 {
     // given
     MockEventScheduler scheduler;
-    std::shared_ptr<MockSequentialPageFinder> sequentialPages = std::make_shared<MockSequentialPageFinder>();
+    std::unique_ptr<MockSequentialPageFinder> sequentialPages = std::make_unique<MockSequentialPageFinder>();
     MpageSet mpageSet;
 
     // when
-    std::shared_ptr<CreateMapFlushInfo> info = std::make_shared<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, sequentialPages);
-    CreateMapFlushEvent event(info, &scheduler);
-
-    // then
     EXPECT_CALL(*sequentialPages.get(), IsRemaining)
         .Times(4)
         .WillOnce(Return(true))
@@ -81,6 +79,10 @@ TEST(CreateMapFlushEvent, Execute_testIfTheEventCanCreateThreeEvents)
         .WillOnce(Return(true))
         .WillOnce(Return(false));
     EXPECT_CALL(*sequentialPages.get(), PopNextMpageSet).Times(3).WillRepeatedly(Return(mpageSet));
+    std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, std::move(sequentialPages));
+    CreateMapFlushEvent event(std::move(info), &scheduler);
+
+    // then
     EXPECT_CALL(scheduler, EnqueueEvent).Times(3).WillRepeatedly(Return());
     EXPECT_TRUE(event.Execute());
 }

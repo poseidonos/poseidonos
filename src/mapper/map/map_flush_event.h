@@ -65,12 +65,12 @@ struct FlushInfo
 class MapFlushEvent : public Event
 {
 public:
-    MapFlushEvent(std::shared_ptr<FlushInfo> info);
+    MapFlushEvent(std::unique_ptr<FlushInfo> info);
     virtual ~MapFlushEvent(void);
     bool Execute(void) override;
 
 private:
-    std::shared_ptr<FlushInfo> info;
+    std::unique_ptr<FlushInfo> info;
 };
 
 } // namespace pos

@@ -214,8 +214,8 @@ MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "FlushDirtyPagesGiven mapId:{} started", mapId);
 
-        std::shared_ptr<SequentialPageFinder> sequentialPages = std::make_shared<SequentialPageFinder>(dirtyPages);
-        _Flush(sequentialPages);
+        std::unique_ptr<SequentialPageFinder> sequentialPages = std::make_unique<SequentialPageFinder>(dirtyPages);
+        _Flush(std::move(sequentialPages));
     }
     else
     {
@@ -242,8 +242,8 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "[MAPPER FlushTouchedPages mapId:{}] started", mapId);
         numPagesToAsyncIo = touchedPages->GetNumBitsSet();
-        std::shared_ptr<SequentialPageFinder> finder = std::make_shared<SequentialPageFinder>(touchedPages);
-        _Flush(finder);
+        std::unique_ptr<SequentialPageFinder> sequentialPages = std::make_unique<SequentialPageFinder>(touchedPages);
+        _Flush(std::move(sequentialPages));
     }
     else
     {
@@ -400,13 +400,13 @@ MapIoHandler::_RemoveCleanPages(MpageList& pages)
 }
 
 void
-MapIoHandler::_Flush(std::shared_ptr<SequentialPageFinder> sequentialPages)
+MapIoHandler::_Flush(std::unique_ptr<SequentialPageFinder> sequentialPages)
 {
     if (sequentialPages->IsRemaining())
     {
         MetaIoCbPtr callback = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
-        std::shared_ptr<CreateMapFlushInfo> info = std::make_shared<CreateMapFlushInfo>(file, map, mapHeader, callback, sequentialPages);
-        EventSmartPtr event(new CreateMapFlushEvent(info, eventScheduler));
+        std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(file, map, mapHeader, callback, std::move(sequentialPages));
+        EventSmartPtr event(new CreateMapFlushEvent(std::move(info), eventScheduler));
         eventScheduler->EnqueueEvent(event);
     }
 }

@@ -100,7 +100,7 @@ private:
     int _FlushMpages(MpageNum startPage, int numPages);
     int _IssueFlush(char* buffer, MpageNum startMpage, int numMpages);
     int _IssueFlushHeader(void);
-    void _Flush(std::shared_ptr<SequentialPageFinder> sequentialPages);
+    void _Flush(std::unique_ptr<SequentialPageFinder> sequentialPages);
     int _IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo, char* headerBuf);
     int _IssueMpageIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
 

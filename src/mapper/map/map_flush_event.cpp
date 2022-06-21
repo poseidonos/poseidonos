@@ -39,9 +39,9 @@
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(std::shared_ptr<FlushInfo> info)
+MapFlushEvent::MapFlushEvent(std::unique_ptr<FlushInfo> info)
 : Event(false, BackendEvent::BackendEvent_MetaIO),
-  info(info)
+  info(std::move(info))
 {
 }
 
