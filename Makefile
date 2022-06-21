@@ -73,13 +73,6 @@ endif
 #	$(SPDK_LIB_LINKER_ARGS) $(ENV_LINKER_ARGS)
 
 #################################################
-# Intel ISA-L libraries
-incdir = $(shell pkg-config --variable=includedir libisal)
-CPPFLAGS += -include $(incdir)/isa-l.h
-CPPFLAGS += -I $(incdir)/isa-l 
-LDFLAGS = $(shell pkg-config --libs libisal)
-
-#################################################
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 APP = $(BINDIR)/ibofos_library
 else
@@ -140,6 +133,7 @@ LDFLAGS += -lyaml-cpp
 LDFLAGS += -ltbb
 LDFLAGS += -lrocksdb
 LDFLAGS += -lstdc++fs
+LDFLAGS += -lisal
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli
