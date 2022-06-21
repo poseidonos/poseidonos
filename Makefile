@@ -75,9 +75,8 @@ endif
 #################################################
 # Intel ISA-L libraries
 incdir = $(shell pkg-config --variable=includedir libisal)
-
-CPPFLAGS += -include $(incdir)/isa-l.h # Add standard header
-CPPFLAGS += -I $(incdir)/isa-l # Add path to remove error
+CPPFLAGS += -include $(incdir)/isa-l.h
+CPPFLAGS += -I $(incdir)/isa-l 
 LDFLAGS = $(shell pkg-config --libs libisal)
 
 #################################################
