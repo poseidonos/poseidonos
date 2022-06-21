@@ -40,8 +40,10 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/sys_info/space_info.h"
 #include "src/qos/qos_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/volume/volume_creator.h"
 #include "src/volume/volume_base.h"
 #include "src/volume/volume_deleter.h"
@@ -53,13 +55,15 @@
 #include "src/volume/volume_meta_intf.h"
 #include "src/volume/volume_renamer.h"
 #include "src/volume/volume_qos_updater.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
-state(s)
+state(s),
+tp(nullptr)
 {
     state->Subscribe(this, typeid(*this).name());
 }
@@ -78,8 +82,18 @@ VolumeManager::Init(void)
     _ClearLock();
     _LoadVolumes();
 
+    tp = new TelemetryPublisher(("Volume_Manager"));
+    tp->AddDefaultLabel("array_name", arrayInfo->GetName());
+
+    if (tp == nullptr)
+    {
+        tp = new TelemetryPublisher(("VolumeManager"));
+        tp->AddDefaultLabel("array_name", arrayInfo->GetName());
+        TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
+    }
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
 
+    _PublishTelemetryArrayUsage();
     return result;
 }
 
@@ -103,6 +117,12 @@ VolumeManager::Dispose(void)
     _ClearLock();
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
+    if (tp != nullptr)
+    {
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
+        delete tp;
+        tp = nullptr;
+    }
 }
 
 void
@@ -154,6 +174,42 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
     return EID(VOL_NOT_FOUND);
 }
 
+void
+VolumeManager::_PublishTelemetryVolumeIdInfo(std::string id, string name)
+{
+    VolumeBase* vol = volumes.GetVolume(name);
+    POSMetricValue volumeInfo;
+
+    if (nullptr != vol)
+    {
+        volumeInfo.gauge = vol->ID;
+        tp->PublishData(id, volumeInfo, MT_GAUGE);
+    }
+}
+
+void
+VolumeManager::_PublishTelemetryVolumeIdInfo(std::string id, int volId)
+{
+    POSMetricValue volumeInfo;
+
+    volumeInfo.gauge = volId;
+    tp->PublishData(id, volumeInfo, MT_GAUGE);
+    
+}
+
+void
+VolumeManager::_PublishTelemetryArrayUsage(void)
+{
+    if (tp != nullptr)
+    {
+        uint64_t arrayUsage = SpaceInfo::Remaining(arrayInfo->GetIndex());
+        POSMetric metric(TEL60002_ARRAY_USAGE_BLK_CNT, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(arrayUsage);
+        metric.AddLabel("array_id", to_string(arrayInfo->GetIndex()));
+        tp->PublishMetric(metric);
+    }
+}
+
 int
 VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume)
 {
@@ -179,7 +235,16 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     // setting default values for miniops and minbw
     uint64_t defaultMinIops = 0;
     uint64_t defaultMinBw = 0;
-    return volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, checkWalVolume);
+
+    ret = volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, checkWalVolume);
+
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90000_VOL_CREATE_VOLUME_ID, name);
+        _PublishTelemetryArrayUsage();
+    }
+
+    return ret;
 }
 
 int
@@ -205,7 +270,19 @@ VolumeManager::Delete(std::string name)
     }
 
     VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeDeleter.Do(name);
+
+    VolumeBase* vol = volumes.GetVolume(name);
+    int volId = vol->ID;
+
+    ret = volumeDeleter.Do(name);
+    
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90001_VOL_DELETE_VOLUME_ID, volId);
+        _PublishTelemetryArrayUsage();
+    }
+
+    return ret;
 }
 
 int
@@ -240,7 +317,14 @@ VolumeManager::Mount(std::string name, std::string subnqn)
     }
 
     VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeMounter.Do(name, subnqn);
+    ret = volumeMounter.Do(name, subnqn);
+
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90002_VOL_MOUNT_VOLUME_ID, name);
+    }
+
+    return ret;
 }
 
 int
@@ -279,7 +363,14 @@ VolumeManager::Unmount(std::string name)
     }
 
     VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeUnmounter.Do(name);
+    ret = volumeUnmounter.Do(name);
+
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90003_VOL_UNMOUNT_VOLUME_ID, name);
+    }
+
+    return ret;
 }
 
 int
@@ -304,7 +395,14 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
     }
 
     VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
+    ret = volumeQosUpdater.Do(name, maxIops, maxBw, minIops, minBw);
+
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90004_VOL_QOS_UPDATE_VOLUME_ID, name);
+    }
+
+    return ret;
 }
 
 int
@@ -329,7 +427,14 @@ VolumeManager::Rename(std::string oldName, std::string newName)
     }
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeRenamer.Do(oldName, newName);
+    ret = volumeRenamer.Do(oldName, newName);
+
+    if (EID(SUCCESS) == ret)
+    {
+        _PublishTelemetryVolumeIdInfo(TEL90005_VOL_RENAME_VOLUME_ID, newName);
+    }
+
+    return ret;
 }
 
 int

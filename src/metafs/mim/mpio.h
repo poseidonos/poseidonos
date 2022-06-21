@@ -63,10 +63,10 @@ enum class MpioType
 
 enum class MpioCacheState
 {
-    Init,
-    FirstRead,
-    MergeSingle,
-    Mergeable,
+    Init,   // mpio is not cached
+    Read,   // cached, need to read
+    Merge,  // cached, need to merge after reading
+    Write,  // cached, mergeable, all other data in the meta lpn have been already read
 };
 
 class Mpio;
@@ -89,10 +89,21 @@ public:
     virtual MpioType GetType(void) const = 0;
 
     virtual void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
-    virtual bool IsPartialIO(void);
+    virtual bool IsPartialIO(void) const;
 
-    virtual MpioCacheState GetCacheState(void);
-    virtual void SetCacheState(const MpioCacheState state)
+    virtual bool IsCacheableVolumeType(void) const
+    {
+        return (MetaStorageType::SSD != io.targetMediaType);
+    }
+    virtual bool IsCached(void) const
+    {
+        return (MpioCacheState::Init != cacheState);
+    }
+    virtual bool IsMergeable(void) const
+    {
+        return (MpioCacheState::Write == cacheState);
+    }
+    virtual void ChangeCacheStateTo(const MpioCacheState state)
     {
         cacheState = state;
     }

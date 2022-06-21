@@ -133,7 +133,7 @@ GrpcGlobalPublisher::_SendMessage(MetricPublishRequest* request, uint32_t numMet
     grpc::Status status = stub->MetricPublish(&cliContext, *request, &response);
     if (status.ok() != true)
     {
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
+        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHREQUEST_SEND_FAILURE), "grpc_status_errorcode:{}, grpc_status_errormsg:{}", status.error_code(), status.error_message());
         return -1;
     }
     else
@@ -141,7 +141,7 @@ GrpcGlobalPublisher::_SendMessage(MetricPublishRequest* request, uint32_t numMet
         uint32_t numReceived = response.totalreceivedmetrics();
         if (numReceived != numMetrics)
         {
-            POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] TelemetryManager responsed with error: received data count mismatch, expected:{}, received:{}", numMetrics, numReceived);
+            POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHRESPONSE_COUNT_NOT_MATCH), "expected:{}, received:{}", numMetrics, numReceived);
             return -1;
         }
     }

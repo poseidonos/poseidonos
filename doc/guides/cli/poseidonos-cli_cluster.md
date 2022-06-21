@@ -46,4 +46,5 @@ poseidonos-cli cluster [flags]
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli cluster ln](poseidonos-cli_cluster_ln.md)	 - List all nodes in the system.
+* [poseidonos-cli cluster lv](poseidonos-cli_cluster_lv.md)	 - List all volumes in the cluster.
 

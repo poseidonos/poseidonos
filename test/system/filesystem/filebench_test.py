@@ -29,7 +29,7 @@ def bring_up_ibofos():
     time.sleep(10)
     print("Try to start telemetry through poseidonos-cli")
     target_script = args.ibofos_root + "/bin/poseidonos-cli telemetry start"
-    remote_execute(args.target_ip, args.target_id, args.target_pw, target_script)
+    remote_procedure.execute(args.target_ip, args.target_id, args.target_pw, target_script)
 
 def execute_filebench_test():
     print("Execute filebench at initiator")

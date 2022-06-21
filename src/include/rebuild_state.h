@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <string>
 namespace pos
 {
 enum class RebuildState
@@ -41,5 +42,15 @@ enum class RebuildState
     PASS,
     CANCELLED,
     FAIL,
+    TYPE_COUNT
+};
+
+static const std::string REBUILD_STATE_STR[(int)RebuildState::TYPE_COUNT] 
+{
+    "READY",
+    "REBUILDING",
+    "PASS",
+    "CANCELLED",
+    "FAIL",
 };
 } // namespace pos

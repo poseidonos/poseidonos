@@ -50,5 +50,6 @@ public:
     MOCK_METHOD(size_t, GetWriteMpioCacheCapacity, (), (const));
     MOCK_METHOD(bool, IsDirectAccessEnabled, (), (const));
     MOCK_METHOD(size_t, GetTimeIntervalInMillisecondsForMetric, (), (const));
+    MOCK_METHOD(size_t, GetSamplingSkipCount, (), (const));
 };
 } // namespace pos

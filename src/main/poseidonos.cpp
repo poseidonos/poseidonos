@@ -64,6 +64,7 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/resource_checker/resource_checker.h"
 
 namespace pos
 {
@@ -84,6 +85,7 @@ Poseidonos::Init(int argc, char** argv)
         _InitAIR();
         _InitIOInterface();
         _InitMemoryChecker();
+        _InitResourceChecker();
     }
     else
     {
@@ -157,6 +159,8 @@ Poseidonos::Terminate(void)
         UserSignalInterface::Enable(false);
     }
     SignalHandlerSingleton::ResetInstance();
+    ResourceCheckerSingleton::ResetInstance();
+
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
 
@@ -308,6 +312,16 @@ Poseidonos::_InitMemoryChecker(void)
     else
     {
         MemoryChecker::Enable(false);
+    }
+}
+
+void
+Poseidonos::_InitResourceChecker(void)
+{
+    ResourceChecker* resourceChecker = ResourceCheckerSingleton::Instance();
+    if (nullptr != resourceChecker)
+    {
+        resourceChecker->Enable();
     }
 }
 

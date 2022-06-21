@@ -11,6 +11,12 @@ import (
 	"pnconnector/src/log"
 )
 
+const (
+	connErrEventName = "POS_CONNECTION_ERROR"
+	connErrCause     = "Cannot connect to PoseidonOS. It might not be running."
+	connErrSolution  = "Launch PoseidonOS first ($YOURPOSDIR/bin/poseidonos-cli system start)."
+)
+
 func connectToCliServer() (net.Conn, error) {
 	var err error
 	conn, err := net.Dial("tcp", globals.IPv4+":"+globals.Port)
@@ -47,10 +53,10 @@ func buildConnErrResp(req string, errMsg string) string {
 	resJson.RID = reqJson.RID
 	resJson.COMMAND = reqJson.COMMAND
 	resJson.RESULT.STATUS.CODE = globals.CliServerFailCode
-	resJson.RESULT.STATUS.EVENTNAME = "POS_CONNECTION_ERROR"
+	resJson.RESULT.STATUS.EVENTNAME = connErrEventName
 	resJson.RESULT.STATUS.DESCRIPTION = errMsg
-	resJson.RESULT.STATUS.CAUSE = "PoseidonOS may not be running"
-	resJson.RESULT.STATUS.SOLUTION = "start PoseidonOS first"
+	resJson.RESULT.STATUS.CAUSE = connErrCause
+	resJson.RESULT.STATUS.SOLUTION = connErrSolution
 
 	resJsonStr, _ := json.Marshal(resJson)
 

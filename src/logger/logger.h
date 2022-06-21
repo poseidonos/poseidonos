@@ -163,6 +163,12 @@ public:
         return preferences.ApplyFilter();
     }
 
+    pos_logger::Preferences
+    GetPreferenceInstance()
+    {
+        return preferences;
+    }
+
     JsonElement
     GetPreference()
     {
