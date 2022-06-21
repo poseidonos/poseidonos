@@ -39,6 +39,7 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/mapper/map/create_map_flush_event.h"
+#include "src/mapper/map/map_flush_event.h"
 
 namespace pos
 {
@@ -399,14 +400,53 @@ MapIoHandler::_RemoveCleanPages(MpageList& pages)
     }
 }
 
+int
+MapIoHandler::CreateFlushRequestFor(MpageNum startMpage, int numMpages, MetaIoCbPtr callback)
+{
+    char* buffer = new char[map->GetSize() * numMpages];
+
+    for (int offset = 0; offset < numMpages; offset++)
+    {
+        char* dest = buffer + map->GetSize() * offset;
+        int pageNr = startMpage + offset;
+
+        map->GetMpageLock(pageNr);
+        memcpy(dest, (void*)map->GetMpage(pageNr), map->GetSize());
+        mapHeader->GetTouchedMpages()->ClearBit(pageNr);
+        map->ReleaseMpageLock(pageNr);
+    }
+
+    MapFlushIoContext* request = new MapFlushIoContext();
+    request->opcode = MetaFsIoOpcode::Write;
+    request->fd = file->GetFd();
+    request->fileOffset = mapHeader->GetSize() + startMpage * map->GetSize();
+    request->length = map->GetSize() * numMpages;
+    request->buffer = buffer;
+    request->callback = callback;
+    request->startMpage = startMpage;
+    request->numMpages = numMpages;
+
+    return file->AsyncIO(request);
+}
+
+void
+MapIoHandler::CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequentialPages)
+{
+    while (sequentialPages->IsRemaining())
+    {
+        MpageSet mpageSet = sequentialPages->PopNextMpageSet();
+        MetaIoCbPtr callback = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
+        EventSmartPtr event(new MapFlushEvent(this, mpageSet, callback));
+        eventScheduler->EnqueueEvent(event);
+    }
+}
+
 void
 MapIoHandler::_Flush(std::unique_ptr<SequentialPageFinder> sequentialPages)
 {
     if (sequentialPages->IsRemaining())
     {
-        MetaIoCbPtr callback = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
-        std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(file, map, mapHeader, callback, std::move(sequentialPages));
-        EventSmartPtr event(new CreateMapFlushEvent(std::move(info), eventScheduler));
+        EventSmartPtr event(new CreateMapFlushEvent(this, std::move(sequentialPages)));
         eventScheduler->EnqueueEvent(event);
     }
 }

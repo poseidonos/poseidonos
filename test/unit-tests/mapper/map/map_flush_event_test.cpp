@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "test/unit-tests/mapper/map/map_header_mock.h"
+#include "test/unit-tests/mapper/map/map_io_handler_mock.h"
 #include "test/unit-tests/mapper/map/map_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 
@@ -51,17 +52,13 @@ TEST(MapFlushEvent, Execute_testIfTheEventCanCreateSingleRequest)
     MockMetaFileIntf file;
     MockMap map;
     MockMapHeader header(0);
+    MockMapIoHandler handler(nullptr, nullptr, 0, nullptr, nullptr);
 
     // when
-    mpageSet.numMpages = 0;
-    std::unique_ptr<FlushInfo> info = std::make_unique<FlushInfo>(&file, mpageSet, &map, &header, nullptr);
-    MapFlushEvent event(std::move(info));
+    MapFlushEvent event(&handler, mpageSet, nullptr);
 
     // then
-    EXPECT_CALL(file, GetFd).WillRepeatedly(Return(0));
-    EXPECT_CALL(map, GetSize).WillRepeatedly(Return(0));
-    EXPECT_CALL(header, GetSize).WillRepeatedly(Return(0));
-    EXPECT_CALL(file, AsyncIO).WillOnce(Return(0));
+    EXPECT_CALL(handler, CreateFlushRequestFor).WillOnce(Return(true));
     EXPECT_TRUE(event.Execute());
 }
 

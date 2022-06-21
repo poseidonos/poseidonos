@@ -18,6 +18,9 @@ class MockMapIoHandler : public MapIoHandler
 {
 public:
     using MapIoHandler::MapIoHandler;
+
+    MOCK_METHOD(int, CreateFlushRequestFor, (MpageNum start, int numPages, MetaIoCbPtr callback));
+    MOCK_METHOD(void, CreateFlushEvents, (std::unique_ptr<SequentialPageFinder> sequentialPages));
 };
 
 } // namespace pos

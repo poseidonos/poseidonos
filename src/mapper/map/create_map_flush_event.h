@@ -32,48 +32,24 @@
 
 #pragma once
 
-#include "src/event_scheduler/event.h"
-#include "src/mapper/map/sequential_page_finder.h"
-#include "src/meta_file_intf/async_context.h"
-
 #include <memory>
+
+#include "src/event_scheduler/event.h"
 
 namespace pos
 {
-class MetaFileIntf;
-class Map;
-class MapHeader;
-class EventScheduler;
-
-struct CreateMapFlushInfo
-{
-    CreateMapFlushInfo(MetaFileIntf* file, Map* map, MapHeader* mapHeader,
-        MetaIoCbPtr callback, std::unique_ptr<SequentialPageFinder> sequentialPages)
-    : file(file),
-      map(map),
-      mapHeader(mapHeader),
-      callback(callback),
-      sequentialPages(std::move(sequentialPages))
-    {
-    }
-
-    MetaFileIntf* file;
-    Map* map;
-    MapHeader* mapHeader;
-    MetaIoCbPtr callback;
-    std::unique_ptr<SequentialPageFinder> sequentialPages;
-};
+class MapIoHandler;
+class SequentialPageFinder;
 
 class CreateMapFlushEvent : public Event
 {
 public:
-    CreateMapFlushEvent(std::unique_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler);
+    CreateMapFlushEvent(MapIoHandler* handler, std::unique_ptr<SequentialPageFinder> finder);
     virtual ~CreateMapFlushEvent(void);
     bool Execute(void) override;
 
 private:
-    std::unique_ptr<CreateMapFlushInfo> info;
-    EventScheduler* eventScheduler;
+    MapIoHandler* handler;
+    std::unique_ptr<SequentialPageFinder> finder;
 };
-
 } // namespace pos

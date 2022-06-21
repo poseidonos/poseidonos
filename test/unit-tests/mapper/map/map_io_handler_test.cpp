@@ -8,6 +8,8 @@
 #include "test/unit-tests/mapper/address/mapper_address_info_mock.h"
 #include "test/unit-tests/mapper/map/map_header_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/mapper/map/sequential_page_finder_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -87,4 +89,38 @@ TEST(MapIoHandler, Load_TestFail1)
     delete header;
 }
 
+TEST(MapIoHandler, CreateFlushEvents_testIfTheEventCanCreateSingleEvent)
+{
+    MockEventScheduler scheduler;
+    std::unique_ptr<MockSequentialPageFinder> finder = std::make_unique<MockSequentialPageFinder>();
+    MapIoHandler mio(nullptr, nullptr, nullptr, 0, nullptr, &scheduler);
+    MpageSet mpageSet;
+
+    EXPECT_CALL(*finder.get(), IsRemaining)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    EXPECT_CALL(*finder.get(), PopNextMpageSet).WillOnce(Return(mpageSet));
+    EXPECT_CALL(scheduler, EnqueueEvent).WillOnce(Return());
+
+    mio.CreateFlushEvents(std::move(finder));
+}
+
+TEST(MapIoHandler, CreateFlushEvents_testIfTheEventCanCreateThreeEvents)
+{
+    MockEventScheduler scheduler;
+    std::unique_ptr<MockSequentialPageFinder> finder = std::make_unique<MockSequentialPageFinder>();
+    MapIoHandler mio(nullptr, nullptr, nullptr, 0, nullptr, &scheduler);
+    MpageSet mpageSet;
+
+    EXPECT_CALL(*finder.get(), IsRemaining)
+        .Times(4)
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    EXPECT_CALL(*finder.get(), PopNextMpageSet).Times(3).WillRepeatedly(Return(mpageSet));
+    EXPECT_CALL(scheduler, EnqueueEvent).Times(3).WillRepeatedly(Return());
+
+    mio.CreateFlushEvents(std::move(finder));
+}
 } // namespace pos

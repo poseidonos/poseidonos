@@ -71,7 +71,7 @@ class MapIoHandler
 public:
     MapIoHandler(MetaFileIntf* file, Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_, EventScheduler* eventScheduler);
     MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_, EventScheduler* scheduler_);
-    ~MapIoHandler(void);
+    virtual ~MapIoHandler(void);
 
     void Dispose(void);
     int OpenFile(std::string fileName, uint64_t fileSize);
@@ -84,6 +84,9 @@ public:
     int FlushHeader(EventSmartPtr callback);
     int LoadForWBT(MetaFileIntf* fileFromLoad);
     int StoreForWBT(MetaFileIntf* fileToStore);
+
+    virtual int CreateFlushRequestFor(MpageNum start, int numPages, MetaIoCbPtr callback);
+    virtual void CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequentialPages);
 
 private:
     int _MakeFileReady(void);

@@ -36,7 +36,7 @@
 
 #include <memory>
 
-#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/mapper/map/map_io_handler_mock.h"
 #include "test/unit-tests/mapper/map/sequential_page_finder_mock.h"
 
 using ::testing::_;
@@ -44,46 +44,17 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(CreateMapFlushEvent, Execute_testIfTheEventCanCreateSingleEvent)
+TEST(CreateMapFlushEvent, Execute_testIfTheMethodCanCallTheHandlerOnce)
 {
     // given
-    MockEventScheduler scheduler;
-    std::unique_ptr<MockSequentialPageFinder> sequentialPages = std::make_unique<MockSequentialPageFinder>();
-    MpageSet mpageSet;
+    std::unique_ptr<MockSequentialPageFinder> finder = std::make_unique<MockSequentialPageFinder>();
+    MockMapIoHandler handler(nullptr, nullptr, 0, nullptr, nullptr);
 
     // when
-    EXPECT_CALL(*sequentialPages.get(), IsRemaining)
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
-    EXPECT_CALL(*sequentialPages.get(), PopNextMpageSet).WillOnce(Return(mpageSet));
-    std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, std::move(sequentialPages));
-    CreateMapFlushEvent event(std::move(info), &scheduler);
+    CreateMapFlushEvent event(&handler, std::move(finder));
 
     // then
-    EXPECT_CALL(scheduler, EnqueueEvent).WillOnce(Return());
-    EXPECT_TRUE(event.Execute());
-}
-
-TEST(CreateMapFlushEvent, Execute_testIfTheEventCanCreateThreeEvents)
-{
-    // given
-    MockEventScheduler scheduler;
-    std::unique_ptr<MockSequentialPageFinder> sequentialPages = std::make_unique<MockSequentialPageFinder>();
-    MpageSet mpageSet;
-
-    // when
-    EXPECT_CALL(*sequentialPages.get(), IsRemaining)
-        .Times(4)
-        .WillOnce(Return(true))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
-    EXPECT_CALL(*sequentialPages.get(), PopNextMpageSet).Times(3).WillRepeatedly(Return(mpageSet));
-    std::unique_ptr<CreateMapFlushInfo> info = std::make_unique<CreateMapFlushInfo>(nullptr, nullptr, nullptr, nullptr, std::move(sequentialPages));
-    CreateMapFlushEvent event(std::move(info), &scheduler);
-
-    // then
-    EXPECT_CALL(scheduler, EnqueueEvent).Times(3).WillRepeatedly(Return());
+    EXPECT_CALL(handler, CreateFlushEvents).WillOnce(Return());
     EXPECT_TRUE(event.Execute());
 }
 } // namespace pos

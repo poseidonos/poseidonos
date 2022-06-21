@@ -40,37 +40,19 @@
 
 namespace pos
 {
-class MetaFileIntf;
-class Map;
-class MapHeader;
-
-struct FlushInfo
-{
-    FlushInfo(MetaFileIntf* file, MpageSet mpageSet, Map* map, MapHeader* mapHeader, MetaIoCbPtr callback)
-    : file(file),
-      mpageSet(mpageSet),
-      map(map),
-      mapHeader(mapHeader),
-      callback(callback)
-    {
-    }
-
-    MetaFileIntf* file;
-    MpageSet mpageSet;
-    Map* map;
-    MapHeader* mapHeader;
-    MetaIoCbPtr callback;
-};
+class MapIoHandler;
 
 class MapFlushEvent : public Event
 {
 public:
-    MapFlushEvent(std::unique_ptr<FlushInfo> info);
+    MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet, MetaIoCbPtr callback);
     virtual ~MapFlushEvent(void);
     bool Execute(void) override;
 
 private:
-    std::unique_ptr<FlushInfo> info;
+    MapIoHandler* handler;
+    MpageSet mpageSet;
+    MetaIoCbPtr callback;
 };
 
 } // namespace pos

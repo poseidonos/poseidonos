@@ -39,9 +39,11 @@
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(std::unique_ptr<FlushInfo> info)
+MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet, MetaIoCbPtr callback)
 : Event(false, BackendEvent::BackendEvent_MetaIO),
-  info(std::move(info))
+  handler(handler),
+  mpageSet(mpageSet),
+  callback(callback)
 {
 }
 
@@ -54,31 +56,6 @@ MapFlushEvent::~MapFlushEvent(void)
 bool
 MapFlushEvent::Execute(void)
 {
-    char* buffer = new char[info->map->GetSize() * info->mpageSet.numMpages];
-
-    for (int offset = 0; offset < info->mpageSet.numMpages; offset++)
-    {
-        char* dest = buffer + info->map->GetSize() * offset;
-        int pageNr = info->mpageSet.startMpage + offset;
-
-        info->map->GetMpageLock(pageNr);
-        memcpy(dest, (void*)info->map->GetMpage(pageNr), info->map->GetSize());
-        info->mapHeader->GetTouchedMpages()->ClearBit(pageNr);
-        info->map->ReleaseMpageLock(pageNr);
-    }
-
-    MapFlushIoContext* request = new MapFlushIoContext();
-    request->opcode = MetaFsIoOpcode::Write;
-    request->fd = info->file->GetFd();
-    request->fileOffset = info->mapHeader->GetSize() + info->mpageSet.startMpage * info->map->GetSize();
-    request->length = info->map->GetSize() * info->mpageSet.numMpages;
-    request->buffer = buffer;
-    request->callback = info->callback;
-    request->startMpage = info->mpageSet.startMpage;
-    request->numMpages = info->mpageSet.numMpages;
-
-    info->file->AsyncIO(request);
-
-    return true;
+    return handler->CreateFlushRequestFor(mpageSet.startMpage, mpageSet.numMpages, callback);
 }
 } // namespace pos

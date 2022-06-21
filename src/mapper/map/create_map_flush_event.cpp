@@ -32,17 +32,14 @@
 
 #include "create_map_flush_event.h"
 
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/mapper/map/map.h"
-#include "src/mapper/map/map_flush_event.h"
-#include "src/mapper/map/map_header.h"
+#include "src/mapper/map/map_io_handler.h"
 
 namespace pos
 {
-CreateMapFlushEvent::CreateMapFlushEvent(std::unique_ptr<CreateMapFlushInfo> info, EventScheduler* eventScheduler)
+CreateMapFlushEvent::CreateMapFlushEvent(MapIoHandler* handler, std::unique_ptr<SequentialPageFinder> finder)
 : Event(false, BackendEvent::BackendEvent_MetaIO),
-  info(std::move(info)),
-  eventScheduler(eventScheduler)
+  handler(handler),
+  finder(std::move(finder))
 {
 }
 
@@ -55,13 +52,7 @@ CreateMapFlushEvent::~CreateMapFlushEvent(void)
 bool
 CreateMapFlushEvent::Execute(void)
 {
-    while (info->sequentialPages->IsRemaining())
-    {
-        MpageSet mpageSet = info->sequentialPages->PopNextMpageSet();
-        std::unique_ptr<FlushInfo> flushInfo = std::make_unique<FlushInfo>(info->file, mpageSet, info->map, info->mapHeader, info->callback);
-        EventSmartPtr event(new MapFlushEvent(std::move(flushInfo)));
-        eventScheduler->EnqueueEvent(event);
-    }
+    handler->CreateFlushEvents(std::move(finder));
 
     return true;
 }
