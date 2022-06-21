@@ -56,7 +56,7 @@ if [ -f /etc/debian_version ]; then
     apt install -y libc-ares-dev pkg-config cmake
     # for pigz (trigger core dump, load dump)
     apt install -y pigz
-    # for cli man page
+    # for cli man
     apt-get install -y mandoc
     # for yaml cpp
     apt-get install -y libyaml-cpp-dev
@@ -71,7 +71,8 @@ if [ -f /etc/debian_version ]; then
     # for rocksdb
     apt install -y librocksdb-dev
     # for isal
-    apt install -y autogen yasm nasm libboost-all-dev libisal-dev
+    #apt install -y autogen yasm nasm libboost-all-dev libisal-dev
+    apt install -y libisal-dev
 
 else
     echo "pkgdep: unknown system type."
