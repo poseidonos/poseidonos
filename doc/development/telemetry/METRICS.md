@@ -1,3 +1,4 @@
+- [- _**AvailableMemorySize**_](#--availablememorysize)
 - [**Device**](#device)
   - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
   - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
@@ -23,16 +24,31 @@
   - [_**write_host_rate_bytes_per_second_per_ssd**_](#write_host_rate_bytes_per_second_per_ssd)
   - [_**write_flush_rate_bytes_per_second_per_ssd**_](#write_flush_rate_bytes_per_second_per_ssd)
   - [_**write_rebuild_rate_bytes_per_second_per_ssd**_](#write_rebuild_rate_bytes_per_second_per_ssd)
+- [**Journal**](#journal)
+  - [_**jrn_checkpoint**_](#jrn_checkpoint)
+  - [_**jrn_log_group_reset_cnt**_](#jrn_log_group_reset_cnt)
+  - [_**jrn_log_group_reset_done_cnt**_](#jrn_log_group_reset_done_cnt)
+  - [_**jrn_load_log_group**_](#jrn_load_log_group)
 - [**MetaFs**](#metafs)
-  - [_**NormalShutdown**_](#normalshutdown)
-  - [_**UserRequest**_](#userrequest)
-  - [_**UserRequestCount**_](#userrequestcount)
-  - [_**FreeMioCount**_](#freemiocount)
-  - [_**FreeMpioCount**_](#freempiocount)
-  - [_**SumOfAllTheTimeSpentByMpio**_](#sumofallthetimespentbympio)
-  - [_**SumOfProcessedMpioCount**_](#sumofprocessedmpiocount)
-  - [_**SumOfAllTheTimeSpentByMio**_](#sumofallthetimespentbymio)
-  - [_**SumOfProcessedMioCount**_](#sumofprocessedmiocount)
+  - [_**normal_shutdown_npor**_](#normal_shutdown_npor)
+  - [_**user_request**_](#user_request)
+  - [_**user_request_cnt**_](#user_request_cnt)
+  - [_**user_request_publish_cnt_per_interval**_](#user_request_publish_cnt_per_interval)
+  - [_**metafs_scheduler_issued_request_count_to_ssd**_](#metafs_scheduler_issued_request_count_to_ssd)
+  - [_**metafs_scheduler_issued_request_count_to_nvram**_](#metafs_scheduler_issued_request_count_to_nvram)
+  - [_**metafs_scheduler_issued_request_count_to_journal_ssd**_](#metafs_scheduler_issued_request_count_to_journal_ssd)
+  - [_**free_mio_count**_](#free_mio_count)
+  - [_**sampled_mpio_time_spent_all_stages**_](#sampled_mpio_time_spent_all_stages)
+  - [_**processed_mpio_count**_](#processed_mpio_count)
+  - [_**sampled_mio_time_from_issue_to_complete**_](#sampled_mio_time_from_issue_to_complete)
+  - [_**sampled_mio_count**_](#sampled_mio_count)
+  - [_**mio_handler_is_working**_](#mio_handler_is_working)
+  - [_**free_mpio_count**_](#free_mpio_count)
+  - [_**sampled_mio_time_spent_all_stages**_](#sampled_mio_time_spent_all_stages)
+  - [_**processed_mio_count**_](#processed_mio_count)
+  - [_**sampled_mpio_time_from_write_to_release**_](#sampled_mpio_time_from_write_to_release)
+  - [_**sampled_mpio_time_from_push_to_pop**_](#sampled_mpio_time_from_push_to_pop)
+  - [_**sampled_mpio_count**_](#sampled_mpio_count)
 - [**Volume**](#volume)
   - [_**read_iops**_](#read_iops)
   - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
@@ -67,8 +83,8 @@
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-- [**ResourceMonitoring**](#resource)
-  - [_**AvailableMemorySize**_](#availableMemorySize)
+- [**ResourceMonitoring**](#resourcemonitoring)
+  - [_**AvailableMemorySize**_](#availablememorysize)
 ---
 ## **Device**
 
@@ -459,13 +475,80 @@ The rate(bytes/second) of flush type write in a specific SSD
 The rate(bytes/second) of rebuild type write in a specific SSD
 
 ---
+## **Journal**
+
+Journal group contains the metrics of the Journal.
+
+---
+
+### _**jrn_checkpoint**_
+
+**ID**: 36001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Introduced**: v0.11.0
+
+The value will be set when checkpoint is running.
+
+---
+
+### _**jrn_log_group_reset_cnt**_
+
+**ID**: 36002
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of reset log group
+
+---
+
+### _**jrn_log_group_reset_done_cnt**_
+
+**ID**: 36003
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of log group reset done
+
+---
+
+### _**jrn_load_log_group**_
+
+**ID**: 36004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+Whether a log group is being loaded
+
+---
 ## **MetaFs**
 
 MetaFs group contains the metrics of the Meta Filsystem.
 
 ---
 
-### _**NormalShutdown**_
+### _**normal_shutdown_npor**_
 
 **ID**: 40000
 
@@ -481,7 +564,7 @@ Whether the previous shutdown was normal.
 
 ---
 
-### _**UserRequest**_
+### _**user_request**_
 
 **ID**: 40010
 
@@ -497,7 +580,7 @@ The byte-sized value of reuqests from user modules.
 
 ---
 
-### _**UserRequestCount**_
+### _**user_request_cnt**_
 
 **ID**: 40011
 
@@ -513,7 +596,55 @@ The count of reuqests from user modules.
 
 ---
 
-### _**FreeMioCount**_
+### _**user_request_publish_cnt_per_interval**_
+
+**ID**: 40012
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.10.0
+
+The count of publishing metrics of metafs
+
+---
+
+### _**metafs_scheduler_issued_request_count_to_ssd**_
+
+**ID**: 40100
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The request count to issue to ssd periodically
+
+---
+
+### _**metafs_scheduler_issued_request_count_to_nvram**_
+
+**ID**: 40101
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The request count to issue to nvramperiodically
+
+---
+
+### _**metafs_scheduler_issued_request_count_to_journal_ssd**_
 
 **ID**: 40102
 
@@ -521,91 +652,203 @@ The count of reuqests from user modules.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
 
-**Introduced**: v0.10.0
+**Introduced**: v0.11.0
 
-The number of mio to allocate
+The request count to issue to journal ssd periodically
 
 ---
 
-### _**FreeMpioCount**_
+### _**free_mio_count**_
 
-**ID**: 40103
+**ID**: 40200
 
 **Type**: Gauge
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
 
 **Introduced**: v0.10.0
 
-The number of mpio to allocate
+The count of mio resource which can be allocated
 
 ---
 
-### _**SumOfAllTheTimeSpentByMpio**_
+### _**sampled_mpio_time_spent_all_stages**_
 
-**ID**: 40104
+**ID**: 40201
 
 **Type**: Gauge
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
 
-**Introduced**: v0.10.0
+**Introduced**: v0.11.0
 
-The Sum of all the time spent by mpio in specific period
+The time in ms during processing mpio
 
 ---
 
-### _**SumOfProcessedMpioCount**_
+### _**processed_mpio_count**_
 
-**ID**: 40105
+**ID**: 40202
 
 **Type**: Gauge
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
 
-**Introduced**: v0.10.0
+**Introduced**: v0.11.0
 
-The Sum of processed mpio count in specific period
+The count of processed mpio
 
 ---
 
-### _**SumOfAllTheTimeSpentByMio**_
+### _**sampled_mio_time_from_issue_to_complete**_
 
-**ID**: 40106
+**ID**: 40203
 
 **Type**: Gauge
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
 
-**Introduced**: v0.10.0
+**Introduced**: v0.11.0
 
-The Sum of all the time spent by mio in specific period
+The time in ms during processing mpio from issue to complete stage
 
 ---
 
-### _**SumOfProcessedMioCount**_
+### _**sampled_mio_count**_
 
-**ID**: 40107
+**ID**: 40204
 
 **Type**: Gauge
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_name": String}
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The count of sampled mio
+
+---
+
+### _**mio_handler_is_working**_
+
+**ID**: 40205
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+timestamp
+
+---
+
+### _**free_mpio_count**_
+
+**ID**: 40300
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
 
 **Introduced**: v0.10.0
 
-The Sum of processed mio count in specific period
+The count of mpio resource which can be allocated
+
+---
+
+### _**sampled_mio_time_spent_all_stages**_
+
+**ID**: 40301
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The time in ms during processing mio
+
+---
+
+### _**processed_mio_count**_
+
+**ID**: 40302
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The count of processed mio
+
+---
+
+### _**sampled_mpio_time_from_write_to_release**_
+
+**ID**: 40303
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The time in ms during processing mio from issue to complete stage
+
+---
+
+### _**sampled_mpio_time_from_push_to_pop**_
+
+**ID**: 40304
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The time in ms during processing mio from push to pop stage
+
+---
+
+### _**sampled_mpio_count**_
+
+**ID**: 40305
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+The count of sampled mpio
 
 ---
 
