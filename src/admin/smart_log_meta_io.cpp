@@ -42,7 +42,8 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
 : loaded(false),
   smartLogFile(nullptr),
   arrayId(arrayIndex),
-  smartLogMgr(smartLogMgr)
+  smartLogMgr(smartLogMgr),
+  fileIoDone(false)
 {
     fileName = "SmartLogPage.bin";
     smartLogFile = new MetaFsFileIntf(fileName, arrayId);
@@ -51,7 +52,8 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, Me
 : loaded(false),
   smartLogFile(metaFile),
   arrayId(arrayIndex),
-  smartLogMgr(smartLogMgr)
+  smartLogMgr(smartLogMgr),
+  fileIoDone(false)
 {
 }
 SmartLogMetaIo::~SmartLogMetaIo(void)
@@ -129,6 +131,7 @@ int
 SmartLogMetaIo::_DoMfsOperation(int direction)
 {
     ioError = 0;
+    fileIoDone = false;
     bool Isopened = smartLogFile->IsOpened();
     if (!Isopened)
     {
@@ -144,12 +147,21 @@ SmartLogMetaIo::_DoMfsOperation(int direction)
     logpageFlushReq->length = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
     logpageFlushReq->buffer = (char*)smartLogMgr->GetLogPages(arrayId);
     logpageFlushReq->callback = std::bind(&SmartLogMetaIo::_CompleteSmartLogIo, this, std::placeholders::_1);
+
     int ret = smartLogFile->AsyncIO(logpageFlushReq);
     if (ret < 0)
     {
         ioError = ret;
+        return ioError;
     }
+
+    // waiting for done
+    while (false == fileIoDone)
+    {
+    }
+
     _CloseFile();
+
     return ioError;
 }
 int
@@ -174,6 +186,7 @@ SmartLogMetaIo::_CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx)
             "MFS AsyncIO error, ioError:{}  mpageNum:{}", ioError, reqCtx->mpageNum);
     }
     delete ctx;
+    fileIoDone = true;
 }
 void
 SmartLogMetaIo::DeleteAsyncIoCtx(AsyncMetaFileIoCtx* ctx)

@@ -31,6 +31,7 @@
  */
 
 #pragma once
+#include <atomic>
 #include <string>
 
 #include "src/admin/smart_log_mgr.h"
@@ -77,5 +78,6 @@ private:
     uint32_t arrayId;
     int ioError = 0;
     SmartLogMgr* smartLogMgr;
+    std::atomic<bool> fileIoDone;
 };
 } // namespace pos
