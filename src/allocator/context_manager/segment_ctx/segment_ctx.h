@@ -58,11 +58,12 @@ public:
         SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_,
         GcCtx* gcCtx_, int arrayId_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-        AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_);
+        AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_, SegmentInfo* segmentInfo_ = nullptr);
     virtual ~SegmentCtx(void);
 
     // Only for UT
     void SetSegmentList(SegmentState state, SegmentList* list);
+    void SetRebuildList(SegmentList* list);
 
     virtual void Init(void);
     virtual void Dispose(void);
