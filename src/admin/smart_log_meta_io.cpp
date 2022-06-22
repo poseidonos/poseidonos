@@ -43,19 +43,21 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
   smartLogFile(nullptr),
   arrayId(arrayIndex),
   smartLogMgr(smartLogMgr),
-  fileIoDone(false)
+  fileIoDone(new MetaIoDoneChecker)
 {
     fileName = "SmartLogPage.bin";
     smartLogFile = new MetaFsFileIntf(fileName, arrayId);
 }
-SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile)
+
+SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile, MetaIoDoneChecker* ioDone)
 : loaded(false),
   smartLogFile(metaFile),
   arrayId(arrayIndex),
   smartLogMgr(smartLogMgr),
-  fileIoDone(false)
+  fileIoDone(ioDone)
 {
 }
+
 SmartLogMetaIo::~SmartLogMetaIo(void)
 {
     if (nullptr != smartLogFile)
@@ -63,53 +65,113 @@ SmartLogMetaIo::~SmartLogMetaIo(void)
         delete smartLogFile;
         smartLogFile = nullptr;
     }
+
+    if (nullptr != fileIoDone)
+    {
+        delete fileIoDone;
+        fileIoDone = nullptr;
+    }
 }
+
 int
 SmartLogMetaIo::Init(void)
 {
-    smartLogMgr->Init();
+    int result = 0;
 
+    smartLogMgr->Init();
     if (smartLogMgr->GetSmartLogEnabled() == false)
     {
-        return 0;
+        return result;
     }
-    _CreateSmartLogFile();
-    return 0;
+
+    if (smartLogFile->DoesFileExist())
+    {
+        do
+        {
+            _SetCheckerReady();
+            result = _LoadLogData();
+            if (result)
+                break;
+
+            _WaitForCheckerDone();
+            result = _CloseFile();
+        } while (0);
+    }
+    else
+    {
+        result = _CreateFile();
+    }
+
+    return result;
 }
+
 void
 SmartLogMetaIo::Dispose(void)
 {
+    int result = 0;
     if (smartLogMgr->GetSmartLogEnabled() == false)
     {
         return;
     }
-    _StoreLogData();
-}
-int
-SmartLogMetaIo::_CreateSmartLogFile(void)
-{
-    int ret = 0;
-    bool result = smartLogFile->DoesFileExist();
-    if (result == false)
+
+    _SetCheckerReady();
+    result = _StoreLogData();
+    if (result)
     {
-        uint64_t fileSize = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
-        ret = smartLogFile->Create(fileSize);
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED),
-                "Map file creation failed, fileName:{}", fileName);
-        }
-        else if (ret == 0)
-        {
-            loaded = true;
-        }
+        POS_TRACE_ERROR(EID(MFS_FILE_WRITE_FAILED),
+            "Failed to save when unmounting, fileName:{}", fileName);
+        return;
+    }
+
+    _WaitForCheckerDone();
+    result = _CloseFile();
+    if (result)
+    {
+        POS_TRACE_ERROR(EID(MFS_FILE_CLOSE_FAILED),
+            "Failed to close when unmounting, fileName:{}", fileName);
+    }
+}
+
+void
+SmartLogMetaIo::_SetCheckerReady(void)
+{
+    fileIoDone->SetReady();
+}
+
+void
+SmartLogMetaIo::_SetCheckerDone(void)
+{
+    fileIoDone->SetDone();
+}
+
+void
+SmartLogMetaIo::_WaitForCheckerDone(void)
+{
+    while (!fileIoDone->IsDone())
+    {
+        usleep(1);
+    }
+}
+
+int
+SmartLogMetaIo::_CreateFile(void)
+{
+    uint64_t fileSize = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
+    int ret = smartLogFile->Create(fileSize);
+
+    if (0 != ret)
+    {
+        POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED),
+            "Map file creation failed, fileName:{}", fileName);
     }
     else
     {
-        _LoadLogData();
+        loaded = true;
     }
+
     return ret;
 }
+
 int
 SmartLogMetaIo::_OpenFile(void)
 {
@@ -131,7 +193,6 @@ int
 SmartLogMetaIo::_DoMfsOperation(int direction)
 {
     ioError = 0;
-    fileIoDone = false;
     bool Isopened = smartLogFile->IsOpened();
     if (!Isopened)
     {
@@ -152,18 +213,11 @@ SmartLogMetaIo::_DoMfsOperation(int direction)
     if (ret < 0)
     {
         ioError = ret;
-        return ioError;
     }
-
-    // waiting for done
-    while (false == fileIoDone)
-    {
-    }
-
-    _CloseFile();
 
     return ioError;
 }
+
 int
 SmartLogMetaIo::_StoreLogData(void)
 {
@@ -186,7 +240,7 @@ SmartLogMetaIo::_CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx)
             "MFS AsyncIO error, ioError:{}  mpageNum:{}", ioError, reqCtx->mpageNum);
     }
     delete ctx;
-    fileIoDone = true;
+    _SetCheckerDone();
 }
 void
 SmartLogMetaIo::DeleteAsyncIoCtx(AsyncMetaFileIoCtx* ctx)

@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/admin/smart_log_mgr_mock.h"
+#include "test/unit-tests/admin/smart_log_meta_io_mock.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 using ::testing::_;
@@ -12,12 +13,29 @@ using testing::Return;
 using ::testing::SetArgPointee;
 namespace pos
 {
+TEST(MetaIoDoneChecker, SetReady_testIfTheInternalFlagIsCleared)
+{
+    MetaIoDoneChecker doneChecker;
+    doneChecker.SetReady();
+
+    EXPECT_FALSE(doneChecker.IsDone());
+}
+
+TEST(MetaIoDoneChecker, SetReady_testIfTheInternalFlagIsSet)
+{
+    MetaIoDoneChecker doneChecker;
+    doneChecker.SetDone();
+
+    EXPECT_TRUE(doneChecker.IsDone());
+}
+
 TEST(SmartLogMetaIo, SmartLogMetaIo_Constructor_Stack_Three_Arguments)
 {
     uint32_t arrayIndex = 0;
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 }
 
 TEST(SmartLogMetaIo, SmartLogMetaIo_Constructor_One_Stack)
@@ -49,6 +67,7 @@ TEST(SmartLogMetaIo, Init_SmartLogEnabledFalse)
     ASSERT_EQ(expected, actual);
     delete mockSmartLogMgr;
 }
+
 TEST(SmartLogMetaIo, Init_SmartLogEnabledTrue)
 {
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
@@ -57,9 +76,10 @@ TEST(SmartLogMetaIo, Init_SmartLogEnabledTrue)
     uint32_t arrayIndex = 0;
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     uint64_t fileSize = 1024;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
+    int expected = 0;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -73,12 +93,13 @@ TEST(SmartLogMetaIo, Init_CreateFileCreationSuccessful)
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
 
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, Create(_)).WillOnce(Return(0));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = 0;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -91,12 +112,13 @@ TEST(SmartLogMetaIo, Init_CreateFileCreationUnsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, Create(_)).WillOnce(Return(-1));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = -1;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -109,14 +131,17 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, Close).WillOnce(Return(0));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = 0;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -129,7 +154,10 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful_Close_Unsuccessf
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
@@ -142,8 +170,8 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOSuccessful_Close_Unsuccessf
                });
 
     EXPECT_CALL(*metaFile, Close).WillOnce(Return(2));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = 2;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -156,13 +184,14 @@ TEST(SmartLogMetaIo, Init_FileLoad_OpenedFile_AsyncIOUnsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(-1));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = -1;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -175,14 +204,17 @@ TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = 0;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -195,13 +227,14 @@ TEST(SmartLogMetaIo, Init_FileLoad_UnopenedFile_AsyncIOUnsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(-1));
-    uint32_t expected = 0;
-    uint32_t actual = smartLogMetaIo.Init();
+    int expected = -1;
+    int actual = smartLogMetaIo.Init();
     ASSERT_EQ(expected, actual);
 }
 
@@ -214,7 +247,8 @@ TEST(SmartLogMetaIo, Dispose_SmartLogEnabledFalse)
     uint32_t arrayIndex = 0;
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
 
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
     smartLogMetaIo.Dispose();
 }
 
@@ -227,7 +261,10 @@ TEST(SmartLogMetaIo, Dispose_SmartLogEnabledTrue)
     uint32_t arrayIndex = 0;
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
 
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
     smartLogMetaIo.Dispose();
 }
 
@@ -240,7 +277,10 @@ TEST(SmartLogMetaIo, Dispose_FileOpenedAsyncIOSuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(0));
@@ -256,7 +296,10 @@ TEST(SmartLogMetaIo, Dispose_FileOpenedAsyncIOUnsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(-1));
@@ -272,7 +315,10 @@ TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOSuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
@@ -289,7 +335,10 @@ TEST(SmartLogMetaIo, Dispose_FileUnopenedAsyncIOUnsuccessful)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    ON_CALL(*doneChecker, SetReady).WillByDefault(Return());
+    ON_CALL(*doneChecker, IsDone).WillByDefault(Return(true));
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
 
     EXPECT_CALL(*metaFile, IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
@@ -306,7 +355,8 @@ TEST(SmartLogMetaIo, Shutdown_Run)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
     smartLogMetaIo.Shutdown();
 }
 
@@ -319,7 +369,8 @@ TEST(SmartLogMetaIo, Flush_Run)
     uint32_t arrayIndex = 0;
 
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile);
+    NiceMock<MockMetaIoDoneChecker>* doneChecker = new NiceMock<MockMetaIoDoneChecker>;
+    SmartLogMetaIo smartLogMetaIo(arrayIndex, &mockSmartLogMgr, metaFile, doneChecker);
     smartLogMetaIo.Flush();
 }
 
