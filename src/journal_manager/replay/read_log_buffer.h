@@ -38,7 +38,7 @@
 
 namespace pos
 {
-class JournalLogBuffer;
+class IJournalLogBuffer;
 class LogReplayer;
 class JournalConfiguration;
 class ReplayLogList;
@@ -47,9 +47,9 @@ class LogBufferParser;
 class ReadLogBuffer : public ReplayTask
 {
 public:
-    ReadLogBuffer(JournalConfiguration* journalConfig, JournalLogBuffer* logBuffer,
+    ReadLogBuffer(JournalConfiguration* journalConfig, IJournalLogBuffer* logBuffer,
         ReplayLogList& logList, ReplayProgressReporter* progressReporter);
-    ReadLogBuffer(JournalConfiguration* journalConfig, JournalLogBuffer* logBuffer,
+    ReadLogBuffer(JournalConfiguration* journalConfig, IJournalLogBuffer* logBuffer,
         ReplayLogList& logList, ReplayProgressReporter* progressReporter, LogBufferParser* logBufferParser);
     virtual ~ReadLogBuffer(void);
 
@@ -60,7 +60,7 @@ public:
 
 private:
     JournalConfiguration* config;
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
     ReplayLogList& logList;
 
     std::vector<void*> readLogBuffer;

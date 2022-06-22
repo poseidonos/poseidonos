@@ -36,12 +36,12 @@
 
 namespace pos
 {
-class JournalLogBuffer;
+class IJournalLogBuffer;
 
 class ResetLogBuffer : public ReplayTask
 {
 public:
-    ResetLogBuffer(JournalLogBuffer* logBuffer, ReplayProgressReporter* reporter);
+    ResetLogBuffer(IJournalLogBuffer* logBuffer, ReplayProgressReporter* reporter);
     virtual ~ResetLogBuffer(void);
 
     virtual int Start(void) override;
@@ -50,7 +50,7 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
 };
 
 } // namespace pos

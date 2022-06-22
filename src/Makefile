@@ -63,7 +63,7 @@ SUBDIRS = allocator \
         metafs/storage \
         logger \
         meta_file_intf \
-        journal_rocks_intf \
+        rocksdb_log_buffer \
         journal_manager \
         helper \
         helper/enumerable \

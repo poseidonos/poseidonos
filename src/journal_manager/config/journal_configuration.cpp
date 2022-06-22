@@ -252,7 +252,7 @@ JournalConfiguration::_IsRocksdbEnabled(void)
         if (enabled == true)
         {
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
-                "Journal RocksDB Interface enabled");
+                "RocksDB Log Buffer is enabled");
             return true;
         }
     }

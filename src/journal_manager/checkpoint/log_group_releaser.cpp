@@ -65,7 +65,7 @@ LogGroupReleaser::~LogGroupReleaser(void)
 
 void
 LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
-    LogBufferWriteDoneNotifier* released, JournalLogBuffer* buffer, CheckpointManager* cpManager,
+    LogBufferWriteDoneNotifier* released, IJournalLogBuffer* buffer, CheckpointManager* cpManager,
     IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler)
 {
     config = journalConfiguration;

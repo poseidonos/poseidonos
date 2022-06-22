@@ -43,6 +43,7 @@
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
+#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 
 namespace pos
 {
@@ -100,7 +101,7 @@ public:
         LogWriteHandler* writeHandler,
         JournalVolumeEventHandler* journalVolumeEventHandler,
         JournalWriter* journalWriter,
-        JournalLogBuffer* journalLogBuffer,
+        IJournalLogBuffer* journalLogBuffer,
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
         CheckpointManager* checkpointManager,
@@ -163,7 +164,7 @@ protected:
     JournalStatusProvider* statusProvider;
     JournalingStatus journalingStatus;
 
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
 
     LogWriteContextFactory* logFactory;
     JournalEventFactory* eventFactory;

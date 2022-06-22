@@ -59,6 +59,7 @@
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 
 namespace pos
 {
@@ -93,7 +94,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     LogWriteHandler* writeHandler,
     JournalVolumeEventHandler* journalVolumeEventHandler,
     JournalWriter* writer,
-    JournalLogBuffer* journalLogBuffer,
+    IJournalLogBuffer* journalLogBuffer,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
     CheckpointManager* cpManager,
@@ -117,6 +118,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     journalWriter = writer;
 
     logBuffer = journalLogBuffer;
+
     bufferAllocator = bufferOffsetAllocator;
     logGroupReleaser = groupReleaser;
 
@@ -129,7 +131,19 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     arrayInfo = info;
 
     telemetryPublisher = tp_;
-    
+
+    if (journalLogBuffer == nullptr)
+    {
+        if (config->IsRocksdbEnabled())
+        {
+            logBuffer = new RocksDBLogBuffer(info->GetName());
+        }
+        else
+        {
+            logBuffer = new JournalLogBuffer();
+        }
+    }
+
     if (versionedSegCtx_ == nullptr)
     {
         // In product code, create object
@@ -151,7 +165,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       new LogWriteHandler(),
       new JournalVolumeEventHandler(),
       new JournalWriter(),
-      new JournalLogBuffer(),
+      nullptr,
       new BufferOffsetAllocator(),
       new LogGroupReleaser(),
       new CheckpointManager(),

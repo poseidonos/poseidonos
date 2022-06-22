@@ -34,40 +34,45 @@
 
 #include <string>
 
-#include "rocksdb/db.h"
+#include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
+#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
-class JournalRocksIntf
+class LogWriteContext;
+class LogBufferIoContext;
+class LogGroupResetContext;
+class LogWriteContextFactory;
+
+class IJournalLogBuffer : public ILogGroupResetCompleted
 {
 public:
-    JournalRocksIntf(void);
-    explicit JournalRocksIntf(const std::string arrayName);
-    virtual ~JournalRocksIntf(void);
+    virtual ~IJournalLogBuffer(void){};
+    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+        int arrayId, TelemetryPublisher* tp) = 0;
+    virtual void InitDataBuffer(void) = 0;
+    virtual void Dispose(void) = 0;
 
-    virtual int Open(void);
-    virtual int Close(void);
+    virtual int Create(uint64_t logBufferSize) = 0;
+    virtual int Open(uint64_t& logBufferSize) = 0;
 
-    virtual int AddJournal(void);
-    virtual int ReadAllJournal(void);
-    virtual int ResetJournalByKey(void);
-    virtual int ResetAllJournal(void);
+    virtual int ReadLogBuffer(int groupId, void* buffer) = 0;
+    virtual int WriteLog(LogWriteContext* context) = 0;
 
-    virtual bool IsOpened(void);
-    virtual bool DeleteDirectory(void);
+    virtual int SyncResetAll(void) = 0;
+    virtual int AsyncReset(int id, EventSmartPtr callbackEvent) = 0;
 
-    virtual std::string GetPathName(void)
-    {
-        return pathName;
-    }
+    virtual int InternalIo(LogBufferIoContext* context) = 0;
+    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx) = 0;
 
-protected:
-    virtual bool _CreateDirectory(void);
-    std::string pathName;
-    bool isOpened;
+    virtual int Delete(void) = 0;
 
-private:
-    rocksdb::DB* rocksJournal;
+    virtual void LogGroupResetCompleted(int logGroupId) = 0;
+
+    virtual bool DoesLogFileExist(void) = 0;
+
 };
-
 } // namespace pos

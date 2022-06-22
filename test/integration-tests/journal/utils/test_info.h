@@ -17,6 +17,14 @@ static std::string GetLogFileName(void)
     return filename;
 }
 
+static std::string GetLogDirName()
+{
+    std::string test_suite = ::testing::UnitTest::GetInstance()->current_test_suite()->name();
+    std::string test = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    std::string filename = test_suite + "_" + test;
+
+    return filename;
+}
 // Test setup variables
 // TODO (cheolho.kang) Change it to global variable or singleton instance
 class TestInfo
