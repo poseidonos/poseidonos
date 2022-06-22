@@ -53,7 +53,9 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
   sampledProcessedMpioCount(0),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
-  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount())
+  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount()),
+  doneCountByStorage(),
+  doneCountByFileType()
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}", threadId, coreId);
@@ -113,6 +115,9 @@ MpioHandler::_UpdateMetricsConditionally(Mpio* mpio)
 {
     totalProcessedMpioCount++;
 
+    doneCountByFileType[(int)mpio->GetFileType()]++;
+    doneCountByStorage[(int)mpio->io.targetMediaType]++;
+
     if (mpio->GetType() == MpioType::Write)
     {
         if (skipCount++ % SAMPLING_SKIP_COUNT == 0)
@@ -147,6 +152,24 @@ MpioHandler::_PublishPeriodicMetrics()
             m.SetGaugeValue(totalProcessedMpioCount);
             metricVector->emplace_back(m);
             totalProcessedMpioCount = 0;
+        }
+
+        for (uint32_t idx = 0; idx < NUM_STORAGE; idx++)
+        {
+            POSMetric m(TEL40104_METAFS_WORKER_DONE_COUNT_PARTITION, POSMetricTypes::MT_GAUGE);
+            m.AddLabel("type", std::to_string(idx));
+            m.SetGaugeValue(doneCountByStorage[idx]);
+            metricVector->emplace_back(m);
+            doneCountByStorage[idx] = 0;
+        }
+
+        for (uint32_t idx = 0; idx < NUM_FILE_TYPE; idx++)
+        {
+            POSMetric m(TEL40106_METAFS_WORKER_DONE_COUNT_FILE_TYPE, POSMetricTypes::MT_GAUGE);
+            m.AddLabel("type", std::to_string(idx));
+            m.SetGaugeValue(doneCountByFileType[idx]);
+            metricVector->emplace_back(m);
+            doneCountByFileType[idx] = 0;
         }
 
         if (sampledProcessedMpioCount)
