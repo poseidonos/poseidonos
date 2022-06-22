@@ -2,9 +2,7 @@
 name: Package_Upload
 
 on:
-  workflow_run:
-    workflows: [M8-72H_VM_Test]
-    types: [completed]
+  workflow_call:
 
   workflow_dispatch:
     inputs:
@@ -18,9 +16,7 @@ on:
 jobs:
   Upload_Package:
     runs-on: ubuntu-18.04
-    if: ${{github.event.workflow_run.conclusion == 'success'}} || ${{github.event_name == 'workflow_dispatch'}}
     steps:
-    
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
