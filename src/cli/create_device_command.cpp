@@ -75,7 +75,7 @@ CreateDeviceCommand::Init(
         }
     }
 
-    errorMessage = "Failed to create buffer device. ";
+    errorMessage = "Failed to create a device. ";
 }
 
 
@@ -132,33 +132,33 @@ CreateDeviceCommand::_ParseJsonToParam(CreateDeviceParam& param, json& doc)
 {
     auto jsonReq = doc["param"];
 
-    if (!jsonReq.contains("dev_type"))
+    if (!jsonReq.contains("devType"))
     {
-        errorMessage += "Device type must be included.";
+        errorMessage += "Device type must be specified.";
         return false;
     }
-    param.devType = jsonReq["dev_type"].get<string>();
+    param.devType = jsonReq["devType"].get<string>();
 
     if (!jsonReq.contains("name"))
     {
-        errorMessage += "Device name must be included.";
+        errorMessage += "Device name must be specified.";
         return false;
     }
     param.name = jsonReq["name"];
 
-    if (!jsonReq.contains("num_blocks"))
+    if (!jsonReq.contains("numBlocks"))
     {
-        errorMessage += "Number of blocks must be included.";
+        errorMessage += "Number of blocks must be specified.";
         return false;
     }
-    param.numBlocks = jsonReq["num_blocks"];
+    param.numBlocks = jsonReq["numBlocks"];
 
-    if (!jsonReq.contains("block_size"))
+    if (!jsonReq.contains("blockSize"))
     {
-        errorMessage += "Block size must be included.";
+        errorMessage += "Block size must be specified.";
         return false;
     }
-    param.blockSize = jsonReq["block_size"];
+    param.blockSize = jsonReq["blockSize"];
 
     if (jsonReq.contains("numa"))
     {
