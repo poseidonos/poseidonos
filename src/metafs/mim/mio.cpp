@@ -343,7 +343,7 @@ Mio::GetStartLpn(void)
 }
 
 MetaStorageType
-Mio::GetTargetStorage(void)
+Mio::GetTargetStorage(void) const
 {
     return originReq->targetMediaType;
 }

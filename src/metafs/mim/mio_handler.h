@@ -92,7 +92,8 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
-    void _UpdateMetricsConditionally(Mio* mio);
+    void _UpdateSubmissionMetricsConditionally(const Mio& mio);
+    void _UpdateCompletionMetricsConditionally(Mio* mio);
     void _PublishPeriodicMetrics(void);
     void _CreateMioPool(void);
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
@@ -126,5 +127,9 @@ private:
     MetaFsTimeInterval metaFsTimeInterval;
     size_t skipCount;
     const size_t SAMPLING_SKIP_COUNT;
+
+    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
+    int64_t issueCountByStorage[NUM_STORAGE];
+    int64_t issueCountByFileType[NUM_FILE_TYPE];
 };
 } // namespace pos

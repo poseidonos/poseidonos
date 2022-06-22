@@ -36,6 +36,7 @@
 #include <string>
 
 #include "mpio_allocator.h"
+#include "src/metafs/include/mf_property.h"
 #include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/metafs_io_multilevel_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -72,5 +73,10 @@ private:
     MetaFsTimeInterval metaFsTimeInterval;
     size_t skipCount;
     const size_t SAMPLING_SKIP_COUNT;
+
+    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
+    int64_t doneCountByStorage[NUM_STORAGE];
+    int64_t doneCountByFileType[NUM_FILE_TYPE];
 };
 } // namespace pos
