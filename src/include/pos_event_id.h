@@ -1796,7 +1796,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Starting all publishers has been triggered.", "", "")},
         {(int)POS_EVENT_ID::TELEMETRY_CLIENT_PUBLISH_STOP_ALL,
             new PosEventInfoEntry("TELEMETRY_CLIENT_PUBLISH_STOP_ALL",
-                "Stoping all publishers has been triggered.", "", "")},        
+                "Stoping all publishers has been triggered.", "", "")},
         {(int)POS_EVENT_ID::TELEMETRY_CLIENT_START_USING_DATA_POOL,
             new PosEventInfoEntry("TELEMETRY_CLIENT_START_USING_DATA_POOL",
                 "A publisher starts to use a data pool.", "", "")},
@@ -1821,15 +1821,12 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION,
             new PosEventInfoEntry("TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION",
                 "Failed to add a default label.", "The default label list is full.", "")},
-        
-        
         {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             new PosEventInfoEntry("MBR_DEVICE_NOT_FOUND",
                 "Could not find a device.", "", "")},
         {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             new PosEventInfoEntry("MBR_ABR_GET_LIST_SUCCESS",
                 "ABR list has been loaded.", "", "")},
-
         {(int)POS_EVENT_ID::REBUILD_INIT_FAILED,
             new PosEventInfoEntry("REBUILD_INIT_FAILED",
                 "Rebuild cannot be performed due to initialization failure.", "There are not enough buffers for rebuild.", "Please request technical support for error.")},
