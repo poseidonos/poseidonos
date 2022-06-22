@@ -35,6 +35,7 @@
 #include "src/mapper/map/map_content.h"
 #include "src/mapper/map/map_io_handler.h"
 #include "src/meta_file_intf/mock_file_intf.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 #include <string>
 
@@ -75,7 +76,7 @@ MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
         mapHeader->Init(numMpages, mpageSize);
         if (mapIoHandler == nullptr)
         {
-            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, addrInfo);
+            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, addrInfo, EventSchedulerSingleton::Instance());
         }
     }
     return 0;
