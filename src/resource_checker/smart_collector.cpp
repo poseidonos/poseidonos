@@ -49,7 +49,6 @@ namespace pos
 {
 SmartCollector::SmartCollector(void)
 {
-    POS_TRACE_TRACE((int)POS_EVENT_ID::SMART_COLLECTOR_CONSTRUCTOR, "[SmartCollector] execute constructor");
     if (nullptr == publisher)
     {
         publisher = new TelemetryPublisher("Disk_Monitoring");
@@ -60,11 +59,12 @@ SmartCollector::SmartCollector(void)
         telemetryClient = TelemetryClientSingleton::Instance();
         telemetryClient->RegisterPublisher(publisher);
     }
+
+    POS_TRACE_DEBUG(EID(SMART_COLLECTOR_CONSTRUCTOR_EXECUTION), "execute constructor");
 }
 
 SmartCollector::~SmartCollector(void)
 {
-    POS_TRACE_TRACE((int)POS_EVENT_ID::SMART_COLLECTOR_DESSTRUCTOR, "[SmartCollector] execute desstructor");
     if (nullptr != publisher)
     {
         telemetryClient->DeregisterPublisher(publisher->GetName());
@@ -73,6 +73,8 @@ SmartCollector::~SmartCollector(void)
     }
 
     telemetryClient = nullptr;
+
+    POS_TRACE_DEBUG(EID(SMART_COLLECTOR_DESTRUCTOR_EXECUTION), "execute destructor");
 }
 
 void
@@ -118,9 +120,7 @@ SmartCollector::PublishSmartDataToTelemetry(void)
         }
         else
         {
-            POS_TRACE_TRACE((int)POS_EVENT_ID::SMART_COLLECTOR_CMD_ERR,
-                "[SmartCollector] command execution error. result={}",
-                result);
+            POS_TRACE_TRACE(EID(SMART_COLLECTOR_CMD_EXEC_ERR), "result:{}", result);
         }
     }
 
