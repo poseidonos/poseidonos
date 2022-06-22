@@ -14,6 +14,16 @@ public:
     using LogPageFlushIoCtx::LogPageFlushIoCtx;
 };
 
+class MockMetaIoDoneChecker : public MetaIoDoneChecker
+{
+public:
+    using MetaIoDoneChecker::MetaIoDoneChecker;
+
+    MOCK_METHOD(void, SetReady, ());
+    MOCK_METHOD(void, SetDone, ());
+    MOCK_METHOD(bool, IsDone, ());
+};
+
 class MockSmartLogMetaIo : public SmartLogMetaIo
 {
 public:
