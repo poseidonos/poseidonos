@@ -75,7 +75,7 @@ public:
         MetaFilePropertySet prop;
         prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
         prop.ioOpType = MetaFileDominant::NoSpecific;
-        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, volumeType);
+        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, MetaFileType::General, volumeType);
         EXPECT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
     }
 

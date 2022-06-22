@@ -45,9 +45,9 @@
 
 namespace pos
 {
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
-                                    MetaVolumeType volumeType)
-: MetaFileIntf(fname, arrayId, volumeType),
+MetaFsFileIntf::MetaFsFileIntf(const std::string fileName, const int arrayId,
+                    MetaFileType fileType, MetaVolumeType volumeType)
+: MetaFileIntf(fileName, arrayId, fileType, volumeType),
   metaFs(MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)),
   blksPerStripe(0),
   baseLpn(UINT64_MAX),
@@ -57,10 +57,10 @@ MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
 }
 
 // only for test
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
-                                    MetaFsConfigManager* configManager,
-                                    MetaVolumeType volumeType)
-: MetaFileIntf(fname, arrayId, volumeType),
+MetaFsFileIntf::MetaFsFileIntf(std::string fileName, int arrayId, MetaFs* metaFs,
+                    MetaFsConfigManager* configManager, const MetaFileType fileType,
+                    const MetaVolumeType volumeType)
+: MetaFileIntf(fileName, arrayId, fileType, volumeType),
   metaFs(metaFs),
   blksPerStripe(0),
   baseLpn(UINT64_MAX),
@@ -205,7 +205,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, fileType, volumeType);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED;

@@ -36,6 +36,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 
 using ::testing::NiceMock;
@@ -115,10 +116,7 @@ TEST_F(MioStateExecuteEntryTexture, DispatchHandler_testIfTheCallbackSetByTheCon
 
     EXPECT_TRUE(result);
 }
-} // namespace pos
 
-namespace pos
-{
 TEST(Mio, GetId_testIfTheUniqueIdIsUnique)
 {
     NiceMock<MockMetaFsConfigManager> conf(nullptr);
@@ -130,6 +128,32 @@ TEST(Mio, GetId_testIfTheUniqueIdIsUnique)
     Mio m2(mpioAllocator);
 
     EXPECT_NE(m1.GetId(), m2.GetId());
+
+    delete mpioAllocator;
+}
+
+TEST(Mio, GetFileType_testIfTheFileTypeCanBeReturned)
+{
+    NiceMock<MockMetaFsConfigManager> conf(nullptr);
+    ON_CALL(conf, GetMpioPoolCapacity).WillByDefault(Return(1));
+
+    MpioAllocator* mpioAllocator = new NiceMock<MockMpioAllocator>(&conf);
+    Mio mio(mpioAllocator);
+
+    EXPECT_EQ(mio.GetFileType(), MetaFileType::General);
+
+    MetaFileExtent extent;
+    MetaFileContext ctx;
+    ctx.fileType = MetaFileType::Journal;
+    NiceMock<MockMetaFsIoRequest> req;
+    ON_CALL(req, GetStartLpn).WillByDefault(Return(0));
+    req.reqType = MetaIoRequestType::Read;
+    req.fileCtx = &ctx;
+    req.extents = &extent;
+    req.extentsCount = 1;
+
+    mio.Setup(&req, 0, nullptr);
+    EXPECT_EQ(mio.GetFileType(), ctx.fileType);
 
     delete mpioAllocator;
 }

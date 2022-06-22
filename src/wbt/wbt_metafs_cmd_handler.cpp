@@ -123,7 +123,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, volumeType);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, MetaFileType::General, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -494,6 +494,7 @@ WbtMetafsCmdHandler::_DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElemen
     metaInode.SetAttribute(JsonAttribute("fileByteSize", std::to_string(static_cast<uint32_t>(data->inodeInfo.data.field.fileByteSize))));
     metaInode.SetAttribute(JsonAttribute("dataChunkSize", std::to_string(static_cast<uint32_t>(data->inodeInfo.data.field.dataChunkSize))));
     metaInode.SetAttribute(JsonAttribute("dataLocation", std::to_string(static_cast<int>(data->inodeInfo.data.field.dataLocation))));
+    metaInode.SetAttribute(JsonAttribute("fileType", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileType))));
 
     // Set pageMap
     fileExtentMap.SetAttribute(JsonAttribute("baseMetaLpn", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap[0].GetStartLpn()))));

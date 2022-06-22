@@ -29,7 +29,7 @@ JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, 
 
     delete logBuffer;
     uint32_t arrayId = 0;
-    logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arrayId, MetaVolumeType::NvRamVolume));
+    logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arrayId, MetaFileType::General, MetaVolumeType::NvRamVolume));
 
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
