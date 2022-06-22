@@ -19,7 +19,7 @@ TEST(Configuration, LogLevel_testIfThereIsNoConfigAboutLogLevel)
     // When
     string ret = config->LogLevel();
     // Then
-    ASSERT_EQ("debug", ret);
+    ASSERT_EQ("info", ret);
 }
 
 } // namespace pos_logger
