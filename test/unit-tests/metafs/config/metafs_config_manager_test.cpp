@@ -98,7 +98,9 @@ protected:
     void _CreateConfigManager(const size_t mioPoolCapacity,
         const size_t mpioPoolCapacity, const size_t writeMpioCacheCapacity,
         const bool directAccessEnabled, const size_t timeIntervalInMillisecondsForMetric,
-        const size_t samplingSkipCount)
+        const size_t samplingSkipCount, const size_t wrrCountReverseMap,
+        const size_t wrrCountJournal, const size_t wrrCountMap,
+        const size_t wrrCountGeneral)
     {
         config = new NiceMock<MockConfigManager>;
 
@@ -114,6 +116,14 @@ protected:
             .WillByDefault(SetArg2ToLongAndReturn0(timeIntervalInMillisecondsForMetric));
         ON_CALL(*config, GetValue("metafs", "sampling_skip_count", _, _))
             .WillByDefault(SetArg2ToLongAndReturn0(samplingSkipCount));
+        ON_CALL(*config, GetValue("metafs", "wrr_count_reverse_map", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(wrrCountReverseMap));
+        ON_CALL(*config, GetValue("metafs", "wrr_count_journal", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(wrrCountJournal));
+        ON_CALL(*config, GetValue("metafs", "wrr_count_map", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(wrrCountMap));
+        ON_CALL(*config, GetValue("metafs", "wrr_count_general", _, _))
+            .WillByDefault(SetArg2ToLongAndReturn0(wrrCountGeneral));
 
         manager = new MetaFsConfigManagerTest(config);
     }
@@ -125,14 +135,15 @@ protected:
 TEST_F(MetaFsConfigManagerFixture, _ValidateConfig_testIfTheConfigIsInvalid)
 {
     const size_t CAPACITY = 0;
-    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, 50, 100);
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, 50, 100, 2, 3, 5, 1);
     EXPECT_FALSE(manager->ValidateConfig());
 }
 
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
 {
     const size_t CAPACITY = 32;
-    _CreateConfigManager(CAPACITY, CAPACITY + 1, CAPACITY + 2, true, CAPACITY + 3, CAPACITY + 4);
+    _CreateConfigManager(CAPACITY, CAPACITY + 1, CAPACITY + 2, true, CAPACITY + 3,
+        CAPACITY + 4, CAPACITY + 5, CAPACITY + 6, CAPACITY + 7, CAPACITY + 8);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
@@ -141,12 +152,17 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
     EXPECT_TRUE(manager->IsDirectAccessEnabled());
     EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY + 3);
     EXPECT_EQ(manager->GetSamplingSkipCount(), CAPACITY + 4);
+    EXPECT_EQ(manager->GetWrrCountReverseMap(), CAPACITY + 5);
+    EXPECT_EQ(manager->GetWrrCountJournal(), CAPACITY + 6);
+    EXPECT_EQ(manager->GetWrrCountMap(), CAPACITY + 7);
+    EXPECT_EQ(manager->GetWrrCountGeneral(), CAPACITY + 8);
 }
 
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse)
 {
     const size_t CAPACITY = 0;
-    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY);
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
+        CAPACITY, CAPACITY, CAPACITY, CAPACITY);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
@@ -155,5 +171,9 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse
     EXPECT_FALSE(manager->IsDirectAccessEnabled());
     EXPECT_EQ(manager->GetTimeIntervalInMillisecondsForMetric(), CAPACITY);
     EXPECT_EQ(manager->GetSamplingSkipCount(), CAPACITY);
+    EXPECT_EQ(manager->GetWrrCountReverseMap(), CAPACITY);
+    EXPECT_EQ(manager->GetWrrCountJournal(), CAPACITY);
+    EXPECT_EQ(manager->GetWrrCountMap(), CAPACITY);
+    EXPECT_EQ(manager->GetWrrCountGeneral(), CAPACITY);
 }
 } // namespace pos

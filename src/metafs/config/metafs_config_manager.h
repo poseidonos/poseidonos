@@ -50,6 +50,10 @@ enum class MetaFsConfigType
     DirectAccessForJournalEnabled,
     TimeIntervalInMillisecondsForMetric,
     SamplingSkipCount,
+    WrrCountReverseMap,
+    WrrCountJournal,
+    WrrCountMap,
+    WrrCountGeneral,
 };
 
 class MetaFsConfigManager
@@ -83,6 +87,22 @@ public:
     {
         return samplingSkipCount_;
     }
+    virtual size_t GetWrrCountReverseMap(void) const
+    {
+        return wrrCountReverseMap_;
+    }
+    virtual size_t GetWrrCountJournal(void) const
+    {
+        return wrrCountJournal_;
+    }
+    virtual size_t GetWrrCountMap(void) const
+    {
+        return wrrCountMap_;
+    }
+    virtual size_t GetWrrCountGeneral(void) const
+    {
+        return wrrCountGeneral_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -107,6 +127,10 @@ private:
     bool _IsDirectAccessEnabled(void);
     size_t _GetTimeIntervalInMillisecondsForMetric(void);
     size_t _GetSamplingSkipCount(void);
+    size_t _GetWrrCountReverseMap(void);
+    size_t _GetWrrCountJournal(void);
+    size_t _GetWrrCountMap(void);
+    size_t _GetWrrCountGeneral(void);
 
     std::unordered_map<MetaFsConfigType, std::pair<std::string, int>> configMap_;
     ConfigManager* configManager_;
@@ -116,6 +140,10 @@ private:
     bool directAccessEnabled_;
     size_t timeIntervalInMillisecondsForMetric_;
     size_t samplingSkipCount_;
+    size_t wrrCountReverseMap_;
+    size_t wrrCountJournal_;
+    size_t wrrCountMap_;
+    size_t wrrCountGeneral_;
 };
 
 } // namespace pos
