@@ -32,11 +32,11 @@
 
 #include "src/journal_manager/log_buffer/reset_log_group.h"
 
-#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 
 namespace pos
 {
-ResetLogGroup::ResetLogGroup(JournalLogBuffer* logBuffer,
+ResetLogGroup::ResetLogGroup(IJournalLogBuffer* logBuffer,
     int logGroupId, EventSmartPtr callback)
 : logBuffer(logBuffer),
   logGroupId(logGroupId),

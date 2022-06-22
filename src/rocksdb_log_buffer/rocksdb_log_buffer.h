@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -32,29 +32,19 @@
 
 #pragma once
 
-#include <atomic>
 #include <string>
 
-#include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-#include "i_journal_log_buffer.h"
+#include "rocksdb/db.h"
+#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 
 namespace pos
 {
-class LogWriteContext;
-class LogBufferIoContext;
-class LogGroupResetContext;
-class LogWriteContextFactory;
-class TelemetryPublisher;
-
-class JournalLogBuffer : public IJournalLogBuffer
+class RocksDBLogBuffer : public IJournalLogBuffer
 {
 public:
-    JournalLogBuffer(void);
-    explicit JournalLogBuffer(MetaFileIntf* metaFile);
-    virtual ~JournalLogBuffer(void);
+    RocksDBLogBuffer(void);
+    explicit RocksDBLogBuffer(const std::string arrayName);
+    virtual ~RocksDBLogBuffer(void);
 
     virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
         int arrayId, TelemetryPublisher* tp) override;
@@ -63,6 +53,7 @@ public:
 
     virtual int Create(uint64_t logBufferSize) override;
     virtual int Open(uint64_t& logBufferSize) override;
+    virtual int Close(void);
 
     virtual int ReadLogBuffer(int groupId, void* buffer) override;
     virtual int WriteLog(LogWriteContext* context) override;
@@ -73,31 +64,27 @@ public:
     virtual int InternalIo(LogBufferIoContext* context) override;
     virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx) override;
 
-    int Delete(void) override; // TODO(huijeong.kim): move to tester code
+    virtual int Delete(void) override;
 
     virtual void LogGroupResetCompleted(int logGroupId) override;
 
     virtual bool DoesLogFileExist(void) override;
-    inline bool
-    IsInitialized(void)
-    {
-        return numInitializedLogGroup == config->GetNumLogGroups();
-    }
 
-    // For UT
-    char* GetInitializedDataBuffer(void)
+    virtual bool IsOpened(void);
+    virtual int DeleteDirectory(void);
+
+    virtual std::string GetPathName(void)
     {
-        return initializedDataBuffer;
+        return pathName;
     }
-    void SetLogBufferReadDone(bool val)
-    {
-        logBufferReadDone = val;
-    }
+    virtual void DeleteDB(void);
+
+protected:
+    int _CreateDirectory(void);
+    std::string pathName;
+    bool isOpened;
 
 private:
-    void _LoadBufferSize(void);
-    void _LogBufferReadDone(AsyncMetaFileIoCtx* ctx);
-
     inline uint64_t
     _GetFileOffset(int groupId, uint64_t offset)
     {
@@ -105,14 +92,22 @@ private:
         return (groupId * groupSize + offset);
     }
 
+    inline std::string
+    _MakeRocksDbKey(int groupId, uint64_t offset)
+    {
+        int numDigits = std::to_string(config->GetLogGroupSize()).size();
+        int zeroSize = numDigits - std::to_string(offset).size();
+        std::string appendZero(zeroSize,'0');
+        std::string key = std::to_string(groupId) + appendZero + std::to_string(offset) + "Log";
+        return key;
+    }
+
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
-    std::atomic<int> numInitializedLogGroup;
-    std::atomic<bool> logBufferReadDone;
-    MetaFileIntf* logFile;
-
-    char* initializedDataBuffer;
+    rocksdb::DB* rocksJournal;
+    uint64_t _logBufferSize;
 
     TelemetryPublisher* telemetryPublisher;
 };
+
 } // namespace pos

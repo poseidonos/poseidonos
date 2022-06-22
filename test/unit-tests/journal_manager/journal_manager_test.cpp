@@ -46,6 +46,7 @@
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/i_journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_event_factory_mock.h"
@@ -100,7 +101,7 @@ public:
         logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
         journalEventFactory = new NiceMock<MockJournalEventFactory>;
         volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
-        logBuffer = new NiceMock<MockJournalLogBuffer>;
+        logBuffer = new NiceMock<MockIJournalLogBuffer>;
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
         checkpointManager = new NiceMock<MockCheckpointManager>;
@@ -140,7 +141,7 @@ protected:
     NiceMock<MockLogWriteContextFactory>* logWriteContextFactory;
     NiceMock<MockJournalEventFactory>* journalEventFactory;
     NiceMock<MockJournalVolumeEventHandler>* volumeEventHandler;
-    NiceMock<MockJournalLogBuffer>* logBuffer;
+    NiceMock<MockIJournalLogBuffer>* logBuffer;
     NiceMock<MockBufferOffsetAllocator>* bufferAllocator;
     NiceMock<MockLogGroupReleaser>* logGroupReleaser;
     NiceMock<MockCheckpointManager>* checkpointManager;

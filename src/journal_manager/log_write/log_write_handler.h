@@ -37,12 +37,12 @@
 #include "../log/waiting_log_list.h"
 #include "../log_buffer/buffer_write_done_notifier.h"
 #include "src/meta_file_intf/async_context.h"
-
+#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 namespace pos
 {
 class BufferOffsetAllocator;
 class LogWriteContext;
-class JournalLogBuffer;
+class IJournalLogBuffer;
 class JournalConfiguration;
 class LogWriteStatistics;
 
@@ -53,7 +53,7 @@ public:
     LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
     virtual ~LogWriteHandler(void);
 
-    virtual void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
+    virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
         JournalConfiguration* config);
     virtual void Dispose(void);
 
@@ -67,7 +67,7 @@ public:
 private:
     void _StartWaitingIos(void);
 
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;
 
     LogWriteStatistics* logWriteStats;
