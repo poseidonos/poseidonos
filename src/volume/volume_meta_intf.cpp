@@ -156,7 +156,8 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
     POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
     if (EID(SUCCESS) != (int)rc)
     {
-        rc = metaFs->ctrl->Create(volFile, fileSize);
+        MetaFilePropertySet prop;
+        rc = metaFs->ctrl->Create(volFile, fileSize, prop, MetaFileType::General);
         if (EID(SUCCESS) != (int)rc)
         {
             POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED),

@@ -42,22 +42,21 @@
 namespace pos
 {
 MetaFileIntf::MetaFileIntf(void)
-: fileName(""),
-  arrayId(INT32_MAX),
-  size(0),
-  isOpened(false),
-  fd(-1),
-  volumeType(MetaVolumeType::SsdVolume),
-  fileProperty(MetaFilePropertySet())
+: MetaFileIntf("", 0, MetaFileType::General, MetaVolumeType::SsdVolume)
 {
 }
 
-MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, MetaVolumeType volumeType)
-: MetaFileIntf()
+MetaFileIntf::MetaFileIntf(const std::string fileName, const int arrayId,
+    const MetaFileType fileType, const MetaVolumeType volumeType)
+: fileName(fileName),
+  arrayId(arrayId),
+  size(0),
+  isOpened(false),
+  fd(-1),
+  fileType(fileType),
+  volumeType(volumeType),
+  fileProperty(MetaFilePropertySet())
 {
-    fileName = fname;
-    this->arrayId = arrayId;
-    this->volumeType = volumeType;
 }
 
 // LCOV_EXCL_START

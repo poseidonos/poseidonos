@@ -131,6 +131,10 @@ public:
     {
         return UNIQUE_ID;
     }
+    virtual MetaFileType GetFileType(void) const
+    {
+        return fileType;
+    }
     void PrintLog(const std::string& str, const int array, const int lpn) const
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -152,6 +156,7 @@ protected:
 
     MpioCacheState cacheState;
     RequestPriority priority;
+    MetaFileType fileType;
 
     virtual void _InitStateHandler(void) = 0;
     bool _DoMemCpy(void* dst, void* src, const size_t nbytes);

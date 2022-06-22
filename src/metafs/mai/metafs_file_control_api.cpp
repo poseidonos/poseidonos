@@ -86,7 +86,7 @@ MetaFsFileControlApi::~MetaFsFileControlApi(void)
 
 POS_EVENT_ID
 MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
-    MetaFilePropertySet prop, MetaVolumeType volumeType)
+    MetaFilePropertySet prop, MetaFileType fileType, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -99,6 +99,7 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
     reqMsg.arrayId = arrayId;
     reqMsg.fileByteSize = fileByteSize;
     reqMsg.fileProperty = prop;
+    reqMsg.fileType = fileType;
     reqMsg.volType = volumeType;
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check & MetaVolumeManager::HandleCreateFileReq()
@@ -449,6 +450,7 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
     // update
     MetaFileContext* context = &cxtList[index];
     context->isActivated = info->data.field.inUse;
+    context->fileType = info->data.field.fileType;
     context->storageType = info->data.field.dataLocation;
     context->sizeInByte = info->data.field.fileByteSize;
     context->fileBaseLpn = info->data.field.extentMap[0].GetStartLpn();

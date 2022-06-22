@@ -48,6 +48,7 @@ public:
     : fd(MetaFsCommonConst::INVALID_FD),
       fileName(nullptr),
       fileByteSize(0),
+      fileType(MetaFileType::General),
       media(MetaStorageType::Default),
       extentList(nullptr)
     {
@@ -64,6 +65,7 @@ public:
         fileName = reqMsg.fileName;
         fileByteSize = reqMsg.fileByteSize;
         ioAttribute = reqMsg.fileProperty;
+        fileType = reqMsg.fileType;
         media = mediaType;
         extentList = newExtent;
     }
@@ -72,6 +74,7 @@ public:
     std::string* fileName;
     FileSizeType fileByteSize;
     MetaFilePropertySet ioAttribute;
+    MetaFileType fileType;
     MetaStorageType media;
     std::vector<MetaFileExtent>* extentList;
 };

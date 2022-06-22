@@ -46,7 +46,7 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
   fileIoDone(new MetaIoDoneChecker)
 {
     fileName = "SmartLogPage.bin";
-    smartLogFile = new MetaFsFileIntf(fileName, arrayId);
+    smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
 }
 
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile, MetaIoDoneChecker* ioDone)
