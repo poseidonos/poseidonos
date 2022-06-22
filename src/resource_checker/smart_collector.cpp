@@ -76,7 +76,7 @@ SmartCollector::~SmartCollector(void)
 }
 
 void
-SmartCollector::Execute(void)
+SmartCollector::PublishSmartDataToTelemetry(void)
 {
     struct spdk_nvme_ctrlr* ctrlr;
     vector<DeviceProperty> list = DeviceManagerSingleton::Instance()->ListDevs();

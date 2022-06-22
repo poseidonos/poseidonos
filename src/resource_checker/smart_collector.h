@@ -59,7 +59,7 @@ class SmartCollector
 public:
     SmartCollector(void);
     virtual ~SmartCollector(void);
-    void Execute(void);
+    void PublishSmartDataToTelemetry(void);
     SmartReturnType CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_nvme_ctrlr* ctrlr);
 
 private:

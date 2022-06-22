@@ -214,6 +214,6 @@ void
 ResourceChecker::CollectSmartLogPage(void)
 {
     SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
-    smartCollector->Execute();
+    smartCollector->PublishSmartDataToTelemetry();
 }
 }
