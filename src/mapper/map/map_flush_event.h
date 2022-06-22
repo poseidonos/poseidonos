@@ -32,59 +32,25 @@
 
 #pragma once
 
-#include <queue>
+#include <memory>
 
-#include "src/mapper/include/mpage_info.h"
-#include "src/lib/bitmap.h"
+#include "src/event_scheduler/event.h"
+#include "src/mapper/map/sequential_page_finder.h"
 
 namespace pos
 {
-static const int MAX_MPAGES_PER_SET = 1024;
+class MapIoHandler;
 
-struct MpageSet
-{
-    MpageNum startMpage;
-    int numMpages;
-
-    bool
-    CanBeCoalesced(MpageNum page)
-    {
-        return (startMpage - 1 <= page &&
-            page <= startMpage + numMpages &&
-            numMpages < MAX_MPAGES_PER_SET);
-    }
-
-    void
-    Coalesce(MpageNum page)
-    {
-        if (startMpage - 1 == page)
-        {
-            startMpage--;
-        }
-        else if (page == startMpage + numMpages)
-        {
-            numMpages++;
-        }
-    }
-};
-
-class SequentialPageFinder
+class MapFlushEvent : public Event
 {
 public:
-    // for test
-    SequentialPageFinder(void) = default;
-    explicit SequentialPageFinder(MpageList& pages);
-    explicit SequentialPageFinder(BitMap* pages);
-    // LCOV_EXCL_START
-    virtual ~SequentialPageFinder(void);
-    // LCOV_EXCL_STOP
-
-    virtual MpageSet PopNextMpageSet(void);
-    virtual bool IsRemaining(void);
+    MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet);
+    virtual ~MapFlushEvent(void);
+    bool Execute(void) override;
 
 private:
-    void _UpdateSequentialPageList(MpageList& pages);
-    std::queue<MpageSet> sequentialPages;
+    MapIoHandler* handler;
+    MpageSet mpageSet;
 };
 
 } // namespace pos

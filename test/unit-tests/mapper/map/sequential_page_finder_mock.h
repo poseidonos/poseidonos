@@ -18,6 +18,9 @@ class MockSequentialPageFinder : public SequentialPageFinder
 {
 public:
     using SequentialPageFinder::SequentialPageFinder;
+
+    MOCK_METHOD(MpageSet, PopNextMpageSet, ());
+    MOCK_METHOD(bool, IsRemaining, ());
 };
 
 } // namespace pos

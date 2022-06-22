@@ -30,61 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "map_flush_event.h"
 
-#include <queue>
-
-#include "src/mapper/include/mpage_info.h"
-#include "src/lib/bitmap.h"
+#include "src/mapper/map/map.h"
+#include "src/mapper/map/map_header.h"
+#include "src/mapper/map/map_io_handler.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-static const int MAX_MPAGES_PER_SET = 1024;
-
-struct MpageSet
+MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
+: Event(false, BackendEvent::BackendEvent_MetaIO),
+  handler(handler),
+  mpageSet(mpageSet)
 {
-    MpageNum startMpage;
-    int numMpages;
+}
 
-    bool
-    CanBeCoalesced(MpageNum page)
-    {
-        return (startMpage - 1 <= page &&
-            page <= startMpage + numMpages &&
-            numMpages < MAX_MPAGES_PER_SET);
-    }
-
-    void
-    Coalesce(MpageNum page)
-    {
-        if (startMpage - 1 == page)
-        {
-            startMpage--;
-        }
-        else if (page == startMpage + numMpages)
-        {
-            numMpages++;
-        }
-    }
-};
-
-class SequentialPageFinder
+// LCOV_EXCL_START
+MapFlushEvent::~MapFlushEvent(void)
 {
-public:
-    // for test
-    SequentialPageFinder(void) = default;
-    explicit SequentialPageFinder(MpageList& pages);
-    explicit SequentialPageFinder(BitMap* pages);
-    // LCOV_EXCL_START
-    virtual ~SequentialPageFinder(void);
-    // LCOV_EXCL_STOP
+}
+// LCOV_EXCL_STOP
 
-    virtual MpageSet PopNextMpageSet(void);
-    virtual bool IsRemaining(void);
-
-private:
-    void _UpdateSequentialPageList(MpageList& pages);
-    std::queue<MpageSet> sequentialPages;
-};
-
+bool
+MapFlushEvent::Execute(void)
+{
+    return (0 == handler->CreateFlushRequestFor(mpageSet));
+}
 } // namespace pos

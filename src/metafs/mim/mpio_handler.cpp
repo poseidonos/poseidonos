@@ -133,9 +133,13 @@ MpioHandler::_PublishPeriodicMetrics()
     {
         POSMetricVector* metricVector = new POSMetricVector();
 
-        POSMetric mFreeMpioCount(TEL40300_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
-        mFreeMpioCount.SetGaugeValue(mpioAllocator->GetFreeCount());
-        metricVector->emplace_back(mFreeMpioCount);
+        for (int i = 0; i < (int)MpioType::Max; ++i)
+        {
+            POSMetric mFreeMpioCount(TEL40300_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
+            mFreeMpioCount.AddLabel("type", std::to_string(i));
+            mFreeMpioCount.SetGaugeValue(mpioAllocator->GetFreeCount((MpioType)i));
+            metricVector->emplace_back(mFreeMpioCount);
+        }
 
         if (totalProcessedMpioCount)
         {

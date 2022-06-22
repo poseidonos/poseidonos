@@ -39,6 +39,7 @@
 #include "src/meta_file_intf/meta_file_intf.h"
 
 #include <string>
+#include <memory>
 
 namespace pos
 {
@@ -56,6 +57,8 @@ enum MapIoStatus
     LOADING_ERROR,
 };
 
+class EventScheduler;
+
 class MapFlushIoContext : public AsyncMetaFileIoCtx
 {
 public:
@@ -66,9 +69,9 @@ public:
 class MapIoHandler
 {
 public:
-    MapIoHandler(MetaFileIntf* file, Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_);
-    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_);
-    ~MapIoHandler(void);
+    MapIoHandler(MetaFileIntf* file, Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_, EventScheduler* eventScheduler);
+    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_, EventScheduler* scheduler_);
+    virtual ~MapIoHandler(void);
 
     void Dispose(void);
     int OpenFile(std::string fileName, uint64_t fileSize);
@@ -81,6 +84,9 @@ public:
     int FlushHeader(EventSmartPtr callback);
     int LoadForWBT(MetaFileIntf* fileFromLoad);
     int StoreForWBT(MetaFileIntf* fileToStore);
+
+    virtual int CreateFlushRequestFor(const MpageSet& mpageSet);
+    virtual void CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequentialPages);
 
 private:
     int _MakeFileReady(void);
@@ -97,7 +103,7 @@ private:
     int _FlushMpages(MpageNum startPage, int numPages);
     int _IssueFlush(char* buffer, MpageNum startMpage, int numMpages);
     int _IssueFlushHeader(void);
-    int _Flush(SequentialPageFinder& sequentialPages);
+    void _Flush(std::unique_ptr<SequentialPageFinder> sequentialPages);
     int _IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo, char* headerBuf);
     int _IssueMpageIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
 
@@ -116,6 +122,7 @@ private:
     EventSmartPtr flushDoneCallBack;
     int ioError;
     MapperAddressInfo* addrInfo;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos
