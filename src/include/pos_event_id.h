@@ -64,6 +64,7 @@ enum class POS_EVENT_ID
     POS_TRACE_ARRAY_STATE_CHANGED = 1026,
     POS_TRACE_DEVICE_ATTACHED = 1050,
     POS_TRACE_DEVICE_DETACHED = 1051,
+    POS_TRACE_MBR_LOADED = 1052,
 
 
     // ------------------- CLI Server (1200 - 1599) -------------------

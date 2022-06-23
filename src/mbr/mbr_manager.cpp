@@ -38,6 +38,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include <sstream>
 
 #include "src/array/array_name_policy.h"
 #include "src/array/device/array_device_list.h"
@@ -118,7 +119,7 @@ MbrManager::LoadMbr(void)
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_READ_DONE,
-        "read mbr data");
+        "read mbr data done : ");
 
     _LoadIndexMap();
 
@@ -128,6 +129,8 @@ MbrManager::LoadMbr(void)
     }
 
     pthread_rwlock_unlock(&mbrLock);
+    POS_TRACE_TRACE(EID(POS_TRACE_MBR_LOADED), 
+    "{}",Serialize());
     return ret;
 }
 
@@ -710,6 +713,27 @@ MbrManager::FindArrayWithDeviceSN(string devSN)
     {
         return "";
     }
+}
+
+string
+MbrManager::Serialize(void)
+{
+    vector<string> mbrinfo;
+    string posVersion(systeminfo.posVersion);
+    string systemUUID(systeminfo.systemUuid);
+
+    mbrinfo.push_back("MBR information\n");
+    mbrinfo.push_back("POS Version : " + posVersion);
+    mbrinfo.push_back("MBR Version : " + to_string(systeminfo.mbrVersion));
+    mbrinfo.push_back("System UUID : " + systemUUID);
+    mbrinfo.push_back("Number of Arrays : " + to_string(systeminfo.arrayNum));
+    
+    stringstream ss;
+    for (string str : mbrinfo)
+    {
+        ss << str << ", ";
+    }
+    return ss.str();
 }
 
 } // namespace pos
