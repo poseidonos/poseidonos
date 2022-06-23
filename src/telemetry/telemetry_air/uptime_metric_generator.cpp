@@ -71,8 +71,8 @@ UptimeMetricGenerator::Generate(POSMetric* m)
         return -1;
     }
     m->SetName(TEL05000_COMMON_PROCESS_UPTIME_SECOND);
-    m->SetType(POSMetricTypes::MT_COUNT);
-    m->SetCountValue(uptime);
+    m->SetType(POSMetricTypes::MT_GAUGE);
+    m->SetGaugeValue(uptime);
     m->AddLabel("version", version);
 
     return 0;

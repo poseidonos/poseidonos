@@ -59,6 +59,6 @@ TEST(UptimeMetricGenerator, Generate_testIfUptimeGeneratedSuccessfully)
     // Then
     sleep(1);
     ASSERT_EQ(0, ret);
-    ASSERT_NE(0, m.GetCountValue());
+    ASSERT_NE(0, m.GetGaugeValue());
     ASSERT_TRUE(version == (*m.GetLabelList())["version"]);
 }
