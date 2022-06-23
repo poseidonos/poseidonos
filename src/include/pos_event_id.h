@@ -1764,6 +1764,10 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
             new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
                 "Failed to delete volumes.", "A timeout has occured.", "Please report the errors.")},
 
+        {(int)POS_EVENT_ID::DEVICE_SCAN_FAILED,
+            new PosEventInfoEntry("DEVICE_SCAN_FAILED",
+                "Failed to scan a device.", "", "")},
+
 
         {(int)POS_EVENT_ID::TELEMETRY_START_FAILURE,
             new PosEventInfoEntry("TELEMETRY_START_FAILURE",

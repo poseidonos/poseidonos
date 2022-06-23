@@ -941,6 +941,43 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, ScanDeviceResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    list<string> failedArrayList;
+    DeviceManagerSingleton::Instance()->ScanDevs();
+    int result = ArrayManagerSingleton::Instance()->Load(failedArrayList);
+    
+    if (result != 0)
+    {
+        string failedArrayString = "";
+        if (failedArrayList.empty() == false)
+        {
+            for (auto arrayName : failedArrayList)
+            {
+                failedArrayString += arrayName;
+                failedArrayString += " ";
+            }
+        }
+        else
+        {
+            failedArrayString += "no array found";
+        }
+
+        POS_TRACE_ERROR(result, "failedArrays: " + failedArrayString);       
+        _SetEventStatus(result, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+  
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 pos::BackendEvent
 CommandProcessor::_GetEventId(std::string eventName)
 {
