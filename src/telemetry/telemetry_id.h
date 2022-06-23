@@ -106,6 +106,10 @@ static const std::string TEL40012_METAFS_USER_REQUEST_PUBLISH_CNT_PER_INTERVAL =
 static const std::string TEL40100_METAFS_SCHEDULER_ISSUE_COUNT_TO_SSD = "metafs_scheduler_issued_request_count_to_ssd";
 static const std::string TEL40101_METAFS_SCHEDULER_ISSUE_COUNT_TO_NVRAM = "metafs_scheduler_issued_request_count_to_nvram";
 static const std::string TEL40102_METAFS_SCHEDULER_ISSUE_COUNT_TO_JOURNAL_SSD = "metafs_scheduler_issued_request_count_to_journal_ssd";
+static const std::string TEL40103_METAFS_WORKER_ISSUE_COUNT_PARTITION = "metafs_worker_issued_request_count_partition";
+static const std::string TEL40104_METAFS_WORKER_DONE_COUNT_PARTITION = "metafs_worker_done_request_count_partition";
+static const std::string TEL40105_METAFS_WORKER_ISSUE_COUNT_FILE_TYPE = "metafs_worker_issued_request_count_file_type";
+static const std::string TEL40106_METAFS_WORKER_DONE_COUNT_FILE_TYPE = "metafs_worker_done_request_count_file_type";
 static const std::string TEL40200_METAFS_FREE_MIO_CNT = "free_mio_count";
 static const std::string TEL40201_METAFS_MPIO_TIME_SPENT_PROCESSING_ALL_STAGES = "sampled_mpio_time_spent_all_stages";
 static const std::string TEL40202_METAFS_PROCESSED_MPIO_COUNT = "processed_mpio_count";
@@ -144,4 +148,21 @@ static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_fo
 static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
+
+static const std::string TEL110000_MEDIA_ERROR_COUNT_LOW = "soft_media_error_low";
+static const std::string TEL110001_MEDIA_ERROR_COUNT_HIGH = "soft_media_error_high";
+static const std::string TEL110002_POWER_CYCLE_LOW = "power_cycle_low";
+static const std::string TEL110003_POWER_CYCLE_HIGH = "power_cycle_high";
+static const std::string TEL110004_POWER_ON_HOUR_LOW = "power_on_hour_low";
+static const std::string TEL110005_POWER_ON_HOUR_HIGH = "power_on_hour_high";
+static const std::string TEL110006_UNSAFE_SHUTDOWNS_LOW = "unsafe_shutdowns_low";
+static const std::string TEL110007_UNSAFE_SHUTDOWNS_HIGH = "unsafe_shutdowns_high";
+static const std::string TEL110008_TEMPERATURE = "temperature";
+static const std::string TEL110009_AVAILABLE_SPARE = "available_spare";
+static const std::string TEL110010_AVAILABLE_SPARE_THRESHOLD = "available_spare_threshold";
+static const std::string TEL110011_PERCENTAGE_USED = "percentage_used";
+static const std::string TEL110012_CONTROLLER_BUSY_TIME_LOW = "controller_busy_time_low";
+static const std::string TEL110013_CONTROLLER_BUSY_TIME_HIGH = "controller_busy_time_high";
+static const std::string TEL110014_WARNING_TEMP_TIME = "warning_temperature_time";
+static const std::string TEL110015_CRITICAL_TEMP_TIME = "critical_temperature_time";
 } // namespace pos

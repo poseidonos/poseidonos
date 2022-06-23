@@ -44,7 +44,7 @@ public:
     using MetaFsFileControlApi::MetaFsFileControlApi;
     MOCK_METHOD(POS_EVENT_ID, Create,
         (std::string & fileName, uint64_t fileByteSize,
-            MetaFilePropertySet prop, MetaVolumeType volumeType),
+            MetaFilePropertySet prop, MetaFileType fileType, MetaVolumeType volumeType),
         (override));
     MOCK_METHOD(POS_EVENT_ID, Delete,
         (std::string & fileName, MetaVolumeType volumeType),

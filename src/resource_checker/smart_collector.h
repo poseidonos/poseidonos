@@ -30,52 +30,44 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SMART_COLLECTOR_H_
+#define SMART_COLLECTOR_H_
 
 #include <string>
-#include <vector>
 
-#include "src/metafs/include/meta_file_extent.h"
-#include "mf_property.h"
-#include "metafs_control_request.h"
+#include "src/lib/singleton.h"
+
+struct spdk_nvme_cpl;
+struct spdk_nvme_health_information_page;
+struct spdk_nvme_ctrlr;
 
 namespace pos
 {
-class MetaFileInodeCreateReq
+class TelemetryPublisher;
+class TelemetryClient;
+
+enum class SmartReturnType
+{
+    SUCCESS = 0,
+    SEND_ERR,
+    RESPONSE_ERR,
+    CTRL_NOT_EXIST
+};
+
+class SmartCollector
 {
 public:
-    MetaFileInodeCreateReq(void)
-    : fd(MetaFsCommonConst::INVALID_FD),
-      fileName(nullptr),
-      fileByteSize(0),
-      fileType(MetaFileType::General),
-      media(MetaStorageType::Default),
-      extentList(nullptr)
-    {
-        ioAttribute.ioAccPattern = MetaFileAccessPattern::Default;
-        ioAttribute.ioOpType = MetaFileDominant::Default;
-        ioAttribute.integrity = MetaFileIntegrityType::Default;
-    }
+    SmartCollector(void);
+    virtual ~SmartCollector(void);
+    void PublishSmartDataToTelemetry(void);
+    SmartReturnType CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_nvme_ctrlr* ctrlr);
 
-    void
-    Setup(MetaFsFileControlRequest& reqMsg, FileDescriptorType newFD,
-            MetaStorageType mediaType, std::vector<MetaFileExtent>* newExtent)
-    {
-        fd = newFD;
-        fileName = reqMsg.fileName;
-        fileByteSize = reqMsg.fileByteSize;
-        ioAttribute = reqMsg.fileProperty;
-        fileType = reqMsg.fileType;
-        media = mediaType;
-        extentList = newExtent;
-    }
-
-    FileDescriptorType fd;
-    std::string* fileName;
-    FileSizeType fileByteSize;
-    MetaFilePropertySet ioAttribute;
-    MetaFileType fileType;
-    MetaStorageType media;
-    std::vector<MetaFileExtent>* extentList;
+private:
+    static void CompleteSmartLogPage(void* arg, const spdk_nvme_cpl* cpl);
+    TelemetryClient* telemetryClient = nullptr;
+    TelemetryPublisher* publisher = nullptr;
 };
+using SmartCollectorSingleton = Singleton<SmartCollector>;
 } // namespace pos
+
+#endif // SMART_COLLECTOR_H_

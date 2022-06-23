@@ -107,7 +107,7 @@ public:
 
     virtual bool IsRead(void);
     virtual MetaLpnType GetStartLpn(void);
-    virtual MetaStorageType GetTargetStorage(void);
+    virtual MetaStorageType GetTargetStorage(void) const;
     virtual bool Init(MioState expNextState = MioState::Max);
     virtual bool Issue(MioState expNextState = MioState::Max);
     virtual bool Complete(MioState expNextState = MioState::Max);
@@ -119,6 +119,10 @@ public:
     virtual uint64_t GetId(void) const
     {
         return UNIQUE_ID;
+    }
+    virtual MetaFileType GetFileType(void) const
+    {
+        return fileType;
     }
 
     virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
@@ -147,6 +151,7 @@ protected:
     MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
     std::vector<MetaFsIoRequest*>* mergedRequestList;
+    MetaFileType fileType;
 
     static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoRequestType::Max)];
     MetaFsSpinLock mpioListCxtLock;

@@ -95,3 +95,7 @@ jobs:
         name: Three_Days_CORE_DUMP
         path: |
           ${{github.workspace}}/tool/dump/*.tar.gz*
+
+  Call_Package_Upload:
+    needs: Three_Days_Test
+    uses: ./.github/workflows/package_upload.yml

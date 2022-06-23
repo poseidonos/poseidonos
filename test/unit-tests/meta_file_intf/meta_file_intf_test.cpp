@@ -43,9 +43,10 @@ public:
     : MetaFileIntf()
     {
     }
-    MetaFileIntfTester(std::string fname, int arrayId,
-                        MetaVolumeType volumeType = MetaVolumeType::SsdVolume)
-    : MetaFileIntf(fname, arrayId, volumeType)
+    MetaFileIntfTester(const std::string fileName, const int arrayId,
+                        const MetaFileType fileType = MetaFileType::General,
+                        const MetaVolumeType volumeType = MetaVolumeType::SsdVolume)
+    : MetaFileIntf(fileName, arrayId, fileType, volumeType)
     {
     }
     ~MetaFileIntfTester(void)

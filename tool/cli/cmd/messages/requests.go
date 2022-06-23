@@ -81,9 +81,9 @@ type SMARTLOGReqParam struct {
 
 type CreateDeviceReqParam struct {
 	DEVICENAME string `json:"name"`
-	NUMBLOCKS  int    `json:"num_blocks"`
-	BLOCKSIZE  int    `json:"block_size"`
-	DEVICETYPE string `json:"dev_type"`
+	NUMBLOCKS  int    `json:"numBlocks"`
+	BLOCKSIZE  int    `json:"blockSize"`
+	DEVICETYPE string `json:"devType"`
 	NUMA       int    `json:"numa"`
 }
 
@@ -103,12 +103,12 @@ type SetSystemPropReqParam struct {
 
 // Volume request params
 type CreateVolumeParam struct {
-	VOLUMENAME    string `json:"name"`
-	ARRAYNAME     string `json:"array"`
-	VOLUMESIZE    uint64 `json:"size"`
-	MAXIOPS       int    `json:"maxiops,omitempty"`
-	MAXBANDWIDTH  int    `json:"maxbw,omitempty"`
-	ISWALVOL      bool   `json:"iswalvol"`
+	VOLUMENAME   string `json:"name"`
+	ARRAYNAME    string `json:"array"`
+	VOLUMESIZE   uint64 `json:"size"`
+	MAXIOPS      int    `json:"maxiops,omitempty"`
+	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
+	ISWALVOL     bool   `json:"iswalvol"`
 }
 
 type DeleteVolumeParam struct {

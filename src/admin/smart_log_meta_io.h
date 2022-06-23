@@ -31,6 +31,7 @@
  */
 
 #pragma once
+#include <atomic>
 #include <string>
 
 #include "src/admin/smart_log_mgr.h"
@@ -50,12 +51,40 @@ class LogPageFlushIoCtx : public AsyncMetaFileIoCtx
 public:
     int mpageNum;
 };
+
+class MetaIoDoneChecker
+{
+public:
+    MetaIoDoneChecker(void)
+    : ioDone(false)
+    {
+    }
+    virtual ~MetaIoDoneChecker(void)
+    {
+    }
+    virtual void SetReady(void)
+    {
+        ioDone = false;
+    }
+    virtual void SetDone(void)
+    {
+        ioDone = true;
+    }
+    virtual bool IsDone(void)
+    {
+        return ioDone;
+    }
+
+private:
+    std::atomic<bool> ioDone;
+};
+
 class SmartLogMetaIo : public IMountSequence
 {
 public:
     SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr);
     // only for test
-    SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile);
+    SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile, MetaIoDoneChecker* ioDone);
     virtual ~SmartLogMetaIo(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
@@ -64,18 +93,23 @@ public:
     void DeleteAsyncIoCtx(AsyncMetaFileIoCtx* ctx);
 private:
     // Meta File
-    int _CreateSmartLogFile(void);
+    int _CreateFile(void);
     int _StoreLogData(void);
     int _LoadLogData(void);
     int _OpenFile(void);
     int _CloseFile(void);
     void _CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx);
     int _DoMfsOperation(int Direction);
+    void _SetCheckerReady(void);
+    void _SetCheckerDone(void);
+    void _WaitForCheckerDone(void);
+
     bool loaded;
     std::string fileName;
     MetaFileIntf* smartLogFile;
     uint32_t arrayId;
     int ioError = 0;
     SmartLogMgr* smartLogMgr;
+    MetaIoDoneChecker* fileIoDone;
 };
 } // namespace pos

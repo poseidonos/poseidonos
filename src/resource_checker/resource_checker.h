@@ -58,6 +58,7 @@ public:
     void Enable(void);
 
 private:
+    void CollectSmartLogPage(void);
     bool enable;
     uint64_t runningCnt;
     uint32_t sleepSecTime;

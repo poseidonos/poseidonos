@@ -123,7 +123,7 @@ public:
             for (auto& info : files[arrayId])
             {
                 rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                    info.second.fileSize, info.second.prop, info.first);
+                    info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
                 ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
                 ASSERT_EQ(GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             }

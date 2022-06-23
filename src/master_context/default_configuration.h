@@ -154,7 +154,11 @@ private:
         {"write_mpio_cache_capacity", "32"},
         {"direct_access_for_journal_enable", "true"},
         {"time_interval_in_milliseconds_for_metric", "1000"},
-        {"sampling_skip_count", "100"}
+        {"sampling_skip_count", "100"},
+        {"wrr_count_reverse_map", "1"},
+        {"wrr_count_journal", "1"},
+        {"wrr_count_map", "1"},
+        {"wrr_count_general", "1"},
     };
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}

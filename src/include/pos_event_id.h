@@ -113,6 +113,8 @@ enum class POS_EVENT_ID
     CLI_UPDATE_EVENT_WRR_FAILURE_UNKNOWN_EVENT,
     CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED,
     CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED,
+    CLI_CREATE_DEVICE_FAILURE,
+    CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -659,6 +661,11 @@ enum class POS_EVENT_ID
     RESOURCE_CHECKER_THREAD_DISABLE = 3630,
     RESOURCE_CHECKER_SET_SLEEP_TIME = 3631,
     RESOURCE_CHECKER_END = 3632,
+
+    // --------------Smart collector (3700)----------------
+    SMART_COLLECTOR_CONSTRUCTOR_EXECUTION = 3700,
+    SMART_COLLECTOR_DESTRUCTOR_EXECUTION = 3701,
+    SMART_COLLECTOR_CMD_EXEC_ERR = 3702,
 
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical
@@ -1436,6 +1443,14 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
             new PosEventInfoEntry("CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED",
                 "Failed to set preference.", "The structured logging is not specified.",
                 "Please input the structured logging.")},
+        {(int)POS_EVENT_ID::CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL,
+            new PosEventInfoEntry("CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL",
+                "Failed to create a device.", "The input NUMA number is equal to or greater than the total number of existing NUMAs.",
+                "Please check the existing NUMAs.")},
+        {(int)POS_EVENT_ID::CLI_CREATE_DEVICE_FAILURE,
+            new PosEventInfoEntry("CLI_CREATE_DEVICE_FAILURE",
+                "Failed to create a device.", "",
+                "Check out the PoseidonOS log.")},
 
         {(int)POS_EVENT_ID::CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS,
             new PosEventInfoEntry("CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS",
@@ -1822,4 +1837,8 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::REBUILD_FORCED_RESET_LOCK,
             new PosEventInfoEntry("REBUILD_FORCED_RESET_LOCK",
                 "The maximum number of retry attempts is exceeded to reset the busy lock range.", "Maybe Meta I/O is busy or deadlock.", "Please request technical support for error.")},
+
+        {(int)POS_EVENT_ID::SMART_COLLECTOR_CMD_EXEC_ERR,
+            new PosEventInfoEntry("SMART_COLLECTOR_CMD_EXEC_ERR",
+                "Command execution error.", "Could not process get log page(02h-smart)", "Please device scan again")},
     };

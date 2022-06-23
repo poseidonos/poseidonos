@@ -1,4 +1,3 @@
-- [- _**AvailableMemorySize**_](#--availablememorysize)
 - [**Device**](#device)
   - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
   - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
@@ -37,6 +36,10 @@
   - [_**metafs_scheduler_issued_request_count_to_ssd**_](#metafs_scheduler_issued_request_count_to_ssd)
   - [_**metafs_scheduler_issued_request_count_to_nvram**_](#metafs_scheduler_issued_request_count_to_nvram)
   - [_**metafs_scheduler_issued_request_count_to_journal_ssd**_](#metafs_scheduler_issued_request_count_to_journal_ssd)
+  - [_**metafs_worker_issued_request_count_partition**_](#metafs_worker_issued_request_count_partition)
+  - [_**metafs_worker_done_request_count_partition**_](#metafs_worker_done_request_count_partition)
+  - [_**metafs_worker_issued_request_count_file_type**_](#metafs_worker_issued_request_count_file_type)
+  - [_**metafs_worker_done_request_count_file_type**_](#metafs_worker_done_request_count_file_type)
   - [_**free_mio_count**_](#free_mio_count)
   - [_**sampled_mpio_time_spent_all_stages**_](#sampled_mpio_time_spent_all_stages)
   - [_**processed_mpio_count**_](#processed_mpio_count)
@@ -83,8 +86,25 @@
   - [_**UnmountVolumeId**_](#unmountvolumeid)
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
-- [**ResourceMonitoring**](#resourcemonitoring)
-  - [_**AvailableMemorySize**_](#availablememorysize)
+- [**Resource**](#resource)
+  - [_**AvailableMemorySize**_](#availableMemorySize)
+- [**Disk**](#disk)
+  - [_**SoftMediaErrorLow**_](#softMediaErrorLow)
+  - [_**SoftMediaErrorHigh**_](#softMediaErrorHigh)
+  - [_**PowerCycleLow**_](#powerCycleLow)
+  - [_**PowerCycleHigh**_](#powerCycleHigh)
+  - [_**PowerOnHourLow**_](#powerOnHourLow)
+  - [_**PowerOnHourHigh**_](#powerOnHourHigh)
+  - [_**UnsafeShutdownsLow**_](#unsafeShutdownsLow)
+  - [_**UnsafeShutdownsHigh**_](#unsafeShutdownsHigh)
+  - [_**Temperature**_](#temperature)
+  - [_**AvailableSpare**_](#availableSpare)
+  - [_**AvailableSpareThreshold**_](#availableSpareThreshold)
+  - [_**PercentageUsed**_](#percentageUsed)
+  - [_**ControllerBusyTimeLow**_](#controllerBusyTimeLow)
+  - [_**ControllerBusyTimeHigh**_](#controllerBusyTimeHigh)
+  - [_**WarningTemperatureTime**_](#warningTemperatureTime)
+  - [_**CriticalTemperatureTime**_](#criticalTemperatureTime)
 ---
 ## **Device**
 
@@ -624,7 +644,7 @@ The count of publishing metrics of metafs
 
 **Introduced**: v0.11.0
 
-The request count to issue to ssd periodically
+The request count that the meta scheduler issues to the ssd periodically
 
 ---
 
@@ -640,7 +660,7 @@ The request count to issue to ssd periodically
 
 **Introduced**: v0.11.0
 
-The request count to issue to nvramperiodically
+The request count that the meta scheduler issues to the nvram periodically
 
 ---
 
@@ -656,7 +676,71 @@ The request count to issue to nvramperiodically
 
 **Introduced**: v0.11.0
 
-The request count to issue to journal ssd periodically
+The request count that the meta scheduler issues to the journal ssd periodically
+
+---
+
+### _**metafs_worker_issued_request_count_partition**_
+
+**ID**: 40103
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The request count that the meta worker issues to a partition periodically
+
+---
+
+### _**metafs_worker_done_request_count_partition**_
+
+**ID**: 40104
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The done count that the meta worker issues to a partition periodically
+
+---
+
+### _**metafs_worker_issued_request_count_file_type**_
+
+**ID**: 40105
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The request count that the meta worker issues to a file type periodically
+
+---
+
+### _**metafs_worker_done_request_count_file_type**_
+
+**ID**: 40106
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The done count that the meta worker issues to a file type periodically
 
 ---
 
@@ -1338,7 +1422,7 @@ The updated volume id
 The renamed Volume id
 
 ---
-## **ResourceMonitoring**
+## **Resource**
 
 Resource group contains the metrics of the pos resource.
 
@@ -1356,5 +1440,251 @@ Resource group contains the metrics of the pos resource.
 **Introduced**: v0.10.0
 
 Available memory size
+
+---
+## **Disk**
+
+disk group contains the smart metrics.
+
+---
+### _**softMediaErrorLow**_
+
+**ID**: 110000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Soft Media Error Low Value
+
+---
+### _**softMediaErrorHigh**_
+
+**ID**: 110001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Soft Media Error High Value
+
+---
+### _**powerCycleLow**_
+
+**ID**: 110002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power cycle Low Value
+
+---
+### _**powerCycleHigh**_
+
+**ID**: 110003
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power cycle High Value
+
+---
+### _**powerOnHourLow**_
+
+**ID**: 110004
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power On Hour Low Value
+
+---
+### _**powerOnHourHigh**_
+
+**ID**: 110005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Power On Hour High Value
+
+---
+### _**unsafeShutdownsLow**_
+
+**ID**: 110006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Unsafe Shutdowns Low Value
+
+---
+### _**unsafeShutdownsHigh**_
+
+**ID**: 110007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Unsafe Shutdowns High Value
+
+---
+### _**temperature**_
+
+**ID**: 110008
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Temperature Value
+
+---
+### _**availableSpare**_
+
+**ID**: 110009
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Available Spare Value
+
+---
+### _**availableSpareThreshold**_
+
+**ID**: 110010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Available Spare Threshold Value
+
+---
+### _**percentageUsed**_
+
+**ID**: 110011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Percentage Used Value
+
+---
+### _**controllerBusyTimeLow**_
+
+
+**ID**: 110012
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Controller Busy Time Low Value
+
+---
+### _**controllerBusyTimeHigh**_
+
+**ID**: 110013
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Controller Busy Time High Value
+
+---
+### _**warningTemperatureTime**_
+
+**ID**: 110014
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Warning Temperature Time Value
+
+---
+### _**criticalTemperatureTime**_
+
+**ID**: 110015
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Critical Temperature Time Value
 
 ---

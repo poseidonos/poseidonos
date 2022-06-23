@@ -47,7 +47,11 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   writeMpioCapacity_(0),
   directAccessEnabled_(false),
   timeIntervalInMillisecondsForMetric_(0),
-  samplingSkipCount_(0)
+  samplingSkipCount_(0),
+  wrrCountReverseMap_(0),
+  wrrCountJournal_(0),
+  wrrCountMap_(0),
+  wrrCountGeneral_(0)
 {
     _BuildConfigMap();
 }
@@ -65,6 +69,10 @@ MetaFsConfigManager::Init(void)
     directAccessEnabled_ = _IsDirectAccessEnabled();
     timeIntervalInMillisecondsForMetric_ = _GetTimeIntervalInMillisecondsForMetric();
     samplingSkipCount_ = _GetSamplingSkipCount();
+    wrrCountReverseMap_ = _GetWrrCountReverseMap();
+    wrrCountJournal_ = _GetWrrCountJournal();
+    wrrCountMap_ = _GetWrrCountMap();
+    wrrCountGeneral_ = _GetWrrCountGeneral();
 
     if (!_ValidateConfig())
     {
@@ -91,6 +99,14 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"time_interval_in_milliseconds_for_metric", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::SamplingSkipCount,
         {"sampling_skip_count", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::WrrCountReverseMap,
+        {"wrr_count_reverse_map", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::WrrCountJournal,
+        {"wrr_count_journal", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::WrrCountMap,
+        {"wrr_count_map", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::WrrCountGeneral,
+        {"wrr_count_general", CONFIG_TYPE_UINT64}});
 }
 
 bool
@@ -182,6 +198,58 @@ MetaFsConfigManager::_GetSamplingSkipCount(void)
 
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
         configMap_[MetaFsConfigType::SamplingSkipCount].first + ": " + std::to_string(count));
+
+    return count;
+}
+
+size_t
+MetaFsConfigManager::_GetWrrCountReverseMap(void)
+{
+    size_t count = 0;
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountReverseMap, &count))
+        return 0;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::WrrCountReverseMap].first + ": " + std::to_string(count));
+
+    return count;
+}
+
+size_t
+MetaFsConfigManager::_GetWrrCountJournal(void)
+{
+    size_t count = 0;
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountJournal, &count))
+        return 0;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::WrrCountJournal].first + ": " + std::to_string(count));
+
+    return count;
+}
+
+size_t
+MetaFsConfigManager::_GetWrrCountMap(void)
+{
+    size_t count = 0;
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountMap, &count))
+        return 0;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::WrrCountMap].first + ": " + std::to_string(count));
+
+    return count;
+}
+
+size_t
+MetaFsConfigManager::_GetWrrCountGeneral(void)
+{
+    size_t count = 0;
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountGeneral, &count))
+        return 0;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::WrrCountGeneral].first + ": " + std::to_string(count));
 
     return count;
 }
