@@ -52,6 +52,7 @@ Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
   priority(RequestPriority::Normal),
+  fileType(MetaFileType::General),
   UNIQUE_ID(idAllocate_++),
   DIRECT_ACCESS_ENABLED(directAccessEnabled)
 {
@@ -87,6 +88,7 @@ Mpio::Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorag
     this->partialIO = partialIO;
     this->forceSyncIO = forceSyncIO;
     this->mssIntf = metaStorage;
+    fileType = mpioIoInfo.fileType;
     aioModeEnabled = metaStorage->IsAIOSupport();
 }
 

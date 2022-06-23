@@ -47,6 +47,7 @@ public:
     : tagId(0),
       mpioId(0),
       opcode(MetaIoOpcode::Max),
+      fileType(MetaFileType::General),
       targetMediaType(MetaStorageType::Max),
       targetFD(MetaFsCommonConst::INVALID_FD),
       metaLpn(INVALID_LPN),
@@ -62,6 +63,7 @@ public:
     uint32_t tagId;
     uint32_t mpioId;
     MetaIoOpcode opcode;
+    MetaFileType fileType;
     MetaStorageType targetMediaType;
     FileDescriptorType targetFD;
     MetaLpnType metaLpn;

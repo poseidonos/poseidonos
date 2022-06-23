@@ -86,6 +86,7 @@ private:
 TEST(MpioTester, Mpio_testConstructor)
 {
     MpioIoInfo ioInfo;
+    ioInfo.fileType = MetaFileType::Journal;
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
@@ -93,6 +94,7 @@ TEST(MpioTester, Mpio_testConstructor)
     mpio.Setup(ioInfo, true, true);
 
     EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
+    EXPECT_EQ(mpio.GetFileType(), ioInfo.fileType);
 
     free(buf);
 }

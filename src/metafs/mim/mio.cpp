@@ -52,6 +52,7 @@ Mio::Mio(MpioAllocator* mpioAllocator)
   ioCQ(nullptr),
   mpioAllocator(nullptr),
   mergedRequestList(nullptr),
+  fileType(MetaFileType::General),
   metaStorage(nullptr),
   UNIQUE_ID(idAllocate_++)
 {
@@ -75,6 +76,7 @@ Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* me
     originReq = ioReq;
     this->metaStorage = metaStorage;
 
+    fileType = ioReq->fileCtx->fileType;
     fileDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
     startLpn = ioReq->GetStartLpn();
@@ -237,6 +239,7 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo, MetaLpnType lpn,
     MetaLpnType lpnCnt, uint32_t mpio_id)
 {
     mpioIoInfo.opcode = static_cast<MetaIoOpcode>(originReq->reqType);
+    mpioIoInfo.fileType = originReq->fileCtx->fileType;
     mpioIoInfo.targetMediaType = originReq->targetMediaType;
     mpioIoInfo.targetFD = originReq->fd;
     mpioIoInfo.metaLpn = lpn;

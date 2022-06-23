@@ -74,6 +74,7 @@ public:
             char fileName[128]; // Change this to MAX_FILE_NAME_LENGTH or string *
             FileSizeType fileByteSize;
             FileSizeType dataChunkSize;
+            MetaFileType fileType;
             MetaStorageType dataLocation;
             MetaFilePropertySet fileProperty;
             uint16_t extentCnt;

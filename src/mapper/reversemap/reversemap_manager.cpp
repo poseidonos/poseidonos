@@ -88,11 +88,11 @@ ReverseMapManager::Init(void)
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
     {
-        revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId());
+        revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::ReverseMap);
     }
     else
     {
-        revMapWholefile = new MockFileIntf("RevMapWhole", addrInfo->GetArrayId());
+        revMapWholefile = new MockFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::ReverseMap);
     }
     if (revMapWholefile->DoesFileExist() == false)
     {

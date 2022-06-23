@@ -120,6 +120,10 @@ public:
     {
         return UNIQUE_ID;
     }
+    virtual MetaFileType GetFileType(void) const
+    {
+        return fileType;
+    }
 
     virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
     virtual void ClearMergedRequestList(void);
@@ -147,6 +151,7 @@ protected:
     MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
     std::vector<MetaFsIoRequest*>* mergedRequestList;
+    MetaFileType fileType;
 
     static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoRequestType::Max)];
     MetaFsSpinLock mpioListCxtLock;

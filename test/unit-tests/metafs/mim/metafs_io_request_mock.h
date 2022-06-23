@@ -21,6 +21,8 @@ public:
     MOCK_METHOD(void, SetError, (bool err), (override));
     MOCK_METHOD(void, SetRetryFlag, (), (override));
     MOCK_METHOD(bool, GetRetryFlag, (), (override));
+    MOCK_METHOD(MetaLpnType, GetStartLpn, (), (const));
+    MOCK_METHOD(size_t, GetRequestLpnCount, (), (const));
 };
 
 } // namespace pos

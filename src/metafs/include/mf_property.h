@@ -60,6 +60,15 @@ enum class MetaFileDominant
     Default = NoSpecific
 };
 
+enum class MetaFileType
+{
+    ReverseMap,
+    Journal,
+    Map,
+    General,
+    MAX
+};
+
 class MetaFilePropertySet
 {
 public:

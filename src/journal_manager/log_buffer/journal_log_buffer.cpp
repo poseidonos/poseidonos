@@ -103,7 +103,7 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
 
     if (logFile == nullptr)
     {
-        logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, config->GetMetaVolumeToUse());
+        logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
         POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
     }
     return 0;

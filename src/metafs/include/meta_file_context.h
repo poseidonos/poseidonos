@@ -35,6 +35,7 @@
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
+#include "src/metafs/include/mf_property.h"
 #include "src/metafs/storage/mss.h"
 
 namespace pos
@@ -50,6 +51,7 @@ public:
     void Reset(void)
     {
         isActivated = false;
+        fileType = MetaFileType::General;
         storageType = MetaStorageType::Default;
         sizeInByte = 0;
         fileBaseLpn = 0;
@@ -62,6 +64,7 @@ public:
 
     // from MetaFileManager::CheckFileInActive()
     bool isActivated;
+    MetaFileType fileType;
     MetaStorageType storageType;
     FileSizeType sizeInByte;
     MetaLpnType fileBaseLpn;
