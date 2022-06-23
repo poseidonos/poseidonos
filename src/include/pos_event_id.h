@@ -662,6 +662,11 @@ enum class POS_EVENT_ID
     RESOURCE_CHECKER_SET_SLEEP_TIME = 3631,
     RESOURCE_CHECKER_END = 3632,
 
+    // --------------Smart collector (3700)----------------
+    SMART_COLLECTOR_CONSTRUCTOR_EXECUTION = 3700,
+    SMART_COLLECTOR_DESTRUCTOR_EXECUTION = 3701,
+    SMART_COLLECTOR_CMD_EXEC_ERR = 3702,
+
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical
     MFS_START = 4000,
@@ -1832,4 +1837,8 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::REBUILD_FORCED_RESET_LOCK,
             new PosEventInfoEntry("REBUILD_FORCED_RESET_LOCK",
                 "The maximum number of retry attempts is exceeded to reset the busy lock range.", "Maybe Meta I/O is busy or deadlock.", "Please request technical support for error.")},
+
+        {(int)POS_EVENT_ID::SMART_COLLECTOR_CMD_EXEC_ERR,
+            new PosEventInfoEntry("SMART_COLLECTOR_CMD_EXEC_ERR",
+                "Command execution error.", "Could not process get log page(02h-smart)", "Please device scan again")},
     };

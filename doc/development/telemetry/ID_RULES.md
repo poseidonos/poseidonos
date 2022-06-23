@@ -7,6 +7,7 @@
 - [**Volume**](#volume)
 - [**Array**](#array)
 - [**Resource Monitoring**](#resource)
+- [**Disk Monitoring**](#disk)
 
 ---
 Rules for telemetry entry naming in "/src/telemetry/telemetry_id.h"
@@ -123,9 +124,46 @@ Array ID Range : 60000 ~ 70000
 
 ---
 
-## **Resource monitoring**
+## **Resource**
 Resource monitoring ID Range : 100000 ~ 100099
 
-100000 Available memory size
+100000 Available host memory size
+
+---
+
+## **Disk**
+Disk monitoring ID Range : 110000 ~ 110099
+
+110000 soft media error low
+
+110001 soft media error high
+
+110002 power cycle low
+
+110003 power cycle high
+
+110004 power on hour low
+
+110005 power on hour high
+
+110006 unsafe shutdowns low
+
+110007 unsafe shutdowns high
+
+110008 temperature
+
+110009 available spare
+
+110010 available spare threshold
+
+110011 percentage used
+
+110012 controller busy time low
+
+110013 controller busy time high
+
+110014 warning temperature time
+
+110015 critical temperature time
 
 ---
