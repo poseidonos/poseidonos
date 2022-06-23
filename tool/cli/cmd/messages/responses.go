@@ -176,35 +176,35 @@ type SMARTLOGResult struct {
 }
 
 type SMARTLog struct {
-	AVAILABLESPARESPACE     string `json:"available_spare_space"`
+	AVAILABLESPARESPACE     string `json:"availableSpareSpace"`
 	TEMPERATURE             string `json:"temperature"`
-	DEVICERELIABILITY       string `json:"device_reliability"`
-	READONLY                string `json:"read_only"`
-	VOLATILEMEMORYBACKUP    string `json:"volatile_memory_backup"`
-	CURRENTTEMPERATURE      string `json:"current_temperature"`
-	AVAILABLESPARE          string `json:"available_spare"`
-	AVAILABLESPARETHRESHOLD string `json:"available_spare_threshold"`
-	LIFEPERCENTAGEUSED      string `json:"life_percentage_used"`
-	DATAUNITSREAD           string `json:"data_units_read"`
-	DATAUNITSWRITTEN        string `json:"data_units_written"`
-	HOSTREADCOMMANDS        string `json:"host_read_commands"`
-	HOSTWRITECOMMANDS       string `json:"host_write_commands"`
-	CONTROLLERBUSYTIME      string `json:"controller_busy_time"`
-	POWERCYCLES             string `json:"power_cycles"`
-	POWERONHOURS            string `json:"power_on_hours"`
-	UNSAFESHUTDOWNS         string `json:"unsafe_shutdowns"`
-	UNRECOVERABLEMEDIAERROS string `json:"unrecoverable_media_errors"`
-	LIFETIMEERRORLOGENTRIES string `json:"lifetime_error_log_entries"`
-	WARNINGTEMPERATURETIME  string `json:"warning_temperature_time"`
-	CRITICALTEMPERATURETIME string `json:"critical_temperature_time"`
-	TEMPERATURESENSOR1      string `json:"temperature_sensor1,omitempty"`
-	TEMPERATURESENSOR2      string `json:"temperature_sensor2,omitempty"`
-	TEMPERATURESENSOR3      string `json:"temperature_sensor3,omitempty"`
-	TEMPERATURESENSOR4      string `json:"temperature_sensor4,omitempty"`
-	TEMPERATURESENSOR5      string `json:"temperature_sensor5,omitempty"`
-	TEMPERATURESENSOR6      string `json:"temperature_sensor6,omitempty"`
-	TEMPERATURESENSOR7      string `json:"temperature_sensor7,omitempty"`
-	TEMPERATURESENSOR8      string `json:"temperature_sensor8,omitempty"`
+	DEVICERELIABILITY       string `json:"deviceReliability"`
+	READONLY                string `json:"readOnly"`
+	VOLATILEMEMORYBACKUP    string `json:"volatileMemoryBackup"`
+	CURRENTTEMPERATURE      string `json:"currentTemperature"`
+	AVAILABLESPARE          string `json:"availableSpare"`
+	AVAILABLESPARETHRESHOLD string `json:"availableSpareThreshold"`
+	LIFEPERCENTAGEUSED      string `json:"lifePercentageUsed"`
+	DATAUNITSREAD           string `json:"dataUnitsRead"`
+	DATAUNITSWRITTEN        string `json:"dataUnitsWritten"`
+	HOSTREADCOMMANDS        string `json:"hostReadCommands"`
+	HOSTWRITECOMMANDS       string `json:"hostWriteCommands"`
+	CONTROLLERBUSYTIME      string `json:"controllerBusyTime"`
+	POWERCYCLES             string `json:"powerCycles"`
+	POWERONHOURS            string `json:"powerOnHours"`
+	UNSAFESHUTDOWNS         string `json:"unsafeShutdowns"`
+	UNRECOVERABLEMEDIAERROS string `json:"unrecoverableMediaErrors"`
+	LIFETIMEERRORLOGENTRIES string `json:"lifetimeErrorLogEntries"`
+	WARNINGTEMPERATURETIME  string `json:"warningTemperatureTime"`
+	CRITICALTEMPERATURETIME string `json:"criticalTemperatureTime"`
+	TEMPERATURESENSOR1      string `json:"temperatureSensor1,omitempty"`
+	TEMPERATURESENSOR2      string `json:"temperatureSensor2,omitempty"`
+	TEMPERATURESENSOR3      string `json:"temperatureSensor3,omitempty"`
+	TEMPERATURESENSOR4      string `json:"temperatureSensor4,omitempty"`
+	TEMPERATURESENSOR5      string `json:"temperatureSensor5,omitempty"`
+	TEMPERATURESENSOR6      string `json:"temperatureSensor6,omitempty"`
+	TEMPERATURESENSOR7      string `json:"temperatureSensor7,omitempty"`
+	TEMPERATURESENSOR8      string `json:"temperatureSensor8,omitempty"`
 }
 
 // Response for VOLUMEINFO command

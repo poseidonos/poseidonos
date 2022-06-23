@@ -462,6 +462,23 @@ class PosCliServiceImpl final : public PosCli::Service {
 
     return status;
   }
+
+  grpc::Status
+  GetSmartLog(ServerContext* context, const GetSmartLogRequest* request,
+                  GetSmartLogResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteGetSmartLogCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
 };
 
 void

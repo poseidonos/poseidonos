@@ -1,5 +1,7 @@
 
 #include <vector>
+#include <spdk/nvme_spec.h>
+#include <string>
 
 #include "src/cli/cli_event_code.h"
 #include "src/cli/command_processor.h"
@@ -19,6 +21,8 @@
 #include "src/logger/preferences.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/device/device_manager.h"
+#include "src/resource_checker/smart_collector.h"
+
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -968,7 +972,7 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
             failedArrayString += "no array found";
         }
 
-        POS_TRACE_ERROR(result, "failedArrays: " + failedArrayString);       
+        POS_TRACE_WARN(result, "failedArrays: " + failedArrayString);       
         _SetEventStatus(result, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1013,6 +1017,54 @@ CommandProcessor::ExecuteListDeviceCommand(const ListDeviceRequest* request, Lis
         device->set_numa(numa);
     }
   
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, GetSmartLogResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+    
+    string deviceName = (request->param()).name();
+    if(deviceName == "")
+    {
+        int eventId = EID(CLI_GET_SMART_LOG_NO_DEVICE_NAME);
+        POS_TRACE_WARN(eventId, "");       
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    struct spdk_nvme_ctrlr* ctrlr;
+    ctrlr = pos::DeviceManagerSingleton::Instance()->GetNvmeCtrlr(deviceName);
+    if (ctrlr == nullptr)
+    {
+        int eventId = EID(CLI_GET_SMART_LOG_DEVICE_NOT_FOUND);
+        POS_TRACE_WARN(eventId, "deviceName:{}", deviceName);       
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    struct spdk_nvme_health_information_page payload = {};
+    SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
+    SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr);
+    
+    if (ret != SmartReturnType::SUCCESS)
+    {
+        int eventId = EID(CLI_GET_SMART_LOG_FAILURE);
+        POS_TRACE_WARN(eventId, "deviceName:{}, error:{}",
+            deviceName, (int)ret);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _FillSmartData(payload, reply->mutable_result()->mutable_data());
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1134,4 +1186,135 @@ CommandProcessor::_GetGCMode(pos::IGCInfo* gc, std::string arrayName)
     }
 
     return strGCMode;
+}
+
+void
+CommandProcessor::_FillSmartData(
+    struct spdk_nvme_health_information_page payload,
+    grpc_cli::SmartLog* data)
+{
+    char cString[128];
+
+    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.available_spare ? "WARNING" : "OK");
+    string availableSpareSpace(cString);
+
+    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    string temperature(cString);
+
+    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    string deviceReliability(cString);
+
+    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.read_only ? "Yes" : "No");
+    string readOnly(cString);
+
+    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
+    string volatileMemoryBackup(cString);
+
+    snprintf(cString, sizeof(cString), "%dC", (int)payload.temperature - 273);
+    string currentTemperature(cString);
+
+    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare);
+    string availableSpare(cString);
+
+    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare_threshold);
+    string availableSpareThreshold(cString);
+
+    snprintf(cString, sizeof(cString), "%u%%", payload.percentage_used);
+    string lifePercentageUsed(cString);
+
+    _PrintUint128Dec(payload.data_units_read, cString, sizeof(cString));
+    string dataUnitsRead(cString);
+
+    _PrintUint128Dec(payload.data_units_written, cString, sizeof(cString));
+    string dataUnitsWritten(cString);
+
+    _PrintUint128Dec(payload.host_read_commands, cString, sizeof(cString));
+    string hostReadCommands(cString);
+
+    _PrintUint128Dec(payload.host_write_commands, cString, sizeof(cString));
+    string hostWriteCommands(cString);
+
+    _PrintUint128Dec(payload.controller_busy_time, cString, sizeof(cString));
+    string controllerBusyTime(cString);
+
+    _PrintUint128Dec(payload.power_cycles, cString, sizeof(cString));
+    string powerCycles(cString);
+
+    _PrintUint128Dec(payload.power_on_hours, cString, sizeof(cString));
+    string powerOnHours(cString);
+
+    _PrintUint128Dec(payload.unsafe_shutdowns, cString, sizeof(cString));
+    string unsafeShutdowns(cString);
+    
+    _PrintUint128Dec(payload.media_errors, cString, sizeof(cString));
+    string unrecoverableMediaErrors(cString);
+
+    _PrintUint128Dec(payload.num_error_info_log_entries, cString, sizeof(cString));
+    string lifetimeErrorLogEntries(cString);
+
+    snprintf(cString, sizeof(cString), "%um", payload.warning_temp_time);
+    string warningTemperatureTime(cString);
+
+    snprintf(cString, sizeof(cString), "%um", payload.critical_temp_time);
+    string criticalTemperatureTime(cString);
+
+    data->set_availablesparespace(availableSpareSpace);
+    data->set_temperature(temperature);
+    data->set_devicereliability(deviceReliability);
+    data->set_readonly(readOnly);
+    data->set_volatilememorybackup(volatileMemoryBackup);
+    data->set_currenttemperature(currentTemperature);
+    data->set_availablespare(availableSpare);
+    data->set_availablesparethreshold(availableSpareThreshold);
+    data->set_lifepercentageused(lifePercentageUsed);
+    data->set_dataunitsread(dataUnitsRead);
+    data->set_dataunitswritten(dataUnitsWritten);
+    data->set_hostreadcommands(hostReadCommands);
+    data->set_hostwritecommands(hostWriteCommands);
+    data->set_controllerbusytime(controllerBusyTime);
+    data->set_powercycles(powerCycles);
+    data->set_poweronhours(powerOnHours);
+    data->set_unsafeshutdowns(unsafeShutdowns);
+    data->set_unrecoverablemediaerrors(unrecoverableMediaErrors);
+    data->set_lifetimeerrorlogentries(lifetimeErrorLogEntries);
+    data->set_warningtemperaturetime(warningTemperatureTime);
+    data->set_criticaltemperaturetime(criticalTemperatureTime);
+
+    for (int i = 0; i < 8; i++)
+    {
+        if (payload.temp_sensor[i] != 0)
+        {
+            snprintf(cString, sizeof(cString), "%dC", (int)payload.temp_sensor[i] - 273);
+            string *temperature = data->add_temperaturesensor();
+            *temperature = cString;
+        }
+    }
+}
+
+void
+CommandProcessor::_PrintUint128Hex(uint64_t* v, char* s, size_t n)
+{
+    unsigned long long lo = v[0], hi = v[1];
+    if (hi)
+    {
+        snprintf(s, n, "0x%llX%016llX", hi, lo);
+    }
+    else
+    {
+        snprintf(s, n, "0x%llX", lo);
+    }
+}
+
+void
+CommandProcessor::_PrintUint128Dec(uint64_t* v, char* s, size_t n)
+{
+    unsigned long long lo = v[0], hi = v[1];
+    if (hi)
+    {
+        _PrintUint128Hex(v, s, n);
+    }
+    else
+    {
+        snprintf(s, n, "%llu", (unsigned long long)lo);
+    }
 }
