@@ -13,20 +13,24 @@ def play(tgts, inits, scenario, timestamp, data):
         targets, initiators = node_manager.initialize()
 
         test_case_list = [
-            {"name": "1_sw", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": "100%",
-                "time_based": "0", "runtime": "0", "log_avg_msec": "30000"},
-            {"name": "2_sr", "rw": "read", "bs": "128k", "iodepth": "4", "io_size": "1t",
-                "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
-            {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128",
-                "io_size": "4t", "time_based": "1", "runtime": "60", "log_avg_msec": "2000"},
-            {"name": "4_sus", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
-                "time_based": "1", "runtime": "28800", "log_avg_msec": "576000"},
-            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128",
-                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
-            {"name": "6_rr", "rw": "randread", "bs": "4k", "iodepth": "128",
-                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"},
-            {"name": "7_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32",
-                "io_size": "4t", "time_based": "1", "runtime": "600", "log_avg_msec": "20000"}
+            {"name": "0_fill", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": "100%",
+                "time_based": "0", "runtime": "0", "log_avg_msec": "30000", "eta-interval": "30"},
+            {"name": "1_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "2_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "4_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "6_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "7_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+            {"name": "8_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
+                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"}
         ]
 
         grapher = graph.manager.Grapher(scenario, timestamp)
@@ -42,7 +46,7 @@ def play(tgts, inits, scenario, timestamp, data):
             fio_cmd_list = []
             for key in initiators:
                 fio_cmd = iogen.fio.Fio(initiators[key], timestamp)
-                fio_cmd.initialize()
+                fio_cmd.initialize(True)
                 fio_cmd.update(test_case)
                 fio_cmd_list.append(fio_cmd.stringify())
 

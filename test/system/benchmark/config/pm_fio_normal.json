@@ -3,48 +3,25 @@
         {
             "NAME": "Target01",
             "ID": "root",
-            "PW": "psd",
+            "PW": "pwd",
             "NIC": {
-                "SSH": "10.1.2.12",
-                "IP1": "10.100.2.12",
-                "IP2": "10.100.21.12"
+                "SSH": "ip_for_sshpass",
+                "IP1": "ip_for_init1",
+                "IP2": "ip_for_init2"
             },
             "PREREQUISITE": {
-                "CPU": {
-                    "RUN": false,
-                    "SCALING": "max"
-                },
                 "SSD": {
-                    "RUN": false,
+                    "RUN": true,
                     "FORMAT": true,
                     "UDEV_FILE": "/etc/udev/rules.d/99-custom-nvme.rules"
                 },
                 "MEMORY": {
-                    "RUN": false,
+                    "RUN": true,
                     "MAX_MAP_COUNT": 65535,
                     "DROP_CACHES": 3
                 },
-                "NETWORK": {
-                    "RUN": false,
-                    "IRQ_BALANCE": "stop",
-                    "TCP_TUNE": "max",
-                    "IRQ_AFFINITYs": [
-                        {
-                            "NIC": "ens17f1",
-                            "CPU_LIST": "88-94"
-                        }
-                    ],
-                    "NICs": [
-                        {
-                            "INTERFACE": "ens17f1",
-                            "IP": "10.100.21.12",
-                            "NETMASK": 24,
-                            "MTU": 9000
-                        }
-                    ]
-                },
                 "MODPROBE": {
-                    "RUN": false,
+                    "RUN": true,
                     "MODs": [
                         "nvme",
                         "nvme_core",
@@ -54,24 +31,16 @@
                     ]
                 },
                 "SPDK": {
-                    "RUN": false,
+                    "RUN": true,
                     "HUGE_EVEN_ALLOC": "yes",
                     "NRHUGE": 65536
-                },
-                "DEBUG": {
-                    "RUN": false,
-                    "ULIMIT": "unlimited",
-                    "APPORT": "disable",
-                    "DUMP_DIR": "/etc/pos/core",
-                    "CORE_PATTERN": "/etc/pos/core/%E.core"
                 }
             },
             "POS": {
-                "DIR": "/home/isaac/ibofos",
+                "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "pos_multi_array_normal.conf",
-                "LOG": "pos.log",
                 "TELEMETRY": false,
                 "LOGGER_LEVEL": "info",
                 "TRANSPORT": {
@@ -118,16 +87,16 @@
                     {
                         "NAME": "ARR0",
                         "RAID_OR_MEDIA": "RAID5",
-                        "WRITE_THROUGH": false,
-                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15",
-                        "SPARE_DEVICE_LIST": "",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14",
+                        "SPARE_DEVICE_LIST": "unvme-ns-15",
                         "BUFFER_DEV": "uram0",
                         "VOLUMEs": [
                             {
                                 "NUM_VOLUMES": 32,
                                 "NAME_PREFIX": "VOL",
                                 "NAME_INDEX": 1,
-                                "SIZE_MiB": 1513944,
+                                "SIZE_MiB": 1413014,
                                 "USE_SUBSYSTEMS": 32,
                                 "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
                                 "NQN_INDEX": 1
@@ -137,16 +106,16 @@
                     {
                         "NAME": "ARR1",
                         "RAID_OR_MEDIA": "RAID5",
-                        "WRITE_THROUGH": false,
-                        "USER_DEVICE_LIST": "unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28,unvme-ns-29,unvme-ns-30,unvme-ns-31",
-                        "SPARE_DEVICE_LIST": "",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28,unvme-ns-29,unvme-ns-30",
+                        "SPARE_DEVICE_LIST": "unvme-ns-31",
                         "BUFFER_DEV": "uram1",
                         "VOLUMEs": [
                             {
                                 "NUM_VOLUMES": 32,
                                 "NAME_PREFIX": "VOL",
                                 "NAME_INDEX": 33,
-                                "SIZE_MiB": 1513944,
+                                "SIZE_MiB": 1413014,
                                 "USE_SUBSYSTEMS": 32,
                                 "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
                                 "NQN_INDEX": 33
@@ -161,35 +130,13 @@
         {
             "NAME": "Initiator01",
             "ID": "root",
-            "PW": "psd",
+            "PW": "pwd",
             "NIC": {
-                "SSH": "10.1.2.30"
+                "SSH": "ip_for_sshpass"
             },
             "PREREQUISITE": {
-                "CPU": {
-                    "RUN": false,
-                    "SCALING": "max"
-                },
-                "MEMORY": {
-                    "RUN": false,
-                    "MAX_MAP_COUNT": 65535,
-                    "DROP_CACHES": 3
-                },
-                "NETWORK": {
-                    "RUN": false,
-                    "IRQ_BALANCE": "stop",
-                    "TCP_TUNE": "max",
-                    "NICs": [
-                        {
-                            "INTERFACE": "ens17f1",
-                            "IP": "10.100.21.10",
-                            "NETMASK": 24,
-                            "MTU": 9000
-                        }
-                    ]
-                },
                 "MODPROBE": {
-                    "RUN": false,
+                    "RUN": true,
                     "MODs": [
                         "nvme",
                         "nvme_core",
@@ -197,15 +144,10 @@
                         "nvme_tcp",
                         "nvme_rdma"
                     ]
-                },
-                "SPDK": {
-                    "RUN": false,
-                    "HUGE_EVEN_ALLOC": "yes",
-                    "NRHUGE": 65536
                 }
             },
             "SPDK": {
-                "DIR": "/home/isaac/ibofos/lib/spdk",
+                "DIR": "/home/psd/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             },
             "TARGETs": [
@@ -214,11 +156,14 @@
                     "TRANSPORT": "tcp",
                     "IP": "IP1",
                     "PORT": 1158,
+                    "KDD_MODE": true,
                     "SUBSYSTEMs": [
                         {
                             "NUM_SUBSYSTEMS": 32,
                             "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
                             "NQN_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1,
                             "NUM_NS": 1,
                             "NS_INDEX": 1
                         }
@@ -229,35 +174,13 @@
         {
             "NAME": "Initiator02",
             "ID": "root",
-            "PW": "psd",
+            "PW": "pwd",
             "NIC": {
-                "SSH": "10.1.2.10"
+                "SSH": "ip_for_sshpass"
             },
             "PREREQUISITE": {
-                "CPU": {
-                    "RUN": false,
-                    "SCALING": "max"
-                },
-                "MEMORY": {
-                    "RUN": false,
-                    "MAX_MAP_COUNT": 65535,
-                    "DROP_CACHES": 3
-                },
-                "NETWORK": {
-                    "RUN": false,
-                    "IRQ_BALANCE": "stop",
-                    "TCP_TUNE": "max",
-                    "NICs": [
-                        {
-                            "INTERFACE": "ens17f1",
-                            "IP": "10.100.21.10",
-                            "NETMASK": 24,
-                            "MTU": 9000
-                        }
-                    ]
-                },
                 "MODPROBE": {
-                    "RUN": false,
+                    "RUN": true,
                     "MODs": [
                         "nvme",
                         "nvme_core",
@@ -265,15 +188,10 @@
                         "nvme_tcp",
                         "nvme_rdma"
                     ]
-                },
-                "SPDK": {
-                    "RUN": false,
-                    "HUGE_EVEN_ALLOC": "yes",
-                    "NRHUGE": 65536
                 }
             },
             "SPDK": {
-                "DIR": "/home/isaac/ibofos/lib/spdk",
+                "DIR": "/home/psd/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             },
             "TARGETs": [
@@ -282,11 +200,14 @@
                     "TRANSPORT": "tcp",
                     "IP": "IP2",
                     "PORT": 1159,
+                    "KDD_MODE": true,
                     "SUBSYSTEMs": [
                         {
                             "NUM_SUBSYSTEMS": 32,
                             "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
                             "NQN_INDEX": 33,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 33,
                             "NUM_NS": 1,
                             "NS_INDEX": 1
                         }
