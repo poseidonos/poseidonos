@@ -44,7 +44,7 @@
                     {
                         "NAME": "ARR0",
                         "RAID_OR_MEDIA": "RAID5",
-                        "WRITE_THROUGH": false,
+                        "WRITE_THROUGH": true,
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3",
                         "SPARE_DEVICE_LIST": "",
                         "BUFFER_DEV": "uram0",
