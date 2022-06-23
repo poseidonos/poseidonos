@@ -46,6 +46,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/LoggerInfo",
   "/grpc_cli.PosCli/GetLogLevel",
   "/grpc_cli.PosCli/ApplyLogFilter",
+  "/grpc_cli.PosCli/CreateDevice",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -79,6 +80,7 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_LoggerInfo_(PosCli_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetLogLevel_(PosCli_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ApplyLogFilter_(PosCli_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateDevice_(PosCli_method_names[24], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -633,6 +635,29 @@ void PosCli::Stub::experimental_async::ApplyLogFilter(::grpc::ClientContext* con
   return result;
 }
 
+::grpc::Status PosCli::Stub::CreateDevice(::grpc::ClientContext* context, const ::grpc_cli::CreateDeviceRequest& request, ::grpc_cli::CreateDeviceResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::CreateDeviceRequest, ::grpc_cli::CreateDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateDevice_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::CreateDevice(::grpc::ClientContext* context, const ::grpc_cli::CreateDeviceRequest* request, ::grpc_cli::CreateDeviceResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::CreateDeviceRequest, ::grpc_cli::CreateDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateDevice_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::CreateDevice(::grpc::ClientContext* context, const ::grpc_cli::CreateDeviceRequest* request, ::grpc_cli::CreateDeviceResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateDevice_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateDeviceResponse>* PosCli::Stub::PrepareAsyncCreateDeviceRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateDeviceRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::CreateDeviceResponse, ::grpc_cli::CreateDeviceRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateDevice_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateDeviceResponse>* PosCli::Stub::AsyncCreateDeviceRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateDeviceRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCreateDeviceRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -874,6 +899,16 @@ PosCli::Service::Service() {
              ::grpc_cli::ApplyLogFilterResponse* resp) {
                return service->ApplyLogFilter(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[24],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateDeviceRequest, ::grpc_cli::CreateDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::CreateDeviceRequest* req,
+             ::grpc_cli::CreateDeviceResponse* resp) {
+               return service->CreateDevice(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -1041,6 +1076,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::ApplyLogFilter(::grpc::ServerContext* context, const ::grpc_cli::ApplyLogFilterRequest* request, ::grpc_cli::ApplyLogFilterResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::CreateDevice(::grpc::ServerContext* context, const ::grpc_cli::CreateDeviceRequest* request, ::grpc_cli::CreateDeviceResponse* response) {
   (void) context;
   (void) request;
   (void) response;

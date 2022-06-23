@@ -1,15 +1,16 @@
 package devicecmds
 
 import (
-	"encoding/json"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"log"
 
-	"github.com/labstack/gommon/log"
+	pb "cli/api"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var CreateDeviceCmd = &cobra.Command{
@@ -24,29 +25,38 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "CREATEDEVICE"
-
-		param := messages.CreateDeviceReqParam{
-			DEVICENAME: create_device_deviceName,
-			NUMBLOCKS:  create_device_numBlocks,
-			BLOCKSIZE:  create_device_blockSize,
-			DEVICETYPE: create_device_deviceType,
-			NUMA:       create_device_numa,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(req)
+		param := &pb.CreateDeviceRequest_Param{Name: create_device_deviceName,
+			NumBlocks: create_device_numBlocks, BlockSize: create_device_blockSize,
+			DevType: create_device_deviceType, Numa: create_device_numa}
+		req := &pb.CreateDeviceRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendCreateDevice(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
@@ -55,11 +65,13 @@ Syntax:
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var create_device_deviceName = ""
-var create_device_numBlocks = 8388608
-var create_device_blockSize = 512
-var create_device_deviceType = "uram"
-var create_device_numa = 0
+var (
+	create_device_deviceName        = ""
+	create_device_numBlocks  uint32 = 8388608
+	create_device_blockSize  uint32 = 512
+	create_device_deviceType        = "uram"
+	create_device_numa       uint32 = 0
+)
 
 func init() {
 	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName,
@@ -71,15 +83,15 @@ func init() {
 		"device-type", "t", "uram",
 		"The type of the buffer device to create.")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks,
+	CreateDeviceCmd.Flags().Uint32VarP(&create_device_numBlocks,
 		"num-blocks", "b", 8388608,
 		"The number of blocks of the buffer device.")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize,
+	CreateDeviceCmd.Flags().Uint32VarP(&create_device_blockSize,
 		"block-size", "s", 512,
 		"The block size of the buffer device.")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_numa,
+	CreateDeviceCmd.Flags().Uint32VarP(&create_device_numa,
 		"numa", "n", 0,
 		"The NUMA node of the buffer device.")
 }

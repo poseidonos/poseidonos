@@ -17,6 +17,7 @@
 #include "src/sys_info/space_info.h"
 #include "src/array_mgmt/numa_awared_array_creation.h"
 #include "src/logger/preferences.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -872,10 +873,70 @@ CommandProcessor::ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, G
 grpc::Status
 CommandProcessor::ExecuteApplyLogFilterCommand(const ApplyLogFilterRequest* request, ApplyLogFilterResponse* reply)
 {
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
     int ret = logger()->ApplyFilter();
 
     POS_TRACE_INFO(ret, "");
     _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request, CreateDeviceResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
+    SpdkRpcClient* spdkRpcClient = new SpdkRpcClient();
+
+    string name, devType;
+    uint32_t numBlocks;
+    uint32_t blockSize;
+    uint32_t numa;
+
+    name = (request->param()).name();
+    devType = (request->param()).devtype();
+    numBlocks = (request->param()).numblocks();
+    blockSize = (request->param()).blocksize();
+    numa = (request->param()).numa(); 
+
+    uint32_t numaCount = affinityManager->GetNumaCount();
+    if (numa >= numaCount)
+    {
+        int eventId = EID(CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    // ToDo(mj): now we support to create bdev only.
+    // When more device creations are supported,
+    // a case switch may be needed.
+    auto ret = spdkRpcClient->BdevMallocCreate(
+        name,
+        numBlocks,
+        blockSize,
+        numa);
+
+    if (ret.first != 0)
+    {
+        int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
+        POS_TRACE_INFO(eventId, "error:{}", ret.second);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (spdkRpcClient != nullptr)
+    {
+        delete spdkRpcClient;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }

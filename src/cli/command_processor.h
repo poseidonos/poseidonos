@@ -97,6 +97,8 @@ using grpc_cli::GetLogLevelRequest;
 using grpc_cli::GetLogLevelResponse;
 using grpc_cli::ApplyLogFilterRequest;
 using grpc_cli::ApplyLogFilterResponse;
+using grpc_cli::CreateDeviceRequest;
+using grpc_cli::CreateDeviceResponse;
 
 class CommandProcessor
 {
@@ -138,6 +140,7 @@ public:
     grpc::Status ExecuteLoggerInfoCommand(const LoggerInfoRequest* request, LoggerInfoResponse* reply);
     grpc::Status ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, GetLogLevelResponse* reply);
     grpc::Status ExecuteApplyLogFilterCommand(const ApplyLogFilterRequest* request, ApplyLogFilterResponse* reply);
+    grpc::Status ExecuteCreateDeviceCommand(const CreateDeviceRequest* request, CreateDeviceResponse* reply);
 
 private:
     bool _isPosTerminating;
