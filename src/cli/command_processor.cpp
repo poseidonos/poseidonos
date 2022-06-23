@@ -973,7 +973,7 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
         }
 
         POS_TRACE_WARN(result, "failedArrays: " + failedArrayString);       
-        _SetEventStatus(result, reply->mutable_result()->mutable_status());
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
