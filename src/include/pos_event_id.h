@@ -115,6 +115,7 @@ enum class POS_EVENT_ID
     CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED,
     CLI_CREATE_DEVICE_FAILURE,
     CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL,
+    CLI_LIST_DEVICE_NO_DEVICE_FOUND,
     CLI_EVENT_ID_END = 1599,
 
     INVALID_PARAM,
@@ -1465,6 +1466,9 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
             new PosEventInfoEntry("CLI_CREATE_DEVICE_FAILURE",
                 "Failed to create a device.", "",
                 "Check out the PoseidonOS log.")},
+        {(int)POS_EVENT_ID::CLI_LIST_DEVICE_NO_DEVICE_FOUND,
+            new PosEventInfoEntry("CLI_LIST_DEVICE_NO_DEVICE_FOUND",
+                "No device found.", "", "")},
 
         {(int)POS_EVENT_ID::CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS,
             new PosEventInfoEntry("CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS",

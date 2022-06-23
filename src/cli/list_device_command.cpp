@@ -61,7 +61,7 @@ ListDeviceCommand::Execute(json& doc, string rid)
     if (list.size() == 0)
     {
         return jFormat.MakeResponse(
-            "LISTDEVICE", rid, SUCCESS, "no any device exists", GetPosInfo());
+            "LISTDEVICE", rid, SUCCESS, "no device exists", GetPosInfo());
     }
 
     JsonArray array("devicelist");
@@ -73,13 +73,13 @@ ListDeviceCommand::Execute(json& doc, string rid)
         elem.SetAttribute(
             JsonAttribute("size", to_string(list[i].size)));
         elem.SetAttribute(
-            JsonAttribute("mn", "\"" + list[i].mn + "\""));
+            JsonAttribute("modelNumber", "\"" + list[i].mn + "\""));
         elem.SetAttribute(
-            JsonAttribute("sn", "\"" + list[i].sn + "\""));
+            JsonAttribute("serialNumber", "\"" + list[i].sn + "\""));
         elem.SetAttribute(
             JsonAttribute("type", "\"" + list[i].GetType() + "\""));
         elem.SetAttribute(
-            JsonAttribute("addr", "\"" + list[i].bdf + "\""));
+            JsonAttribute("address", "\"" + list[i].bdf + "\""));
         elem.SetAttribute(
             JsonAttribute("class", "\"" + list[i].GetClass() + "\""));
         string numa = to_string(list[i].numa);
