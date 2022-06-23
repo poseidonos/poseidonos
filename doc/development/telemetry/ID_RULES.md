@@ -14,7 +14,7 @@ Rules for telemetry entry naming in "/src/telemetry/telemetry_id.h"
 
 ---
 ## **Reserved**
-Reserved ID Range : 0 ~ 5000
+Reserved ID Range : 0 ~ 4999
 
 ---
 ## **Common**
