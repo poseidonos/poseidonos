@@ -197,11 +197,11 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     std::string keyToLimit = _MakeRocksDbKey(groupId + 1, 0);
 
     rocksdb::Iterator* it = rocksJournal->NewIterator(rocksdb::ReadOptions());
-    int offset = 0;
+    uint64_t offset = 0;
     for (it->Seek(keyToStart); it->Valid() && it->key().ToString() < keyToLimit; it->Next())
     {
         std::string itValue = it->value().ToString();
-        int size = itValue.size();
+        uint64_t size = itValue.size();
 
         if (offset + size >= _logBufferSize)
         {
