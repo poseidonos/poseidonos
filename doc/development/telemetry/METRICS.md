@@ -106,6 +106,27 @@
   - [_**WarningTemperatureTime**_](#warningTemperatureTime)
   - [_**CriticalTemperatureTime**_](#criticalTemperatureTime)
 ---
+## **Common**
+
+Common group contains the metrics from the overall informaition of PoseidonOS
+---
+
+### _**common_process_uptime_second**_
+
+**ID**: 05000
+
+**Type**: Counter
+
+**Monitoring**: Mandatory
+
+**Labels**: {"version": String}
+
+**Introduced**: v0.11.0
+
+The seconds since PoseidonOS process started
+
+---
+
 ## **Device**
 
 Device group contains the metrics of the Devices (NVMe SSD)
