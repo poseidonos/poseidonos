@@ -68,7 +68,9 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   sampledProcessedMioCount(0),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
-  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount())
+  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount()),
+  issueCountByStorage(),
+  issueCountByFileType()
 {
     ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
     ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
@@ -105,7 +107,9 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   sampledProcessedMioCount(0),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
-  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount())
+  SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount()),
+  issueCountByStorage(),
+  issueCountByFileType()
 {
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
@@ -215,7 +219,14 @@ MioHandler::_HandleIoSQ(void)
 }
 
 void
-MioHandler::_UpdateMetricsConditionally(Mio* mio)
+MioHandler::_UpdateSubmissionMetricsConditionally(const Mio& mio)
+{
+    issueCountByStorage[(int)mio.GetTargetStorage()]++;
+    issueCountByFileType[(int)mio.GetFileType()]++;
+}
+
+void
+MioHandler::_UpdateCompletionMetricsConditionally(Mio* mio)
 {
     totalProcessedMioCount++;
 
@@ -249,6 +260,24 @@ MioHandler::_PublishPeriodicMetrics(void)
             m.SetGaugeValue(totalProcessedMioCount);
             metricVector->emplace_back(m);
             totalProcessedMioCount = 0;
+        }
+
+        for (uint32_t idx = 0; idx < NUM_STORAGE; idx++)
+        {
+            POSMetric m(TEL40103_METAFS_WORKER_ISSUE_COUNT_PARTITION, POSMetricTypes::MT_GAUGE);
+            m.AddLabel("type", std::to_string(idx));
+            m.SetGaugeValue(issueCountByStorage[idx]);
+            metricVector->emplace_back(m);
+            issueCountByStorage[idx] = 0;
+        }
+
+        for (uint32_t idx = 0; idx < NUM_FILE_TYPE; idx++)
+        {
+            POSMetric m(TEL40105_METAFS_WORKER_ISSUE_COUNT_FILE_TYPE, POSMetricTypes::MT_GAUGE);
+            m.AddLabel("type", std::to_string(idx));
+            m.SetGaugeValue(issueCountByFileType[idx]);
+            metricVector->emplace_back(m);
+            issueCountByFileType[idx] = 0;
         }
 
         if (sampledProcessedMioCount)
@@ -415,7 +444,7 @@ void
 MioHandler::_FinalizeMio(Mio* mio)
 {
     mio->StoreTimestamp(MioTimestampStage::Release);
-    _UpdateMetricsConditionally(mio);
+    _UpdateCompletionMetricsConditionally(mio);
 
     if (mio->GetMergedRequestList())
     {
@@ -516,6 +545,7 @@ MioHandler::_FreeLockContext(Mio* mio)
 void
 MioHandler::ExecuteMio(Mio& mio)
 {
+    _UpdateSubmissionMetricsConditionally(mio);
     mio.ExecuteAsyncState();
 }
 

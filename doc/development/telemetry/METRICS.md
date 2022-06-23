@@ -37,6 +37,10 @@
   - [_**metafs_scheduler_issued_request_count_to_ssd**_](#metafs_scheduler_issued_request_count_to_ssd)
   - [_**metafs_scheduler_issued_request_count_to_nvram**_](#metafs_scheduler_issued_request_count_to_nvram)
   - [_**metafs_scheduler_issued_request_count_to_journal_ssd**_](#metafs_scheduler_issued_request_count_to_journal_ssd)
+  - [_**metafs_worker_issued_request_count_partition**_](#metafs_worker_issued_request_count_partition)
+  - [_**metafs_worker_done_request_count_partition**_](#metafs_worker_done_request_count_partition)
+  - [_**metafs_worker_issued_request_count_file_type**_](#metafs_worker_issued_request_count_file_type)
+  - [_**metafs_worker_done_request_count_file_type**_](#metafs_worker_done_request_count_file_type)
   - [_**free_mio_count**_](#free_mio_count)
   - [_**sampled_mpio_time_spent_all_stages**_](#sampled_mpio_time_spent_all_stages)
   - [_**processed_mpio_count**_](#processed_mpio_count)
@@ -624,7 +628,7 @@ The count of publishing metrics of metafs
 
 **Introduced**: v0.11.0
 
-The request count to issue to ssd periodically
+The request count that the meta scheduler issues to the ssd periodically
 
 ---
 
@@ -640,7 +644,7 @@ The request count to issue to ssd periodically
 
 **Introduced**: v0.11.0
 
-The request count to issue to nvramperiodically
+The request count that the meta scheduler issues to the nvram periodically
 
 ---
 
@@ -656,7 +660,71 @@ The request count to issue to nvramperiodically
 
 **Introduced**: v0.11.0
 
-The request count to issue to journal ssd periodically
+The request count that the meta scheduler issues to the journal ssd periodically
+
+---
+
+### _**metafs_worker_issued_request_count_partition**_
+
+**ID**: 40103
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The request count that the meta worker issues to a partition periodically
+
+---
+
+### _**metafs_worker_done_request_count_partition**_
+
+**ID**: 40104
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The done count that the meta worker issues to a partition periodically
+
+---
+
+### _**metafs_worker_issued_request_count_file_type**_
+
+**ID**: 40105
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The request count that the meta worker issues to a file type periodically
+
+---
+
+### _**metafs_worker_done_request_count_file_type**_
+
+**ID**: 40106
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"type": Integer}
+
+**Introduced**: v0.11.0
+
+The done count that the meta worker issues to a file type periodically
 
 ---
 
