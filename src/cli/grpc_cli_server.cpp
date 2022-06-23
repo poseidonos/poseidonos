@@ -445,6 +445,23 @@ class PosCliServiceImpl final : public PosCli::Service {
 
     return status;
   }
+
+  grpc::Status
+  ListDevice(ServerContext* context, const ListDeviceRequest* request,
+                  ListDeviceResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteListDeviceCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
 };
 
 void

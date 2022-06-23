@@ -18,6 +18,7 @@
 #include "src/array_mgmt/numa_awared_array_creation.h"
 #include "src/logger/preferences.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/device/device_manager.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -971,6 +972,45 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
         _SetEventStatus(result, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
+    }
+  
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteListDeviceCommand(const ListDeviceRequest* request, ListDeviceResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    vector<DeviceProperty> list =
+        DeviceManagerSingleton::Instance()->ListDevs();
+
+    if (list.size() == 0)
+    {
+        POS_TRACE_INFO(EID(CLI_LIST_DEVICE_NO_DEVICE_FOUND), "");
+        _SetEventStatus(EID(CLI_LIST_DEVICE_NO_DEVICE_FOUND), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    for (size_t i = 0; i < list.size(); i++)
+    {
+        grpc_cli::Device* device =
+                reply->mutable_result()->mutable_data()->add_devicelist();
+        device->set_name(list[i].name);
+        device->set_size(list[i].size);
+        device->set_modelnumber(list[i].mn);
+        device->set_serialnumber(list[i].sn);
+        device->set_type(list[i].GetType());
+        device->set_address(list[i].bdf);
+        device->set_class_(list[i].GetClass());
+    
+        string numa = ((list[i].numa == UNKNOWN_NUMA_NODE) ?
+            "UNKNOWN" : to_string(list[i].numa));
+        device->set_numa(numa);
     }
   
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());

@@ -144,6 +144,12 @@ service PosCli {
       		post: "/v1/scandevice"
     	};
 	}
+
+	rpc ListDevice (ListDeviceRequest) returns (ListDeviceResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listdevice"
+    	};
+	}
 }
 
 message Status {
@@ -499,16 +505,6 @@ message UnmountArrayResponse {
 	PosInfo info = 4;
 }
 
-message Device {
-	string name = 1;
-	string type = 2;
-	string address = 3;
-	string class = 4;
-	string mn = 5;
-	string numa = 6;
-	string serial = 7;
-}
-
 message Array {
 	int32 index = 1;
 	int32 unique_id = 2;
@@ -755,6 +751,37 @@ message ScanDeviceResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Device {
+	string name = 1;
+	string type = 2;
+	string address = 3;
+	string class = 4;
+	string modelNumber = 5;
+	string numa = 6;
+	uint64 size = 7;
+	string serialNumber = 8;
+}
+
+message ListDeviceRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListDeviceResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message DeviceList {
+			repeated Device deviceList = 1;
+		}
+		DeviceList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;

@@ -101,6 +101,8 @@ using grpc_cli::CreateDeviceRequest;
 using grpc_cli::CreateDeviceResponse;
 using grpc_cli::ScanDeviceRequest;
 using grpc_cli::ScanDeviceResponse;
+using grpc_cli::ListDeviceRequest;
+using grpc_cli::ListDeviceResponse;
 
 class CommandProcessor
 {
@@ -146,6 +148,7 @@ public:
     // Device Commands
     grpc::Status ExecuteCreateDeviceCommand(const CreateDeviceRequest* request, CreateDeviceResponse* reply);
     grpc::Status ExecuteScanDeviceCommand(const ScanDeviceRequest* request, ScanDeviceResponse* reply);
+    grpc::Status ExecuteListDeviceCommand(const ListDeviceRequest* request, ListDeviceResponse* reply);
 
 private:
     bool _isPosTerminating;

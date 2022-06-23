@@ -114,10 +114,10 @@ type Device struct {
 	DEVICETYPE string `json:"type"`
 	ADDRESS    string `json:"addr,omitempty"`
 	CLASS      string `json:"class,omitempty"`
-	MN         string `json:"mn,omitempty"`
+	MN         string `json:"modelNumber,omitempty"`
 	NUMA       string `json:"numa,omitempty"`
 	SIZE       uint64 `json:"size,omitempty"`
-	SERIAL     string `json:"sn,omitempty"`
+	SERIAL     string `json:"serialNumber,omitempty"`
 }
 
 // Response for LOGGERINFO command
@@ -268,14 +268,14 @@ type ListDeviceResult struct {
 }
 
 type ListDeviceResData struct {
-	DEVICELIST []Device `json:"devicelist"`
+	DEVICELIST []Device `json:"deviceList"`
 }
 
 type ListDeviceInfo struct {
 	CAPACITY           int    `json:"capacity"`
-	REBUILDINGPROGRESS string `json"rebulidingProgress"`
+	REBUILDINGPROGRESS string `json:"rebulidingProgress"`
 	STATE              string `json:"NOT_EXIST"`
-	USED               int    `"json:used"`
+	USED               int    `json:"used"`
 }
 
 type ListQosResponse struct {

@@ -946,24 +946,6 @@ struct UnmountArrayResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UnmountArrayResponseDefaultTypeInternal _UnmountArrayResponse_default_instance_;
-constexpr Device::Device(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , address_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , class__(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , mn_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , numa_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , serial_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
-struct DeviceDefaultTypeInternal {
-  constexpr DeviceDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceDefaultTypeInternal() {}
-  union {
-    Device _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceDefaultTypeInternal _Device_default_instance_;
 constexpr Array::Array(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : devicelist_()
@@ -1579,8 +1561,81 @@ struct ScanDeviceResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ScanDeviceResponseDefaultTypeInternal _ScanDeviceResponse_default_instance_;
+constexpr Device::Device(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , address_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , class__(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , modelnumber_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , numa_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , serialnumber_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , size_(PROTOBUF_ULONGLONG(0)){}
+struct DeviceDefaultTypeInternal {
+  constexpr DeviceDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DeviceDefaultTypeInternal() {}
+  union {
+    Device _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceDefaultTypeInternal _Device_default_instance_;
+constexpr ListDeviceRequest::ListDeviceRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , requestor_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct ListDeviceRequestDefaultTypeInternal {
+  constexpr ListDeviceRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ListDeviceRequestDefaultTypeInternal() {}
+  union {
+    ListDeviceRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ListDeviceRequestDefaultTypeInternal _ListDeviceRequest_default_instance_;
+constexpr ListDeviceResponse_Result_DeviceList::ListDeviceResponse_Result_DeviceList(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : devicelist_(){}
+struct ListDeviceResponse_Result_DeviceListDefaultTypeInternal {
+  constexpr ListDeviceResponse_Result_DeviceListDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ListDeviceResponse_Result_DeviceListDefaultTypeInternal() {}
+  union {
+    ListDeviceResponse_Result_DeviceList _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ListDeviceResponse_Result_DeviceListDefaultTypeInternal _ListDeviceResponse_Result_DeviceList_default_instance_;
+constexpr ListDeviceResponse_Result::ListDeviceResponse_Result(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : status_(nullptr)
+  , data_(nullptr){}
+struct ListDeviceResponse_ResultDefaultTypeInternal {
+  constexpr ListDeviceResponse_ResultDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ListDeviceResponse_ResultDefaultTypeInternal() {}
+  union {
+    ListDeviceResponse_Result _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ListDeviceResponse_ResultDefaultTypeInternal _ListDeviceResponse_Result_default_instance_;
+constexpr ListDeviceResponse::ListDeviceResponse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , result_(nullptr)
+  , info_(nullptr){}
+struct ListDeviceResponseDefaultTypeInternal {
+  constexpr ListDeviceResponseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ListDeviceResponseDefaultTypeInternal() {}
+  union {
+    ListDeviceResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ListDeviceResponseDefaultTypeInternal _ListDeviceResponse_default_instance_;
 }  // namespace grpc_cli
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[112];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[116];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_cli_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_cli_2eproto = nullptr;
 
@@ -2114,18 +2169,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::UnmountArrayResponse, result_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::UnmountArrayResponse, info_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, name_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, type_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, address_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, class__),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, mn_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, numa_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, serial_),
-  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -2482,6 +2525,49 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::ScanDeviceResponse, rid_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::ScanDeviceResponse, result_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::ScanDeviceResponse, info_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, name_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, type_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, address_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, class__),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, modelnumber_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, numa_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, size_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Device, serialnumber_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceRequest, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceRequest, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceRequest, requestor_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse_Result_DeviceList, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse_Result_DeviceList, devicelist_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse_Result, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse_Result, status_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse_Result, data_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse, result_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::ListDeviceResponse, info_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 10, sizeof(::grpc_cli::Status)},
@@ -2552,50 +2638,54 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 504, -1, sizeof(::grpc_cli::UnmountArrayRequest)},
   { 513, -1, sizeof(::grpc_cli::UnmountArrayResponse_Result)},
   { 519, -1, sizeof(::grpc_cli::UnmountArrayResponse)},
-  { 528, -1, sizeof(::grpc_cli::Device)},
-  { 540, -1, sizeof(::grpc_cli::Array)},
-  { 561, -1, sizeof(::grpc_cli::ListArrayRequest)},
-  { 569, -1, sizeof(::grpc_cli::ListArrayResponse_Result_ArrayList)},
-  { 575, -1, sizeof(::grpc_cli::ListArrayResponse_Result)},
-  { 582, -1, sizeof(::grpc_cli::ListArrayResponse)},
-  { 591, -1, sizeof(::grpc_cli::ArrayInfoRequest_Param)},
-  { 597, -1, sizeof(::grpc_cli::ArrayInfoRequest)},
-  { 606, -1, sizeof(::grpc_cli::ArrayInfoResponse_Result)},
-  { 613, -1, sizeof(::grpc_cli::ArrayInfoResponse)},
-  { 622, -1, sizeof(::grpc_cli::ListNodeRequest)},
-  { 630, -1, sizeof(::grpc_cli::ListNodeResponse_Result_Node)},
-  { 638, -1, sizeof(::grpc_cli::ListNodeResponse_Result)},
-  { 645, -1, sizeof(::grpc_cli::ListNodeResponse)},
-  { 654, -1, sizeof(::grpc_cli::ListHaVolumeRequest)},
-  { 662, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result_Volume)},
-  { 673, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result)},
-  { 680, -1, sizeof(::grpc_cli::ListHaVolumeResponse)},
-  { 689, -1, sizeof(::grpc_cli::SetLogLevelRequest_Param)},
-  { 695, -1, sizeof(::grpc_cli::SetLogLevelRequest)},
-  { 704, -1, sizeof(::grpc_cli::SetLogLevelResponse_Result)},
-  { 710, -1, sizeof(::grpc_cli::SetLogLevelResponse)},
-  { 719, -1, sizeof(::grpc_cli::SetLogPreferenceRequest_Param)},
-  { 725, -1, sizeof(::grpc_cli::SetLogPreferenceRequest)},
-  { 734, -1, sizeof(::grpc_cli::SetLogPreferenceResponse_Result)},
-  { 740, -1, sizeof(::grpc_cli::SetLogPreferenceResponse)},
-  { 749, -1, sizeof(::grpc_cli::LoggerInfoRequest)},
-  { 757, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result_LoggerInfo)},
-  { 771, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result)},
-  { 778, -1, sizeof(::grpc_cli::LoggerInfoResponse)},
-  { 787, -1, sizeof(::grpc_cli::GetLogLevelRequest)},
-  { 795, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result_LogLevel)},
-  { 801, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result)},
-  { 808, -1, sizeof(::grpc_cli::GetLogLevelResponse)},
-  { 817, -1, sizeof(::grpc_cli::ApplyLogFilterRequest)},
-  { 825, -1, sizeof(::grpc_cli::ApplyLogFilterResponse_Result)},
-  { 831, -1, sizeof(::grpc_cli::ApplyLogFilterResponse)},
-  { 840, -1, sizeof(::grpc_cli::CreateDeviceRequest_Param)},
-  { 850, -1, sizeof(::grpc_cli::CreateDeviceRequest)},
-  { 859, -1, sizeof(::grpc_cli::CreateDeviceResponse_Result)},
-  { 865, -1, sizeof(::grpc_cli::CreateDeviceResponse)},
-  { 874, -1, sizeof(::grpc_cli::ScanDeviceRequest)},
-  { 882, -1, sizeof(::grpc_cli::ScanDeviceResponse_Result)},
-  { 888, -1, sizeof(::grpc_cli::ScanDeviceResponse)},
+  { 528, -1, sizeof(::grpc_cli::Array)},
+  { 549, -1, sizeof(::grpc_cli::ListArrayRequest)},
+  { 557, -1, sizeof(::grpc_cli::ListArrayResponse_Result_ArrayList)},
+  { 563, -1, sizeof(::grpc_cli::ListArrayResponse_Result)},
+  { 570, -1, sizeof(::grpc_cli::ListArrayResponse)},
+  { 579, -1, sizeof(::grpc_cli::ArrayInfoRequest_Param)},
+  { 585, -1, sizeof(::grpc_cli::ArrayInfoRequest)},
+  { 594, -1, sizeof(::grpc_cli::ArrayInfoResponse_Result)},
+  { 601, -1, sizeof(::grpc_cli::ArrayInfoResponse)},
+  { 610, -1, sizeof(::grpc_cli::ListNodeRequest)},
+  { 618, -1, sizeof(::grpc_cli::ListNodeResponse_Result_Node)},
+  { 626, -1, sizeof(::grpc_cli::ListNodeResponse_Result)},
+  { 633, -1, sizeof(::grpc_cli::ListNodeResponse)},
+  { 642, -1, sizeof(::grpc_cli::ListHaVolumeRequest)},
+  { 650, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result_Volume)},
+  { 661, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result)},
+  { 668, -1, sizeof(::grpc_cli::ListHaVolumeResponse)},
+  { 677, -1, sizeof(::grpc_cli::SetLogLevelRequest_Param)},
+  { 683, -1, sizeof(::grpc_cli::SetLogLevelRequest)},
+  { 692, -1, sizeof(::grpc_cli::SetLogLevelResponse_Result)},
+  { 698, -1, sizeof(::grpc_cli::SetLogLevelResponse)},
+  { 707, -1, sizeof(::grpc_cli::SetLogPreferenceRequest_Param)},
+  { 713, -1, sizeof(::grpc_cli::SetLogPreferenceRequest)},
+  { 722, -1, sizeof(::grpc_cli::SetLogPreferenceResponse_Result)},
+  { 728, -1, sizeof(::grpc_cli::SetLogPreferenceResponse)},
+  { 737, -1, sizeof(::grpc_cli::LoggerInfoRequest)},
+  { 745, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result_LoggerInfo)},
+  { 759, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result)},
+  { 766, -1, sizeof(::grpc_cli::LoggerInfoResponse)},
+  { 775, -1, sizeof(::grpc_cli::GetLogLevelRequest)},
+  { 783, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result_LogLevel)},
+  { 789, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result)},
+  { 796, -1, sizeof(::grpc_cli::GetLogLevelResponse)},
+  { 805, -1, sizeof(::grpc_cli::ApplyLogFilterRequest)},
+  { 813, -1, sizeof(::grpc_cli::ApplyLogFilterResponse_Result)},
+  { 819, -1, sizeof(::grpc_cli::ApplyLogFilterResponse)},
+  { 828, -1, sizeof(::grpc_cli::CreateDeviceRequest_Param)},
+  { 838, -1, sizeof(::grpc_cli::CreateDeviceRequest)},
+  { 847, -1, sizeof(::grpc_cli::CreateDeviceResponse_Result)},
+  { 853, -1, sizeof(::grpc_cli::CreateDeviceResponse)},
+  { 862, -1, sizeof(::grpc_cli::ScanDeviceRequest)},
+  { 870, -1, sizeof(::grpc_cli::ScanDeviceResponse_Result)},
+  { 876, -1, sizeof(::grpc_cli::ScanDeviceResponse)},
+  { 885, -1, sizeof(::grpc_cli::Device)},
+  { 898, -1, sizeof(::grpc_cli::ListDeviceRequest)},
+  { 906, -1, sizeof(::grpc_cli::ListDeviceResponse_Result_DeviceList)},
+  { 912, -1, sizeof(::grpc_cli::ListDeviceResponse_Result)},
+  { 919, -1, sizeof(::grpc_cli::ListDeviceResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2667,7 +2757,6 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_UnmountArrayRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_UnmountArrayResponse_Result_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_UnmountArrayResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_Device_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_Array_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListArrayRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListArrayResponse_Result_ArrayList_default_instance_),
@@ -2711,6 +2800,11 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ScanDeviceRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ScanDeviceResponse_Result_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ScanDeviceResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_Device_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListDeviceRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListDeviceResponse_Result_DeviceList_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListDeviceResponse_Result_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_ListDeviceResponse_default_instance_),
 };
 
 const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -2867,193 +2961,206 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030\003 \001("
   "\0132%.grpc_cli.UnmountArrayResponse.Result"
   "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Res"
-  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"n\n"
-  "\006Device\022\014\n\004name\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022\017\n\007a"
-  "ddress\030\003 \001(\t\022\r\n\005class\030\004 \001(\t\022\n\n\002mn\030\005 \001(\t\022"
-  "\014\n\004numa\030\006 \001(\t\022\016\n\006serial\030\007 \001(\t\"\314\002\n\005Array\022"
-  "\r\n\005index\030\001 \001(\005\022\021\n\tunique_id\030\002 \001(\005\022\014\n\004nam"
-  "e\030\003 \001(\t\022\016\n\006status\030\004 \001(\t\022\r\n\005state\030\005 \001(\t\022\021"
-  "\n\tsituation\030\006 \001(\t\022\026\n\016createDatetime\030\007 \001("
-  "\t\022\026\n\016updateDatetime\030\010 \001(\t\022\032\n\022rebuildingP"
-  "rogress\030\t \001(\t\022\020\n\010capacity\030\n \001(\004\022\014\n\004used\030"
-  "\013 \001(\004\022\016\n\006gcMode\030\014 \001(\t\022\020\n\010metaRaid\030\r \001(\t\022"
-  "\020\n\010dataRaid\030\016 \001(\t\022\033\n\023writeThroughEnabled"
-  "\030\017 \001(\010\022$\n\ndevicelist\030\020 \003(\0132\020.grpc_cli.De"
-  "vice\"C\n\020ListArrayRequest\022\017\n\007command\030\001 \001("
-  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\240\002\n\021Li"
-  "stArrayResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
-  "\002 \001(\t\0222\n\006result\030\003 \001(\0132\".grpc_cli.ListArr"
-  "ayResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_c"
-  "li.PosInfo\032\227\001\n\006Result\022 \n\006status\030\001 \001(\0132\020."
-  "grpc_cli.Status\022:\n\004data\030\002 \001(\0132,.grpc_cli"
-  ".ListArrayResponse.Result.ArrayList\032/\n\tA"
-  "rrayList\022\"\n\tarrayList\030\001 \003(\0132\017.grpc_cli.A"
-  "rray\"\213\001\n\020ArrayInfoRequest\022\017\n\007command\030\001 \001"
-  "(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\022/\n\005pa"
-  "ram\030\004 \001(\0132 .grpc_cli.ArrayInfoRequest.Pa"
-  "ram\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\321\001\n\021ArrayInfo"
-  "Response\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0222"
-  "\n\006result\030\003 \001(\0132\".grpc_cli.ArrayInfoRespo"
-  "nse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosI"
-  "nfo\032I\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli"
-  ".Status\022\035\n\004data\030\002 \001(\0132\017.grpc_cli.Array\"B"
-  "\n\017ListNodeRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
-  "d\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\233\002\n\020ListNodeR"
-  "esponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0221\n"
-  "\006result\030\003 \001(\0132!.grpc_cli.ListNodeRespons"
-  "e.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInf"
-  "o\032\224\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli."
-  "Status\0224\n\004data\030\002 \003(\0132&.grpc_cli.ListNode"
-  "Response.Result.Node\0322\n\004Node\022\014\n\004name\030\001 \001"
-  "(\t\022\n\n\002ip\030\002 \001(\t\022\020\n\010lastseen\030\003 \001(\t\"F\n\023List"
-  "HaVolumeRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
-  "\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\336\002\n\024ListHaVolum"
-  "eResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022"
-  "5\n\006result\030\003 \001(\0132%.grpc_cli.ListHaVolumeR"
-  "esponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli."
-  "PosInfo\032\317\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grp"
-  "c_cli.Status\022:\n\004data\030\002 \003(\0132,.grpc_cli.Li"
-  "stHaVolumeResponse.Result.Volume\032g\n\006Volu"
-  "me\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\020\n\010nodeName"
-  "\030\003 \001(\t\022\021\n\tarrayName\030\004 \001(\t\022\014\n\004size\030\005 \001(\003\022"
-  "\020\n\010lastseen\030\006 \001(\t\"\220\001\n\022SetLogLevelRequest"
-  "\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treques"
-  "tor\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.SetL"
-  "ogLevelRequest.Param\032\026\n\005Param\022\r\n\005level\030\001"
-  " \001(\t\"\266\001\n\023SetLogLevelResponse\022\017\n\007command\030"
-  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.grp"
-  "c_cli.SetLogLevelResponse.Result\022\037\n\004info"
-  "\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006s"
-  "tatus\030\001 \001(\0132\020.grpc_cli.Status\"\246\001\n\027SetLog"
-  "PreferenceRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
-  "d\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0226\n\005param\030\004 \001("
-  "\0132\'.grpc_cli.SetLogPreferenceRequest.Par"
-  "am\032\"\n\005Param\022\031\n\021structuredLogging\030\001 \001(\t\"\300"
-  "\001\n\030SetLogPreferenceResponse\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\0229\n\006result\030\003 \001(\0132).grpc"
-  "_cli.SetLogPreferenceResponse.Result\022\037\n\004"
-  "info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022"
-  " \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"D\n\021Log"
-  "gerInfoRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
-  " \001(\t\022\021\n\trequestor\030\003 \001(\t\"\345\003\n\022LoggerInfoRe"
-  "sponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006"
-  "result\030\003 \001(\0132#.grpc_cli.LoggerInfoRespon"
-  "se.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosIn"
-  "fo\032\332\002\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli"
-  ".Status\022<\n\004data\030\002 \001(\0132..grpc_cli.LoggerI"
-  "nfoResponse.Result.LoggerInfo\032\357\001\n\nLogger"
-  "Info\022\024\n\014minorLogPath\030\001 \001(\t\022\024\n\014majorLogPa"
-  "th\030\002 \001(\t\022\027\n\017logfileSizeInMb\030\003 \001(\t\022\034\n\024log"
-  "fileRotationCount\030\004 \001(\005\022\034\n\024minAllowableL"
-  "ogLevel\030\005 \001(\t\022\025\n\rfilterEnabled\030\006 \001(\005\022\026\n\016"
-  "filterIncluded\030\007 \001(\t\022\026\n\016filterExcluded\030\010"
-  " \001(\t\022\031\n\021structuredLogging\030\t \001(\010\"E\n\022GetLo"
-  "gLevelRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 "
-  "\001(\t\022\021\n\trequestor\030\003 \001(\t\"\217\002\n\023GetLogLevelRe"
-  "sponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006"
-  "result\030\003 \001(\0132$.grpc_cli.GetLogLevelRespo"
-  "nse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosI"
-  "nfo\032\202\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
-  "i.Status\022;\n\004data\030\002 \001(\0132-.grpc_cli.GetLog"
-  "LevelResponse.Result.LogLevel\032\031\n\010LogLeve"
-  "l\022\r\n\005level\030\001 \001(\t\"H\n\025ApplyLogFilterReques"
-  "t\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treque"
-  "stor\030\003 \001(\t\"\274\001\n\026ApplyLogFilterResponse\022\017\n"
-  "\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result\030\003 "
-  "\001(\0132\'.grpc_cli.ApplyLogFilterResponse.Re"
+  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\314\002"
+  "\n\005Array\022\r\n\005index\030\001 \001(\005\022\021\n\tunique_id\030\002 \001("
+  "\005\022\014\n\004name\030\003 \001(\t\022\016\n\006status\030\004 \001(\t\022\r\n\005state"
+  "\030\005 \001(\t\022\021\n\tsituation\030\006 \001(\t\022\026\n\016createDatet"
+  "ime\030\007 \001(\t\022\026\n\016updateDatetime\030\010 \001(\t\022\032\n\022reb"
+  "uildingProgress\030\t \001(\t\022\020\n\010capacity\030\n \001(\004\022"
+  "\014\n\004used\030\013 \001(\004\022\016\n\006gcMode\030\014 \001(\t\022\020\n\010metaRai"
+  "d\030\r \001(\t\022\020\n\010dataRaid\030\016 \001(\t\022\033\n\023writeThroug"
+  "hEnabled\030\017 \001(\010\022$\n\ndevicelist\030\020 \003(\0132\020.grp"
+  "c_cli.Device\"C\n\020ListArrayRequest\022\017\n\007comm"
+  "and\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001("
+  "\t\"\240\002\n\021ListArrayResponse\022\017\n\007command\030\001 \001(\t"
+  "\022\013\n\003rid\030\002 \001(\t\0222\n\006result\030\003 \001(\0132\".grpc_cli"
+  ".ListArrayResponse.Result\022\037\n\004info\030\004 \001(\0132"
+  "\021.grpc_cli.PosInfo\032\227\001\n\006Result\022 \n\006status\030"
+  "\001 \001(\0132\020.grpc_cli.Status\022:\n\004data\030\002 \001(\0132,."
+  "grpc_cli.ListArrayResponse.Result.ArrayL"
+  "ist\032/\n\tArrayList\022\"\n\tarrayList\030\001 \003(\0132\017.gr"
+  "pc_cli.Array\"\213\001\n\020ArrayInfoRequest\022\017\n\007com"
+  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001"
+  "(\t\022/\n\005param\030\004 \001(\0132 .grpc_cli.ArrayInfoRe"
+  "quest.Param\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\321\001\n\021A"
+  "rrayInfoResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
+  "\030\002 \001(\t\0222\n\006result\030\003 \001(\0132\".grpc_cli.ArrayI"
+  "nfoResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_"
+  "cli.PosInfo\032I\n\006Result\022 \n\006status\030\001 \001(\0132\020."
+  "grpc_cli.Status\022\035\n\004data\030\002 \001(\0132\017.grpc_cli"
+  ".Array\"B\n\017ListNodeRequest\022\017\n\007command\030\001 \001"
+  "(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\233\002\n\020L"
+  "istNodeResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
+  "\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grpc_cli.ListNod"
+  "eResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cl"
+  "i.PosInfo\032\224\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.g"
+  "rpc_cli.Status\0224\n\004data\030\002 \003(\0132&.grpc_cli."
+  "ListNodeResponse.Result.Node\0322\n\004Node\022\014\n\004"
+  "name\030\001 \001(\t\022\n\n\002ip\030\002 \001(\t\022\020\n\010lastseen\030\003 \001(\t"
+  "\"F\n\023ListHaVolumeRequest\022\017\n\007command\030\001 \001(\t"
+  "\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\336\002\n\024Lis"
+  "tHaVolumeResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
+  "d\030\002 \001(\t\0225\n\006result\030\003 \001(\0132%.grpc_cli.ListH"
+  "aVolumeResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
+  "rpc_cli.PosInfo\032\317\001\n\006Result\022 \n\006status\030\001 \001"
+  "(\0132\020.grpc_cli.Status\022:\n\004data\030\002 \003(\0132,.grp"
+  "c_cli.ListHaVolumeResponse.Result.Volume"
+  "\032g\n\006Volume\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\020\n\010"
+  "nodeName\030\003 \001(\t\022\021\n\tarrayName\030\004 \001(\t\022\014\n\004siz"
+  "e\030\005 \001(\003\022\020\n\010lastseen\030\006 \001(\t\"\220\001\n\022SetLogLeve"
+  "lRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021"
+  "\n\trequestor\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_"
+  "cli.SetLogLevelRequest.Param\032\026\n\005Param\022\r\n"
+  "\005level\030\001 \001(\t\"\266\001\n\023SetLogLevelResponse\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001"
+  "(\0132$.grpc_cli.SetLogLevelResponse.Result"
+  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Res"
+  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\246\001"
+  "\n\027SetLogPreferenceRequest\022\017\n\007command\030\001 \001"
+  "(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0226\n\005pa"
+  "ram\030\004 \001(\0132\'.grpc_cli.SetLogPreferenceReq"
+  "uest.Param\032\"\n\005Param\022\031\n\021structuredLogging"
+  "\030\001 \001(\t\"\300\001\n\030SetLogPreferenceResponse\022\017\n\007c"
+  "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0229\n\006result\030\003 \001("
+  "\0132).grpc_cli.SetLogPreferenceResponse.Re"
   "sult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n"
   "\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Statu"
-  "s\"\326\001\n\023CreateDeviceRequest\022\017\n\007command\030\001 \001"
-  "(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0222\n\005pa"
-  "ram\030\004 \001(\0132#.grpc_cli.CreateDeviceRequest"
-  ".Param\032Z\n\005Param\022\014\n\004name\030\001 \001(\t\022\021\n\tnumBloc"
-  "ks\030\002 \001(\r\022\021\n\tblockSize\030\003 \001(\r\022\017\n\007devType\030\004"
-  " \001(\t\022\014\n\004numa\030\005 \001(\r\"\270\001\n\024CreateDeviceRespo"
-  "nse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006res"
-  "ult\030\003 \001(\0132%.grpc_cli.CreateDeviceRespons"
-  "e.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInf"
-  "o\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.S"
-  "tatus\"D\n\021ScanDeviceRequest\022\017\n\007command\030\001 "
-  "\001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022"
-  "ScanDeviceResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003r"
-  "id\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.Scan"
-  "DeviceResponse.Result\022\037\n\004info\030\004 \001(\0132\021.gr"
-  "pc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\013"
-  "2\020.grpc_cli.Status2\316\024\n\006PosCli\022_\n\nSystemI"
-  "nfo\022\033.grpc_cli.SystemInfoRequest\032\034.grpc_"
-  "cli.SystemInfoResponse\"\026\202\323\344\223\002\020\022\016/v1/syst"
-  "eminfo\022_\n\nSystemStop\022\033.grpc_cli.SystemSt"
-  "opRequest\032\034.grpc_cli.SystemStopResponse\""
-  "\026\202\323\344\223\002\020\022\016/v1/systemstop\022}\n\021GetSystemProp"
-  "erty\022\".grpc_cli.GetSystemPropertyRequest"
-  "\032#.grpc_cli.GetSystemPropertyResponse\"\037\202"
-  "\323\344\223\002\031\022\027/v1/get_system_property\022\205\001\n\021SetSy"
-  "stemProperty\022\".grpc_cli.SetSystemPropert"
-  "yRequest\032#.grpc_cli.SetSystemPropertyRes"
-  "ponse\"\'\202\323\344\223\002!\022\037/v1/set_system_property/{"
-  "level}\022p\n\016StartTelemetry\022\037.grpc_cli.Star"
-  "tTelemetryRequest\032 .grpc_cli.StartTeleme"
-  "tryResponse\"\033\202\323\344\223\002\025\022\023/v1/start_telemetry"
-  "\022l\n\rStopTelemetry\022\036.grpc_cli.StopTelemet"
-  "ryRequest\032\037.grpc_cli.StopTelemetryRespon"
-  "se\"\032\202\323\344\223\002\024\022\022/v1/stop_telemetry\022P\n\rResetE"
-  "ventWrr\022\036.grpc_cli.ResetEventWrrRequest\032"
-  "\037.grpc_cli.ResetEventWrrResponse\022A\n\010Rese"
-  "tMbr\022\031.grpc_cli.ResetMbrRequest\032\032.grpc_c"
-  "li.ResetMbrResponse\022S\n\016StopRebuilding\022\037."
-  "grpc_cli.StopRebuildingRequest\032 .grpc_cl"
-  "i.StopRebuildingResponse\022S\n\016UpdateEventW"
-  "rr\022\037.grpc_cli.UpdateEventWrrRequest\032 .gr"
-  "pc_cli.UpdateEventWrrResponse\022W\n\010AddSpar"
-  "e\022\031.grpc_cli.AddSpareRequest\032\032.grpc_cli."
-  "AddSpareResponse\"\024\202\323\344\223\002\016\"\014/v1/addspare\022c"
-  "\n\013RemoveSpare\022\034.grpc_cli.RemoveSpareRequ"
-  "est\032\035.grpc_cli.RemoveSpareResponse\"\027\202\323\344\223"
-  "\002\021\"\017/v1/removespare\022c\n\013CreateArray\022\034.grp"
-  "c_cli.CreateArrayRequest\032\035.grpc_cli.Crea"
-  "teArrayResponse\"\027\202\323\344\223\002\021\"\017/v1/createarray"
-  "\022s\n\017AutocreateArray\022 .grpc_cli.Autocreat"
-  "eArrayRequest\032!.grpc_cli.AutocreateArray"
-  "Response\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray\022d\n"
-  "\013DeleteArray\022\034.grpc_cli.DeleteArrayReque"
-  "st\032\035.grpc_cli.DeleteArrayResponse\"\030\202\323\344\223\002"
-  "\022\"\020/v1/deletearray/\022_\n\nMountArray\022\033.grpc"
-  "_cli.MountArrayRequest\032\034.grpc_cli.MountA"
-  "rrayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarray\022g\n\014"
-  "UnmountArray\022\035.grpc_cli.UnmountArrayRequ"
-  "est\032\036.grpc_cli.UnmountArrayResponse\"\030\202\323\344"
-  "\223\002\022\"\020/v1/unmountarray\022[\n\tListArray\022\032.grp"
-  "c_cli.ListArrayRequest\032\033.grpc_cli.ListAr"
-  "rayResponse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022[\n\tAr"
-  "rayInfo\022\032.grpc_cli.ArrayInfoRequest\032\033.gr"
-  "pc_cli.ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v1/ar"
-  "rayinfo\022w\n\020SetLogPreference\022!.grpc_cli.S"
-  "etLogPreferenceRequest\032\".grpc_cli.SetLog"
-  "PreferenceResponse\"\034\202\323\344\223\002\026\"\024/v1/setlogpr"
-  "eference\022c\n\013SetLogLevel\022\034.grpc_cli.SetLo"
-  "gLevelRequest\032\035.grpc_cli.SetLogLevelResp"
-  "onse\"\027\202\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLoggerI"
-  "nfo\022\033.grpc_cli.LoggerInfoRequest\032\034.grpc_"
-  "cli.LoggerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/logg"
-  "erinfo\022c\n\013GetLogLevel\022\034.grpc_cli.GetLogL"
-  "evelRequest\032\035.grpc_cli.GetLogLevelRespon"
-  "se\"\027\202\323\344\223\002\021\"\017/v1/getloglevel\022l\n\016ApplyLogF"
-  "ilter\022\037.grpc_cli.ApplyLogFilterRequest\032 "
-  ".grpc_cli.ApplyLogFilterResponse\"\027\202\323\344\223\002\021"
-  "\"\017/v1/applyfilter\022g\n\014CreateDevice\022\035.grpc"
-  "_cli.CreateDeviceRequest\032\036.grpc_cli.Crea"
-  "teDeviceResponse\"\030\202\323\344\223\002\022\"\020/v1/createdevi"
-  "ce\022_\n\nScanDevice\022\033.grpc_cli.ScanDeviceRe"
-  "quest\032\034.grpc_cli.ScanDeviceResponse\"\026\202\323\344"
-  "\223\002\020\"\016/v1/scandeviceB\tZ\007cli/apib\006proto3"
+  "s\"D\n\021LoggerInfoRequest\022\017\n\007command\030\001 \001(\t\022"
+  "\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\345\003\n\022Logg"
+  "erInfoResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
+  " \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.LoggerIn"
+  "foResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_c"
+  "li.PosInfo\032\332\002\n\006Result\022 \n\006status\030\001 \001(\0132\020."
+  "grpc_cli.Status\022<\n\004data\030\002 \001(\0132..grpc_cli"
+  ".LoggerInfoResponse.Result.LoggerInfo\032\357\001"
+  "\n\nLoggerInfo\022\024\n\014minorLogPath\030\001 \001(\t\022\024\n\014ma"
+  "jorLogPath\030\002 \001(\t\022\027\n\017logfileSizeInMb\030\003 \001("
+  "\t\022\034\n\024logfileRotationCount\030\004 \001(\005\022\034\n\024minAl"
+  "lowableLogLevel\030\005 \001(\t\022\025\n\rfilterEnabled\030\006"
+  " \001(\005\022\026\n\016filterIncluded\030\007 \001(\t\022\026\n\016filterEx"
+  "cluded\030\010 \001(\t\022\031\n\021structuredLogging\030\t \001(\010\""
+  "E\n\022GetLogLevelRequest\022\017\n\007command\030\001 \001(\t\022\013"
+  "\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\217\002\n\023GetLo"
+  "gLevelResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
+  " \001(\t\0224\n\006result\030\003 \001(\0132$.grpc_cli.GetLogLe"
+  "velResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_"
+  "cli.PosInfo\032\202\001\n\006Result\022 \n\006status\030\001 \001(\0132\020"
+  ".grpc_cli.Status\022;\n\004data\030\002 \001(\0132-.grpc_cl"
+  "i.GetLogLevelResponse.Result.LogLevel\032\031\n"
+  "\010LogLevel\022\r\n\005level\030\001 \001(\t\"H\n\025ApplyLogFilt"
+  "erRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022"
+  "\021\n\trequestor\030\003 \001(\t\"\274\001\n\026ApplyLogFilterRes"
+  "ponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006r"
+  "esult\030\003 \001(\0132\'.grpc_cli.ApplyLogFilterRes"
+  "ponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Po"
+  "sInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_c"
+  "li.Status\"\326\001\n\023CreateDeviceRequest\022\017\n\007com"
+  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001"
+  "(\t\0222\n\005param\030\004 \001(\0132#.grpc_cli.CreateDevic"
+  "eRequest.Param\032Z\n\005Param\022\014\n\004name\030\001 \001(\t\022\021\n"
+  "\tnumBlocks\030\002 \001(\r\022\021\n\tblockSize\030\003 \001(\r\022\017\n\007d"
+  "evType\030\004 \001(\t\022\014\n\004numa\030\005 \001(\r\"\270\001\n\024CreateDev"
+  "iceResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001("
+  "\t\0225\n\006result\030\003 \001(\0132%.grpc_cli.CreateDevic"
+  "eResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cl"
+  "i.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.gr"
+  "pc_cli.Status\"D\n\021ScanDeviceRequest\022\017\n\007co"
+  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 "
+  "\001(\t\"\264\001\n\022ScanDeviceResponse\022\017\n\007command\030\001 "
+  "\001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_"
+  "cli.ScanDeviceResponse.Result\022\037\n\004info\030\004 "
+  "\001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006stat"
+  "us\030\001 \001(\0132\020.grpc_cli.Status\"\213\001\n\006Device\022\014\n"
+  "\004name\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022\017\n\007address\030\003 \001"
+  "(\t\022\r\n\005class\030\004 \001(\t\022\023\n\013modelNumber\030\005 \001(\t\022\014"
+  "\n\004numa\030\006 \001(\t\022\014\n\004size\030\007 \001(\004\022\024\n\014serialNumb"
+  "er\030\010 \001(\t\"D\n\021ListDeviceRequest\022\017\n\007command"
+  "\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\247"
+  "\002\n\022ListDeviceResponse\022\017\n\007command\030\001 \001(\t\022\013"
+  "\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.L"
+  "istDeviceResponse.Result\022\037\n\004info\030\004 \001(\0132\021"
+  ".grpc_cli.PosInfo\032\234\001\n\006Result\022 \n\006status\030\001"
+  " \001(\0132\020.grpc_cli.Status\022<\n\004data\030\002 \001(\0132..g"
+  "rpc_cli.ListDeviceResponse.Result.Device"
+  "List\0322\n\nDeviceList\022$\n\ndeviceList\030\001 \003(\0132\020"
+  ".grpc_cli.Device2\257\025\n\006PosCli\022_\n\nSystemInf"
+  "o\022\033.grpc_cli.SystemInfoRequest\032\034.grpc_cl"
+  "i.SystemInfoResponse\"\026\202\323\344\223\002\020\022\016/v1/system"
+  "info\022_\n\nSystemStop\022\033.grpc_cli.SystemStop"
+  "Request\032\034.grpc_cli.SystemStopResponse\"\026\202"
+  "\323\344\223\002\020\022\016/v1/systemstop\022}\n\021GetSystemProper"
+  "ty\022\".grpc_cli.GetSystemPropertyRequest\032#"
+  ".grpc_cli.GetSystemPropertyResponse\"\037\202\323\344"
+  "\223\002\031\022\027/v1/get_system_property\022\205\001\n\021SetSyst"
+  "emProperty\022\".grpc_cli.SetSystemPropertyR"
+  "equest\032#.grpc_cli.SetSystemPropertyRespo"
+  "nse\"\'\202\323\344\223\002!\022\037/v1/set_system_property/{le"
+  "vel}\022p\n\016StartTelemetry\022\037.grpc_cli.StartT"
+  "elemetryRequest\032 .grpc_cli.StartTelemetr"
+  "yResponse\"\033\202\323\344\223\002\025\022\023/v1/start_telemetry\022l"
+  "\n\rStopTelemetry\022\036.grpc_cli.StopTelemetry"
+  "Request\032\037.grpc_cli.StopTelemetryResponse"
+  "\"\032\202\323\344\223\002\024\022\022/v1/stop_telemetry\022P\n\rResetEve"
+  "ntWrr\022\036.grpc_cli.ResetEventWrrRequest\032\037."
+  "grpc_cli.ResetEventWrrResponse\022A\n\010ResetM"
+  "br\022\031.grpc_cli.ResetMbrRequest\032\032.grpc_cli"
+  ".ResetMbrResponse\022S\n\016StopRebuilding\022\037.gr"
+  "pc_cli.StopRebuildingRequest\032 .grpc_cli."
+  "StopRebuildingResponse\022S\n\016UpdateEventWrr"
+  "\022\037.grpc_cli.UpdateEventWrrRequest\032 .grpc"
+  "_cli.UpdateEventWrrResponse\022W\n\010AddSpare\022"
+  "\031.grpc_cli.AddSpareRequest\032\032.grpc_cli.Ad"
+  "dSpareResponse\"\024\202\323\344\223\002\016\"\014/v1/addspare\022c\n\013"
+  "RemoveSpare\022\034.grpc_cli.RemoveSpareReques"
+  "t\032\035.grpc_cli.RemoveSpareResponse\"\027\202\323\344\223\002\021"
+  "\"\017/v1/removespare\022c\n\013CreateArray\022\034.grpc_"
+  "cli.CreateArrayRequest\032\035.grpc_cli.Create"
+  "ArrayResponse\"\027\202\323\344\223\002\021\"\017/v1/createarray\022s"
+  "\n\017AutocreateArray\022 .grpc_cli.AutocreateA"
+  "rrayRequest\032!.grpc_cli.AutocreateArrayRe"
+  "sponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray\022d\n\013D"
+  "eleteArray\022\034.grpc_cli.DeleteArrayRequest"
+  "\032\035.grpc_cli.DeleteArrayResponse\"\030\202\323\344\223\002\022\""
+  "\020/v1/deletearray/\022_\n\nMountArray\022\033.grpc_c"
+  "li.MountArrayRequest\032\034.grpc_cli.MountArr"
+  "ayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarray\022g\n\014Un"
+  "mountArray\022\035.grpc_cli.UnmountArrayReques"
+  "t\032\036.grpc_cli.UnmountArrayResponse\"\030\202\323\344\223\002"
+  "\022\"\020/v1/unmountarray\022[\n\tListArray\022\032.grpc_"
+  "cli.ListArrayRequest\032\033.grpc_cli.ListArra"
+  "yResponse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022[\n\tArra"
+  "yInfo\022\032.grpc_cli.ArrayInfoRequest\032\033.grpc"
+  "_cli.ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v1/arra"
+  "yinfo\022w\n\020SetLogPreference\022!.grpc_cli.Set"
+  "LogPreferenceRequest\032\".grpc_cli.SetLogPr"
+  "eferenceResponse\"\034\202\323\344\223\002\026\"\024/v1/setlogpref"
+  "erence\022c\n\013SetLogLevel\022\034.grpc_cli.SetLogL"
+  "evelRequest\032\035.grpc_cli.SetLogLevelRespon"
+  "se\"\027\202\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLoggerInf"
+  "o\022\033.grpc_cli.LoggerInfoRequest\032\034.grpc_cl"
+  "i.LoggerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/logger"
+  "info\022c\n\013GetLogLevel\022\034.grpc_cli.GetLogLev"
+  "elRequest\032\035.grpc_cli.GetLogLevelResponse"
+  "\"\027\202\323\344\223\002\021\"\017/v1/getloglevel\022l\n\016ApplyLogFil"
+  "ter\022\037.grpc_cli.ApplyLogFilterRequest\032 .g"
+  "rpc_cli.ApplyLogFilterResponse\"\027\202\323\344\223\002\021\"\017"
+  "/v1/applyfilter\022g\n\014CreateDevice\022\035.grpc_c"
+  "li.CreateDeviceRequest\032\036.grpc_cli.Create"
+  "DeviceResponse\"\030\202\323\344\223\002\022\"\020/v1/createdevice"
+  "\022_\n\nScanDevice\022\033.grpc_cli.ScanDeviceRequ"
+  "est\032\034.grpc_cli.ScanDeviceResponse\"\026\202\323\344\223\002"
+  "\020\"\016/v1/scandevice\022_\n\nListDevice\022\033.grpc_c"
+  "li.ListDeviceRequest\032\034.grpc_cli.ListDevi"
+  "ceResponse\"\026\202\323\344\223\002\020\"\016/v1/listdeviceB\tZ\007cl"
+  "i/apib\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 13278, descriptor_table_protodef_cli_2eproto, "cli.proto", 
-  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 112,
+  false, false, 13773, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 116,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
 };
@@ -21295,434 +21402,6 @@ void UnmountArrayResponse::InternalSwap(UnmountArrayResponse* other) {
 
 // ===================================================================
 
-class Device::_Internal {
- public:
-};
-
-Device::Device(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:grpc_cli.Device)
-}
-Device::Device(const Device& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_name().empty()) {
-    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
-      GetArena());
-  }
-  type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_type().empty()) {
-    type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_type(), 
-      GetArena());
-  }
-  address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_address().empty()) {
-    address_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_address(), 
-      GetArena());
-  }
-  class__.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_class_().empty()) {
-    class__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_class_(), 
-      GetArena());
-  }
-  mn_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_mn().empty()) {
-    mn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_mn(), 
-      GetArena());
-  }
-  numa_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_numa().empty()) {
-    numa_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_numa(), 
-      GetArena());
-  }
-  serial_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_serial().empty()) {
-    serial_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_serial(), 
-      GetArena());
-  }
-  // @@protoc_insertion_point(copy_constructor:grpc_cli.Device)
-}
-
-void Device::SharedCtor() {
-name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-class__.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-mn_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-numa_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-serial_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-
-Device::~Device() {
-  // @@protoc_insertion_point(destructor:grpc_cli.Device)
-  SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-void Device::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  type_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  address_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  class__.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  mn_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  numa_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  serial_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-
-void Device::ArenaDtor(void* object) {
-  Device* _this = reinterpret_cast< Device* >(object);
-  (void)_this;
-}
-void Device::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
-void Device::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
-}
-
-void Device::Clear() {
-// @@protoc_insertion_point(message_clear_start:grpc_cli.Device)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  name_.ClearToEmpty();
-  type_.ClearToEmpty();
-  address_.ClearToEmpty();
-  class__.ClearToEmpty();
-  mn_.ClearToEmpty();
-  numa_.ClearToEmpty();
-  serial_.ClearToEmpty();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* Device::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
-    switch (tag >> 3) {
-      // string name = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_name();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.name"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string type = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          auto str = _internal_mutable_type();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.type"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string address = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          auto str = _internal_mutable_address();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.address"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string class = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
-          auto str = _internal_mutable_class_();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.class"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string mn = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
-          auto str = _internal_mutable_mn();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.mn"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string numa = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
-          auto str = _internal_mutable_numa();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.numa"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string serial = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
-          auto str = _internal_mutable_serial();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.serial"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
-    }  // switch
-  }  // while
-success:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto success;
-#undef CHK_
-}
-
-::PROTOBUF_NAMESPACE_ID::uint8* Device::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.Device)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // string name = 1;
-  if (this->name().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.name");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_name(), target);
-  }
-
-  // string type = 2;
-  if (this->type().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_type().data(), static_cast<int>(this->_internal_type().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.type");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_type(), target);
-  }
-
-  // string address = 3;
-  if (this->address().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_address().data(), static_cast<int>(this->_internal_address().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.address");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_address(), target);
-  }
-
-  // string class = 4;
-  if (this->class_().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_class_().data(), static_cast<int>(this->_internal_class_().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.class");
-    target = stream->WriteStringMaybeAliased(
-        4, this->_internal_class_(), target);
-  }
-
-  // string mn = 5;
-  if (this->mn().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_mn().data(), static_cast<int>(this->_internal_mn().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.mn");
-    target = stream->WriteStringMaybeAliased(
-        5, this->_internal_mn(), target);
-  }
-
-  // string numa = 6;
-  if (this->numa().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_numa().data(), static_cast<int>(this->_internal_numa().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.numa");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_numa(), target);
-  }
-
-  // string serial = 7;
-  if (this->serial().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_serial().data(), static_cast<int>(this->_internal_serial().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.Device.serial");
-    target = stream->WriteStringMaybeAliased(
-        7, this->_internal_serial(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.Device)
-  return target;
-}
-
-size_t Device::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:grpc_cli.Device)
-  size_t total_size = 0;
-
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // string name = 1;
-  if (this->name().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_name());
-  }
-
-  // string type = 2;
-  if (this->type().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_type());
-  }
-
-  // string address = 3;
-  if (this->address().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_address());
-  }
-
-  // string class = 4;
-  if (this->class_().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_class_());
-  }
-
-  // string mn = 5;
-  if (this->mn().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_mn());
-  }
-
-  // string numa = 6;
-  if (this->numa().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_numa());
-  }
-
-  // string serial = 7;
-  if (this->serial().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_serial());
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
-}
-
-void Device::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.Device)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Device* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Device>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.Device)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.Device)
-    MergeFrom(*source);
-  }
-}
-
-void Device::MergeFrom(const Device& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.Device)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from.name().size() > 0) {
-    _internal_set_name(from._internal_name());
-  }
-  if (from.type().size() > 0) {
-    _internal_set_type(from._internal_type());
-  }
-  if (from.address().size() > 0) {
-    _internal_set_address(from._internal_address());
-  }
-  if (from.class_().size() > 0) {
-    _internal_set_class_(from._internal_class_());
-  }
-  if (from.mn().size() > 0) {
-    _internal_set_mn(from._internal_mn());
-  }
-  if (from.numa().size() > 0) {
-    _internal_set_numa(from._internal_numa());
-  }
-  if (from.serial().size() > 0) {
-    _internal_set_serial(from._internal_serial());
-  }
-}
-
-void Device::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.Device)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void Device::CopyFrom(const Device& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.Device)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool Device::IsInitialized() const {
-  return true;
-}
-
-void Device::InternalSwap(Device* other) {
-  using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  type_.Swap(&other->type_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  address_.Swap(&other->address_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  class__.Swap(&other->class__, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  mn_.Swap(&other->mn_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  numa_.Swap(&other->numa_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  serial_.Swap(&other->serial_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata Device::GetMetadata() const {
-  return GetMetadataStatic();
-}
-
-
-// ===================================================================
-
 class Array::_Internal {
  public:
 };
@@ -34178,6 +33857,1511 @@ void ScanDeviceResponse::InternalSwap(ScanDeviceResponse* other) {
 }
 
 
+// ===================================================================
+
+class Device::_Internal {
+ public:
+};
+
+Device::Device(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.Device)
+}
+Device::Device(const Device& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_name().empty()) {
+    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+      GetArena());
+  }
+  type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_type().empty()) {
+    type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_type(), 
+      GetArena());
+  }
+  address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_address().empty()) {
+    address_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_address(), 
+      GetArena());
+  }
+  class__.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_class_().empty()) {
+    class__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_class_(), 
+      GetArena());
+  }
+  modelnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_modelnumber().empty()) {
+    modelnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_modelnumber(), 
+      GetArena());
+  }
+  numa_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_numa().empty()) {
+    numa_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_numa(), 
+      GetArena());
+  }
+  serialnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_serialnumber().empty()) {
+    serialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_serialnumber(), 
+      GetArena());
+  }
+  size_ = from.size_;
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.Device)
+}
+
+void Device::SharedCtor() {
+name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+class__.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+modelnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+numa_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+serialnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+size_ = PROTOBUF_ULONGLONG(0);
+}
+
+Device::~Device() {
+  // @@protoc_insertion_point(destructor:grpc_cli.Device)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void Device::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  type_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  address_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  class__.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  modelnumber_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  numa_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  serialnumber_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void Device::ArenaDtor(void* object) {
+  Device* _this = reinterpret_cast< Device* >(object);
+  (void)_this;
+}
+void Device::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void Device::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void Device::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.Device)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  name_.ClearToEmpty();
+  type_.ClearToEmpty();
+  address_.ClearToEmpty();
+  class__.ClearToEmpty();
+  modelnumber_.ClearToEmpty();
+  numa_.ClearToEmpty();
+  serialnumber_.ClearToEmpty();
+  size_ = PROTOBUF_ULONGLONG(0);
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* Device::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string name = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string type = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_type();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.type"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string address = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_address();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.address"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string class = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          auto str = _internal_mutable_class_();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.class"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string modelNumber = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_modelnumber();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.modelNumber"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string numa = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_numa();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.numa"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 size = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string serialNumber = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          auto str = _internal_mutable_serialnumber();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Device.serialNumber"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* Device::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.Device)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.name");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_name(), target);
+  }
+
+  // string type = 2;
+  if (this->type().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_type().data(), static_cast<int>(this->_internal_type().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.type");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_type(), target);
+  }
+
+  // string address = 3;
+  if (this->address().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_address().data(), static_cast<int>(this->_internal_address().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.address");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_address(), target);
+  }
+
+  // string class = 4;
+  if (this->class_().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_class_().data(), static_cast<int>(this->_internal_class_().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.class");
+    target = stream->WriteStringMaybeAliased(
+        4, this->_internal_class_(), target);
+  }
+
+  // string modelNumber = 5;
+  if (this->modelnumber().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_modelnumber().data(), static_cast<int>(this->_internal_modelnumber().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.modelNumber");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_modelnumber(), target);
+  }
+
+  // string numa = 6;
+  if (this->numa().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_numa().data(), static_cast<int>(this->_internal_numa().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.numa");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_numa(), target);
+  }
+
+  // uint64 size = 7;
+  if (this->size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(7, this->_internal_size(), target);
+  }
+
+  // string serialNumber = 8;
+  if (this->serialnumber().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_serialnumber().data(), static_cast<int>(this->_internal_serialnumber().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Device.serialNumber");
+    target = stream->WriteStringMaybeAliased(
+        8, this->_internal_serialnumber(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.Device)
+  return target;
+}
+
+size_t Device::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.Device)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_name());
+  }
+
+  // string type = 2;
+  if (this->type().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_type());
+  }
+
+  // string address = 3;
+  if (this->address().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_address());
+  }
+
+  // string class = 4;
+  if (this->class_().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_class_());
+  }
+
+  // string modelNumber = 5;
+  if (this->modelnumber().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_modelnumber());
+  }
+
+  // string numa = 6;
+  if (this->numa().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_numa());
+  }
+
+  // string serialNumber = 8;
+  if (this->serialnumber().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_serialnumber());
+  }
+
+  // uint64 size = 7;
+  if (this->size() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_size());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void Device::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.Device)
+  GOOGLE_DCHECK_NE(&from, this);
+  const Device* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Device>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.Device)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.Device)
+    MergeFrom(*source);
+  }
+}
+
+void Device::MergeFrom(const Device& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.Device)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.name().size() > 0) {
+    _internal_set_name(from._internal_name());
+  }
+  if (from.type().size() > 0) {
+    _internal_set_type(from._internal_type());
+  }
+  if (from.address().size() > 0) {
+    _internal_set_address(from._internal_address());
+  }
+  if (from.class_().size() > 0) {
+    _internal_set_class_(from._internal_class_());
+  }
+  if (from.modelnumber().size() > 0) {
+    _internal_set_modelnumber(from._internal_modelnumber());
+  }
+  if (from.numa().size() > 0) {
+    _internal_set_numa(from._internal_numa());
+  }
+  if (from.serialnumber().size() > 0) {
+    _internal_set_serialnumber(from._internal_serialnumber());
+  }
+  if (from.size() != 0) {
+    _internal_set_size(from._internal_size());
+  }
+}
+
+void Device::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.Device)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Device::CopyFrom(const Device& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.Device)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Device::IsInitialized() const {
+  return true;
+}
+
+void Device::InternalSwap(Device* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  type_.Swap(&other->type_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  address_.Swap(&other->address_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  class__.Swap(&other->class__, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  modelnumber_.Swap(&other->modelnumber_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  numa_.Swap(&other->numa_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  serialnumber_.Swap(&other->serialnumber_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(size_, other->size_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata Device::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class ListDeviceRequest::_Internal {
+ public:
+};
+
+ListDeviceRequest::ListDeviceRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.ListDeviceRequest)
+}
+ListDeviceRequest::ListDeviceRequest(const ListDeviceRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_requestor().empty()) {
+    requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_requestor(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.ListDeviceRequest)
+}
+
+void ListDeviceRequest::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+ListDeviceRequest::~ListDeviceRequest() {
+  // @@protoc_insertion_point(destructor:grpc_cli.ListDeviceRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ListDeviceRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  requestor_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void ListDeviceRequest::ArenaDtor(void* object) {
+  ListDeviceRequest* _this = reinterpret_cast< ListDeviceRequest* >(object);
+  (void)_this;
+}
+void ListDeviceRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ListDeviceRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ListDeviceRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.ListDeviceRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  requestor_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ListDeviceRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.ListDeviceRequest.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.ListDeviceRequest.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string requestor = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_requestor();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.ListDeviceRequest.requestor"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ListDeviceRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.ListDeviceRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.ListDeviceRequest.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.ListDeviceRequest.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_requestor().data(), static_cast<int>(this->_internal_requestor().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.ListDeviceRequest.requestor");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_requestor(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.ListDeviceRequest)
+  return target;
+}
+
+size_t ListDeviceRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.ListDeviceRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_requestor());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ListDeviceRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.ListDeviceRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ListDeviceRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ListDeviceRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.ListDeviceRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.ListDeviceRequest)
+    MergeFrom(*source);
+  }
+}
+
+void ListDeviceRequest::MergeFrom(const ListDeviceRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.ListDeviceRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.requestor().size() > 0) {
+    _internal_set_requestor(from._internal_requestor());
+  }
+}
+
+void ListDeviceRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.ListDeviceRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListDeviceRequest::CopyFrom(const ListDeviceRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.ListDeviceRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListDeviceRequest::IsInitialized() const {
+  return true;
+}
+
+void ListDeviceRequest::InternalSwap(ListDeviceRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  requestor_.Swap(&other->requestor_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ListDeviceRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class ListDeviceResponse_Result_DeviceList::_Internal {
+ public:
+};
+
+ListDeviceResponse_Result_DeviceList::ListDeviceResponse_Result_DeviceList(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  devicelist_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.ListDeviceResponse.Result.DeviceList)
+}
+ListDeviceResponse_Result_DeviceList::ListDeviceResponse_Result_DeviceList(const ListDeviceResponse_Result_DeviceList& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      devicelist_(from.devicelist_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.ListDeviceResponse.Result.DeviceList)
+}
+
+void ListDeviceResponse_Result_DeviceList::SharedCtor() {
+}
+
+ListDeviceResponse_Result_DeviceList::~ListDeviceResponse_Result_DeviceList() {
+  // @@protoc_insertion_point(destructor:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ListDeviceResponse_Result_DeviceList::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void ListDeviceResponse_Result_DeviceList::ArenaDtor(void* object) {
+  ListDeviceResponse_Result_DeviceList* _this = reinterpret_cast< ListDeviceResponse_Result_DeviceList* >(object);
+  (void)_this;
+}
+void ListDeviceResponse_Result_DeviceList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ListDeviceResponse_Result_DeviceList::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ListDeviceResponse_Result_DeviceList::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  devicelist_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ListDeviceResponse_Result_DeviceList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // repeated .grpc_cli.Device deviceList = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_devicelist(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ListDeviceResponse_Result_DeviceList::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated .grpc_cli.Device deviceList = 1;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_devicelist_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, this->_internal_devicelist(i), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  return target;
+}
+
+size_t ListDeviceResponse_Result_DeviceList::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .grpc_cli.Device deviceList = 1;
+  total_size += 1UL * this->_internal_devicelist_size();
+  for (const auto& msg : this->devicelist_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ListDeviceResponse_Result_DeviceList::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ListDeviceResponse_Result_DeviceList* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ListDeviceResponse_Result_DeviceList>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.ListDeviceResponse.Result.DeviceList)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.ListDeviceResponse.Result.DeviceList)
+    MergeFrom(*source);
+  }
+}
+
+void ListDeviceResponse_Result_DeviceList::MergeFrom(const ListDeviceResponse_Result_DeviceList& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  devicelist_.MergeFrom(from.devicelist_);
+}
+
+void ListDeviceResponse_Result_DeviceList::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListDeviceResponse_Result_DeviceList::CopyFrom(const ListDeviceResponse_Result_DeviceList& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.ListDeviceResponse.Result.DeviceList)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListDeviceResponse_Result_DeviceList::IsInitialized() const {
+  return true;
+}
+
+void ListDeviceResponse_Result_DeviceList::InternalSwap(ListDeviceResponse_Result_DeviceList* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  devicelist_.InternalSwap(&other->devicelist_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ListDeviceResponse_Result_DeviceList::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class ListDeviceResponse_Result::_Internal {
+ public:
+  static const ::grpc_cli::Status& status(const ListDeviceResponse_Result* msg);
+  static const ::grpc_cli::ListDeviceResponse_Result_DeviceList& data(const ListDeviceResponse_Result* msg);
+};
+
+const ::grpc_cli::Status&
+ListDeviceResponse_Result::_Internal::status(const ListDeviceResponse_Result* msg) {
+  return *msg->status_;
+}
+const ::grpc_cli::ListDeviceResponse_Result_DeviceList&
+ListDeviceResponse_Result::_Internal::data(const ListDeviceResponse_Result* msg) {
+  return *msg->data_;
+}
+ListDeviceResponse_Result::ListDeviceResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.ListDeviceResponse.Result)
+}
+ListDeviceResponse_Result::ListDeviceResponse_Result(const ListDeviceResponse_Result& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_status()) {
+    status_ = new ::grpc_cli::Status(*from.status_);
+  } else {
+    status_ = nullptr;
+  }
+  if (from._internal_has_data()) {
+    data_ = new ::grpc_cli::ListDeviceResponse_Result_DeviceList(*from.data_);
+  } else {
+    data_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.ListDeviceResponse.Result)
+}
+
+void ListDeviceResponse_Result::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&status_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&data_) -
+    reinterpret_cast<char*>(&status_)) + sizeof(data_));
+}
+
+ListDeviceResponse_Result::~ListDeviceResponse_Result() {
+  // @@protoc_insertion_point(destructor:grpc_cli.ListDeviceResponse.Result)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ListDeviceResponse_Result::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete status_;
+  if (this != internal_default_instance()) delete data_;
+}
+
+void ListDeviceResponse_Result::ArenaDtor(void* object) {
+  ListDeviceResponse_Result* _this = reinterpret_cast< ListDeviceResponse_Result* >(object);
+  (void)_this;
+}
+void ListDeviceResponse_Result::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ListDeviceResponse_Result::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ListDeviceResponse_Result::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.ListDeviceResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+  if (GetArena() == nullptr && data_ != nullptr) {
+    delete data_;
+  }
+  data_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ListDeviceResponse_Result::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .grpc_cli.Status status = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_status(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.ListDeviceResponse.Result.DeviceList data = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_data(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ListDeviceResponse_Result::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.ListDeviceResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::status(this), target, stream);
+  }
+
+  // .grpc_cli.ListDeviceResponse.Result.DeviceList data = 2;
+  if (this->has_data()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::data(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.ListDeviceResponse.Result)
+  return target;
+}
+
+size_t ListDeviceResponse_Result::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.ListDeviceResponse.Result)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *status_);
+  }
+
+  // .grpc_cli.ListDeviceResponse.Result.DeviceList data = 2;
+  if (this->has_data()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *data_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ListDeviceResponse_Result::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.ListDeviceResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ListDeviceResponse_Result* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ListDeviceResponse_Result>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.ListDeviceResponse.Result)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.ListDeviceResponse.Result)
+    MergeFrom(*source);
+  }
+}
+
+void ListDeviceResponse_Result::MergeFrom(const ListDeviceResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.ListDeviceResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_status()) {
+    _internal_mutable_status()->::grpc_cli::Status::MergeFrom(from._internal_status());
+  }
+  if (from.has_data()) {
+    _internal_mutable_data()->::grpc_cli::ListDeviceResponse_Result_DeviceList::MergeFrom(from._internal_data());
+  }
+}
+
+void ListDeviceResponse_Result::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.ListDeviceResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListDeviceResponse_Result::CopyFrom(const ListDeviceResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.ListDeviceResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListDeviceResponse_Result::IsInitialized() const {
+  return true;
+}
+
+void ListDeviceResponse_Result::InternalSwap(ListDeviceResponse_Result* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ListDeviceResponse_Result, data_)
+      + sizeof(ListDeviceResponse_Result::data_)
+      - PROTOBUF_FIELD_OFFSET(ListDeviceResponse_Result, status_)>(
+          reinterpret_cast<char*>(&status_),
+          reinterpret_cast<char*>(&other->status_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ListDeviceResponse_Result::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class ListDeviceResponse::_Internal {
+ public:
+  static const ::grpc_cli::ListDeviceResponse_Result& result(const ListDeviceResponse* msg);
+  static const ::grpc_cli::PosInfo& info(const ListDeviceResponse* msg);
+};
+
+const ::grpc_cli::ListDeviceResponse_Result&
+ListDeviceResponse::_Internal::result(const ListDeviceResponse* msg) {
+  return *msg->result_;
+}
+const ::grpc_cli::PosInfo&
+ListDeviceResponse::_Internal::info(const ListDeviceResponse* msg) {
+  return *msg->info_;
+}
+ListDeviceResponse::ListDeviceResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.ListDeviceResponse)
+}
+ListDeviceResponse::ListDeviceResponse(const ListDeviceResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  if (from._internal_has_result()) {
+    result_ = new ::grpc_cli::ListDeviceResponse_Result(*from.result_);
+  } else {
+    result_ = nullptr;
+  }
+  if (from._internal_has_info()) {
+    info_ = new ::grpc_cli::PosInfo(*from.info_);
+  } else {
+    info_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.ListDeviceResponse)
+}
+
+void ListDeviceResponse::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&result_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&info_) -
+    reinterpret_cast<char*>(&result_)) + sizeof(info_));
+}
+
+ListDeviceResponse::~ListDeviceResponse() {
+  // @@protoc_insertion_point(destructor:grpc_cli.ListDeviceResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ListDeviceResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete result_;
+  if (this != internal_default_instance()) delete info_;
+}
+
+void ListDeviceResponse::ArenaDtor(void* object) {
+  ListDeviceResponse* _this = reinterpret_cast< ListDeviceResponse* >(object);
+  (void)_this;
+}
+void ListDeviceResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ListDeviceResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ListDeviceResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.ListDeviceResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ListDeviceResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.ListDeviceResponse.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.ListDeviceResponse.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.ListDeviceResponse.Result result = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.PosInfo info = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_info(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ListDeviceResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.ListDeviceResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.ListDeviceResponse.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.ListDeviceResponse.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // .grpc_cli.ListDeviceResponse.Result result = 3;
+  if (this->has_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::result(this), target, stream);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        4, _Internal::info(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.ListDeviceResponse)
+  return target;
+}
+
+size_t ListDeviceResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.ListDeviceResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // .grpc_cli.ListDeviceResponse.Result result = 3;
+  if (this->has_result()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *result_);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *info_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ListDeviceResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.ListDeviceResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ListDeviceResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ListDeviceResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.ListDeviceResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.ListDeviceResponse)
+    MergeFrom(*source);
+  }
+}
+
+void ListDeviceResponse::MergeFrom(const ListDeviceResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.ListDeviceResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.has_result()) {
+    _internal_mutable_result()->::grpc_cli::ListDeviceResponse_Result::MergeFrom(from._internal_result());
+  }
+  if (from.has_info()) {
+    _internal_mutable_info()->::grpc_cli::PosInfo::MergeFrom(from._internal_info());
+  }
+}
+
+void ListDeviceResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.ListDeviceResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListDeviceResponse::CopyFrom(const ListDeviceResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.ListDeviceResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListDeviceResponse::IsInitialized() const {
+  return true;
+}
+
+void ListDeviceResponse::InternalSwap(ListDeviceResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ListDeviceResponse, info_)
+      + sizeof(ListDeviceResponse::info_)
+      - PROTOBUF_FIELD_OFFSET(ListDeviceResponse, result_)>(
+          reinterpret_cast<char*>(&result_),
+          reinterpret_cast<char*>(&other->result_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ListDeviceResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace grpc_cli
 PROTOBUF_NAMESPACE_OPEN
@@ -34385,9 +35569,6 @@ template<> PROTOBUF_NOINLINE ::grpc_cli::UnmountArrayResponse_Result* Arena::Cre
 template<> PROTOBUF_NOINLINE ::grpc_cli::UnmountArrayResponse* Arena::CreateMaybeMessage< ::grpc_cli::UnmountArrayResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::UnmountArrayResponse >(arena);
 }
-template<> PROTOBUF_NOINLINE ::grpc_cli::Device* Arena::CreateMaybeMessage< ::grpc_cli::Device >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::grpc_cli::Device >(arena);
-}
 template<> PROTOBUF_NOINLINE ::grpc_cli::Array* Arena::CreateMaybeMessage< ::grpc_cli::Array >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::Array >(arena);
 }
@@ -34516,6 +35697,21 @@ template<> PROTOBUF_NOINLINE ::grpc_cli::ScanDeviceResponse_Result* Arena::Creat
 }
 template<> PROTOBUF_NOINLINE ::grpc_cli::ScanDeviceResponse* Arena::CreateMaybeMessage< ::grpc_cli::ScanDeviceResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::ScanDeviceResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::Device* Arena::CreateMaybeMessage< ::grpc_cli::Device >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::Device >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::ListDeviceRequest* Arena::CreateMaybeMessage< ::grpc_cli::ListDeviceRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::ListDeviceRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::ListDeviceResponse_Result_DeviceList* Arena::CreateMaybeMessage< ::grpc_cli::ListDeviceResponse_Result_DeviceList >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::ListDeviceResponse_Result_DeviceList >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::ListDeviceResponse_Result* Arena::CreateMaybeMessage< ::grpc_cli::ListDeviceResponse_Result >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::ListDeviceResponse_Result >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::ListDeviceResponse* Arena::CreateMaybeMessage< ::grpc_cli::ListDeviceResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::ListDeviceResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 
