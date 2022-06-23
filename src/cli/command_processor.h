@@ -103,6 +103,8 @@ using grpc_cli::ScanDeviceRequest;
 using grpc_cli::ScanDeviceResponse;
 using grpc_cli::ListDeviceRequest;
 using grpc_cli::ListDeviceResponse;
+using grpc_cli::GetSmartLogRequest;
+using grpc_cli::GetSmartLogResponse;
 
 class CommandProcessor
 {
@@ -149,6 +151,7 @@ public:
     grpc::Status ExecuteCreateDeviceCommand(const CreateDeviceRequest* request, CreateDeviceResponse* reply);
     grpc::Status ExecuteScanDeviceCommand(const ScanDeviceRequest* request, ScanDeviceResponse* reply);
     grpc::Status ExecuteListDeviceCommand(const ListDeviceRequest* request, ListDeviceResponse* reply);
+    grpc::Status ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, GetSmartLogResponse* reply);
 
 private:
     bool _isPosTerminating;
@@ -159,4 +162,7 @@ private:
     std::string _GetRebuildImpactString(uint8_t impact);
     pos::BackendEvent _GetEventId(std::string eventName);
     std::string _GetGCMode(pos::IGCInfo* gc, std::string arrayName);
+    void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
+    void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
+    void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
 };

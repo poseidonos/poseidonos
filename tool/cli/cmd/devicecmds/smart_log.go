@@ -1,15 +1,16 @@
 package devicecmds
 
 import (
-	"encoding/json"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	"log"
 
-	"github.com/labstack/gommon/log"
+	pb "cli/api"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var SMARTLOGCmd = &cobra.Command{
@@ -24,25 +25,36 @@ Syntax:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "SMARTLOG"
-
-		param := messages.SMARTLOGReqParam{
-			DEVICENAME: smart_log_deviceName,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(req)
+		param := &pb.GetSmartLogRequest_Param{Name: smart_log_deviceName}
+		req := &pb.GetSmartLogRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendGetSmartLog(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
