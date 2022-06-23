@@ -1,4 +1,4 @@
-- [- _**CriticalTemperatureTime**_](#--criticaltemperaturetime)
+- [- _**write_rate_bytes_per_second_per_port**_](#--write_rate_bytes_per_second_per_port)
 - [**Common**](#common)
 - [Common group contains the metrics from the overall informaition of PoseidonOS](#common-group-contains-the-metrics-from-the-overall-informaition-of-poseidonos)
   - [_**common_process_uptime_second**_](#common_process_uptime_second)
@@ -109,6 +109,11 @@
   - [_**controllerBusyTimeHigh**_](#controllerbusytimehigh)
   - [_**warningTemperatureTime**_](#warningtemperaturetime)
   - [_**criticalTemperatureTime**_](#criticaltemperaturetime)
+- [**Network**](#network)
+  - [_**read_iops_per_port**_](#read_iops_per_port)
+  - [_**read_rate_bytes_per_second_per_port**_](#read_rate_bytes_per_second_per_port)
+  - [_**write_iops_per_port**_](#write_iops_per_port)
+  - [_**write_rate_bytes_per_second_per_port**_](#write_rate_bytes_per_second_per_port)
 ---
 ## **Common**
 
@@ -1713,3 +1718,70 @@ Warning Temperature Time Value
 Critical Temperature Time Value
 
 ---
+## **Network**
+
+Network group contains the metrics from the network related metric of PoseidonOS
+
+---
+
+### _**read_iops_per_port**_
+
+**ID**: 120001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.10.0
+
+The IOPS of read in a port.
+
+---
+
+### _**read_rate_bytes_per_second_per_port**_
+
+**ID**: 120002
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.10.0
+
+The rate(bytes/second) of read in a port.
+
+---
+
+### _**write_iops_per_port**_
+
+**ID**: 120011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.10.0
+
+The IOPS of write in a port.
+
+---
+
+### _**write_rate_bytes_per_second_per_port**_
+
+**ID**: 120012
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.10.0
+
+The rate(bytes/second) of write in a port.
