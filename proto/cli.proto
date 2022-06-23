@@ -138,6 +138,12 @@ service PosCli {
       		post: "/v1/createdevice"
     	};
 	}
+
+	rpc ScanDevice (ScanDeviceRequest) returns (ScanDeviceResponse) {
+		option (google.api.http) = {
+      		post: "/v1/scandevice"
+    	};
+	}
 }
 
 message Status {
@@ -729,6 +735,22 @@ message CreateDeviceRequest {
 }
 
 message CreateDeviceResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ScanDeviceRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ScanDeviceResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
