@@ -71,10 +71,18 @@ index 14f5b9f10..07a0df7f2 100644
  	if (f->filetype != FIO_TYPE_FILE && \
  	    f->filetype != FIO_TYPE_BLOCK && \
 diff --git include/spdk/nvme.h include/spdk/nvme.h
-index f5a8f73c9..0a0b31893 100644
+index f5a8f73c9..59fee094b 100644
 --- include/spdk/nvme.h
 +++ include/spdk/nvme.h
-@@ -1028,6 +1028,8 @@ int spdk_nvme_ctrlr_reset_subsystem(struct spdk_nvme_ctrlr *ctrlr);
+@@ -419,6 +419,7 @@ struct spdk_nvme_transport_id {
+ 	 * information of this field can be found from the socket(7) man page.
+ 	 */
+ 	int priority;
++	uint64_t traddr_int;
+ };
+ 
+ /**
+@@ -1028,6 +1029,8 @@ int spdk_nvme_ctrlr_reset_subsystem(struct spdk_nvme_ctrlr *ctrlr);
   */
  void spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr);
  
@@ -1946,7 +1954,7 @@ index e7eab45b9..b5d7bd790 100644
  C_SRCS-$(CONFIG_RDMA) += rdma.c
  LIBNAME = nvmf
 diff --git lib/nvmf/ctrlr.c lib/nvmf/ctrlr.c
-index 4fe815d06..cfcfc4a84 100644
+index 4fe815d06..ba32a4b41 100644
 --- lib/nvmf/ctrlr.c
 +++ lib/nvmf/ctrlr.c
 @@ -42,6 +42,7 @@
@@ -1965,7 +1973,44 @@ index 4fe815d06..cfcfc4a84 100644
  
  /*
   * Report the SPDK version as the firmware revision.
-@@ -499,7 +501,15 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
+@@ -310,6 +312,28 @@ nvmf_ctrlr_cdata_init(struct spdk_nvmf_transport *transport, struct spdk_nvmf_su
+ 	}
+ }
+ 
++static uint64_t
++encode_traddr(const char* traddr_str, const char* traddr_port)
++{
++	char traddr_copy[SPDK_NVMF_TRADDR_MAX_LEN + 1];
++	char *token = NULL;
++	char *ptr = NULL;
++	// Parse traddr in little endian way
++	const uint32_t SHIFT_SIZE = 8;
++	uint32_t shift = 0;
++	uint64_t ret_val = 0;
++	memcpy(traddr_copy, traddr_str, SPDK_NVMF_TRADDR_MAX_LEN + 1);
++	token = strtok_r(traddr_copy, ".", &ptr);
++	while (token)
++	{
++		ret_val += atoi(token) * (1ULL << shift);
++		token = strtok_r(NULL, ".", &ptr);
++		shift = shift + SHIFT_SIZE;
++	}
++	ret_val += (uint64_t)atoi(traddr_port) * (1ULL << shift);
++	return ret_val;
++}
++
+ static struct spdk_nvmf_ctrlr *
+ nvmf_ctrlr_create(struct spdk_nvmf_subsystem *subsystem,
+ 		  struct spdk_nvmf_request *req,
+@@ -441,6 +465,7 @@ nvmf_ctrlr_create(struct spdk_nvmf_subsystem *subsystem,
+ 			free(ctrlr);
+ 			return NULL;
+ 		}
++		ctrlr->listener->trid->traddr_int = encode_traddr(ctrlr->listener->trid->traddr, ctrlr->listener->trid->trsvcid);
+ 	}
+ 
+ 	req->qpair->ctrlr = ctrlr;
+@@ -499,7 +524,15 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
  	  */
  	qpair->ctrlr = NULL;
  
@@ -1981,7 +2026,7 @@ index 4fe815d06..cfcfc4a84 100644
  	if (ctrlr->in_destruct) {
  		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
  		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
-@@ -542,6 +552,8 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
+@@ -542,6 +575,8 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
  	}
  
  	ctrlr_add_qpair_and_update_rsp(qpair, ctrlr, rsp);
@@ -1990,7 +2035,7 @@ index 4fe815d06..cfcfc4a84 100644
  end:
  	spdk_nvmf_request_complete(req);
  }
-@@ -574,6 +586,14 @@ _nvmf_ctrlr_add_io_qpair(void *ctx)
+@@ -574,6 +609,14 @@ _nvmf_ctrlr_add_io_qpair(void *ctx)
  		return;
  	}
  
@@ -2005,7 +2050,7 @@ index 4fe815d06..cfcfc4a84 100644
  	/* fail before passing a message to the controller thread. */
  	if (ctrlr->in_destruct) {
  		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
-@@ -781,7 +801,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
+@@ -781,7 +824,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
  		goto out;
  	}
  
@@ -2014,7 +2059,7 @@ index 4fe815d06..cfcfc4a84 100644
  	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
  
  	status = _nvmf_ctrlr_connect(req);
-@@ -1683,7 +1703,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
+@@ -1683,7 +1726,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
  	/* AER cmd is an exception */
  	sgroup = &req->qpair->group->sgroups[ctrlr->subsys->id];
  	assert(sgroup != NULL);
@@ -2022,7 +2067,7 @@ index 4fe815d06..cfcfc4a84 100644
  
  	/* Four asynchronous events are supported for now */
  	if (ctrlr->nr_aer_reqs >= NVMF_MAX_ASYNC_EVENTS) {
-@@ -3571,7 +3590,7 @@ spdk_nvmf_request_exec_fabrics(struct spdk_nvmf_request *req)
+@@ -3571,7 +3613,7 @@ spdk_nvmf_request_exec_fabrics(struct spdk_nvmf_request *req)
  	}
  
  	assert(sgroup != NULL);
@@ -2031,7 +2076,7 @@ index 4fe815d06..cfcfc4a84 100644
  
  	/* Place the request on the outstanding list so we can keep track of it */
  	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
-@@ -3609,7 +3628,7 @@ spdk_nvmf_request_exec(struct spdk_nvmf_request *req)
+@@ -3609,7 +3651,7 @@ spdk_nvmf_request_exec(struct spdk_nvmf_request *req)
  				TAILQ_INSERT_TAIL(&sgroup->queued, req, link);
  				return;
  			}
@@ -2040,6 +2085,41 @@ index 4fe815d06..cfcfc4a84 100644
  		} else {
  			nsid = req->cmd->nvme_cmd.nsid;
  
+diff --git lib/nvmf/ctrlr_bdev.c lib/nvmf/ctrlr_bdev.c
+index a631b8003..be27bfc1f 100644
+--- lib/nvmf/ctrlr_bdev.c
++++ lib/nvmf/ctrlr_bdev.c
+@@ -48,6 +48,7 @@
+ #include "spdk/util.h"
+ 
+ #include "spdk/log.h"
++#include <air/Air_c.h>
+ 
+ static bool
+ nvmf_subsystem_bdev_io_type_supported(struct spdk_nvmf_subsystem *subsystem,
+@@ -286,6 +287,10 @@ nvmf_bdev_ctrlr_read_cmd(struct spdk_bdev *bdev, struct spdk_bdev_desc *desc,
+ 		return SPDK_NVMF_REQUEST_EXEC_STATUS_COMPLETE;
+ 	}
+ 
++	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
++	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
++		AIRLOG(PERF_PORT, AIR_READ, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
++	}
+ 	rc = spdk_bdev_readv_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
+ 				    nvmf_bdev_ctrlr_complete_cmd, req);
+ 	if (spdk_unlikely(rc)) {
+@@ -330,6 +335,11 @@ nvmf_bdev_ctrlr_write_cmd(struct spdk_bdev *bdev, struct spdk_bdev_desc *desc,
+ 		return SPDK_NVMF_REQUEST_EXEC_STATUS_COMPLETE;
+ 	}
+ 
++	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
++	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
++		AIRLOG(PERF_PORT, AIR_WRITE, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
++	}
++
+ 	rc = spdk_bdev_writev_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
+ 				     nvmf_bdev_ctrlr_complete_cmd, req);
+ 	if (spdk_unlikely(rc)) {
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
 index 05aaff048..b732a8cf8 100644
 --- lib/nvmf/nvmf.c

@@ -222,6 +222,61 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     delete copier;
 }
 
+TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
+{
+    // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
+    POSMetricVector* posMetricVector {nullptr};
+    NiceMock<MockTelemetryPublisher> mockTelPub;
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
+        [&] (POSMetricVector* posMetricVectorArg)
+        {
+            posMetricVector = posMetricVectorArg;
+            return 0;
+        }
+    );
+    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    auto& air_data = air::json("air_data");
+    air_data["interval"] = {3};
+    auto& perf_port = air::json("perf_port");
+    auto& obj_read = air::json("obj_read");
+    auto& obj_read_period = air::json("obj_read_period");
+    obj_read["filter"] = {"AIR_READ"};
+    obj_read_period["iops"] = {100};
+    obj_read_period["bw"] = {409600};
+    obj_read["period"] = {obj_read_period};
+    obj_read["index"] = {0x123100111};
+    obj_read["target_id"] = {7824};
+    obj_read["target_name"] = {"reactor_0"};
+    auto& obj_write = air::json("obj_write");
+    auto& obj_write_period = air::json("obj_write_period");
+    obj_write["filter"] = {"AIR_WRITE"};
+    obj_write_period["iops"] = {10};
+    obj_write_period["bw"] = {1310720};
+    obj_write["period"] = {obj_write_period};
+    obj_write["index"] = {0x223100311};
+    obj_write["target_id"] = {7824};
+    obj_write["target_name"] = {"reactor_0"};
+    perf_port["objs"] = {obj_read, obj_write};
+    air_data["PERF_PORT"] = {perf_port};
+    auto copier = air::json_copy("air_data");
+    int actual, expected = 0;
+
+    // When: Call dataHandler
+    actual = telAirDelegator.dataHandler(std::move(*copier));
+
+    // Then: Expect dataHandler returns zero(success), Clear AIR data
+    EXPECT_EQ(actual, expected);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL120001_READ_IOPS_PER_PORT);
+    EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("port"), "17.1.16.35:1");
+
+    delete posMetricVector;
+    air::json_clear();
+    delete copier;
+}
+
 TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
 {
     // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data

@@ -49,6 +49,14 @@
 
 namespace pos
 {
+
+enum class PerformanceMetric
+{
+    GET_SSD_ID,
+    ARR_VOLUME,
+    PORT
+};
+
 void
 AddLabelArrayVolumeInterval(POSMetric& posMetric,
     const air::JSONdoc& data, const std::string& interval)
@@ -79,24 +87,53 @@ AddSSDIdInterval(POSMetric& posMetric,
     posMetric.AddLabel("interval", interval);
 }
 
+std::string
+DecodePort(uint64_t index)
+{
+    std::string portId[4], port;
+    portId[0] = std::to_string(index & 0xFF);
+    portId[1] = std::to_string((index & 0xFF00) >> 8);
+    portId[2] = std::to_string((index & 0xFF0000) >> 16);
+    portId[3] = std::to_string((index & 0xFF000000) >> 24);
+    port = std::to_string(index >> 32);
+    return (portId[0] + "." + portId[1] + "." + portId[2] + "." + portId[3] + ":" + port);
+}
+
+void
+AddPortInterval(POSMetric& posMetric,
+    const air::JSONdoc& data, const std::string& interval)
+{
+    std::stringstream stream_index;
+    stream_index << data["index"];
+    uint64_t index{0};
+    stream_index >> index;
+    posMetric.AddLabel("port", DecodePort(index));
+}
+
 void
 AddPerformanceMetric(POSMetricVector* posMetricVector,
     const std::string& name, const POSMetricTypes type, const uint64_t value,
-    const air::JSONdoc& data, const std::string& interval, bool getSSDId = false)
+    const air::JSONdoc& data, const std::string& interval,
+    PerformanceMetric perfMetric = PerformanceMetric::ARR_VOLUME)
 {
     POSMetric posMetric{name, type};
     if (POSMetricTypes::MT_GAUGE == type)
     {
         posMetric.SetGaugeValue(value);
     }
-    if (getSSDId)
+    if (perfMetric == PerformanceMetric::GET_SSD_ID)
     {
         AddSSDIdInterval(posMetric, data, interval);
     }
-    else
+    else if (perfMetric == PerformanceMetric::ARR_VOLUME)
     {
         AddLabelArrayVolumeInterval(posMetric, data, interval);
     }
+    else
+    {
+        AddPortInterval(posMetric, data, interval);
+    }
+    
     std::stringstream stream_thread_id;
     stream_thread_id << data["target_id"];
     posMetric.AddLabel("thread_id", stream_thread_id.str());
@@ -280,6 +317,47 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                     }
                 }
 
+                if (data.HasKey("PERF_PORT"))
+                {
+                    auto& objs = data["PERF_PORT"]["objs"];
+                    for (auto& obj_it : objs)
+                    {
+                        auto& obj = objs[obj_it.first];
+
+                        std::stringstream stream_filter;
+                        stream_filter << obj["filter"];
+                        std::string str_filter = stream_filter.str();
+
+                        std::stringstream stream_iops;
+                        stream_iops << obj["period"]["iops"];
+                        uint32_t iops{0};
+                        stream_iops >> iops;
+
+                        std::stringstream stream_bw;
+                        stream_bw << obj["period"]["bw"];
+                        uint64_t bw{0};
+                        stream_bw >> bw;
+
+                        std::string iopsMetricId;
+                        std::string bwMetricId;
+
+                        if (0 == str_filter.compare("\"AIR_READ\""))
+                        {
+                            iopsMetricId = TEL120001_READ_IOPS_PER_PORT;
+                            bwMetricId = TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT;
+                        }
+                        else
+                        {
+                            iopsMetricId = TEL120011_WRITE_IOPS_PER_PORT;
+                            bwMetricId = TEL120012_WRITE_RATE_BYTES_PER_SECOND_PER_PORT;
+                        }
+                        AddPerformanceMetric(posMetricVector, iopsMetricId,
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::PORT);
+                        AddPerformanceMetric(posMetricVector, bwMetricId,
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::PORT);
+                    }
+                }
+
                 if (data.HasKey("LAT_ARR_VOL_READ"))
                 {
                     auto& objs = data["LAT_ARR_VOL_READ"]["objs"];
@@ -331,7 +409,6 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                 if (data.HasKey("PERF_SSD_Read"))
                 {
                     auto& objs = data["PERF_SSD_Read"]["objs"];
-                    bool getSSDId = true;
                     for (auto& obj_it : objs)
                     {
                         auto& obj = objs[obj_it.first];
@@ -384,16 +461,15 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                             bwMetricId = TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::GET_SSD_ID);
                         AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::GET_SSD_ID);
                     }
                 }
 
                 if (data.HasKey("PERF_SSD_Write"))
                 {
                     auto& objs = data["PERF_SSD_Write"]["objs"];
-                    bool getSSDId = true;
                     for (auto& obj_it : objs)
                     {
                         auto& obj = objs[obj_it.first];
@@ -446,9 +522,9 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                             bwMetricId = TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval, getSSDId);
+                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::GET_SSD_ID);
                         AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval, getSSDId);
+                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::GET_SSD_ID);
                     }
                 }
 
@@ -533,7 +609,7 @@ void
 TelemetryAirDelegator::RegisterAirEvent(void)
 {
     air_request_data(
-        {"PERF_ARR_VOL", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
+        {"PERF_ARR_VOL", "PERF_PORT", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
             "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO"},
         std::move(dataHandler));
 }
