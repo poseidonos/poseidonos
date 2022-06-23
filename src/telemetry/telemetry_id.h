@@ -148,4 +148,21 @@ static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_fo
 static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
+
+static const std::string TEL110000_MEDIA_ERROR_COUNT_LOW = "soft_media_error_low";
+static const std::string TEL110001_MEDIA_ERROR_COUNT_HIGH = "soft_media_error_high";
+static const std::string TEL110002_POWER_CYCLE_LOW = "power_cycle_low";
+static const std::string TEL110003_POWER_CYCLE_HIGH = "power_cycle_high";
+static const std::string TEL110004_POWER_ON_HOUR_LOW = "power_on_hour_low";
+static const std::string TEL110005_POWER_ON_HOUR_HIGH = "power_on_hour_high";
+static const std::string TEL110006_UNSAFE_SHUTDOWNS_LOW = "unsafe_shutdowns_low";
+static const std::string TEL110007_UNSAFE_SHUTDOWNS_HIGH = "unsafe_shutdowns_high";
+static const std::string TEL110008_TEMPERATURE = "temperature";
+static const std::string TEL110009_AVAILABLE_SPARE = "available_spare";
+static const std::string TEL110010_AVAILABLE_SPARE_THRESHOLD = "available_spare_threshold";
+static const std::string TEL110011_PERCENTAGE_USED = "percentage_used";
+static const std::string TEL110012_CONTROLLER_BUSY_TIME_LOW = "controller_busy_time_low";
+static const std::string TEL110013_CONTROLLER_BUSY_TIME_HIGH = "controller_busy_time_high";
+static const std::string TEL110014_WARNING_TEMP_TIME = "warning_temperature_time";
+static const std::string TEL110015_CRITICAL_TEMP_TIME = "critical_temperature_time";
 } // namespace pos

@@ -37,6 +37,7 @@
 #include "src/cli/cli_event_code.h"
 #include "src/device/device_manager.h"
 #include "src/logger/logger.h"
+#include "src/resource_checker/smart_collector.h"
 
 namespace pos_cli
 {
@@ -103,17 +104,18 @@ SMARTLOGCommand::Execute(json& doc, string rid)
             return jFormat.MakeResponse("SMARTLOG", rid, BADREQUEST, "Can't get nvme ctrlr", GetPosInfo());
         }
 
-        if (spdk_nvme_ctrlr_cmd_get_log_page(ctrlr, SPDK_NVME_LOG_HEALTH_INFORMATION, SPDK_NVME_GLOBAL_NS_TAG, &payload, sizeof(payload), 0, &_Complete, NULL))
+        SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
+        SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr);
+        switch (ret)
         {
-            return jFormat.MakeResponse("SMARTLOG", rid, BADREQUEST, "Can't get log page", GetPosInfo());
-        }
+            case SmartReturnType::SEND_ERR:
+                return jFormat.MakeResponse("SMARTLOG", rid, BADREQUEST, "Can't get log page", GetPosInfo());
 
-        int ret;
-
-        while ((ret = spdk_nvme_ctrlr_process_admin_completions(ctrlr)) <= 0)
-        {
-            if (ret < 0)
+            case SmartReturnType::RESPONSE_ERR:
                 return jFormat.MakeResponse("SMARTLOG", rid, BADREQUEST, "Can't process completions", GetPosInfo());
+
+            default:
+                break;
         }
 
         JsonElement data("data");

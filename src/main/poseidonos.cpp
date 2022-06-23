@@ -65,6 +65,7 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/resource_checker/resource_checker.h"
+#include "src/resource_checker/smart_collector.h"
 
 namespace pos
 {
@@ -160,6 +161,7 @@ Poseidonos::Terminate(void)
     }
     SignalHandlerSingleton::ResetInstance();
     ResourceCheckerSingleton::ResetInstance();
+    SmartCollectorSingleton::ResetInstance();
 
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
