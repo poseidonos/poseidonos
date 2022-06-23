@@ -88,6 +88,12 @@ SmartCollector::PublishSmartDataToTelemetry(void)
     for (auto device : list)
     {
         ctrlr = pos::DeviceManagerSingleton::Instance()->GetNvmeCtrlr(device.name);
+        if (nullptr == ctrlr)
+        {
+            // NVRAM case. ListDevs() includes SSD and NVRAM. But GetNvmeCtrlr() return only SSD.
+            continue;
+        }
+
         SmartReturnType result = CollectPerCtrl(&payload, ctrlr);
 
         if (SmartReturnType::SUCCESS == result)

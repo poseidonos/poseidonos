@@ -31,29 +31,24 @@
  */
 
 #pragma once
-#include <mutex>
-#include <set>
 
-#include "stripe_locker_state.h"
+#include "src/include/address_type.h"
+#include <string>
 
 using namespace std;
 
 namespace pos
 {
-class StripeLockerNormalState : public StripeLockerState
+class StripeLockInfo
 {
 public:
-    virtual ~StripeLockerNormalState(void)
+    explicit StripeLockInfo(StripeId id, string owner = "")
+    : id(id), owner(owner) {}
+    bool operator < (const StripeLockInfo& info) const
     {
+        return id < info.id;
     }
-    bool TryLock(StripeLockInfo lockInfo) override;
-    void Unlock(StripeId val) override;
-    bool Exists(StripeId val) override;
-    uint32_t Count(void) override;
-
-private:
-    multiset<StripeLockInfo> workingSet;
-    mutex mtx;
+    StripeId id;
+    string owner;
 };
-
 } // namespace pos

@@ -107,12 +107,15 @@ StripeBasedRaceRebuild::Read(void)
     {
         if (locker->ResetBusyLock(ctx->faultDev) == false)
         {
-            int logInterval = TRY_LOCK_MAX_RETRY / 500;
+            int logInterval = TRY_LOCK_MAX_RETRY / 10;
             if (resetLockRetryCnt % logInterval == 0)
             {
-                POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+                locker->WriteBusyLog(ctx->faultDev);
+                POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
                     "Partition {} rebuild done, but waiting lock release, retried:{}",
                     PARTITION_TYPE_STR[ctx->part], resetLockRetryCnt);
+                int sleep = resetLockRetryCnt * 10;
+                usleep(sleep);
             }
             resetLockRetryCnt++;
             if (resetLockRetryCnt >= TRY_LOCK_MAX_RETRY)
@@ -168,17 +171,21 @@ StripeBasedRaceRebuild::Read(void)
 
     if (locker->TryBusyLock(ctx->faultDev, from, to) == false)
     {
-        int logInterval = TRY_LOCK_MAX_RETRY / 500;
+        int logInterval = TRY_LOCK_MAX_RETRY / 10;
         if (tryLockRetryCnt % logInterval == 0)
         {
+            locker->WriteBusyLog(ctx->faultDev);
             POS_TRACE_WARN(EID(REBUILD_TRY_LOCK_RETRY),
                 "Failed to acquire rebuild lock, array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
                 ctx->array, PARTITION_TYPE_STR[ctx->part], ctx->faultDev->GetName(), from, to, tryLockRetryCnt);
+            int sleep = tryLockRetryCnt * 10;
+            usleep(sleep);
         }
 
         tryLockRetryCnt++;
         if (tryLockRetryCnt >= TRY_LOCK_MAX_RETRY)
         {
+            locker->WriteBusyLog(ctx->faultDev);
             POS_TRACE_ERROR(EID(REBUILD_TRY_LOCK_FAILED),
                 "array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
                 ctx->array, PARTITION_TYPE_STR[ctx->part], ctx->faultDev->GetName(), from, to, tryLockRetryCnt);

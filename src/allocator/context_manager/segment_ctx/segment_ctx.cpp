@@ -83,8 +83,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-    AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_)
-: SegmentCtx(tp_, nullptr, nullptr, rebuildCtx_, info, gcCtx_, arrayId_)
+    AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_, SegmentInfo* segmentInfo_)
+: SegmentCtx(tp_, nullptr, segmentInfo_, rebuildCtx_, info, gcCtx_, arrayId_)
 {
 }
 
@@ -98,6 +98,12 @@ void
 SegmentCtx::SetSegmentList(SegmentState state, SegmentList* list)
 {
     segmentList[state] = list;
+}
+
+void
+SegmentCtx::SetRebuildList(SegmentList* list)
+{
+    rebuildList = list;
 }
 
 void
