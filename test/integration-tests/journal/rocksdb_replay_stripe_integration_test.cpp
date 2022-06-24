@@ -1,3 +1,4 @@
+#include <experimental/filesystem>
 #include "gtest/gtest.h"
 
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
@@ -8,37 +9,53 @@ using ::testing::Return;
 
 namespace pos
 {
-class ReplayStripeIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
+class RocksDBReplayStripeIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
 {
 public:
-    ReplayStripeIntegrationTest(void);
-    virtual ~ReplayStripeIntegrationTest(void) = default;
+    RocksDBReplayStripeIntegrationTest(void);
+    virtual ~RocksDBReplayStripeIntegrationTest(void) = default;
+    JournalConfigurationBuilder builder;
 
 protected:
     virtual void SetUp(void);
     virtual void TearDown(void);
 };
 
-ReplayStripeIntegrationTest::ReplayStripeIntegrationTest(void)
-: JournalManagerTestFixture(GetLogFileName())
+RocksDBReplayStripeIntegrationTest::RocksDBReplayStripeIntegrationTest(void)
+: JournalManagerTestFixture(GetLogDirName()),
+builder(testInfo)
 {
 }
 
 void
-ReplayStripeIntegrationTest::SetUp(void)
+RocksDBReplayStripeIntegrationTest::SetUp(void)
 {
+    builder.SetRocksDBEnable(true);
+
+    // remove rocksdb log files by removing temporary directory if exist
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(targetDirName);
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
 void
-ReplayStripeIntegrationTest::TearDown(void)
+RocksDBReplayStripeIntegrationTest::TearDown(void)
 {
+    // Teardown : remove rocksdb log files by removing temporary directory.
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    int ret = std::experimental::filesystem::remove_all(targetDirName);
+
+    // Remove SPOR directory
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayOverwrite)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayOverwrite)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayOverwrite");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayOverwrite");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     BlkAddr rba = std::rand() % testInfo->defaultTestVolSizeInBlock;
     StripeId vsid = std::rand() % testInfo->numUserStripes;
@@ -48,7 +65,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayOverwrite)
     writeTester->WriteOverwrittenBlockLogs(stripe, rba, 0, numBlksToOverwrite);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayOverwrittenBlockLog(stripe);
@@ -60,11 +77,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayOverwrite)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayFullStripe)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayFullStripe)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayFullStripe");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayFullStripe");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeId vsid = std::rand() % testInfo->numUserStripes;
     StripeTestFixture stripe(vsid, testInfo->defaultTestVol);
@@ -72,7 +89,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripe)
     writeTester->WriteLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayFullStripe(stripe);
@@ -81,11 +98,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripe)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayFullStripeSeveralTimes");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayFullStripeSeveralTimes");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     std::list<StripeTestFixture> writtenStripes;
 
@@ -103,7 +120,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
@@ -116,11 +133,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplaySeveralUnflushedStripe");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplaySeveralUnflushedStripe");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture partialStripe(0, testInfo->defaultTestVol);
     int startOffset = std::rand() % testInfo->numBlksPerStripe;
@@ -132,7 +149,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
     writeTester->WriteBlockLogsForStripe(fullStripe);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     {
@@ -172,11 +189,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesFromStart");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWritesFromStart");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
@@ -184,7 +201,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
     writeTester->WriteBlockLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     {
@@ -203,18 +220,18 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWrites)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWrites");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWrites");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
     writeTester->GenerateLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
     writeTester->WriteBlockLogsForStripe(stripe);
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
@@ -229,11 +246,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWrites_WhenStripeMapCheckpointed");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWrites_WhenStripeMapCheckpointed");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
@@ -241,7 +258,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
     writeTester->WriteBlockLogsForStripe(stripe);
     writeTester->WaitForAllLogWriteDone();
 
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     StripeAddr stroedAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
@@ -258,18 +275,18 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStartToEnd)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWritesFromStartToEnd)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesFromStartToEnd");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWritesFromStartToEnd");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
     writeTester->WriteBlockLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     {
@@ -289,11 +306,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStartToEnd)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesAndFlush");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWritesAndFlush");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
@@ -304,7 +321,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
     EXPECT_TRUE(writeSuccessful == true);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
 
@@ -322,11 +339,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
@@ -337,7 +354,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     EXPECT_TRUE(writeSuccessful == true);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     StripeAddr stroedAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
@@ -356,11 +373,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
@@ -371,7 +388,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     EXPECT_TRUE(writeSuccessful == true);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     StripeAddr stroedAddr = {
         .stripeLoc = IN_USER_AREA,
@@ -389,18 +406,18 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayFlush)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayFlush)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayFlushButMapNotUpdated");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayFlushButMapNotUpdated");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
     EXPECT_TRUE(writeSuccessful == true);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
@@ -412,11 +429,11 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFlush)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayStripeIntegrationTest, ReplayGcStripe)
+TEST_F(RocksDBReplayStripeIntegrationTest, ReplayGcStripe)
 {
-    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayGcStripe");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayStripeIntegrationTest::ReplayGcStripe");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
 
@@ -424,7 +441,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayGcStripe)
     EXPECT_TRUE(writeSuccessful == true);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);

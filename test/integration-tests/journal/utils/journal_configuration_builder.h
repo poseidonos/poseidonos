@@ -15,7 +15,7 @@ public:
     JournalConfigurationBuilder* SetLogBufferSize(uint64_t logBufferSize);
     JournalConfigurationBuilder* SetMetaPageSize(uint64_t metaPageSize);
     JournalConfigurationBuilder* SetMaxPartitionSize(uint64_t partitionSize);
-
+    JournalConfigurationBuilder* SetRocksDBEnable(uint64_t isRocksDBEnabled);
     JournalConfigurationSpy* Build(void);
 
 private:
@@ -23,5 +23,6 @@ private:
     uint64_t logBufferSize;
     uint64_t metaPageSize;
     uint64_t partitionSize;
+    bool isRocksDBEnabled;
 };
 } // namespace pos

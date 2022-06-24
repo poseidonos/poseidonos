@@ -13,6 +13,7 @@
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
@@ -45,6 +46,7 @@ RocksDBLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, IsEnabled).WillByDefault(Return(true));
     ON_CALL(config, GetLogBufferSize).WillByDefault(Return(LOG_BUFFER_SIZE));
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(NUM_LOG_GROUPS));
 
     factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks = new RocksDBLogBuffer(GetLogDirName());
@@ -69,6 +71,7 @@ RocksDBLogBufferIntegrationTest::TearDown(void)
     int ret = std::experimental::filesystem::remove_all(targetDirName);
     EXPECT_TRUE(ret >= 1);
 
+    // Remove SPOR directory
     std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(SPORDirectory);
 
@@ -86,6 +89,8 @@ RocksDBLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 
     LogWriteContext* context =
         factory.CreateBlockMapLogWriteContext(volumeIo, callback);
+    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
     return context;
 }
 
@@ -101,7 +106,8 @@ RocksDBLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 
     LogWriteContext* context =
         factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
-
+    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
     return context;
 }
 
@@ -127,7 +133,8 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
-
+    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
     return context;
 }
 
@@ -153,7 +160,8 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
-
+    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
     return context;
 }
 
@@ -169,6 +177,20 @@ RocksDBLogBufferIntegrationTest::_ParseLogBuffer(int groupId, LogList& groupLogs
 
     free(buffer);
     return result;
+}
+
+void
+RocksDBLogBufferIntegrationTest::WriteDone(AsyncMetaFileIoCtx* ctx)
+{
+    numLogsWritten++;
+}
+
+void
+RocksDBLogBufferIntegrationTest::_WaitForLogWriteDone(int numLogsWaitingFor)
+{
+    while (numLogsWritten != numLogsWaitingFor)
+    {
+    }
 }
 
 void
@@ -247,14 +269,14 @@ void
 RocksDBLogBufferIntegrationTest::SimulateSPOR(void)
 {
     // To Simulate SPOR, copy rocksdb data to another directory at any time which is similar to closing rocksdb abrubtly before closing db.
-    std::string SPOR = "SPOR" + GetLogDirName();
-    std::string SPORDirectory = "/etc/pos/" + SPOR + "_RocksJournal";
+    std::string SPORDirName = "SPOR" + GetLogDirName();
+    std::string SPORDirectory = "/etc/pos/" + SPORDirName + "_RocksJournal";
     std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::copy(targetDirName, SPORDirectory);
 
     // Open abrubtly closed rocksDB (Copied rocksdb)
     delete journalRocks;
-    journalRocks = new RocksDBLogBuffer(SPOR);
+    journalRocks = new RocksDBLogBuffer(SPORDirName);
     _PrepareLogBuffer();
     journalRocks->Init(&config, &factory, 0, nullptr);
 }
@@ -318,6 +340,7 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteAndVerify)
     _AddToList(context);
 
     EXPECT_EQ(4, addedLogs.size());
+    _WaitForLogWriteDone(addedLogs.size());
 
     SimulateSPOR();
 
@@ -401,6 +424,113 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteWithoutMark)
     }
 
     delete context;
+}
+
+TEST_F(RocksDBLogBufferIntegrationTest, ResetByGroupId)
+{
+    // Given : add logs (4 logs have logGroupId 0 , 1 log has logGroupId 1)
+    uint64_t offset = 0;
+    // Write block write done log, group 0
+    LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write stripe map updated log, group 0
+    context = _CreateContextForStripeMapUpdatedLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write gc block write done log, group 0
+    context = _CreateContextForGcBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write gc stripe flushed log, group 0
+    context = _CreateContextForGcStripeFlushedLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write block write done log, group 1
+    context = _CreateContextForBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 1, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // When : remove logs of groupId 0
+    EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(journalRocks, 0));
+    journalRocks->AsyncReset(0, callbackEvent);
+
+    LogList logs;
+    EXPECT_TRUE(_ParseLogBuffer(0, logs) == 0);
+    EXPECT_TRUE(_ParseLogBuffer(1, logs) == 0);
+
+    // Then : so there is 1 log which groupId is 1
+    EXPECT_EQ(logs.GetLogs().size(), 1);
+
+    // When : remove logs of groupId 1
+    logs.Reset();
+    journalRocks->AsyncReset(1, callbackEvent);
+
+    // Then : there is no log
+    EXPECT_TRUE(_ParseLogBuffer(1, logs) == 0);
+    EXPECT_TRUE(logs.IsEmpty() == true);
+}
+
+TEST_F(RocksDBLogBufferIntegrationTest, ResetAllLogs)
+{
+    // Given : add logs (4 logs have logGroupId 0 , 1 log has logGroupId 1)
+    uint64_t offset = 0;
+    // Write block write done log, group 0
+    LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write stripe map updated log, group 0
+    context = _CreateContextForStripeMapUpdatedLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write gc block write done log, group 0
+    context = _CreateContextForGcBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write gc stripe flushed log, group 0
+    context = _CreateContextForGcStripeFlushedLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // Write block write done log, group 1
+    context = _CreateContextForBlockWriteDoneLog();
+    context->SetBufferAllocated(offset, 1, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+
+    // When : remove logs of all groups (0,1)
+    journalRocks->SyncResetAll();
+
+    LogList logs;
+    EXPECT_TRUE(_ParseLogBuffer(0, logs) == 0);
+    EXPECT_TRUE(_ParseLogBuffer(1, logs) == 0);
+    EXPECT_TRUE(logs.IsEmpty() == true);
 }
 
 } // namespace pos

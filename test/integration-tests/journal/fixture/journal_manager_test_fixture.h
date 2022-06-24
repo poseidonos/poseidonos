@@ -28,6 +28,8 @@ public:
     void SimulateSPORWithoutRecovery(void);
     void SimulateSPORWithoutRecovery(JournalConfigurationSpy* config);
 
+    void SimulateRocksDBSPORWithoutRecovery(void);
+
     void SetTriggerCheckpoint(bool isCheckpointEnabled);
     void ExpectCheckpointTriggered(void);
     void WaitForAllCheckpointDone(void);

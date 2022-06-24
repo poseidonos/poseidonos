@@ -1,5 +1,6 @@
-#include "journal_volume_integration_test.h"
-#include <iostream>
+#include <experimental/filesystem>
+
+#include "rocksdb_journal_volume_integration_test.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -8,24 +9,40 @@ using ::testing::Return;
 
 namespace pos
 {
-JournalVolumeIntegrationTest::JournalVolumeIntegrationTest(void)
-: JournalManagerTestFixture(GetLogFileName())
+RocksDBJournalVolumeIntegrationTest::RocksDBJournalVolumeIntegrationTest(void)
+: JournalManagerTestFixture(GetLogDirName()),
+builder(testInfo)
 {
 }
 
 void
-JournalVolumeIntegrationTest::SetUp(void)
+RocksDBJournalVolumeIntegrationTest::SetUp(void)
 {
+    builder.SetRocksDBEnable(true);
+
+    // remove rocksdb log files by removing temporary directory if exist
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(targetDirName);
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
 void
-JournalVolumeIntegrationTest::TearDown(void)
+RocksDBJournalVolumeIntegrationTest::TearDown(void)
 {
+
+    // Teardown : remove rocksdb log files by removing temporary directory.
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    int ret = std::experimental::filesystem::remove_all(targetDirName);
+
+    // Remove SPOR directory
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
 // Write one stripe per volume and return stripe list indexed by volume id
 StripeList
-JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
+RocksDBJournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 {
     StripeList writtenStripes(numVolumes);
     StripeId currentVsid = std::rand() % testInfo->numUserStripes;
@@ -44,7 +61,7 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 }
 
 void
-JournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
+RocksDBJournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(volumesToDelete.size());
@@ -57,7 +74,7 @@ JournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 }
 
 void
-JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDelete)
+RocksDBJournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDelete)
 {
     LogList logList;
     EXPECT_TRUE(journal->GetLogs(logList) == 0);
@@ -65,6 +82,7 @@ JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDel
     std::list<LogHandlerInterface*> logs = logList.GetLogs();
 
     int deleteVolumeLogFound = 0;
+    
     while (logs.size() != 0)
     {
         LogHandlerInterface* log = logs.front();
@@ -83,7 +101,7 @@ JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volumesToDel
 }
 
 void
-JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList& writtenStripes,
+RocksDBJournalVolumeIntegrationTest::ExpectReplayStripes(StripeList& writtenStripes,
     int numVolumes, Volumes& deletedVolumes)
 {
     replayTester->ExpectReturningUnmapStripes();
@@ -105,7 +123,7 @@ JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList& writtenStripes,
 }
 
 void
-JournalVolumeIntegrationTest::ExpectReplayTail(int numVolumesWritten)
+RocksDBJournalVolumeIntegrationTest::ExpectReplayTail(int numVolumesWritten)
 {
     for (int volId = 0; volId < numVolumesWritten; volId++)
     {
@@ -116,11 +134,10 @@ JournalVolumeIntegrationTest::ExpectReplayTail(int numVolumesWritten)
     EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }
 
-TEST_F(JournalVolumeIntegrationTest, DisableJournalAndNotifyVolumeDeleted)
+TEST_F(RocksDBJournalVolumeIntegrationTest, DisableJournalAndNotifyVolumeDeleted)
 {
-    POS_TRACE_DEBUG(9999, "JournalVolumeIntegrationTest::DisableJournalAndNotifyVolumeDeleted");
+    POS_TRACE_DEBUG(9999, "RocksDBJournalVolumeIntegrationTest::DisableJournalAndNotifyVolumeDeleted");
 
-    JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(false);
 
     InitializeJournal(builder.Build());
@@ -128,11 +145,11 @@ TEST_F(JournalVolumeIntegrationTest, DisableJournalAndNotifyVolumeDeleted)
     EXPECT_TRUE(journal->VolumeDeleted(testInfo->defaultTestVol) == 0);
 }
 
-TEST_F(JournalVolumeIntegrationTest, WriteLogsAndDeleteVolume)
+TEST_F(RocksDBJournalVolumeIntegrationTest, WriteLogsAndDeleteVolume)
 {
-    POS_TRACE_DEBUG(9999, "JournalVolumeIntegrationTest::WriteLogsAndDeleteVolume");
+    POS_TRACE_DEBUG(9999, "RocksDBJournalVolumeIntegrationTest::WriteLogsAndDeleteVolume");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
     SetTriggerCheckpoint(false);
 
     int numVolumes = testInfo->maxNumVolume;
@@ -143,18 +160,18 @@ TEST_F(JournalVolumeIntegrationTest, WriteLogsAndDeleteVolume)
     DeleteVolumes(volumesToDelete);
     CheckVolumeDeleteLogsWritten(volumesToDelete);
 
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
     ExpectReplayStripes(writtenStripes, numVolumes, volumesToDelete);
     ExpectReplayTail(numVolumes);
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(JournalVolumeIntegrationTest, WriteLogsAndDeleteVolumes)
+TEST_F(RocksDBJournalVolumeIntegrationTest, WriteLogsAndDeleteVolumes)
 {
-    POS_TRACE_DEBUG(9999, "JournalVolumeIntegrationTest::WriteLogsAndDeleteVolumes");
+    POS_TRACE_DEBUG(9999, "RocksDBJournalVolumeIntegrationTest::WriteLogsAndDeleteVolumes");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
     SetTriggerCheckpoint(false);
 
     int numVolumes = testInfo->maxNumVolume;
@@ -165,18 +182,18 @@ TEST_F(JournalVolumeIntegrationTest, WriteLogsAndDeleteVolumes)
     DeleteVolumes(volumesToDelete);
     CheckVolumeDeleteLogsWritten(volumesToDelete);
 
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
     ExpectReplayStripes(writtenStripes, numVolumes, volumesToDelete);
     ExpectReplayTail(numVolumes);
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(JournalVolumeIntegrationTest, DeleteAndCreateVolume)
+TEST_F(RocksDBJournalVolumeIntegrationTest, DeleteAndCreateVolume)
 {
-    POS_TRACE_DEBUG(9999, "JournalVolumeIntegrationTest::DeleteAndCreateVolume");
+    POS_TRACE_DEBUG(9999, "RocksDBJournalVolumeIntegrationTest::DeleteAndCreateVolume");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
     SetTriggerCheckpoint(false);
 
     int numVolumes = 3;
@@ -190,7 +207,7 @@ TEST_F(JournalVolumeIntegrationTest, DeleteAndCreateVolume)
     StripeList writtenStripesAfter = WriteStripes(numVolumes);
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     ExpectReplayStripes(writtenStripes, numVolumes, volumesToDelete);
 
