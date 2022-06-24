@@ -21131,9 +21131,9 @@ class ListDeviceResponse_Result_DeviceList PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDeviceListFieldNumber = 1,
+    kDevicelistFieldNumber = 1,
   };
-  // repeated .grpc_cli.Device deviceList = 1;
+  // repeated .grpc_cli.Device devicelist = 1;
   int devicelist_size() const;
   private:
   int _internal_devicelist_size() const;
@@ -44970,7 +44970,7 @@ inline void ListDeviceRequest::set_allocated_requestor(std::string* requestor) {
 
 // ListDeviceResponse_Result_DeviceList
 
-// repeated .grpc_cli.Device deviceList = 1;
+// repeated .grpc_cli.Device devicelist = 1;
 inline int ListDeviceResponse_Result_DeviceList::_internal_devicelist_size() const {
   return devicelist_.size();
 }
@@ -44981,31 +44981,31 @@ inline void ListDeviceResponse_Result_DeviceList::clear_devicelist() {
   devicelist_.Clear();
 }
 inline ::grpc_cli::Device* ListDeviceResponse_Result_DeviceList::mutable_devicelist(int index) {
-  // @@protoc_insertion_point(field_mutable:grpc_cli.ListDeviceResponse.Result.DeviceList.deviceList)
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListDeviceResponse.Result.DeviceList.devicelist)
   return devicelist_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Device >*
 ListDeviceResponse_Result_DeviceList::mutable_devicelist() {
-  // @@protoc_insertion_point(field_mutable_list:grpc_cli.ListDeviceResponse.Result.DeviceList.deviceList)
+  // @@protoc_insertion_point(field_mutable_list:grpc_cli.ListDeviceResponse.Result.DeviceList.devicelist)
   return &devicelist_;
 }
 inline const ::grpc_cli::Device& ListDeviceResponse_Result_DeviceList::_internal_devicelist(int index) const {
   return devicelist_.Get(index);
 }
 inline const ::grpc_cli::Device& ListDeviceResponse_Result_DeviceList::devicelist(int index) const {
-  // @@protoc_insertion_point(field_get:grpc_cli.ListDeviceResponse.Result.DeviceList.deviceList)
+  // @@protoc_insertion_point(field_get:grpc_cli.ListDeviceResponse.Result.DeviceList.devicelist)
   return _internal_devicelist(index);
 }
 inline ::grpc_cli::Device* ListDeviceResponse_Result_DeviceList::_internal_add_devicelist() {
   return devicelist_.Add();
 }
 inline ::grpc_cli::Device* ListDeviceResponse_Result_DeviceList::add_devicelist() {
-  // @@protoc_insertion_point(field_add:grpc_cli.ListDeviceResponse.Result.DeviceList.deviceList)
+  // @@protoc_insertion_point(field_add:grpc_cli.ListDeviceResponse.Result.DeviceList.devicelist)
   return _internal_add_devicelist();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Device >&
 ListDeviceResponse_Result_DeviceList::devicelist() const {
-  // @@protoc_insertion_point(field_list:grpc_cli.ListDeviceResponse.Result.DeviceList.deviceList)
+  // @@protoc_insertion_point(field_list:grpc_cli.ListDeviceResponse.Result.DeviceList.devicelist)
   return devicelist_;
 }
 

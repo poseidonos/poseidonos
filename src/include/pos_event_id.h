@@ -1630,7 +1630,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Failed to configure an array.", "SSD of the requested name could not be found", "Please check SSD name and try again")},
         {(int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND,
             new PosEventInfoEntry("ARRAY_NVM_NOT_FOUND",
-                "Failed to configure an array.", "Write buffer device of the requested name could not be found", "Please check Write buffer device name and try again")},
+                "Failed to configure an array.", "Write buffer device of the requested name could not be found", "Please check the write buffer device name and try again")},
         {(int)POS_EVENT_ID::ARRAY_MGR_NO_ARRAY_MATCHING_NAME,
             new PosEventInfoEntry("ARRAY_MGR_NO_ARRAY_MATCHING_NAME",
                 "Failed to get the array info.", "Could not find the array with the given name", "Please check the array name again")},

@@ -785,7 +785,7 @@ message ListDeviceResponse {
 	message Result {
 		Status status = 1;
 		message DeviceList {
-			repeated Device deviceList = 1;
+			repeated Device devicelist = 1;
 		}
 		DeviceList data = 2;
 	}

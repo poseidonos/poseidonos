@@ -303,7 +303,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"------------------")
 
 		// Data
-		for _, device := range res.GetResult().GetData().GetDeviceList() {
+		for _, device := range res.GetResult().GetData().GetDevicelist() {
 			fmt.Fprintln(w,
 				device.Name+"\t"+
 					globals.FieldSeparator+device.SerialNumber+"\t"+
