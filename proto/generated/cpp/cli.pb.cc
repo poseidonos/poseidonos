@@ -3238,7 +3238,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   ".grpc_cli.PosInfo\032\234\001\n\006Result\022 \n\006status\030\001"
   " \001(\0132\020.grpc_cli.Status\022<\n\004data\030\002 \001(\0132..g"
   "rpc_cli.ListDeviceResponse.Result.Device"
-  "List\0322\n\nDeviceList\022$\n\ndeviceList\030\001 \003(\0132\020"
+  "List\0322\n\nDeviceList\022$\n\ndevicelist\030\001 \003(\0132\020"
   ".grpc_cli.Device\"\335\004\n\010SmartLog\022\033\n\023availab"
   "leSpareSpace\030\001 \001(\t\022\023\n\013temperature\030\002 \001(\t\022"
   "\031\n\021deviceReliability\030\003 \001(\t\022\020\n\010readOnly\030\004"
@@ -34831,7 +34831,7 @@ const char* ListDeviceResponse_Result_DeviceList::_InternalParse(const char* ptr
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated .grpc_cli.Device deviceList = 1;
+      // repeated .grpc_cli.Device devicelist = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr -= 1;
@@ -34871,7 +34871,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Device deviceList = 1;
+  // repeated .grpc_cli.Device devicelist = 1;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_devicelist_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -34895,7 +34895,7 @@ size_t ListDeviceResponse_Result_DeviceList::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Device deviceList = 1;
+  // repeated .grpc_cli.Device devicelist = 1;
   total_size += 1UL * this->_internal_devicelist_size();
   for (const auto& msg : this->devicelist_) {
     total_size +=
