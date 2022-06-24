@@ -1,3 +1,7 @@
+- [- _**CriticalTemperatureTime**_](#--criticaltemperaturetime)
+- [**Common**](#common)
+- [Common group contains the metrics from the overall informaition of PoseidonOS](#common-group-contains-the-metrics-from-the-overall-informaition-of-poseidonos)
+  - [_**common_process_uptime_second**_](#common_process_uptime_second)
 - [**Device**](#device)
   - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
   - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
@@ -87,25 +91,46 @@
   - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
   - [_**RenameVolumeId**_](#renamevolumeid)
 - [**Resource**](#resource)
-  - [_**AvailableMemorySize**_](#availableMemorySize)
+  - [_**AvailableMemorySize**_](#availablememorysize)
 - [**Disk**](#disk)
-  - [_**SoftMediaErrorLow**_](#softMediaErrorLow)
-  - [_**SoftMediaErrorHigh**_](#softMediaErrorHigh)
-  - [_**PowerCycleLow**_](#powerCycleLow)
-  - [_**PowerCycleHigh**_](#powerCycleHigh)
-  - [_**PowerOnHourLow**_](#powerOnHourLow)
-  - [_**PowerOnHourHigh**_](#powerOnHourHigh)
-  - [_**UnsafeShutdownsLow**_](#unsafeShutdownsLow)
-  - [_**UnsafeShutdownsHigh**_](#unsafeShutdownsHigh)
-  - [_**Temperature**_](#temperature)
-  - [_**AvailableSpare**_](#availableSpare)
-  - [_**AvailableSpareThreshold**_](#availableSpareThreshold)
-  - [_**PercentageUsed**_](#percentageUsed)
-  - [_**ControllerBusyTimeLow**_](#controllerBusyTimeLow)
-  - [_**ControllerBusyTimeHigh**_](#controllerBusyTimeHigh)
-  - [_**WarningTemperatureTime**_](#warningTemperatureTime)
-  - [_**CriticalTemperatureTime**_](#criticalTemperatureTime)
+  - [_**softMediaErrorLow**_](#softmediaerrorlow)
+  - [_**softMediaErrorHigh**_](#softmediaerrorhigh)
+  - [_**powerCycleLow**_](#powercyclelow)
+  - [_**powerCycleHigh**_](#powercyclehigh)
+  - [_**powerOnHourLow**_](#poweronhourlow)
+  - [_**powerOnHourHigh**_](#poweronhourhigh)
+  - [_**unsafeShutdownsLow**_](#unsafeshutdownslow)
+  - [_**unsafeShutdownsHigh**_](#unsafeshutdownshigh)
+  - [_**temperature**_](#temperature)
+  - [_**availableSpare**_](#availablespare)
+  - [_**availableSpareThreshold**_](#availablesparethreshold)
+  - [_**percentageUsed**_](#percentageused)
+  - [_**controllerBusyTimeLow**_](#controllerbusytimelow)
+  - [_**controllerBusyTimeHigh**_](#controllerbusytimehigh)
+  - [_**warningTemperatureTime**_](#warningtemperaturetime)
+  - [_**criticalTemperatureTime**_](#criticaltemperaturetime)
 ---
+## **Common**
+
+Common group contains the metrics from the overall informaition of PoseidonOS
+---
+
+### _**common_process_uptime_second**_
+
+**ID**: 05000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"version": String}
+
+**Introduced**: v0.11.0
+
+The seconds since PoseidonOS process started
+
+---
+
 ## **Device**
 
 Device group contains the metrics of the Devices (NVMe SSD)

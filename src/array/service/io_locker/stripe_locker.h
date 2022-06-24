@@ -52,6 +52,7 @@ public:
     void Unlock(StripeId val);
     bool TryBusyLock(StripeId from, StripeId to);
     bool ResetBusyLock(bool force = false);
+    void WriteBusyLog(void);
 
 private:
     StripeLockerNormalState* normalLocker = nullptr;

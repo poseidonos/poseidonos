@@ -44,9 +44,9 @@ namespace pos
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
     ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator)
 : BlockMapUpdate(volumeIo, vsaMap, segmentCtx, wbStripeAllocator,
-      new VsaRangeMaker(volumeIo->GetVolumeId(),
-          ChangeSectorToBlock(volumeIo->GetSectorRba()),
-          DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
+    new VsaRangeMaker(volumeIo->GetVolumeId(),
+        ChangeSectorToBlock(volumeIo->GetSectorRba()),
+        DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
 {
 }
 
@@ -54,11 +54,11 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
     ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
     VsaRangeMaker* vsaRangeMaker)
 : Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
-  volumeIo(volumeIo),
-  vsaMap(vsaMap),
-  segmentCtx(segmentCtx),
-  wbStripeAllocator(wbStripeAllocator),
-  oldVsaRangeMaker(vsaRangeMaker)
+    volumeIo(volumeIo),
+    vsaMap(vsaMap),
+    segmentCtx(segmentCtx),
+    wbStripeAllocator(wbStripeAllocator),
+    oldVsaRangeMaker(vsaRangeMaker)
 {
 }
 
@@ -87,7 +87,7 @@ BlockMapUpdate::_DoSpecificJob(void)
 
     uint32_t vsaRangeCount = oldVsaRangeMaker->GetCount();
     for (uint32_t vsaRangeIndex = 0; vsaRangeIndex < vsaRangeCount;
-         vsaRangeIndex++)
+        vsaRangeIndex++)
     {
         VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
         bool allowVictimSegRelease = false;

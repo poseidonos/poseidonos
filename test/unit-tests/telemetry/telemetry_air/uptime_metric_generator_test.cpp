@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,44 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/telemetry/telemetry_air/uptime_metric_generator.h"
 
-#include <string>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "rocksdb/db.h"
+#include "test/unit-tests/master_context/version_provider_mock.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
-namespace pos
+using namespace pos;
+using namespace std;
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
+
+TEST(UptimeMetricGenerator, Generate_testIfUptimeGeneratedSuccessfully)
 {
-class JournalRocksIntf
-{
-public:
-    JournalRocksIntf(void);
-    explicit JournalRocksIntf(const std::string arrayName);
-    virtual ~JournalRocksIntf(void);
+    // Given
+    MockVersionProvider vp;
+    string version = "TestVersionString";
+    EXPECT_CALL(vp, GetVersion).WillOnce(Return(version));
+    UptimeMetricGenerator g(&vp);
+    POSMetric m;
 
-    virtual int Open(void);
-    virtual int Close(void);
+    // When
+    int ret = g.Generate(&m);
 
-    virtual int AddJournal(void);
-    virtual int ReadAllJournal(void);
-    virtual int ResetJournalByKey(void);
-    virtual int ResetAllJournal(void);
-
-    virtual bool IsOpened(void);
-    virtual bool DeleteDirectory(void);
-
-    virtual std::string GetPathName(void)
-    {
-        return pathName;
-    }
-
-protected:
-    virtual bool _CreateDirectory(void);
-    std::string pathName;
-    bool isOpened;
-
-private:
-    rocksdb::DB* rocksJournal;
-};
-
-} // namespace pos
+    // Then
+    sleep(1);
+    ASSERT_EQ(0, ret);
+    ASSERT_NE(0, m.GetGaugeValue());
+    ASSERT_TRUE(version == (*m.GetLabelList())["version"]);
+}

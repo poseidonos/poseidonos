@@ -180,6 +180,16 @@ IOLocker::ResetBusyLock(IArrayDevice* dev, bool forceReset)
     return locker->ResetBusyLock();
 }
 
+void
+IOLocker::WriteBusyLog(IArrayDevice* dev)
+{
+    StripeLocker* locker = _Find(dev);
+    if (locker != nullptr)
+    {
+        return locker->WriteBusyLog();
+    }
+}
+
 StripeLocker*
 IOLocker::_Find(IArrayDevice* dev)
 {

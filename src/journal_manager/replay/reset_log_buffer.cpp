@@ -32,13 +32,13 @@
 
 #include "reset_log_buffer.h"
 
-#include "../log_buffer/journal_log_buffer.h"
+#include "../log_buffer/i_journal_log_buffer.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-ResetLogBuffer::ResetLogBuffer(JournalLogBuffer* logBuffer, ReplayProgressReporter* reporter)
+ResetLogBuffer::ResetLogBuffer(IJournalLogBuffer* logBuffer, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
   logBuffer(logBuffer)
 {

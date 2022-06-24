@@ -36,6 +36,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/telemetry/telemetry_air/mock_uptime_metric_generator.h"
 
 using namespace pos;
 using namespace std;
@@ -51,7 +52,7 @@ TEST(TelemetryAirDelegator, TelemetryAirDelegator_Stack)
     // Given: Do nothing
 
     // When: Create TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
 
     // Then: Do nothing
 }
@@ -61,7 +62,7 @@ TEST(TelemetryAirDelegator, TelemetryAirDelegator_Heap)
     // Given: Do nothing
 
     // When: Create TelemetryAirDelegator
-    TelemetryAirDelegator* telAirDelegator = new TelemetryAirDelegator {nullptr};
+    TelemetryAirDelegator* telAirDelegator = new TelemetryAirDelegator {nullptr, nullptr};
     delete telAirDelegator;
 
     // Then: Do nothing
@@ -70,7 +71,7 @@ TEST(TelemetryAirDelegator, TelemetryAirDelegator_Heap)
 TEST(TelemetryAirDelegator, SetState_SimpleCall)
 {
     // Given: TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
 
     // When: Call SetState
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
@@ -81,7 +82,7 @@ TEST(TelemetryAirDelegator, SetState_SimpleCall)
 TEST(TelemetryAirDelegator, RegisterAirEvent_SimpleCall)
 {
     // Given: TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
 
     // When: Call RegisterAirEvent
     telAirDelegator.RegisterAirEvent();
@@ -92,7 +93,7 @@ TEST(TelemetryAirDelegator, RegisterAirEvent_SimpleCall)
 TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
     auto& air_data = air::json("air_data");
     auto copier = air::json_copy("air_data");
     int actual, expected = 0;
@@ -109,7 +110,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
 TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
     auto& air_data = air::json("air_data");
     auto& empty_node = air::json("empty_node");
     air_data["PERF_ARR_VOL"] = {empty_node};
@@ -128,7 +129,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 TEST(TelemetryAirDelegator, dataHandler_EndState)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr};
+    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
     auto& air_data = air::json("air_data");
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
     auto copier = air::json_copy("air_data");
@@ -155,7 +156,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
             return 0;
         }
     );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     air_data["interval"] = {3};
     auto& perf_arr_vol = air::json("perf_arr_vol");
@@ -233,7 +234,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
             return 0;
         }
     );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     auto& lat_arr_vol_read = air::json("lat_arr_vol_read");
     auto& obj = air::json("obj");
@@ -283,7 +284,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
             return 0;
         }
     );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     auto& lat_arr_vol_write = air::json("lat_arr_vol_write");
     auto& obj = air::json("obj");

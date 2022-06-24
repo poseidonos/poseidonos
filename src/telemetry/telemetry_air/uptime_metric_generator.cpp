@@ -30,51 +30,68 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "uptime_metric_generator.h"
 
-#include <atomic>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "../log/waiting_log_list.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
-#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
-namespace pos
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
+
+using namespace pos;
+using namespace std;
+
+UptimeMetricGenerator::UptimeMetricGenerator(VersionProvider* vp)
+: vp(vp)
 {
-class BufferOffsetAllocator;
-class LogWriteContext;
-class IJournalLogBuffer;
-class JournalConfiguration;
-class LogWriteStatistics;
+    started = getProcessStartTime();
+}
 
-class LogWriteHandler : public LogBufferWriteDoneEvent
+UptimeMetricGenerator::~UptimeMetricGenerator(void)
 {
-public:
-    LogWriteHandler(void);
-    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
-    virtual ~LogWriteHandler(void);
+}
 
-    virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config);
-    virtual void Dispose(void);
 
-    virtual int AddLog(LogWriteContext* context);
-    virtual void AddLogToWaitingList(LogWriteContext* context);
-    void LogWriteDone(AsyncMetaFileIoCtx* ctx);
+int
+UptimeMetricGenerator::Generate(POSMetric* m)
+{
+    time_t current = time(nullptr);
+    time_t uptime = current - started;
+    string version = vp->GetVersion();
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
+    if (uptime <= 0 || version == "")
+    {
+        return -1;
+    }
 
-private:
-    void _StartWaitingIos(void);
+    if (m == nullptr)
+    {
+        return -1;
+    }
+    m->SetName(TEL05000_COMMON_PROCESS_UPTIME_SECOND);
+    m->SetType(POSMetricTypes::MT_GAUGE);
+    m->SetGaugeValue(uptime);
+    m->AddLabel("version", version);
 
-    IJournalLogBuffer* logBuffer;
-    BufferOffsetAllocator* bufferAllocator;
+    return 0;
+}
 
-    LogWriteStatistics* logWriteStats;
-    WaitingLogList* waitingList;
+time_t
+UptimeMetricGenerator::getProcessStartTime(void)
+{
+    const string PROC_PATH= "/proc/";
+    string pid = to_string(getpid());
+    string statPath = PROC_PATH + pid;
 
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
-};
+    struct stat s;
+    int ret = stat(statPath.c_str(), &s);
+    if(ret != 0)
+    {
+        POS_TRACE_ERROR(EID(TELEMETRY_WARNING_MSG), "Faild to get process start time");
+        return 0;
+    }
 
-} // namespace pos
+    return s.st_mtim.tv_sec;
+}

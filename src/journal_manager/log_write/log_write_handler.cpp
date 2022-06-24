@@ -65,7 +65,7 @@ LogWriteHandler::~LogWriteHandler(void)
 }
 
 void
-LogWriteHandler::Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
+LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
     JournalConfiguration* journalConfig)
 {
     bufferAllocator = allocator;

@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 #include "src/journal_manager/replay/flush_metadata.h"
 #include "src/journal_manager/replay/flush_pending_stripes.h"
 #include "src/journal_manager/replay/read_log_buffer.h"
@@ -57,7 +57,7 @@ ReplayHandler::ReplayHandler(IStateControl* iState)
 
 void
 ReplayHandler::Init(JournalConfiguration* journalConfiguration,
-    JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)

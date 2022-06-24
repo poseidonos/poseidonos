@@ -375,6 +375,7 @@ enum class POS_EVENT_ID
     REBUILD_TRY_LOCK_RETRY = 2815,
     REBUILD_TRY_LOCK_FAILED = 2816,
     REBUILD_FORCED_RESET_LOCK = 2817,
+    BUSY_LOCKER_WARN = 2818,
     REBUILD_RECORD = 2850,
     REBUILD_END,
     REBUILD_COUNT = REBUILD_END - REBUILD_START,
@@ -452,15 +453,27 @@ enum class POS_EVENT_ID
     JOURNAL_REPLAY_VOLUME_EVENT = 3064,
     JOURNAL_REPLAY_WB_STRIPE = 3065,
 
-    // Journal Rocks Interface (3080)
-    JOURNAL_ROCKS_OPENED = 3080,
-    JOURNAL_ROCKS_CLOSED = 3081,
-    JOURNAL_ROCKS_DIR_EXISTS = 3082,
-    JOURNAL_ROCKS_DIR_CREATION_FAILED = 3083,
-    JOURNAL_ROCKS_DIR_CREATED = 3084,
-    JOURNAL_ROCKS_DIR_DELETION_FAILED = 3085,
-    JOURNAL_ROCKS_DIR_DELETED = 3086,
-    JOURNAL_ROCKS_OPEN_FAILED = 3087,
+    // RocksDB Log Buffer (3070)
+    ROCKSDB_LOG_BUFFER_OPENED = 3070,
+    ROCKSDB_LOG_BUFFER_CLOSED = 3071,
+    ROCKSDB_LOG_BUFFER_DIR_EXISTS = 3072,
+    ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED = 3073,
+    ROCKSDB_LOG_BUFFER_DIR_CREATED = 3074,
+    ROCKSDB_LOG_BUFFER_DIR_DELETION_FAILED = 3075,
+    ROCKSDB_LOG_BUFFER_DIR_DELETED = 3076,
+    ROCKSDB_LOG_BUFFER_OPEN_FAILED = 3077,
+    ROCKSDB_LOG_BUFFER_TRY_WRITE_LOG = 3078,
+    ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE = 3079,
+    ROCKSDB_LOG_BUFFER_WRITE_LOG_FAILED = 3080,
+    ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET = 3081,
+    ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET_FAILED = 3082,
+    ROCKSDB_LOG_BUFFER_CREATED = 3083,
+    ROCKSDB_LOG_BUFFER_CREATION_FAILED = 3084,
+    ROCKSDB_LOG_BUFFER_DELETE_DB = 3085,
+    ROCKSDB_LOG_BUFFER_INTERNAL_IO_CONTEXT_NOT_EXIST = 3086,
+    ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_SUCCEED = 3087,
+    ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_ROCKSDB_SCAN_FAILED = 3088,
+    ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET = 3089,
 
     JOURNAL_DEBUG = 3099,
     JOURNAL_END = JOURNAL_DEBUG,
@@ -1200,6 +1213,7 @@ enum class POS_EVENT_ID
     TELEMETRY_CLIENT_STOP_USING_DATA_POOL_ALL,
 
     TELEMETRY_AIR_DATA_PARSING_FAILED = 9700,
+    TELEMETRY_WARNING_MSG = 9800,
 
     // --------------Debug (10000)----------------
     DEBUG_START = 10000,
@@ -1814,7 +1828,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Starting all publishers has been triggered.", "", "")},
         {(int)POS_EVENT_ID::TELEMETRY_CLIENT_PUBLISH_STOP_ALL,
             new PosEventInfoEntry("TELEMETRY_CLIENT_PUBLISH_STOP_ALL",
-                "Stoping all publishers has been triggered.", "", "")},        
+                "Stoping all publishers has been triggered.", "", "")},
         {(int)POS_EVENT_ID::TELEMETRY_CLIENT_START_USING_DATA_POOL,
             new PosEventInfoEntry("TELEMETRY_CLIENT_START_USING_DATA_POOL",
                 "A publisher starts to use a data pool.", "", "")},
@@ -1839,15 +1853,12 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION,
             new PosEventInfoEntry("TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION",
                 "Failed to add a default label.", "The default label list is full.", "")},
-        
-        
         {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             new PosEventInfoEntry("MBR_DEVICE_NOT_FOUND",
                 "Could not find a device.", "", "")},
         {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             new PosEventInfoEntry("MBR_ABR_GET_LIST_SUCCESS",
                 "ABR list has been loaded.", "", "")},
-
         {(int)POS_EVENT_ID::REBUILD_INIT_FAILED,
             new PosEventInfoEntry("REBUILD_INIT_FAILED",
                 "Rebuild cannot be performed due to initialization failure.", "There are not enough buffers for rebuild.", "Please request technical support for error.")},

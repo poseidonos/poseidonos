@@ -32,49 +32,23 @@
 
 #pragma once
 
-#include <atomic>
+#include "src/include/address_type.h"
+#include <string>
 
-#include "../log/waiting_log_list.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
-#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
+using namespace std;
+
 namespace pos
 {
-class BufferOffsetAllocator;
-class LogWriteContext;
-class IJournalLogBuffer;
-class JournalConfiguration;
-class LogWriteStatistics;
-
-class LogWriteHandler : public LogBufferWriteDoneEvent
+class StripeLockInfo
 {
 public:
-    LogWriteHandler(void);
-    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
-    virtual ~LogWriteHandler(void);
-
-    virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config);
-    virtual void Dispose(void);
-
-    virtual int AddLog(LogWriteContext* context);
-    virtual void AddLogToWaitingList(LogWriteContext* context);
-    void LogWriteDone(AsyncMetaFileIoCtx* ctx);
-
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
-
-private:
-    void _StartWaitingIos(void);
-
-    IJournalLogBuffer* logBuffer;
-    BufferOffsetAllocator* bufferAllocator;
-
-    LogWriteStatistics* logWriteStats;
-    WaitingLogList* waitingList;
-
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
+    explicit StripeLockInfo(StripeId id, string owner = "")
+    : id(id), owner(owner) {}
+    bool operator < (const StripeLockInfo& info) const
+    {
+        return id < info.id;
+    }
+    StripeId id;
+    string owner;
 };
-
 } // namespace pos

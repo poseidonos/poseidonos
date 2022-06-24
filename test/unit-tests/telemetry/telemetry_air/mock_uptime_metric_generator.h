@@ -30,51 +30,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <atomic>
+#include "src/telemetry/telemetry_air/uptime_metric_generator.h"
 
-#include "../log/waiting_log_list.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
-#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 namespace pos
 {
-class BufferOffsetAllocator;
-class LogWriteContext;
-class IJournalLogBuffer;
-class JournalConfiguration;
-class LogWriteStatistics;
-
-class LogWriteHandler : public LogBufferWriteDoneEvent
+class MockUptimeMetricGenerator : public UptimeMetricGenerator
 {
 public:
-    LogWriteHandler(void);
-    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
-    virtual ~LogWriteHandler(void);
-
-    virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config);
-    virtual void Dispose(void);
-
-    virtual int AddLog(LogWriteContext* context);
-    virtual void AddLogToWaitingList(LogWriteContext* context);
-    void LogWriteDone(AsyncMetaFileIoCtx* ctx);
-
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
-
-private:
-    void _StartWaitingIos(void);
-
-    IJournalLogBuffer* logBuffer;
-    BufferOffsetAllocator* bufferAllocator;
-
-    LogWriteStatistics* logWriteStats;
-    WaitingLogList* waitingList;
-
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
+    MOCK_METHOD(int, Generate, (POSMetric*), (override));
 };
 
 } // namespace pos
