@@ -48,8 +48,7 @@ namespace pos
 {
 ResourceChecker::ResourceChecker(void)
 {
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_CONSTRUCTOR_IN,
-        "[ResourceChecker] In constructor");
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_CONSTRUCTOR_IN), "try constructor execution");
 
     if (nullptr == affinityManager)
     {
@@ -76,20 +75,17 @@ ResourceChecker::ResourceChecker(void)
     runningCnt = 0;
     enable = false;
 
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_CONSTRUCTOR_OUT,
-        "[ResourceChecker] Out constructor");
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_CONSTRUCTOR_OUT), "complete constructor execution");
 }
 
 ResourceChecker::~ResourceChecker(void)
 {
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_DESTRUCTOR_IN,
-        "[ResourceChecker] In destructor");
-
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DESTRUCTOR_IN), "try destructor execution");
+    
     if (nullptr != envChecker)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::RESOURCE_CHECKER_DELETE_EVENT_CHECKER,
-            "[ResourceChecker] delete envChecker. execution count={}",
-            runningCnt);
+        POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DELETE_EVENT_CHECKER),
+            "running_count:{}", runningCnt);
         delete envChecker;
         envChecker = nullptr;
     }
@@ -103,24 +99,21 @@ ResourceChecker::~ResourceChecker(void)
 
     if (nullptr != th && th->joinable())
     {
-        POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_DELETE_THREAD_IN,
-            "[ResourceChecker] terminated start. thread id={}",
-            std::hash<std::thread::id>{}(th->get_id()));
+        POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DELETE_THREAD_IN),
+            "Thread_id:{}", std::hash<std::thread::id>{}(th->get_id()));
+
         th->join();
         delete th;
         th = nullptr;
 
-        POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_DELETE_THREAD_OUT,
-            "[ResourceChecker] terminate completed. execution count={}",
-            runningCnt);
+        POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DELETE_THREAD_OUT),
+            "running_count:{}", runningCnt);
     }
 
     affinityManager = nullptr;
     telemetryClient = nullptr;
 
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_DESTRUCTOR_OUT,
-        "[ResourceChecker] Out destructor. execution count={}",
-        runningCnt);
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DESTRUCTOR_OUT), "complete destructor execution");
 }
 
 uint64_t
@@ -132,9 +125,8 @@ ResourceChecker::GetIterationCount(void)
 void
 ResourceChecker::SetSleepTime(uint32_t time)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::RESOURCE_CHECKER_SET_SLEEP_TIME,
-        "[ResourceChecker] Set sleep time value={}",
-        time);
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_SET_SLEEP_TIME),
+        "sleep_time_value:{}", time);
 
     sleepSecTime = time;
 }
@@ -142,32 +134,30 @@ ResourceChecker::SetSleepTime(uint32_t time)
 void
 ResourceChecker::Enable(void)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::RESOURCE_CHECKER_ENABLE_THREAD_IN,
-        "[ResourceChecker] In enable. enable={}",
-        enable);
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_ENABLE_THREAD_IN),
+        "enable:{}", enable);
 
     if (false == enable)
     {
         if (nullptr == th)
         {
             th = new std::thread(&ResourceChecker::Execute, this);
-            POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_MAKE_THREAD,
-                "[ResourceChecker] Thread joined. thread id={}",
-                std::hash<std::thread::id>{}(th->get_id()));
+            POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_MAKE_THREAD),
+                "thread_id:{}", std::hash<std::thread::id>{}(th->get_id()));
             enable = true;
         }
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::RESOURCE_CHECKER_ENABLE_THREAD_OUT,
-        "[ResourceChecker] Out enable. thread id={}, enable={}",
+    POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_ENABLE_THREAD_OUT),
+        "thread_id:{}, enable:{}", 
         std::hash<std::thread::id>{}(th->get_id()), enable);
 }
 
 void
 ResourceChecker::Execute(void)
 {
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_EXECUTE_IN,
-        "[ResourceChecker][Thread] In Execute");
+    POS_TRACE_INFO(EID(RESOURCE_CHECKER_EXECUTE_IN),
+        "running_count:{}", runningCnt);
 
     if (nullptr != affinityManager)
     {
@@ -199,15 +189,15 @@ ResourceChecker::Execute(void)
             }
             else
             {
-                POS_TRACE_DEBUG((int)POS_EVENT_ID::RESOURCE_CHECKER_EXECUTE_EVENT_DELETED,
-                    "[ResourceChecker][Thread] stopped periodic checker");
+                POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_EXECUTE_EVENT_DELETED),
+                    "stopped periodic checker");
                 break;
             }
         }
     }
 
-    POS_TRACE_TRACE((int)POS_EVENT_ID::RESOURCE_CHECKER_EXECUTE_IN,
-        "[ResourceChecker][Thread] Out Execute");
+    POS_TRACE_INFO(EID(RESOURCE_CHECKER_EXECUTE_OUT),
+        "running_count:{}", runningCnt);
 }
 
 void

@@ -162,7 +162,7 @@ FlowControl::GetToken(FlowControlType type, int token)
 {
     if (token < 0)
     {
-        POS_TRACE_DEBUG(EID(FC_NEGATIVE_TOKEN), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
+        POS_TRACE_DEBUG(EID(FLOW_CONTROL_REQUESTED_TOKEN_NEGATIVE), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
         return 0;
     }
 
@@ -173,7 +173,7 @@ FlowControl::GetToken(FlowControlType type, int token)
     }
 
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
-    uint32_t freeSegments = segmentCtx->GetNumOfFreeSegmentWoLock();
+    freeSegments = segmentCtx->GetNumOfFreeSegmentWoLock();
     if (freeSegments > gcThreshold)
     {
         return token;
@@ -212,7 +212,7 @@ FlowControl::ReturnToken(FlowControlType type, int token)
 {
     if (token < 0)
     {
-        POS_TRACE_DEBUG(EID(FC_NEGATIVE_TOKEN), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
+        POS_TRACE_DEBUG(EID(FLOW_CONTROL_REQUESTED_TOKEN_NEGATIVE), "FlowControl ReturnToken should be greater than or equal to zero token:{}", token);
         return;
     }
 
@@ -227,16 +227,16 @@ FlowControl::ReturnToken(FlowControlType type, int token)
 void
 FlowControl::InitDistributer(void)
 {
-    POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_INIT), "IN InitDistributer");
+    POS_TRACE_DEBUG(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED_INIT), "IN InitDistributer");
 
     if (nullptr != tokenDistributer)
     {
         tokenDistributer->Init();
-        POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_TRY_INIT), "try to distributer init");
+        POS_TRACE_DEBUG(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED_TRY_INIT), "try to distributer init");
     }
     else
     {
-        POS_TRACE_DEBUG(EID(FC_TOKEN_DISTRIBUTED_SKIP_INIT), "skip to distributer init");
+        POS_TRACE_DEBUG(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED_SKIP_INIT), "skip to distributer init");
     }
 }
 
@@ -257,8 +257,9 @@ FlowControl::_RefillToken(FlowControlType type)
     uint32_t gcToken;
 
     std::tie(userToken, gcToken) = _DistributeToken();
-    POS_TRACE_INFO(EID(FC_TOKEN_DISTRIBUTED), "_DistributeToken userToken:{}, gcToken:{}, userBucket:{}, gcBucket:{}",
-                                        userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
+    POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED),
+        "userToken:{}, gcToken:{}, userBucket:{}, gcBucket:{}",
+        userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
     bucket[FlowControlType::USER].fetch_add(userToken);
     bucket[FlowControlType::GC].fetch_add(gcToken);
 
@@ -274,9 +275,6 @@ FlowControl::_TryForceResetToken(FlowControlType type)
         previousBucket[counterType] = bucket[counterType].load();
         if (true == isForceReset)
         {
-            POS_TRACE_INFO(EID(FC_RESET_FORCERESET), "_reset isForceReset, userBucket:{}, gcBucket:{}, userPrevBucket:{}, gcPrevBucket:{}",
-                            bucket[FlowControlType::USER], bucket[FlowControlType::GC],
-                            previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC]);
             isForceReset = false;
         }
         return false;
@@ -284,8 +282,6 @@ FlowControl::_TryForceResetToken(FlowControlType type)
 
     if (false == isForceReset)
     {
-        POS_TRACE_INFO(EID(FC_SET_FORCERESET), "_set isForceReset, userBucket:{}, gcBucket:{}",
-                        bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
         systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());
         isForceReset = true;
         return false;
@@ -300,8 +296,11 @@ FlowControl::_TryForceResetToken(FlowControlType type)
     bucket[FlowControlType::GC] = 0;
 
     isForceReset = false;
-    POS_TRACE_INFO(EID(FC_FORCERESET_DONE), "_force Reset, userPrevBucket:{}, gcPrevBucket:{}",
-                        previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC]);
+    POS_TRACE_INFO(EID(FLOW_CONTROL_FORCERESET_DONE),
+        "userPrevBucket:{}, gcPrevBucket:{}, gcThreshold:{}, freeSegments:{}",
+        previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC],
+        gcThreshold, freeSegments);
+
     return true;
 }
 

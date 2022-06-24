@@ -171,7 +171,7 @@ FlowControlConfiguration::_IsEnabled(void)
                 &enabled, ConfigType::CONFIG_TYPE_BOOL);
     if (0 != ret)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl enablement from config file, default_enable: {}",
             enabled);
     }
@@ -186,7 +186,7 @@ FlowControlConfiguration::_IsDefaultSetting(void)
                 &use_default, ConfigType::CONFIG_TYPE_BOOL);
     if (0 != ret)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl use default setting from config file, default_use_default: {}",
             use_default);
     }
@@ -201,7 +201,7 @@ FlowControlConfiguration::_ReadTimeoutInMsec(void)
             &timeoutInMsec, ConfigType::CONFIG_TYPE_UINT64);
     if (0 != ret)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl timeout in msec from config file, default_refill_timeout_in_msed: {}",
             timeoutInMsec);
     }
@@ -216,7 +216,7 @@ FlowControlConfiguration::_ReadTotalTokenInStripe(void)
             &total_token_in_stripe, ConfigType::CONFIG_TYPE_UINT32);
     if (0 != ret)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl total token in stripe from config file, defualt_total_token_in_stripe: {}",
             total_token_in_stripe);
     }
@@ -243,7 +243,7 @@ FlowControlConfiguration::_ReadFlowControlStrategy(void)
     else
     {
         flowControlStrategy = FlowControlStrategy::LINEAR;
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl strategy from config file, defualt_strategy: linear");
     }
     return flowControlStrategy;
@@ -291,7 +291,7 @@ FlowControlConfiguration::_ReadStateConfig(void)
 
     if (false == success)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::FC_CONFIGURATION,
+        POS_TRACE_INFO(EID(FLOW_CONTROL_CONFIGURATION),
             "Failed to read FlowControl state strategy from config file, default_strategy: linear");
         return std::make_tuple(false, 0, 0, 0, 0);
     }
