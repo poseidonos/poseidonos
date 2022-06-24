@@ -30,14 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "src/array_models/dto/partition_physical_size.h"
-#include "src/helper/enumerable/query.h"
+#include "raid6.h"
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
+#include "src/array_models/dto/partition_physical_size.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
-#include "raid6.h"
+#include "src/helper/enumerable/query.h"
 
 #include <string>
 #include <isa-l.h>
@@ -55,12 +54,16 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
         .blksPerStripe = pSize->chunksPerStripe * pSize->blksPerChunk,
         .chunksPerStripe = pSize->chunksPerStripe};
     ftSize_.minWriteBlkCnt = ftSize_.blksPerStripe - ftSize_.backupBlkCnt;
-    raid6BufferCnt = ftSize_.blksPerChunk;
+
+    raid6BufferCnt = ftSize_.chunksPerStripe;
     parityBufferCnt = 2;
     srcBufferCnt = raid6BufferCnt - parityBufferCnt;
-    raid6BufferSize = ArrayConfig::BLOCK_SIZE_BYTE;
-    rsCodeSrc = nullptr;
-    _GenCauchyMatrixandTableforRaid6();
+    raid6BufferSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
+    rsCodeSrc = new uint8_t*[raid6BufferCnt];
+    for (uint32_t i = 0; i < raid6BufferCnt; i++)
+    {
+        rsCodeSrc[i] = new uint8_t[raid6BufferSize];
+    }
     _BindRecoverFunc();
 }
 
@@ -71,6 +74,7 @@ Raid6::Translate(const LogicalEntry& le)
     uint32_t offsetSizeforParity = ftSize_.blksPerChunk;
 
     assert(parityOffset.size() == 2);
+
     uint32_t pParityIndex = parityOffset.front();
     uint32_t qParityIndex = parityOffset.back();
 
@@ -81,7 +85,8 @@ Raid6::Translate(const LogicalEntry& le)
     BlkOffset lastOffset = startOffset + le.blkCnt - 1;
     uint32_t firstIndex = startOffset / ftSize_.blksPerChunk;
     uint32_t lastIndex = lastOffset / ftSize_.blksPerChunk;
-
+    uint32_t maxBlksCnt = ftSize_.blksPerStripe;
+ 
     list<FtEntry> feList;
     FtEntry fe;
     fe.addr.stripeId = le.addr.stripeId;
@@ -92,12 +97,7 @@ Raid6::Translate(const LogicalEntry& le)
     {
         feList.push_back(fe);
     }
-    else if (qParityIndex == firstIndex || pParityIndex == firstIndex)
-    {
-        fe.addr.offset = qParityOffset + offsetSizeforParity;
-        feList.push_back(fe);
-    }
-    else
+    else if (firstIndex < pParityIndex && pParityIndex <= lastIndex)
     {
         fe.blkCnt = pParityOffset - startOffset;
         feList.push_back(fe);
@@ -107,6 +107,25 @@ Raid6::Translate(const LogicalEntry& le)
         feSecond.addr.offset = qParityOffset + offsetSizeforParity;
         feSecond.blkCnt = le.blkCnt - fe.blkCnt;
         feList.push_back(feSecond);
+    }
+    else
+    {
+        fe.addr.offset = (fe.addr.offset + qParityOffset + offsetSizeforParity) % maxBlksCnt;
+        if(maxBlksCnt < fe.addr.offset+le.blkCnt)
+        {
+            fe.blkCnt = maxBlksCnt - fe.addr.offset; 
+            feList.push_back(fe);
+            
+            FtEntry feSecond;
+            feSecond.addr.stripeId = le.addr.stripeId;
+            feSecond.addr.offset = 0;
+            feSecond.blkCnt = le.blkCnt - fe.blkCnt;
+            feList.push_back(feSecond);
+        }
+        else
+        {
+            feList.push_back(fe);      
+        }
     }
     return feList;
 }
@@ -156,6 +175,7 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
     parities.push_back(pParity);
     parities.push_back(qParity);
 
+    _GenCauchyMatrixandTableforRaid6();
     _ComputePQParitiesforChunk(parities, *(src.buffers));
 
     pParity = parities.front();
@@ -258,12 +278,6 @@ Raid6::_ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry
     uint64_t* src_ptr = nullptr;
     uint64_t* dst_ptr = nullptr;
 
-    rsCodeSrc = new uint8_t*[raid6BufferCnt];
-    for (i = 0; i < raid6BufferCnt; i++)
-    {
-        rsCodeSrc[i] = new uint8_t[raid6BufferSize];
-    }
-
     for (const BufferEntry& src_buffer : src)
     {
         src_ptr = (uint64_t*)src_buffer.GetBufferPtr();
@@ -296,7 +310,6 @@ Raid6::_BindRecoverFunc(void)
 void
 Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize)
 {
-
 }
 
 bool
