@@ -97,6 +97,16 @@ RocksDBLogBuffer::InitDataBuffer(void)
 void
 RocksDBLogBuffer::Dispose(void)
 {
+    if (IsOpened())
+    {
+        Close();
+    }
+
+    if (rocksJournal != nullptr)
+    {
+        delete rocksJournal;
+        rocksJournal = nullptr;
+    }
 }
 
 int
@@ -210,7 +220,7 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
                 offset, size, _logBufferSize, groupId, pathName);
             return -1 * EID(ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET);
         }
-
+        //다른 logGroup이 있어도 offset 같은 위치에 덮어버리는 느낌
         memcpy((void*)((char*)buffer + offset), itValue.c_str(), size);
         offset += size;
     }
@@ -235,7 +245,7 @@ RocksDBLogBuffer::WriteLog(LogWriteContext* context)
     int logGroupId = context->GetLogGroupId();
     uint64_t fileOffset = context->fileOffset;
     std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
-    POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_CLOSED),
+    POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_TRY_WRITE_LOG),
         "RocksDB Key : {} (logGroupId : {}, fileOffset : {}) , Trying to Write Log (path : {})", key, logGroupId, fileOffset, pathName);
 
     std::string value(context->GetLog()->GetData(), context->GetLog()->GetSize());
@@ -243,7 +253,7 @@ RocksDBLogBuffer::WriteLog(LogWriteContext* context)
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE), "RocksDB Key : {} insertion succeed", key);
-        context->IoDone();
+        context->HandleIoComplete(context);    
         return 0;
     }
     else
@@ -283,6 +293,7 @@ RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
     if (ret.ok())
     {
         POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET), "RocksDB logs in logGroupId {} is reset ", id);
+        callbackEvent->Execute();
         return 0;
     }
     else
@@ -295,10 +306,18 @@ RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 int
 RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
 {
-    LogWriteContext* ctx = dynamic_cast<LogWriteContext*>(context);
-    if (context != nullptr)
+    int logGroupId = context->GetLogGroupId();
+    uint64_t fileOffset = context->fileOffset;
+    std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
+
+    std::string value(context->buffer, context->length);
+    rocksdb::Status ret = rocksJournal->Put(rocksdb::WriteOptions(), key, value);
+    if (ret.ok())
     {
-        return WriteLog(ctx);
+        POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE), "RocksDB Key : {} insertion succeed", key);
+        // TODO(sang7.park) : logbufferiocontext 넘겨주는거 맞는지 확인해야함. override하지 않아도될지 고민
+        InternalIoDone(context);    
+        return 0;
     }
     else
     {
@@ -310,12 +329,28 @@ RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
 void
 RocksDBLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
-    // nothing to do
+    LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
+    if (context != nullptr)
+    {
+        context->IoDone();
+        delete context;
+    }
 }
 
 int
 RocksDBLogBuffer::Delete(void)
 {
+    int ret = 0;
+    if (DoesLogFileExist()){
+        if (rocksJournal != nullptr)
+        {
+            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DELETE_DB), "RocksDB DB handler deleted (path : {})", pathName);
+            delete rocksJournal;
+            rocksJournal = nullptr;
+        }
+        ret = _DeleteDirectory();
+        return ret;
+    }
     return 0;
 }
 
@@ -368,9 +403,9 @@ RocksDBLogBuffer::_CreateDirectory(void)
 
 //TODO(sang7.park) : This method is supposed to be used when array is removed.
 int
-RocksDBLogBuffer::DeleteDirectory(void)
+RocksDBLogBuffer::_DeleteDirectory(void)
 {
-    bool ret = std::experimental::filesystem::remove(pathName);
+    bool ret = std::experimental::filesystem::remove_all(pathName);
     if (ret != true)
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DIR_DELETION_FAILED), "RocksDB directory does not exists, so deletion failed (path :{}) ", pathName);
@@ -380,14 +415,4 @@ RocksDBLogBuffer::DeleteDirectory(void)
     return 0;
 }
 
-void
-RocksDBLogBuffer::DeleteDB(void)
-{
-    if (rocksJournal != nullptr)
-    {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DELETE_DB), "RocksDB DB handler deleted (path : {})", pathName);
-        delete rocksJournal;
-        rocksJournal = nullptr;
-    }
-}
 } // namespace pos

@@ -37,6 +37,7 @@ public:
     RocksDBLogBufferIntegrationTest(void);
     virtual ~RocksDBLogBufferIntegrationTest(void);
 
+    void WriteDone(AsyncMetaFileIoCtx* ctx);
     void SimulateSPOR(void);
 
 protected:
@@ -49,6 +50,7 @@ protected:
     LogWriteContext* _CreateContextForGcStripeFlushedLog(void);
 
     int _ParseLogBuffer(int groupId, LogList& logs);
+    void _WaitForLogWriteDone(int numLogsWaitingFor);
 
     void _CompareWithAdded(LogList& logs);
     bool _CheckLogInTheList(LogHandlerInterface* log);

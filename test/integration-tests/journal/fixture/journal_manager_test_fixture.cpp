@@ -1,6 +1,7 @@
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 
 #include <string>
+#include <experimental/filesystem>
 
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
@@ -94,6 +95,28 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
 
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
+    journal->ResetJournalConfiguration(configurationBuilder.Build());
+    writeTester->UpdateJournal(journal);
+
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+}
+
+void
+JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
+{
+    JournalConfigurationBuilder configurationBuilder(testInfo);
+    configurationBuilder.SetRocksDBEnable(true);
+
+    // To Simulate SPOR, copy rocksdb data to another directory at any time which is similar to closing rocksdb abrubtly before closing db.
+    std::string SPORDirName = "SPOR" + GetLogDirName();
+    std::string SPORDirectory = "/etc/pos/" + SPORDirName + "_RocksJournal";
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::copy(targetDirName, SPORDirectory);
+
+    delete journal;
+
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, SPORDirName);
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
