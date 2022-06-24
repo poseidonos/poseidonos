@@ -138,6 +138,24 @@ service PosCli {
       		post: "/v1/createdevice"
     	};
 	}
+
+	rpc ScanDevice (ScanDeviceRequest) returns (ScanDeviceResponse) {
+		option (google.api.http) = {
+      		post: "/v1/scandevice"
+    	};
+	}
+
+	rpc ListDevice (ListDeviceRequest) returns (ListDeviceResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listdevice"
+    	};
+	}
+
+	rpc GetSmartLog (GetSmartLogRequest) returns (GetSmartLogResponse) {
+		option (google.api.http) = {
+      		post: "/v1/smartlog"
+    	};
+	}
 }
 
 message Status {
@@ -493,16 +511,6 @@ message UnmountArrayResponse {
 	PosInfo info = 4;
 }
 
-message Device {
-	string name = 1;
-	string type = 2;
-	string address = 3;
-	string class = 4;
-	string mn = 5;
-	string numa = 6;
-	string serial = 7;
-}
-
 message Array {
 	int32 index = 1;
 	int32 unique_id = 2;
@@ -733,6 +741,99 @@ message CreateDeviceResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ScanDeviceRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ScanDeviceResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Device {
+	string name = 1;
+	string type = 2;
+	string address = 3;
+	string class = 4;
+	string modelNumber = 5;
+	string numa = 6;
+	uint64 size = 7;
+	string serialNumber = 8;
+}
+
+message ListDeviceRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListDeviceResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message DeviceList {
+			repeated Device devicelist = 1;
+		}
+		DeviceList data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SmartLog {
+	string availableSpareSpace = 1;
+	string temperature = 2;
+	string deviceReliability = 3;
+	string readOnly = 4;
+	string volatileMemoryBackup = 5;
+	string currentTemperature = 6;
+	string availableSpare = 7;
+	string availableSpareThreshold = 8;
+	string lifePercentageUsed = 9;
+	string dataUnitsRead = 10;
+	string dataUnitsWritten = 11;
+	string hostReadCommands = 12;
+	string hostWriteCommands = 13;
+	string controllerBusyTime = 14;
+	string powerCycles = 15;
+	string powerOnHours = 16;
+	string unsafeShutdowns = 17;
+	string unrecoverableMediaErrors = 18;
+	string lifetimeErrorLogEntries = 19;
+	string warningTemperatureTime = 20;
+	string criticalTemperatureTime = 21;
+	repeated string temperatureSensor = 22;
+}
+
+message GetSmartLogRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+	}
+	Param param = 4;
+}
+
+message GetSmartLogResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		SmartLog data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;

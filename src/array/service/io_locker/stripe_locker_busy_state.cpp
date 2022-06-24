@@ -31,19 +31,20 @@
  */
 
 #include "stripe_locker_busy_state.h"
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+#include <sstream>
 
 namespace pos
 {
 bool
-StripeLockerBusyState::TryLock(StripeId id)
+StripeLockerBusyState::TryLock(StripeLockInfo lockInfo)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    if (busySet.find(id) == busySet.end())
+    if (busySet.find(lockInfo) == busySet.end())
     {
-        busySet.insert(id);
+        busySet.insert(lockInfo);
         return true;
     }
     return false;
@@ -53,13 +54,13 @@ void
 StripeLockerBusyState::Unlock(StripeId id)
 {
     unique_lock<mutex> lock(mtx);
-    busySet.erase(id);
+    busySet.erase(StripeLockInfo(id));
 }
 
 bool
 StripeLockerBusyState::Exists(StripeId id)
 {
-    return busySet.find(id) != busySet.end();
+    return busySet.find(StripeLockInfo(id)) != busySet.end();
 }
 
 uint32_t
@@ -67,6 +68,18 @@ StripeLockerBusyState::Count(void)
 {
     unique_lock<mutex> lock(mtx);
     return busySet.size();
+}
+
+void
+StripeLockerBusyState::WriteLog(void)
+{
+    stringstream ss;
+    for (auto item : busySet)
+    {
+        ss << "(id:" << item.id << ", owner:" << item.owner << "), ";
+    }
+    POS_TRACE_WARN(EID(BUSY_LOCKER_WARN), "BusyLocker, cnt:{}, items:{}",
+        busySet.size(), ss.str());
 }
 
 }; // namespace pos

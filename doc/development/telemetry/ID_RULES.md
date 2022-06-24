@@ -1,5 +1,5 @@
 - [**Reserved**](#reserved)
-- [Reserved ID Range : 0 ~ 9999](#reserved-id-range--0--9999)
+- [**Common**](#common)
 - [**CLI**](#cli)
 - [**Device**](#device)
 - [**Meta**](#meta)
@@ -14,7 +14,14 @@ Rules for telemetry entry naming in "/src/telemetry/telemetry_id.h"
 
 ---
 ## **Reserved**
-Reserved ID Range : 0 ~ 9999
+Reserved ID Range : 0 ~ 4999
+
+---
+## **Common**
+Common ID Range : 5000 ~ 9999
+
+05000 common_process_uptime_second
+
 ---
 ## **CLI**
 CLI ID Range : 10000 ~ 19999

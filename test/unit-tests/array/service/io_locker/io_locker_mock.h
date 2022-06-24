@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(bool, ResetBusyLock, (IArrayDevice* dev, bool forceReset), (override));
     MOCK_METHOD(void, Unlock, (IArrayDevice* dev, StripeId val), (override));
     MOCK_METHOD(void, Unlock, (set<IArrayDevice*>& devs, StripeId val), (override));
+    MOCK_METHOD(void, WriteBusyLog, (IArrayDevice* devs), (override));
 };
 
 } // namespace pos

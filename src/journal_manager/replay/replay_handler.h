@@ -47,7 +47,7 @@ class Allocator;
 class Mapper;
 
 class JournalConfiguration;
-class JournalLogBuffer;
+class IJournalLogBuffer;
 class LogReplayer;
 
 class IVSAMap;
@@ -68,7 +68,7 @@ public:
     virtual ~ReplayHandler(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration,
-        JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
@@ -93,7 +93,7 @@ private:
     LogDeleteChecker* logDeleteChecker;
 
     JournalConfiguration* config;
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
 
     ReplayProgressReporter* reporter;
     std::list<ReplayTask*> taskList;

@@ -12,6 +12,7 @@ class MockVersionProvider : public VersionProvider
 {
 public:
     using VersionProvider::VersionProvider;
+    MOCK_METHOD(const std::string, GetVersion, (), (override));
 };
 
 } // namespace pos

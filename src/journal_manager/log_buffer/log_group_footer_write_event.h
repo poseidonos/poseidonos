@@ -39,12 +39,12 @@
 
 namespace pos
 {
-class JournalLogBuffer;
+class IJournalLogBuffer;
 
 class LogGroupFooterWriteEvent : public Event
 {
 public:
-    LogGroupFooterWriteEvent(JournalLogBuffer* logBuffer,
+    LogGroupFooterWriteEvent(IJournalLogBuffer* logBuffer,
         LogGroupFooter footer, uint64_t footerOffset,
         int logGroupId, EventSmartPtr callback);
     virtual ~LogGroupFooterWriteEvent(void) = default;
@@ -52,7 +52,7 @@ public:
     virtual bool Execute(void) override;
 
 private:
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
 
     uint64_t offset;
     LogGroupFooter footer;

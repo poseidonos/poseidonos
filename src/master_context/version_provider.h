@@ -42,9 +42,9 @@ class VersionProvider
 {
 public:
     VersionProvider(void);
-    ~VersionProvider(void);
+    virtual ~VersionProvider(void);
 
-    const std::string GetVersion(void);
+    virtual const std::string GetVersion(void);
 
 private:
     const std::string VERSION;

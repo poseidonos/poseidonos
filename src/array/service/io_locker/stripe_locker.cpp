@@ -31,6 +31,7 @@
  */
 
 #include "stripe_locker.h"
+#include "stripe_lock_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -75,7 +76,7 @@ StripeLocker::TryBusyLock(StripeId from, StripeId to)
 
     for (StripeId id = from; id <= to; id++)
     {
-        bool ret = busyLocker->TryLock(id);
+        bool ret = busyLocker->TryLock(StripeLockInfo(id, "rebuilder"));
         assert(ret == true);
     }
     isBusyRangeChanging = false;
@@ -111,9 +112,9 @@ StripeLocker::TryLock(StripeId id)
         }
         if (busyRange != nullptr && busyRange->IsBusy(id) == true)
         {
-            return busyLocker->TryLock(id);
+            return busyLocker->TryLock(StripeLockInfo(id, "metafs"));
         }
-        return normalLocker->TryLock(id);
+        return normalLocker->TryLock(StripeLockInfo(id, "metafs"));
     }
     else
     {
@@ -134,6 +135,12 @@ StripeLocker::Unlock(StripeId id)
     {
         normalLocker->Unlock(id);
     }
+}
+
+void
+StripeLocker::WriteBusyLog(void)
+{
+    busyLocker->WriteLog();
 }
 
 } // namespace pos

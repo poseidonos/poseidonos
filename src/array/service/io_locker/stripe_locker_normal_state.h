@@ -46,13 +46,13 @@ public:
     virtual ~StripeLockerNormalState(void)
     {
     }
-    bool TryLock(StripeId val) override;
+    bool TryLock(StripeLockInfo lockInfo) override;
     void Unlock(StripeId val) override;
     bool Exists(StripeId val) override;
     uint32_t Count(void) override;
 
 private:
-    multiset<StripeId> workingSet;
+    multiset<StripeLockInfo> workingSet;
     mutex mtx;
 };
 

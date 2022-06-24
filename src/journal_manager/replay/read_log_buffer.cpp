@@ -46,13 +46,13 @@
 namespace pos
 {
 ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
-    JournalLogBuffer* logBuffer, ReplayLogList& logList, ReplayProgressReporter* reporter)
+    IJournalLogBuffer* logBuffer, ReplayLogList& logList, ReplayProgressReporter* reporter)
 : ReadLogBuffer(journalConfig, logBuffer, logList, reporter, new LogBufferParser())
 {
 }
 
 ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
-    JournalLogBuffer* logBuffer, ReplayLogList& logList,
+    IJournalLogBuffer* logBuffer, ReplayLogList& logList,
     ReplayProgressReporter* reporter, LogBufferParser* logBufferParser)
 : ReplayTask(reporter),
   config(journalConfig),
