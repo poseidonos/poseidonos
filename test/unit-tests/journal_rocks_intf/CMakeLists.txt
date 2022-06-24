@@ -1,1 +1,0 @@
-POS_ADD_UNIT_TEST(journal_rocks_intf_ut journal_rocks_intf_test.cpp)

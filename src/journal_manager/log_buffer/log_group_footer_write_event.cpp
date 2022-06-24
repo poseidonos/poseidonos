@@ -34,13 +34,13 @@
 #include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
 
 #include "src/include/pos_event_id.h"
-#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-LogGroupFooterWriteEvent::LogGroupFooterWriteEvent(JournalLogBuffer* logBuffer,
+LogGroupFooterWriteEvent::LogGroupFooterWriteEvent(IJournalLogBuffer* logBuffer,
     LogGroupFooter footer, uint64_t footerOffset,
     int logGroupId, EventSmartPtr callback)
 : logBuffer(logBuffer),

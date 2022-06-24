@@ -41,7 +41,6 @@
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"
-#include "src/journal_rocks_intf/journal_rocks_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -53,7 +52,6 @@ JournalLogBuffer::JournalLogBuffer(void)
   logBufferReadDone(0),
   logFile(nullptr),
   initializedDataBuffer(nullptr),
-  journalRocks(nullptr),
   telemetryPublisher(nullptr)
 {
 }
@@ -77,12 +75,6 @@ JournalLogBuffer::~JournalLogBuffer(void)
         delete logFile;
         logFile = nullptr;
     }
-
-    if (journalRocks != nullptr)
-    {
-        delete journalRocks;
-        journalRocks = nullptr;
-    }
 }
 
 int
@@ -92,14 +84,6 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
     config = journalConfiguration;
     logFactory = logWriteContextFactory;
     telemetryPublisher = tp;
-
-    //TODO(sang7.park) : connect conditional statement with creating MetaFsFileIntf case when journalRocks API codes are written
-    if (config->IsRocksdbEnabled())
-    {
-        //TODO(sang7.park) : have to change rocksdb path to have an array dependency and ensure directory is already created
-        journalRocks = new JournalRocksIntf("rocksdbpoc");
-        journalRocks->Open();
-    }
 
     if (logFile == nullptr)
     {
@@ -133,17 +117,6 @@ JournalLogBuffer::Dispose(void)
         }
     }
 
-    if (journalRocks != nullptr && journalRocks->IsOpened() == true)
-    {
-        bool ret = journalRocks->Close();
-        if (ret != true)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
-                "Failed to close journal rocks");
-        }
-
-    }
-
     if (initializedDataBuffer != nullptr)
     {
         delete[] initializedDataBuffer;
@@ -156,11 +129,6 @@ JournalLogBuffer::Dispose(void)
         logFile = nullptr;
     }
 
-    if (journalRocks != nullptr)
-    {
-        delete journalRocks;
-        journalRocks = nullptr;
-    }
 }
 
 int

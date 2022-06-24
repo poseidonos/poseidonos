@@ -44,7 +44,7 @@
 namespace pos
 {
 class JournalConfiguration;
-class JournalLogBuffer;
+class IJournalLogBuffer;
 class CheckpointManager;
 class LogBufferWriteDoneNotifier;
 class EventScheduler;
@@ -59,7 +59,7 @@ public:
     virtual ~LogGroupReleaser(void);
 
     virtual void Init(JournalConfiguration* config,
-        LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer, CheckpointManager* cpManager,
+        LogBufferWriteDoneNotifier* notified, IJournalLogBuffer* logBuffer, CheckpointManager* cpManager,
         IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
 
@@ -88,7 +88,7 @@ protected:
 
     JournalConfiguration* config;
     LogBufferWriteDoneNotifier* releaseNotifier;
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
 
     std::mutex fullLogGroupLock;
     std::list<int> fullLogGroup;

@@ -123,74 +123,74 @@ SMARTLOGCommand::Execute(json& doc, string rid)
 
         snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.available_spare ? "WARNING" : "OK");
         string s1(cString);
-        data.SetAttribute(JsonAttribute("available_spare_space", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("availableSpareSpace", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.temperature ? "WARNING" : "OK");
         s1 = cString;
         data.SetAttribute(JsonAttribute("temperature", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
         s1 = cString;
-        data.SetAttribute(JsonAttribute("device_reliability", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("deviceReliability", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.read_only ? "Yes" : "No");
         s1 = cString;
-        data.SetAttribute(JsonAttribute("read_only", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("readOnly", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
         s1 = cString;
-        data.SetAttribute(JsonAttribute("volatile_memory_backup", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("volatileMemoryBackup", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%dC", (int)payload.temperature - 273);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("current_temperature", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("currentTemperature", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%u%%", payload.available_spare);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("available_spare", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("availableSpare", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%u%%", payload.available_spare_threshold);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("available_spare_threshold", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("availableSpareThreshold", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%u%%", payload.percentage_used);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("life_percentage_used", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("lifePercentageUsed", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.data_units_read, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("data_units_read", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("dataUnitsRead", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.data_units_written, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("data_units_written", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("dataUnitsWritten", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.host_read_commands, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("host_read_commands", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("hostReadCommands", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.host_write_commands, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("host_write_commands", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("hostWriteCommands", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.controller_busy_time, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("controller_busy_time", "\"" + s1 + "m" + "\""));
+        data.SetAttribute(JsonAttribute("controllerBusyTime", "\"" + s1 + "m" + "\""));
         _PrintUint128Dec(payload.power_cycles, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("power_cycles", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("powerCycles", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.power_on_hours, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("power_on_hours", "\"" + s1 + "h" + "\""));
+        data.SetAttribute(JsonAttribute("powerOnHours", "\"" + s1 + "h" + "\""));
         _PrintUint128Dec(payload.unsafe_shutdowns, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("unsafe_shutdowns", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("unsafeShutdowns", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.media_errors, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("unrecoverable_media_errors", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("unrecoverableMediaErrors", "\"" + s1 + "\""));
         _PrintUint128Dec(payload.num_error_info_log_entries, cString, sizeof(cString));
         s1 = cString;
-        data.SetAttribute(JsonAttribute("lifetime_error_log_entries", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("lifetimeErrorLogEntries", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%um", payload.warning_temp_time);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("warning_temperature_time", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("warningTemperatureTime", "\"" + s1 + "\""));
         snprintf(cString, sizeof(cString), "%um", payload.critical_temp_time);
         s1 = cString;
-        data.SetAttribute(JsonAttribute("critical_temperature_time", "\"" + s1 + "\""));
+        data.SetAttribute(JsonAttribute("criticalTemperatureTime", "\"" + s1 + "\""));
         for (int i = 0; i < 8; i++)
         {
             if (payload.temp_sensor[i] != 0)
             {
                 snprintf(cString, sizeof(cString), "%dC", (int)payload.temp_sensor[i] - 273);
                 s1 = cString;
-                data.SetAttribute(JsonAttribute("temperature_sensor" + to_string(i + 1), "\"" + s1 + "\""));
+                data.SetAttribute(JsonAttribute("temperatureSensor" + to_string(i + 1), "\"" + s1 + "\""));
             }
         }
 

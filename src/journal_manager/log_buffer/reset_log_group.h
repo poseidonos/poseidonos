@@ -37,18 +37,18 @@
 
 namespace pos
 {
-class JournalLogBuffer;
+class IJournalLogBuffer;
 
 class ResetLogGroup : public Event
 {
 public:
     ResetLogGroup(void) = default;
-    ResetLogGroup(JournalLogBuffer* logBuffer, int groupId, EventSmartPtr callback);
+    ResetLogGroup(IJournalLogBuffer* logBuffer, int groupId, EventSmartPtr callback);
 
     virtual bool Execute(void) override;
 
 private:
-    JournalLogBuffer* logBuffer;
+    IJournalLogBuffer* logBuffer;
     int logGroupId;
     EventSmartPtr callback;
 };

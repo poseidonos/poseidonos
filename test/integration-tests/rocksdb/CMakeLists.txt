@@ -1,1 +1,1 @@
-POS_ADD_INTEGRATION_TEST(journal_rocks_intf_it journal_rocks_integration_test.cpp)
+POS_ADD_INTEGRATION_TEST(rocksdb_log_buffer_it rocksdb_log_buffer_integration_test.cpp)

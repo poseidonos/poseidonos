@@ -271,12 +271,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 
 	case "LISTDEVICE":
-		res := messages.ListDeviceResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.ListDeviceResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -285,10 +285,10 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		// Header
 		fmt.Fprintln(w,
 			"Name\t"+
-				globals.FieldSeparator+"SerialNumber(SN)\t"+
+				globals.FieldSeparator+"SerialNumber\t"+
 				globals.FieldSeparator+"Address\t"+
 				globals.FieldSeparator+"Class\t"+
-				globals.FieldSeparator+"MN\t"+
+				globals.FieldSeparator+"ModelNumber\t"+
 				globals.FieldSeparator+"NUMA\t"+
 				globals.FieldSeparator+"Size")
 
@@ -303,15 +303,15 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"------------------")
 
 		// Data
-		for _, device := range res.RESULT.DATA.DEVICELIST {
+		for _, device := range res.GetResult().GetData().GetDevicelist() {
 			fmt.Fprintln(w,
-				device.DEVICENAME+"\t"+
-					globals.FieldSeparator+device.SERIAL+"\t"+
-					globals.FieldSeparator+device.ADDRESS+"\t"+
-					globals.FieldSeparator+device.CLASS+"\t"+
-					globals.FieldSeparator+device.MN+"\t"+
-					globals.FieldSeparator+device.NUMA+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, device.SIZE))
+				device.Name+"\t"+
+					globals.FieldSeparator+device.SerialNumber+"\t"+
+					globals.FieldSeparator+device.Address+"\t"+
+					globals.FieldSeparator+device.Class+"\t"+
+					globals.FieldSeparator+device.ModelNumber+"\t"+
+					globals.FieldSeparator+device.Numa+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, device.Size))
 		}
 		w.Flush()
 
