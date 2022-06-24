@@ -117,6 +117,7 @@ private:
     uint32_t totalSegments = 0;
     uint32_t gcThreshold = 0;
     uint32_t gcUrgentThreshold = 0;
+    uint32_t freeSegments = 0;
 
     uint32_t targetPercent = 30;
     uint32_t urgentPercent = 10;
