@@ -11,6 +11,9 @@ all:
 	@cp -f ../bin/poseidonos src/usr/local/bin/
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
 	@cp -f ../bin/pos-exporter src/usr/local/bin/
+	@cp -f ../tool/ipmi_exporter/ipmi_exporter src/usr/local/bin
+	@chmod +x src/usr/local/bin/ipmi_exporter
+	@cp -f ../config/pos-prometheus.yml src/etc/pos/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
 	@cp -rf ../lib/spdk src/usr/local/lib/
 	@cp -f ../config/pos.conf src/etc/pos/
