@@ -38,6 +38,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include <sstream>
 
 #include "src/array/array_name_policy.h"
 #include "src/array/device/array_device_list.h"
@@ -118,7 +119,7 @@ MbrManager::LoadMbr(void)
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_READ_DONE,
-        "read mbr data");
+        "read mbr data done : ");
 
     _LoadIndexMap();
 
@@ -128,6 +129,8 @@ MbrManager::LoadMbr(void)
     }
 
     pthread_rwlock_unlock(&mbrLock);
+    POS_TRACE_TRACE(EID(POS_TRACE_MBR_LOADED),
+        "mbr_info:{}", Serialize());
     return ret;
 }
 
@@ -710,6 +713,46 @@ MbrManager::FindArrayWithDeviceSN(string devSN)
     {
         return "";
     }
+}
+
+string
+MbrManager::Serialize(void)
+{
+    vector<string> mbrinfo;
+    string posVersion(systeminfo.posVersion);
+    string systemUUID(systeminfo.systemUuid);
+
+    mbrinfo.push_back("poseidon_version:" + posVersion);
+    mbrinfo.push_back("mbr_version:" + to_string(systeminfo.mbrVersion));
+    mbrinfo.push_back("system_uuid:" + systemUUID);
+    mbrinfo.push_back("num_of_array:" + to_string(systeminfo.arrayNum));
+
+    for (unsigned int i = 0; i < MAX_ARRAY_CNT; ++i)
+    {
+        if (systeminfo.arrayValidFlag[i] == 1)
+        {
+            string arrayName(systeminfo.arrayInfo[i].arrayName);
+            string metaRaidType(systeminfo.arrayInfo[i].metaRaidType);
+            string dataRaidType(systeminfo.arrayInfo[i].dataRaidType);
+            string createDatetime(systeminfo.arrayInfo[i].createDatetime);
+            string updateDatetime(systeminfo.arrayInfo[i].updateDatetime);
+            mbrinfo.push_back("array_name:" + arrayName);
+            mbrinfo.push_back("uniqueId:" + to_string(systeminfo.arrayInfo[i].uniqueId));
+            mbrinfo.push_back("abr_version:" + to_string(systeminfo.arrayInfo[i].abrVersion));
+            mbrinfo.push_back("total_dev_num:" + to_string(systeminfo.arrayInfo[i].totalDevNum));
+            mbrinfo.push_back("data_dev_num:" + to_string(systeminfo.arrayInfo[i].dataDevNum));
+            mbrinfo.push_back("spare_dev_num:" + to_string(systeminfo.arrayInfo[i].spareDevNum));
+            mbrinfo.push_back("create_datetime:" + createDatetime);
+            mbrinfo.push_back("update_datetime:" + updateDatetime);
+        }
+    }
+
+    stringstream ss;
+    for (string str : mbrinfo)
+    {
+        ss << str << ", ";
+    }
+    return ss.str();
 }
 
 } // namespace pos
