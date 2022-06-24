@@ -170,7 +170,7 @@ IOLocker::Unlock(set<IArrayDevice*>& devs, StripeId val)
 }
 
 bool
-IOLocker::ResetBusyLock(IArrayDevice* dev)
+IOLocker::ResetBusyLock(IArrayDevice* dev, bool forceReset)
 {
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)

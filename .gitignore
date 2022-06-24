@@ -9,7 +9,7 @@
 *.log
 *.o
 *.pyc
-*.so
+*.so*
 *.swp
 *.cmake
 **/CMakeFiles/**

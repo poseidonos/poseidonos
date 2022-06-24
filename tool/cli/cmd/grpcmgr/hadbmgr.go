@@ -3,27 +3,19 @@ package grpcmgr
 import (
 	pb "cli/api"
 	"cli/cmd/globals"
-	"database/sql"
+	sql "database/sql"
 	"errors"
 	"fmt"
 	"os"
 )
 
 const listNodeQuery = `SELECT "name","ip","lastseen" FROM "node"`
+const listVolumeQuery = `SELECT "id","name","node_name","array_name","size","lastseen" FROM "volume"`
 
 func SendListNode(req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
-	host, port, username, password, dbname, err := GetHaDbInfo()
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, username, password, dbname)
-	// open database
-	db, err := sql.Open("postgres", psqlconn)
-	if err != nil {
-		return nil, err
-	}
+	db, err := OpenHaDb()
+
 	// close database
 	defer db.Close()
 	// check db
@@ -57,7 +49,70 @@ func SendListNode(req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
 	res := &pb.ListNodeResponse{Command: req.Command, Rid: req.Rid, Result: result}
 
 	return res, nil
+}
 
+func SendListHaVolume(req *pb.ListHaVolumeRequest) (*pb.ListHaVolumeResponse, error) {
+
+	db, err := OpenHaDb()
+
+	// close database
+	defer db.Close()
+	// check db
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := db.Query(listVolumeQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		code        int32  = 0
+		description string = "SUCCESS"
+	)
+	status := &pb.Status{Code: &code, Description: &description}
+	result := &pb.ListHaVolumeResponse_Result{Status: status}
+
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id                                  int32
+			size                                int64
+			name, nodeName, arrayName, lastSeen string
+		)
+
+		err = rows.Scan(&id, &name, &nodeName, &arrayName, &size, &lastSeen)
+		if err != nil {
+			return nil, err
+		}
+		result.Data = append(result.Data,
+			&pb.ListHaVolumeResponse_Result_Volume{Id: id, Name: name, NodeName: nodeName,
+				ArrayName: arrayName, Size: size, Lastseen: lastSeen})
+	}
+
+	res := &pb.ListHaVolumeResponse{Command: req.Command, Rid: req.Rid, Result: result}
+
+	return res, nil
+}
+
+func OpenHaDb() (*sql.DB, error) {
+	host, port, username, password, dbname, err := GetHaDbInfo()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, username, password, dbname)
+
+	// open database
+	db, err := sql.Open("postgres", psqlconn)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, err
 }
 
 func GetHaDbInfo() (string, string, string, string, string, error) {

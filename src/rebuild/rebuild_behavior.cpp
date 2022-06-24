@@ -120,8 +120,13 @@ RebuildBehavior::_InitBuffers(void)
     bool ret = _InitRecoverBuffers(owner);
     if (ret == false)
     {
-        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(recover) BufferPool, owner:{}, array:{}, part:{}",
-            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
+        int logInterval = INIT_REBUILD_BUFFER_MAX_RETRY / 10;
+        if (initBufferRetryCnt % logInterval == 0)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(recover) BufferPool, owner:{}, array:{}, part:{}, retried:{}",
+                owner, ctx->array, PARTITION_TYPE_STR[ctx->part], initBufferRetryCnt);
+        }
+        initBufferRetryCnt++;
         return ret;
     }
     else
@@ -134,17 +139,23 @@ RebuildBehavior::_InitBuffers(void)
     ret = _InitRebuildReadBuffers(owner, totalChunks);
     if (ret == false)
     {
-        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(read) BufferPool, owner:{}, array:{}, part:{}",
-            owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
+        int logInterval = INIT_REBUILD_BUFFER_MAX_RETRY / 10;
+        if (initBufferRetryCnt % logInterval == 0)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to alloc rebuild(read) BufferPool, owner:{}, array:{}, part:{}, retried:{}",
+                owner, ctx->array, PARTITION_TYPE_STR[ctx->part], initBufferRetryCnt);
+        }
         mm->DeleteBufferPool(recoverBuffers);
         recoverBuffers = nullptr;
+        initBufferRetryCnt++;
+        return ret;
     }
     else
     {
         POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "BufferPool for rebuild(read) allocation has been successful, owner:{}, array:{}, part:{}",
             owner, ctx->array, PARTITION_TYPE_STR[ctx->part]);
     }
-
+    initBufferRetryCnt = 0;
     return true;
 }
 

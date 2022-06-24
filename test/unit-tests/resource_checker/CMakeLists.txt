@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(resource_checker_ut resource_checker_test.cpp)

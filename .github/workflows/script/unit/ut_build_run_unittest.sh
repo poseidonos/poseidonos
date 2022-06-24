@@ -16,7 +16,6 @@ cd ${pos_working_dir}/test/; sudo cmake .
 retVal=$?
 if [ $retVal -ne 0 ]; then
     echo "Cannot proceed due to cmake error."
-    cd ${pos_working_dir}/test/regression/; echo ${retVal} > utbuildtest
     exit $retVal
 fi
 
@@ -34,9 +33,14 @@ echo "Running UTs and ITs (a.k.a. called as basic_tests)"
 cd ${pos_working_dir}/test/; sudo make run_basic_tests
 retVal=$?
 if [ $retVal -ne 0 ]; then
-    echo "Test Failed"
+    echo "Cannot proceed due to UT run error."
     exit $retVal
 fi
 
 echo "Calculating code coverage..."
 cd ${pos_working_dir}/test/; sudo make run_cov
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "Cannot proceed due to code coverage error."
+    exit $retVal
+fi

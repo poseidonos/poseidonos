@@ -104,15 +104,9 @@ Mpio::SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier)
 }
 
 bool
-Mpio::IsPartialIO(void)
+Mpio::IsPartialIO(void) const
 {
     return partialIO;
-}
-
-MpioCacheState
-Mpio::GetCacheState(void)
-{
-    return cacheState;
 }
 
 bool
@@ -236,7 +230,7 @@ Mpio::DoIO(const MpAioState expNextState)
     void* buf = GetMDPageDataBuf();
     MssOpcode opcode = _ConvertToMssOpcode(GetStateInExecution());
 
-    if (io.targetMediaType != MetaStorageType::SSD)
+    if (IsCacheableVolumeType())
     {
         if (opcode == MssOpcode::Read)
             PrintLog("[io  -   read]", io.arrayId, io.metaLpn);
@@ -246,14 +240,12 @@ Mpio::DoIO(const MpAioState expNextState)
 
     if (aioModeEnabled && (!forceSyncIO))
     {
-        if (cacheState != MpioCacheState::Init)
+        FileSizeType startOffset = 0;
+        if (!IsCached())
         {
-            mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, 0);
+            startOffset = io.startByteOffset;
         }
-        else
-        {
-            mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
-        }
+        mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, startOffset);
         mssAioCbCxt.Init(&mssAioData, mpioDoneCallback);
 
         SetNextState(expNextState);

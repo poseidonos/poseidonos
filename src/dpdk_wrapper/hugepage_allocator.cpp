@@ -48,8 +48,6 @@ HugepageAllocator::AllocFromSocket(const uint32_t size,
     // best effort for another socket id to avoid memory allocation fail
     if (ret == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_HUGEPAGE_ALLOCATION_FAIL,
-            "Failed to allocate Hugepages in socket {}. Try to another socket.", socket);
         ret = rte_malloc(nullptr, size * count, size);
     }
     if (ret == nullptr)

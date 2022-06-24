@@ -37,11 +37,14 @@
 #include <sstream>
 #include <string>
 
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/sys_info/space_info.h"
 #include "src/telemetry/telemetry_client/pos_metric.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/telemetry/telemetry_id.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -153,6 +156,52 @@ AddCommonMetric(POSMetricVector* posMetricVector,
     posMetric.AddLabel("index", stream_index.str());
 
     posMetricVector->push_back(posMetric);
+}
+
+void
+AddUsageMetric(POSMetricVector* posMetricVector,
+    const std::string& name, const POSMetricTypes type, const uint64_t value,
+    uint32_t array_id, uint32_t volume_id)
+{
+    POSMetric posMetric{name, type};
+    if (POSMetricTypes::MT_GAUGE == type)
+    {
+        posMetric.SetGaugeValue(value);
+    }
+    else if (POSMetricTypes::MT_COUNT == type)
+    {
+        posMetric.SetCountValue(value);
+    }
+    else
+    {
+        return;
+    }
+    posMetric.AddLabel("array_id", std::to_string(array_id));
+    posMetric.AddLabel("volume_id", std::to_string(volume_id));
+
+    posMetricVector->push_back(posMetric);
+}
+
+void
+PublishTimeTriggeredMetric(POSMetricVector* posMetricVector)
+{
+    for (uint32_t arrayId = 0; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
+    {
+        IVolumeManager* vm = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+        if (vm != nullptr)
+        {
+            for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
+            {
+                VolumeBase* volume = vm->GetVolume(volId);
+                if ((volume != nullptr) && (volume->GetStatus() == Mounted))
+                {
+                    uint64_t volUsage = volume->UsedSize();
+                    AddUsageMetric(posMetricVector, TEL60003_VOL_USAGE_BLK_CNT,
+                    POSMetricTypes::MT_GAUGE, volUsage, arrayId, volId);
+                }
+            }
+        }
+    }
 }
 
 TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
@@ -423,6 +472,8 @@ TelemetryAirDelegator::TelemetryAirDelegator(TelemetryPublisher* telPub)
                             POSMetricTypes::MT_GAUGE, count, obj, interval);
                     }
                 }
+
+                PublishTimeTriggeredMetric(posMetricVector);
 
                 if (!posMetricVector->empty())
                 {

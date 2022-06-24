@@ -38,6 +38,10 @@
 
 #include "src/metafs/mim/metafs_io_request.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
+#include "test/unit-tests/metafs/lib/metafs_time_interval.h"
+
+using ::testing::Return;
+using ::testing::Test;
 
 namespace pos
 {
@@ -81,17 +85,46 @@ private:
     std::map<MetaLpnType, size_t> countMap;
 };
 
-TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
+class MetaFsIoSchedulerTexture : public ::testing::Test
+{
+public:
+    MetaFsIoSchedulerTexture(void)
+    : interval(nullptr),
+      scheduler(nullptr)
+    {
+    }
+
+    virtual ~MetaFsIoSchedulerTexture(void)
+    {
+    }
+
+    virtual void SetUp(void)
+    {
+        interval = new MockMetaFsTimeInterval(1000);
+        ON_CALL(*interval, CheckInterval).WillByDefault(Return(false));
+        CPU_SET(0, &mioCoreSet);
+        scheduler = new MetaFsIoScheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr, interval);
+        scheduler->RegisterMetaIoWorkerForTest(&metaIoWorker);
+    }
+
+    virtual void TearDown(void)
+    {
+        delete scheduler;
+    }
+
+protected:
+    MockMetaFsTimeInterval* interval;
+    ScalableMetaIoWorkerTester metaIoWorker;
+    cpu_set_t mioCoreSet;
+    MetaFsIoScheduler* scheduler;
+};
+
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
 {
     // given
-    ScalableMetaIoWorkerTester metaIoWorker;
     MetaFileExtent extents;
     extents.SetStartLpn(0);
     extents.SetCount(1024);
-    cpu_set_t mioCoreSet;
-    CPU_SET(0, &mioCoreSet);
-    MetaFsIoScheduler scheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr);
-    scheduler.RegisterMetaIoWorkerForTest(&metaIoWorker);
     MetaFileContext fileCtx;
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
@@ -108,9 +141,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
     req->byteSize = 4032;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -126,9 +160,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
     req->byteSize = 4032;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -144,9 +179,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
     req->byteSize = 2016;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -154,17 +190,12 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnAlignedRequestCreatesOneRequest)
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 2016);
 }
 
-TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
 {
     // given
-    ScalableMetaIoWorkerTester metaIoWorker;
     MetaFileExtent extents;
     extents.SetStartLpn(0);
     extents.SetCount(1024);
-    cpu_set_t mioCoreSet;
-    CPU_SET(0, &mioCoreSet);
-    MetaFsIoScheduler scheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr);
-    scheduler.RegisterMetaIoWorkerForTest(&metaIoWorker);
     MetaFileContext fileCtx;
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
@@ -181,9 +212,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
     req->byteSize = 4032 + 2016;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -199,9 +231,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 2016;
     req->byteSize = 4032;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 0);
@@ -217,9 +250,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
     req->byteSize = 4032 + 2016;
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 2);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 2);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 1);
@@ -227,17 +261,12 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfAnUnalignedRequestCreatesTwoRequests)
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4032 + 2016);
 }
 
-TEST(MetaFsIoScheduler, IssueRequest_testIfABigAlignedRequestCreatesManyRequests)
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfABigAlignedRequestCreatesManyRequests)
 {
     // given
-    ScalableMetaIoWorkerTester metaIoWorker;
     MetaFileExtent extents;
     extents.SetStartLpn(43082495);
     extents.SetCount(2048);
-    cpu_set_t mioCoreSet;
-    CPU_SET(0, &mioCoreSet);
-    MetaFsIoScheduler scheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr);
-    scheduler.RegisterMetaIoWorkerForTest(&metaIoWorker);
     MetaFileContext fileCtx;
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 43082495;
@@ -254,9 +283,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfABigAlignedRequestCreatesManyRequests
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
     req->byteSize = 4032 * 1048; // 1048 lpns
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1048);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1048);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495);
@@ -264,10 +294,9 @@ TEST(MetaFsIoScheduler, IssueRequest_testIfABigAlignedRequestCreatesManyRequests
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4032 * 1048);
 }
 
-TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiExtentSimple)
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesWithMultiExtentSimple)
 {
     // given
-    ScalableMetaIoWorkerTester metaIoWorker;
     MetaFileExtent extents[3];
     extents[0].SetStartLpn(5);
     extents[0].SetCount(5);
@@ -275,10 +304,6 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     extents[1].SetCount(10);
     extents[2].SetStartLpn(40);
     extents[2].SetCount(5);
-    cpu_set_t mioCoreSet;
-    CPU_SET(0, &mioCoreSet);
-    MetaFsIoScheduler scheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr);
-    scheduler.RegisterMetaIoWorkerForTest(&metaIoWorker);
     MetaFileContext fileCtx;
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 5;
@@ -295,9 +320,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
     req->byteSize = 4032; // lpn 6
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 6);
@@ -313,9 +339,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 2;
     req->byteSize = 4032 * 6; // lpn 7,8,9,20,21,22
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 6);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 6);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 7);
@@ -331,9 +358,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 4;
     req->byteSize = 4032 * 12; // lpn 9,20...29,40
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 12);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 12);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 9);
@@ -341,10 +369,9 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4032 * 12);
 }
 
-TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiExtent)
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesWithMultiExtent)
 {
     // given
-    ScalableMetaIoWorkerTester metaIoWorker;
     MetaFileExtent extents[3];
     extents[0].SetStartLpn(43082495);
     extents[0].SetCount(1048);
@@ -352,10 +379,6 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     extents[1].SetCount(2088);
     extents[2].SetStartLpn(43089807);
     extents[2].SetCount(512);
-    cpu_set_t mioCoreSet;
-    CPU_SET(0, &mioCoreSet);
-    MetaFsIoScheduler scheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr);
-    scheduler.RegisterMetaIoWorkerForTest(&metaIoWorker);
     MetaFileContext fileCtx;
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 43082495;
@@ -372,9 +395,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032; // from 2nd lpn (43082495 + 1)
     req->byteSize = 4032;         // to 2nd lpn (43082495 + 1)
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 1);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495 + 1);
@@ -390,9 +414,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 2; // from 3rd lpn (43082495 + 2)
     req->byteSize = 4032 * 1024;      // to 1026th lpn (43082495 + 1025)
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43082495 + 2);
@@ -408,9 +433,10 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 1026; // from 1027th lpn (43082495 + 1026)
     req->byteSize = 4032 * 1024;         // to 1002nd of next extent (43085111 + 1001)
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43083521);
@@ -426,13 +452,23 @@ TEST(MetaFsIoScheduler, IssueRequest_testForProcessingRequestsForFilesWithMultiE
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 2050; // from 1003rd lpn of 2nd extent (43085111 + 1002)
     req->byteSize = 4032 * 1024;         // to 2026th of the extent (43085111 + 2025)
+    req->targetMediaType = MetaStorageType::SSD;
 
     // then
-    scheduler.IssueRequestAndDelete(req);
+    scheduler->IssueRequestAndDelete(req);
     EXPECT_EQ(originReq.requestCount, 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetRequestedCount(), 4128768 / 4032);
     EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 43085111 + 1002);
     EXPECT_EQ(metaIoWorker.GetTheLastLpn(), 43085111 + 2025);
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4128768);
+
+    // then, check for metric
+    size_t arraySize = 0;
+    const int64_t* countArray = scheduler->GetIssueCount(arraySize);
+
+    EXPECT_EQ(arraySize, (size_t)MetaStorageType::Max);
+    EXPECT_EQ(countArray[(size_t)MetaStorageType::SSD], 1 + 1024 + 1024 + 1024);
+    EXPECT_EQ(countArray[(size_t)MetaStorageType::NVRAM], 0);
+    EXPECT_EQ(countArray[(size_t)MetaStorageType::JOURNAL_SSD], 0);
 }
 } // namespace pos

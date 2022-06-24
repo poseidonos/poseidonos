@@ -45,7 +45,7 @@ class IIOLocker
 {
 public:
     virtual bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) = 0;
-    virtual bool ResetBusyLock(IArrayDevice* dev) = 0;
+    virtual bool ResetBusyLock(IArrayDevice* dev, bool forceReset = false) = 0;
     virtual bool TryLock(set<IArrayDevice*>& devs, StripeId val) = 0;
     virtual void Unlock(IArrayDevice* dev, StripeId val) = 0;
     virtual void Unlock(set<IArrayDevice*>& devs, StripeId val) = 0;
