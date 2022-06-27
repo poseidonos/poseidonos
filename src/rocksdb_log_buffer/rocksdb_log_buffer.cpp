@@ -220,7 +220,6 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
                 offset, size, _logBufferSize, groupId, pathName);
             return -1 * EID(ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET);
         }
-        //다른 logGroup이 있어도 offset 같은 위치에 덮어버리는 느낌
         memcpy((void*)((char*)buffer + offset), itValue.c_str(), size);
         offset += size;
     }
@@ -315,7 +314,6 @@ RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE), "RocksDB Key : {} insertion succeed", key);
-        // TODO(sang7.park) : logbufferiocontext 넘겨주는거 맞는지 확인해야함. override하지 않아도될지 고민
         InternalIoDone(context);    
         return 0;
     }
