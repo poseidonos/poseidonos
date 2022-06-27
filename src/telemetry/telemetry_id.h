@@ -130,6 +130,7 @@ static const std::string TEL50000_READ_IOPS = "read_iops";
 static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";
 static const std::string TEL50002_READ_LATENCY_MEAN_NS = "read_latency_mean_ns";
 static const std::string TEL50003_READ_LATENCY_MAX_NS = "read_latency_max_ns";
+
 static const std::string TEL50010_WRITE_IOPS = "write_iops";
 static const std::string TEL50011_WRITE_RATE_BYTES_PER_SECOND = "write_rate_bytes_per_second";
 static const std::string TEL50012_WRITE_LATENCY_MEAN_NS = "write_latency_mean_ns";
@@ -168,4 +169,9 @@ static const std::string TEL110012_CONTROLLER_BUSY_TIME_LOW = "controller_busy_t
 static const std::string TEL110013_CONTROLLER_BUSY_TIME_HIGH = "controller_busy_time_high";
 static const std::string TEL110014_WARNING_TEMP_TIME = "warning_temperature_time";
 static const std::string TEL110015_CRITICAL_TEMP_TIME = "critical_temperature_time";
+
+static const std::string TEL120001_READ_IOPS_PER_PORT = "read_iops_per_port";
+static const std::string TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT = "read_rate_bytes_per_second_per_port";
+static const std::string TEL120011_WRITE_IOPS_PER_PORT = "write_iops_per_port";
+static const std::string TEL120012_WRITE_RATE_BYTES_PER_SECOND_PER_PORT = "write_rate_bytes_per_second_per_port";
 } // namespace pos
