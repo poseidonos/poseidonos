@@ -1,0 +1,15 @@
+scrape_configs:
+  - job_name: 'poseidonos'
+    scrape_interval: 1s
+    static_configs:
+      - targets: ['localhost:2112']
+        labels:
+          group: 'pos'
+
+  - job_name: 'infra' 
+    scrape_interval: 5s
+    scrape_timeout: 4s    
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          group: 'node'

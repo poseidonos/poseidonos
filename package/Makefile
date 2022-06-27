@@ -11,6 +11,7 @@ all:
 	@cp -f ../bin/poseidonos src/usr/local/bin/
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
 	@cp -f ../bin/pos-exporter src/usr/local/bin/
+	@cp -f ../config/pos-prometheus.yml src/etc/pos/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
 	@cp -rf ../lib/spdk src/usr/local/lib/
 	@cp -f ../config/pos.conf src/etc/pos/
