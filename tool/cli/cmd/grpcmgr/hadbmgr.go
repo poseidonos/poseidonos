@@ -11,6 +11,7 @@ import (
 
 const listNodeQuery = `SELECT "name","ip","lastseen" FROM "node"`
 const listVolumeQuery = `SELECT "id","name","node_name","array_name","size","lastseen" FROM "volume"`
+const listReplicationQuery = `SELECT "id","source_volume_id","source_wal_volume_id","destination_volume_id","destination_wal_volume_id" FROM "replication"`
 
 func SendListNode(req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
 
@@ -93,6 +94,55 @@ func SendListHaVolume(req *pb.ListHaVolumeRequest) (*pb.ListHaVolumeResponse, er
 	}
 
 	res := &pb.ListHaVolumeResponse{Command: req.Command, Rid: req.Rid, Result: result}
+
+	return res, nil
+}
+
+func SendListHaReplication(req *pb.ListHaReplicationRequest) (*pb.ListHaReplicationResponse, error) {
+
+	db, err := OpenHaDb()
+
+	// close database
+	defer db.Close()
+	// check db
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := db.Query(listReplicationQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		code        int32  = 0
+		description string = "SUCCESS"
+	)
+	status := &pb.Status{Code: &code, Description: &description}
+	result := &pb.ListHaReplicationResponse_Result{Status: status}
+
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id                     int32
+			sourceVolumeId         int32
+			sourceWalVolumeId      int32
+			destinationVolumeId    int32
+			destinationWalVolumeId int32
+		)
+
+		err = rows.Scan(&id, &sourceVolumeId, &sourceWalVolumeId, &destinationVolumeId, &destinationWalVolumeId)
+		if err != nil {
+			return nil, err
+		}
+		result.Data = append(result.Data,
+			&pb.ListHaReplicationResponse_Result_Replication{Id: id, SourceVolumeId: sourceVolumeId,
+				SourceWalVolumeId: sourceWalVolumeId, DestinationVolumeId: destinationVolumeId,
+				DestinationWalVolumeId: destinationWalVolumeId})
+	}
+
+	res := &pb.ListHaReplicationResponse{Command: req.Command, Rid: req.Rid, Result: result}
 
 	return res, nil
 }
