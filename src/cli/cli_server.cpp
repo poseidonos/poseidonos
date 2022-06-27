@@ -93,7 +93,7 @@ Wait()
         delete reqHandler;
         reqHandler = nullptr;
     }
-    POS_TRACE_INFO(EID(CLI_SERVER_THREAD_JOINED), "");
+    POS_TRACE_DEBUG(EID(CLI_SERVER_THREAD_JOINED), "");
 }
 
 void
@@ -119,10 +119,10 @@ SendMsg(sock_pool_t* client, string msg)
 
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(CLI_MSG_SENDING_FAILURE),
+        POS_TRACE_WARN(EID(CLI_MSG_SENDING_FAILURE),
             "fd:{}, result:{}, message:{}", client->sockfd, ret, msg);
     }
-    POS_TRACE_INFO(EID(CLI_MSG_SENT),
+    POS_TRACE_TRACE(EID(CLI_MSG_SENT),
         "fd:{}, length:{}, message:{}", client->sockfd, ret, msg);
 
     free(buffer);
@@ -218,7 +218,7 @@ ClientThread(void* arg)
     if (str_len > 0)
     {
         int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVED;
-        POS_TRACE_INFO(event, "message:{}", clnt->recv_buff);
+        POS_TRACE_TRACE(event, "message:{}", clnt->recv_buff);
 
         if (clnt->work)
         {
@@ -236,7 +236,7 @@ ClientThread(void* arg)
 
             if (timedout)
             {
-                POS_TRACE_INFO(EID(CLI_SERVER_TIMED_OUT), "");
+                POS_TRACE_TRACE(EID(CLI_SERVER_TIMED_OUT), "");
                 SendMsg(clnt, reqHandler->TimedOut(clnt->recv_buff));
             }
             else
@@ -256,7 +256,7 @@ ClientThread(void* arg)
     }
     else
     {
-        POS_TRACE_ERROR(EID(CLI_MSG_RECEIVE_FAILURE),
+        POS_TRACE_WARN(EID(CLI_MSG_RECEIVE_FAILURE),
             "str_len:{}, error:{}", str_len, strerror(errno));
 
         if (clnt->work)
