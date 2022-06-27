@@ -484,20 +484,20 @@ class PosCliServiceImpl final : public PosCli::Service {
 void
 _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf::Message* reply)
 {
-  POS_TRACE_INFO(EID(CLI_TIMEOUT_OR_CANCELLED), "request: {}, reply: {}",
+  POS_TRACE_TRACE(EID(CLI_TIMEOUT_OR_CANCELLED), "request: {}, reply: {}",
   request->ShortDebugString(), reply->ShortDebugString());
 }
 
 void
 _LogCliRequest(const google::protobuf::Message* request)
 {
-  POS_TRACE_INFO(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
+  POS_TRACE_TRACE(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
 }
 
 void
 _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status)
 {
-  POS_TRACE_INFO(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
+  POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
       reply->ShortDebugString(), status.error_code(), status.error_details(), status.error_message());
 }
 
