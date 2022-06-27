@@ -3,16 +3,12 @@
 # remove poseidonos.servie
 systemctl stop poseidonos.service
 systemctl stop pos-exporter.service
-systemctl stop ipmi-exporter.service
 
 systemctl disable poseidonos.service
 systemctl disable pos-exporter.service
-systemctl disable ipmi-exporter.service
 
 rm -rf /lib/systemd/system/poseidonos.service
 rm -rf /lib/systemd/system/pos-exporter.service
-rm -rf /lib/systemd/system/ipmi-exporter.service
-
 systemctl reset-failed
 systemctl daemon-reload
 

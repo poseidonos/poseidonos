@@ -13,6 +13,3 @@ scrape_configs:
       - targets: ['localhost:9100']
         labels:
           group: 'node'
-      - targets: ['localhost:9290']
-        labels:
-          group: 'ipmi'
