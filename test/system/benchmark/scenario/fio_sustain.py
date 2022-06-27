@@ -13,8 +13,8 @@ def play(tgts, inits, scenario, timestamp, data):
         targets, initiators = node_manager.initialize()
 
         test_case_list = [
-            {"name": "0_fill", "rw": "write", "bs": "128k", "iodepth": "4", "io_size": "100%",
-                "time_based": "0", "runtime": "0", "log_avg_msec": "30000", "eta-interval": "30"},
+            {"name": "0_fill", "rw": "write", "bs": "128k", "iodepth": "4",
+                "time_based": "1", "runtime": "10800", "log_avg_msec": "108000", "eta-interval": "108"},
             {"name": "1_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
                 "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
             {"name": "2_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
