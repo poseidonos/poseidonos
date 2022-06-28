@@ -117,7 +117,7 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         FlowControl* iFlowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName);
         if (nullptr == iFlowControl)
         {
-            POS_TRACE_ERROR(EID(FC_NO_MATCHING_REQ_ARRAY_NAME), "failed to get flowControl");
+            POS_TRACE_ERROR(EID(FLOW_CONTROL_NO_MATCHING_REQ_ARRAY_NAME), "failed to get flowControl");
             return returnValue;
         }
         else
