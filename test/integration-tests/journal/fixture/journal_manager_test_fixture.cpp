@@ -1,7 +1,7 @@
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 
-#include <string>
 #include <experimental/filesystem>
+#include <string>
 
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
@@ -113,8 +113,11 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
     std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::copy(targetDirName, SPORDirectory);
 
+    // Remove Existing Target Directory
     delete journal;
+    std::experimental::filesystem::remove_all(targetDirName);
 
+    // Use copied SPOR Directory
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, SPORDirName);
     journal->ResetJournalConfiguration(configurationBuilder.Build());

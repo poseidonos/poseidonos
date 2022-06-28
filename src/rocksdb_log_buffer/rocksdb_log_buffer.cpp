@@ -252,7 +252,7 @@ RocksDBLogBuffer::WriteLog(LogWriteContext* context)
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE), "RocksDB Key : {} insertion succeed", key);
-        context->HandleIoComplete(context);    
+        context->HandleIoComplete(context);
         return 0;
     }
     else
@@ -285,7 +285,7 @@ int
 RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
     std::string keyStart = _MakeRocksDbKey(id, 0);
-    std::string keyEnd = _MakeRocksDbKey(id, config->GetLogGroupSize());
+    std::string keyEnd = _MakeRocksDbKey(id + 1, 0);
     rocksdb::ColumnFamilyHandle* cf = rocksJournal->DefaultColumnFamily();
     rocksdb::Slice start(keyStart), end(keyEnd);
     rocksdb::Status ret = rocksJournal->DeleteRange(rocksdb::WriteOptions(), cf, start, end);
@@ -314,7 +314,7 @@ RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE), "RocksDB Key : {} insertion succeed", key);
-        InternalIoDone(context);    
+        InternalIoDone(context);
         return 0;
     }
     else
@@ -339,7 +339,8 @@ int
 RocksDBLogBuffer::Delete(void)
 {
     int ret = 0;
-    if (DoesLogFileExist()){
+    if (DoesLogFileExist())
+    {
         if (rocksJournal != nullptr)
         {
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DELETE_DB), "RocksDB DB handler deleted (path : {})", pathName);
