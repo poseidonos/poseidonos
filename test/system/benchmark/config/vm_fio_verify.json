@@ -155,7 +155,7 @@
     ],
     "Scenarios": [
         {
-            "PATH": "./test/system/benchmark/scenario/fio_precommit.py",
+            "PATH": "./test/system/benchmark/scenario/fio_verify.py",
             "NAME": "fio_precommit",
             "OUTPUT_DIR": "./output",
             "RESULT_FORMAT": "junit_xml",

@@ -218,7 +218,7 @@
     ],
     "Scenarios": [
         {
-            "PATH": "./test/system/benchmark/scenario/fio_normal.py",
+            "PATH": "./test/system/benchmark/scenario/fio_sustain.py",
             "NAME": "fio_normal",
             "OUTPUT_DIR": "./output",
             "RESULT_FORMAT": "junit_xml",
