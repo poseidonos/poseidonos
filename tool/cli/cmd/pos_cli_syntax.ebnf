@@ -306,8 +306,9 @@ UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
 ResetEventWrrCmd = "reset-event-wrr" ;
 
 ClusterCmd = "cluster" ,
-  ( ListNodeCmd | ListHaVolumeCmd | ListHaReplication) ;
+  ( ListNodeCmd | ListHaVolumeCmd | ListHaReplicationCmd | StartHaReplicationCmd ) ;
 
 ListNodeCmd = "ln" ;
 ListHaVolume = "lv" ;
 ListHaReplication = "lr" ;
+StartHaReplicationCmd = "start-rep" ;

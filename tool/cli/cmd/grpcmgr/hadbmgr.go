@@ -147,6 +147,65 @@ func SendListHaReplication(req *pb.ListHaReplicationRequest) (*pb.ListHaReplicat
 	return res, nil
 }
 
+func SendStartHaReplication(req *pb.StartHaReplicationRequest) (*pb.StartHaReplicationResponse, error) {
+
+	db, err := OpenHaDb()
+
+	// close database
+	defer db.Close()
+	// check db
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	primaryNodeName := req.Param.PrimaryNodeName
+	primaryArrayName := req.Param.PrimaryArrayName
+	primaryVolumeName := req.Param.PrimaryVolumeName
+	primaryWalVolumeName := req.Param.PrimaryWalVolumeName
+	secondaryNodeName := req.Param.SecondaryNodeName
+	secondaryArrayName := req.Param.SecondaryArrayName
+	secondaryVolumeName := req.Param.SecondaryVolumeName
+	secondaryWalVolumeName := req.Param.SecondaryWalVolumeName
+	timestamp := req.Param.Timestamp
+
+	// mj: declare query here for this command as the query
+	startHaRepPrimaryQuery := `INSERT INTO command ("node_name","content","status","timestamp") ` +
+		`VALUES ` + `('` + primaryNodeName + `', 'volumecopy ` +
+		primaryNodeName + ` ` + primaryArrayName + ` ` + primaryVolumeName + ` ` + primaryWalVolumeName +
+		secondaryNodeName + ` ` + secondaryArrayName + ` ` + secondaryVolumeName + ` ` + secondaryWalVolumeName +
+		`', 'Created', '` + timestamp + `')`
+
+	startHaRepSecondaryQuery := `INSERT INTO command ("node_name","content","status","timestamp") ` +
+		`VALUES ` + `('` + secondaryNodeName + `', 'volumecopy ` +
+		primaryNodeName + ` ` + primaryArrayName + ` ` + primaryVolumeName + ` ` + primaryWalVolumeName +
+		secondaryNodeName + ` ` + secondaryArrayName + ` ` + secondaryVolumeName + ` ` + secondaryWalVolumeName +
+		`', 'Created', '` + timestamp + `')`
+
+	rows, err := db.Query(startHaRepPrimaryQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err = db.Query(startHaRepSecondaryQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		code        int32  = 0
+		description string = "SUCCESS"
+	)
+	status := &pb.Status{Code: &code, Description: &description}
+	result := &pb.StartHaReplicationResponse_Result{Status: status}
+
+	defer rows.Close()
+
+	res := &pb.StartHaReplicationResponse{Command: req.Command, Rid: req.Rid, Result: result}
+
+	return res, nil
+}
+
 func OpenHaDb() (*sql.DB, error) {
 	host, port, username, password, dbname, err := GetHaDbInfo()
 	if err != nil {

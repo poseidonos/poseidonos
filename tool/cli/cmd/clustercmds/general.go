@@ -34,4 +34,5 @@ func init() {
 	ClusterCmd.AddCommand(ListNodeCmd)
 	ClusterCmd.AddCommand(ListHaVolumeCmd)
 	ClusterCmd.AddCommand(ListHaReplicationCmd)
+	ClusterCmd.AddCommand(StartHaReplicationCmd)
 }
