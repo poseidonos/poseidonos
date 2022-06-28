@@ -33,4 +33,5 @@ Example (to list nodes in the system):
 func init() {
 	ClusterCmd.AddCommand(ListNodeCmd)
 	ClusterCmd.AddCommand(ListHaVolumeCmd)
+	ClusterCmd.AddCommand(ListHaReplicationCmd)
 }

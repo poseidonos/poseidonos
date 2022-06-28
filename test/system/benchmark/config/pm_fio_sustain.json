@@ -1,0 +1,228 @@
+{
+    "Targets": [
+        {
+            "NAME": "Target01",
+            "ID": "root",
+            "PW": "pwd",
+            "NIC": {
+                "SSH": "ip_for_sshpass",
+                "IP1": "ip_for_init1",
+                "IP2": "ip_for_init2"
+            },
+            "PREREQUISITE": {
+                "SSD": {
+                    "RUN": true,
+                    "FORMAT": true,
+                    "UDEV_FILE": "/etc/udev/rules.d/99-custom-nvme.rules"
+                },
+                "MEMORY": {
+                    "RUN": true,
+                    "MAX_MAP_COUNT": 65535,
+                    "DROP_CACHES": 3
+                },
+                "MODPROBE": {
+                    "RUN": true,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                },
+                "SPDK": {
+                    "RUN": true,
+                    "HUGE_EVEN_ALLOC": "yes",
+                    "NRHUGE": 65536
+                }
+            },
+            "POS": {
+                "DIR": "/home/psd/ibofos",
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CFG": "pos_multi_array_normal.conf",
+                "TELEMETRY": false,
+                "LOGGER_LEVEL": "info",
+                "TRANSPORT": {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },
+                "SUBSYSTEMs": [
+                    {
+                        "NUM_SUBSYSTEMS": 32,
+                        "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                        "NQN_INDEX": 1,
+                        "SN_PREFIX": "POS00000000000",
+                        "SN_INDEX": 1,
+                        "IP": "IP1",
+                        "PORT": 1158
+                    },
+                    {
+                        "NUM_SUBSYSTEMS": 32,
+                        "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                        "NQN_INDEX": 33,
+                        "SN_PREFIX": "POS00000000000",
+                        "SN_INDEX": 33,
+                        "IP": "IP2",
+                        "PORT": 1159
+                    }
+                ],
+                "DEVICEs": [
+                    {
+                        "NAME": "uram0",
+                        "TYPE": "uram",
+                        "NUM_BLOCKS": 16777216,
+                        "BLOCK_SIZE": 512,
+                        "NUMA": 0
+                    },
+                    {
+                        "NAME": "uram1",
+                        "TYPE": "uram",
+                        "NUM_BLOCKS": 16777216,
+                        "BLOCK_SIZE": 512,
+                        "NUMA": 1
+                    }
+                ],
+                "ARRAYs": [
+                    {
+                        "NAME": "ARR0",
+                        "RAID_OR_MEDIA": "RAID5",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14",
+                        "SPARE_DEVICE_LIST": "unvme-ns-15",
+                        "BUFFER_DEV": "uram0",
+                        "VOLUMEs": [
+                            {
+                                "NUM_VOLUMES": 32,
+                                "NAME_PREFIX": "VOL",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 1413014,
+                                "USE_SUBSYSTEMS": 32,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 1
+                            }
+                        ]
+                    },
+                    {
+                        "NAME": "ARR1",
+                        "RAID_OR_MEDIA": "RAID5",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28,unvme-ns-29,unvme-ns-30",
+                        "SPARE_DEVICE_LIST": "unvme-ns-31",
+                        "BUFFER_DEV": "uram1",
+                        "VOLUMEs": [
+                            {
+                                "NUM_VOLUMES": 32,
+                                "NAME_PREFIX": "VOL",
+                                "NAME_INDEX": 33,
+                                "SIZE_MiB": 1413014,
+                                "USE_SUBSYSTEMS": 32,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 33
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "Initiators": [
+        {
+            "NAME": "Initiator01",
+            "ID": "root",
+            "PW": "pwd",
+            "NIC": {
+                "SSH": "ip_for_sshpass"
+            },
+            "PREREQUISITE": {
+                "MODPROBE": {
+                    "RUN": true,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                }
+            },
+            "SPDK": {
+                "DIR": "/home/psd/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "TARGETs": [
+                {
+                    "NAME": "Target01",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP1",
+                    "PORT": 1158,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 32,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "NAME": "Initiator02",
+            "ID": "root",
+            "PW": "pwd",
+            "NIC": {
+                "SSH": "ip_for_sshpass"
+            },
+            "PREREQUISITE": {
+                "MODPROBE": {
+                    "RUN": true,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                }
+            },
+            "SPDK": {
+                "DIR": "/home/psd/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "TARGETs": [
+                {
+                    "NAME": "Target01",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP2",
+                    "PORT": 1159,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 32,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 33,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 33,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "Scenarios": [
+        {
+            "PATH": "./test/system/benchmark/scenario/fio_sustain.py",
+            "NAME": "fio_normal",
+            "OUTPUT_DIR": "./output",
+            "RESULT_FORMAT": "junit_xml",
+            "SUBPROC_LOG": true
+        }
+    ]
+}

@@ -612,6 +612,45 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		}
 		w.Flush()
 
+	case "LISTHAREPLICATION":
+		res := &pb.ListHaReplicationResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		// Header
+		fmt.Fprintln(w,
+			"Id\t"+
+				globals.FieldSeparator+"SourceVolumeId\t"+
+				globals.FieldSeparator+"SourceWalVolumeId\t"+
+				globals.FieldSeparator+"DestinationVolumeId\t"+
+				globals.FieldSeparator+"DestinationWalVolumeId\t")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------\t"+
+				globals.FieldSeparator+"---------------------------\t"+
+				globals.FieldSeparator+"---------------------------\t"+
+				globals.FieldSeparator+"---------------------------\t"+
+				globals.FieldSeparator+"---------------------------\t")
+
+		// Data
+		for _, replication := range res.GetResult().GetData() {
+			fmt.Fprintln(w,
+				strconv.FormatInt(int64(replication.Id), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(replication.SourceVolumeId), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(replication.SourceWalVolumeId), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(replication.DestinationVolumeId), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(replication.DestinationWalVolumeId), 10)+"\t")
+		}
+		w.Flush()
+
 	case "SYSTEMINFO":
 		res := messages.POSInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)

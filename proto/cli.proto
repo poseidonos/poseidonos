@@ -618,6 +618,30 @@ message ListHaVolumeResponse {
 	PosInfo info = 4;
 }
 
+message ListHaReplicationRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListHaReplicationResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message Replication {
+			int32 id = 1;
+			int32 sourceVolumeId = 2;
+			int32 sourceWalVolume_id = 3;
+			int32 destinationVolumeId = 4;
+			int32 destinationWalVolumeId = 5;
+		}
+		repeated Replication data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
 message SetLogLevelRequest {
 	string command = 1;
 	string rid = 2;
