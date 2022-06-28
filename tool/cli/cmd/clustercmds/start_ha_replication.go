@@ -23,7 +23,7 @@ var StartHaReplicationCmd = &cobra.Command{
 Start replication.
 
 Syntax:
-	poseidonos-cli cluster start-replication
+	poseidonos-cli cluster start-rep flags
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

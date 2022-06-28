@@ -48,4 +48,5 @@ poseidonos-cli cluster [flags]
 * [poseidonos-cli cluster ln](poseidonos-cli_cluster_ln.md)	 - List all nodes in the system.
 * [poseidonos-cli cluster lr](poseidonos-cli_cluster_lr.md)	 - List all replications in the cluster.
 * [poseidonos-cli cluster lv](poseidonos-cli_cluster_lv.md)	 - List all volumes in the cluster.
+* [poseidonos-cli cluster start-rep](poseidonos-cli_cluster_start-rep.md)	 - Start replication.
 

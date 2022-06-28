@@ -171,13 +171,13 @@ func SendStartHaReplication(req *pb.StartHaReplicationRequest) (*pb.StartHaRepli
 
 	// mj: declare query here for this command as the query
 	startHaRepPrimaryQuery := `INSERT INTO command ("node_name","content","status","timestamp") ` +
-		`VALUES ` + `('` + primaryNodeName + `', 'initsync ` +
+		`VALUES ` + `('` + primaryNodeName + `', 'volumecopy ` +
 		primaryNodeName + ` ` + primaryArrayName + ` ` + primaryVolumeName + ` ` + primaryWalVolumeName +
 		secondaryNodeName + ` ` + secondaryArrayName + ` ` + secondaryVolumeName + ` ` + secondaryWalVolumeName +
 		`', 'Created', '` + timestamp + `')`
 
 	startHaRepSecondaryQuery := `INSERT INTO command ("node_name","content","status","timestamp") ` +
-		`VALUES ` + `('` + secondaryNodeName + `', 'initsync ` +
+		`VALUES ` + `('` + secondaryNodeName + `', 'volumecopy ` +
 		primaryNodeName + ` ` + primaryArrayName + ` ` + primaryVolumeName + ` ` + primaryWalVolumeName +
 		secondaryNodeName + ` ` + secondaryArrayName + ` ` + secondaryVolumeName + ` ` + secondaryWalVolumeName +
 		`', 'Created', '` + timestamp + `')`
