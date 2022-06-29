@@ -123,8 +123,8 @@ VictimStripe::LoadValidBlock(void)
         return true;
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::GC_LOAD_VALID_BLOCKS,
-        "[LoadValidBlock] blockOffset:{}, myLsid:{}, validBlkInfos.empty():{}",
+    POS_TRACE_DEBUG(EID(GC_LOAD_VALID_BLOCKS),
+        "LoadValidBlock, blockOffset:{}, myLsid:{}, validBlkInfos.empty():{}",
         blockOffset, myLsid, validBlkInfos.empty());
 
     for (; blockOffset < dataBlks; blockOffset++)
@@ -161,8 +161,8 @@ VictimStripe::LoadValidBlock(void)
 
         if ((UNMAP_STRIPE <= blkInfo.vsa.stripeId) || (UNMAP_OFFSET <= blkInfo.vsa.offset))
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::GC_GET_UNMAP_VSA,
-                "loaded Unmap VSA, volId:{}, rba:{}, stripeId:{}, vsaOffset:{}",
+            POS_TRACE_INFO(EID(GC_GET_UNMAP_VSA),
+                "volId:{}, rba:{}, stripeId:{}, vsaOffset:{}",
                 blkInfo.volID, blkInfo.rba, blkInfo.vsa.stripeId, blkInfo.vsa.offset);
             continue;
         }
@@ -170,8 +170,8 @@ VictimStripe::LoadValidBlock(void)
         StripeAddr lsa = iStripeMap->GetLSA(blkInfo.vsa.stripeId);
         if (true == IsUnMapStripe(lsa.stripeId))
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::GC_GET_UNMAP_LSA,
-                "Get Unmap LSA, volId:{}, rba:{}, vsaStripeId:{}, vsaOffset:{}, lsaStripeId:{}",
+            POS_TRACE_ERROR(EID(GC_GET_UNMAP_LSA),
+                "volId:{}, rba:{}, vsaStripeId:{}, vsaOffset:{}, lsaStripeId:{}",
                 blkInfo.volID, blkInfo.rba, blkInfo.vsa.stripeId, blkInfo.vsa.offset, lsa.stripeId);
             continue;
         }
