@@ -459,7 +459,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     logGroupReleaser->Init(config, logFilledNotifier, logBuffer,
         checkpointManager, mapFlush, contextManager, eventScheduler);
 
-    logWriteHandler->Init(bufferAllocator, logBuffer, config);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, telemetryPublisher);
     volumeEventHandler->Init(logFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);
     journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus);
