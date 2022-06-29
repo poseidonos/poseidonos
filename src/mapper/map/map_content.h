@@ -37,6 +37,7 @@
 #include "src/mapper/map/map.h"
 #include "src/mapper/map/map_header.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/metafs/include/mf_property.h"
 
 #include <string>
 
@@ -52,8 +53,7 @@ class MapContent
 {
 public:
     MapContent(void) = default;
-    MapContent(int mapId_, MapperAddressInfo* addrInfo, Map* map_, MapHeader* mapHeader_);
-    MapContent(int mapId_, MapperAddressInfo* addrInfo);
+    MapContent(int mapId_, MapperAddressInfo* addrInfo, MetaFileType type = MetaFileType::Map);
     virtual ~MapContent(void);
 
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) = 0;
@@ -80,6 +80,7 @@ protected:
     Map* map;
     MapIoHandler* mapIoHandler;
     std::string fileName;
+    MetaFileType fileType;
     int mapId;
     uint64_t entriesPerMpage;
     MapperAddressInfo* addrInfo;

@@ -41,7 +41,7 @@ namespace pos
 {
 MpioHandler::MpioHandler(const int threadId, const int coreId,
     MetaFsConfigManager* configManager, TelemetryPublisher* tp,
-    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ)
+    MetaFsIoQ<Mpio*>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioAllocator(nullptr),
   coreId(coreId),
@@ -61,7 +61,7 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
-        partialMpioDoneQ = new MetaFsIoMultilevelQ<Mpio*, RequestPriority>();
+        partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
 }
 
 MpioHandler::~MpioHandler(void)
@@ -77,7 +77,7 @@ void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
     mpio->StoreTimestamp(MpioTimestampStage::PushToDoneQ);
-    partialMpioDoneQ->Enqueue(mpio, mpio->GetPriority());
+    partialMpioDoneQ->Enqueue(mpio);
 }
 
 void

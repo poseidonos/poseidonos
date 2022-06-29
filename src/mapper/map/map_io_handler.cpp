@@ -71,12 +71,12 @@ MapIoHandler::~MapIoHandler(void)
 }
 // LCOV_EXCL_STOP
 int
-MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize)
+MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize, MetaFileType fileType)
 {
     if (addrInfo->IsUT() == false)
     {
         assert(file == nullptr);
-        file = new MetaFsFileIntf(fileName, addrInfo->GetArrayId());
+        file = new MetaFsFileIntf(fileName, addrInfo->GetArrayId(), fileType);
     }
     else
     {

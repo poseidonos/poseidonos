@@ -41,10 +41,11 @@
 
 namespace pos
 {
-MapContent::MapContent(int mapId_, MapperAddressInfo* addrInfo_)
+MapContent::MapContent(int mapId_, MapperAddressInfo* addrInfo_, MetaFileType type)
 : mapHeader(nullptr),
   map(nullptr),
   mapIoHandler(nullptr),
+  fileType(type),
   mapId(mapId_),
   entriesPerMpage(0),
   addrInfo(addrInfo_),
@@ -88,7 +89,7 @@ MapContent::OpenMapFile(void)
     uint64_t fileSize = mapHeader->GetSize() + map->GetSize() * map->GetNumMpages();
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Open MapFile fileName:{}, size:{}, arrayId:{}", fileName, fileSize, addrInfo->GetArrayId());
     assert(fileSize > 0);
-    int ret = mapIoHandler->OpenFile(fileName, fileSize);
+    int ret = mapIoHandler->OpenFile(fileName, fileSize, fileType);
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
         POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());

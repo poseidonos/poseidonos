@@ -92,40 +92,4 @@ TEST(AsyncMetaFileIoCtx, GetLength_testIfTheMethodCanReturnTheLength)
 
     EXPECT_EQ(ctx.GetLength(), length);
 }
-
-TEST(AsyncMetaFileIoCtx, SetTopPriority_testIfTheMethodCanSetTopPriority)
-{
-    AsyncMetaFileIoCtx ctx;
-    ctx.SetTopPriority();
-
-    EXPECT_EQ(ctx.priority, RequestPriority::Highest);
-}
-
-TEST(AsyncMetaFileIoCtx, ClearTopPriority_testIfTheMethodCanClearTopPriority)
-{
-    AsyncMetaFileIoCtx ctx;
-    ctx.SetTopPriority();
-    ctx.ClearTopPriority();
-
-    EXPECT_EQ(ctx.priority, RequestPriority::Normal);
-}
-
-TEST(AsyncMetaFileIoCtx, IsTopPriority_testIfTheMethodCanCheckWheatherTheContextIsTopPriority)
-{
-    AsyncMetaFileIoCtx ctx;
-    ctx.SetTopPriority();
-
-    EXPECT_TRUE(ctx.IsTopPriority());
-}
-
-TEST(AsyncMetaFileIoCtx, SetPriority_testIfTheMethodCanSetPriority)
-{
-    AsyncMetaFileIoCtx ctx;
-
-    ctx.SetPriority(RequestPriority::Highest);
-    EXPECT_EQ(ctx.GetPriority(), RequestPriority::Highest);
-
-    ctx.SetPriority(RequestPriority::Normal);
-    EXPECT_EQ(ctx.GetPriority(), RequestPriority::Normal);
-}
 } // namespace pos

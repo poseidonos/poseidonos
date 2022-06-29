@@ -74,7 +74,7 @@ public:
     virtual ~MapIoHandler(void);
 
     void Dispose(void);
-    int OpenFile(std::string fileName, uint64_t fileSize);
+    int OpenFile(std::string fileName, uint64_t fileSize, MetaFileType fileType = MetaFileType::Map);
     int DeleteFile(void);
     int Load(AsyncLoadCallBack& cb);
     bool DoesFileExist(void);

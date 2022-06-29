@@ -30,41 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "async_context.h"
+#include <gmock/gmock.h>
+
+#include "src/metafs/mim/metafs_io_wrr_q.h"
 
 namespace pos
 {
-AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
-: opcode(MetaFsIoOpcode::Write),
-  fd(-1),
-  fileOffset(0),
-  length(0),
-  buffer(nullptr),
-  callback(nullptr),
-  error(0),
-  ioDoneCheckCallback(nullptr),
-  vsid(0)
+template<typename T, class E>
+class MockMetaFsIoWrrQ : public MetaFsIoWrrQ<T, E>
 {
-}
+public:
+    using MetaFsIoWrrQ<T, E>::MetaFsIoWrrQ;
 
-void
-AsyncMetaFileIoCtx::HandleIoComplete(void* data)
-{
-    if (ioDoneCheckCallback)
-        error = ioDoneCheckCallback(data);
-    if (callback)
-        callback(this);
-}
+    MOCK_METHOD(void, Enqueue, (const T entry, const E priority), (override));
+    MOCK_METHOD(T, Dequeue, (), (override));
+};
 
-int
-AsyncMetaFileIoCtx::GetError(void) const
-{
-    return error;
-}
-
-uint64_t
-AsyncMetaFileIoCtx::GetLength(void) const
-{
-    return length;
-}
 } // namespace pos
