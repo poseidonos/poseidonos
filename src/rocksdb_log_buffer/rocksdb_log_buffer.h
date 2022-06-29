@@ -106,7 +106,7 @@ private:
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
     rocksdb::DB* rocksJournal;
-    uint64_t LogBufferSize;
+    uint64_t logBufferSize;
 
     TelemetryPublisher* telemetryPublisher;
 };

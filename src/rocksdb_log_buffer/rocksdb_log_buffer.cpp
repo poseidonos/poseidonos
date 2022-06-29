@@ -56,7 +56,7 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
   config(nullptr),
   logFactory(nullptr),
   rocksJournal(nullptr),
-  LogBufferSize(0),
+  logBufferSize(0),
   telemetryPublisher(nullptr)
 {
 }
@@ -137,7 +137,7 @@ RocksDBLogBuffer::Create(uint64_t logBufferSize)
         {
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_CREATED),
                 "RocksDB Journal Created with logBufferSize {}, RocksDB buffer size insertion succeed", logBufferSize);
-            LogBufferSize = logBufferSize;
+            this->logBufferSize = logBufferSize;
             return static_cast<int>(POS_EVENT_ID::SUCCESS);
         }
         else
@@ -170,7 +170,7 @@ RocksDBLogBuffer::Open(uint64_t& logBufferSize)
         if (readBufferSizeStatus.ok())
         {
             logBufferSize = atoi(logBufferSizeString.c_str());
-            LogBufferSize = logBufferSize;
+            this->logBufferSize = logBufferSize;
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_OPENED), "RocksDB Journal opened (path : {}) and logBufferSize : {}", pathName, logBufferSize);
             return static_cast<int>(POS_EVENT_ID::SUCCESS);
         }
@@ -218,11 +218,11 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
         std::string itValue = it->value().ToString();
         uint64_t size = itValue.size();
 
-        if (offset + size >= LogBufferSize)
+        if (offset + size >= this->logBufferSize)
         {
             POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET),
                 "RocksDB Read LogBuffer failed, size of read buffer is over logbuffersize (offset + size >= logbuffersize) ({} + {} >= {}), logGroupID : {} (path : {})",
-                offset, size, LogBufferSize, groupId, pathName);
+                offset, size, this->logBufferSize, groupId, pathName);
             return -1 * EID(ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET);
         }
         memcpy((void*)((char*)buffer + offset), itValue.c_str(), size);
