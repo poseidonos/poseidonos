@@ -34,8 +34,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <vector>
+
 #include <tuple>
+#include <vector>
 
 #include "spdk/include/spdk/nvme_spec.h"
 #include "src/admin/disk_query_manager.h"
@@ -78,13 +79,17 @@ SmartCollector::~SmartCollector(void)
 }
 
 void
-SmartCollector::PublishSmartDataToTelemetry(void)
+SmartCollector::PublishSmartDataToTelemetryAllCtrl(void)
 {
     struct spdk_nvme_ctrlr* ctrlr;
-    vector<DeviceProperty> list = DeviceManagerSingleton::Instance()->ListDevs();
-    struct spdk_nvme_health_information_page payload = {};
+    IIODispatcher* dispatcher = IODispatcherSingleton::Instance();
+    DeviceManager* deviceMgr = DeviceManagerSingleton::Instance();
 
-    POSMetricVector* metricList = new POSMetricVector();
+    struct spdk_nvme_health_information_page* payload = new struct spdk_nvme_health_information_page();
+    uint16_t lid = SPDK_NVME_LOG_HEALTH_INFORMATION;
+    GetLogPageContext* smartLogPageContext = new GetLogPageContext(payload, lid);
+
+    vector<DeviceProperty> list = DeviceManagerSingleton::Instance()->ListDevs();
     for (auto device : list)
     {
         ctrlr = pos::DeviceManagerSingleton::Instance()->GetNvmeCtrlr(device.name);
@@ -94,40 +99,62 @@ SmartCollector::PublishSmartDataToTelemetry(void)
             continue;
         }
 
-        SmartReturnType result = CollectPerCtrl(&payload, ctrlr);
+        PhysicalBlkAddr addr;
+        addr.lba = INVALID_LBA;
 
-        if (SmartReturnType::SUCCESS == result)
+        // re-use payload & smartLogPageContext
+        UbioSmartPtr ubio(new Ubio((void*)smartLogPageContext, sizeof(struct spdk_nvme_health_information_page), 0 /*array index*/));
+        DevName dev(device.name);
+        UblockSharedPtr targetDevice = deviceMgr->GetDev(dev);
+
+        ubio->dir = UbioDir::GetLogPage;
+        ubio->SetPba(addr);
+        ubio->SetUblock(targetDevice);
+
+        int result = dispatcher->Submit(ubio, true);
+        if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
         {
-            vector<pair<string, uint64_t>> smartEntries;
-            smartEntries.push_back(make_pair(TEL110000_MEDIA_ERROR_COUNT_LOW, payload.media_errors[1]));
-            smartEntries.push_back(make_pair(TEL110001_MEDIA_ERROR_COUNT_HIGH, payload.media_errors[0]));
-            smartEntries.push_back(make_pair(TEL110002_POWER_CYCLE_LOW, payload.power_cycles[1]));
-            smartEntries.push_back(make_pair(TEL110003_POWER_CYCLE_HIGH, payload.power_cycles[0]));
-            smartEntries.push_back(make_pair(TEL110004_POWER_ON_HOUR_LOW, payload.power_on_hours[1]));
-            smartEntries.push_back(make_pair(TEL110005_POWER_ON_HOUR_HIGH, payload.media_errors[0]));
-            smartEntries.push_back(make_pair(TEL110006_UNSAFE_SHUTDOWNS_LOW, payload.unsafe_shutdowns[1]));
-            smartEntries.push_back(make_pair(TEL110007_UNSAFE_SHUTDOWNS_HIGH, payload.unsafe_shutdowns[0]));
-            smartEntries.push_back(make_pair(TEL110008_TEMPERATURE, (uint64_t)payload.temperature));
-            smartEntries.push_back(make_pair(TEL110009_AVAILABLE_SPARE, payload.available_spare));
-            smartEntries.push_back(make_pair(TEL110010_AVAILABLE_SPARE_THRESHOLD, payload.available_spare_threshold));
-            smartEntries.push_back(make_pair(TEL110011_PERCENTAGE_USED, payload.percentage_used));
-            smartEntries.push_back(make_pair(TEL110012_CONTROLLER_BUSY_TIME_LOW, payload.controller_busy_time[1]));
-            smartEntries.push_back(make_pair(TEL110013_CONTROLLER_BUSY_TIME_HIGH, payload.controller_busy_time[0]));
-            smartEntries.push_back(make_pair(TEL110014_WARNING_TEMP_TIME, (uint64_t)payload.warning_temp_time));
-            smartEntries.push_back(make_pair(TEL110015_CRITICAL_TEMP_TIME, (uint64_t)payload.critical_temp_time));
-
-            for(auto entry : smartEntries)
-            {
-                POSMetric metric(entry.first, POSMetricTypes::MT_GAUGE);
-                metric.AddLabel("nvme_ctrl_id", device.name);
-                metric.SetGaugeValue(static_cast<uint64_t>(entry.second));
-                metricList->push_back(metric);
-            }
+            POS_TRACE_INFO(EID(SMART_COLLECTOR_CMD_EXEC_ERR), "result:{}", result);
         }
         else
         {
-            POS_TRACE_TRACE(EID(SMART_COLLECTOR_CMD_EXEC_ERR), "result:{}", result);
+            PublishTelemetry(payload, device.name);
         }
+    }
+
+    delete payload;
+    delete smartLogPageContext;
+}
+
+void
+SmartCollector::PublishTelemetry(spdk_nvme_health_information_page* payload, string deviceName)
+{
+    POSMetricVector* metricList = new POSMetricVector();
+    vector<pair<string, uint64_t>> smartEntries;
+
+    smartEntries.push_back(make_pair(TEL110000_MEDIA_ERROR_COUNT_LOW, payload->media_errors[0]));
+    smartEntries.push_back(make_pair(TEL110001_MEDIA_ERROR_COUNT_HIGH, payload->media_errors[1]));
+    smartEntries.push_back(make_pair(TEL110002_POWER_CYCLE_LOW, payload->power_cycles[0]));
+    smartEntries.push_back(make_pair(TEL110003_POWER_CYCLE_HIGH, payload->power_cycles[1]));
+    smartEntries.push_back(make_pair(TEL110004_POWER_ON_HOUR_LOW, payload->power_on_hours[0]));
+    smartEntries.push_back(make_pair(TEL110005_POWER_ON_HOUR_HIGH, payload->power_on_hours[1]));
+    smartEntries.push_back(make_pair(TEL110006_UNSAFE_SHUTDOWNS_LOW, payload->unsafe_shutdowns[0]));
+    smartEntries.push_back(make_pair(TEL110007_UNSAFE_SHUTDOWNS_HIGH, payload->unsafe_shutdowns[1]));
+    smartEntries.push_back(make_pair(TEL110008_TEMPERATURE, (uint64_t)payload->temperature));
+    smartEntries.push_back(make_pair(TEL110009_AVAILABLE_SPARE, payload->available_spare));
+    smartEntries.push_back(make_pair(TEL110010_AVAILABLE_SPARE_THRESHOLD, payload->available_spare_threshold));
+    smartEntries.push_back(make_pair(TEL110011_PERCENTAGE_USED, payload->percentage_used));
+    smartEntries.push_back(make_pair(TEL110012_CONTROLLER_BUSY_TIME_LOW, payload->controller_busy_time[0]));
+    smartEntries.push_back(make_pair(TEL110013_CONTROLLER_BUSY_TIME_HIGH, payload->controller_busy_time[1]));
+    smartEntries.push_back(make_pair(TEL110014_WARNING_TEMP_TIME, (uint64_t)payload->warning_temp_time));
+    smartEntries.push_back(make_pair(TEL110015_CRITICAL_TEMP_TIME, (uint64_t)payload->critical_temp_time));
+
+    for (auto entry : smartEntries)
+    {
+        POSMetric metric(entry.first, POSMetricTypes::MT_GAUGE);
+        metric.AddLabel("nvme_ctrl_id", deviceName);
+        metric.SetGaugeValue(static_cast<uint64_t>(entry.second));
+        metricList->push_back(metric);
     }
 
     if (!metricList->empty() && nullptr != publisher)
@@ -155,6 +182,9 @@ SmartCollector::CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_
             {
                 result = SmartReturnType::RESPONSE_ERR;
             }
+
+            // sleep 10ms to avoid excessive spdk occupancy
+            usleep(10000);
         }
     }
     else
