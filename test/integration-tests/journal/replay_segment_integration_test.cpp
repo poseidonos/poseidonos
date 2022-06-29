@@ -33,18 +33,18 @@ ReplaySegmentIntegrationTest::TearDown(void)
 {
 }
 
-TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPatial)
+TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
 {
-    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplaySegmentsWithPatial");
+    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplaySegmentsWithPartial");
 
     InitializeJournal();
 
-    uint32_t lengthOfPatialIndex = testInfo->numStripesPerSegment / 2;
+    uint32_t lengthOfPartialIndex = testInfo->numStripesPerSegment / 2;
     uint32_t numSegments = 5;
-    uint32_t numTests = testInfo->numStripesPerSegment * numSegments - lengthOfPatialIndex;
+    uint32_t numTests = testInfo->numStripesPerSegment * numSegments - lengthOfPartialIndex;
 
     std::list<StripeTestFixture> writtenStripes;
-    for (uint32_t index = lengthOfPatialIndex; index < numTests; index++)
+    for (uint32_t index = lengthOfPartialIndex; index < numTests; index++)
     {
         StripeTestFixture stripe(index, testInfo->defaultTestVol);
         writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
