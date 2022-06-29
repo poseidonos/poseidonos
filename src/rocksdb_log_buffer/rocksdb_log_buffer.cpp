@@ -56,7 +56,7 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
   config(nullptr),
   logFactory(nullptr),
   rocksJournal(nullptr),
-  _logBufferSize(0),
+  LogBufferSize(0),
   telemetryPublisher(nullptr)
 {
 }
@@ -100,6 +100,11 @@ RocksDBLogBuffer::Dispose(void)
     if (IsOpened())
     {
         Close();
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DISPOSED), "RocksDB Disposed (path : {})", pathName);
+    }
+    else
+    {
+        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DISPOSED), "RocksDB Disposed RocksDB was not opened (path : {})", pathName);
     }
 
     if (rocksJournal != nullptr)
@@ -132,7 +137,7 @@ RocksDBLogBuffer::Create(uint64_t logBufferSize)
         {
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_CREATED),
                 "RocksDB Journal Created with logBufferSize {}, RocksDB buffer size insertion succeed", logBufferSize);
-            _logBufferSize = logBufferSize;
+            LogBufferSize = logBufferSize;
             return static_cast<int>(POS_EVENT_ID::SUCCESS);
         }
         else
@@ -165,7 +170,7 @@ RocksDBLogBuffer::Open(uint64_t& logBufferSize)
         if (readBufferSizeStatus.ok())
         {
             logBufferSize = atoi(logBufferSizeString.c_str());
-            _logBufferSize = logBufferSize;
+            LogBufferSize = logBufferSize;
             POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_OPENED), "RocksDB Journal opened (path : {}) and logBufferSize : {}", pathName, logBufferSize);
             return static_cast<int>(POS_EVENT_ID::SUCCESS);
         }
@@ -213,11 +218,11 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
         std::string itValue = it->value().ToString();
         uint64_t size = itValue.size();
 
-        if (offset + size >= _logBufferSize)
+        if (offset + size >= LogBufferSize)
         {
             POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET),
                 "RocksDB Read LogBuffer failed, size of read buffer is over logbuffersize (offset + size >= logbuffersize) ({} + {} >= {}), logGroupID : {} (path : {})",
-                offset, size, _logBufferSize, groupId, pathName);
+                offset, size, LogBufferSize, groupId, pathName);
             return -1 * EID(ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET);
         }
         memcpy((void*)((char*)buffer + offset), itValue.c_str(), size);
@@ -333,6 +338,10 @@ RocksDBLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
         context->IoDone();
         delete context;
     }
+    else
+    {
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_INTERNAL_IO_DONE_FAILED), "RocksDB internalIo (logGroupFooter write) done failed (path :{}) ", pathName);
+    }
 }
 
 int
@@ -349,6 +358,10 @@ RocksDBLogBuffer::Delete(void)
         }
         ret = _DeleteDirectory();
         return ret;
+    }
+    else
+    {
+        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DELETE_DB_FAILED_NOT_EXIST), "RocksDB DB handler deleted failed (db not exists) (path : {})", pathName);
     }
     return 0;
 }

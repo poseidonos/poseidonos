@@ -52,18 +52,18 @@ RocksDBReplaySegmentIntegrationTest::TearDown(void)
     std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
-TEST_F(RocksDBReplaySegmentIntegrationTest, ReplaySegmentsWithPatial)
+TEST_F(RocksDBReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
 {
-    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplaySegmentsWithPatial");
+    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplaySegmentsWithPartial");
 
     InitializeJournal(builder.Build());
 
-    uint32_t lengthOfPatialIndex = testInfo->numStripesPerSegment / 2;
+    uint32_t lengthOfPartialIndex = testInfo->numStripesPerSegment / 2;
     uint32_t numSegments = 5;
-    uint32_t numTests = testInfo->numStripesPerSegment * numSegments - lengthOfPatialIndex;
+    uint32_t numTests = testInfo->numStripesPerSegment * numSegments - lengthOfPartialIndex;
 
     std::list<StripeTestFixture> writtenStripes;
-    for (uint32_t index = lengthOfPatialIndex; index < numTests; index++)
+    for (uint32_t index = lengthOfPartialIndex; index < numTests; index++)
     {
         StripeTestFixture stripe(index, testInfo->defaultTestVol);
         writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);

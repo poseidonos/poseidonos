@@ -146,6 +146,7 @@ JournalManagerTestFixture::WaitForAllCheckpointDone(void)
 {
     while (journal->IsCheckpointCompleted() == false)
     {
+        usleep(1);
     }
 }
 
