@@ -59,6 +59,7 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
     parityBufferCnt = 2;
     srcBufferCnt = raid6BufferCnt - parityBufferCnt;
     raid6BufferSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
+
     rsCodeSrc = new uint8_t*[raid6BufferCnt];
     for (uint32_t i = 0; i < raid6BufferCnt; i++)
     {
@@ -110,15 +111,17 @@ Raid6::Translate(const LogicalEntry& le)
     }
     else
     {
-        fe.addr.offset = (fe.addr.offset + qParityOffset + offsetSizeforParity) % maxBlksCnt;
-        if(maxBlksCnt < fe.addr.offset+le.blkCnt)
+        uint32_t baseOffsetforSecondFeCase = le.addr.offset + qParityOffset + offsetSizeforParity;
+        fe.addr.offset = baseOffsetforSecondFeCase % maxBlksCnt;
+
+        if(maxBlksCnt < fe.addr.offset + le.blkCnt)
         {
             fe.blkCnt = maxBlksCnt - fe.addr.offset; 
             feList.push_back(fe);
             
             FtEntry feSecond;
             feSecond.addr.stripeId = le.addr.stripeId;
-            feSecond.addr.offset = 0;
+            feSecond.addr.offset = (baseOffsetforSecondFeCase + fe.blkCnt) % maxBlksCnt;
             feSecond.blkCnt = le.blkCnt - fe.blkCnt;
             feList.push_back(feSecond);
         }
@@ -166,7 +169,7 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
     fwe_qParity.addr.stripeId = src.addr.stripeId;
     fwe_qParity.addr.offset = (uint64_t)qParityIndex * (uint64_t)ftSize_.blksPerChunk;
     fwe_qParity.blkCnt = ftSize_.blksPerChunk;
-
+  
     BufferEntry pParity = _AllocChunk();
     BufferEntry qParity = _AllocChunk();
 
@@ -175,8 +178,7 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
     parities.push_back(pParity);
     parities.push_back(qParity);
 
-    _GenCauchyMatrixandTableforRaid6();
-    _ComputePQParitiesforChunk(parities, *(src.buffers));
+    _ComputePQParities(parities, *(src.buffers));
 
     pParity = parities.front();
     qParity = parities.back();
@@ -252,6 +254,7 @@ Raid6::_AllocChunk()
             POS_TRACE_ERROR(eventId, "required number of buffers:{}", parityBufferCntPerNuma);
         }
     }
+
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
     void* mem = bufferPool->TryGetBuffer();
@@ -265,18 +268,17 @@ Raid6::_AllocChunk()
 }
 
 void
-Raid6::_GenCauchyMatrixandTableforRaid6()
-{
-    gf_gen_cauchy1_matrix(encodeMatrixforRaid6.data(), raid6BufferCnt, srcBufferCnt);
-    ec_init_tables(srcBufferCnt, parityBufferCnt, &encodeMatrixforRaid6[srcBufferCnt * srcBufferCnt], encodeTableforRaid6.data());
-}
-
-void
-Raid6::_ComputePQParitiesforChunk(list<BufferEntry>& dst, const list<BufferEntry>& src)
+Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 {
     uint32_t i;
     uint64_t* src_ptr = nullptr;
     uint64_t* dst_ptr = nullptr;
+
+    vector<uint8_t> encodeMatrixforRaid6(raid6BufferCnt * srcBufferCnt, 0);
+    vector<uint8_t> encodeTableforRaid6(srcBufferCnt * parityBufferCnt * 32 ,0);
+
+    gf_gen_cauchy1_matrix(encodeMatrixforRaid6.data(), raid6BufferCnt, srcBufferCnt);
+    ec_init_tables(srcBufferCnt, parityBufferCnt, &encodeMatrixforRaid6[srcBufferCnt * srcBufferCnt], encodeTableforRaid6.data());
 
     for (const BufferEntry& src_buffer : src)
     {
@@ -322,7 +324,7 @@ Raid6::AllocParityPools(uint64_t maxParityBufferCntPerNuma,
     const uint64_t ARRAY_CHUNK_SIZE = ArrayConfig::BLOCK_SIZE_BYTE * ArrayConfig::BLOCKS_PER_CHUNK;
 
     uint32_t totalNumaCount = affinityManager->GetNumaCount();
-
+    
     for (uint32_t numa = 0; numa < totalNumaCount; numa++)
     {
         BufferInfo info = {
