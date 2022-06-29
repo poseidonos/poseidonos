@@ -50,7 +50,7 @@ enum class MetaFsConfigType
     DirectAccessForJournalEnabled,
     TimeIntervalInMillisecondsForMetric,
     SamplingSkipCount,
-    WrrCountReverseMap,
+    WrrCountSpecialPurposeMap,
     WrrCountJournal,
     WrrCountMap,
     WrrCountGeneral,
@@ -87,9 +87,9 @@ public:
     {
         return samplingSkipCount_;
     }
-    virtual size_t GetWrrCountReverseMap(void) const
+    virtual size_t GetWrrCountSpecialPurposeMap(void) const
     {
-        return wrrCountReverseMap_;
+        return wrrCountSpecialPurposeMap_;
     }
     virtual size_t GetWrrCountJournal(void) const
     {
@@ -127,7 +127,7 @@ private:
     bool _IsDirectAccessEnabled(void);
     size_t _GetTimeIntervalInMillisecondsForMetric(void);
     size_t _GetSamplingSkipCount(void);
-    size_t _GetWrrCountReverseMap(void);
+    size_t _GetWrrCountSpecialPurposeMap(void);
     size_t _GetWrrCountJournal(void);
     size_t _GetWrrCountMap(void);
     size_t _GetWrrCountGeneral(void);
@@ -140,7 +140,7 @@ private:
     bool directAccessEnabled_;
     size_t timeIntervalInMillisecondsForMetric_;
     size_t samplingSkipCount_;
-    size_t wrrCountReverseMap_;
+    size_t wrrCountSpecialPurposeMap_;
     size_t wrrCountJournal_;
     size_t wrrCountMap_;
     size_t wrrCountGeneral_;

@@ -72,7 +72,7 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   issueCountByFileType()
 {
     std::vector<int> weight{
-        (int)configManager->GetWrrCountReverseMap(),
+        (int)configManager->GetWrrCountSpecialPurposeMap(),
         (int)configManager->GetWrrCountJournal(),
         (int)configManager->GetWrrCountMap(),
         (int)configManager->GetWrrCountGeneral()

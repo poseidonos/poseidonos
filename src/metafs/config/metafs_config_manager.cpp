@@ -48,7 +48,7 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   directAccessEnabled_(false),
   timeIntervalInMillisecondsForMetric_(0),
   samplingSkipCount_(0),
-  wrrCountReverseMap_(0),
+  wrrCountSpecialPurposeMap_(0),
   wrrCountJournal_(0),
   wrrCountMap_(0),
   wrrCountGeneral_(0)
@@ -69,7 +69,7 @@ MetaFsConfigManager::Init(void)
     directAccessEnabled_ = _IsDirectAccessEnabled();
     timeIntervalInMillisecondsForMetric_ = _GetTimeIntervalInMillisecondsForMetric();
     samplingSkipCount_ = _GetSamplingSkipCount();
-    wrrCountReverseMap_ = _GetWrrCountReverseMap();
+    wrrCountSpecialPurposeMap_ = _GetWrrCountSpecialPurposeMap();
     wrrCountJournal_ = _GetWrrCountJournal();
     wrrCountMap_ = _GetWrrCountMap();
     wrrCountGeneral_ = _GetWrrCountGeneral();
@@ -99,8 +99,8 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"time_interval_in_milliseconds_for_metric", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::SamplingSkipCount,
         {"sampling_skip_count", CONFIG_TYPE_UINT64}});
-    configMap_.insert({MetaFsConfigType::WrrCountReverseMap,
-        {"wrr_count_reverse_map", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::WrrCountSpecialPurposeMap,
+        {"wrr_count_special_purpose_map", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::WrrCountJournal,
         {"wrr_count_journal", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::WrrCountMap,
@@ -203,14 +203,14 @@ MetaFsConfigManager::_GetSamplingSkipCount(void)
 }
 
 size_t
-MetaFsConfigManager::_GetWrrCountReverseMap(void)
+MetaFsConfigManager::_GetWrrCountSpecialPurposeMap(void)
 {
     size_t count = 0;
-    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountReverseMap, &count))
+    if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountSpecialPurposeMap, &count))
         return 0;
 
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
-        configMap_[MetaFsConfigType::WrrCountReverseMap].first + ": " + std::to_string(count));
+        configMap_[MetaFsConfigType::WrrCountSpecialPurposeMap].first + ": " + std::to_string(count));
 
     return count;
 }
