@@ -37,8 +37,8 @@
 
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
-#include "src/resource_checker/smart_collector.h"
 #include "src/resource_checker/environment_checker.h"
+#include "src/resource_checker/smart_collector.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -81,7 +81,7 @@ ResourceChecker::ResourceChecker(void)
 ResourceChecker::~ResourceChecker(void)
 {
     POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DESTRUCTOR_IN), "try destructor execution");
-    
+
     if (nullptr != envChecker)
     {
         POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_DELETE_EVENT_CHECKER),
@@ -149,7 +149,7 @@ ResourceChecker::Enable(void)
     }
 
     POS_TRACE_DEBUG(EID(RESOURCE_CHECKER_ENABLE_THREAD_OUT),
-        "thread_id:{}, enable:{}", 
+        "thread_id:{}, enable:{}",
         std::hash<std::thread::id>{}(th->get_id()), enable);
 }
 
@@ -166,6 +166,8 @@ ResourceChecker::Execute(void)
         pthread_setname_np(pthread_self(), "ResourceChecker");
     }
 
+    uint32_t availableMemorySizeInKByte = envChecker->GetAvailableMemorySize();
+    
     if (nullptr != publisher && nullptr != envChecker)
     {
         while (true)
@@ -173,8 +175,6 @@ ResourceChecker::Execute(void)
             if (nullptr != envChecker)
             {
                 runningCnt++;
-                uint32_t availableMemorySizeInKByte = envChecker->GetAvailableMemorySize();
-
                 if (nullptr != publisher)
                 {
                     POSMetric metric(TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY, POSMetricTypes::MT_GAUGE);
@@ -204,6 +204,6 @@ void
 ResourceChecker::CollectSmartLogPage(void)
 {
     SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
-    smartCollector->PublishSmartDataToTelemetry();
+    smartCollector->PublishSmartDataToTelemetryAllCtrl();
 }
-}
+} // namespace pos

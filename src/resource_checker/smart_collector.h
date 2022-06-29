@@ -59,11 +59,13 @@ class SmartCollector
 public:
     SmartCollector(void);
     virtual ~SmartCollector(void);
-    void PublishSmartDataToTelemetry(void);
+    void PublishSmartDataToTelemetryAllCtrl(void);
     SmartReturnType CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_nvme_ctrlr* ctrlr);
 
 private:
     static void CompleteSmartLogPage(void* arg, const spdk_nvme_cpl* cpl);
+    void PublishTelemetry(spdk_nvme_health_information_page* payload, std::string deviceName);
+
     TelemetryClient* telemetryClient = nullptr;
     TelemetryPublisher* publisher = nullptr;
 };
