@@ -55,6 +55,7 @@ public:
       remainedWeight_(weight[0])
     {
     }
+    /* All items in queue will be deleted */
     virtual ~MetaFsIoWrrQ(void)
     {
         ItemT t;
@@ -63,10 +64,12 @@ public:
             delete t;
         }
     }
+    /* thread safe */
     virtual void Enqueue(const ItemT entry, const TypeE type)
     {
         queue_[(size_t)type].Enqueue(entry);
     }
+    /* thread unsafe */
     virtual ItemT Dequeue(void)
     {
         for (size_t cnt = 0; cnt < TYPE_COUNT; ++cnt)
