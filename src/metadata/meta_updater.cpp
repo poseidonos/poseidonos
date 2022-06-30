@@ -123,7 +123,7 @@ MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
 }
 
 int
-MetaUpdater::UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback)
+MetaUpdater::UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback)
 {
     int result = 0;
 

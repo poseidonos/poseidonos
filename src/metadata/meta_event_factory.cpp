@@ -69,7 +69,7 @@ MetaEventFactory::CreateStripeMapUpdateEvent(Stripe* stripe)
 }
 
 CallbackSmartPtr
-MetaEventFactory::CreateGcMapUpdateEvent(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt)
+MetaEventFactory::CreateGcMapUpdateEvent(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt)
 {
     CallbackSmartPtr callback(new GcMapUpdate(vsaMap, stripeMap, segmentCtx, contextManager, arrayInfo, stripe, mapUpdateInfoList, invalidSegCnt));
     return callback;

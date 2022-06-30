@@ -36,6 +36,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/gc/victim_stripe.h"
 #include "src/gc/gc_stripe_manager.h"
+#include "src/include/smart_ptr_type.h"
 
 #include <string>
 #include <list>
@@ -60,9 +61,9 @@ public:
     ~GcFlushSubmission(void) override;
     bool Execute(void) override;
 
-    Stripe* AllocateStripe(uint32_t volumeId);
-
 private:
+    Stripe* _AllocateStripe(uint32_t volumeId);
+
     std::string arrayName;
     std::vector<BlkInfo>* blkInfoList;
     uint32_t volumeId;

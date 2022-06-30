@@ -55,7 +55,7 @@
 
 namespace pos
 {
-GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+GcMapUpdateCompletion::GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
                                             EventScheduler* eventScheduler, GcStripeManager* gcStripeManager)
 : GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager,
                         ArrayMgr()->GetInfo(arrayName)->arrayInfo,
@@ -64,7 +64,7 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayNa
 {
 }
 
-GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+GcMapUpdateCompletion::GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
                                             EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
                                             IArrayInfo* inputIArrayInfo,
                                             RBAStateManager* inputRbaStateManager,
@@ -116,7 +116,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_COMPLETION,
         "gc map update completion, arrayName:{}, stripeUserLsid:{}",
         arrayName, stripe->GetUserLsid());
-    delete stripe;
+
     return true;
 }
 

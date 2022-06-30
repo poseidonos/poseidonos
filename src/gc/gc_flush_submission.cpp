@@ -105,8 +105,8 @@ GcFlushSubmission::Execute(void)
         return false;
     }
 
-    Stripe* stripe = AllocateStripe(volumeId);
-    if (stripe == nullptr)
+    Stripe* allocatedStripe = _AllocateStripe(volumeId);
+    if (allocatedStripe == nullptr)
     {
         if (0 < token)
         {
@@ -114,6 +114,8 @@ GcFlushSubmission::Execute(void)
         }
         return false;
     }
+
+    StripeSmartPtr stripe(allocatedStripe);
 
     for (uint32_t offset = 0; offset < blkInfoList->size(); offset++)
     {
@@ -178,7 +180,7 @@ GcFlushSubmission::Execute(void)
 }
 
 Stripe*
-GcFlushSubmission::AllocateStripe(uint32_t volumeId)
+GcFlushSubmission::_AllocateStripe(uint32_t volumeId)
 {
     Stripe* stripe = iBlockAllocator->AllocateGcDestStripe(volumeId);
     return stripe;

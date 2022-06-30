@@ -38,6 +38,7 @@
 #include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/mapper/i_vsamap.h"
 
@@ -56,7 +57,7 @@ public:
     GcMapUpdate(void);
     GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
         ISegmentCtx* segmentCtx, IContextManager* contextManager,
-        IArrayInfo* arrayInfo, Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList,
+        IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
         std::map<SegmentId, uint32_t> invalidSegCnt);
     virtual ~GcMapUpdate(void);
 
@@ -71,7 +72,7 @@ private:
     IContextManager* contextManager;
     IArrayInfo* arrayInfo;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
     uint32_t stripesPerSegment;

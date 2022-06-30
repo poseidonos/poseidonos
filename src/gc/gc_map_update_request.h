@@ -42,6 +42,7 @@
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 #include "src/include/address_type.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/include/mpage_info.h"
@@ -58,8 +59,10 @@ class IArrayInfo;
 class GcMapUpdateRequest : public Event
 {
 public:
-    explicit GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager);
-    GcMapUpdateRequest(Stripe* stripe,
+    GcMapUpdateRequest(void) = default;
+
+    explicit GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName, GcStripeManager* gcStripeManager);
+    GcMapUpdateRequest(StripeSmartPtr stripe,
         CallbackSmartPtr completionEvent,
         IVSAMap* inputIVSAMap,
         IArrayInfo* inputIArrayInfo,
@@ -74,7 +77,7 @@ private:
     void _AddVsaMapUpdateLog(uint32_t volId, BlkAddr rba, VirtualBlks writeVsaRange);
     void _RegisterInvalidateSegments(VirtualBlkAddr vsa);
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
 
     CallbackSmartPtr completionEvent;
     IVSAMap* iVSAMap;

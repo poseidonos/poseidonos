@@ -39,6 +39,7 @@
 
 #include "src/event_scheduler/callback.h"
 #include "src/gc/gc_stripe_manager.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
@@ -49,8 +50,8 @@ class IArrayInfo;
 class GcFlushCompletion : public Callback
 {
 public:
-    explicit GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
-    GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+    explicit GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
+    GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
                     EventSmartPtr inputEvent,
                     RBAStateManager* inputRbaStateManager,
                     IArrayInfo* inputIArrayInfo);
@@ -59,7 +60,7 @@ public:
 private:
     bool _DoSpecificJob(void) override;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     std::string arrayName;
     GcStripeManager* gcStripeManager;
     GcWriteBuffer* dataBuffer;
