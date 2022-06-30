@@ -81,6 +81,7 @@ public:
         }
         return nullptr;
     }
+    // for test
     virtual void SetStartIndex(size_t index)
     {
         index_ = index;

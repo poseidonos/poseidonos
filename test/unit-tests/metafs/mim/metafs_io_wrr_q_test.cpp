@@ -118,7 +118,6 @@ public:
 
 protected:
     static const int TEST_ITEM_COUNT_EACH_TYPE = 10;
-    std::vector<int> weight;
     std::vector<MetaFileType> expectedSequence;
     MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType> multiQ;
 };
