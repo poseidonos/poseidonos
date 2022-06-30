@@ -122,19 +122,6 @@ protected:
     MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType> multiQ;
 };
 
-TEST_F(MetaFsIoWrrQFixture, testIfDequeueCountMatchesWithEnqueueCountWithTwoDifferentPriorities)
-{
-    std::vector<MetaFileType> expectedSequence{
-        MetaFileType::SpecialPurposeMap, MetaFileType::Journal, MetaFileType::Map, MetaFileType::General};
-
-    Fill();
-
-    // check sequence
-    CheckResult(expectedSequence);
-
-    Empty();
-}
-
 TEST_F(MetaFsIoWrrQFixture, WeightVerification_testIfDequeueSequenceMatchesWithExpectedSequence_FromSpecialPurposeMap)
 {
     std::vector<MetaFileType> expectedSequence{
