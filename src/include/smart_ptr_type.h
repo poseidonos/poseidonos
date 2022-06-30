@@ -1,3 +1,4 @@
+
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -43,6 +44,7 @@ class Callback;
 class UBlockDevice;
 class UnvmeSsd;
 class Uram;
+class Stripe;
 
 using UbioSmartPtr = std::shared_ptr<Ubio>;
 using VolumeIoSmartPtr = std::shared_ptr<VolumeIo>;
@@ -51,5 +53,6 @@ using CallbackSmartPtr = std::shared_ptr<Callback>;
 using UblockSharedPtr = std::shared_ptr<UBlockDevice>;
 using UnvmeSsdSharedPtr = std::shared_ptr<UnvmeSsd>;
 using UramSharedPtr = std::shared_ptr<Uram>;
+using StripeSmartPtr = std::shared_ptr<Stripe>;
 
 } // namespace pos

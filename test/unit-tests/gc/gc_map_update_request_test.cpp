@@ -74,13 +74,14 @@ public:
         ON_CALL(*array, GetSizeInfo(_)).WillByDefault(Return(&partitionLogicalSize));
 
         stripe = new NiceMock<MockStripe>();
+        stripeSmartPtr = StripeSmartPtr(stripe);
 
         stripeMap = new NiceMock<MockIStripeMap>;
         vsaMap = new NiceMock<MockIVSAMap>;
 
         metaUpdater = new NiceMock<MockIMetaUpdater>;
 
-        completionCallback = std::make_shared<MockGcMapUpdateCompletion>(stripe, arrayName, stripeMap, nullptr, nullptr, array, nullptr, nullptr);
+        completionCallback = std::make_shared<MockGcMapUpdateCompletion>(stripeSmartPtr, arrayName, stripeMap, nullptr, nullptr, array, nullptr, nullptr);
     }
 
     virtual void
@@ -88,11 +89,11 @@ public:
     {
         delete gcMapUpdateRequest;
         delete array;
-        delete stripe;
         delete vsaMap;
         delete stripeMap;
         delete metaUpdater;
         completionCallback = nullptr;
+        stripeSmartPtr = nullptr;
     }
 
 protected:
@@ -103,6 +104,7 @@ protected:
 
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockStripe>* stripe;
+    StripeSmartPtr stripeSmartPtr;
 
     CallbackSmartPtr completionCallback;
 
@@ -123,7 +125,7 @@ protected:
 
 TEST_F(GcMapUpdateRequestTestFixture, Execute_testIfExecutedSuccessfully)
 {
-    gcMapUpdateRequest = new GcMapUpdateRequest(stripe, completionCallback, vsaMap, array, metaUpdater);
+    gcMapUpdateRequest = new GcMapUpdateRequest(stripeSmartPtr, completionCallback, vsaMap, array, metaUpdater);
 
     uint32_t stripeId = 100;
     EXPECT_CALL(*stripe, GetVsid).WillOnce(Return(stripeId));

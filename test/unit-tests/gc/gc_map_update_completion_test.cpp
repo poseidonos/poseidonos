@@ -124,7 +124,7 @@ protected:
 
 TEST_F(GcMapUpdateCompletionTestFixture, Execute_testGcMapCompletionReleaseRbaOwnershipAndDecreasePendingIo)
 {
-    gcMapUpdateCompletion = new GcMapUpdateCompletion(stripe, arrayName, stripeMap, eventScheduler,
+    gcMapUpdateCompletion = new GcMapUpdateCompletion(StripeSmartPtr(stripe), arrayName, stripeMap, eventScheduler,
         gcStripeManager, array, rbaStateManager, volumeManager);
 
     // given rba list

@@ -43,6 +43,7 @@
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/include/mpage_info.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
@@ -57,9 +58,9 @@ class IVolumeIoManager;
 class GcMapUpdateCompletion : public Callback
 {
 public:
-    explicit GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+    explicit GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
                                EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
-    GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+    GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
                         EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
                         IArrayInfo* inputIArrayInfo,
                         RBAStateManager* inputRbaStateManager,
@@ -69,7 +70,7 @@ public:
 private:
     bool _DoSpecificJob(void) override;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     std::string arrayName;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;

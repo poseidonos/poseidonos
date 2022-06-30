@@ -82,14 +82,14 @@ TEST(MetaEventFactory, CreateGcMapUpdateEvent_testIfGcMapUpdateEventCreatedSucce
 
     MetaEventFactory factory(&vsaMap, &stripeMap, &segmentCtx, &wbStripeAllocator, &contextManager, &arrayInfo);
 
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t > invalidSegCnt;
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.stripesPerSegment = 1;
     EXPECT_CALL(arrayInfo, GetSizeInfo).WillRepeatedly(Return(&partitionLogicalSize));
 
-    CallbackSmartPtr actual = factory.CreateGcMapUpdateEvent(&stripe, mapUpdateInfoList, invalidSegCnt);
+    CallbackSmartPtr actual = factory.CreateGcMapUpdateEvent(StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 
     EXPECT_EQ(typeid(*actual.get()), typeid(GcMapUpdate));
 }

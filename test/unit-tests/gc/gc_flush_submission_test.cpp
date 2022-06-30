@@ -60,7 +60,7 @@ public:
         stripe = new NiceMock<MockStripe>();
         rbaStateManager = new NiceMock<MockRBAStateManager>(arrayName, 0);
 
-        inputEvent = std::make_shared<MockGcMapUpdateRequest>(stripe, nullptr, nullptr, array, nullptr);
+        inputEvent = std::make_shared<MockGcMapUpdateRequest>(StripeSmartPtr(new NiceMock<MockStripe>()), nullptr, nullptr, array, nullptr);
 
         blockAllocator = new NiceMock<MockIBlockAllocator>();
         ioSubmitHandler = new NiceMock<MockIIOSubmitHandler>();
@@ -75,7 +75,6 @@ public:
         delete array;
         delete gcStripeManager;
         delete volumeEventPublisher;
-        delete stripe;
         delete rbaStateManager;
         delete blockAllocator;
         delete ioSubmitHandler;
@@ -130,6 +129,8 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenG
     // when Execute
     // then return false
     EXPECT_TRUE(gcFlushSubmission->Execute() == false);
+
+    delete stripe;
 }
 
 TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenAllocateGcStripeFail)
@@ -145,6 +146,8 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfgcFlushSubmissionExecuteWhenA
     // when Execute
     // then return false
     EXPECT_TRUE(gcFlushSubmission->Execute() == false);
+
+    delete stripe;
 }
 
 TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocateGcStripeSuccess)
@@ -164,7 +167,8 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
     dataBuffer = new GcWriteBuffer;
     void* buffer = (void*)0x20000000;
     dataBuffer->push_back(buffer);
-    callback = std::make_shared<MockGcFlushCompletion>(stripe, arrayName, gcStripeManager, dataBuffer, nullptr, nullptr, array);
+    StripeSmartPtr testStripe(new NiceMock<MockStripe>());
+    callback = std::make_shared<MockGcFlushCompletion>(testStripe, arrayName, gcStripeManager, dataBuffer, nullptr, nullptr, array);
 
     gcFlushSubmission = new GcFlushSubmission(arrayName, blkInfoList, testVolumeId,
                         dataBuffer, gcStripeManager, callback, blockAllocator,

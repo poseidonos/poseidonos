@@ -25,14 +25,14 @@ TEST(GcMapUpdate, GcMapUpdate_testIfConstructedSuccessfully)
     NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
 
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.stripesPerSegment = 1;
     EXPECT_CALL(arrayInfo, GetSizeInfo).WillRepeatedly(Return(&partitionLogicalSize));
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 }
 
 TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
@@ -48,7 +48,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
     NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
     PartitionLogicalSize partitionLogicalSize;
@@ -68,10 +68,10 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
     }
     invalidSegCnt[1] = 10;
 
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, &stripe, mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 
-    ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
-    ON_CALL(stripe, GetVsid).WillByDefault(Return(vsid));
+    ON_CALL(*stripe, GetUserLsid).WillByDefault(Return(userLsid));
+    ON_CALL(*stripe, GetVsid).WillByDefault(Return(vsid));
     EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
 
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
