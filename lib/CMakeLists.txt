@@ -154,7 +154,7 @@ endif()
 ExternalProject_Add(spdk
     DEPENDS dpdk fio air
     GIT_REPOSITORY ${REPO_SPDK}
-    GIT_TAG "v21.04"
+    GIT_TAG "v22.01.1"
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_SPDK}
     BUILD_IN_SOURCE 1
     LOG_CONFIGURE
@@ -166,7 +166,7 @@ ExternalProject_Add(spdk
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-21.04.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-22.01.1.patch
     CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG}
     BUILD_COMMAND ./scripts/pkgdep.sh
     COMMAND make -j ${NUM_BUILD_CORE}
