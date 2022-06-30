@@ -326,7 +326,7 @@ Nvme::_RegisterController(struct spdk_nvme_ctrlr* ctrlr, const char* trAddr)
     entry->ctrlr = ctrlr;
     controllers.push_back(entry);
 
-    spdk_nvme_ctrlr_register_timeout_callback(ctrlr, ctrlTimeoutInUs,
+    spdk_nvme_ctrlr_register_timeout_callback(ctrlr, ctrlTimeoutInUs, ctrlTimeoutInUs,
         &ControllerTimeoutCallback, nullptr);
 
     int numNs = spdk_nvme_ctrlr_get_num_ns(ctrlr);

@@ -48,9 +48,9 @@ endif
 endif
 endif
 
-SPDK_LIB_LIST += accel event_bdev event_iscsi event_net event_scsi event_nvmf event_vmd event_accel event_sock event
+SPDK_LIB_LIST += accel event_bdev event_iscsi event_scsi event_nvmf event_vmd event_accel event_sock event
 SPDK_LIB_LIST += nvmf trace log conf thread util bdev iscsi scsi rpc jsonrpc json
-SPDK_LIB_LIST += net sock notify
+SPDK_LIB_LIST += sock notify
 
 
 ifeq ($(OS),Linux)

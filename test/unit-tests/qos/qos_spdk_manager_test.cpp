@@ -3,7 +3,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "lib/spdk/include/spdk_internal/thread.h"
 #include "src/qos/qos_common.h"
 #include "test/unit-tests/qos/qos_context_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
@@ -69,11 +68,11 @@ TEST(QosSpdkManager, Check_Update_And_Get_SpdkPoller)
     bool feQos = true;
     QosSpdkManager qosSpdkManager(&mockQoscontext, feQos, &mockEventFrameworkApi);
     uint32_t reactor = 1;
-    struct spdk_poller spdkPoller;
-    spdkPoller.next_run_tick = 10;
-    qosSpdkManager.UpdateSpdkPoller(reactor, &spdkPoller);
+    struct spdk_poller* sp[1];
+    
+    qosSpdkManager.UpdateSpdkPoller(reactor, sp[0]);
     struct spdk_poller* retSpdkPoller = qosSpdkManager.GetSpdkPoller(reactor);
-    ASSERT_EQ(retSpdkPoller->next_run_tick, 10);
+    ASSERT_EQ(retSpdkPoller, sp[0]);   
 }
 
 TEST(QosSpdkManager, RegisterQosPoller_Test)

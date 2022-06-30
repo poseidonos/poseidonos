@@ -414,10 +414,12 @@ SET(DEP_LIBRARIES
     gmock
     poslib
     postestlib
+    spdk_trace_parser
     spdk_thread
     spdk_event
-    spdk_json
+    spdk_init
     spdk_jsonrpc
+    spdk_json
     spdk_rpc
     spdk_trace
     spdk_nvme
