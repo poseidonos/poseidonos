@@ -51,7 +51,6 @@ Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
   errorStopState(false),
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
-  priority(RequestPriority::Normal),
   fileType(MetaFileType::General),
   UNIQUE_ID(idAllocate_++),
   DIRECT_ACCESS_ENABLED(directAccessEnabled)

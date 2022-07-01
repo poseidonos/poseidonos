@@ -52,9 +52,10 @@ public:
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
 
         stripe = new NiceMock<MockStripe>();
+        stripeSmartPtr = StripeSmartPtr(stripe);
         rbaStateManager = new NiceMock<MockRBAStateManager>(arrayName, 0);
 
-        inputEvent = std::make_shared<MockGcMapUpdateRequest>(stripe, nullptr, nullptr, array, nullptr);
+        inputEvent = std::make_shared<MockGcMapUpdateRequest>(StripeSmartPtr(new NiceMock<MockStripe>()), nullptr, nullptr, array, nullptr);
     }
 
     virtual void
@@ -64,11 +65,11 @@ public:
         delete array;
         delete gcStripeManager;
         delete volumeEventPublisher;
-        delete stripe;
         delete rbaStateManager;
         delete memoryManager;
 
         inputEvent = nullptr;
+        stripeSmartPtr = nullptr;
     }
 
 protected:
@@ -81,6 +82,7 @@ protected:
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockStripe>* stripe;
+    StripeSmartPtr stripeSmartPtr;
     NiceMock<MockRBAStateManager>* rbaStateManager;
     MockMemoryManager* memoryManager;
 
@@ -102,7 +104,7 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testIfgcFlushCompletionWhenAcquireR
 {
     // given create gc flush completion and can not acquire rba ownership
     dataBuffer = new GcWriteBuffer();
-    gcFlushCompletion = new GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
+    gcFlushCompletion = new GcFlushCompletion(stripeSmartPtr, arrayName, gcStripeManager, dataBuffer,
                                 inputEvent,
                                 rbaStateManager,
                                 array);
@@ -127,7 +129,7 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testgcFlushExecuteWhenAcquireOwners
 {
     // given create gc flush completion and acquire rba ownership
     dataBuffer = nullptr;
-    gcFlushCompletion = new GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
+    gcFlushCompletion = new GcFlushCompletion(stripeSmartPtr, arrayName, gcStripeManager, dataBuffer,
                                 inputEvent,
                                 rbaStateManager,
                                 array);

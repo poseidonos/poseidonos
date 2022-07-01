@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/mim/metafs_io_multilevel_q.h"
+#include "src/metafs/mim/metafs_io_q.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
 
 namespace pos
@@ -89,7 +89,7 @@ private:
     MetaFsTimeInterval* timeInterval_;
     const size_t MAX_CPU_STALL_COUNT = 1000;
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority> ioMultiQ_;
+    MetaFsIoQ<MetaFsIoRequest*> ioSQ_;
     MetaFsIoRequest* currentReqMsg_;
     FileSizeType chunkSize_;
     MetaLpnType fileBaseLpn_;

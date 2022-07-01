@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(bool, IsDirectAccessEnabled, (), (const));
     MOCK_METHOD(size_t, GetTimeIntervalInMillisecondsForMetric, (), (const));
     MOCK_METHOD(size_t, GetSamplingSkipCount, (), (const));
-    MOCK_METHOD(size_t, GetWrrCountReverseMap, (), (const));
+    MOCK_METHOD(size_t, GetWrrCountSpecialPurposeMap, (), (const));
     MOCK_METHOD(size_t, GetWrrCountJournal, (), (const));
     MOCK_METHOD(size_t, GetWrrCountMap, (), (const));
     MOCK_METHOD(size_t, GetWrrCountGeneral, (), (const));

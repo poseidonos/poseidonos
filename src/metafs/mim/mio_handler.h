@@ -32,18 +32,17 @@
 
 #pragma once
 
-#include <chrono>
 #include <map>
 #include <string>
-#include <vector>
 
 #include "metafs_io_handler_base.h"
-#include "metafs_io_multilevel_q.h"
 #include "mfs_io_range_overlap_chker.h"
 #include "mpio_handler.h"
 #include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/lib/metafs_pool.h"
 #include "src/metafs/lib/metafs_time_interval.h"
+#include "src/metafs/mim/metafs_io_wrr_q.h"
+#include "src/metafs/mim/metafs_io_q.h"
 #include "src/metafs/mim/mio.h"
 #include "src/metafs/util/metafs_time.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -60,8 +59,8 @@ public:
     // for test
     MioHandler(const int threadId, const int coreId,
         MetaFsConfigManager* configManager,
-        MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-        MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator,
+        MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>* ioSQ,
+        MetaFsIoQ<Mio*>* ioCQ, MpioAllocator* mpioAllocator,
         MetaFsPool<Mio*>* mioPool, TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
@@ -98,8 +97,8 @@ private:
     void _CreateMioPool(void);
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ;
-    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
+    MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>* ioSQ;
+    MetaFsIoQ<Mio*>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
     MetaFsPool<Mio*>* mioPool;

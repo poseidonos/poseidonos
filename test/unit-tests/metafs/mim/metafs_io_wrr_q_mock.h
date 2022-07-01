@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,58 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <atomic>
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
-
-#include "src/include/address_type.h"
-#include "src/event_scheduler/callback.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/include/mpage_info.h"
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/include/smart_ptr_type.h"
+#include "src/metafs/mim/metafs_io_wrr_q.h"
 
 namespace pos
 {
-class Stripe;
-class IStripeMap;
-class EventScheduler;
-class GcStripeManager;
-class IArrayInfo;
-class RBAStateManager;
-class IVolumeIoManager;
-
-class GcMapUpdateCompletion : public Callback
+template<typename T, class E>
+class MockMetaFsIoWrrQ : public MetaFsIoWrrQ<T, E>
 {
 public:
-    explicit GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
-                               EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
-    GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
-                        EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
-                        IArrayInfo* inputIArrayInfo,
-                        RBAStateManager* inputRbaStateManager,
-                        IVolumeIoManager* inputVolumeManager);
-    ~GcMapUpdateCompletion(void) override;
+    using MetaFsIoWrrQ<T, E>::MetaFsIoWrrQ;
 
-private:
-    bool _DoSpecificJob(void) override;
-
-    StripeSmartPtr stripe;
-    std::string arrayName;
-    IStripeMap* iStripeMap;
-    EventScheduler* eventScheduler;
-    GcStripeManager* gcStripeManager;
-
-    uint32_t totalBlksPerUserStripe;
-
-    IArrayInfo* iArrayInfo;
-    RBAStateManager* rbaStateManager;
-    IVolumeIoManager* volumeManager;
+    MOCK_METHOD(void, Enqueue, (const T entry, const E priority), (override));
+    MOCK_METHOD(T, Dequeue, (), (override));
 };
 
 } // namespace pos
-

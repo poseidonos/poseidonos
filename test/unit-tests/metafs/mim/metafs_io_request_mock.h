@@ -23,6 +23,7 @@ public:
     MOCK_METHOD(bool, GetRetryFlag, (), (override));
     MOCK_METHOD(MetaLpnType, GetStartLpn, (), (const));
     MOCK_METHOD(size_t, GetRequestLpnCount, (), (const));
+    MOCK_METHOD(MetaFileType, GetFileType, (), (const));
 };
 
 } // namespace pos

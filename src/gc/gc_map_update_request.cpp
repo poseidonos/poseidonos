@@ -58,7 +58,7 @@
 
 namespace pos
 {
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager)
+GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName, GcStripeManager* gcStripeManager)
 : GcMapUpdateRequest(stripe,
       std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager),
       MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
@@ -67,7 +67,7 @@ GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, Gc
 {
 }
 
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe,
+GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe,
     CallbackSmartPtr completionEvent,
     IVSAMap* inputIVSAMap,
     IArrayInfo* inputIArrayInfo,

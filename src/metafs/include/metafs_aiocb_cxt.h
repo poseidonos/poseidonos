@@ -57,8 +57,7 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      tagId(0),
-      priority(RequestPriority::Normal)
+      tagId(0)
     {
         callbackCount = 0;
     }
@@ -72,8 +71,7 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      tagId(0),
-      priority(RequestPriority::Normal)
+      tagId(0)
     {
     }
 
@@ -86,8 +84,7 @@ public:
       buf((void*)ctx->buffer),
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
       rc(POS_EVENT_ID::MFS_END),
-      tagId(0),
-      priority(ctx->GetPriority())
+      tagId(0)
     {
         callbackCount = 0;
     }
@@ -177,31 +174,6 @@ public:
         callbackCount = cnt;
     }
 
-    virtual void SetTopPriority(void)
-    {
-        priority = RequestPriority::Highest;
-    }
-
-    virtual void ClearTopPriority(void)
-    {
-        priority = RequestPriority::Normal;
-    }
-
-    virtual bool IsTopPriority(void) const
-    {
-        return (RequestPriority::Highest == priority);
-    }
-
-    virtual void SetPriority(const RequestPriority p)
-    {
-        priority = p;
-    }
-
-    virtual RequestPriority GetPriority(void) const
-    {
-        return priority;
-    }
-
 private:
     friend class MetaFsIoApi;
 
@@ -216,6 +188,5 @@ private:
     POS_EVENT_ID rc;
     uint32_t tagId;
     std::atomic<int> callbackCount;
-    RequestPriority priority;
 };
 } // namespace pos

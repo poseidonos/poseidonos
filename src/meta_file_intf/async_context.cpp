@@ -43,8 +43,7 @@ AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
   callback(nullptr),
   error(0),
   ioDoneCheckCallback(nullptr),
-  vsid(0),
-  priority(RequestPriority::Normal)
+  vsid(0)
 {
 }
 
@@ -67,35 +66,5 @@ uint64_t
 AsyncMetaFileIoCtx::GetLength(void) const
 {
     return length;
-}
-
-void
-AsyncMetaFileIoCtx::SetTopPriority(void)
-{
-    priority = RequestPriority::Highest;
-}
-
-void
-AsyncMetaFileIoCtx::ClearTopPriority(void)
-{
-    priority = RequestPriority::Normal;
-}
-
-bool
-AsyncMetaFileIoCtx::IsTopPriority(void) const
-{
-    return (RequestPriority::Highest == priority);
-}
-
-void
-AsyncMetaFileIoCtx::SetPriority(const RequestPriority p)
-{
-    priority = p;
-}
-
-RequestPriority
-AsyncMetaFileIoCtx::GetPriority(void) const
-{
-    return priority;
 }
 } // namespace pos

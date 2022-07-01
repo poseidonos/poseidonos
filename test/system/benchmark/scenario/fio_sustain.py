@@ -16,21 +16,13 @@ def play(tgts, inits, scenario, timestamp, data):
             {"name": "0_fill", "rw": "write", "bs": "128k", "iodepth": "4",
                 "time_based": "1", "runtime": "10800", "log_avg_msec": "108000", "eta-interval": "108"},
             {"name": "1_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "2_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
+                "time_based": "1", "runtime": "1800", "log_avg_msec": "18000", "eta-interval": "18"},
+            {"name": "2_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "1800", "log_avg_msec": "18000", "eta-interval": "18"},
             {"name": "3_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "4_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "5_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "6_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "7_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"},
-            {"name": "8_mix", "rw": "randrw", "rwmixread": "70", "bs": "16k", "iodepth": "32", "io_size": "4t",
-                "time_based": "1", "runtime": "900", "log_avg_msec": "9000", "eta-interval": "9"}
+                "time_based": "1", "runtime": "1800", "log_avg_msec": "18000", "eta-interval": "18"},
+            {"name": "4_rw", "rw": "randwrite", "bs": "4k", "iodepth": "128", "io_size": "4t",
+                "time_based": "1", "runtime": "1800", "log_avg_msec": "18000", "eta-interval": "18"}
         ]
 
         grapher = graph.manager.Grapher(scenario, timestamp)

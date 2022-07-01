@@ -59,7 +59,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(*config, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
     EXPECT_CALL(*config, GetSamplingSkipCount).WillRepeatedly(Return(100));
-    EXPECT_CALL(*config, GetWrrCountReverseMap).WillRepeatedly(Return(2));
+    EXPECT_CALL(*config, GetWrrCountSpecialPurposeMap).WillRepeatedly(Return(2));
     EXPECT_CALL(*config, GetWrrCountJournal).WillRepeatedly(Return(3));
     EXPECT_CALL(*config, GetWrrCountMap).WillRepeatedly(Return(5));
     EXPECT_CALL(*config, GetWrrCountGeneral).WillRepeatedly(Return(1));

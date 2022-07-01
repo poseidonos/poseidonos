@@ -298,7 +298,7 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 
     // When
     uint32_t stripeId = 100;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     GcStripeMapUpdateList mapUpdateInfoList;
     mapUpdateInfoList.volumeId = 1;
     uint32_t blockCount = 1;
@@ -309,7 +309,7 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 
     ON_CALL(metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(true));
-    ON_CALL(stripe, GetVsid).WillByDefault(Return(stripeId));
+    ON_CALL(*stripe, GetVsid).WillByDefault(Return(stripeId));
 
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.blksPerStripe = 10;
@@ -317,7 +317,7 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 
     // Then
     int expected = 0;
-    int actual = metaUpdater.UpdateGcMap(&stripe, mapUpdateInfoList, invalidSegCnt, clientCallback);
+    int actual = metaUpdater.UpdateGcMap(StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt, clientCallback);
 
     EXPECT_EQ(actual, expected);
 }
@@ -334,19 +334,19 @@ TEST(MetaUpdater, UpdateGcMap_testIfExecutedSuccessullfyWhenJournalDisable)
 
     // When
     uint32_t stripeId = 100;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     GcStripeMapUpdateList mapUpdateInfoList;
     std::map<SegmentId, uint32_t> invalidSegCnt;
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
 
     ON_CALL(metaEventFactory, CreateGcMapUpdateEvent).WillByDefault(Return(metaCallback));
     ON_CALL(journal, IsEnabled).WillByDefault(Return(false));
-    ON_CALL(stripe, GetVsid).WillByDefault(Return(stripeId));
+    ON_CALL(*stripe, GetVsid).WillByDefault(Return(stripeId));
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
     // Then
     int expected = 0;
-    int actual = metaUpdater.UpdateGcMap(&stripe, mapUpdateInfoList, invalidSegCnt, nullptr);
+    int actual = metaUpdater.UpdateGcMap(StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt, nullptr);
 
     EXPECT_EQ(actual, expected);
 }

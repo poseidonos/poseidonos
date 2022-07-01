@@ -642,6 +642,35 @@ message ListHaReplicationResponse {
 	PosInfo info = 4;
 }
 
+message StartHaReplicationRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string primaryNodeName = 1;
+			string primaryArrayName = 2;
+			string primaryVolumeName = 3;
+			string primaryWalVolumeName = 4;
+			string secondaryNodeName = 5;
+			string secondaryArrayName = 6;
+			string secondaryVolumeName = 7;
+			string secondaryWalVolumeName = 8;
+			string stuats = 9;
+			string timestamp = 10;
+	}
+	Param param = 4;
+}
+
+message StartHaReplicationResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
 message SetLogLevelRequest {
 	string command = 1;
 	string rid = 2;

@@ -125,24 +125,4 @@ TEST(MetaFsAioCbCxt, CheckBuffer)
 
     EXPECT_TRUE(cb.GetBuffer() == nullptr);
 }
-
-TEST(MetaFsAioCbCxt, CheckTopPriority)
-{
-    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
-    cb.SetTopPriority();
-    EXPECT_TRUE(cb.IsTopPriority());
-
-    cb.ClearTopPriority();
-    EXPECT_FALSE(cb.IsTopPriority());
-}
-
-TEST(MetaFsAioCbCxt, CheckPriority)
-{
-    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
-    cb.SetPriority(RequestPriority::Highest);
-    EXPECT_EQ(cb.GetPriority(), RequestPriority::Highest);
-
-    cb.SetPriority(RequestPriority::Normal);
-    EXPECT_EQ(cb.GetPriority(), RequestPriority::Normal);
-}
 } // namespace pos

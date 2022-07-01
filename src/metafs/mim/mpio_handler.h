@@ -32,13 +32,12 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
 
 #include "mpio_allocator.h"
 #include "src/metafs/include/mf_property.h"
 #include "src/metafs/lib/metafs_time_interval.h"
-#include "src/metafs/mim/metafs_io_multilevel_q.h"
+#include "src/metafs/mim/metafs_io_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -50,7 +49,7 @@ class MpioHandler
 public:
     explicit MpioHandler(const int threadId, const int coreId,
         MetaFsConfigManager* configManager, TelemetryPublisher* tp = nullptr,
-        MetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = nullptr);
+        MetaFsIoQ<Mpio*>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
@@ -61,7 +60,7 @@ private:
     void _UpdateMetricsConditionally(Mpio* mpio);
     void _PublishPeriodicMetrics(void);
 
-    MetaFsIoMultilevelQ<Mpio*, RequestPriority>* partialMpioDoneQ;
+    MetaFsIoQ<Mpio*>* partialMpioDoneQ;
     MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;

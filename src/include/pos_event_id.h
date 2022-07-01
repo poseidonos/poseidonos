@@ -1884,5 +1884,12 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Create each token for user io and garbage collector.", "", "")},
         {(int)POS_EVENT_ID::FLOW_CONTROL_FORCERESET_DONE,
             new PosEventInfoEntry("FLOW_CONTROL_FORCERESET_DONE",
-                "Force reset is completed normally.", "", "")}, 
+                "Force reset is completed normally.", "", "")},
+
+        {(int)POS_EVENT_ID::GC_GET_UNMAP_VSA,
+            new PosEventInfoEntry("GC_GET_UNMAP_VSA",
+                "The current VSA map is in unmap state", "", "")},
+        {(int)POS_EVENT_ID::GC_GET_UNMAP_LSA,
+            new PosEventInfoEntry("GC_GET_UNMAP_LSA",
+                "The current LSA map is in unmap state", "", "")},
 };

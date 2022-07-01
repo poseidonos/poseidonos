@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "src/metafs/mim/mpio_handler.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
@@ -44,7 +46,8 @@
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_wbt_api_mock.h"
-#include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_q_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_wrr_q_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
@@ -93,6 +96,11 @@ public:
         const uint32_t POOL_SIZE = 1024;
         const uint32_t CACHE_SIZE = 10;
 
+        for (int i = 0; i < (int)MetaFileType::MAX; i++)
+        {
+            weight.push_back(1);
+        }
+
         tp = new NiceMock<MockTelemetryPublisher>;
         conf = new NiceMock<MockMetaFsConfigManager>(nullptr);
         EXPECT_CALL(*conf, GetMioPoolCapacity).WillRepeatedly(Return(1024));
@@ -100,9 +108,9 @@ public:
         EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(10));
         EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
 
-        ioSQ = new NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>>;
-        ioCQ = new NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>;
-        doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
+        ioSQ = new NiceMock<MockMetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>>(weight);
+        ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
+        doneQ = new MockMetaFsIoQ<Mpio*>();
         bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, conf, nullptr, doneQ);
         mpioAllocator = new NiceMock<MockMpioAllocator>(conf);
         mioPool = new NiceMock<MockMetaFsPool<Mio*>>(POOL_SIZE);
@@ -137,9 +145,9 @@ public:
 protected:
     MioHandler* handler;
 
-    NiceMock<MockMetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>>* ioSQ;
-    NiceMock<MockMetaFsIoMultilevelQ<Mio*, RequestPriority>>* ioCQ;
-    MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ;
+    NiceMock<MockMetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>>* ioSQ;
+    NiceMock<MockMetaFsIoQ<Mio*>>* ioCQ;
+    MockMetaFsIoQ<Mpio*>* doneQ;
     NiceMock<MockMpioHandler>* bottomhalfHandler;
     NiceMock<MockMetaFsPool<Mio*>>* mioPool;
     NiceMock<MockMpioAllocator>* mpioAllocator;
@@ -156,6 +164,8 @@ protected:
     MockMetaFs* metaFs;
 
     MaxMetaLpnMapPerMetaStorage map;
+
+    std::vector<int> weight;
 };
 
 TEST_F(MioHandlerTestFixture, Normal)

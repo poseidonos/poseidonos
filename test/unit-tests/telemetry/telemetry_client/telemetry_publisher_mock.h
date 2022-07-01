@@ -18,7 +18,6 @@ public:
     MOCK_METHOD(void, StartUsingDataPool, (), (override));
     MOCK_METHOD(void, StopUsingDataPool, (), (override));
     MOCK_METHOD(void, SetMaxEntryLimit, (int limit), (override));
-    MOCK_METHOD(int, GetNumEntries, (), (override));
     MOCK_METHOD(int, PublishData, (std::string id_, POSMetricValue value_, POSMetricTypes type_), (override));
     MOCK_METHOD(int, PublishMetric, (POSMetric metric), (override));
     MOCK_METHOD(int, PublishMetricList, (POSMetricVector* metricList), (override));

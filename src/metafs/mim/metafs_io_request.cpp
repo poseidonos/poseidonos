@@ -237,4 +237,10 @@ MetaFsIoRequest::GetRequestLpnCount(void) const
 
     return endLpn - startLpn + 1;
 }
+
+MetaFileType
+MetaFsIoRequest::GetFileType(void) const
+{
+    return fileCtx->fileType;
+}
 } // namespace pos

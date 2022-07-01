@@ -44,6 +44,7 @@
 #include "src/metafs/common/metafs_stopwatch.h"
 #include "src/metafs/include/meta_file_context.h"
 #include "src/metafs/include/meta_file_extent.h"
+#include "src/metafs/include/mf_property.h"
 
 namespace pos
 {
@@ -116,6 +117,7 @@ public:
     virtual std::string GetLogString(void) const;
     virtual MetaLpnType GetStartLpn(void) const;
     virtual size_t GetRequestLpnCount(void) const;
+    virtual MetaFileType GetFileType(void) const;
 
     MetaIoRequestType reqType;
     MetaIoMode ioMode;

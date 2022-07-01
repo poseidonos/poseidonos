@@ -62,7 +62,7 @@ enum class MetaFileDominant
 
 enum class MetaFileType
 {
-    ReverseMap,
+    SpecialPurposeMap,
     Journal,
     Map,
     General,
