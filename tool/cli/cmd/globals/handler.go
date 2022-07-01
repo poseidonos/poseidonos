@@ -12,5 +12,7 @@ func PrintErrMsg(err error) {
 	switch status.Code() {
 	case codes.ResourceExhausted:
 		fmt.Println(PosBusy)
+	default:
+		fmt.Println("Error: " + err.Error())
 	}
 }
