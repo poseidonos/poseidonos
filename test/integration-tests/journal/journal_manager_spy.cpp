@@ -188,12 +188,14 @@ JournalManagerSpy::_GetLogsFromBuffer(LogList& logList)
         result = logBuffer->ReadLogBuffer(groupId, logGroupBuffer);
         if (result != 0)
         {
+            free(logGroupBuffer);
             break;
         }
 
         result = parser.GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
+            free(logGroupBuffer);
             break;
         }
         free(logGroupBuffer);
