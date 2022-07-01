@@ -50,8 +50,6 @@ public:
     virtual int DeleteAbr(string arrayName) = 0;
     virtual int LoadAbr(ArrayMeta& meta) = 0;
     virtual int SaveAbr(ArrayMeta& meta) = 0;
-    virtual bool GetMfsInit(string arrayName) = 0;
-    virtual int SetMfsInit(string arrayName, bool value) = 0;
     virtual int ResetMbr(void) = 0;
     virtual string FindArrayWithDeviceSN(string devSN) = 0;
     virtual string GetLastUpdatedDateTime(string arrayName) = 0;
