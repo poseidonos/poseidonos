@@ -56,12 +56,6 @@ TelemetryPublisher::SetMaxEntryLimit(int limit)
     dataPool.SetMaxEntryLimit(limit);
 }
 
-int
-TelemetryPublisher::GetNumEntries(void)
-{
-    return dataPool.GetNumEntries();
-}
-
 std::string
 TelemetryPublisher::GetName(void)
 {

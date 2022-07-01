@@ -49,10 +49,6 @@ public:
     TelemetryDataPool(void);
     ~TelemetryDataPool(void);
     void SetMaxEntryLimit(int limit);
-    int SetLog(POSMetric& metric);
-    int GetLog(std::string id, POSMetric& outLog);
-    list<POSMetric> GetAll(void);
-    int GetNumEntries(void);
 
     static const int LIMIT_NUM_MAX_ENTRY = 100000;
 
