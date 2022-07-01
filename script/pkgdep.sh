@@ -70,7 +70,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libgoogle-perftools-dev
     # for rocksdb
     apt install -y librocksdb-dev
-
+    # for isal
+    apt install -y libisal-dev
 
 else
     echo "pkgdep: unknown system type."
