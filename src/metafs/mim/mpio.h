@@ -119,14 +119,6 @@ public:
     {
         return {error, errorStopState};
     }
-    virtual void SetPriority(const RequestPriority p)
-    {
-        priority = p;
-    }
-    virtual RequestPriority GetPriority(void) const
-    {
-        return priority;
-    }
     virtual uint64_t GetId(void) const
     {
         return UNIQUE_ID;
@@ -155,7 +147,6 @@ protected:
     MetaAsyncCbCxt aioCbCxt;
 
     MpioCacheState cacheState;
-    RequestPriority priority;
     MetaFileType fileType;
 
     virtual void _InitStateHandler(void) = 0;

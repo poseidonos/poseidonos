@@ -40,7 +40,7 @@
 #include "mpio.h"
 #include "mpio_allocator.h"
 #include "src/metafs/common/metafs_stopwatch.h"
-#include "src/metafs/mim/metafs_io_multilevel_q.h"
+#include "src/metafs/mim/metafs_io_q.h"
 
 namespace pos
 {
@@ -100,7 +100,7 @@ public:
     virtual void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
     virtual void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    virtual void SetIoCQ(MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ);
+    virtual void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
@@ -147,7 +147,7 @@ protected:
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
     MfsError error;
-    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ;
+    MetaFsIoQ<Mio*>* ioCQ;
     MpioAllocator* mpioAllocator;
     MetaAsyncCbCxt aioCbCxt;
     std::vector<MetaFsIoRequest*>* mergedRequestList;

@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
-#include "test/unit-tests/metafs/mim/metafs_io_multilevel_q_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_q_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/write_mpio_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
@@ -64,7 +64,7 @@ TEST(MpioHandler, Normal)
     MockWriteMpio* mpio = new MockWriteMpio(this, conf->IsDirectAccessEnabled());
     EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
 
-    MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>* doneQ = new MockMetaFsIoMultilevelQ<Mpio*, RequestPriority>();
+    MockMetaFsIoQ<Mpio*>* doneQ = new MockMetaFsIoQ<Mpio*>();
     EXPECT_CALL(*doneQ, Enqueue).Times(AtLeast(1));
     EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
 

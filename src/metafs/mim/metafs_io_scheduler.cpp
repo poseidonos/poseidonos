@@ -245,7 +245,7 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 void
 MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    ioMultiQ_.Enqueue(reqMsg, reqMsg->priority);
+    ioSQ_.Enqueue(reqMsg);
 }
 
 bool
@@ -374,6 +374,6 @@ MetaFsIoScheduler::Execute(void)
 MetaFsIoRequest*
 MetaFsIoScheduler::_FetchPendingNewReq(void)
 {
-    return ioMultiQ_.Dequeue();
+    return ioSQ_.Dequeue();
 }
 } // namespace pos

@@ -33,10 +33,9 @@
 
 #include "mio_handler.h"
 
-#include <chrono>
-#include <ctime>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "Air.h"
 #include "meta_volume_manager.h"
@@ -72,8 +71,15 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   issueCountByStorage(),
   issueCountByFileType()
 {
-    ioCQ = new MetaFsIoMultilevelQ<Mio*, RequestPriority>();
-    ioSQ = new MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>();
+    std::vector<int> weight{
+        (int)configManager->GetWrrCountSpecialPurposeMap(),
+        (int)configManager->GetWrrCountJournal(),
+        (int)configManager->GetWrrCountMap(),
+        (int)configManager->GetWrrCountGeneral()
+    };
+
+    ioCQ = new MetaFsIoQ<Mio*>();
+    ioSQ = new MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>(weight);
 
     mpioAllocator = new MpioAllocator(configManager);
     _CreateMioPool();
@@ -88,8 +94,8 @@ MioHandler::MioHandler(const int threadId, const int coreId,
 
 MioHandler::MioHandler(const int threadId, const int coreId,
     MetaFsConfigManager* configManager,
-    MetaFsIoMultilevelQ<MetaFsIoRequest*, RequestPriority>* ioSQ,
-    MetaFsIoMultilevelQ<Mio*, RequestPriority>* ioCQ, MpioAllocator* mpioAllocator,
+    MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>* ioSQ,
+    MetaFsIoQ<Mio*>* ioCQ, MpioAllocator* mpioAllocator,
     MetaFsPool<Mio*>* mioPool, TelemetryPublisher* tp)
 : ioSQ(ioSQ),
   ioCQ(ioCQ),
@@ -437,7 +443,7 @@ void
 MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
     reqMsg->StoreTimestamp(IoRequestStage::Enqueue);
-    ioSQ->Enqueue(reqMsg, reqMsg->priority);
+    ioSQ->Enqueue(reqMsg, reqMsg->GetFileType());
 }
 
 void

@@ -101,7 +101,7 @@ AllocatorFileIo::_CreateFile(void)
 {
     if (file == nullptr)
     {
-        file = new MetaFsFileIntf(client->GetFilename(), arrayId);
+        file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
     }
 }
 
