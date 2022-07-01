@@ -12,14 +12,4 @@ TEST(Configuration, NumOfLogFilesForRotation_)
 {
 }
 
-TEST(Configuration, LogLevel_testIfThereIsNoConfigAboutLogLevel)
-{
-    // Given
-    Configuration* config = new Configuration();
-    // When
-    string ret = config->LogLevel();
-    // Then
-    ASSERT_EQ("info", ret);
-}
-
 } // namespace pos_logger
