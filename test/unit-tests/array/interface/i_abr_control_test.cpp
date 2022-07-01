@@ -24,14 +24,6 @@ TEST(IAbrControl, DeleteAbr_)
 {
 }
 
-TEST(IAbrControl, SetMfsInit_)
-{
-}
-
-TEST(IAbrControl, GetMfsInit_)
-{
-}
-
 TEST(IAbrControl, ResetMbr_)
 {
 }

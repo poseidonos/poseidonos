@@ -166,36 +166,12 @@ AbrManager::SaveAbr(ArrayMeta& meta)
             meta.devs.spares.at(i).uid, DEVICE_UID_SIZE);
     }
 
-    abr->mfsInit = GetMfsInit(meta.arrayName);
-
     meta.createDatetime = abr->createDatetime;
     meta.updateDatetime = abr->updateDatetime;
     mbrManager->UpdateDeviceIndexMap(meta.arrayName);
 
     int result = mbrManager->SaveMbr();
     return result;
-}
-
-bool
-AbrManager::GetMfsInit(string arrayName)
-{
-    struct ArrayBootRecord* abr = nullptr;
-    unsigned int arrayIndex;
-    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
-    int value = abr->mfsInit;
-    return value ? true : false;
-}
-
-int
-AbrManager::SetMfsInit(string arrayName, bool value)
-{
-    struct ArrayBootRecord* abr = nullptr;
-    unsigned int arrayIndex;
-    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
-    int mfsInit = value == true ? 1 : 0;
-    abr->mfsInit = mfsInit;
-    mbrManager->SaveMbr();
-    return 0;
 }
 
 int

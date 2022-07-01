@@ -14,8 +14,6 @@ public:
     using AbrManager::AbrManager;
     MOCK_METHOD(int, LoadAbr, (ArrayMeta& meta), (override));
     MOCK_METHOD(int, SaveAbr, (ArrayMeta& meta), (override));
-    MOCK_METHOD(bool, GetMfsInit, (string arrayName), (override));
-    MOCK_METHOD(int, SetMfsInit, (string arrayName, bool value), (override));
     MOCK_METHOD(int, CreateAbr, (ArrayMeta& meta), (override));
     MOCK_METHOD(int, DeleteAbr, (string name), (override));
     MOCK_METHOD(int, ResetMbr, (), (override));
