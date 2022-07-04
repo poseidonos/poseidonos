@@ -131,6 +131,8 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenJournalEnabledIsJournalR
         });
     EXPECT_CALL(configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
         { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "interval_in_msec_for_metric", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        { return 0; });
     EXPECT_CALL(configManager, GetValue("journal", "use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         {
             bool* targetToChange = static_cast<bool*>(value);
@@ -143,6 +145,41 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenJournalEnabledIsJournalR
     // Then: Will IsRocksdbEnabled() is true
     bool expected = true;
     EXPECT_EQ(config.IsRocksdbEnabled(), expected);
+}
+
+TEST(JournalConfiguration, JournalConfiguration_testWhenTimeIntervalIsValid)
+{
+    // Given journal is enabled
+    NiceMock<MockConfigManager> configManager;
+    
+    // When: Use RocksDB is enabled
+    EXPECT_CALL(configManager, GetValue);
+    EXPECT_CALL(configManager, GetValue("journal", "enable", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
+    EXPECT_CALL(configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "interval_in_msec_for_metric", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            uint64_t* targetToChange = static_cast<uint64_t*>(value);
+            *targetToChange = 1000;
+            return 0;
+        });
+    EXPECT_CALL(configManager, GetValue("journal", "use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
+
+    JournalConfiguration config(&configManager);
+
+    // Then: Will IsRocksdbEnabled() is true
+    size_t expected = 1000;
+    EXPECT_EQ(config.GetIntervalForMetric(), expected);
 }
 
 TEST(JournalConfiguration, JournalConfiguration_testIfFailedToReadJournalEnabled)
@@ -176,6 +213,8 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
         });
     EXPECT_CALL(configManager, GetValue("journal", "buffer_size_in_mb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
         { return -1; });
+    EXPECT_CALL(configManager, GetValue("journal", "interval_in_msec_for_metric", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        { return 0; });
     EXPECT_CALL(configManager, GetValue("journal", "use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
 

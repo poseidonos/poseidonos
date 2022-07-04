@@ -57,7 +57,8 @@ public:
     virtual ~LogWriteHandler(void);
 
     virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config, TelemetryPublisher* telemetryPublisher);
+        JournalConfiguration* config, TelemetryPublisher* telemetryPublisher,
+        ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
     virtual void Dispose(void);
 
     virtual int AddLog(LogWriteContext* context);
@@ -69,6 +70,7 @@ public:
 
 private:
     void _StartWaitingIos(void);
+    void _PublishPeriodicMetrics(LogWriteContext* context);
 
     IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;
@@ -81,8 +83,8 @@ private:
 
     TelemetryPublisher* telemetryPublisher;
     ConcurrentMetaFsTimeInterval* interval;
-    std::atomic<uint64_t> sumOfTimeSpent;
-    std::atomic<uint64_t> doneCount;
+    std::atomic<uint64_t> sumOfTimeSpentPerInterval;
+    std::atomic<uint64_t> doneCountPerInterval;
 };
 
 } // namespace pos
