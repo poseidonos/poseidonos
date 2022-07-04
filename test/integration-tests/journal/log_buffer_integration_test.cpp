@@ -210,6 +210,7 @@ JournalLogBufferIntegrationTest::_WaitForLogWriteDone(int numLogsWaitingFor)
 {
     while (numLogsWritten != numLogsWaitingFor)
     {
+        usleep(1);
     }
 }
 

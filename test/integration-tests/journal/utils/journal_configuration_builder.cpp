@@ -8,7 +8,8 @@ JournalConfigurationBuilder::JournalConfigurationBuilder(TestInfo* testInfo)
 : isJournalEnabled(true),
   logBufferSize(16 * 1024 * 1024),
   metaPageSize(testInfo->metaPageSize),
-  partitionSize(testInfo->metaPartitionSize)
+  partitionSize(testInfo->metaPartitionSize),
+  isRocksDBEnabled(false)
 {
 }
 
@@ -44,10 +45,18 @@ JournalConfigurationBuilder::SetMaxPartitionSize(uint64_t partitionSize)
     return this;
 }
 
+JournalConfigurationBuilder*
+JournalConfigurationBuilder::SetRocksDBEnable(uint64_t isRocksDBEnabled)
+{
+    this->isRocksDBEnabled = isRocksDBEnabled;
+    return this;
+}
+
+
 JournalConfigurationSpy*
 JournalConfigurationBuilder::Build(void)
 {
-    JournalConfigurationSpy* config = new JournalConfigurationSpy(isJournalEnabled, logBufferSize, metaPageSize, partitionSize);
+    JournalConfigurationSpy* config = new JournalConfigurationSpy(isJournalEnabled, logBufferSize, metaPageSize, partitionSize, isRocksDBEnabled);
     return config;
 }
 

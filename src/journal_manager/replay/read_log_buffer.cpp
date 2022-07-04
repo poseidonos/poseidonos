@@ -93,7 +93,7 @@ ReadLogBuffer::Start(void)
 
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
-        void* logGroupBuffer = malloc(groupSize);
+        void* logGroupBuffer = calloc(groupSize, sizeof(char));
         readLogBuffer.push_back(logGroupBuffer);
 
         result = logBuffer->ReadLogBuffer(groupId, logGroupBuffer);
