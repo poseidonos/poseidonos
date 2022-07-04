@@ -3,6 +3,7 @@ package grpcmgr
 import (
 	"cli/cmd/globals"
 	"context"
+	"errors"
 	"pnconnector/src/log"
 	"time"
 
@@ -11,18 +12,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-const timeout = 30
+const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
+const dialTimeout = 10
+const reqTimeout = 30
 
 func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.SystemInfo(ctx, req)
@@ -35,15 +39,16 @@ func SendSystemInfoRpc(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error
 }
 
 func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.SystemStop(ctx, req)
@@ -57,15 +62,16 @@ func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error
 }
 
 func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.GetSystemProperty(ctx, req)
@@ -79,15 +85,16 @@ func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPr
 }
 
 func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.SetSystemProperty(ctx, req)
@@ -100,15 +107,16 @@ func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPr
 }
 
 func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.StartTelemetry(ctx, req)
@@ -122,15 +130,16 @@ func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryRes
 }
 
 func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.StopTelemetry(ctx, req)
@@ -144,15 +153,16 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 }
 
 func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ResetEventWrr(ctx, req)
@@ -165,15 +175,16 @@ func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrr
 }
 
 func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ResetMbr(ctx, req)
@@ -186,15 +197,16 @@ func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 }
 
 func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.StopRebuilding(ctx, req)
@@ -207,15 +219,16 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 }
 
 func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.UpdateEventWrr(ctx, req)
@@ -228,15 +241,16 @@ func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrRespons
 }
 
 func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.AddSpare(ctx, req)
@@ -249,15 +263,16 @@ func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 }
 
 func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.RemoveSpare(ctx, req)
@@ -270,15 +285,16 @@ func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error
 }
 
 func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.CreateArray(ctx, req)
@@ -291,15 +307,16 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 }
 
 func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.AutocreateArray(ctx, req)
@@ -312,15 +329,16 @@ func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayRes
 }
 
 func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.DeleteArray(ctx, req)
@@ -333,15 +351,16 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 }
 
 func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.MountArray(ctx, req)
@@ -354,15 +373,16 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 }
 
 func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.UnmountArray(ctx, req)
@@ -375,15 +395,16 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 }
 
 func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ArrayInfo(ctx, req)
@@ -396,15 +417,16 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 }
 
 func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ListArray(ctx, req)
@@ -417,15 +439,16 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 }
 
 func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreferenceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.SetLogPreference(ctx, req)
@@ -438,15 +461,16 @@ func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreference
 }
 
 func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.SetLogLevel(ctx, req)
@@ -459,15 +483,16 @@ func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error
 }
 
 func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.LoggerInfo(ctx, req)
@@ -480,15 +505,16 @@ func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
 }
 
 func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.GetLogLevel(ctx, req)
@@ -501,15 +527,16 @@ func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error
 }
 
 func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ApplyLogFilter(ctx, req)
@@ -522,15 +549,16 @@ func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterRespon
 }
 
 func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.CreateDevice(ctx, req)
@@ -543,15 +571,16 @@ func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, er
 }
 
 func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ScanDevice(ctx, req)
@@ -564,15 +593,16 @@ func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
 }
 
 func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.ListDevice(ctx, req)
@@ -585,15 +615,16 @@ func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
 }
 
 func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Error("cannot send a request to cli server: not connected")
-		return nil, err
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
 	}
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
 	res, err := c.GetSmartLog(ctx, req)
