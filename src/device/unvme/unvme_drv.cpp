@@ -134,6 +134,9 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
                     case BackendEvent::BackendEvent_Unknown:
                         airlog("PERF_SSD_Read", "AIR_UNKNOWN", ssdId, size);
                         break;
+                    case BackendEvent::BackendEvent_JournalIO:
+                        airlog("PERF_SSD_Read", "AIR_JOURNAL", ssdId, size);
+                        break;
                     case BackendEvent::BackendEvent_MetaIO:
                         airlog("PERF_SSD_Read", "AIR_META", ssdId, size);
                         break;
@@ -160,6 +163,9 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
                 {
                     case BackendEvent::BackendEvent_Unknown:
                         airlog("PERF_SSD_Write", "AIR_UNKNOWN", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_JournalIO:
+                        airlog("PERF_SSD_Write", "AIR_JOURNAL", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_MetaIO:
                         airlog("PERF_SSD_Write", "AIR_META", ssdId, size);

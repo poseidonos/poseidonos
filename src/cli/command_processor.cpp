@@ -1078,6 +1078,7 @@ CommandProcessor::_GetEventId(std::string eventName)
         {"gc", pos::BackendEvent_GC},
         {"rebuild", pos::BackendEvent_UserdataRebuild},
         {"meta_rebuild", pos::BackendEvent_MetadataRebuild},
+        {"journalio", pos::BackendEvent_JournalIO},
         {"metaio", pos::BackendEvent_MetaIO},
         {"fe_rebuild", pos::BackendEvent_FrontendIO}
     };

@@ -306,6 +306,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     MetaLpnType requestLpnCount = aioData->GetLpnCount();
     MetaStorageType mediaType = aioData->GetStorageType();
     POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
+    const bool isJournal = (mediaType != MetaStorageType::SSD) ? true : false;
 
     assert(pos::BLOCK_SIZE == MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
@@ -326,7 +327,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
 
     MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
-    CallbackSmartPtr callback(new MssIoCompletion(cb));
+    CallbackSmartPtr callback(new MssIoCompletion(cb, isJournal));
 
     BufferEntry buffEntry(buffer, 1 /*4KB*/);
     std::list<BufferEntry> bufferList;

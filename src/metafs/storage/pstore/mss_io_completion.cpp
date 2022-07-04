@@ -37,11 +37,18 @@
 
 namespace pos
 {
-MssIoCompletion::MssIoCompletion(MssAioCbCxt* cb)
+MssIoCompletion::MssIoCompletion(MssAioCbCxt* cb, const bool isJournal)
 : Callback(false, CallbackType_MssIoCompletion),
   cbCxt(cb)
 {
-    SetEventType(BackendEvent_MetaIO);
+    if (isJournal)
+    {
+        SetEventType(BackendEvent_JournalIO);
+    }
+    else
+    {
+        SetEventType(BackendEvent_MetaIO);
+    }
 }
 
 MssIoCompletion::~MssIoCompletion(void)

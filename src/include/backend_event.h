@@ -42,6 +42,7 @@ enum BackendEvent
     BackendEvent_GC,
     BackendEvent_UserdataRebuild,
     BackendEvent_MetadataRebuild = BackendEvent_UserdataRebuild,
+    BackendEvent_JournalIO,
     BackendEvent_MetaIO,
     BackendEvent_Unknown,
     BackendEvent_End,
