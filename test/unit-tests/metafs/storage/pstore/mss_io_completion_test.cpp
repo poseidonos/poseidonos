@@ -52,4 +52,20 @@ TEST(MssIoCompletion, Execute)
 
     completion.Execute();
 }
+
+TEST(MssIoCompletion, GetEventType_testIfTheEventTypeIsDifferentDependingOnTheParameter_NoJournal)
+{
+    NiceMock<MockMssAioCbCxt> cb;
+    MssIoCompletion completion(&cb);
+
+    EXPECT_EQ(completion.GetEventType(), BackendEvent_MetaIO);
+}
+
+TEST(MssIoCompletion, GetEventType_testIfTheEventTypeIsDifferentDependingOnTheParameter_Journal)
+{
+    NiceMock<MockMssAioCbCxt> cb;
+    MssIoCompletion completion(&cb, true);
+
+    EXPECT_EQ(completion.GetEventType(), BackendEvent_JournalIO);
+}
 } // namespace pos

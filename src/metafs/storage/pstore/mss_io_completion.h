@@ -41,7 +41,7 @@ namespace pos
 class MssIoCompletion : public Callback
 {
 public:
-    explicit MssIoCompletion(MssAioCbCxt* cb);
+    explicit MssIoCompletion(MssAioCbCxt* cb, const bool isJournal = false);
     virtual ~MssIoCompletion(void);
 
 private:

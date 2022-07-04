@@ -103,6 +103,9 @@ BackendEventRatioPolicy::EnqueueEvent(EventSmartPtr input)
             case BackendEvent_UserdataRebuild:
                 eventQueue[BackendEvent_UserdataRebuild]->EnqueueEvent(input);
                 break;
+            case BackendEvent_JournalIO:
+                eventQueue[BackendEvent_JournalIO]->EnqueueEvent(input);
+                break;
             case BackendEvent_MetaIO:
                 eventQueue[BackendEvent_MetaIO]->EnqueueEvent(input);
                 break;
