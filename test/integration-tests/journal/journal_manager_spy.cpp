@@ -13,6 +13,7 @@
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/journal_manager/status/journal_status_provider.h"
 #include "src/meta_file_intf/mock_file_intf.h"
+#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
@@ -30,6 +31,8 @@ JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, 
     delete logBuffer;
     uint32_t arrayId = 0;
     logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arrayId, MetaFileType::General, MetaVolumeType::NvRamVolume));
+
+    LogFileName = logFileName;
 
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
@@ -93,6 +96,12 @@ JournalManagerSpy::ResetJournalConfiguration(JournalConfiguration* journalConfig
 {
     delete config;
     config = journalConfig;
+
+    if (config->IsRocksdbEnabled())
+    {
+        delete logBuffer;
+        logBuffer = new RocksDBLogBuffer(LogFileName);
+    }
 }
 
 void
@@ -137,8 +146,7 @@ JournalManagerSpy::IsCheckpointCompleted(void)
 {
     CheckpointStatus status = logGroupReleaser->GetStatus();
 
-    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED)
-        && ((LogGroupReleaserSpy*)(logGroupReleaser))->IsFlushCompleted());
+    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED) && ((LogGroupReleaserSpy*)(logGroupReleaser))->IsFlushCompleted());
 }
 
 int
@@ -174,23 +182,24 @@ JournalManagerSpy::_GetLogsFromBuffer(LogList& logList)
 
     int result = 0;
     uint64_t groupSize = config->GetLogGroupSize();
-    void* logGroupBuffer = malloc(groupSize);
     for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
     {
+        void* logGroupBuffer = calloc(groupSize, sizeof(char));
         result = logBuffer->ReadLogBuffer(groupId, logGroupBuffer);
         if (result != 0)
         {
+            free(logGroupBuffer);
             break;
         }
 
         result = parser.GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
+            free(logGroupBuffer);
             break;
         }
+        free(logGroupBuffer);
     }
-    free(logGroupBuffer);
-
     return result;
 }
 

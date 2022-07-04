@@ -1,3 +1,5 @@
+#include <experimental/filesystem>
+
 #include "gtest/gtest.h"
 
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
@@ -6,38 +8,55 @@ using ::testing::Return;
 
 namespace pos
 {
-class ReplaySegmentIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
+class RocksDBReplaySegmentIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
 {
 public:
-    ReplaySegmentIntegrationTest(void);
-    virtual ~ReplaySegmentIntegrationTest(void) = default;
+    RocksDBReplaySegmentIntegrationTest(void);
+    virtual ~RocksDBReplaySegmentIntegrationTest(void) = default;
+    JournalConfigurationBuilder builder;
 
 protected:
     virtual void SetUp(void);
     virtual void TearDown(void);
 };
 
-ReplaySegmentIntegrationTest::ReplaySegmentIntegrationTest(void)
-: JournalManagerTestFixture(GetLogFileName())
+RocksDBReplaySegmentIntegrationTest::RocksDBReplaySegmentIntegrationTest(void)
+: JournalManagerTestFixture(GetLogDirName()),
+builder(testInfo)
 {
 }
 
 void
-ReplaySegmentIntegrationTest::SetUp(void)
+RocksDBReplaySegmentIntegrationTest::SetUp(void)
 {
     testInfo->numStripesPerSegment = testInfo->numStripesPerSegment / 8;
+ 
+    builder.SetRocksDBEnable(true);
+
+    // remove rocksdb log files by removing temporary directory if exist
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(targetDirName);
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
 void
-ReplaySegmentIntegrationTest::TearDown(void)
+RocksDBReplaySegmentIntegrationTest::TearDown(void)
 {
+    // Teardown : remove rocksdb log files by removing temporary directory.
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    int ret = std::experimental::filesystem::remove_all(targetDirName);
+
+    // Remove SPOR directory
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
-TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
+TEST_F(RocksDBReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
 {
-    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplaySegmentsWithPartial");
+    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplaySegmentsWithPartial");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     uint32_t lengthOfPartialIndex = testInfo->numStripesPerSegment / 2;
     uint32_t numSegments = 5;
@@ -53,7 +72,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
@@ -66,11 +85,11 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPartial)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplaySegmentIntegrationTest, ReplaySegment)
+TEST_F(RocksDBReplaySegmentIntegrationTest, ReplaySegment)
 {
-    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplaySegment");
+    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplaySegment");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     uint32_t numSegments = 1;
     uint32_t numTests = testInfo->numStripesPerSegment * numSegments;
@@ -85,7 +104,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegment)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
@@ -98,11 +117,11 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegment)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplaySegmentIntegrationTest, ReplayFullSegment)
+TEST_F(RocksDBReplaySegmentIntegrationTest, ReplayFullSegment)
 {
-    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplayFullSegment");
+    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplayFullSegment");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     uint32_t numSegments = 3;
     uint32_t numTests = testInfo->numStripesPerSegment * numSegments;
@@ -117,7 +136,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayFullSegment)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
@@ -130,11 +149,11 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayFullSegment)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplaySegmentIntegrationTest, ReplayReusedSegment)
+TEST_F(RocksDBReplaySegmentIntegrationTest, ReplayReusedSegment)
 {
-    POS_TRACE_DEBUG(9999, "ReplaySegmentIntegrationTest::ReplayReusedSegment");
+    POS_TRACE_DEBUG(9999, "RocksDBReplaySegmentIntegrationTest::ReplayReusedSegment");
 
-    InitializeJournal();
+    InitializeJournal(builder.Build());
 
     uint32_t numTestsBeforeSegmentFull = testInfo->numStripesPerSegment;
     uint32_t numTestbeforeGC = testInfo->numStripesPerSegment / 2;
@@ -157,7 +176,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayReusedSegment)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)

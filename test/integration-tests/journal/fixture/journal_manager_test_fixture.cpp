@@ -1,5 +1,6 @@
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 
+#include <experimental/filesystem>
 #include <string>
 
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
@@ -101,6 +102,31 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
 }
 
 void
+JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
+{
+    JournalConfigurationBuilder configurationBuilder(testInfo);
+    configurationBuilder.SetRocksDBEnable(true);
+
+    // To Simulate SPOR, copy rocksdb data to another directory at any time which is similar to closing rocksdb abrubtly before closing db.
+    std::string SPORDirName = "SPOR" + GetLogDirName();
+    std::string SPORDirectory = "/etc/pos/" + SPORDirName + "_RocksJournal";
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::copy(targetDirName, SPORDirectory);
+
+    // Remove Existing Target Directory
+    delete journal;
+    std::experimental::filesystem::remove_all(targetDirName);
+
+    // Use copied SPOR Directory
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, SPORDirName);
+    journal->ResetJournalConfiguration(configurationBuilder.Build());
+    writeTester->UpdateJournal(journal);
+
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+}
+
+void
 JournalManagerTestFixture::SetTriggerCheckpoint(bool isCheckpointEnabled)
 {
     journal->SetTriggerCheckpoint(isCheckpointEnabled);
@@ -120,6 +146,7 @@ JournalManagerTestFixture::WaitForAllCheckpointDone(void)
 {
     while (journal->IsCheckpointCompleted() == false)
     {
+        usleep(1);
     }
 }
 

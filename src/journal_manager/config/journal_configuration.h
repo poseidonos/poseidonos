@@ -83,6 +83,7 @@ protected:
     uint64_t logBufferSizeInConfig;
     uint64_t metaPageSize;
     uint64_t maxPartitionSize;
+    bool rocksdbEnabled;
     MetaVolumeType metaVolumeToUse;
 
 private:
@@ -96,7 +97,6 @@ private:
 
     bool areReplayWbStripesInUserArea;
     bool debugEnabled;
-    bool rocksdbEnabled;
 
     ConfigManager* configManager;
     int numLogGroups;

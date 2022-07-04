@@ -57,6 +57,7 @@ private:
     int _GetLogsFromBuffer(LogList& logList);
 
     MockEventScheduler* eventScheduler;
+    std::string LogFileName;
 };
 
 } // namespace pos

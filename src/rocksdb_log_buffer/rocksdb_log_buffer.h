@@ -71,16 +71,16 @@ public:
     virtual bool DoesLogFileExist(void) override;
 
     virtual bool IsOpened(void);
-    virtual int DeleteDirectory(void);
 
     virtual std::string GetPathName(void)
     {
         return pathName;
     }
-    virtual void DeleteDB(void);
 
 protected:
-    int _CreateDirectory(void);
+    virtual int _CreateDirectory(void);
+    virtual int _DeleteDirectory(void);
+
     std::string pathName;
     bool isOpened;
 
@@ -95,7 +95,8 @@ private:
     inline std::string
     _MakeRocksDbKey(int groupId, uint64_t offset)
     {
-        int numDigits = std::to_string(config->GetLogGroupSize()).size();
+        int numDigits = std::to_string(config->GetLogBufferSize()).size();
+        offset = offset % config->GetLogGroupSize();
         int zeroSize = numDigits - std::to_string(offset).size();
         std::string appendZero(zeroSize,'0');
         std::string key = std::to_string(groupId) + appendZero + std::to_string(offset) + "Log";
@@ -105,7 +106,7 @@ private:
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
     rocksdb::DB* rocksJournal;
-    uint64_t _logBufferSize;
+    uint64_t logBufferSize;
 
     TelemetryPublisher* telemetryPublisher;
 };

@@ -2,7 +2,7 @@
 
 namespace pos
 {
-JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize)
+JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize, bool isRocksDBEnabled)
 : JournalConfiguration()
 {
     journalEnabled = isJournalEnabled;
@@ -10,6 +10,7 @@ JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t
 
     metaPageSize = pageSize;
     maxPartitionSize = partitionSize;
+    rocksdbEnabled = isRocksDBEnabled;
 }
 
 JournalConfigurationSpy::~JournalConfigurationSpy(void)

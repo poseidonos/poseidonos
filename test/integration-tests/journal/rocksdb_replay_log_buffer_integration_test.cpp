@@ -1,5 +1,7 @@
-#include "gtest/gtest.h"
+#include <experimental/filesystem>
 #include <iostream>
+
+#include "gtest/gtest.h"
 
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
@@ -12,37 +14,52 @@ using ::testing::Return;
 
 namespace pos
 {
-class ReplayLogBufferIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
+class RocksDBReplayLogBufferIntegrationTest : public JournalManagerTestFixture, public ::testing::Test
 {
 public:
-    ReplayLogBufferIntegrationTest(void);
-    virtual ~ReplayLogBufferIntegrationTest(void) = default;
+    RocksDBReplayLogBufferIntegrationTest(void);
+    virtual ~RocksDBReplayLogBufferIntegrationTest(void) = default;
+    JournalConfigurationBuilder builder;
 
 protected:
     virtual void SetUp(void);
     virtual void TearDown(void);
 };
 
-ReplayLogBufferIntegrationTest::ReplayLogBufferIntegrationTest(void)
-:JournalManagerTestFixture(GetLogFileName())
+RocksDBReplayLogBufferIntegrationTest::RocksDBReplayLogBufferIntegrationTest(void)
+:JournalManagerTestFixture(GetLogDirName()),
+builder(testInfo)
 {
 }
 
 void
-ReplayLogBufferIntegrationTest::SetUp(void)
+RocksDBReplayLogBufferIntegrationTest::SetUp(void)
 {
+    builder.SetRocksDBEnable(true);
+
+    // remove rocksdb log files by removing temporary directory if exist
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(targetDirName);
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
 void
-ReplayLogBufferIntegrationTest::TearDown(void)
+RocksDBReplayLogBufferIntegrationTest::TearDown(void)
 {
+    // Teardown : remove rocksdb log files by removing temporary directory.
+    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    int ret = std::experimental::filesystem::remove_all(targetDirName);
+
+    // Remove SPOR directory
+    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
-TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
+TEST_F(RocksDBReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
 {
-    POS_TRACE_DEBUG(9999, "ReplayLogBufferIntegrationTest::ReplaySeveralLogGroup");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayLogBufferIntegrationTest::ReplaySeveralLogGroup");
 
-    JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(true)
         ->SetLogBufferSize(16 * 1024);
 
@@ -61,7 +78,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
     }
 
     writeTester->WaitForAllLogWriteDone();
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayOverwrittenBlockLog(stripe);
@@ -73,11 +90,10 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
+TEST_F(RocksDBReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
 {
-    POS_TRACE_DEBUG(9999, "ReplayLogBufferIntegrationTest::ReplayCirculatedLogBuffer");
+    POS_TRACE_DEBUG(9999, "RocksDBReplayLogBufferIntegrationTest::ReplayCirculatedLogBuffer");
 
-    JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(true)
         ->SetLogBufferSize(16 * 1024);
 
@@ -121,7 +137,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
 
     writeTester->WaitForAllLogWriteDone();
 
-    SimulateSPORWithoutRecovery();
+    SimulateRocksDBSPORWithoutRecovery();
 
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenLogs)
