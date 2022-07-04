@@ -64,7 +64,7 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
 RocksDBLogBuffer::RocksDBLogBuffer(const std::string arrayName)
 : RocksDBLogBuffer()
 {
-    this->pathName = "/etc/pos/" + arrayName + "_RocksJournal";
+    this->pathName = "/POSRaid/" + arrayName + "_RocksJournal";
 }
 
 // LCOV_EXCL_START

@@ -38,6 +38,9 @@
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/meta_file_intf/meta_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -101,7 +104,14 @@ AllocatorFileIo::_CreateFile(void)
 {
     if (file == nullptr)
     {
-        file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+        if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+        {
+            file = new RocksDBMetaFsIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+        }
+        else
+        {
+            file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+        }
     }
 }
 

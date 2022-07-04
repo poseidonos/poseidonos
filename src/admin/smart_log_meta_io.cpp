@@ -35,6 +35,9 @@
 #include "src/admin/smart_log_mgr.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -46,7 +49,14 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
   fileIoDone(new MetaIoDoneChecker)
 {
     fileName = "SmartLogPage.bin";
-    smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
+    if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+    {
+        smartLogFile = new RocksDBMetaFsIntf(fileName, arrayId, MetaFileType::General);
+    }
+    else
+    {
+        smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
+    }
 }
 
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile, MetaIoDoneChecker* ioDone)

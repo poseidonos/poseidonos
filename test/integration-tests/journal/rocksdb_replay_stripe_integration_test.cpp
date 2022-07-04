@@ -33,9 +33,9 @@ RocksDBReplayStripeIntegrationTest::SetUp(void)
     builder.SetRocksDBEnable(true);
 
     // remove rocksdb log files by removing temporary directory if exist
-    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::string targetDirName = "/POSRaid/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(targetDirName);
-    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = "/POSRaid/SPOR" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(SPORDirectory);
 }
 
@@ -43,11 +43,11 @@ void
 RocksDBReplayStripeIntegrationTest::TearDown(void)
 {
     // Teardown : remove rocksdb log files by removing temporary directory.
-    std::string targetDirName = "/etc/pos/" + GetLogDirName() + "_RocksJournal";
+    std::string targetDirName = "/POSRaid/" + GetLogDirName() + "_RocksJournal";
     int ret = std::experimental::filesystem::remove_all(targetDirName);
 
     // Remove SPOR directory
-    std::string SPORDirectory = "/etc/pos/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = "/POSRaid/SPOR" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(SPORDirectory);
 }
 

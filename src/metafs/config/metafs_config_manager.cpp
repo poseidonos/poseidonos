@@ -51,7 +51,8 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   wrrCountSpecialPurposeMap_(0),
   wrrCountJournal_(0),
   wrrCountMap_(0),
-  wrrCountGeneral_(0)
+  wrrCountGeneral_(0),
+  rocksdbEnabled_(false)
 {
     _BuildConfigMap();
 }
@@ -73,6 +74,7 @@ MetaFsConfigManager::Init(void)
     wrrCountJournal_ = _GetWrrCountJournal();
     wrrCountMap_ = _GetWrrCountMap();
     wrrCountGeneral_ = _GetWrrCountGeneral();
+    rocksdbEnabled_ = _IsRocksdbEnabled();
 
     if (!_ValidateConfig())
     {
@@ -107,6 +109,8 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"wrr_count_map", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::WrrCountGeneral,
         {"wrr_count_general", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::UseRocksdbEnabled,
+        {"use_rocksdb", CONFIG_TYPE_BOOL}});
 }
 
 bool
@@ -253,5 +257,18 @@ MetaFsConfigManager::_GetWrrCountGeneral(void)
 
     return count;
 }
-} // namespace pos
 
+bool
+MetaFsConfigManager::_IsRocksdbEnabled(void)
+{
+    bool enabled = false;
+    if (_ReadConfiguration<bool>(MetaFsConfigType::UseRocksdbEnabled, &enabled))
+        return false;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::UseRocksdbEnabled].first + (enabled ? " is enabled" : " is disabled"));
+
+    return enabled;
+}
+
+} // namespace pos
