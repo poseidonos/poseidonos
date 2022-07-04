@@ -55,6 +55,7 @@ enum class MetaFsConfigType
     WrrCountJournal,
     WrrCountMap,
     WrrCountGeneral,
+    UseRocksdbEnabled,
 };
 
 class MetaFsConfigManager
@@ -112,6 +113,10 @@ public:
             (int)wrrCountMap_,
             (int)wrrCountGeneral_};
     }
+    virtual bool IsRocksdbEnabled(void) const
+    {
+        return rocksdbEnabled_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -140,6 +145,7 @@ private:
     size_t _GetWrrCountJournal(void);
     size_t _GetWrrCountMap(void);
     size_t _GetWrrCountGeneral(void);
+    bool _IsRocksdbEnabled(void);
 
     std::unordered_map<MetaFsConfigType, std::pair<std::string, int>> configMap_;
     ConfigManager* configManager_;
@@ -153,6 +159,7 @@ private:
     size_t wrrCountJournal_;
     size_t wrrCountMap_;
     size_t wrrCountGeneral_;
+    bool rocksdbEnabled_;
 };
 
 } // namespace pos

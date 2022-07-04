@@ -43,6 +43,9 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -92,7 +95,14 @@ ReverseMapManager::Init(void)
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
     {
-        revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+        if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+        {
+            revMapWholefile = new RocksDBMetaFsIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+        }
+        else
+        {
+            revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+        }
     }
     else
     {

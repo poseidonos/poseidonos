@@ -42,7 +42,9 @@
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/rocksdb_metafs_intf.h"
 namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
@@ -87,7 +89,14 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
 
     if (logFile == nullptr)
     {
-        logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+        if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+        {
+            logFile = new RocksDBMetaFsIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+        }
+        else
+        {
+            logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+        }
         POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
     }
     return 0;

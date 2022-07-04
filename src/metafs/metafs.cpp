@@ -40,6 +40,7 @@
 #include "src/metafs/log/metafs_log.h"
 #include "src/metafs/storage/pstore/mss_on_disk.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/metafs/config/metafs_config_manager.h"
 
 namespace pos
 {
@@ -56,7 +57,9 @@ MetaFs::MetaFs(void)
   arrayName_(""),
   arrayId_(INT32_MAX),
   metaStorage_(nullptr),
-  telemetryPublisher_(nullptr)
+  telemetryPublisher_(nullptr),
+  rocksMeta(nullptr),
+  fileDescriptorAllocator(nullptr)
 {
 }
 
@@ -83,6 +86,26 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
+
+    if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+    {
+        rocksdb::Options options;
+        options.create_if_missing = true;
+        // TODO(sang7.park) : get rocksdb directory location from config file
+        std::string metaRocksDir = "/POSRaid/";
+        std::string pathName = metaRocksDir + arrayInfo->GetName() + "_RocksMeta";
+        rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);
+        fileDescriptorAllocator = new FileDescriptorAllocator();
+        if (status.ok())
+        {
+            MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_SUCCEED, "RocksDB Open succeed path : {}", pathName);
+        }
+        else
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED, "RocksDB Open failed path : {}",pathName);
+        }
+        
+    }
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
@@ -99,7 +122,9 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
   arrayName_(arrayInfo->GetName()),
   arrayId_(arrayInfo->GetIndex()),
   metaStorage_(metaStorage_),
-  telemetryPublisher_(tp)
+  telemetryPublisher_(tp),
+  rocksMeta(nullptr),
+  fileDescriptorAllocator(nullptr)
 {
     if (nullptr != telemetryPublisher_)
         TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
@@ -146,6 +171,18 @@ MetaFs::~MetaFs(void)
         metaStorage_->Close();
         delete metaStorage_;
         metaStorage_ = nullptr;
+    }
+
+    if (nullptr != rocksMeta)
+    {
+        delete rocksMeta;
+        rocksMeta = nullptr;
+    }
+
+    if (nullptr != fileDescriptorAllocator)
+    {
+        delete fileDescriptorAllocator;
+        fileDescriptorAllocator = nullptr;
     }
 }
 
@@ -310,7 +347,6 @@ MetaFs::_Initialize(void)
 
     if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId_, &infoList))
         return false;
-
     return true;
 }
 

@@ -46,9 +46,12 @@
 #include "src/metafs/mai/metafs_wbt_api.h"
 #include "src/metafs/storage/mss.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/metafs/mvm/volume/file_descriptor_allocator.h"
+#include "rocksdb/db.h"
 
 namespace pos
 {
+class MetaFsConfigManager;
 class MetaFs : public IMountSequence
 {
 public:
@@ -66,6 +69,15 @@ public:
 
     virtual uint64_t GetEpochSignature(void);
     virtual StripeId GetTheLastValidStripeId(void);
+
+    virtual rocksdb::DB* GetRocksMeta(void)
+    {
+        return rocksMeta;
+    }
+    virtual FileDescriptorAllocator* GetFileDescriptorAllocator(void)
+    {
+        return fileDescriptorAllocator;
+    }
     virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
 
     MetaFsManagementApi* mgmt;
@@ -93,5 +105,7 @@ private:
     int arrayId_;
     MetaStorageSubsystem* metaStorage_;
     TelemetryPublisher* telemetryPublisher_;
+    rocksdb::DB* rocksMeta;
+    FileDescriptorAllocator* fileDescriptorAllocator;
 };
 } // namespace pos
