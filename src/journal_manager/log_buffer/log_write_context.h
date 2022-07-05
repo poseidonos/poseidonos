@@ -35,10 +35,18 @@
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 namespace pos
 {
 class LogBufferWriteDoneNotifier;
+
+enum class LogStage
+{
+    Issue,
+    Complete,
+    Count
+};
 
 class LogWriteContext : public LogBufferIoContext
 {
@@ -64,6 +72,7 @@ public:
     {
         return logFilledNotifier;
     }
+    MetaFsStopwatch<LogStage> stopwatch;
 
 protected:
     LogBufferWriteDoneNotifier* logFilledNotifier;

@@ -59,6 +59,7 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   maxPartitionSize(UINT64_MAX),
   areReplayWbStripesInUserArea(false),
   debugEnabled(false),
+  intervalForMetric(0),
   configManager(configManager),
   numLogGroups(2),
   logBufferSize(UINT64_MAX)
@@ -111,6 +112,12 @@ bool
 JournalConfiguration::IsDebugEnabled(void)
 {
     return debugEnabled;
+}
+
+uint64_t
+JournalConfiguration::GetIntervalForMetric(void)
+{
+    return intervalForMetric;
 }
 
 bool
@@ -178,6 +185,7 @@ JournalConfiguration::_ReadConfiguration(void)
         debugEnabled = _IsDebugEnabled();
         logBufferSizeInConfig = _ReadLogBufferSize();
         rocksdbEnabled = _IsRocksdbEnabled();
+        intervalForMetric = _GetIntervalForMetric();
     }
     else
     {
@@ -221,6 +229,23 @@ JournalConfiguration::_IsDebugEnabled(void)
     }
 
     return false;
+}
+
+uint64_t
+JournalConfiguration::_GetIntervalForMetric(void)
+{
+    uint64_t interval = 0;
+    int ret = configManager->GetValue("journal", "interval_in_msec_for_metric",
+        static_cast<void*>(&interval), ConfigType::CONFIG_TYPE_UINT64);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "Interval is {}", interval);
+        return interval;
+    }
+
+    return 0;
 }
 
 uint64_t

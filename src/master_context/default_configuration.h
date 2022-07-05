@@ -80,7 +80,8 @@ private:
     vector<ConfigKeyValue> journalData = {
         {"enable", "true"},
         {"buffer_size_in_mb", "0"},
-        {"debug_mode", "false"}
+        {"debug_mode", "false"},
+        {"interval_in_msec_for_metric", "1000"}
     };
     vector<ConfigKeyValue> flushData = {
         {"enable", "false"},
