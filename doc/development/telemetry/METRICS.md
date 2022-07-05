@@ -32,6 +32,9 @@
   - [_**jrn_log_group_reset_cnt**_](#jrn_log_group_reset_cnt)
   - [_**jrn_log_group_reset_done_cnt**_](#jrn_log_group_reset_done_cnt)
   - [_**jrn_load_log_group**_](#jrn_load_log_group)
+  - [_**jrn_log_count**_](#jrn_log_count)
+  - [_**jrn_log_done_count**_](#jrn_log_done_count)
+  - [_**jrn_log_write_time_average**_](#jrn_log_write_time_average)
 - [**MetaFs**](#metafs)
   - [_**normal_shutdown_npor**_](#normal_shutdown_npor)
   - [_**user_request**_](#user_request)
@@ -590,6 +593,54 @@ The count of log group reset done
 **Introduced**: v0.11.0
 
 Whether a log group is being loaded
+
+---
+
+### _**jrn_log_count**_
+
+**ID**: 36005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of log issued
+
+---
+
+### _**jrn_log_done_count**_
+
+**ID**: 36006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of log done
+
+---
+
+### _**jrn_log_write_time_average**_
+
+**ID**: 36007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+Average of time spent from issue to done
 
 ---
 ## **MetaFs**

@@ -56,6 +56,7 @@ public:
     // Can be called before initialized
     virtual bool IsEnabled(void);
     virtual bool IsDebugEnabled(void);
+    virtual uint64_t GetIntervalForMetric(void);
     virtual bool AreReplayWbStripesInUserArea(void);
     virtual bool IsRocksdbEnabled(void);
 
@@ -90,6 +91,7 @@ private:
     void _ReadConfiguration(void);
     bool _IsJournalEnabled(void);
     bool _IsDebugEnabled(void);
+    uint64_t _GetIntervalForMetric(void);
     uint64_t _ReadLogBufferSize(void);
     bool _IsRocksdbEnabled(void);
 
@@ -97,6 +99,7 @@ private:
 
     bool areReplayWbStripesInUserArea;
     bool debugEnabled;
+    uint64_t intervalForMetric;
 
     ConfigManager* configManager;
     int numLogGroups;
