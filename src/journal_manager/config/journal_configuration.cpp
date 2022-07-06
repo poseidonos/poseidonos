@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   debugEnabled(false),
   intervalForMetric(0),
   configManager(configManager),
-  numLogGroups(2),
+  numLogGroups(DEFAULT_NUMBER_OF_LOG_GROUPS),
   logBufferSize(UINT64_MAX)
 {
     _ReadConfiguration();
@@ -186,6 +186,7 @@ JournalConfiguration::_ReadConfiguration(void)
         logBufferSizeInConfig = _ReadLogBufferSize();
         rocksdbEnabled = _IsRocksdbEnabled();
         intervalForMetric = _GetIntervalForMetric();
+        numLogGroups = _ReadNumLogGroup();
     }
     else
     {
@@ -263,6 +264,26 @@ JournalConfiguration::_ReadLogBufferSize(void)
         size = 0;
     }
     return size;
+}
+
+uint64_t
+JournalConfiguration::_ReadNumLogGroup(void)
+{
+    uint64_t count = 0;
+    int ret = configManager->GetValue("journal", "number_of_log_groups",
+        static_cast<void*>(&count), ConfigType::CONFIG_TYPE_UINT64);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "The number of log groups is {}", count);
+    }
+    else
+    {
+        count = DEFAULT_NUMBER_OF_LOG_GROUPS;
+    }
+
+    return count;
 }
 
 bool
