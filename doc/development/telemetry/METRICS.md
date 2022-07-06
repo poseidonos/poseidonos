@@ -27,6 +27,10 @@
   - [_**write_host_rate_bytes_per_second_per_ssd**_](#write_host_rate_bytes_per_second_per_ssd)
   - [_**write_flush_rate_bytes_per_second_per_ssd**_](#write_flush_rate_bytes_per_second_per_ssd)
   - [_**write_rebuild_rate_bytes_per_second_per_ssd**_](#write_rebuild_rate_bytes_per_second_per_ssd)
+  - [_**read_journal_iops_per_ssd**_](#read_journal_iops_per_ssd)
+  - [_**read_journal_rate_bytes_per_second_per_ssd**_](#read_journal_rate_bytes_per_second_per_ssd)
+  - [_**write_journal_iops_per_ssd**_](#write_journal_iops_per_ssd)
+  - [_**write_journal_rate_bytes_per_second_per_ssd**_](#write_journal_rate_bytes_per_second_per_ssd)
 - [**Journal**](#journal)
   - [_**jrn_checkpoint**_](#jrn_checkpoint)
   - [_**jrn_log_group_reset_cnt**_](#jrn_log_group_reset_cnt)
@@ -526,6 +530,70 @@ The rate(bytes/second) of flush type write in a specific SSD
 **Introduced**: v0.11.0
 
 The rate(bytes/second) of rebuild type write in a specific SSD
+
+---
+
+### _**read_journal_iops_per_ssd**_
+
+**ID**: 20024
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of journal type read in a specific SSD
+
+---
+
+### _**read_journal_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20025
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of journal type read in a specific SSD
+
+---
+
+### _**write_journal_iops_per_ssd**_
+
+**ID**: 20026
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of journal type read in a specific SSD
+
+---
+
+### _**write_journal_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20027
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of journal type read in a specific SSD
 
 ---
 ## **Journal**

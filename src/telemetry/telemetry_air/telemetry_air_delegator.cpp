@@ -435,6 +435,11 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                             iopsMetricId = TEL20000_READ_UNKNOWN_IOPS_PER_SSD;
                             bwMetricId = TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
+                        else if (0 == str_filter.compare("\"AIR_JOURNAL\""))
+                        {
+                            iopsMetricId = TEL20024_READ_JOURNAL_IOPS_PER_SSD;
+                            bwMetricId = TEL20025_READ_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD;
+                        }
                         else if (0 == str_filter.compare("\"AIR_META\""))
                         {
                             iopsMetricId = TEL20001_READ_META_IOPS_PER_SSD;
@@ -495,6 +500,11 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                         {
                             iopsMetricId = TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD;
                             bwMetricId = TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
+                        }
+                        else if (0 == str_filter.compare("\"AIR_JOURNAL\""))
+                        {
+                            iopsMetricId = TEL20026_WRITE_JOURNAL_IOPS_PER_SSD;
+                            bwMetricId = TEL20027_WRITE_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD;
                         }
                         else if (0 == str_filter.compare("\"AIR_META\""))
                         {
