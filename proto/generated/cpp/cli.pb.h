@@ -1248,6 +1248,12 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   enum : int {
     kVersionFieldNumber = 1,
     kBiosVersionFieldNumber = 2,
+    kBiosVendorFieldNumber = 3,
+    kBiosReleaseDateFieldNumber = 4,
+    kSystemManufacturerFieldNumber = 5,
+    kSystemProductNameFieldNumber = 6,
+    kSystemSerialNumberFieldNumber = 7,
+    kSystemUuidFieldNumber = 8,
   };
   // string version = 1;
   void clear_version();
@@ -1281,6 +1287,102 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   std::string* _internal_mutable_biosversion();
   public:
 
+  // string biosVendor = 3;
+  void clear_biosvendor();
+  const std::string& biosvendor() const;
+  void set_biosvendor(const std::string& value);
+  void set_biosvendor(std::string&& value);
+  void set_biosvendor(const char* value);
+  void set_biosvendor(const char* value, size_t size);
+  std::string* mutable_biosvendor();
+  std::string* release_biosvendor();
+  void set_allocated_biosvendor(std::string* biosvendor);
+  private:
+  const std::string& _internal_biosvendor() const;
+  void _internal_set_biosvendor(const std::string& value);
+  std::string* _internal_mutable_biosvendor();
+  public:
+
+  // string biosReleaseDate = 4;
+  void clear_biosreleasedate();
+  const std::string& biosreleasedate() const;
+  void set_biosreleasedate(const std::string& value);
+  void set_biosreleasedate(std::string&& value);
+  void set_biosreleasedate(const char* value);
+  void set_biosreleasedate(const char* value, size_t size);
+  std::string* mutable_biosreleasedate();
+  std::string* release_biosreleasedate();
+  void set_allocated_biosreleasedate(std::string* biosreleasedate);
+  private:
+  const std::string& _internal_biosreleasedate() const;
+  void _internal_set_biosreleasedate(const std::string& value);
+  std::string* _internal_mutable_biosreleasedate();
+  public:
+
+  // string systemManufacturer = 5;
+  void clear_systemmanufacturer();
+  const std::string& systemmanufacturer() const;
+  void set_systemmanufacturer(const std::string& value);
+  void set_systemmanufacturer(std::string&& value);
+  void set_systemmanufacturer(const char* value);
+  void set_systemmanufacturer(const char* value, size_t size);
+  std::string* mutable_systemmanufacturer();
+  std::string* release_systemmanufacturer();
+  void set_allocated_systemmanufacturer(std::string* systemmanufacturer);
+  private:
+  const std::string& _internal_systemmanufacturer() const;
+  void _internal_set_systemmanufacturer(const std::string& value);
+  std::string* _internal_mutable_systemmanufacturer();
+  public:
+
+  // string systemProductName = 6;
+  void clear_systemproductname();
+  const std::string& systemproductname() const;
+  void set_systemproductname(const std::string& value);
+  void set_systemproductname(std::string&& value);
+  void set_systemproductname(const char* value);
+  void set_systemproductname(const char* value, size_t size);
+  std::string* mutable_systemproductname();
+  std::string* release_systemproductname();
+  void set_allocated_systemproductname(std::string* systemproductname);
+  private:
+  const std::string& _internal_systemproductname() const;
+  void _internal_set_systemproductname(const std::string& value);
+  std::string* _internal_mutable_systemproductname();
+  public:
+
+  // string systemSerialNumber = 7;
+  void clear_systemserialnumber();
+  const std::string& systemserialnumber() const;
+  void set_systemserialnumber(const std::string& value);
+  void set_systemserialnumber(std::string&& value);
+  void set_systemserialnumber(const char* value);
+  void set_systemserialnumber(const char* value, size_t size);
+  std::string* mutable_systemserialnumber();
+  std::string* release_systemserialnumber();
+  void set_allocated_systemserialnumber(std::string* systemserialnumber);
+  private:
+  const std::string& _internal_systemserialnumber() const;
+  void _internal_set_systemserialnumber(const std::string& value);
+  std::string* _internal_mutable_systemserialnumber();
+  public:
+
+  // string systemUuid = 8;
+  void clear_systemuuid();
+  const std::string& systemuuid() const;
+  void set_systemuuid(const std::string& value);
+  void set_systemuuid(std::string&& value);
+  void set_systemuuid(const char* value);
+  void set_systemuuid(const char* value, size_t size);
+  std::string* mutable_systemuuid();
+  std::string* release_systemuuid();
+  void set_allocated_systemuuid(std::string* systemuuid);
+  private:
+  const std::string& _internal_systemuuid() const;
+  void _internal_set_systemuuid(const std::string& value);
+  std::string* _internal_mutable_systemuuid();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.SystemInfoResponse.Result.Data)
  private:
   class _Internal;
@@ -1290,6 +1392,12 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr biosversion_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr biosvendor_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr biosreleasedate_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemmanufacturer_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemproductname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemserialnumber_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemuuid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -25128,6 +25236,372 @@ inline void SystemInfoResponse_Result_Data::set_allocated_biosversion(std::strin
   biosversion_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), biosversion,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+}
+
+// string biosVendor = 3;
+inline void SystemInfoResponse_Result_Data::clear_biosvendor() {
+  biosvendor_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::biosvendor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+  return _internal_biosvendor();
+}
+inline void SystemInfoResponse_Result_Data::set_biosvendor(const std::string& value) {
+  _internal_set_biosvendor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_biosvendor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+  return _internal_mutable_biosvendor();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_biosvendor() const {
+  return biosvendor_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_biosvendor(const std::string& value) {
+  
+  biosvendor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_biosvendor(std::string&& value) {
+  
+  biosvendor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+}
+inline void SystemInfoResponse_Result_Data::set_biosvendor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  biosvendor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+}
+inline void SystemInfoResponse_Result_Data::set_biosvendor(const char* value,
+    size_t size) {
+  
+  biosvendor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_biosvendor() {
+  
+  return biosvendor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_biosvendor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+  return biosvendor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_biosvendor(std::string* biosvendor) {
+  if (biosvendor != nullptr) {
+    
+  } else {
+    
+  }
+  biosvendor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), biosvendor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.biosVendor)
+}
+
+// string biosReleaseDate = 4;
+inline void SystemInfoResponse_Result_Data::clear_biosreleasedate() {
+  biosreleasedate_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::biosreleasedate() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+  return _internal_biosreleasedate();
+}
+inline void SystemInfoResponse_Result_Data::set_biosreleasedate(const std::string& value) {
+  _internal_set_biosreleasedate(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_biosreleasedate() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+  return _internal_mutable_biosreleasedate();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_biosreleasedate() const {
+  return biosreleasedate_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_biosreleasedate(const std::string& value) {
+  
+  biosreleasedate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_biosreleasedate(std::string&& value) {
+  
+  biosreleasedate_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+}
+inline void SystemInfoResponse_Result_Data::set_biosreleasedate(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  biosreleasedate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+}
+inline void SystemInfoResponse_Result_Data::set_biosreleasedate(const char* value,
+    size_t size) {
+  
+  biosreleasedate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_biosreleasedate() {
+  
+  return biosreleasedate_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_biosreleasedate() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+  return biosreleasedate_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_biosreleasedate(std::string* biosreleasedate) {
+  if (biosreleasedate != nullptr) {
+    
+  } else {
+    
+  }
+  biosreleasedate_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), biosreleasedate,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate)
+}
+
+// string systemManufacturer = 5;
+inline void SystemInfoResponse_Result_Data::clear_systemmanufacturer() {
+  systemmanufacturer_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::systemmanufacturer() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+  return _internal_systemmanufacturer();
+}
+inline void SystemInfoResponse_Result_Data::set_systemmanufacturer(const std::string& value) {
+  _internal_set_systemmanufacturer(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_systemmanufacturer() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+  return _internal_mutable_systemmanufacturer();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_systemmanufacturer() const {
+  return systemmanufacturer_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_systemmanufacturer(const std::string& value) {
+  
+  systemmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_systemmanufacturer(std::string&& value) {
+  
+  systemmanufacturer_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_systemmanufacturer(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  systemmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_systemmanufacturer(const char* value,
+    size_t size) {
+  
+  systemmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_systemmanufacturer() {
+  
+  return systemmanufacturer_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_systemmanufacturer() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+  return systemmanufacturer_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_systemmanufacturer(std::string* systemmanufacturer) {
+  if (systemmanufacturer != nullptr) {
+    
+  } else {
+    
+  }
+  systemmanufacturer_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), systemmanufacturer,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer)
+}
+
+// string systemProductName = 6;
+inline void SystemInfoResponse_Result_Data::clear_systemproductname() {
+  systemproductname_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::systemproductname() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+  return _internal_systemproductname();
+}
+inline void SystemInfoResponse_Result_Data::set_systemproductname(const std::string& value) {
+  _internal_set_systemproductname(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_systemproductname() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+  return _internal_mutable_systemproductname();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_systemproductname() const {
+  return systemproductname_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_systemproductname(const std::string& value) {
+  
+  systemproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_systemproductname(std::string&& value) {
+  
+  systemproductname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+}
+inline void SystemInfoResponse_Result_Data::set_systemproductname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  systemproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+}
+inline void SystemInfoResponse_Result_Data::set_systemproductname(const char* value,
+    size_t size) {
+  
+  systemproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_systemproductname() {
+  
+  return systemproductname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_systemproductname() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+  return systemproductname_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_systemproductname(std::string* systemproductname) {
+  if (systemproductname != nullptr) {
+    
+  } else {
+    
+  }
+  systemproductname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), systemproductname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.systemProductName)
+}
+
+// string systemSerialNumber = 7;
+inline void SystemInfoResponse_Result_Data::clear_systemserialnumber() {
+  systemserialnumber_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::systemserialnumber() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+  return _internal_systemserialnumber();
+}
+inline void SystemInfoResponse_Result_Data::set_systemserialnumber(const std::string& value) {
+  _internal_set_systemserialnumber(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_systemserialnumber() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+  return _internal_mutable_systemserialnumber();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_systemserialnumber() const {
+  return systemserialnumber_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_systemserialnumber(const std::string& value) {
+  
+  systemserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_systemserialnumber(std::string&& value) {
+  
+  systemserialnumber_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+}
+inline void SystemInfoResponse_Result_Data::set_systemserialnumber(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  systemserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+}
+inline void SystemInfoResponse_Result_Data::set_systemserialnumber(const char* value,
+    size_t size) {
+  
+  systemserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_systemserialnumber() {
+  
+  return systemserialnumber_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_systemserialnumber() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+  return systemserialnumber_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_systemserialnumber(std::string* systemserialnumber) {
+  if (systemserialnumber != nullptr) {
+    
+  } else {
+    
+  }
+  systemserialnumber_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), systemserialnumber,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber)
+}
+
+// string systemUuid = 8;
+inline void SystemInfoResponse_Result_Data::clear_systemuuid() {
+  systemuuid_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::systemuuid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+  return _internal_systemuuid();
+}
+inline void SystemInfoResponse_Result_Data::set_systemuuid(const std::string& value) {
+  _internal_set_systemuuid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_systemuuid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+  return _internal_mutable_systemuuid();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_systemuuid() const {
+  return systemuuid_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_systemuuid(const std::string& value) {
+  
+  systemuuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_systemuuid(std::string&& value) {
+  
+  systemuuid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+}
+inline void SystemInfoResponse_Result_Data::set_systemuuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  systemuuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+}
+inline void SystemInfoResponse_Result_Data::set_systemuuid(const char* value,
+    size_t size) {
+  
+  systemuuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_systemuuid() {
+  
+  return systemuuid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_systemuuid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+  return systemuuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_systemuuid(std::string* systemuuid) {
+  if (systemuuid != nullptr) {
+    
+  } else {
+    
+  }
+  systemuuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), systemuuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
 }
 
 // -------------------------------------------------------------------

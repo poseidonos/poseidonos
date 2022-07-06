@@ -172,7 +172,15 @@ private:
         std::string version;
         std::string releaseDate;
     } BiosInfo;
+
+    typedef struct SystemInfo {
+        std::string manufacturer;
+        std::string productName;
+        std::string serialNumber;
+        std::string uuid;
+    } SystemInfo;
     
     BiosInfo _GetBiosInfo();
-    std::string _ExecuteLinuxCmd(std::string command);
+    SystemInfo _GetSystemInfo();
+    std::string _ExecuteLinuxCmd(std::string command);    
 };

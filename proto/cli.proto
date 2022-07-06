@@ -184,8 +184,12 @@ message SystemInfoResponse {
 		message Data {
 			string version = 1;
 			string biosVersion = 2;
-			string biosVendor = 2;
-			string biosReleaseDate = 3;
+			string biosVendor = 3;
+			string biosReleaseDate = 4;
+			string systemManufacturer = 5;
+			string systemProductName = 6;
+			string systemSerialNumber = 7;
+			string systemUuid = 8;
 		}
 		Data data = 2;
 	}
