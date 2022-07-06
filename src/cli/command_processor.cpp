@@ -60,6 +60,11 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     reply->mutable_result()->mutable_data()->set_baseboardserialnumber(baseboardInfo.serialNumber);
     reply->mutable_result()->mutable_data()->set_baseboardversion(baseboardInfo.version);
 
+    ProcessorInfo proccessorInfo = _GetProcessorInfo();
+    reply->mutable_result()->mutable_data()->set_processormanufacturer(proccessorInfo.manufacturer);
+    reply->mutable_result()->mutable_data()->set_processorversion(proccessorInfo.version);
+    reply->mutable_result()->mutable_data()->set_processorfrequency(proccessorInfo.frequency);
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     
@@ -1383,6 +1388,21 @@ CommandProcessor::_GetBaseboardInfo()
     baseboard.version = _ExecuteLinuxCmd(getBaseboardVersionCmd);
 
     return baseboard;
+}
+
+CommandProcessor::ProcessorInfo
+CommandProcessor::_GetProcessorInfo()
+{
+    const std::string getProcessorManufacturerCmd = "dmidecode -s processor-manufacturer";
+    const std::string getProcessorVersioneCmd = "dmidecode -s processor-version";
+    const std::string getProcessorFrequencyCmd = "dmidecode -s processor-frequency";
+    
+    ProcessorInfo processor;
+    processor.manufacturer = _ExecuteLinuxCmd(getProcessorManufacturerCmd);
+    processor.version = _ExecuteLinuxCmd(getProcessorVersioneCmd);
+    processor.frequency = _ExecuteLinuxCmd(getProcessorFrequencyCmd);
+
+    return processor;
 }
 
 std::string

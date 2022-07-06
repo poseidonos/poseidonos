@@ -1258,6 +1258,9 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
     kBaseboardProductNameFieldNumber = 10,
     kBaseboardSerialNumberFieldNumber = 11,
     kBaseboardVersionFieldNumber = 12,
+    kProcessorManufacturerFieldNumber = 13,
+    kProcessorVersionFieldNumber = 14,
+    kProcessorFrequencyFieldNumber = 15,
   };
   // string version = 1;
   void clear_version();
@@ -1451,6 +1454,54 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   std::string* _internal_mutable_baseboardversion();
   public:
 
+  // string processorManufacturer = 13;
+  void clear_processormanufacturer();
+  const std::string& processormanufacturer() const;
+  void set_processormanufacturer(const std::string& value);
+  void set_processormanufacturer(std::string&& value);
+  void set_processormanufacturer(const char* value);
+  void set_processormanufacturer(const char* value, size_t size);
+  std::string* mutable_processormanufacturer();
+  std::string* release_processormanufacturer();
+  void set_allocated_processormanufacturer(std::string* processormanufacturer);
+  private:
+  const std::string& _internal_processormanufacturer() const;
+  void _internal_set_processormanufacturer(const std::string& value);
+  std::string* _internal_mutable_processormanufacturer();
+  public:
+
+  // string processorVersion = 14;
+  void clear_processorversion();
+  const std::string& processorversion() const;
+  void set_processorversion(const std::string& value);
+  void set_processorversion(std::string&& value);
+  void set_processorversion(const char* value);
+  void set_processorversion(const char* value, size_t size);
+  std::string* mutable_processorversion();
+  std::string* release_processorversion();
+  void set_allocated_processorversion(std::string* processorversion);
+  private:
+  const std::string& _internal_processorversion() const;
+  void _internal_set_processorversion(const std::string& value);
+  std::string* _internal_mutable_processorversion();
+  public:
+
+  // string processorFrequency = 15;
+  void clear_processorfrequency();
+  const std::string& processorfrequency() const;
+  void set_processorfrequency(const std::string& value);
+  void set_processorfrequency(std::string&& value);
+  void set_processorfrequency(const char* value);
+  void set_processorfrequency(const char* value, size_t size);
+  std::string* mutable_processorfrequency();
+  std::string* release_processorfrequency();
+  void set_allocated_processorfrequency(std::string* processorfrequency);
+  private:
+  const std::string& _internal_processorfrequency() const;
+  void _internal_set_processorfrequency(const std::string& value);
+  std::string* _internal_mutable_processorfrequency();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.SystemInfoResponse.Result.Data)
  private:
   class _Internal;
@@ -1470,6 +1521,9 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardproductname_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardserialnumber_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardversion_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr processormanufacturer_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr processorversion_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr processorfrequency_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -25918,6 +25972,189 @@ inline void SystemInfoResponse_Result_Data::set_allocated_baseboardversion(std::
   baseboardversion_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), baseboardversion,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+}
+
+// string processorManufacturer = 13;
+inline void SystemInfoResponse_Result_Data::clear_processormanufacturer() {
+  processormanufacturer_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::processormanufacturer() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+  return _internal_processormanufacturer();
+}
+inline void SystemInfoResponse_Result_Data::set_processormanufacturer(const std::string& value) {
+  _internal_set_processormanufacturer(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_processormanufacturer() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+  return _internal_mutable_processormanufacturer();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_processormanufacturer() const {
+  return processormanufacturer_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_processormanufacturer(const std::string& value) {
+  
+  processormanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_processormanufacturer(std::string&& value) {
+  
+  processormanufacturer_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_processormanufacturer(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  processormanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_processormanufacturer(const char* value,
+    size_t size) {
+  
+  processormanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_processormanufacturer() {
+  
+  return processormanufacturer_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_processormanufacturer() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+  return processormanufacturer_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_processormanufacturer(std::string* processormanufacturer) {
+  if (processormanufacturer != nullptr) {
+    
+  } else {
+    
+  }
+  processormanufacturer_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), processormanufacturer,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.processorManufacturer)
+}
+
+// string processorVersion = 14;
+inline void SystemInfoResponse_Result_Data::clear_processorversion() {
+  processorversion_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::processorversion() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+  return _internal_processorversion();
+}
+inline void SystemInfoResponse_Result_Data::set_processorversion(const std::string& value) {
+  _internal_set_processorversion(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_processorversion() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+  return _internal_mutable_processorversion();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_processorversion() const {
+  return processorversion_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_processorversion(const std::string& value) {
+  
+  processorversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_processorversion(std::string&& value) {
+  
+  processorversion_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_processorversion(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  processorversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_processorversion(const char* value,
+    size_t size) {
+  
+  processorversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_processorversion() {
+  
+  return processorversion_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_processorversion() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+  return processorversion_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_processorversion(std::string* processorversion) {
+  if (processorversion != nullptr) {
+    
+  } else {
+    
+  }
+  processorversion_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), processorversion,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.processorVersion)
+}
+
+// string processorFrequency = 15;
+inline void SystemInfoResponse_Result_Data::clear_processorfrequency() {
+  processorfrequency_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::processorfrequency() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+  return _internal_processorfrequency();
+}
+inline void SystemInfoResponse_Result_Data::set_processorfrequency(const std::string& value) {
+  _internal_set_processorfrequency(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_processorfrequency() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+  return _internal_mutable_processorfrequency();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_processorfrequency() const {
+  return processorfrequency_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_processorfrequency(const std::string& value) {
+  
+  processorfrequency_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_processorfrequency(std::string&& value) {
+  
+  processorfrequency_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+}
+inline void SystemInfoResponse_Result_Data::set_processorfrequency(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  processorfrequency_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+}
+inline void SystemInfoResponse_Result_Data::set_processorfrequency(const char* value,
+    size_t size) {
+  
+  processorfrequency_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_processorfrequency() {
+  
+  return processorfrequency_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_processorfrequency() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
+  return processorfrequency_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_processorfrequency(std::string* processorfrequency) {
+  if (processorfrequency != nullptr) {
+    
+  } else {
+    
+  }
+  processorfrequency_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), processorfrequency,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.processorFrequency)
 }
 
 // -------------------------------------------------------------------

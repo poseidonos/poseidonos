@@ -186,9 +186,16 @@ private:
         std::string serialNumber;
         std::string version;
     } BaseboardInfo;
+
+    typedef struct ProcessorInfo {
+        std::string manufacturer;
+        std::string version;
+        std::string frequency;
+    } ProcessorInfo;
     
     BiosInfo _GetBiosInfo();
     SystemInfo _GetSystemInfo();
     BaseboardInfo _GetBaseboardInfo();
+    ProcessorInfo _GetProcessorInfo();
     std::string _ExecuteLinuxCmd(std::string command);    
 };

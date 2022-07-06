@@ -194,6 +194,9 @@ message SystemInfoResponse {
 			string baseboardProductName = 10;
 			string baseboardSerialNumber = 11;
 			string baseboardVersion = 12;
+			string processorManufacturer = 13;
+			string processorVersion = 14;
+			string processorFrequency = 15;
 		}
 		Data data = 2;
 	}
