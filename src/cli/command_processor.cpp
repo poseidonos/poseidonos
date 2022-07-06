@@ -1421,7 +1421,9 @@ CommandProcessor::_ExecuteLinuxCmd(std::string command)
           result += buffer;
     }   
     
-    buffer[strcspn(buffer, "\n")] = '\0';    
+    result.erase(std::remove(result.begin(), result.end(), '\n'),
+            result.end());
     pclose(pipe);
+
     return result;
 }
