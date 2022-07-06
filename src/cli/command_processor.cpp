@@ -1327,10 +1327,12 @@ CommandProcessor::_GetBiosInfo()
 {
     const std::string getBiosVersionCmd = "dmidecode -s bios-version";
     const std::string getBiosVendorCmd = "dmidecode -s bios-vendor";
+    const std::string getBiosReleaseDateCmd = "dmidecode -s bios-release-date";
     
     BiosInfo bios;
     bios.version = _ExecuteLinuxCmd(getBiosVersionCmd);
     bios.vendor = _ExecuteLinuxCmd(getBiosVendorCmd);
+    bios.releaseDate = _ExecuteLinuxCmd(getBiosReleaseDateCmd);
 
     return bios;
 }
