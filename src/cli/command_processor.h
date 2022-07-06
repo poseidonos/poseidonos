@@ -179,8 +179,16 @@ private:
         std::string serialNumber;
         std::string uuid;
     } SystemInfo;
+
+    typedef struct BaseboardInfo {
+        std::string manufacturer;
+        std::string productName;
+        std::string serialNumber;
+        std::string version;
+    } BaseboardInfo;
     
     BiosInfo _GetBiosInfo();
     SystemInfo _GetSystemInfo();
+    BaseboardInfo _GetBaseboardInfo();
     std::string _ExecuteLinuxCmd(std::string command);    
 };

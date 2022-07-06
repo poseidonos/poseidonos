@@ -190,6 +190,10 @@ message SystemInfoResponse {
 			string systemProductName = 6;
 			string systemSerialNumber = 7;
 			string systemUuid = 8;
+			string baseboardManufacturer = 9;
+			string baseboardProductName = 10;
+			string baseboardSerialNumber = 11;
+			string baseboardVersion = 12;
 		}
 		Data data = 2;
 	}

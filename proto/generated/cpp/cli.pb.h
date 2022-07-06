@@ -1254,6 +1254,10 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
     kSystemProductNameFieldNumber = 6,
     kSystemSerialNumberFieldNumber = 7,
     kSystemUuidFieldNumber = 8,
+    kBaseboardManufacturerFieldNumber = 9,
+    kBaseboardProductNameFieldNumber = 10,
+    kBaseboardSerialNumberFieldNumber = 11,
+    kBaseboardVersionFieldNumber = 12,
   };
   // string version = 1;
   void clear_version();
@@ -1383,6 +1387,70 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   std::string* _internal_mutable_systemuuid();
   public:
 
+  // string baseboardManufacturer = 9;
+  void clear_baseboardmanufacturer();
+  const std::string& baseboardmanufacturer() const;
+  void set_baseboardmanufacturer(const std::string& value);
+  void set_baseboardmanufacturer(std::string&& value);
+  void set_baseboardmanufacturer(const char* value);
+  void set_baseboardmanufacturer(const char* value, size_t size);
+  std::string* mutable_baseboardmanufacturer();
+  std::string* release_baseboardmanufacturer();
+  void set_allocated_baseboardmanufacturer(std::string* baseboardmanufacturer);
+  private:
+  const std::string& _internal_baseboardmanufacturer() const;
+  void _internal_set_baseboardmanufacturer(const std::string& value);
+  std::string* _internal_mutable_baseboardmanufacturer();
+  public:
+
+  // string baseboardProductName = 10;
+  void clear_baseboardproductname();
+  const std::string& baseboardproductname() const;
+  void set_baseboardproductname(const std::string& value);
+  void set_baseboardproductname(std::string&& value);
+  void set_baseboardproductname(const char* value);
+  void set_baseboardproductname(const char* value, size_t size);
+  std::string* mutable_baseboardproductname();
+  std::string* release_baseboardproductname();
+  void set_allocated_baseboardproductname(std::string* baseboardproductname);
+  private:
+  const std::string& _internal_baseboardproductname() const;
+  void _internal_set_baseboardproductname(const std::string& value);
+  std::string* _internal_mutable_baseboardproductname();
+  public:
+
+  // string baseboardSerialNumber = 11;
+  void clear_baseboardserialnumber();
+  const std::string& baseboardserialnumber() const;
+  void set_baseboardserialnumber(const std::string& value);
+  void set_baseboardserialnumber(std::string&& value);
+  void set_baseboardserialnumber(const char* value);
+  void set_baseboardserialnumber(const char* value, size_t size);
+  std::string* mutable_baseboardserialnumber();
+  std::string* release_baseboardserialnumber();
+  void set_allocated_baseboardserialnumber(std::string* baseboardserialnumber);
+  private:
+  const std::string& _internal_baseboardserialnumber() const;
+  void _internal_set_baseboardserialnumber(const std::string& value);
+  std::string* _internal_mutable_baseboardserialnumber();
+  public:
+
+  // string baseboardVersion = 12;
+  void clear_baseboardversion();
+  const std::string& baseboardversion() const;
+  void set_baseboardversion(const std::string& value);
+  void set_baseboardversion(std::string&& value);
+  void set_baseboardversion(const char* value);
+  void set_baseboardversion(const char* value, size_t size);
+  std::string* mutable_baseboardversion();
+  std::string* release_baseboardversion();
+  void set_allocated_baseboardversion(std::string* baseboardversion);
+  private:
+  const std::string& _internal_baseboardversion() const;
+  void _internal_set_baseboardversion(const std::string& value);
+  std::string* _internal_mutable_baseboardversion();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.SystemInfoResponse.Result.Data)
  private:
   class _Internal;
@@ -1398,6 +1466,10 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemproductname_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemserialnumber_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr systemuuid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardmanufacturer_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardproductname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardserialnumber_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr baseboardversion_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -25602,6 +25674,250 @@ inline void SystemInfoResponse_Result_Data::set_allocated_systemuuid(std::string
   systemuuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), systemuuid,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.systemUuid)
+}
+
+// string baseboardManufacturer = 9;
+inline void SystemInfoResponse_Result_Data::clear_baseboardmanufacturer() {
+  baseboardmanufacturer_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::baseboardmanufacturer() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+  return _internal_baseboardmanufacturer();
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardmanufacturer(const std::string& value) {
+  _internal_set_baseboardmanufacturer(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_baseboardmanufacturer() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+  return _internal_mutable_baseboardmanufacturer();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_baseboardmanufacturer() const {
+  return baseboardmanufacturer_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_baseboardmanufacturer(const std::string& value) {
+  
+  baseboardmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardmanufacturer(std::string&& value) {
+  
+  baseboardmanufacturer_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardmanufacturer(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  baseboardmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardmanufacturer(const char* value,
+    size_t size) {
+  
+  baseboardmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_baseboardmanufacturer() {
+  
+  return baseboardmanufacturer_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_baseboardmanufacturer() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+  return baseboardmanufacturer_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_baseboardmanufacturer(std::string* baseboardmanufacturer) {
+  if (baseboardmanufacturer != nullptr) {
+    
+  } else {
+    
+  }
+  baseboardmanufacturer_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), baseboardmanufacturer,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.baseboardManufacturer)
+}
+
+// string baseboardProductName = 10;
+inline void SystemInfoResponse_Result_Data::clear_baseboardproductname() {
+  baseboardproductname_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::baseboardproductname() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+  return _internal_baseboardproductname();
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardproductname(const std::string& value) {
+  _internal_set_baseboardproductname(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_baseboardproductname() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+  return _internal_mutable_baseboardproductname();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_baseboardproductname() const {
+  return baseboardproductname_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_baseboardproductname(const std::string& value) {
+  
+  baseboardproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardproductname(std::string&& value) {
+  
+  baseboardproductname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardproductname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  baseboardproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardproductname(const char* value,
+    size_t size) {
+  
+  baseboardproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_baseboardproductname() {
+  
+  return baseboardproductname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_baseboardproductname() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+  return baseboardproductname_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_baseboardproductname(std::string* baseboardproductname) {
+  if (baseboardproductname != nullptr) {
+    
+  } else {
+    
+  }
+  baseboardproductname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), baseboardproductname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.baseboardProductName)
+}
+
+// string baseboardSerialNumber = 11;
+inline void SystemInfoResponse_Result_Data::clear_baseboardserialnumber() {
+  baseboardserialnumber_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::baseboardserialnumber() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+  return _internal_baseboardserialnumber();
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardserialnumber(const std::string& value) {
+  _internal_set_baseboardserialnumber(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_baseboardserialnumber() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+  return _internal_mutable_baseboardserialnumber();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_baseboardserialnumber() const {
+  return baseboardserialnumber_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_baseboardserialnumber(const std::string& value) {
+  
+  baseboardserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardserialnumber(std::string&& value) {
+  
+  baseboardserialnumber_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardserialnumber(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  baseboardserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardserialnumber(const char* value,
+    size_t size) {
+  
+  baseboardserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_baseboardserialnumber() {
+  
+  return baseboardserialnumber_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_baseboardserialnumber() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+  return baseboardserialnumber_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_baseboardserialnumber(std::string* baseboardserialnumber) {
+  if (baseboardserialnumber != nullptr) {
+    
+  } else {
+    
+  }
+  baseboardserialnumber_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), baseboardserialnumber,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.baseboardSerialNumber)
+}
+
+// string baseboardVersion = 12;
+inline void SystemInfoResponse_Result_Data::clear_baseboardversion() {
+  baseboardversion_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::baseboardversion() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+  return _internal_baseboardversion();
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardversion(const std::string& value) {
+  _internal_set_baseboardversion(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_baseboardversion() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+  return _internal_mutable_baseboardversion();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_baseboardversion() const {
+  return baseboardversion_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_baseboardversion(const std::string& value) {
+  
+  baseboardversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardversion(std::string&& value) {
+  
+  baseboardversion_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardversion(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  baseboardversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_baseboardversion(const char* value,
+    size_t size) {
+  
+  baseboardversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_baseboardversion() {
+  
+  return baseboardversion_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_baseboardversion() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
+  return baseboardversion_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_baseboardversion(std::string* baseboardversion) {
+  if (baseboardversion != nullptr) {
+    
+  } else {
+    
+  }
+  baseboardversion_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), baseboardversion,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.baseboardVersion)
 }
 
 // -------------------------------------------------------------------
