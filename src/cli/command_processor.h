@@ -40,6 +40,7 @@
 #define RESET_EVENT_WRR_DEFAULT_WEIGHT 20
 #define DEFAULT_ARRAY_STATUS "Unmounted"
 #define ARRAY_ERROR_INDEX -1
+#define MAX_LINUX_CMD_LENGTH 128
 
 namespace pos
 {
@@ -165,4 +166,15 @@ private:
     void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
+    
+    typedef struct BiosInfo {
+        std::string vendor;
+        std::string version;
+        std::string releaseDate;
+        std::string address;
+        std::string romSize;
+    } BiosInfo;
+    
+    BiosInfo _GetBiosInfo();
+    std::string _ExecuteLinuxCmd(std::string command);
 };

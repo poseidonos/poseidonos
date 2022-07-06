@@ -23,7 +23,6 @@
 #include "src/device/device_manager.h"
 #include "src/resource_checker/smart_collector.h"
 
-
 CommandProcessor::CommandProcessor(void)
 {
 }
@@ -43,6 +42,10 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
     reply->mutable_result()->mutable_data()->set_version(version);
+
+    BiosInfo biosInfo = _GetBiosInfo();
+    cout << biosInfo.version;
+    reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.version);
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1318,4 +1321,36 @@ CommandProcessor::_PrintUint128Dec(uint64_t* v, char* s, size_t n)
     {
         snprintf(s, n, "%llu", (unsigned long long)lo);
     }
+}
+
+CommandProcessor::BiosInfo
+CommandProcessor::_GetBiosInfo()
+{
+    const std::string getBiosVersionCmd = "dmidecode -s bios-version";
+
+    BiosInfo bios;
+    bios.version = _ExecuteLinuxCmd(getBiosVersionCmd);   
+
+    return bios;
+}
+
+std::string
+CommandProcessor::_ExecuteLinuxCmd(std::string command)
+{
+    char buffer[MAX_LINUX_CMD_LENGTH];
+    string result = ""; 
+    FILE* pipe = popen(command.c_str(), "r");
+
+    if (!pipe) {
+       return "popen failed!";
+    }   
+
+    while (!feof(pipe)) {
+       if ((fgets(buffer, MAX_LINUX_CMD_LENGTH, pipe) != NULL))
+          result += buffer;
+    }   
+    
+    buffer[strcspn(buffer, "\n")] = '\0';    
+    pclose(pipe);
+    return result;
 }
