@@ -44,7 +44,6 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     reply->mutable_result()->mutable_data()->set_version(version);
 
     BiosInfo biosInfo = _GetBiosInfo();
-    cout << biosInfo.version;
     reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.version);
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
@@ -1327,9 +1326,11 @@ CommandProcessor::BiosInfo
 CommandProcessor::_GetBiosInfo()
 {
     const std::string getBiosVersionCmd = "dmidecode -s bios-version";
-
+    const std::string getBiosVendorCmd = "dmidecode -s bios-vendor";
+    
     BiosInfo bios;
-    bios.version = _ExecuteLinuxCmd(getBiosVersionCmd);   
+    bios.version = _ExecuteLinuxCmd(getBiosVersionCmd);
+    bios.vendor = _ExecuteLinuxCmd(getBiosVendorCmd);
 
     return bios;
 }
