@@ -652,16 +652,37 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 
 	case "SYSTEMINFO":
-		res := messages.POSInfoResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.SystemInfoResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
-		fmt.Println(res.RESULT.DATA.VERSION)
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "PosVersion\t: "+res.GetResult().GetData().Version)
+		fmt.Fprintln(w, "BiosVersion\t: "+res.GetResult().GetData().BiosVersion)
+		fmt.Fprintln(w, "BiosVendor\t: "+res.GetResult().GetData().BiosVendor)
+		fmt.Fprintln(w, "BiosReleaseDate\t: "+res.GetResult().GetData().BiosReleaseDate)
+
+		fmt.Fprintln(w, "SystemManufacturer\t: "+res.GetResult().GetData().SystemManufacturer)
+		fmt.Fprintln(w, "SystemProductName\t: "+res.GetResult().GetData().SystemProductName)
+		fmt.Fprintln(w, "SystemSerialNumber\t: "+res.GetResult().GetData().SystemSerialNumber)
+		fmt.Fprintln(w, "SystemUuid\t: "+res.GetResult().GetData().SystemUuid)
+
+		fmt.Fprintln(w, "BaseboardManufacturer\t: "+res.GetResult().GetData().BaseboardManufacturer)
+		fmt.Fprintln(w, "BaseboardProductName\t: "+res.GetResult().GetData().BaseboardProductName)
+		fmt.Fprintln(w, "BaseboardSerialNumber\t: "+res.GetResult().GetData().BaseboardSerialNumber)
+		fmt.Fprintln(w, "BaseboardVersion\t: "+res.GetResult().GetData().BaseboardVersion)
+
+		fmt.Fprintln(w, "ProcessorManufacturer\t: "+res.GetResult().GetData().ProcessorManufacturer)
+		fmt.Fprintln(w, "ProcessorVersion\t: "+res.GetResult().GetData().ProcessorVersion)
+		fmt.Fprintln(w, "ProcessorFrequency\t: "+res.GetResult().GetData().ProcessorFrequency)
+
+		w.Flush()
 
 	case "GETSYSTEMPROPERTY":
 		res := messages.POSPropertyResponse{}
