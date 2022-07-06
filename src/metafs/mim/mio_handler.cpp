@@ -1,7 +1,6 @@
-
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -71,15 +70,8 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   issueCountByStorage(),
   issueCountByFileType()
 {
-    std::vector<int> weight{
-        (int)configManager->GetWrrCountSpecialPurposeMap(),
-        (int)configManager->GetWrrCountJournal(),
-        (int)configManager->GetWrrCountMap(),
-        (int)configManager->GetWrrCountGeneral()
-    };
-
     ioCQ = new MetaFsIoQ<Mio*>();
-    ioSQ = new MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>(weight);
+    ioSQ = new MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>(configManager->GetWrrWeight());
 
     mpioAllocator = new MpioAllocator(configManager);
     _CreateMioPool();

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,14 @@ public:
     virtual size_t GetWrrCountGeneral(void) const
     {
         return wrrCountGeneral_;
+    }
+    virtual std::vector<int> GetWrrWeight(void) const
+    {
+        return {
+            (int)wrrCountSpecialPurposeMap_,
+            (int)wrrCountJournal_,
+            (int)wrrCountMap_,
+            (int)wrrCountGeneral_};
     }
 
 protected:

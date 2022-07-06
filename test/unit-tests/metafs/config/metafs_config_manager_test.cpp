@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -175,5 +175,16 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse
     EXPECT_EQ(manager->GetWrrCountJournal(), CAPACITY);
     EXPECT_EQ(manager->GetWrrCountMap(), CAPACITY);
     EXPECT_EQ(manager->GetWrrCountGeneral(), CAPACITY);
+}
+
+TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedWeightForWrr)
+{
+    const size_t CAPACITY = 0;
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
+        1, 2, 3, 4);
+    manager->Init();
+
+    std::vector<int> expected{1, 2, 3, 4};
+    EXPECT_EQ(expected, manager->GetWrrWeight());
 }
 } // namespace pos
