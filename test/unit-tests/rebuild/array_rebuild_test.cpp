@@ -35,7 +35,7 @@ TEST(ArrayRebuild, ArrayRebuild_testConstructor)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
 
     // Then
 }
@@ -71,7 +71,7 @@ TEST(ArrayRebuild, StartRebuild_testIfJobContainsEmptyTaskWhenArrayRebuildStart)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     ar->Start();
     // Then
 }
@@ -85,7 +85,7 @@ TEST(ArrayRebuild, DiscardRebuild_testIfNeedToDiscardBecauseThereAreNoTasks)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     ar->Discard();
     RebuildState state = ar->GetState();
 
@@ -128,7 +128,7 @@ TEST(ArrayRebuild, GetState_testIfStateIsReadyBeforeRebuildStarts)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     RebuildState state = ar->GetState();
 
     // Then

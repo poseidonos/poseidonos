@@ -30,53 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/include/rebuild_state.h"
-#include "rebuild_behavior_factory.h"
-#include "src/array/rebuild/rebuild_progress.h"
-#include "src/array/rebuild/rebuild_context.h"
-
-#include <list>
-#include <mutex>
-#include <string>
-
-using namespace std;
+#include "quick_recovery.h"
+#include "src/io/backend_io/rebuild_io/rebuild_read.h"
 
 namespace pos
 {
-class PartitionRebuild;
-class ArrayDevice;
-class RebuildTarget;
-
-class ArrayRebuild
+QuickRecovery::QuickRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt)
+: RecoveryBase(srcSize, destSize, bufCnt)
 {
-public:
-    ArrayRebuild(void) {}
-    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dev,
-        RebuildComplete cb, list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-        RebuildTypeEnum rebuildType, bool isWT = false);
-    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
-        list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
-    virtual ~ArrayRebuild(void);
-    virtual void Start(void);
-    virtual void Discard(void);
-    virtual void Stop(void);
-    virtual RebuildState GetState(void);
-    virtual uint64_t GetProgress(void);
+}
 
-private:
-    void _RebuildNext(void);
-    void _RebuildDone(RebuildResult res);
-    void _RebuildCompleted(RebuildResult res);
-    string arrayName = "";
-    ArrayDevice* targetDev = nullptr;
-    RebuildState state = RebuildState::READY;
-    RebuildComplete rebuildComplete;
-    list<PartitionRebuild*> tasks;
-    RebuildProgress* progress = nullptr;
-    RebuildLogger* rebuildLogger = nullptr;
-    RebuildComplete rebuildDoneCb;
-    mutex mtx;
-};
+int
+QuickRecovery::Recover(UbioSmartPtr ubio)
+{
+    // TODO (minjoon.ahn) 
+    // RebuildRead rebuildRead;
+    // return rebuildRead.Recover(ubio, srcBuffer);
+    return 0;
+}
+
 } // namespace pos

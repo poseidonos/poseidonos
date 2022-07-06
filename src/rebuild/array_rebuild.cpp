@@ -41,7 +41,8 @@ namespace pos
 {
 ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                         ArrayDevice* dev, RebuildComplete cb,
-                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory, bool isWT)
+                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
+                        RebuildTypeEnum rebuildType, bool isWT)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
@@ -56,6 +57,8 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dev);
         if (ctx && factory != nullptr)
         {
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "ArrayRebuild rebuildtype:{}",rebuildType);
+            ctx->rebuildType = rebuildType;
             ctx->isWT = isWT;
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;

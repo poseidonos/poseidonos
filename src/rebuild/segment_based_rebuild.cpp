@@ -96,10 +96,10 @@ SegmentBasedRebuild::Init(void)
         bool ret = _InitBuffers();
         if (ret == false)
         {
-            if (initBufferRetryCnt >= INIT_REBUILD_BUFFER_MAX_RETRY)
+            if (initRebuildRetryCnt >= INIT_REBUILD_MAX_RETRY)
             {
                 POS_TRACE_ERROR(EID(REBUILD_INIT_FAILED), "part_type:{}, retried:{}",
-                    PARTITION_TYPE_STR[ctx->part], initBufferRetryCnt);
+                    PARTITION_TYPE_STR[ctx->part], initRebuildRetryCnt);
                 ctx->SetResult(RebuildState::FAIL);
                 return Read();
             }
@@ -128,6 +128,7 @@ SegmentBasedRebuild::Read(void)
     }
     UpdateProgress(0);
 
+    uint32_t targetIndex = ctx->faultIdx;
     RebuildState state = ctx->GetResult();
     if (segId == ctx->size->totalSegments ||
         state >= RebuildState::CANCELLED)
@@ -169,21 +170,21 @@ SegmentBasedRebuild::Read(void)
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;
-        void* buffer = recoverBuffers->TryGetBuffer();
+        void* buffer = recovery->GetDestBuffer()->TryGetBuffer();
         assert(buffer != nullptr);
 
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->arrayIndex));
         ubio->dir = UbioDir::Write;
         FtBlkAddr fta = {.stripeId = stripeId,
-            .offset = ctx->faultIdx * blkCnt};
+            .offset = targetIndex * blkCnt};
         PhysicalBlkAddr addr = ctx->translate(fta);
         ubio->SetPba(addr);
         CallbackSmartPtr callback(new UpdateDataHandler(segId, ubio, this));
         callback->SetEventType(BackendEvent_UserdataRebuild);
         ubio->SetEventType(BackendEvent_UserdataRebuild);
         ubio->SetCallback(callback);
-        RebuildRead rebuildRead;
-        int res = rebuildRead.Recover(ubio, rebuildReadBuffers);
+
+        int res = recovery->Recover(ubio);
         if (res != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
@@ -236,7 +237,7 @@ bool SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
         nextEvent->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
     }
-    recoverBuffers->ReturnBuffer(ubio->GetBuffer());
+    recovery->GetDestBuffer()->ReturnBuffer(ubio->GetBuffer());
     ubio = nullptr;
 
     return true;
