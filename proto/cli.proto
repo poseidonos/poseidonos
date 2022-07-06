@@ -185,6 +185,7 @@ message SystemInfoResponse {
 			string version = 1;
 			string biosVersion = 2;
 			string biosVendor = 2;
+			string biosReleaseDate = 3;
 		}
 		Data data = 2;
 	}
