@@ -54,6 +54,12 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     reply->mutable_result()->mutable_data()->set_systemserialnumber(systemInfo.serialNumber);
     reply->mutable_result()->mutable_data()->set_systemuuid(systemInfo.uuid);
 
+    BaseboardInfo baseboardInfo = _GetBaseboardInfo();
+    reply->mutable_result()->mutable_data()->set_baseboardmanufacturer(baseboardInfo.manufacturer);
+    reply->mutable_result()->mutable_data()->set_baseboardproductname(baseboardInfo.productName);
+    reply->mutable_result()->mutable_data()->set_baseboardserialnumber(baseboardInfo.serialNumber);
+    reply->mutable_result()->mutable_data()->set_baseboardversion(baseboardInfo.version);
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     
@@ -1351,7 +1357,7 @@ CommandProcessor::_GetSystemInfo()
     const std::string getSystemManufacturerCmd = "dmidecode -s system-manufacturer";
     const std::string getSystemProductNameCmd = "dmidecode -s system-product-name";
     const std::string getSystemSerialNumberCmd = "dmidecode -s system-serial-number";
-    const std::string getSystemUuidCmd = "dmidecode -s system-serial-uuid";
+    const std::string getSystemUuidCmd = "dmidecode -s system-uuid";
     
     SystemInfo system;
     system.manufacturer = _ExecuteLinuxCmd(getSystemManufacturerCmd);
@@ -1360,6 +1366,23 @@ CommandProcessor::_GetSystemInfo()
     system.uuid = _ExecuteLinuxCmd(getSystemUuidCmd);
 
     return system;
+}
+
+CommandProcessor::BaseboardInfo
+CommandProcessor::_GetBaseboardInfo()
+{
+    const std::string getBaseboardManufacturerCmd = "dmidecode -s baseboard-manufacturer";
+    const std::string getBaseboardProductNameCmd = "dmidecode -s baseboard-product-name";
+    const std::string getBaseboardSerialNumberCmd = "dmidecode -s baseboard-serial-number";
+    const std::string getBaseboardVersionCmd = "dmidecode -s baseboard-version";
+    
+    BaseboardInfo baseboard;
+    baseboard.manufacturer = _ExecuteLinuxCmd(getBaseboardManufacturerCmd);
+    baseboard.productName = _ExecuteLinuxCmd(getBaseboardProductNameCmd);
+    baseboard.serialNumber = _ExecuteLinuxCmd(getBaseboardSerialNumberCmd);
+    baseboard.version = _ExecuteLinuxCmd(getBaseboardVersionCmd);
+
+    return baseboard;
 }
 
 std::string
