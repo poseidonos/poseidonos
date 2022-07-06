@@ -62,7 +62,13 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SystemInfoRequestDefaultTypeInt
 constexpr SystemInfoResponse_Result_Data::SystemInfoResponse_Result_Data(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : version_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , biosversion_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , biosversion_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , biosvendor_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , biosreleasedate_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , systemmanufacturer_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , systemproductname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , systemserialnumber_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , systemuuid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
 struct SystemInfoResponse_Result_DataDefaultTypeInternal {
   constexpr SystemInfoResponse_Result_DataDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1886,6 +1892,12 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, version_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, biosversion_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, biosvendor_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, biosreleasedate_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, systemmanufacturer_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, systemproductname_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, systemserialnumber_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result_Data, systemuuid_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse_Result, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2916,131 +2928,131 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 15, -1, sizeof(::grpc_cli::PosInfo)},
   { 21, -1, sizeof(::grpc_cli::SystemInfoRequest)},
   { 29, -1, sizeof(::grpc_cli::SystemInfoResponse_Result_Data)},
-  { 36, -1, sizeof(::grpc_cli::SystemInfoResponse_Result)},
-  { 43, -1, sizeof(::grpc_cli::SystemInfoResponse)},
-  { 52, -1, sizeof(::grpc_cli::SystemStopRequest)},
-  { 60, -1, sizeof(::grpc_cli::SystemStopResponse_Result)},
-  { 66, -1, sizeof(::grpc_cli::SystemStopResponse)},
-  { 75, -1, sizeof(::grpc_cli::GetSystemPropertyRequest)},
-  { 83, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result_Data)},
-  { 89, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result)},
-  { 96, -1, sizeof(::grpc_cli::GetSystemPropertyResponse)},
-  { 105, -1, sizeof(::grpc_cli::SetSystemPropertyRequest_Param)},
-  { 111, -1, sizeof(::grpc_cli::SetSystemPropertyRequest)},
-  { 120, -1, sizeof(::grpc_cli::SetSystemPropertyResponse_Result)},
-  { 126, -1, sizeof(::grpc_cli::SetSystemPropertyResponse)},
-  { 135, -1, sizeof(::grpc_cli::StartTelemetryRequest)},
-  { 143, -1, sizeof(::grpc_cli::StartTelemetryResponse_Result)},
-  { 149, -1, sizeof(::grpc_cli::StartTelemetryResponse)},
-  { 158, -1, sizeof(::grpc_cli::StopTelemetryRequest)},
-  { 166, -1, sizeof(::grpc_cli::StopTelemetryResponse_Result)},
-  { 172, -1, sizeof(::grpc_cli::StopTelemetryResponse)},
-  { 181, -1, sizeof(::grpc_cli::ResetEventWrrRequest)},
-  { 189, -1, sizeof(::grpc_cli::ResetEventWrrResponse_Result)},
-  { 195, -1, sizeof(::grpc_cli::ResetEventWrrResponse)},
-  { 204, -1, sizeof(::grpc_cli::ResetMbrRequest)},
-  { 212, -1, sizeof(::grpc_cli::ResetMbrResponse_Result)},
-  { 218, -1, sizeof(::grpc_cli::ResetMbrResponse)},
-  { 227, -1, sizeof(::grpc_cli::StopRebuildingRequest_Param)},
-  { 233, -1, sizeof(::grpc_cli::StopRebuildingRequest)},
-  { 242, -1, sizeof(::grpc_cli::StopRebuildingResponse_Result)},
-  { 248, -1, sizeof(::grpc_cli::StopRebuildingResponse)},
-  { 257, -1, sizeof(::grpc_cli::UpdateEventWrrRequest_Param)},
-  { 264, -1, sizeof(::grpc_cli::UpdateEventWrrRequest)},
-  { 273, -1, sizeof(::grpc_cli::UpdateEventWrrResponse_Result)},
-  { 279, -1, sizeof(::grpc_cli::UpdateEventWrrResponse)},
-  { 288, -1, sizeof(::grpc_cli::AddSpareRequest_SpareDeviceName)},
-  { 294, -1, sizeof(::grpc_cli::AddSpareRequest_Param)},
-  { 301, -1, sizeof(::grpc_cli::AddSpareRequest)},
-  { 310, -1, sizeof(::grpc_cli::AddSpareResponse_Result)},
-  { 316, -1, sizeof(::grpc_cli::AddSpareResponse)},
-  { 325, -1, sizeof(::grpc_cli::DeviceNameList)},
-  { 331, -1, sizeof(::grpc_cli::RemoveSpareRequest_SpareDeviceName)},
-  { 337, -1, sizeof(::grpc_cli::RemoveSpareRequest_Param)},
-  { 344, -1, sizeof(::grpc_cli::RemoveSpareRequest)},
-  { 353, -1, sizeof(::grpc_cli::RemoveSpareResponse_Result)},
-  { 359, -1, sizeof(::grpc_cli::RemoveSpareResponse)},
-  { 368, -1, sizeof(::grpc_cli::CreateArrayRequest_Param)},
-  { 378, -1, sizeof(::grpc_cli::CreateArrayRequest)},
-  { 387, -1, sizeof(::grpc_cli::CreateArrayResponse_Result)},
-  { 393, -1, sizeof(::grpc_cli::CreateArrayResponse)},
-  { 402, -1, sizeof(::grpc_cli::AutocreateArrayRequest_Param)},
-  { 412, -1, sizeof(::grpc_cli::AutocreateArrayRequest)},
-  { 421, -1, sizeof(::grpc_cli::AutocreateArrayResponse_Result)},
-  { 427, -1, sizeof(::grpc_cli::AutocreateArrayResponse)},
-  { 436, -1, sizeof(::grpc_cli::DeleteArrayRequest_Param)},
-  { 442, -1, sizeof(::grpc_cli::DeleteArrayRequest)},
-  { 451, -1, sizeof(::grpc_cli::DeleteArrayResponse_Result)},
-  { 457, -1, sizeof(::grpc_cli::DeleteArrayResponse)},
-  { 466, 473, sizeof(::grpc_cli::MountArrayRequest_Param)},
-  { 475, -1, sizeof(::grpc_cli::MountArrayRequest)},
-  { 484, -1, sizeof(::grpc_cli::MountArrayResponse_Result)},
-  { 490, -1, sizeof(::grpc_cli::MountArrayResponse)},
-  { 499, -1, sizeof(::grpc_cli::UnmountArrayRequest_Param)},
-  { 505, -1, sizeof(::grpc_cli::UnmountArrayRequest)},
-  { 514, -1, sizeof(::grpc_cli::UnmountArrayResponse_Result)},
-  { 520, -1, sizeof(::grpc_cli::UnmountArrayResponse)},
-  { 529, -1, sizeof(::grpc_cli::Array)},
-  { 550, -1, sizeof(::grpc_cli::ListArrayRequest)},
-  { 558, -1, sizeof(::grpc_cli::ListArrayResponse_Result_ArrayList)},
-  { 564, -1, sizeof(::grpc_cli::ListArrayResponse_Result)},
-  { 571, -1, sizeof(::grpc_cli::ListArrayResponse)},
-  { 580, -1, sizeof(::grpc_cli::ArrayInfoRequest_Param)},
-  { 586, -1, sizeof(::grpc_cli::ArrayInfoRequest)},
-  { 595, -1, sizeof(::grpc_cli::ArrayInfoResponse_Result)},
-  { 602, -1, sizeof(::grpc_cli::ArrayInfoResponse)},
-  { 611, -1, sizeof(::grpc_cli::ListNodeRequest)},
-  { 619, -1, sizeof(::grpc_cli::ListNodeResponse_Result_Node)},
-  { 627, -1, sizeof(::grpc_cli::ListNodeResponse_Result)},
-  { 634, -1, sizeof(::grpc_cli::ListNodeResponse)},
-  { 643, -1, sizeof(::grpc_cli::ListHaVolumeRequest)},
-  { 651, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result_Volume)},
-  { 662, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result)},
-  { 669, -1, sizeof(::grpc_cli::ListHaVolumeResponse)},
-  { 678, -1, sizeof(::grpc_cli::ListHaReplicationRequest)},
-  { 686, -1, sizeof(::grpc_cli::ListHaReplicationResponse_Result_Replication)},
-  { 696, -1, sizeof(::grpc_cli::ListHaReplicationResponse_Result)},
-  { 703, -1, sizeof(::grpc_cli::ListHaReplicationResponse)},
-  { 712, -1, sizeof(::grpc_cli::StartHaReplicationRequest_Param)},
-  { 727, -1, sizeof(::grpc_cli::StartHaReplicationRequest)},
-  { 736, -1, sizeof(::grpc_cli::StartHaReplicationResponse_Result)},
-  { 742, -1, sizeof(::grpc_cli::StartHaReplicationResponse)},
-  { 751, -1, sizeof(::grpc_cli::SetLogLevelRequest_Param)},
-  { 757, -1, sizeof(::grpc_cli::SetLogLevelRequest)},
-  { 766, -1, sizeof(::grpc_cli::SetLogLevelResponse_Result)},
-  { 772, -1, sizeof(::grpc_cli::SetLogLevelResponse)},
-  { 781, -1, sizeof(::grpc_cli::SetLogPreferenceRequest_Param)},
-  { 787, -1, sizeof(::grpc_cli::SetLogPreferenceRequest)},
-  { 796, -1, sizeof(::grpc_cli::SetLogPreferenceResponse_Result)},
-  { 802, -1, sizeof(::grpc_cli::SetLogPreferenceResponse)},
-  { 811, -1, sizeof(::grpc_cli::LoggerInfoRequest)},
-  { 819, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result_LoggerInfo)},
-  { 833, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result)},
-  { 840, -1, sizeof(::grpc_cli::LoggerInfoResponse)},
-  { 849, -1, sizeof(::grpc_cli::GetLogLevelRequest)},
-  { 857, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result_LogLevel)},
-  { 863, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result)},
-  { 870, -1, sizeof(::grpc_cli::GetLogLevelResponse)},
-  { 879, -1, sizeof(::grpc_cli::ApplyLogFilterRequest)},
-  { 887, -1, sizeof(::grpc_cli::ApplyLogFilterResponse_Result)},
-  { 893, -1, sizeof(::grpc_cli::ApplyLogFilterResponse)},
-  { 902, -1, sizeof(::grpc_cli::CreateDeviceRequest_Param)},
-  { 912, -1, sizeof(::grpc_cli::CreateDeviceRequest)},
-  { 921, -1, sizeof(::grpc_cli::CreateDeviceResponse_Result)},
-  { 927, -1, sizeof(::grpc_cli::CreateDeviceResponse)},
-  { 936, -1, sizeof(::grpc_cli::ScanDeviceRequest)},
-  { 944, -1, sizeof(::grpc_cli::ScanDeviceResponse_Result)},
-  { 950, -1, sizeof(::grpc_cli::ScanDeviceResponse)},
-  { 959, -1, sizeof(::grpc_cli::Device)},
-  { 972, -1, sizeof(::grpc_cli::ListDeviceRequest)},
-  { 980, -1, sizeof(::grpc_cli::ListDeviceResponse_Result_DeviceList)},
-  { 986, -1, sizeof(::grpc_cli::ListDeviceResponse_Result)},
-  { 993, -1, sizeof(::grpc_cli::ListDeviceResponse)},
-  { 1002, -1, sizeof(::grpc_cli::SmartLog)},
-  { 1029, -1, sizeof(::grpc_cli::GetSmartLogRequest_Param)},
-  { 1035, -1, sizeof(::grpc_cli::GetSmartLogRequest)},
-  { 1044, -1, sizeof(::grpc_cli::GetSmartLogResponse_Result)},
-  { 1051, -1, sizeof(::grpc_cli::GetSmartLogResponse)},
+  { 42, -1, sizeof(::grpc_cli::SystemInfoResponse_Result)},
+  { 49, -1, sizeof(::grpc_cli::SystemInfoResponse)},
+  { 58, -1, sizeof(::grpc_cli::SystemStopRequest)},
+  { 66, -1, sizeof(::grpc_cli::SystemStopResponse_Result)},
+  { 72, -1, sizeof(::grpc_cli::SystemStopResponse)},
+  { 81, -1, sizeof(::grpc_cli::GetSystemPropertyRequest)},
+  { 89, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result_Data)},
+  { 95, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result)},
+  { 102, -1, sizeof(::grpc_cli::GetSystemPropertyResponse)},
+  { 111, -1, sizeof(::grpc_cli::SetSystemPropertyRequest_Param)},
+  { 117, -1, sizeof(::grpc_cli::SetSystemPropertyRequest)},
+  { 126, -1, sizeof(::grpc_cli::SetSystemPropertyResponse_Result)},
+  { 132, -1, sizeof(::grpc_cli::SetSystemPropertyResponse)},
+  { 141, -1, sizeof(::grpc_cli::StartTelemetryRequest)},
+  { 149, -1, sizeof(::grpc_cli::StartTelemetryResponse_Result)},
+  { 155, -1, sizeof(::grpc_cli::StartTelemetryResponse)},
+  { 164, -1, sizeof(::grpc_cli::StopTelemetryRequest)},
+  { 172, -1, sizeof(::grpc_cli::StopTelemetryResponse_Result)},
+  { 178, -1, sizeof(::grpc_cli::StopTelemetryResponse)},
+  { 187, -1, sizeof(::grpc_cli::ResetEventWrrRequest)},
+  { 195, -1, sizeof(::grpc_cli::ResetEventWrrResponse_Result)},
+  { 201, -1, sizeof(::grpc_cli::ResetEventWrrResponse)},
+  { 210, -1, sizeof(::grpc_cli::ResetMbrRequest)},
+  { 218, -1, sizeof(::grpc_cli::ResetMbrResponse_Result)},
+  { 224, -1, sizeof(::grpc_cli::ResetMbrResponse)},
+  { 233, -1, sizeof(::grpc_cli::StopRebuildingRequest_Param)},
+  { 239, -1, sizeof(::grpc_cli::StopRebuildingRequest)},
+  { 248, -1, sizeof(::grpc_cli::StopRebuildingResponse_Result)},
+  { 254, -1, sizeof(::grpc_cli::StopRebuildingResponse)},
+  { 263, -1, sizeof(::grpc_cli::UpdateEventWrrRequest_Param)},
+  { 270, -1, sizeof(::grpc_cli::UpdateEventWrrRequest)},
+  { 279, -1, sizeof(::grpc_cli::UpdateEventWrrResponse_Result)},
+  { 285, -1, sizeof(::grpc_cli::UpdateEventWrrResponse)},
+  { 294, -1, sizeof(::grpc_cli::AddSpareRequest_SpareDeviceName)},
+  { 300, -1, sizeof(::grpc_cli::AddSpareRequest_Param)},
+  { 307, -1, sizeof(::grpc_cli::AddSpareRequest)},
+  { 316, -1, sizeof(::grpc_cli::AddSpareResponse_Result)},
+  { 322, -1, sizeof(::grpc_cli::AddSpareResponse)},
+  { 331, -1, sizeof(::grpc_cli::DeviceNameList)},
+  { 337, -1, sizeof(::grpc_cli::RemoveSpareRequest_SpareDeviceName)},
+  { 343, -1, sizeof(::grpc_cli::RemoveSpareRequest_Param)},
+  { 350, -1, sizeof(::grpc_cli::RemoveSpareRequest)},
+  { 359, -1, sizeof(::grpc_cli::RemoveSpareResponse_Result)},
+  { 365, -1, sizeof(::grpc_cli::RemoveSpareResponse)},
+  { 374, -1, sizeof(::grpc_cli::CreateArrayRequest_Param)},
+  { 384, -1, sizeof(::grpc_cli::CreateArrayRequest)},
+  { 393, -1, sizeof(::grpc_cli::CreateArrayResponse_Result)},
+  { 399, -1, sizeof(::grpc_cli::CreateArrayResponse)},
+  { 408, -1, sizeof(::grpc_cli::AutocreateArrayRequest_Param)},
+  { 418, -1, sizeof(::grpc_cli::AutocreateArrayRequest)},
+  { 427, -1, sizeof(::grpc_cli::AutocreateArrayResponse_Result)},
+  { 433, -1, sizeof(::grpc_cli::AutocreateArrayResponse)},
+  { 442, -1, sizeof(::grpc_cli::DeleteArrayRequest_Param)},
+  { 448, -1, sizeof(::grpc_cli::DeleteArrayRequest)},
+  { 457, -1, sizeof(::grpc_cli::DeleteArrayResponse_Result)},
+  { 463, -1, sizeof(::grpc_cli::DeleteArrayResponse)},
+  { 472, 479, sizeof(::grpc_cli::MountArrayRequest_Param)},
+  { 481, -1, sizeof(::grpc_cli::MountArrayRequest)},
+  { 490, -1, sizeof(::grpc_cli::MountArrayResponse_Result)},
+  { 496, -1, sizeof(::grpc_cli::MountArrayResponse)},
+  { 505, -1, sizeof(::grpc_cli::UnmountArrayRequest_Param)},
+  { 511, -1, sizeof(::grpc_cli::UnmountArrayRequest)},
+  { 520, -1, sizeof(::grpc_cli::UnmountArrayResponse_Result)},
+  { 526, -1, sizeof(::grpc_cli::UnmountArrayResponse)},
+  { 535, -1, sizeof(::grpc_cli::Array)},
+  { 556, -1, sizeof(::grpc_cli::ListArrayRequest)},
+  { 564, -1, sizeof(::grpc_cli::ListArrayResponse_Result_ArrayList)},
+  { 570, -1, sizeof(::grpc_cli::ListArrayResponse_Result)},
+  { 577, -1, sizeof(::grpc_cli::ListArrayResponse)},
+  { 586, -1, sizeof(::grpc_cli::ArrayInfoRequest_Param)},
+  { 592, -1, sizeof(::grpc_cli::ArrayInfoRequest)},
+  { 601, -1, sizeof(::grpc_cli::ArrayInfoResponse_Result)},
+  { 608, -1, sizeof(::grpc_cli::ArrayInfoResponse)},
+  { 617, -1, sizeof(::grpc_cli::ListNodeRequest)},
+  { 625, -1, sizeof(::grpc_cli::ListNodeResponse_Result_Node)},
+  { 633, -1, sizeof(::grpc_cli::ListNodeResponse_Result)},
+  { 640, -1, sizeof(::grpc_cli::ListNodeResponse)},
+  { 649, -1, sizeof(::grpc_cli::ListHaVolumeRequest)},
+  { 657, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result_Volume)},
+  { 668, -1, sizeof(::grpc_cli::ListHaVolumeResponse_Result)},
+  { 675, -1, sizeof(::grpc_cli::ListHaVolumeResponse)},
+  { 684, -1, sizeof(::grpc_cli::ListHaReplicationRequest)},
+  { 692, -1, sizeof(::grpc_cli::ListHaReplicationResponse_Result_Replication)},
+  { 702, -1, sizeof(::grpc_cli::ListHaReplicationResponse_Result)},
+  { 709, -1, sizeof(::grpc_cli::ListHaReplicationResponse)},
+  { 718, -1, sizeof(::grpc_cli::StartHaReplicationRequest_Param)},
+  { 733, -1, sizeof(::grpc_cli::StartHaReplicationRequest)},
+  { 742, -1, sizeof(::grpc_cli::StartHaReplicationResponse_Result)},
+  { 748, -1, sizeof(::grpc_cli::StartHaReplicationResponse)},
+  { 757, -1, sizeof(::grpc_cli::SetLogLevelRequest_Param)},
+  { 763, -1, sizeof(::grpc_cli::SetLogLevelRequest)},
+  { 772, -1, sizeof(::grpc_cli::SetLogLevelResponse_Result)},
+  { 778, -1, sizeof(::grpc_cli::SetLogLevelResponse)},
+  { 787, -1, sizeof(::grpc_cli::SetLogPreferenceRequest_Param)},
+  { 793, -1, sizeof(::grpc_cli::SetLogPreferenceRequest)},
+  { 802, -1, sizeof(::grpc_cli::SetLogPreferenceResponse_Result)},
+  { 808, -1, sizeof(::grpc_cli::SetLogPreferenceResponse)},
+  { 817, -1, sizeof(::grpc_cli::LoggerInfoRequest)},
+  { 825, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result_LoggerInfo)},
+  { 839, -1, sizeof(::grpc_cli::LoggerInfoResponse_Result)},
+  { 846, -1, sizeof(::grpc_cli::LoggerInfoResponse)},
+  { 855, -1, sizeof(::grpc_cli::GetLogLevelRequest)},
+  { 863, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result_LogLevel)},
+  { 869, -1, sizeof(::grpc_cli::GetLogLevelResponse_Result)},
+  { 876, -1, sizeof(::grpc_cli::GetLogLevelResponse)},
+  { 885, -1, sizeof(::grpc_cli::ApplyLogFilterRequest)},
+  { 893, -1, sizeof(::grpc_cli::ApplyLogFilterResponse_Result)},
+  { 899, -1, sizeof(::grpc_cli::ApplyLogFilterResponse)},
+  { 908, -1, sizeof(::grpc_cli::CreateDeviceRequest_Param)},
+  { 918, -1, sizeof(::grpc_cli::CreateDeviceRequest)},
+  { 927, -1, sizeof(::grpc_cli::CreateDeviceResponse_Result)},
+  { 933, -1, sizeof(::grpc_cli::CreateDeviceResponse)},
+  { 942, -1, sizeof(::grpc_cli::ScanDeviceRequest)},
+  { 950, -1, sizeof(::grpc_cli::ScanDeviceResponse_Result)},
+  { 956, -1, sizeof(::grpc_cli::ScanDeviceResponse)},
+  { 965, -1, sizeof(::grpc_cli::Device)},
+  { 978, -1, sizeof(::grpc_cli::ListDeviceRequest)},
+  { 986, -1, sizeof(::grpc_cli::ListDeviceResponse_Result_DeviceList)},
+  { 992, -1, sizeof(::grpc_cli::ListDeviceResponse_Result)},
+  { 999, -1, sizeof(::grpc_cli::ListDeviceResponse)},
+  { 1008, -1, sizeof(::grpc_cli::SmartLog)},
+  { 1035, -1, sizeof(::grpc_cli::GetSmartLogRequest_Param)},
+  { 1041, -1, sizeof(::grpc_cli::GetSmartLogRequest)},
+  { 1050, -1, sizeof(::grpc_cli::GetSmartLogResponse_Result)},
+  { 1057, -1, sizeof(::grpc_cli::GetSmartLogResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -3184,404 +3196,408 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "tionB\010\n\006_causeB\013\n\t_solution\"\032\n\007PosInfo\022\017"
   "\n\007version\030\001 \001(\t\"D\n\021SystemInfoRequest\022\017\n\007"
   "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030"
-  "\003 \001(\t\"\233\002\n\022SystemInfoResponse\022\017\n\007command\030"
+  "\003 \001(\t\"\260\003\n\022SystemInfoResponse\022\017\n\007command\030"
   "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grp"
   "c_cli.SystemInfoResponse.Result\022\037\n\004info\030"
-  "\004 \001(\0132\021.grpc_cli.PosInfo\032\220\001\n\006Result\022 \n\006s"
+  "\004 \001(\0132\021.grpc_cli.PosInfo\032\245\002\n\006Result\022 \n\006s"
   "tatus\030\001 \001(\0132\020.grpc_cli.Status\0226\n\004data\030\002 "
   "\001(\0132(.grpc_cli.SystemInfoResponse.Result"
-  ".Data\032,\n\004Data\022\017\n\007version\030\001 \001(\t\022\023\n\013biosVe"
-  "rsion\030\002 \001(\t\"D\n\021SystemStopRequest\022\017\n\007comm"
-  "and\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001("
-  "\t\"\264\001\n\022SystemStopResponse\022\017\n\007command\030\001 \001("
-  "\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cl"
-  "i.SystemStopResponse.Result\022\037\n\004info\030\004 \001("
-  "\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006status"
-  "\030\001 \001(\0132\020.grpc_cli.Status\"K\n\030GetSystemPro"
+  ".Data\032\300\001\n\004Data\022\017\n\007version\030\001 \001(\t\022\023\n\013biosV"
+  "ersion\030\002 \001(\t\022\022\n\nbiosVendor\030\003 \001(\t\022\027\n\017bios"
+  "ReleaseDate\030\004 \001(\t\022\032\n\022systemManufacturer\030"
+  "\005 \001(\t\022\031\n\021systemProductName\030\006 \001(\t\022\032\n\022syst"
+  "emSerialNumber\030\007 \001(\t\022\022\n\nsystemUuid\030\010 \001(\t"
+  "\"D\n\021SystemStopRequest\022\017\n\007command\030\001 \001(\t\022\013"
+  "\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022Syste"
+  "mStopResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 "
+  "\001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.SystemSto"
+  "pResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cl"
+  "i.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.gr"
+  "pc_cli.Status\"K\n\030GetSystemPropertyReques"
+  "t\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treque"
+  "stor\030\003 \001(\t\"\242\002\n\031GetSystemPropertyResponse"
+  "\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022:\n\006result"
+  "\030\003 \001(\0132*.grpc_cli.GetSystemPropertyRespo"
+  "nse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosI"
+  "nfo\032\211\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
+  "i.Status\022=\n\004data\030\002 \001(\0132/.grpc_cli.GetSys"
+  "temPropertyResponse.Result.Data\032\036\n\004Data\022"
+  "\026\n\016rebuild_policy\030\001 \001(\t\"\234\001\n\030SetSystemPro"
   "pertyRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001"
-  "(\t\022\021\n\trequestor\030\003 \001(\t\"\242\002\n\031GetSystemPrope"
-  "rtyResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001("
-  "\t\022:\n\006result\030\003 \001(\0132*.grpc_cli.GetSystemPr"
-  "opertyResponse.Result\022\037\n\004info\030\004 \001(\0132\021.gr"
-  "pc_cli.PosInfo\032\211\001\n\006Result\022 \n\006status\030\001 \001("
-  "\0132\020.grpc_cli.Status\022=\n\004data\030\002 \001(\0132/.grpc"
-  "_cli.GetSystemPropertyResponse.Result.Da"
-  "ta\032\036\n\004Data\022\026\n\016rebuild_policy\030\001 \001(\t\"\234\001\n\030S"
-  "etSystemPropertyRequest\022\017\n\007command\030\001 \001(\t"
-  "\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0227\n\005para"
-  "m\030\004 \001(\0132(.grpc_cli.SetSystemPropertyRequ"
-  "est.Param\032\026\n\005Param\022\r\n\005level\030\001 \001(\t\"\302\001\n\031Se"
-  "tSystemPropertyResponse\022\017\n\007command\030\001 \001(\t"
-  "\022\013\n\003rid\030\002 \001(\t\022:\n\006result\030\003 \001(\0132*.grpc_cli"
-  ".SetSystemPropertyResponse.Result\022\037\n\004inf"
-  "o\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006"
-  "status\030\001 \001(\0132\020.grpc_cli.Status\"H\n\025StartT"
-  "elemetryRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
-  "\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\274\001\n\026StartTeleme"
-  "tryResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001("
-  "\t\0227\n\006result\030\003 \001(\0132\'.grpc_cli.StartTeleme"
-  "tryResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_"
-  "cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020."
-  "grpc_cli.Status\"G\n\024StopTelemetryRequest\022"
-  "\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequest"
-  "or\030\003 \001(\t\"\272\001\n\025StopTelemetryResponse\022\017\n\007co"
-  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0226\n\006result\030\003 \001(\013"
-  "2&.grpc_cli.StopTelemetryResponse.Result"
-  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Res"
-  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"G\n"
-  "\024ResetEventWrrRequest\022\017\n\007command\030\001 \001(\t\022\013"
-  "\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\272\001\n\025Reset"
-  "EventWrrResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
-  "\030\002 \001(\t\0226\n\006result\030\003 \001(\0132&.grpc_cli.ResetE"
-  "ventWrrResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
+  "(\t\022\021\n\trequestor\030\003 \001(\t\0227\n\005param\030\004 \001(\0132(.g"
+  "rpc_cli.SetSystemPropertyRequest.Param\032\026"
+  "\n\005Param\022\r\n\005level\030\001 \001(\t\"\302\001\n\031SetSystemProp"
+  "ertyResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001"
+  "(\t\022:\n\006result\030\003 \001(\0132*.grpc_cli.SetSystemP"
+  "ropertyResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
   "rpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001("
-  "\0132\020.grpc_cli.Status\"B\n\017ResetMbrRequest\022\017"
-  "\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequesto"
-  "r\030\003 \001(\t\"\260\001\n\020ResetMbrResponse\022\017\n\007command\030"
-  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grp"
-  "c_cli.ResetMbrResponse.Result\022\037\n\004info\030\004 "
-  "\001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006stat"
-  "us\030\001 \001(\0132\020.grpc_cli.Status\"\225\001\n\025StopRebui"
-  "ldingRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001"
-  "(\t\022\021\n\trequestor\030\003 \001(\t\0224\n\005param\030\004 \001(\0132%.g"
-  "rpc_cli.StopRebuildingRequest.Param\032\025\n\005P"
-  "aram\022\014\n\004name\030\001 \001(\t\"\274\001\n\026StopRebuildingRes"
-  "ponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006r"
-  "esult\030\003 \001(\0132\'.grpc_cli.StopRebuildingRes"
-  "ponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Po"
-  "sInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_c"
-  "li.Status\"\245\001\n\025UpdateEventWrrRequest\022\017\n\007c"
-  "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003"
-  " \001(\t\0224\n\005param\030\004 \001(\0132%.grpc_cli.UpdateEve"
-  "ntWrrRequest.Param\032%\n\005Param\022\014\n\004name\030\001 \001("
-  "\t\022\016\n\006weight\030\002 \001(\003\"\274\001\n\026UpdateEventWrrResp"
-  "onse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006re"
-  "sult\030\003 \001(\0132\'.grpc_cli.UpdateEventWrrResp"
-  "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
-  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
-  "i.Status\"\353\001\n\017AddSpareRequest\022\017\n\007command\030"
-  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\022.\n"
-  "\005param\030\004 \001(\0132\037.grpc_cli.AddSpareRequest."
-  "Param\032%\n\017SpareDeviceName\022\022\n\ndeviceName\030\001"
-  " \001(\t\032P\n\005Param\022\r\n\005array\030\001 \001(\t\0228\n\005spare\030\003 "
-  "\003(\0132).grpc_cli.AddSpareRequest.SpareDevi"
-  "ceName\"\260\001\n\020AddSpareResponse\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grpc"
-  "_cli.AddSpareResponse.Result\022\037\n\004info\030\004 \001"
-  "(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006statu"
-  "s\030\001 \001(\0132\020.grpc_cli.Status\"$\n\016DeviceNameL"
-  "ist\022\022\n\ndeviceName\030\001 \001(\t\"\364\001\n\022RemoveSpareR"
-  "equest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\t"
-  "requestor\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cl"
-  "i.RemoveSpareRequest.Param\032%\n\017SpareDevic"
-  "eName\022\022\n\ndeviceName\030\001 \001(\t\032S\n\005Param\022\r\n\005ar"
-  "ray\030\001 \001(\t\022;\n\005spare\030\002 \003(\0132,.grpc_cli.Remo"
-  "veSpareRequest.SpareDeviceName\"\266\001\n\023Remov"
-  "eSpareResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
-  " \001(\t\0224\n\006result\030\003 \001(\0132$.grpc_cli.RemoveSp"
-  "areResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_"
-  "cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020."
-  "grpc_cli.Status\"\235\002\n\022CreateArrayRequest\022\017"
-  "\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequesto"
-  "r\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.Create"
-  "ArrayRequest.Param\032\242\001\n\005Param\022\014\n\004name\030\001 \001"
-  "(\t\022(\n\006buffer\030\002 \003(\0132\030.grpc_cli.DeviceName"
-  "List\022&\n\004data\030\003 \003(\0132\030.grpc_cli.DeviceName"
-  "List\022\'\n\005spare\030\004 \003(\0132\030.grpc_cli.DeviceNam"
-  "eList\022\020\n\010raidtype\030\005 \001(\t\"\266\001\n\023CreateArrayR"
-  "esponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n"
-  "\006result\030\003 \001(\0132$.grpc_cli.CreateArrayResp"
-  "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
-  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
-  "i.Status\"\366\001\n\026AutocreateArrayRequest\022\017\n\007c"
-  "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003"
-  " \001(\t\0225\n\005param\030\004 \001(\0132&.grpc_cli.Autocreat"
-  "eArrayRequest.Param\032t\n\005Param\022\014\n\004name\030\001 \001"
-  "(\t\022(\n\006buffer\030\002 \003(\0132\030.grpc_cli.DeviceName"
-  "List\022\017\n\007numData\030\003 \001(\005\022\020\n\010numSpare\030\004 \001(\005\022"
-  "\020\n\010raidtype\030\005 \001(\t\"\276\001\n\027AutocreateArrayRes"
-  "ponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0228\n\006r"
-  "esult\030\003 \001(\0132(.grpc_cli.AutocreateArrayRe"
-  "sponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.P"
-  "osInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_"
-  "cli.Status\"\217\001\n\022DeleteArrayRequest\022\017\n\007com"
-  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001"
-  "(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.DeleteArray"
-  "Request.Param\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\266\001\n"
-  "\023DeleteArrayResponse\022\017\n\007command\030\001 \001(\t\022\013\n"
-  "\003rid\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.grpc_cli.De"
-  "leteArrayResponse.Result\022\037\n\004info\030\004 \001(\0132\021"
-  ".grpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 "
-  "\001(\0132\020.grpc_cli.Status\"\305\001\n\021MountArrayRequ"
-  "est\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treq"
-  "uestor\030\003 \001(\t\0220\n\005param\030\004 \001(\0132!.grpc_cli.M"
-  "ountArrayRequest.Param\032M\n\005Param\022\014\n\004name\030"
-  "\001 \001(\t\022\037\n\022enableWriteThrough\030\002 \001(\010H\000\210\001\001B\025"
-  "\n\023_enableWriteThrough\"\264\001\n\022MountArrayResp"
-  "onse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006re"
-  "sult\030\003 \001(\0132#.grpc_cli.MountArrayResponse"
+  "\0132\020.grpc_cli.Status\"H\n\025StartTelemetryReq"
+  "uest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tre"
+  "questor\030\003 \001(\t\"\274\001\n\026StartTelemetryResponse"
+  "\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result"
+  "\030\003 \001(\0132\'.grpc_cli.StartTelemetryResponse"
   ".Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo"
   "\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.St"
-  "atus\"\221\001\n\023UnmountArrayRequest\022\017\n\007command\030"
-  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0222\n"
-  "\005param\030\004 \001(\0132#.grpc_cli.UnmountArrayRequ"
-  "est.Param\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\270\001\n\024Unm"
-  "ountArrayResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
-  "d\030\002 \001(\t\0225\n\006result\030\003 \001(\0132%.grpc_cli.Unmou"
-  "ntArrayResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
-  "rpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001("
-  "\0132\020.grpc_cli.Status\"\314\002\n\005Array\022\r\n\005index\030\001"
-  " \001(\005\022\021\n\tunique_id\030\002 \001(\005\022\014\n\004name\030\003 \001(\t\022\016\n"
-  "\006status\030\004 \001(\t\022\r\n\005state\030\005 \001(\t\022\021\n\tsituatio"
-  "n\030\006 \001(\t\022\026\n\016createDatetime\030\007 \001(\t\022\026\n\016updat"
-  "eDatetime\030\010 \001(\t\022\032\n\022rebuildingProgress\030\t "
-  "\001(\t\022\020\n\010capacity\030\n \001(\004\022\014\n\004used\030\013 \001(\004\022\016\n\006g"
-  "cMode\030\014 \001(\t\022\020\n\010metaRaid\030\r \001(\t\022\020\n\010dataRai"
-  "d\030\016 \001(\t\022\033\n\023writeThroughEnabled\030\017 \001(\010\022$\n\n"
-  "devicelist\030\020 \003(\0132\020.grpc_cli.Device\"C\n\020Li"
-  "stArrayRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
-  " \001(\t\022\021\n\trequestor\030\003 \001(\t\"\240\002\n\021ListArrayRes"
-  "ponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0222\n\006r"
-  "esult\030\003 \001(\0132\".grpc_cli.ListArrayResponse"
-  ".Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo"
-  "\032\227\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.S"
-  "tatus\022:\n\004data\030\002 \001(\0132,.grpc_cli.ListArray"
-  "Response.Result.ArrayList\032/\n\tArrayList\022\""
-  "\n\tarrayList\030\001 \003(\0132\017.grpc_cli.Array\"\213\001\n\020A"
-  "rrayInfoRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
-  "\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\022/\n\005param\030\004 \001(\0132"
-  " .grpc_cli.ArrayInfoRequest.Param\032\025\n\005Par"
-  "am\022\014\n\004name\030\001 \001(\t\"\321\001\n\021ArrayInfoResponse\022\017"
-  "\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0222\n\006result\030\003"
-  " \001(\0132\".grpc_cli.ArrayInfoResponse.Result"
-  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032I\n\006Res"
-  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\022\035\n"
-  "\004data\030\002 \001(\0132\017.grpc_cli.Array\"B\n\017ListNode"
-  "Request\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n"
-  "\trequestor\030\003 \001(\t\"\233\002\n\020ListNodeResponse\022\017\n"
-  "\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0221\n\006result\030\003 "
-  "\001(\0132!.grpc_cli.ListNodeResponse.Result\022\037"
-  "\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\224\001\n\006Resu"
-  "lt\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\0224\n\004"
-  "data\030\002 \003(\0132&.grpc_cli.ListNodeResponse.R"
-  "esult.Node\0322\n\004Node\022\014\n\004name\030\001 \001(\t\022\n\n\002ip\030\002"
-  " \001(\t\022\020\n\010lastseen\030\003 \001(\t\"F\n\023ListHaVolumeRe"
-  "quest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tr"
-  "equestor\030\003 \001(\t\"\336\002\n\024ListHaVolumeResponse\022"
-  "\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030"
-  "\003 \001(\0132%.grpc_cli.ListHaVolumeResponse.Re"
-  "sult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\317\001"
-  "\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Stat"
-  "us\022:\n\004data\030\002 \003(\0132,.grpc_cli.ListHaVolume"
-  "Response.Result.Volume\032g\n\006Volume\022\n\n\002id\030\001"
-  " \001(\005\022\014\n\004name\030\002 \001(\t\022\020\n\010nodeName\030\003 \001(\t\022\021\n\t"
-  "arrayName\030\004 \001(\t\022\014\n\004size\030\005 \001(\003\022\020\n\010lastsee"
-  "n\030\006 \001(\t\"K\n\030ListHaReplicationRequest\022\017\n\007c"
-  "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003"
-  " \001(\t\"\226\003\n\031ListHaReplicationResponse\022\017\n\007co"
-  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022:\n\006result\030\003 \001(\013"
-  "2*.grpc_cli.ListHaReplicationResponse.Re"
-  "sult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\375\001"
-  "\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Stat"
-  "us\022D\n\004data\030\002 \003(\01326.grpc_cli.ListHaReplic"
-  "ationResponse.Result.Replication\032\212\001\n\013Rep"
-  "lication\022\n\n\002id\030\001 \001(\005\022\026\n\016sourceVolumeId\030\002"
-  " \001(\005\022\032\n\022sourceWalVolume_id\030\003 \001(\005\022\033\n\023dest"
-  "inationVolumeId\030\004 \001(\005\022\036\n\026destinationWalV"
-  "olumeId\030\005 \001(\005\"\223\003\n\031StartHaReplicationRequ"
-  "est\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treq"
-  "uestor\030\003 \001(\t\0228\n\005param\030\004 \001(\0132).grpc_cli.S"
-  "tartHaReplicationRequest.Param\032\212\002\n\005Param"
-  "\022\027\n\017primaryNodeName\030\001 \001(\t\022\030\n\020primaryArra"
-  "yName\030\002 \001(\t\022\031\n\021primaryVolumeName\030\003 \001(\t\022\034"
-  "\n\024primaryWalVolumeName\030\004 \001(\t\022\031\n\021secondar"
-  "yNodeName\030\005 \001(\t\022\032\n\022secondaryArrayName\030\006 "
-  "\001(\t\022\033\n\023secondaryVolumeName\030\007 \001(\t\022\036\n\026seco"
-  "ndaryWalVolumeName\030\010 \001(\t\022\016\n\006stuats\030\t \001(\t"
-  "\022\021\n\ttimestamp\030\n \001(\t\"\304\001\n\032StartHaReplicati"
-  "onResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t"
-  "\022;\n\006result\030\003 \001(\0132+.grpc_cli.StartHaRepli"
-  "cationResponse.Result\022\037\n\004info\030\004 \001(\0132\021.gr"
-  "pc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\013"
-  "2\020.grpc_cli.Status\"\220\001\n\022SetLogLevelReques"
-  "t\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treque"
-  "stor\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.Set"
-  "LogLevelRequest.Param\032\026\n\005Param\022\r\n\005level\030"
-  "\001 \001(\t\"\266\001\n\023SetLogLevelResponse\022\017\n\007command"
-  "\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.gr"
-  "pc_cli.SetLogLevelResponse.Result\022\037\n\004inf"
-  "o\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006"
-  "status\030\001 \001(\0132\020.grpc_cli.Status\"\246\001\n\027SetLo"
-  "gPreferenceRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003r"
-  "id\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0226\n\005param\030\004 \001"
-  "(\0132\'.grpc_cli.SetLogPreferenceRequest.Pa"
-  "ram\032\"\n\005Param\022\031\n\021structuredLogging\030\001 \001(\t\""
-  "\300\001\n\030SetLogPreferenceResponse\022\017\n\007command\030"
-  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0229\n\006result\030\003 \001(\0132).grp"
-  "c_cli.SetLogPreferenceResponse.Result\022\037\n"
-  "\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result"
-  "\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"D\n\021Lo"
-  "ggerInfoRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
-  "\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\345\003\n\022LoggerInfoR"
-  "esponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n"
-  "\006result\030\003 \001(\0132#.grpc_cli.LoggerInfoRespo"
-  "nse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosI"
-  "nfo\032\332\002\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
-  "i.Status\022<\n\004data\030\002 \001(\0132..grpc_cli.Logger"
-  "InfoResponse.Result.LoggerInfo\032\357\001\n\nLogge"
-  "rInfo\022\024\n\014minorLogPath\030\001 \001(\t\022\024\n\014majorLogP"
-  "ath\030\002 \001(\t\022\027\n\017logfileSizeInMb\030\003 \001(\t\022\034\n\024lo"
-  "gfileRotationCount\030\004 \001(\005\022\034\n\024minAllowable"
-  "LogLevel\030\005 \001(\t\022\025\n\rfilterEnabled\030\006 \001(\005\022\026\n"
-  "\016filterIncluded\030\007 \001(\t\022\026\n\016filterExcluded\030"
-  "\010 \001(\t\022\031\n\021structuredLogging\030\t \001(\010\"E\n\022GetL"
-  "ogLevelRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
-  " \001(\t\022\021\n\trequestor\030\003 \001(\t\"\217\002\n\023GetLogLevelR"
-  "esponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n"
-  "\006result\030\003 \001(\0132$.grpc_cli.GetLogLevelResp"
+  "atus\"G\n\024StopTelemetryRequest\022\017\n\007command\030"
+  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\272\001"
+  "\n\025StopTelemetryResponse\022\017\n\007command\030\001 \001(\t"
+  "\022\013\n\003rid\030\002 \001(\t\0226\n\006result\030\003 \001(\0132&.grpc_cli"
+  ".StopTelemetryResponse.Result\022\037\n\004info\030\004 "
+  "\001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006stat"
+  "us\030\001 \001(\0132\020.grpc_cli.Status\"G\n\024ResetEvent"
+  "WrrRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t"
+  "\022\021\n\trequestor\030\003 \001(\t\"\272\001\n\025ResetEventWrrRes"
+  "ponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0226\n\006r"
+  "esult\030\003 \001(\0132&.grpc_cli.ResetEventWrrResp"
   "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
-  "Info\032\202\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_c"
-  "li.Status\022;\n\004data\030\002 \001(\0132-.grpc_cli.GetLo"
-  "gLevelResponse.Result.LogLevel\032\031\n\010LogLev"
-  "el\022\r\n\005level\030\001 \001(\t\"H\n\025ApplyLogFilterReque"
-  "st\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequ"
-  "estor\030\003 \001(\t\"\274\001\n\026ApplyLogFilterResponse\022\017"
-  "\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result\030\003"
-  " \001(\0132\'.grpc_cli.ApplyLogFilterResponse.R"
-  "esult\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*"
-  "\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Stat"
-  "us\"\326\001\n\023CreateDeviceRequest\022\017\n\007command\030\001 "
-  "\001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0222\n\005p"
-  "aram\030\004 \001(\0132#.grpc_cli.CreateDeviceReques"
-  "t.Param\032Z\n\005Param\022\014\n\004name\030\001 \001(\t\022\021\n\tnumBlo"
-  "cks\030\002 \001(\r\022\021\n\tblockSize\030\003 \001(\r\022\017\n\007devType\030"
-  "\004 \001(\t\022\014\n\004numa\030\005 \001(\r\"\270\001\n\024CreateDeviceResp"
-  "onse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006re"
-  "sult\030\003 \001(\0132%.grpc_cli.CreateDeviceRespon"
-  "se.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosIn"
-  "fo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli."
-  "Status\"D\n\021ScanDeviceRequest\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n"
-  "\022ScanDeviceResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003"
-  "rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.Sca"
-  "nDeviceResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
+  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
+  "i.Status\"B\n\017ResetMbrRequest\022\017\n\007command\030\001"
+  " \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\260\001\n"
+  "\020ResetMbrResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
+  "d\030\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grpc_cli.Reset"
+  "MbrResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_"
+  "cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020."
+  "grpc_cli.Status\"\225\001\n\025StopRebuildingReques"
+  "t\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treque"
+  "stor\030\003 \001(\t\0224\n\005param\030\004 \001(\0132%.grpc_cli.Sto"
+  "pRebuildingRequest.Param\032\025\n\005Param\022\014\n\004nam"
+  "e\030\001 \001(\t\"\274\001\n\026StopRebuildingResponse\022\017\n\007co"
+  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result\030\003 \001(\013"
+  "2\'.grpc_cli.StopRebuildingResponse.Resul"
+  "t\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Re"
+  "sult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\245"
+  "\001\n\025UpdateEventWrrRequest\022\017\n\007command\030\001 \001("
+  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0224\n\005par"
+  "am\030\004 \001(\0132%.grpc_cli.UpdateEventWrrReques"
+  "t.Param\032%\n\005Param\022\014\n\004name\030\001 \001(\t\022\016\n\006weight"
+  "\030\002 \001(\003\"\274\001\n\026UpdateEventWrrResponse\022\017\n\007com"
+  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result\030\003 \001(\0132"
+  "\'.grpc_cli.UpdateEventWrrResponse.Result"
+  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Res"
+  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\353\001"
+  "\n\017AddSpareRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
+  "d\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\022.\n\005param\030\004 \001("
+  "\0132\037.grpc_cli.AddSpareRequest.Param\032%\n\017Sp"
+  "areDeviceName\022\022\n\ndeviceName\030\001 \001(\t\032P\n\005Par"
+  "am\022\r\n\005array\030\001 \001(\t\0228\n\005spare\030\003 \003(\0132).grpc_"
+  "cli.AddSpareRequest.SpareDeviceName\"\260\001\n\020"
+  "AddSpareResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
+  "\030\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grpc_cli.AddSpa"
+  "reResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_c"
+  "li.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.g"
+  "rpc_cli.Status\"$\n\016DeviceNameList\022\022\n\ndevi"
+  "ceName\030\001 \001(\t\"\364\001\n\022RemoveSpareRequest\022\017\n\007c"
+  "ommand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003"
+  " \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.RemoveSpa"
+  "reRequest.Param\032%\n\017SpareDeviceName\022\022\n\nde"
+  "viceName\030\001 \001(\t\032S\n\005Param\022\r\n\005array\030\001 \001(\t\022;"
+  "\n\005spare\030\002 \003(\0132,.grpc_cli.RemoveSpareRequ"
+  "est.SpareDeviceName\"\266\001\n\023RemoveSpareRespo"
+  "nse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006res"
+  "ult\030\003 \001(\0132$.grpc_cli.RemoveSpareResponse"
+  ".Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo"
+  "\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.St"
+  "atus\"\235\002\n\022CreateArrayRequest\022\017\n\007command\030\001"
+  " \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0221\n\005"
+  "param\030\004 \001(\0132\".grpc_cli.CreateArrayReques"
+  "t.Param\032\242\001\n\005Param\022\014\n\004name\030\001 \001(\t\022(\n\006buffe"
+  "r\030\002 \003(\0132\030.grpc_cli.DeviceNameList\022&\n\004dat"
+  "a\030\003 \003(\0132\030.grpc_cli.DeviceNameList\022\'\n\005spa"
+  "re\030\004 \003(\0132\030.grpc_cli.DeviceNameList\022\020\n\010ra"
+  "idtype\030\005 \001(\t\"\266\001\n\023CreateArrayResponse\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001"
+  "(\0132$.grpc_cli.CreateArrayResponse.Result"
+  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Res"
+  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\366\001"
+  "\n\026AutocreateArrayRequest\022\017\n\007command\030\001 \001("
+  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0225\n\005par"
+  "am\030\004 \001(\0132&.grpc_cli.AutocreateArrayReque"
+  "st.Param\032t\n\005Param\022\014\n\004name\030\001 \001(\t\022(\n\006buffe"
+  "r\030\002 \003(\0132\030.grpc_cli.DeviceNameList\022\017\n\007num"
+  "Data\030\003 \001(\005\022\020\n\010numSpare\030\004 \001(\005\022\020\n\010raidtype"
+  "\030\005 \001(\t\"\276\001\n\027AutocreateArrayResponse\022\017\n\007co"
+  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0228\n\006result\030\003 \001(\013"
+  "2(.grpc_cli.AutocreateArrayResponse.Resu"
+  "lt\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006R"
+  "esult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\""
+  "\217\001\n\022DeleteArrayRequest\022\017\n\007command\030\001 \001(\t\022"
+  "\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0221\n\005param"
+  "\030\004 \001(\0132\".grpc_cli.DeleteArrayRequest.Par"
+  "am\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\266\001\n\023DeleteArra"
+  "yResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022"
+  "4\n\006result\030\003 \001(\0132$.grpc_cli.DeleteArrayRe"
+  "sponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.P"
+  "osInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_"
+  "cli.Status\"\305\001\n\021MountArrayRequest\022\017\n\007comm"
+  "and\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001("
+  "\t\0220\n\005param\030\004 \001(\0132!.grpc_cli.MountArrayRe"
+  "quest.Param\032M\n\005Param\022\014\n\004name\030\001 \001(\t\022\037\n\022en"
+  "ableWriteThrough\030\002 \001(\010H\000\210\001\001B\025\n\023_enableWr"
+  "iteThrough\"\264\001\n\022MountArrayResponse\022\017\n\007com"
+  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001(\0132"
+  "#.grpc_cli.MountArrayResponse.Result\022\037\n\004"
+  "info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022"
+  " \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\221\001\n\023Un"
+  "mountArrayRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
+  "d\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0222\n\005param\030\004 \001("
+  "\0132#.grpc_cli.UnmountArrayRequest.Param\032\025"
+  "\n\005Param\022\014\n\004name\030\001 \001(\t\"\270\001\n\024UnmountArrayRe"
+  "sponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006"
+  "result\030\003 \001(\0132%.grpc_cli.UnmountArrayResp"
+  "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
+  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
+  "i.Status\"\314\002\n\005Array\022\r\n\005index\030\001 \001(\005\022\021\n\tuni"
+  "que_id\030\002 \001(\005\022\014\n\004name\030\003 \001(\t\022\016\n\006status\030\004 \001"
+  "(\t\022\r\n\005state\030\005 \001(\t\022\021\n\tsituation\030\006 \001(\t\022\026\n\016"
+  "createDatetime\030\007 \001(\t\022\026\n\016updateDatetime\030\010"
+  " \001(\t\022\032\n\022rebuildingProgress\030\t \001(\t\022\020\n\010capa"
+  "city\030\n \001(\004\022\014\n\004used\030\013 \001(\004\022\016\n\006gcMode\030\014 \001(\t"
+  "\022\020\n\010metaRaid\030\r \001(\t\022\020\n\010dataRaid\030\016 \001(\t\022\033\n\023"
+  "writeThroughEnabled\030\017 \001(\010\022$\n\ndevicelist\030"
+  "\020 \003(\0132\020.grpc_cli.Device\"C\n\020ListArrayRequ"
+  "est\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treq"
+  "uestor\030\003 \001(\t\"\240\002\n\021ListArrayResponse\022\017\n\007co"
+  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0222\n\006result\030\003 \001(\013"
+  "2\".grpc_cli.ListArrayResponse.Result\022\037\n\004"
+  "info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\227\001\n\006Result"
+  "\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\022:\n\004da"
+  "ta\030\002 \001(\0132,.grpc_cli.ListArrayResponse.Re"
+  "sult.ArrayList\032/\n\tArrayList\022\"\n\tarrayList"
+  "\030\001 \003(\0132\017.grpc_cli.Array\"\213\001\n\020ArrayInfoReq"
+  "uest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tre"
+  "questor\030\003 \001(\t\022/\n\005param\030\004 \001(\0132 .grpc_cli."
+  "ArrayInfoRequest.Param\032\025\n\005Param\022\014\n\004name\030"
+  "\001 \001(\t\"\321\001\n\021ArrayInfoResponse\022\017\n\007command\030\001"
+  " \001(\t\022\013\n\003rid\030\002 \001(\t\0222\n\006result\030\003 \001(\0132\".grpc"
+  "_cli.ArrayInfoResponse.Result\022\037\n\004info\030\004 "
+  "\001(\0132\021.grpc_cli.PosInfo\032I\n\006Result\022 \n\006stat"
+  "us\030\001 \001(\0132\020.grpc_cli.Status\022\035\n\004data\030\002 \001(\013"
+  "2\017.grpc_cli.Array\"B\n\017ListNodeRequest\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030"
+  "\003 \001(\t\"\233\002\n\020ListNodeResponse\022\017\n\007command\030\001 "
+  "\001(\t\022\013\n\003rid\030\002 \001(\t\0221\n\006result\030\003 \001(\0132!.grpc_"
+  "cli.ListNodeResponse.Result\022\037\n\004info\030\004 \001("
+  "\0132\021.grpc_cli.PosInfo\032\224\001\n\006Result\022 \n\006statu"
+  "s\030\001 \001(\0132\020.grpc_cli.Status\0224\n\004data\030\002 \003(\0132"
+  "&.grpc_cli.ListNodeResponse.Result.Node\032"
+  "2\n\004Node\022\014\n\004name\030\001 \001(\t\022\n\n\002ip\030\002 \001(\t\022\020\n\010las"
+  "tseen\030\003 \001(\t\"F\n\023ListHaVolumeRequest\022\017\n\007co"
+  "mmand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 "
+  "\001(\t\"\336\002\n\024ListHaVolumeResponse\022\017\n\007command\030"
+  "\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030\003 \001(\0132%.grp"
+  "c_cli.ListHaVolumeResponse.Result\022\037\n\004inf"
+  "o\030\004 \001(\0132\021.grpc_cli.PosInfo\032\317\001\n\006Result\022 \n"
+  "\006status\030\001 \001(\0132\020.grpc_cli.Status\022:\n\004data\030"
+  "\002 \003(\0132,.grpc_cli.ListHaVolumeResponse.Re"
+  "sult.Volume\032g\n\006Volume\022\n\n\002id\030\001 \001(\005\022\014\n\004nam"
+  "e\030\002 \001(\t\022\020\n\010nodeName\030\003 \001(\t\022\021\n\tarrayName\030\004"
+  " \001(\t\022\014\n\004size\030\005 \001(\003\022\020\n\010lastseen\030\006 \001(\t\"K\n\030"
+  "ListHaReplicationRequest\022\017\n\007command\030\001 \001("
+  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\226\003\n\031Li"
+  "stHaReplicationResponse\022\017\n\007command\030\001 \001(\t"
+  "\022\013\n\003rid\030\002 \001(\t\022:\n\006result\030\003 \001(\0132*.grpc_cli"
+  ".ListHaReplicationResponse.Result\022\037\n\004inf"
+  "o\030\004 \001(\0132\021.grpc_cli.PosInfo\032\375\001\n\006Result\022 \n"
+  "\006status\030\001 \001(\0132\020.grpc_cli.Status\022D\n\004data\030"
+  "\002 \003(\01326.grpc_cli.ListHaReplicationRespon"
+  "se.Result.Replication\032\212\001\n\013Replication\022\n\n"
+  "\002id\030\001 \001(\005\022\026\n\016sourceVolumeId\030\002 \001(\005\022\032\n\022sou"
+  "rceWalVolume_id\030\003 \001(\005\022\033\n\023destinationVolu"
+  "meId\030\004 \001(\005\022\036\n\026destinationWalVolumeId\030\005 \001"
+  "(\005\"\223\003\n\031StartHaReplicationRequest\022\017\n\007comm"
+  "and\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001("
+  "\t\0228\n\005param\030\004 \001(\0132).grpc_cli.StartHaRepli"
+  "cationRequest.Param\032\212\002\n\005Param\022\027\n\017primary"
+  "NodeName\030\001 \001(\t\022\030\n\020primaryArrayName\030\002 \001(\t"
+  "\022\031\n\021primaryVolumeName\030\003 \001(\t\022\034\n\024primaryWa"
+  "lVolumeName\030\004 \001(\t\022\031\n\021secondaryNodeName\030\005"
+  " \001(\t\022\032\n\022secondaryArrayName\030\006 \001(\t\022\033\n\023seco"
+  "ndaryVolumeName\030\007 \001(\t\022\036\n\026secondaryWalVol"
+  "umeName\030\010 \001(\t\022\016\n\006stuats\030\t \001(\t\022\021\n\ttimesta"
+  "mp\030\n \001(\t\"\304\001\n\032StartHaReplicationResponse\022"
+  "\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022;\n\006result\030"
+  "\003 \001(\0132+.grpc_cli.StartHaReplicationRespo"
+  "nse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosI"
+  "nfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli"
+  ".Status\"\220\001\n\022SetLogLevelRequest\022\017\n\007comman"
+  "d\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\022"
+  "1\n\005param\030\004 \001(\0132\".grpc_cli.SetLogLevelReq"
+  "uest.Param\032\026\n\005Param\022\r\n\005level\030\001 \001(\t\"\266\001\n\023S"
+  "etLogLevelResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003r"
+  "id\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.grpc_cli.SetL"
+  "ogLevelResponse.Result\022\037\n\004info\030\004 \001(\0132\021.g"
   "rpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001("
-  "\0132\020.grpc_cli.Status\"\213\001\n\006Device\022\014\n\004name\030\001"
-  " \001(\t\022\014\n\004type\030\002 \001(\t\022\017\n\007address\030\003 \001(\t\022\r\n\005c"
-  "lass\030\004 \001(\t\022\023\n\013modelNumber\030\005 \001(\t\022\014\n\004numa\030"
-  "\006 \001(\t\022\014\n\004size\030\007 \001(\004\022\024\n\014serialNumber\030\010 \001("
-  "\t\"D\n\021ListDeviceRequest\022\017\n\007command\030\001 \001(\t\022"
-  "\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\247\002\n\022List"
-  "DeviceResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
-  " \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.ListDevi"
-  "ceResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_c"
-  "li.PosInfo\032\234\001\n\006Result\022 \n\006status\030\001 \001(\0132\020."
-  "grpc_cli.Status\022<\n\004data\030\002 \001(\0132..grpc_cli"
-  ".ListDeviceResponse.Result.DeviceList\0322\n"
-  "\nDeviceList\022$\n\ndevicelist\030\001 \003(\0132\020.grpc_c"
-  "li.Device\"\335\004\n\010SmartLog\022\033\n\023availableSpare"
-  "Space\030\001 \001(\t\022\023\n\013temperature\030\002 \001(\t\022\031\n\021devi"
-  "ceReliability\030\003 \001(\t\022\020\n\010readOnly\030\004 \001(\t\022\034\n"
-  "\024volatileMemoryBackup\030\005 \001(\t\022\032\n\022currentTe"
-  "mperature\030\006 \001(\t\022\026\n\016availableSpare\030\007 \001(\t\022"
-  "\037\n\027availableSpareThreshold\030\010 \001(\t\022\032\n\022life"
-  "PercentageUsed\030\t \001(\t\022\025\n\rdataUnitsRead\030\n "
-  "\001(\t\022\030\n\020dataUnitsWritten\030\013 \001(\t\022\030\n\020hostRea"
-  "dCommands\030\014 \001(\t\022\031\n\021hostWriteCommands\030\r \001"
-  "(\t\022\032\n\022controllerBusyTime\030\016 \001(\t\022\023\n\013powerC"
-  "ycles\030\017 \001(\t\022\024\n\014powerOnHours\030\020 \001(\t\022\027\n\017uns"
-  "afeShutdowns\030\021 \001(\t\022 \n\030unrecoverableMedia"
-  "Errors\030\022 \001(\t\022\037\n\027lifetimeErrorLogEntries\030"
-  "\023 \001(\t\022\036\n\026warningTemperatureTime\030\024 \001(\t\022\037\n"
-  "\027criticalTemperatureTime\030\025 \001(\t\022\031\n\021temper"
-  "atureSensor\030\026 \003(\t\"\217\001\n\022GetSmartLogRequest"
-  "\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treques"
-  "tor\030\003 \001(\t\0221\n\005param\030\004 \001(\0132\".grpc_cli.GetS"
-  "martLogRequest.Param\032\025\n\005Param\022\014\n\004name\030\001 "
-  "\001(\t\"\330\001\n\023GetSmartLogResponse\022\017\n\007command\030\001"
-  " \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.grpc"
-  "_cli.GetSmartLogResponse.Result\022\037\n\004info\030"
-  "\004 \001(\0132\021.grpc_cli.PosInfo\032L\n\006Result\022 \n\006st"
-  "atus\030\001 \001(\0132\020.grpc_cli.Status\022 \n\004data\030\002 \001"
-  "(\0132\022.grpc_cli.SmartLog2\221\026\n\006PosCli\022_\n\nSys"
-  "temInfo\022\033.grpc_cli.SystemInfoRequest\032\034.g"
-  "rpc_cli.SystemInfoResponse\"\026\202\323\344\223\002\020\022\016/v1/"
-  "systeminfo\022_\n\nSystemStop\022\033.grpc_cli.Syst"
-  "emStopRequest\032\034.grpc_cli.SystemStopRespo"
-  "nse\"\026\202\323\344\223\002\020\022\016/v1/systemstop\022}\n\021GetSystem"
-  "Property\022\".grpc_cli.GetSystemPropertyReq"
-  "uest\032#.grpc_cli.GetSystemPropertyRespons"
-  "e\"\037\202\323\344\223\002\031\022\027/v1/get_system_property\022\205\001\n\021S"
-  "etSystemProperty\022\".grpc_cli.SetSystemPro"
-  "pertyRequest\032#.grpc_cli.SetSystemPropert"
-  "yResponse\"\'\202\323\344\223\002!\022\037/v1/set_system_proper"
-  "ty/{level}\022p\n\016StartTelemetry\022\037.grpc_cli."
-  "StartTelemetryRequest\032 .grpc_cli.StartTe"
-  "lemetryResponse\"\033\202\323\344\223\002\025\022\023/v1/start_telem"
-  "etry\022l\n\rStopTelemetry\022\036.grpc_cli.StopTel"
-  "emetryRequest\032\037.grpc_cli.StopTelemetryRe"
-  "sponse\"\032\202\323\344\223\002\024\022\022/v1/stop_telemetry\022P\n\rRe"
-  "setEventWrr\022\036.grpc_cli.ResetEventWrrRequ"
-  "est\032\037.grpc_cli.ResetEventWrrResponse\022A\n\010"
-  "ResetMbr\022\031.grpc_cli.ResetMbrRequest\032\032.gr"
-  "pc_cli.ResetMbrResponse\022S\n\016StopRebuildin"
-  "g\022\037.grpc_cli.StopRebuildingRequest\032 .grp"
-  "c_cli.StopRebuildingResponse\022S\n\016UpdateEv"
-  "entWrr\022\037.grpc_cli.UpdateEventWrrRequest\032"
-  " .grpc_cli.UpdateEventWrrResponse\022W\n\010Add"
-  "Spare\022\031.grpc_cli.AddSpareRequest\032\032.grpc_"
-  "cli.AddSpareResponse\"\024\202\323\344\223\002\016\"\014/v1/addspa"
-  "re\022c\n\013RemoveSpare\022\034.grpc_cli.RemoveSpare"
-  "Request\032\035.grpc_cli.RemoveSpareResponse\"\027"
-  "\202\323\344\223\002\021\"\017/v1/removespare\022c\n\013CreateArray\022\034"
-  ".grpc_cli.CreateArrayRequest\032\035.grpc_cli."
-  "CreateArrayResponse\"\027\202\323\344\223\002\021\"\017/v1/createa"
-  "rray\022s\n\017AutocreateArray\022 .grpc_cli.Autoc"
-  "reateArrayRequest\032!.grpc_cli.AutocreateA"
-  "rrayResponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearra"
-  "y\022d\n\013DeleteArray\022\034.grpc_cli.DeleteArrayR"
-  "equest\032\035.grpc_cli.DeleteArrayResponse\"\030\202"
-  "\323\344\223\002\022\"\020/v1/deletearray/\022_\n\nMountArray\022\033."
-  "grpc_cli.MountArrayRequest\032\034.grpc_cli.Mo"
-  "untArrayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarray"
-  "\022g\n\014UnmountArray\022\035.grpc_cli.UnmountArray"
-  "Request\032\036.grpc_cli.UnmountArrayResponse\""
-  "\030\202\323\344\223\002\022\"\020/v1/unmountarray\022[\n\tListArray\022\032"
-  ".grpc_cli.ListArrayRequest\032\033.grpc_cli.Li"
-  "stArrayResponse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022["
-  "\n\tArrayInfo\022\032.grpc_cli.ArrayInfoRequest\032"
-  "\033.grpc_cli.ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v"
-  "1/arrayinfo\022w\n\020SetLogPreference\022!.grpc_c"
-  "li.SetLogPreferenceRequest\032\".grpc_cli.Se"
-  "tLogPreferenceResponse\"\034\202\323\344\223\002\026\"\024/v1/setl"
-  "ogpreference\022c\n\013SetLogLevel\022\034.grpc_cli.S"
-  "etLogLevelRequest\032\035.grpc_cli.SetLogLevel"
-  "Response\"\027\202\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLog"
-  "gerInfo\022\033.grpc_cli.LoggerInfoRequest\032\034.g"
-  "rpc_cli.LoggerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/"
-  "loggerinfo\022c\n\013GetLogLevel\022\034.grpc_cli.Get"
-  "LogLevelRequest\032\035.grpc_cli.GetLogLevelRe"
-  "sponse\"\027\202\323\344\223\002\021\"\017/v1/getloglevel\022l\n\016Apply"
-  "LogFilter\022\037.grpc_cli.ApplyLogFilterReque"
-  "st\032 .grpc_cli.ApplyLogFilterResponse\"\027\202\323"
-  "\344\223\002\021\"\017/v1/applyfilter\022g\n\014CreateDevice\022\035."
-  "grpc_cli.CreateDeviceRequest\032\036.grpc_cli."
-  "CreateDeviceResponse\"\030\202\323\344\223\002\022\"\020/v1/create"
-  "device\022_\n\nScanDevice\022\033.grpc_cli.ScanDevi"
-  "ceRequest\032\034.grpc_cli.ScanDeviceResponse\""
-  "\026\202\323\344\223\002\020\"\016/v1/scandevice\022_\n\nListDevice\022\033."
-  "grpc_cli.ListDeviceRequest\032\034.grpc_cli.Li"
-  "stDeviceResponse\"\026\202\323\344\223\002\020\"\016/v1/listdevice"
-  "\022`\n\013GetSmartLog\022\034.grpc_cli.GetSmartLogRe"
-  "quest\032\035.grpc_cli.GetSmartLogResponse\"\024\202\323"
-  "\344\223\002\016\"\014/v1/smartlogB\tZ\007cli/apib\006proto3"
+  "\0132\020.grpc_cli.Status\"\246\001\n\027SetLogPreference"
+  "Request\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n"
+  "\trequestor\030\003 \001(\t\0226\n\005param\030\004 \001(\0132\'.grpc_c"
+  "li.SetLogPreferenceRequest.Param\032\"\n\005Para"
+  "m\022\031\n\021structuredLogging\030\001 \001(\t\"\300\001\n\030SetLogP"
+  "referenceResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003ri"
+  "d\030\002 \001(\t\0229\n\006result\030\003 \001(\0132).grpc_cli.SetLo"
+  "gPreferenceResponse.Result\022\037\n\004info\030\004 \001(\013"
+  "2\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030"
+  "\001 \001(\0132\020.grpc_cli.Status\"D\n\021LoggerInfoReq"
+  "uest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tre"
+  "questor\030\003 \001(\t\"\345\003\n\022LoggerInfoResponse\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006result\030\003 \001"
+  "(\0132#.grpc_cli.LoggerInfoResponse.Result\022"
+  "\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\332\002\n\006Res"
+  "ult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\022<\n"
+  "\004data\030\002 \001(\0132..grpc_cli.LoggerInfoRespons"
+  "e.Result.LoggerInfo\032\357\001\n\nLoggerInfo\022\024\n\014mi"
+  "norLogPath\030\001 \001(\t\022\024\n\014majorLogPath\030\002 \001(\t\022\027"
+  "\n\017logfileSizeInMb\030\003 \001(\t\022\034\n\024logfileRotati"
+  "onCount\030\004 \001(\005\022\034\n\024minAllowableLogLevel\030\005 "
+  "\001(\t\022\025\n\rfilterEnabled\030\006 \001(\005\022\026\n\016filterIncl"
+  "uded\030\007 \001(\t\022\026\n\016filterExcluded\030\010 \001(\t\022\031\n\021st"
+  "ructuredLogging\030\t \001(\010\"E\n\022GetLogLevelRequ"
+  "est\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\treq"
+  "uestor\030\003 \001(\t\"\217\002\n\023GetLogLevelResponse\022\017\n\007"
+  "command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0224\n\006result\030\003 \001"
+  "(\0132$.grpc_cli.GetLogLevelResponse.Result"
+  "\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032\202\001\n\006Re"
+  "sult\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\022;"
+  "\n\004data\030\002 \001(\0132-.grpc_cli.GetLogLevelRespo"
+  "nse.Result.LogLevel\032\031\n\010LogLevel\022\r\n\005level"
+  "\030\001 \001(\t\"H\n\025ApplyLogFilterRequest\022\017\n\007comma"
+  "nd\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t"
+  "\"\274\001\n\026ApplyLogFilterResponse\022\017\n\007command\030\001"
+  " \001(\t\022\013\n\003rid\030\002 \001(\t\0227\n\006result\030\003 \001(\0132\'.grpc"
+  "_cli.ApplyLogFilterResponse.Result\022\037\n\004in"
+  "fo\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n"
+  "\006status\030\001 \001(\0132\020.grpc_cli.Status\"\326\001\n\023Crea"
+  "teDeviceRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030"
+  "\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0222\n\005param\030\004 \001(\0132"
+  "#.grpc_cli.CreateDeviceRequest.Param\032Z\n\005"
+  "Param\022\014\n\004name\030\001 \001(\t\022\021\n\tnumBlocks\030\002 \001(\r\022\021"
+  "\n\tblockSize\030\003 \001(\r\022\017\n\007devType\030\004 \001(\t\022\014\n\004nu"
+  "ma\030\005 \001(\r\"\270\001\n\024CreateDeviceResponse\022\017\n\007com"
+  "mand\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030\003 \001(\0132"
+  "%.grpc_cli.CreateDeviceResponse.Result\022\037"
+  "\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Resul"
+  "t\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"D\n\021S"
+  "canDeviceRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
+  "\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022ScanDevice"
+  "Response\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223"
+  "\n\006result\030\003 \001(\0132#.grpc_cli.ScanDeviceResp"
+  "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
+  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
+  "i.Status\"\213\001\n\006Device\022\014\n\004name\030\001 \001(\t\022\014\n\004typ"
+  "e\030\002 \001(\t\022\017\n\007address\030\003 \001(\t\022\r\n\005class\030\004 \001(\t\022"
+  "\023\n\013modelNumber\030\005 \001(\t\022\014\n\004numa\030\006 \001(\t\022\014\n\004si"
+  "ze\030\007 \001(\004\022\024\n\014serialNumber\030\010 \001(\t\"D\n\021ListDe"
+  "viceRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001("
+  "\t\022\021\n\trequestor\030\003 \001(\t\"\247\002\n\022ListDeviceRespo"
+  "nse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0223\n\006res"
+  "ult\030\003 \001(\0132#.grpc_cli.ListDeviceResponse."
+  "Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032"
+  "\234\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.St"
+  "atus\022<\n\004data\030\002 \001(\0132..grpc_cli.ListDevice"
+  "Response.Result.DeviceList\0322\n\nDeviceList"
+  "\022$\n\ndevicelist\030\001 \003(\0132\020.grpc_cli.Device\"\335"
+  "\004\n\010SmartLog\022\033\n\023availableSpareSpace\030\001 \001(\t"
+  "\022\023\n\013temperature\030\002 \001(\t\022\031\n\021deviceReliabili"
+  "ty\030\003 \001(\t\022\020\n\010readOnly\030\004 \001(\t\022\034\n\024volatileMe"
+  "moryBackup\030\005 \001(\t\022\032\n\022currentTemperature\030\006"
+  " \001(\t\022\026\n\016availableSpare\030\007 \001(\t\022\037\n\027availabl"
+  "eSpareThreshold\030\010 \001(\t\022\032\n\022lifePercentageU"
+  "sed\030\t \001(\t\022\025\n\rdataUnitsRead\030\n \001(\t\022\030\n\020data"
+  "UnitsWritten\030\013 \001(\t\022\030\n\020hostReadCommands\030\014"
+  " \001(\t\022\031\n\021hostWriteCommands\030\r \001(\t\022\032\n\022contr"
+  "ollerBusyTime\030\016 \001(\t\022\023\n\013powerCycles\030\017 \001(\t"
+  "\022\024\n\014powerOnHours\030\020 \001(\t\022\027\n\017unsafeShutdown"
+  "s\030\021 \001(\t\022 \n\030unrecoverableMediaErrors\030\022 \001("
+  "\t\022\037\n\027lifetimeErrorLogEntries\030\023 \001(\t\022\036\n\026wa"
+  "rningTemperatureTime\030\024 \001(\t\022\037\n\027criticalTe"
+  "mperatureTime\030\025 \001(\t\022\031\n\021temperatureSensor"
+  "\030\026 \003(\t\"\217\001\n\022GetSmartLogRequest\022\017\n\007command"
+  "\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0221"
+  "\n\005param\030\004 \001(\0132\".grpc_cli.GetSmartLogRequ"
+  "est.Param\032\025\n\005Param\022\014\n\004name\030\001 \001(\t\"\330\001\n\023Get"
+  "SmartLogResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
+  "\030\002 \001(\t\0224\n\006result\030\003 \001(\0132$.grpc_cli.GetSma"
+  "rtLogResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grp"
+  "c_cli.PosInfo\032L\n\006Result\022 \n\006status\030\001 \001(\0132"
+  "\020.grpc_cli.Status\022 \n\004data\030\002 \001(\0132\022.grpc_c"
+  "li.SmartLog2\221\026\n\006PosCli\022_\n\nSystemInfo\022\033.g"
+  "rpc_cli.SystemInfoRequest\032\034.grpc_cli.Sys"
+  "temInfoResponse\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022"
+  "_\n\nSystemStop\022\033.grpc_cli.SystemStopReque"
+  "st\032\034.grpc_cli.SystemStopResponse\"\026\202\323\344\223\002\020"
+  "\022\016/v1/systemstop\022}\n\021GetSystemProperty\022\"."
+  "grpc_cli.GetSystemPropertyRequest\032#.grpc"
+  "_cli.GetSystemPropertyResponse\"\037\202\323\344\223\002\031\022\027"
+  "/v1/get_system_property\022\205\001\n\021SetSystemPro"
+  "perty\022\".grpc_cli.SetSystemPropertyReques"
+  "t\032#.grpc_cli.SetSystemPropertyResponse\"\'"
+  "\202\323\344\223\002!\022\037/v1/set_system_property/{level}\022"
+  "p\n\016StartTelemetry\022\037.grpc_cli.StartTeleme"
+  "tryRequest\032 .grpc_cli.StartTelemetryResp"
+  "onse\"\033\202\323\344\223\002\025\022\023/v1/start_telemetry\022l\n\rSto"
+  "pTelemetry\022\036.grpc_cli.StopTelemetryReque"
+  "st\032\037.grpc_cli.StopTelemetryResponse\"\032\202\323\344"
+  "\223\002\024\022\022/v1/stop_telemetry\022P\n\rResetEventWrr"
+  "\022\036.grpc_cli.ResetEventWrrRequest\032\037.grpc_"
+  "cli.ResetEventWrrResponse\022A\n\010ResetMbr\022\031."
+  "grpc_cli.ResetMbrRequest\032\032.grpc_cli.Rese"
+  "tMbrResponse\022S\n\016StopRebuilding\022\037.grpc_cl"
+  "i.StopRebuildingRequest\032 .grpc_cli.StopR"
+  "ebuildingResponse\022S\n\016UpdateEventWrr\022\037.gr"
+  "pc_cli.UpdateEventWrrRequest\032 .grpc_cli."
+  "UpdateEventWrrResponse\022W\n\010AddSpare\022\031.grp"
+  "c_cli.AddSpareRequest\032\032.grpc_cli.AddSpar"
+  "eResponse\"\024\202\323\344\223\002\016\"\014/v1/addspare\022c\n\013Remov"
+  "eSpare\022\034.grpc_cli.RemoveSpareRequest\032\035.g"
+  "rpc_cli.RemoveSpareResponse\"\027\202\323\344\223\002\021\"\017/v1"
+  "/removespare\022c\n\013CreateArray\022\034.grpc_cli.C"
+  "reateArrayRequest\032\035.grpc_cli.CreateArray"
+  "Response\"\027\202\323\344\223\002\021\"\017/v1/createarray\022s\n\017Aut"
+  "ocreateArray\022 .grpc_cli.AutocreateArrayR"
+  "equest\032!.grpc_cli.AutocreateArrayRespons"
+  "e\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray\022d\n\013Delete"
+  "Array\022\034.grpc_cli.DeleteArrayRequest\032\035.gr"
+  "pc_cli.DeleteArrayResponse\"\030\202\323\344\223\002\022\"\020/v1/"
+  "deletearray/\022_\n\nMountArray\022\033.grpc_cli.Mo"
+  "untArrayRequest\032\034.grpc_cli.MountArrayRes"
+  "ponse\"\026\202\323\344\223\002\020\"\016/v1/mountarray\022g\n\014Unmount"
+  "Array\022\035.grpc_cli.UnmountArrayRequest\032\036.g"
+  "rpc_cli.UnmountArrayResponse\"\030\202\323\344\223\002\022\"\020/v"
+  "1/unmountarray\022[\n\tListArray\022\032.grpc_cli.L"
+  "istArrayRequest\032\033.grpc_cli.ListArrayResp"
+  "onse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022[\n\tArrayInfo"
+  "\022\032.grpc_cli.ArrayInfoRequest\032\033.grpc_cli."
+  "ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v1/arrayinfo"
+  "\022w\n\020SetLogPreference\022!.grpc_cli.SetLogPr"
+  "eferenceRequest\032\".grpc_cli.SetLogPrefere"
+  "nceResponse\"\034\202\323\344\223\002\026\"\024/v1/setlogpreferenc"
+  "e\022c\n\013SetLogLevel\022\034.grpc_cli.SetLogLevelR"
+  "equest\032\035.grpc_cli.SetLogLevelResponse\"\027\202"
+  "\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLoggerInfo\022\033.g"
+  "rpc_cli.LoggerInfoRequest\032\034.grpc_cli.Log"
+  "gerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/loggerinfo\022"
+  "c\n\013GetLogLevel\022\034.grpc_cli.GetLogLevelReq"
+  "uest\032\035.grpc_cli.GetLogLevelResponse\"\027\202\323\344"
+  "\223\002\021\"\017/v1/getloglevel\022l\n\016ApplyLogFilter\022\037"
+  ".grpc_cli.ApplyLogFilterRequest\032 .grpc_c"
+  "li.ApplyLogFilterResponse\"\027\202\323\344\223\002\021\"\017/v1/a"
+  "pplyfilter\022g\n\014CreateDevice\022\035.grpc_cli.Cr"
+  "eateDeviceRequest\032\036.grpc_cli.CreateDevic"
+  "eResponse\"\030\202\323\344\223\002\022\"\020/v1/createdevice\022_\n\nS"
+  "canDevice\022\033.grpc_cli.ScanDeviceRequest\032\034"
+  ".grpc_cli.ScanDeviceResponse\"\026\202\323\344\223\002\020\"\016/v"
+  "1/scandevice\022_\n\nListDevice\022\033.grpc_cli.Li"
+  "stDeviceRequest\032\034.grpc_cli.ListDeviceRes"
+  "ponse\"\026\202\323\344\223\002\020\"\016/v1/listdevice\022`\n\013GetSmar"
+  "tLog\022\034.grpc_cli.GetSmartLogRequest\032\035.grp"
+  "c_cli.GetSmartLogResponse\"\024\202\323\344\223\002\016\"\014/v1/s"
+  "martlogB\tZ\007cli/apib\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 15957, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  false, false, 16106, descriptor_table_protodef_cli_2eproto, "cli.proto", 
   &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 129,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
@@ -4478,12 +4494,48 @@ SystemInfoResponse_Result_Data::SystemInfoResponse_Result_Data(const SystemInfoR
     biosversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_biosversion(), 
       GetArena());
   }
+  biosvendor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_biosvendor().empty()) {
+    biosvendor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_biosvendor(), 
+      GetArena());
+  }
+  biosreleasedate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_biosreleasedate().empty()) {
+    biosreleasedate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_biosreleasedate(), 
+      GetArena());
+  }
+  systemmanufacturer_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_systemmanufacturer().empty()) {
+    systemmanufacturer_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_systemmanufacturer(), 
+      GetArena());
+  }
+  systemproductname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_systemproductname().empty()) {
+    systemproductname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_systemproductname(), 
+      GetArena());
+  }
+  systemserialnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_systemserialnumber().empty()) {
+    systemserialnumber_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_systemserialnumber(), 
+      GetArena());
+  }
+  systemuuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_systemuuid().empty()) {
+    systemuuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_systemuuid(), 
+      GetArena());
+  }
   // @@protoc_insertion_point(copy_constructor:grpc_cli.SystemInfoResponse.Result.Data)
 }
 
 void SystemInfoResponse_Result_Data::SharedCtor() {
 version_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 biosversion_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+biosvendor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+biosreleasedate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+systemmanufacturer_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+systemproductname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+systemserialnumber_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+systemuuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 SystemInfoResponse_Result_Data::~SystemInfoResponse_Result_Data() {
@@ -4496,6 +4548,12 @@ void SystemInfoResponse_Result_Data::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   version_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   biosversion_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  biosvendor_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  biosreleasedate_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  systemmanufacturer_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  systemproductname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  systemserialnumber_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  systemuuid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void SystemInfoResponse_Result_Data::ArenaDtor(void* object) {
@@ -4516,6 +4574,12 @@ void SystemInfoResponse_Result_Data::Clear() {
 
   version_.ClearToEmpty();
   biosversion_.ClearToEmpty();
+  biosvendor_.ClearToEmpty();
+  biosreleasedate_.ClearToEmpty();
+  systemmanufacturer_.ClearToEmpty();
+  systemproductname_.ClearToEmpty();
+  systemserialnumber_.ClearToEmpty();
+  systemuuid_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -4541,6 +4605,60 @@ const char* SystemInfoResponse_Result_Data::_InternalParse(const char* ptr, ::PR
           auto str = _internal_mutable_biosversion();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.biosVersion"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string biosVendor = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_biosvendor();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.biosVendor"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string biosReleaseDate = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          auto str = _internal_mutable_biosreleasedate();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string systemManufacturer = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_systemmanufacturer();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string systemProductName = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_systemproductname();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.systemProductName"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string systemSerialNumber = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+          auto str = _internal_mutable_systemserialnumber();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string systemUuid = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          auto str = _internal_mutable_systemuuid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemInfoResponse.Result.Data.systemUuid"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -4592,6 +4710,66 @@ failure:
         2, this->_internal_biosversion(), target);
   }
 
+  // string biosVendor = 3;
+  if (this->biosvendor().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_biosvendor().data(), static_cast<int>(this->_internal_biosvendor().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.biosVendor");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_biosvendor(), target);
+  }
+
+  // string biosReleaseDate = 4;
+  if (this->biosreleasedate().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_biosreleasedate().data(), static_cast<int>(this->_internal_biosreleasedate().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.biosReleaseDate");
+    target = stream->WriteStringMaybeAliased(
+        4, this->_internal_biosreleasedate(), target);
+  }
+
+  // string systemManufacturer = 5;
+  if (this->systemmanufacturer().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_systemmanufacturer().data(), static_cast<int>(this->_internal_systemmanufacturer().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.systemManufacturer");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_systemmanufacturer(), target);
+  }
+
+  // string systemProductName = 6;
+  if (this->systemproductname().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_systemproductname().data(), static_cast<int>(this->_internal_systemproductname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.systemProductName");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_systemproductname(), target);
+  }
+
+  // string systemSerialNumber = 7;
+  if (this->systemserialnumber().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_systemserialnumber().data(), static_cast<int>(this->_internal_systemserialnumber().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.systemSerialNumber");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_systemserialnumber(), target);
+  }
+
+  // string systemUuid = 8;
+  if (this->systemuuid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_systemuuid().data(), static_cast<int>(this->_internal_systemuuid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.SystemInfoResponse.Result.Data.systemUuid");
+    target = stream->WriteStringMaybeAliased(
+        8, this->_internal_systemuuid(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -4620,6 +4798,48 @@ size_t SystemInfoResponse_Result_Data::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_biosversion());
+  }
+
+  // string biosVendor = 3;
+  if (this->biosvendor().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_biosvendor());
+  }
+
+  // string biosReleaseDate = 4;
+  if (this->biosreleasedate().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_biosreleasedate());
+  }
+
+  // string systemManufacturer = 5;
+  if (this->systemmanufacturer().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_systemmanufacturer());
+  }
+
+  // string systemProductName = 6;
+  if (this->systemproductname().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_systemproductname());
+  }
+
+  // string systemSerialNumber = 7;
+  if (this->systemserialnumber().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_systemserialnumber());
+  }
+
+  // string systemUuid = 8;
+  if (this->systemuuid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_systemuuid());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -4659,6 +4879,24 @@ void SystemInfoResponse_Result_Data::MergeFrom(const SystemInfoResponse_Result_D
   if (from.biosversion().size() > 0) {
     _internal_set_biosversion(from._internal_biosversion());
   }
+  if (from.biosvendor().size() > 0) {
+    _internal_set_biosvendor(from._internal_biosvendor());
+  }
+  if (from.biosreleasedate().size() > 0) {
+    _internal_set_biosreleasedate(from._internal_biosreleasedate());
+  }
+  if (from.systemmanufacturer().size() > 0) {
+    _internal_set_systemmanufacturer(from._internal_systemmanufacturer());
+  }
+  if (from.systemproductname().size() > 0) {
+    _internal_set_systemproductname(from._internal_systemproductname());
+  }
+  if (from.systemserialnumber().size() > 0) {
+    _internal_set_systemserialnumber(from._internal_systemserialnumber());
+  }
+  if (from.systemuuid().size() > 0) {
+    _internal_set_systemuuid(from._internal_systemuuid());
+  }
 }
 
 void SystemInfoResponse_Result_Data::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -4684,6 +4922,12 @@ void SystemInfoResponse_Result_Data::InternalSwap(SystemInfoResponse_Result_Data
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   version_.Swap(&other->version_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   biosversion_.Swap(&other->biosversion_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  biosvendor_.Swap(&other->biosvendor_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  biosreleasedate_.Swap(&other->biosreleasedate_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  systemmanufacturer_.Swap(&other->systemmanufacturer_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  systemproductname_.Swap(&other->systemproductname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  systemserialnumber_.Swap(&other->systemserialnumber_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  systemuuid_.Swap(&other->systemuuid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SystemInfoResponse_Result_Data::GetMetadata() const {

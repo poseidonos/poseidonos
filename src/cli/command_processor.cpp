@@ -44,7 +44,15 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     reply->mutable_result()->mutable_data()->set_version(version);
 
     BiosInfo biosInfo = _GetBiosInfo();
+    reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.vendor);
     reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.version);
+    reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.releaseDate);
+
+    SystemInfo systemInfo = _GetSystemInfo();
+    reply->mutable_result()->mutable_data()->set_systemmanufacturer(systemInfo.manufacturer);
+    reply->mutable_result()->mutable_data()->set_systemproductname(systemInfo.productName);
+    reply->mutable_result()->mutable_data()->set_systemserialnumber(systemInfo.serialNumber);
+    reply->mutable_result()->mutable_data()->set_systemuuid(systemInfo.uuid);
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1335,6 +1343,23 @@ CommandProcessor::_GetBiosInfo()
     bios.releaseDate = _ExecuteLinuxCmd(getBiosReleaseDateCmd);
 
     return bios;
+}
+
+CommandProcessor::SystemInfo
+CommandProcessor::_GetSystemInfo()
+{
+    const std::string getSystemManufacturerCmd = "dmidecode -s system-manufacturer";
+    const std::string getSystemProductNameCmd = "dmidecode -s system-product-name";
+    const std::string getSystemSerialNumberCmd = "dmidecode -s system-serial-number";
+    const std::string getSystemUuidCmd = "dmidecode -s system-serial-uuid";
+    
+    SystemInfo system;
+    system.manufacturer = _ExecuteLinuxCmd(getSystemManufacturerCmd);
+    system.productName = _ExecuteLinuxCmd(getSystemProductNameCmd);
+    system.serialNumber = _ExecuteLinuxCmd(getSystemSerialNumberCmd);
+    system.uuid = _ExecuteLinuxCmd(getSystemUuidCmd);
+
+    return system;
 }
 
 std::string
