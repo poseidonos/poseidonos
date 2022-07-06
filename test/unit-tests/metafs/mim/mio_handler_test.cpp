@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ public:
 
         ioSQ = new NiceMock<MockMetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>>(weight);
         ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
-        doneQ = new MockMetaFsIoQ<Mpio*>();
+        doneQ = new MockMetaFsIoWrrQ<Mpio*, MetaFileType>();
         bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, conf, nullptr, doneQ);
         mpioAllocator = new NiceMock<MockMpioAllocator>(conf);
         mioPool = new NiceMock<MockMetaFsPool<Mio*>>(POOL_SIZE);
@@ -147,7 +147,7 @@ protected:
 
     NiceMock<MockMetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>>* ioSQ;
     NiceMock<MockMetaFsIoQ<Mio*>>* ioCQ;
-    MockMetaFsIoQ<Mpio*>* doneQ;
+    MockMetaFsIoWrrQ<Mpio*, MetaFileType>* doneQ;
     NiceMock<MockMpioHandler>* bottomhalfHandler;
     NiceMock<MockMetaFsPool<Mio*>>* mioPool;
     NiceMock<MockMpioAllocator>* mpioAllocator;

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include <sched.h>
 
 #include <string>
+#include <vector>
 
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_scheduler_mock.h"
@@ -78,8 +79,9 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenSyncIoIsEnabledAndIoHa
     const int arrayId = 0;
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
+    const std::vector<int> weight = {1, 1, 1, 1};
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr, weight);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -109,8 +111,9 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenReqTypeIsReadAndIoMode
     const int arrayId = 0;
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
+    const std::vector<int> weight = {1, 1, 1, 1};
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr, weight);
     EXPECT_CALL(*scheduler, EnqueueNewReq).Times(AtLeast(1));
 
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
@@ -140,8 +143,9 @@ TEST(MetaIoManager, CheckArray)
     const int arrayId = 0;
     cpu_set_t cpuSet;
     const std::string threadName = "testThread";
+    const std::vector<int> weight = {1, 1, 1, 1};
     NiceMock<MockMetaFsIoScheduler>* scheduler =
-        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr);
+        new NiceMock<MockMetaFsIoScheduler>(0, 0, 0, threadName, cpuSet, nullptr, nullptr, nullptr, weight);
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(true));
 

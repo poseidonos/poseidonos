@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,13 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/mim/metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
 
 namespace pos
 {
 class TelemetryPublisher;
+class MetaFsConfigManager;
 class MetaFsTimeInterval;
 
 class MetaFsIoScheduler : public MetaFsIoHandlerBase
@@ -52,7 +53,8 @@ public:
     explicit MetaFsIoScheduler(const int threadId, const int coreId,
         const int totalCoreCount, const std::string& threadName,
         const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
-        TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval);
+        TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval,
+        std::vector<int> weight);
     virtual ~MetaFsIoScheduler(void);
 
     void IssueRequestAndDelete(MetaFsIoRequest* reqMsg);
@@ -89,7 +91,7 @@ private:
     MetaFsTimeInterval* timeInterval_;
     const size_t MAX_CPU_STALL_COUNT = 1000;
 
-    MetaFsIoQ<MetaFsIoRequest*> ioSQ_;
+    MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType> ioSQ_;
     MetaFsIoRequest* currentReqMsg_;
     FileSizeType chunkSize_;
     MetaLpnType fileBaseLpn_;
@@ -100,6 +102,7 @@ private:
     int extentsCount_;
     int currentExtent_;
     MetaFileExtent* extents_;
+    std::vector<int> weight_;
 
     static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
     int64_t issueCount_[NUM_STORAGE];
