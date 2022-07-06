@@ -171,8 +171,6 @@ private:
         std::string vendor;
         std::string version;
         std::string releaseDate;
-        std::string address;
-        std::string romSize;
     } BiosInfo;
     
     BiosInfo _GetBiosInfo();
