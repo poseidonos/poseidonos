@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,8 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
 
             ioScheduler_ = new MetaFsIoScheduler(0, coreId, totalCoreCount,
                 threadName, mioSet, configManager_, tp_,
-                new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()));
+                new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()),
+                configManager_->GetWrrWeight());
             ioScheduler_->StartThread();
             break;
         }

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #include "mpio_allocator.h"
 #include "src/metafs/include/mf_property.h"
 #include "src/metafs/lib/metafs_time_interval.h"
-#include "src/metafs/mim/metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -49,7 +49,7 @@ class MpioHandler
 public:
     explicit MpioHandler(const int threadId, const int coreId,
         MetaFsConfigManager* configManager, TelemetryPublisher* tp = nullptr,
-        MetaFsIoQ<Mpio*>* doneQ = nullptr);
+        MetaFsIoWrrQ<Mpio*, MetaFileType>* doneQ = nullptr);
     virtual ~MpioHandler(void);
 
     virtual void EnqueuePartialMpio(Mpio* mpio);
@@ -60,7 +60,7 @@ private:
     void _UpdateMetricsConditionally(Mpio* mpio);
     void _PublishPeriodicMetrics(void);
 
-    MetaFsIoQ<Mpio*>* partialMpioDoneQ;
+    MetaFsIoWrrQ<Mpio*, MetaFileType>* partialMpioDoneQ;
     MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;

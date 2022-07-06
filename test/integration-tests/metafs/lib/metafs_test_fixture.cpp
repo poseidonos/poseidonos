@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     EXPECT_CALL(*config, GetWrrCountJournal).WillRepeatedly(Return(3));
     EXPECT_CALL(*config, GetWrrCountMap).WillRepeatedly(Return(5));
     EXPECT_CALL(*config, GetWrrCountGeneral).WillRepeatedly(Return(1));
+    EXPECT_CALL(*config, GetWrrWeight).WillRepeatedly(Return(std::vector<int>{2, 3, 5, 1}));
 
     _SetThreadModel();
 

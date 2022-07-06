@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ namespace pos
 {
 MpioHandler::MpioHandler(const int threadId, const int coreId,
     MetaFsConfigManager* configManager, TelemetryPublisher* tp,
-    MetaFsIoQ<Mpio*>* doneQ)
+    MetaFsIoWrrQ<Mpio*, MetaFileType>* doneQ)
 : partialMpioDoneQ(doneQ),
   mpioAllocator(nullptr),
   coreId(coreId),
@@ -61,7 +61,7 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
-        partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
+        partialMpioDoneQ = new MetaFsIoWrrQ<Mpio*, MetaFileType>(configManager->GetWrrWeight());
 }
 
 MpioHandler::~MpioHandler(void)
@@ -77,7 +77,7 @@ void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
     mpio->StoreTimestamp(MpioTimestampStage::PushToDoneQ);
-    partialMpioDoneQ->Enqueue(mpio);
+    partialMpioDoneQ->Enqueue(mpio, mpio->GetFileType());
 }
 
 void

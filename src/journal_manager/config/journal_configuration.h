@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ public:
     // Can be called before initialized
     virtual bool IsEnabled(void);
     virtual bool IsDebugEnabled(void);
+    virtual uint64_t GetIntervalForMetric(void);
     virtual bool AreReplayWbStripesInUserArea(void);
     virtual bool IsRocksdbEnabled(void);
 
@@ -90,13 +91,16 @@ private:
     void _ReadConfiguration(void);
     bool _IsJournalEnabled(void);
     bool _IsDebugEnabled(void);
+    uint64_t _GetIntervalForMetric(void);
     uint64_t _ReadLogBufferSize(void);
+    uint64_t _ReadNumLogGroup(void);
     bool _IsRocksdbEnabled(void);
 
     void _ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl);
 
     bool areReplayWbStripesInUserArea;
     bool debugEnabled;
+    uint64_t intervalForMetric;
 
     ConfigManager* configManager;
     int numLogGroups;
@@ -106,6 +110,7 @@ private:
     LogBufferLayout bufferLayout;
 
     const uint64_t SIZE_MB = 1024 * 1024;
+    const uint64_t DEFAULT_NUMBER_OF_LOG_GROUPS = 2;
 };
 
 } // namespace pos
