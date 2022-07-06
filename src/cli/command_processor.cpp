@@ -44,9 +44,9 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
     reply->mutable_result()->mutable_data()->set_version(version);
 
     BiosInfo biosInfo = _GetBiosInfo();
-    reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.vendor);
+    reply->mutable_result()->mutable_data()->set_biosvendor(biosInfo.vendor);
     reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.version);
-    reply->mutable_result()->mutable_data()->set_biosversion(biosInfo.releaseDate);
+    reply->mutable_result()->mutable_data()->set_biosreleasedate(biosInfo.releaseDate);
 
     SystemInfo systemInfo = _GetSystemInfo();
     reply->mutable_result()->mutable_data()->set_systemmanufacturer(systemInfo.manufacturer);
