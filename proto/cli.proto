@@ -183,6 +183,7 @@ message SystemInfoResponse {
 		Status status = 1;
 		message Data {
 			string version = 1;
+			string biosVersion = 2;
 		}
 		Data data = 2;
 	}

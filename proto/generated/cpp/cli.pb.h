@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[121]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[129]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -209,6 +209,18 @@ extern ListDeviceResponse_ResultDefaultTypeInternal _ListDeviceResponse_Result_d
 class ListDeviceResponse_Result_DeviceList;
 struct ListDeviceResponse_Result_DeviceListDefaultTypeInternal;
 extern ListDeviceResponse_Result_DeviceListDefaultTypeInternal _ListDeviceResponse_Result_DeviceList_default_instance_;
+class ListHaReplicationRequest;
+struct ListHaReplicationRequestDefaultTypeInternal;
+extern ListHaReplicationRequestDefaultTypeInternal _ListHaReplicationRequest_default_instance_;
+class ListHaReplicationResponse;
+struct ListHaReplicationResponseDefaultTypeInternal;
+extern ListHaReplicationResponseDefaultTypeInternal _ListHaReplicationResponse_default_instance_;
+class ListHaReplicationResponse_Result;
+struct ListHaReplicationResponse_ResultDefaultTypeInternal;
+extern ListHaReplicationResponse_ResultDefaultTypeInternal _ListHaReplicationResponse_Result_default_instance_;
+class ListHaReplicationResponse_Result_Replication;
+struct ListHaReplicationResponse_Result_ReplicationDefaultTypeInternal;
+extern ListHaReplicationResponse_Result_ReplicationDefaultTypeInternal _ListHaReplicationResponse_Result_Replication_default_instance_;
 class ListHaVolumeRequest;
 struct ListHaVolumeRequestDefaultTypeInternal;
 extern ListHaVolumeRequestDefaultTypeInternal _ListHaVolumeRequest_default_instance_;
@@ -341,6 +353,18 @@ extern SetSystemPropertyResponse_ResultDefaultTypeInternal _SetSystemPropertyRes
 class SmartLog;
 struct SmartLogDefaultTypeInternal;
 extern SmartLogDefaultTypeInternal _SmartLog_default_instance_;
+class StartHaReplicationRequest;
+struct StartHaReplicationRequestDefaultTypeInternal;
+extern StartHaReplicationRequestDefaultTypeInternal _StartHaReplicationRequest_default_instance_;
+class StartHaReplicationRequest_Param;
+struct StartHaReplicationRequest_ParamDefaultTypeInternal;
+extern StartHaReplicationRequest_ParamDefaultTypeInternal _StartHaReplicationRequest_Param_default_instance_;
+class StartHaReplicationResponse;
+struct StartHaReplicationResponseDefaultTypeInternal;
+extern StartHaReplicationResponseDefaultTypeInternal _StartHaReplicationResponse_default_instance_;
+class StartHaReplicationResponse_Result;
+struct StartHaReplicationResponse_ResultDefaultTypeInternal;
+extern StartHaReplicationResponse_ResultDefaultTypeInternal _StartHaReplicationResponse_Result_default_instance_;
 class StartTelemetryRequest;
 struct StartTelemetryRequestDefaultTypeInternal;
 extern StartTelemetryRequestDefaultTypeInternal _StartTelemetryRequest_default_instance_;
@@ -472,6 +496,10 @@ template<> ::grpc_cli::ListDeviceRequest* Arena::CreateMaybeMessage<::grpc_cli::
 template<> ::grpc_cli::ListDeviceResponse* Arena::CreateMaybeMessage<::grpc_cli::ListDeviceResponse>(Arena*);
 template<> ::grpc_cli::ListDeviceResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ListDeviceResponse_Result>(Arena*);
 template<> ::grpc_cli::ListDeviceResponse_Result_DeviceList* Arena::CreateMaybeMessage<::grpc_cli::ListDeviceResponse_Result_DeviceList>(Arena*);
+template<> ::grpc_cli::ListHaReplicationRequest* Arena::CreateMaybeMessage<::grpc_cli::ListHaReplicationRequest>(Arena*);
+template<> ::grpc_cli::ListHaReplicationResponse* Arena::CreateMaybeMessage<::grpc_cli::ListHaReplicationResponse>(Arena*);
+template<> ::grpc_cli::ListHaReplicationResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ListHaReplicationResponse_Result>(Arena*);
+template<> ::grpc_cli::ListHaReplicationResponse_Result_Replication* Arena::CreateMaybeMessage<::grpc_cli::ListHaReplicationResponse_Result_Replication>(Arena*);
 template<> ::grpc_cli::ListHaVolumeRequest* Arena::CreateMaybeMessage<::grpc_cli::ListHaVolumeRequest>(Arena*);
 template<> ::grpc_cli::ListHaVolumeResponse* Arena::CreateMaybeMessage<::grpc_cli::ListHaVolumeResponse>(Arena*);
 template<> ::grpc_cli::ListHaVolumeResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ListHaVolumeResponse_Result>(Arena*);
@@ -516,6 +544,10 @@ template<> ::grpc_cli::SetSystemPropertyRequest_Param* Arena::CreateMaybeMessage
 template<> ::grpc_cli::SetSystemPropertyResponse* Arena::CreateMaybeMessage<::grpc_cli::SetSystemPropertyResponse>(Arena*);
 template<> ::grpc_cli::SetSystemPropertyResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::SetSystemPropertyResponse_Result>(Arena*);
 template<> ::grpc_cli::SmartLog* Arena::CreateMaybeMessage<::grpc_cli::SmartLog>(Arena*);
+template<> ::grpc_cli::StartHaReplicationRequest* Arena::CreateMaybeMessage<::grpc_cli::StartHaReplicationRequest>(Arena*);
+template<> ::grpc_cli::StartHaReplicationRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::StartHaReplicationRequest_Param>(Arena*);
+template<> ::grpc_cli::StartHaReplicationResponse* Arena::CreateMaybeMessage<::grpc_cli::StartHaReplicationResponse>(Arena*);
+template<> ::grpc_cli::StartHaReplicationResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::StartHaReplicationResponse_Result>(Arena*);
 template<> ::grpc_cli::StartTelemetryRequest* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryRequest>(Arena*);
 template<> ::grpc_cli::StartTelemetryResponse* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryResponse>(Arena*);
 template<> ::grpc_cli::StartTelemetryResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::StartTelemetryResponse_Result>(Arena*);
@@ -1215,6 +1247,7 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
 
   enum : int {
     kVersionFieldNumber = 1,
+    kBiosVersionFieldNumber = 2,
   };
   // string version = 1;
   void clear_version();
@@ -1232,6 +1265,22 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   std::string* _internal_mutable_version();
   public:
 
+  // string biosVersion = 2;
+  void clear_biosversion();
+  const std::string& biosversion() const;
+  void set_biosversion(const std::string& value);
+  void set_biosversion(std::string&& value);
+  void set_biosversion(const char* value);
+  void set_biosversion(const char* value, size_t size);
+  std::string* mutable_biosversion();
+  std::string* release_biosversion();
+  void set_allocated_biosversion(std::string* biosversion);
+  private:
+  const std::string& _internal_biosversion() const;
+  void _internal_set_biosversion(const std::string& value);
+  std::string* _internal_mutable_biosversion();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.SystemInfoResponse.Result.Data)
  private:
   class _Internal;
@@ -1240,6 +1289,7 @@ class SystemInfoResponse_Result_Data PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr biosversion_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -15861,6 +15911,1597 @@ class ListHaVolumeResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ListHaReplicationRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListHaReplicationRequest) */ {
+ public:
+  inline ListHaReplicationRequest() : ListHaReplicationRequest(nullptr) {}
+  virtual ~ListHaReplicationRequest();
+  explicit constexpr ListHaReplicationRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListHaReplicationRequest(const ListHaReplicationRequest& from);
+  ListHaReplicationRequest(ListHaReplicationRequest&& from) noexcept
+    : ListHaReplicationRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline ListHaReplicationRequest& operator=(const ListHaReplicationRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListHaReplicationRequest& operator=(ListHaReplicationRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListHaReplicationRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListHaReplicationRequest* internal_default_instance() {
+    return reinterpret_cast<const ListHaReplicationRequest*>(
+               &_ListHaReplicationRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    85;
+
+  friend void swap(ListHaReplicationRequest& a, ListHaReplicationRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListHaReplicationRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListHaReplicationRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListHaReplicationRequest* New() const final {
+    return CreateMaybeMessage<ListHaReplicationRequest>(nullptr);
+  }
+
+  ListHaReplicationRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListHaReplicationRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListHaReplicationRequest& from);
+  void MergeFrom(const ListHaReplicationRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListHaReplicationRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListHaReplicationRequest";
+  }
+  protected:
+  explicit ListHaReplicationRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListHaReplicationRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListHaReplicationResponse_Result_Replication PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListHaReplicationResponse.Result.Replication) */ {
+ public:
+  inline ListHaReplicationResponse_Result_Replication() : ListHaReplicationResponse_Result_Replication(nullptr) {}
+  virtual ~ListHaReplicationResponse_Result_Replication();
+  explicit constexpr ListHaReplicationResponse_Result_Replication(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListHaReplicationResponse_Result_Replication(const ListHaReplicationResponse_Result_Replication& from);
+  ListHaReplicationResponse_Result_Replication(ListHaReplicationResponse_Result_Replication&& from) noexcept
+    : ListHaReplicationResponse_Result_Replication() {
+    *this = ::std::move(from);
+  }
+
+  inline ListHaReplicationResponse_Result_Replication& operator=(const ListHaReplicationResponse_Result_Replication& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListHaReplicationResponse_Result_Replication& operator=(ListHaReplicationResponse_Result_Replication&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListHaReplicationResponse_Result_Replication& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListHaReplicationResponse_Result_Replication* internal_default_instance() {
+    return reinterpret_cast<const ListHaReplicationResponse_Result_Replication*>(
+               &_ListHaReplicationResponse_Result_Replication_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    86;
+
+  friend void swap(ListHaReplicationResponse_Result_Replication& a, ListHaReplicationResponse_Result_Replication& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListHaReplicationResponse_Result_Replication* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListHaReplicationResponse_Result_Replication* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListHaReplicationResponse_Result_Replication* New() const final {
+    return CreateMaybeMessage<ListHaReplicationResponse_Result_Replication>(nullptr);
+  }
+
+  ListHaReplicationResponse_Result_Replication* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListHaReplicationResponse_Result_Replication>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListHaReplicationResponse_Result_Replication& from);
+  void MergeFrom(const ListHaReplicationResponse_Result_Replication& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListHaReplicationResponse_Result_Replication* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListHaReplicationResponse.Result.Replication";
+  }
+  protected:
+  explicit ListHaReplicationResponse_Result_Replication(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+    kSourceVolumeIdFieldNumber = 2,
+    kSourceWalVolumeIdFieldNumber = 3,
+    kDestinationVolumeIdFieldNumber = 4,
+    kDestinationWalVolumeIdFieldNumber = 5,
+  };
+  // int32 id = 1;
+  void clear_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 id() const;
+  void set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_id() const;
+  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 sourceVolumeId = 2;
+  void clear_sourcevolumeid();
+  ::PROTOBUF_NAMESPACE_ID::int32 sourcevolumeid() const;
+  void set_sourcevolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sourcevolumeid() const;
+  void _internal_set_sourcevolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 sourceWalVolume_id = 3;
+  void clear_sourcewalvolume_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 sourcewalvolume_id() const;
+  void set_sourcewalvolume_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sourcewalvolume_id() const;
+  void _internal_set_sourcewalvolume_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 destinationVolumeId = 4;
+  void clear_destinationvolumeid();
+  ::PROTOBUF_NAMESPACE_ID::int32 destinationvolumeid() const;
+  void set_destinationvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_destinationvolumeid() const;
+  void _internal_set_destinationvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 destinationWalVolumeId = 5;
+  void clear_destinationwalvolumeid();
+  ::PROTOBUF_NAMESPACE_ID::int32 destinationwalvolumeid() const;
+  void set_destinationwalvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_destinationwalvolumeid() const;
+  void _internal_set_destinationwalvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListHaReplicationResponse.Result.Replication)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::int32 id_;
+  ::PROTOBUF_NAMESPACE_ID::int32 sourcevolumeid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 sourcewalvolume_id_;
+  ::PROTOBUF_NAMESPACE_ID::int32 destinationvolumeid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 destinationwalvolumeid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListHaReplicationResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListHaReplicationResponse.Result) */ {
+ public:
+  inline ListHaReplicationResponse_Result() : ListHaReplicationResponse_Result(nullptr) {}
+  virtual ~ListHaReplicationResponse_Result();
+  explicit constexpr ListHaReplicationResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListHaReplicationResponse_Result(const ListHaReplicationResponse_Result& from);
+  ListHaReplicationResponse_Result(ListHaReplicationResponse_Result&& from) noexcept
+    : ListHaReplicationResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline ListHaReplicationResponse_Result& operator=(const ListHaReplicationResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListHaReplicationResponse_Result& operator=(ListHaReplicationResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListHaReplicationResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListHaReplicationResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const ListHaReplicationResponse_Result*>(
+               &_ListHaReplicationResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    87;
+
+  friend void swap(ListHaReplicationResponse_Result& a, ListHaReplicationResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListHaReplicationResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListHaReplicationResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListHaReplicationResponse_Result* New() const final {
+    return CreateMaybeMessage<ListHaReplicationResponse_Result>(nullptr);
+  }
+
+  ListHaReplicationResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListHaReplicationResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListHaReplicationResponse_Result& from);
+  void MergeFrom(const ListHaReplicationResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListHaReplicationResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListHaReplicationResponse.Result";
+  }
+  protected:
+  explicit ListHaReplicationResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ListHaReplicationResponse_Result_Replication Replication;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 2,
+    kStatusFieldNumber = 1,
+  };
+  // repeated .grpc_cli.ListHaReplicationResponse.Result.Replication data = 2;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::grpc_cli::ListHaReplicationResponse_Result_Replication* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::ListHaReplicationResponse_Result_Replication >*
+      mutable_data();
+  private:
+  const ::grpc_cli::ListHaReplicationResponse_Result_Replication& _internal_data(int index) const;
+  ::grpc_cli::ListHaReplicationResponse_Result_Replication* _internal_add_data();
+  public:
+  const ::grpc_cli::ListHaReplicationResponse_Result_Replication& data(int index) const;
+  ::grpc_cli::ListHaReplicationResponse_Result_Replication* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::ListHaReplicationResponse_Result_Replication >&
+      data() const;
+
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListHaReplicationResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::ListHaReplicationResponse_Result_Replication > data_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListHaReplicationResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListHaReplicationResponse) */ {
+ public:
+  inline ListHaReplicationResponse() : ListHaReplicationResponse(nullptr) {}
+  virtual ~ListHaReplicationResponse();
+  explicit constexpr ListHaReplicationResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListHaReplicationResponse(const ListHaReplicationResponse& from);
+  ListHaReplicationResponse(ListHaReplicationResponse&& from) noexcept
+    : ListHaReplicationResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline ListHaReplicationResponse& operator=(const ListHaReplicationResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListHaReplicationResponse& operator=(ListHaReplicationResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListHaReplicationResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListHaReplicationResponse* internal_default_instance() {
+    return reinterpret_cast<const ListHaReplicationResponse*>(
+               &_ListHaReplicationResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    88;
+
+  friend void swap(ListHaReplicationResponse& a, ListHaReplicationResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListHaReplicationResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListHaReplicationResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListHaReplicationResponse* New() const final {
+    return CreateMaybeMessage<ListHaReplicationResponse>(nullptr);
+  }
+
+  ListHaReplicationResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListHaReplicationResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListHaReplicationResponse& from);
+  void MergeFrom(const ListHaReplicationResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListHaReplicationResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListHaReplicationResponse";
+  }
+  protected:
+  explicit ListHaReplicationResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ListHaReplicationResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.ListHaReplicationResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::ListHaReplicationResponse_Result& result() const;
+  ::grpc_cli::ListHaReplicationResponse_Result* release_result();
+  ::grpc_cli::ListHaReplicationResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::ListHaReplicationResponse_Result* result);
+  private:
+  const ::grpc_cli::ListHaReplicationResponse_Result& _internal_result() const;
+  ::grpc_cli::ListHaReplicationResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::ListHaReplicationResponse_Result* result);
+  ::grpc_cli::ListHaReplicationResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListHaReplicationResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::ListHaReplicationResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartHaReplicationRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartHaReplicationRequest.Param) */ {
+ public:
+  inline StartHaReplicationRequest_Param() : StartHaReplicationRequest_Param(nullptr) {}
+  virtual ~StartHaReplicationRequest_Param();
+  explicit constexpr StartHaReplicationRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartHaReplicationRequest_Param(const StartHaReplicationRequest_Param& from);
+  StartHaReplicationRequest_Param(StartHaReplicationRequest_Param&& from) noexcept
+    : StartHaReplicationRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline StartHaReplicationRequest_Param& operator=(const StartHaReplicationRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartHaReplicationRequest_Param& operator=(StartHaReplicationRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartHaReplicationRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartHaReplicationRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const StartHaReplicationRequest_Param*>(
+               &_StartHaReplicationRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    89;
+
+  friend void swap(StartHaReplicationRequest_Param& a, StartHaReplicationRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartHaReplicationRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartHaReplicationRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartHaReplicationRequest_Param* New() const final {
+    return CreateMaybeMessage<StartHaReplicationRequest_Param>(nullptr);
+  }
+
+  StartHaReplicationRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartHaReplicationRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartHaReplicationRequest_Param& from);
+  void MergeFrom(const StartHaReplicationRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartHaReplicationRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartHaReplicationRequest.Param";
+  }
+  protected:
+  explicit StartHaReplicationRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPrimaryNodeNameFieldNumber = 1,
+    kPrimaryArrayNameFieldNumber = 2,
+    kPrimaryVolumeNameFieldNumber = 3,
+    kPrimaryWalVolumeNameFieldNumber = 4,
+    kSecondaryNodeNameFieldNumber = 5,
+    kSecondaryArrayNameFieldNumber = 6,
+    kSecondaryVolumeNameFieldNumber = 7,
+    kSecondaryWalVolumeNameFieldNumber = 8,
+    kStuatsFieldNumber = 9,
+    kTimestampFieldNumber = 10,
+  };
+  // string primaryNodeName = 1;
+  void clear_primarynodename();
+  const std::string& primarynodename() const;
+  void set_primarynodename(const std::string& value);
+  void set_primarynodename(std::string&& value);
+  void set_primarynodename(const char* value);
+  void set_primarynodename(const char* value, size_t size);
+  std::string* mutable_primarynodename();
+  std::string* release_primarynodename();
+  void set_allocated_primarynodename(std::string* primarynodename);
+  private:
+  const std::string& _internal_primarynodename() const;
+  void _internal_set_primarynodename(const std::string& value);
+  std::string* _internal_mutable_primarynodename();
+  public:
+
+  // string primaryArrayName = 2;
+  void clear_primaryarrayname();
+  const std::string& primaryarrayname() const;
+  void set_primaryarrayname(const std::string& value);
+  void set_primaryarrayname(std::string&& value);
+  void set_primaryarrayname(const char* value);
+  void set_primaryarrayname(const char* value, size_t size);
+  std::string* mutable_primaryarrayname();
+  std::string* release_primaryarrayname();
+  void set_allocated_primaryarrayname(std::string* primaryarrayname);
+  private:
+  const std::string& _internal_primaryarrayname() const;
+  void _internal_set_primaryarrayname(const std::string& value);
+  std::string* _internal_mutable_primaryarrayname();
+  public:
+
+  // string primaryVolumeName = 3;
+  void clear_primaryvolumename();
+  const std::string& primaryvolumename() const;
+  void set_primaryvolumename(const std::string& value);
+  void set_primaryvolumename(std::string&& value);
+  void set_primaryvolumename(const char* value);
+  void set_primaryvolumename(const char* value, size_t size);
+  std::string* mutable_primaryvolumename();
+  std::string* release_primaryvolumename();
+  void set_allocated_primaryvolumename(std::string* primaryvolumename);
+  private:
+  const std::string& _internal_primaryvolumename() const;
+  void _internal_set_primaryvolumename(const std::string& value);
+  std::string* _internal_mutable_primaryvolumename();
+  public:
+
+  // string primaryWalVolumeName = 4;
+  void clear_primarywalvolumename();
+  const std::string& primarywalvolumename() const;
+  void set_primarywalvolumename(const std::string& value);
+  void set_primarywalvolumename(std::string&& value);
+  void set_primarywalvolumename(const char* value);
+  void set_primarywalvolumename(const char* value, size_t size);
+  std::string* mutable_primarywalvolumename();
+  std::string* release_primarywalvolumename();
+  void set_allocated_primarywalvolumename(std::string* primarywalvolumename);
+  private:
+  const std::string& _internal_primarywalvolumename() const;
+  void _internal_set_primarywalvolumename(const std::string& value);
+  std::string* _internal_mutable_primarywalvolumename();
+  public:
+
+  // string secondaryNodeName = 5;
+  void clear_secondarynodename();
+  const std::string& secondarynodename() const;
+  void set_secondarynodename(const std::string& value);
+  void set_secondarynodename(std::string&& value);
+  void set_secondarynodename(const char* value);
+  void set_secondarynodename(const char* value, size_t size);
+  std::string* mutable_secondarynodename();
+  std::string* release_secondarynodename();
+  void set_allocated_secondarynodename(std::string* secondarynodename);
+  private:
+  const std::string& _internal_secondarynodename() const;
+  void _internal_set_secondarynodename(const std::string& value);
+  std::string* _internal_mutable_secondarynodename();
+  public:
+
+  // string secondaryArrayName = 6;
+  void clear_secondaryarrayname();
+  const std::string& secondaryarrayname() const;
+  void set_secondaryarrayname(const std::string& value);
+  void set_secondaryarrayname(std::string&& value);
+  void set_secondaryarrayname(const char* value);
+  void set_secondaryarrayname(const char* value, size_t size);
+  std::string* mutable_secondaryarrayname();
+  std::string* release_secondaryarrayname();
+  void set_allocated_secondaryarrayname(std::string* secondaryarrayname);
+  private:
+  const std::string& _internal_secondaryarrayname() const;
+  void _internal_set_secondaryarrayname(const std::string& value);
+  std::string* _internal_mutable_secondaryarrayname();
+  public:
+
+  // string secondaryVolumeName = 7;
+  void clear_secondaryvolumename();
+  const std::string& secondaryvolumename() const;
+  void set_secondaryvolumename(const std::string& value);
+  void set_secondaryvolumename(std::string&& value);
+  void set_secondaryvolumename(const char* value);
+  void set_secondaryvolumename(const char* value, size_t size);
+  std::string* mutable_secondaryvolumename();
+  std::string* release_secondaryvolumename();
+  void set_allocated_secondaryvolumename(std::string* secondaryvolumename);
+  private:
+  const std::string& _internal_secondaryvolumename() const;
+  void _internal_set_secondaryvolumename(const std::string& value);
+  std::string* _internal_mutable_secondaryvolumename();
+  public:
+
+  // string secondaryWalVolumeName = 8;
+  void clear_secondarywalvolumename();
+  const std::string& secondarywalvolumename() const;
+  void set_secondarywalvolumename(const std::string& value);
+  void set_secondarywalvolumename(std::string&& value);
+  void set_secondarywalvolumename(const char* value);
+  void set_secondarywalvolumename(const char* value, size_t size);
+  std::string* mutable_secondarywalvolumename();
+  std::string* release_secondarywalvolumename();
+  void set_allocated_secondarywalvolumename(std::string* secondarywalvolumename);
+  private:
+  const std::string& _internal_secondarywalvolumename() const;
+  void _internal_set_secondarywalvolumename(const std::string& value);
+  std::string* _internal_mutable_secondarywalvolumename();
+  public:
+
+  // string stuats = 9;
+  void clear_stuats();
+  const std::string& stuats() const;
+  void set_stuats(const std::string& value);
+  void set_stuats(std::string&& value);
+  void set_stuats(const char* value);
+  void set_stuats(const char* value, size_t size);
+  std::string* mutable_stuats();
+  std::string* release_stuats();
+  void set_allocated_stuats(std::string* stuats);
+  private:
+  const std::string& _internal_stuats() const;
+  void _internal_set_stuats(const std::string& value);
+  std::string* _internal_mutable_stuats();
+  public:
+
+  // string timestamp = 10;
+  void clear_timestamp();
+  const std::string& timestamp() const;
+  void set_timestamp(const std::string& value);
+  void set_timestamp(std::string&& value);
+  void set_timestamp(const char* value);
+  void set_timestamp(const char* value, size_t size);
+  std::string* mutable_timestamp();
+  std::string* release_timestamp();
+  void set_allocated_timestamp(std::string* timestamp);
+  private:
+  const std::string& _internal_timestamp() const;
+  void _internal_set_timestamp(const std::string& value);
+  std::string* _internal_mutable_timestamp();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartHaReplicationRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr primarynodename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr primaryarrayname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr primaryvolumename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr primarywalvolumename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr secondarynodename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr secondaryarrayname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr secondaryvolumename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr secondarywalvolumename_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr stuats_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr timestamp_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartHaReplicationRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartHaReplicationRequest) */ {
+ public:
+  inline StartHaReplicationRequest() : StartHaReplicationRequest(nullptr) {}
+  virtual ~StartHaReplicationRequest();
+  explicit constexpr StartHaReplicationRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartHaReplicationRequest(const StartHaReplicationRequest& from);
+  StartHaReplicationRequest(StartHaReplicationRequest&& from) noexcept
+    : StartHaReplicationRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline StartHaReplicationRequest& operator=(const StartHaReplicationRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartHaReplicationRequest& operator=(StartHaReplicationRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartHaReplicationRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartHaReplicationRequest* internal_default_instance() {
+    return reinterpret_cast<const StartHaReplicationRequest*>(
+               &_StartHaReplicationRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    90;
+
+  friend void swap(StartHaReplicationRequest& a, StartHaReplicationRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartHaReplicationRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartHaReplicationRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartHaReplicationRequest* New() const final {
+    return CreateMaybeMessage<StartHaReplicationRequest>(nullptr);
+  }
+
+  StartHaReplicationRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartHaReplicationRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartHaReplicationRequest& from);
+  void MergeFrom(const StartHaReplicationRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartHaReplicationRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartHaReplicationRequest";
+  }
+  protected:
+  explicit StartHaReplicationRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef StartHaReplicationRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.StartHaReplicationRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::StartHaReplicationRequest_Param& param() const;
+  ::grpc_cli::StartHaReplicationRequest_Param* release_param();
+  ::grpc_cli::StartHaReplicationRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::StartHaReplicationRequest_Param* param);
+  private:
+  const ::grpc_cli::StartHaReplicationRequest_Param& _internal_param() const;
+  ::grpc_cli::StartHaReplicationRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::StartHaReplicationRequest_Param* param);
+  ::grpc_cli::StartHaReplicationRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartHaReplicationRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::StartHaReplicationRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartHaReplicationResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartHaReplicationResponse.Result) */ {
+ public:
+  inline StartHaReplicationResponse_Result() : StartHaReplicationResponse_Result(nullptr) {}
+  virtual ~StartHaReplicationResponse_Result();
+  explicit constexpr StartHaReplicationResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartHaReplicationResponse_Result(const StartHaReplicationResponse_Result& from);
+  StartHaReplicationResponse_Result(StartHaReplicationResponse_Result&& from) noexcept
+    : StartHaReplicationResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline StartHaReplicationResponse_Result& operator=(const StartHaReplicationResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartHaReplicationResponse_Result& operator=(StartHaReplicationResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartHaReplicationResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartHaReplicationResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const StartHaReplicationResponse_Result*>(
+               &_StartHaReplicationResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    91;
+
+  friend void swap(StartHaReplicationResponse_Result& a, StartHaReplicationResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartHaReplicationResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartHaReplicationResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartHaReplicationResponse_Result* New() const final {
+    return CreateMaybeMessage<StartHaReplicationResponse_Result>(nullptr);
+  }
+
+  StartHaReplicationResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartHaReplicationResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartHaReplicationResponse_Result& from);
+  void MergeFrom(const StartHaReplicationResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartHaReplicationResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartHaReplicationResponse.Result";
+  }
+  protected:
+  explicit StartHaReplicationResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartHaReplicationResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StartHaReplicationResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.StartHaReplicationResponse) */ {
+ public:
+  inline StartHaReplicationResponse() : StartHaReplicationResponse(nullptr) {}
+  virtual ~StartHaReplicationResponse();
+  explicit constexpr StartHaReplicationResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartHaReplicationResponse(const StartHaReplicationResponse& from);
+  StartHaReplicationResponse(StartHaReplicationResponse&& from) noexcept
+    : StartHaReplicationResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline StartHaReplicationResponse& operator=(const StartHaReplicationResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartHaReplicationResponse& operator=(StartHaReplicationResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartHaReplicationResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartHaReplicationResponse* internal_default_instance() {
+    return reinterpret_cast<const StartHaReplicationResponse*>(
+               &_StartHaReplicationResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    92;
+
+  friend void swap(StartHaReplicationResponse& a, StartHaReplicationResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartHaReplicationResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartHaReplicationResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartHaReplicationResponse* New() const final {
+    return CreateMaybeMessage<StartHaReplicationResponse>(nullptr);
+  }
+
+  StartHaReplicationResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartHaReplicationResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartHaReplicationResponse& from);
+  void MergeFrom(const StartHaReplicationResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartHaReplicationResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.StartHaReplicationResponse";
+  }
+  protected:
+  explicit StartHaReplicationResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef StartHaReplicationResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.StartHaReplicationResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::StartHaReplicationResponse_Result& result() const;
+  ::grpc_cli::StartHaReplicationResponse_Result* release_result();
+  ::grpc_cli::StartHaReplicationResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::StartHaReplicationResponse_Result* result);
+  private:
+  const ::grpc_cli::StartHaReplicationResponse_Result& _internal_result() const;
+  ::grpc_cli::StartHaReplicationResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::StartHaReplicationResponse_Result* result);
+  ::grpc_cli::StartHaReplicationResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.StartHaReplicationResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::StartHaReplicationResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SetLogLevelRequest_Param PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.SetLogLevelRequest.Param) */ {
  public:
@@ -15904,7 +17545,7 @@ class SetLogLevelRequest_Param PROTOBUF_FINAL :
                &_SetLogLevelRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    93;
 
   friend void swap(SetLogLevelRequest_Param& a, SetLogLevelRequest_Param& b) {
     a.Swap(&b);
@@ -16048,7 +17689,7 @@ class SetLogLevelRequest PROTOBUF_FINAL :
                &_SetLogLevelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    94;
 
   friend void swap(SetLogLevelRequest& a, SetLogLevelRequest& b) {
     a.Swap(&b);
@@ -16250,7 +17891,7 @@ class SetLogLevelResponse_Result PROTOBUF_FINAL :
                &_SetLogLevelResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    95;
 
   friend void swap(SetLogLevelResponse_Result& a, SetLogLevelResponse_Result& b) {
     a.Swap(&b);
@@ -16396,7 +18037,7 @@ class SetLogLevelResponse PROTOBUF_FINAL :
                &_SetLogLevelResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    96;
 
   friend void swap(SetLogLevelResponse& a, SetLogLevelResponse& b) {
     a.Swap(&b);
@@ -16600,7 +18241,7 @@ class SetLogPreferenceRequest_Param PROTOBUF_FINAL :
                &_SetLogPreferenceRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    97;
 
   friend void swap(SetLogPreferenceRequest_Param& a, SetLogPreferenceRequest_Param& b) {
     a.Swap(&b);
@@ -16744,7 +18385,7 @@ class SetLogPreferenceRequest PROTOBUF_FINAL :
                &_SetLogPreferenceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    98;
 
   friend void swap(SetLogPreferenceRequest& a, SetLogPreferenceRequest& b) {
     a.Swap(&b);
@@ -16946,7 +18587,7 @@ class SetLogPreferenceResponse_Result PROTOBUF_FINAL :
                &_SetLogPreferenceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    99;
 
   friend void swap(SetLogPreferenceResponse_Result& a, SetLogPreferenceResponse_Result& b) {
     a.Swap(&b);
@@ -17092,7 +18733,7 @@ class SetLogPreferenceResponse PROTOBUF_FINAL :
                &_SetLogPreferenceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    100;
 
   friend void swap(SetLogPreferenceResponse& a, SetLogPreferenceResponse& b) {
     a.Swap(&b);
@@ -17296,7 +18937,7 @@ class LoggerInfoRequest PROTOBUF_FINAL :
                &_LoggerInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    101;
 
   friend void swap(LoggerInfoRequest& a, LoggerInfoRequest& b) {
     a.Swap(&b);
@@ -17476,7 +19117,7 @@ class LoggerInfoResponse_Result_LoggerInfo PROTOBUF_FINAL :
                &_LoggerInfoResponse_Result_LoggerInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    102;
 
   friend void swap(LoggerInfoResponse_Result_LoggerInfo& a, LoggerInfoResponse_Result_LoggerInfo& b) {
     a.Swap(&b);
@@ -17743,7 +19384,7 @@ class LoggerInfoResponse_Result PROTOBUF_FINAL :
                &_LoggerInfoResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    103;
 
   friend void swap(LoggerInfoResponse_Result& a, LoggerInfoResponse_Result& b) {
     a.Swap(&b);
@@ -17911,7 +19552,7 @@ class LoggerInfoResponse PROTOBUF_FINAL :
                &_LoggerInfoResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    104;
 
   friend void swap(LoggerInfoResponse& a, LoggerInfoResponse& b) {
     a.Swap(&b);
@@ -18115,7 +19756,7 @@ class GetLogLevelRequest PROTOBUF_FINAL :
                &_GetLogLevelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    105;
 
   friend void swap(GetLogLevelRequest& a, GetLogLevelRequest& b) {
     a.Swap(&b);
@@ -18295,7 +19936,7 @@ class GetLogLevelResponse_Result_LogLevel PROTOBUF_FINAL :
                &_GetLogLevelResponse_Result_LogLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    106;
 
   friend void swap(GetLogLevelResponse_Result_LogLevel& a, GetLogLevelResponse_Result_LogLevel& b) {
     a.Swap(&b);
@@ -18439,7 +20080,7 @@ class GetLogLevelResponse_Result PROTOBUF_FINAL :
                &_GetLogLevelResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    107;
 
   friend void swap(GetLogLevelResponse_Result& a, GetLogLevelResponse_Result& b) {
     a.Swap(&b);
@@ -18607,7 +20248,7 @@ class GetLogLevelResponse PROTOBUF_FINAL :
                &_GetLogLevelResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    108;
 
   friend void swap(GetLogLevelResponse& a, GetLogLevelResponse& b) {
     a.Swap(&b);
@@ -18811,7 +20452,7 @@ class ApplyLogFilterRequest PROTOBUF_FINAL :
                &_ApplyLogFilterRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    109;
 
   friend void swap(ApplyLogFilterRequest& a, ApplyLogFilterRequest& b) {
     a.Swap(&b);
@@ -18991,7 +20632,7 @@ class ApplyLogFilterResponse_Result PROTOBUF_FINAL :
                &_ApplyLogFilterResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    110;
 
   friend void swap(ApplyLogFilterResponse_Result& a, ApplyLogFilterResponse_Result& b) {
     a.Swap(&b);
@@ -19137,7 +20778,7 @@ class ApplyLogFilterResponse PROTOBUF_FINAL :
                &_ApplyLogFilterResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    111;
 
   friend void swap(ApplyLogFilterResponse& a, ApplyLogFilterResponse& b) {
     a.Swap(&b);
@@ -19341,7 +20982,7 @@ class CreateDeviceRequest_Param PROTOBUF_FINAL :
                &_CreateDeviceRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    112;
 
   friend void swap(CreateDeviceRequest_Param& a, CreateDeviceRequest_Param& b) {
     a.Swap(&b);
@@ -19536,7 +21177,7 @@ class CreateDeviceRequest PROTOBUF_FINAL :
                &_CreateDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    113;
 
   friend void swap(CreateDeviceRequest& a, CreateDeviceRequest& b) {
     a.Swap(&b);
@@ -19738,7 +21379,7 @@ class CreateDeviceResponse_Result PROTOBUF_FINAL :
                &_CreateDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    114;
 
   friend void swap(CreateDeviceResponse_Result& a, CreateDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -19884,7 +21525,7 @@ class CreateDeviceResponse PROTOBUF_FINAL :
                &_CreateDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    107;
+    115;
 
   friend void swap(CreateDeviceResponse& a, CreateDeviceResponse& b) {
     a.Swap(&b);
@@ -20088,7 +21729,7 @@ class ScanDeviceRequest PROTOBUF_FINAL :
                &_ScanDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    108;
+    116;
 
   friend void swap(ScanDeviceRequest& a, ScanDeviceRequest& b) {
     a.Swap(&b);
@@ -20268,7 +21909,7 @@ class ScanDeviceResponse_Result PROTOBUF_FINAL :
                &_ScanDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    109;
+    117;
 
   friend void swap(ScanDeviceResponse_Result& a, ScanDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -20414,7 +22055,7 @@ class ScanDeviceResponse PROTOBUF_FINAL :
                &_ScanDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    110;
+    118;
 
   friend void swap(ScanDeviceResponse& a, ScanDeviceResponse& b) {
     a.Swap(&b);
@@ -20618,7 +22259,7 @@ class Device PROTOBUF_FINAL :
                &_Device_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    111;
+    119;
 
   friend void swap(Device& a, Device& b) {
     a.Swap(&b);
@@ -20881,7 +22522,7 @@ class ListDeviceRequest PROTOBUF_FINAL :
                &_ListDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    112;
+    120;
 
   friend void swap(ListDeviceRequest& a, ListDeviceRequest& b) {
     a.Swap(&b);
@@ -21061,7 +22702,7 @@ class ListDeviceResponse_Result_DeviceList PROTOBUF_FINAL :
                &_ListDeviceResponse_Result_DeviceList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    113;
+    121;
 
   friend void swap(ListDeviceResponse_Result_DeviceList& a, ListDeviceResponse_Result_DeviceList& b) {
     a.Swap(&b);
@@ -21207,7 +22848,7 @@ class ListDeviceResponse_Result PROTOBUF_FINAL :
                &_ListDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    114;
+    122;
 
   friend void swap(ListDeviceResponse_Result& a, ListDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -21375,7 +23016,7 @@ class ListDeviceResponse PROTOBUF_FINAL :
                &_ListDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    115;
+    123;
 
   friend void swap(ListDeviceResponse& a, ListDeviceResponse& b) {
     a.Swap(&b);
@@ -21579,7 +23220,7 @@ class SmartLog PROTOBUF_FINAL :
                &_SmartLog_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    116;
+    124;
 
   friend void swap(SmartLog& a, SmartLog& b) {
     a.Swap(&b);
@@ -22109,7 +23750,7 @@ class GetSmartLogRequest_Param PROTOBUF_FINAL :
                &_GetSmartLogRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    117;
+    125;
 
   friend void swap(GetSmartLogRequest_Param& a, GetSmartLogRequest_Param& b) {
     a.Swap(&b);
@@ -22253,7 +23894,7 @@ class GetSmartLogRequest PROTOBUF_FINAL :
                &_GetSmartLogRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    118;
+    126;
 
   friend void swap(GetSmartLogRequest& a, GetSmartLogRequest& b) {
     a.Swap(&b);
@@ -22455,7 +24096,7 @@ class GetSmartLogResponse_Result PROTOBUF_FINAL :
                &_GetSmartLogResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    119;
+    127;
 
   friend void swap(GetSmartLogResponse_Result& a, GetSmartLogResponse_Result& b) {
     a.Swap(&b);
@@ -22621,7 +24262,7 @@ class GetSmartLogResponse PROTOBUF_FINAL :
                &_GetSmartLogResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    120;
+    128;
 
   friend void swap(GetSmartLogResponse& a, GetSmartLogResponse& b) {
     a.Swap(&b);
@@ -23426,6 +25067,67 @@ inline void SystemInfoResponse_Result_Data::set_allocated_version(std::string* v
   version_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), version,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.version)
+}
+
+// string biosVersion = 2;
+inline void SystemInfoResponse_Result_Data::clear_biosversion() {
+  biosversion_.ClearToEmpty();
+}
+inline const std::string& SystemInfoResponse_Result_Data::biosversion() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+  return _internal_biosversion();
+}
+inline void SystemInfoResponse_Result_Data::set_biosversion(const std::string& value) {
+  _internal_set_biosversion(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::mutable_biosversion() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+  return _internal_mutable_biosversion();
+}
+inline const std::string& SystemInfoResponse_Result_Data::_internal_biosversion() const {
+  return biosversion_.Get();
+}
+inline void SystemInfoResponse_Result_Data::_internal_set_biosversion(const std::string& value) {
+  
+  biosversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_biosversion(std::string&& value) {
+  
+  biosversion_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_biosversion(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  biosversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+}
+inline void SystemInfoResponse_Result_Data::set_biosversion(const char* value,
+    size_t size) {
+  
+  biosversion_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+}
+inline std::string* SystemInfoResponse_Result_Data::_internal_mutable_biosversion() {
+  
+  return biosversion_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SystemInfoResponse_Result_Data::release_biosversion() {
+  // @@protoc_insertion_point(field_release:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
+  return biosversion_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SystemInfoResponse_Result_Data::set_allocated_biosversion(std::string* biosversion) {
+  if (biosversion != nullptr) {
+    
+  } else {
+    
+  }
+  biosversion_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), biosversion,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.SystemInfoResponse.Result.Data.biosVersion)
 }
 
 // -------------------------------------------------------------------
@@ -39142,6 +40844,1978 @@ inline void ListHaVolumeResponse::set_allocated_info(::grpc_cli::PosInfo* info) 
 
 // -------------------------------------------------------------------
 
+// ListHaReplicationRequest
+
+// string command = 1;
+inline void ListHaReplicationRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& ListHaReplicationRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationRequest.command)
+  return _internal_command();
+}
+inline void ListHaReplicationRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationRequest.command)
+}
+inline std::string* ListHaReplicationRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& ListHaReplicationRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void ListHaReplicationRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListHaReplicationRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListHaReplicationRequest.command)
+}
+inline void ListHaReplicationRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListHaReplicationRequest.command)
+}
+inline void ListHaReplicationRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListHaReplicationRequest.command)
+}
+inline std::string* ListHaReplicationRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListHaReplicationRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListHaReplicationRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationRequest.command)
+}
+
+// string rid = 2;
+inline void ListHaReplicationRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& ListHaReplicationRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationRequest.rid)
+  return _internal_rid();
+}
+inline void ListHaReplicationRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationRequest.rid)
+}
+inline std::string* ListHaReplicationRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& ListHaReplicationRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void ListHaReplicationRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListHaReplicationRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListHaReplicationRequest.rid)
+}
+inline void ListHaReplicationRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListHaReplicationRequest.rid)
+}
+inline void ListHaReplicationRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListHaReplicationRequest.rid)
+}
+inline std::string* ListHaReplicationRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListHaReplicationRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListHaReplicationRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationRequest.rid)
+}
+
+// string requestor = 3;
+inline void ListHaReplicationRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& ListHaReplicationRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationRequest.requestor)
+  return _internal_requestor();
+}
+inline void ListHaReplicationRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationRequest.requestor)
+}
+inline std::string* ListHaReplicationRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& ListHaReplicationRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void ListHaReplicationRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListHaReplicationRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListHaReplicationRequest.requestor)
+}
+inline void ListHaReplicationRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListHaReplicationRequest.requestor)
+}
+inline void ListHaReplicationRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListHaReplicationRequest.requestor)
+}
+inline std::string* ListHaReplicationRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListHaReplicationRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListHaReplicationRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationRequest.requestor)
+}
+
+// -------------------------------------------------------------------
+
+// ListHaReplicationResponse_Result_Replication
+
+// int32 id = 1;
+inline void ListHaReplicationResponse_Result_Replication::clear_id() {
+  id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::_internal_id() const {
+  return id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::id() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.Replication.id)
+  return _internal_id();
+}
+inline void ListHaReplicationResponse_Result_Replication::_internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  id_ = value;
+}
+inline void ListHaReplicationResponse_Result_Replication::set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.Result.Replication.id)
+}
+
+// int32 sourceVolumeId = 2;
+inline void ListHaReplicationResponse_Result_Replication::clear_sourcevolumeid() {
+  sourcevolumeid_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::_internal_sourcevolumeid() const {
+  return sourcevolumeid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::sourcevolumeid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.Replication.sourceVolumeId)
+  return _internal_sourcevolumeid();
+}
+inline void ListHaReplicationResponse_Result_Replication::_internal_set_sourcevolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  sourcevolumeid_ = value;
+}
+inline void ListHaReplicationResponse_Result_Replication::set_sourcevolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_sourcevolumeid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.Result.Replication.sourceVolumeId)
+}
+
+// int32 sourceWalVolume_id = 3;
+inline void ListHaReplicationResponse_Result_Replication::clear_sourcewalvolume_id() {
+  sourcewalvolume_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::_internal_sourcewalvolume_id() const {
+  return sourcewalvolume_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::sourcewalvolume_id() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.Replication.sourceWalVolume_id)
+  return _internal_sourcewalvolume_id();
+}
+inline void ListHaReplicationResponse_Result_Replication::_internal_set_sourcewalvolume_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  sourcewalvolume_id_ = value;
+}
+inline void ListHaReplicationResponse_Result_Replication::set_sourcewalvolume_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_sourcewalvolume_id(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.Result.Replication.sourceWalVolume_id)
+}
+
+// int32 destinationVolumeId = 4;
+inline void ListHaReplicationResponse_Result_Replication::clear_destinationvolumeid() {
+  destinationvolumeid_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::_internal_destinationvolumeid() const {
+  return destinationvolumeid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::destinationvolumeid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.Replication.destinationVolumeId)
+  return _internal_destinationvolumeid();
+}
+inline void ListHaReplicationResponse_Result_Replication::_internal_set_destinationvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  destinationvolumeid_ = value;
+}
+inline void ListHaReplicationResponse_Result_Replication::set_destinationvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_destinationvolumeid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.Result.Replication.destinationVolumeId)
+}
+
+// int32 destinationWalVolumeId = 5;
+inline void ListHaReplicationResponse_Result_Replication::clear_destinationwalvolumeid() {
+  destinationwalvolumeid_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::_internal_destinationwalvolumeid() const {
+  return destinationwalvolumeid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ListHaReplicationResponse_Result_Replication::destinationwalvolumeid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.Replication.destinationWalVolumeId)
+  return _internal_destinationwalvolumeid();
+}
+inline void ListHaReplicationResponse_Result_Replication::_internal_set_destinationwalvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  destinationwalvolumeid_ = value;
+}
+inline void ListHaReplicationResponse_Result_Replication::set_destinationwalvolumeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_destinationwalvolumeid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.Result.Replication.destinationWalVolumeId)
+}
+
+// -------------------------------------------------------------------
+
+// ListHaReplicationResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool ListHaReplicationResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool ListHaReplicationResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void ListHaReplicationResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& ListHaReplicationResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& ListHaReplicationResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.status)
+  return _internal_status();
+}
+inline void ListHaReplicationResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListHaReplicationResponse.Result.status)
+}
+inline ::grpc_cli::Status* ListHaReplicationResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* ListHaReplicationResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* ListHaReplicationResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* ListHaReplicationResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void ListHaReplicationResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationResponse.Result.status)
+}
+
+// repeated .grpc_cli.ListHaReplicationResponse.Result.Replication data = 2;
+inline int ListHaReplicationResponse_Result::_internal_data_size() const {
+  return data_.size();
+}
+inline int ListHaReplicationResponse_Result::data_size() const {
+  return _internal_data_size();
+}
+inline void ListHaReplicationResponse_Result::clear_data() {
+  data_.Clear();
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result_Replication* ListHaReplicationResponse_Result::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.Result.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::ListHaReplicationResponse_Result_Replication >*
+ListHaReplicationResponse_Result::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:grpc_cli.ListHaReplicationResponse.Result.data)
+  return &data_;
+}
+inline const ::grpc_cli::ListHaReplicationResponse_Result_Replication& ListHaReplicationResponse_Result::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::grpc_cli::ListHaReplicationResponse_Result_Replication& ListHaReplicationResponse_Result::data(int index) const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.Result.data)
+  return _internal_data(index);
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result_Replication* ListHaReplicationResponse_Result::_internal_add_data() {
+  return data_.Add();
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result_Replication* ListHaReplicationResponse_Result::add_data() {
+  // @@protoc_insertion_point(field_add:grpc_cli.ListHaReplicationResponse.Result.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::ListHaReplicationResponse_Result_Replication >&
+ListHaReplicationResponse_Result::data() const {
+  // @@protoc_insertion_point(field_list:grpc_cli.ListHaReplicationResponse.Result.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
+// ListHaReplicationResponse
+
+// string command = 1;
+inline void ListHaReplicationResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& ListHaReplicationResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.command)
+  return _internal_command();
+}
+inline void ListHaReplicationResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.command)
+}
+inline std::string* ListHaReplicationResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& ListHaReplicationResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void ListHaReplicationResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListHaReplicationResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListHaReplicationResponse.command)
+}
+inline void ListHaReplicationResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListHaReplicationResponse.command)
+}
+inline void ListHaReplicationResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListHaReplicationResponse.command)
+}
+inline std::string* ListHaReplicationResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListHaReplicationResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListHaReplicationResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationResponse.command)
+}
+
+// string rid = 2;
+inline void ListHaReplicationResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& ListHaReplicationResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.rid)
+  return _internal_rid();
+}
+inline void ListHaReplicationResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListHaReplicationResponse.rid)
+}
+inline std::string* ListHaReplicationResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& ListHaReplicationResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void ListHaReplicationResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListHaReplicationResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListHaReplicationResponse.rid)
+}
+inline void ListHaReplicationResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListHaReplicationResponse.rid)
+}
+inline void ListHaReplicationResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListHaReplicationResponse.rid)
+}
+inline std::string* ListHaReplicationResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListHaReplicationResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListHaReplicationResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationResponse.rid)
+}
+
+// .grpc_cli.ListHaReplicationResponse.Result result = 3;
+inline bool ListHaReplicationResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool ListHaReplicationResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void ListHaReplicationResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::ListHaReplicationResponse_Result& ListHaReplicationResponse::_internal_result() const {
+  const ::grpc_cli::ListHaReplicationResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::ListHaReplicationResponse_Result&>(
+      ::grpc_cli::_ListHaReplicationResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::ListHaReplicationResponse_Result& ListHaReplicationResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.result)
+  return _internal_result();
+}
+inline void ListHaReplicationResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::ListHaReplicationResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListHaReplicationResponse.result)
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result* ListHaReplicationResponse::release_result() {
+  
+  ::grpc_cli::ListHaReplicationResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result* ListHaReplicationResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationResponse.result)
+  
+  ::grpc_cli::ListHaReplicationResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result* ListHaReplicationResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::ListHaReplicationResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::ListHaReplicationResponse_Result* ListHaReplicationResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.result)
+  return _internal_mutable_result();
+}
+inline void ListHaReplicationResponse::set_allocated_result(::grpc_cli::ListHaReplicationResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool ListHaReplicationResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool ListHaReplicationResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void ListHaReplicationResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& ListHaReplicationResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& ListHaReplicationResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListHaReplicationResponse.info)
+  return _internal_info();
+}
+inline void ListHaReplicationResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListHaReplicationResponse.info)
+}
+inline ::grpc_cli::PosInfo* ListHaReplicationResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* ListHaReplicationResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListHaReplicationResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* ListHaReplicationResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* ListHaReplicationResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListHaReplicationResponse.info)
+  return _internal_mutable_info();
+}
+inline void ListHaReplicationResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListHaReplicationResponse.info)
+}
+
+// -------------------------------------------------------------------
+
+// StartHaReplicationRequest_Param
+
+// string primaryNodeName = 1;
+inline void StartHaReplicationRequest_Param::clear_primarynodename() {
+  primarynodename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::primarynodename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+  return _internal_primarynodename();
+}
+inline void StartHaReplicationRequest_Param::set_primarynodename(const std::string& value) {
+  _internal_set_primarynodename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_primarynodename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+  return _internal_mutable_primarynodename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_primarynodename() const {
+  return primarynodename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_primarynodename(const std::string& value) {
+  
+  primarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_primarynodename(std::string&& value) {
+  
+  primarynodename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+}
+inline void StartHaReplicationRequest_Param::set_primarynodename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  primarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+}
+inline void StartHaReplicationRequest_Param::set_primarynodename(const char* value,
+    size_t size) {
+  
+  primarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_primarynodename() {
+  
+  return primarynodename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_primarynodename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+  return primarynodename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_primarynodename(std::string* primarynodename) {
+  if (primarynodename != nullptr) {
+    
+  } else {
+    
+  }
+  primarynodename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), primarynodename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.primaryNodeName)
+}
+
+// string primaryArrayName = 2;
+inline void StartHaReplicationRequest_Param::clear_primaryarrayname() {
+  primaryarrayname_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::primaryarrayname() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+  return _internal_primaryarrayname();
+}
+inline void StartHaReplicationRequest_Param::set_primaryarrayname(const std::string& value) {
+  _internal_set_primaryarrayname(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_primaryarrayname() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+  return _internal_mutable_primaryarrayname();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_primaryarrayname() const {
+  return primaryarrayname_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_primaryarrayname(const std::string& value) {
+  
+  primaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_primaryarrayname(std::string&& value) {
+  
+  primaryarrayname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+}
+inline void StartHaReplicationRequest_Param::set_primaryarrayname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  primaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+}
+inline void StartHaReplicationRequest_Param::set_primaryarrayname(const char* value,
+    size_t size) {
+  
+  primaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_primaryarrayname() {
+  
+  return primaryarrayname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_primaryarrayname() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+  return primaryarrayname_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_primaryarrayname(std::string* primaryarrayname) {
+  if (primaryarrayname != nullptr) {
+    
+  } else {
+    
+  }
+  primaryarrayname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), primaryarrayname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.primaryArrayName)
+}
+
+// string primaryVolumeName = 3;
+inline void StartHaReplicationRequest_Param::clear_primaryvolumename() {
+  primaryvolumename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::primaryvolumename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+  return _internal_primaryvolumename();
+}
+inline void StartHaReplicationRequest_Param::set_primaryvolumename(const std::string& value) {
+  _internal_set_primaryvolumename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_primaryvolumename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+  return _internal_mutable_primaryvolumename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_primaryvolumename() const {
+  return primaryvolumename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_primaryvolumename(const std::string& value) {
+  
+  primaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_primaryvolumename(std::string&& value) {
+  
+  primaryvolumename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_primaryvolumename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  primaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_primaryvolumename(const char* value,
+    size_t size) {
+  
+  primaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_primaryvolumename() {
+  
+  return primaryvolumename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_primaryvolumename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+  return primaryvolumename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_primaryvolumename(std::string* primaryvolumename) {
+  if (primaryvolumename != nullptr) {
+    
+  } else {
+    
+  }
+  primaryvolumename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), primaryvolumename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.primaryVolumeName)
+}
+
+// string primaryWalVolumeName = 4;
+inline void StartHaReplicationRequest_Param::clear_primarywalvolumename() {
+  primarywalvolumename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::primarywalvolumename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+  return _internal_primarywalvolumename();
+}
+inline void StartHaReplicationRequest_Param::set_primarywalvolumename(const std::string& value) {
+  _internal_set_primarywalvolumename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_primarywalvolumename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+  return _internal_mutable_primarywalvolumename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_primarywalvolumename() const {
+  return primarywalvolumename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_primarywalvolumename(const std::string& value) {
+  
+  primarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_primarywalvolumename(std::string&& value) {
+  
+  primarywalvolumename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_primarywalvolumename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  primarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_primarywalvolumename(const char* value,
+    size_t size) {
+  
+  primarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_primarywalvolumename() {
+  
+  return primarywalvolumename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_primarywalvolumename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+  return primarywalvolumename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_primarywalvolumename(std::string* primarywalvolumename) {
+  if (primarywalvolumename != nullptr) {
+    
+  } else {
+    
+  }
+  primarywalvolumename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), primarywalvolumename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.primaryWalVolumeName)
+}
+
+// string secondaryNodeName = 5;
+inline void StartHaReplicationRequest_Param::clear_secondarynodename() {
+  secondarynodename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::secondarynodename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+  return _internal_secondarynodename();
+}
+inline void StartHaReplicationRequest_Param::set_secondarynodename(const std::string& value) {
+  _internal_set_secondarynodename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_secondarynodename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+  return _internal_mutable_secondarynodename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_secondarynodename() const {
+  return secondarynodename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_secondarynodename(const std::string& value) {
+  
+  secondarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_secondarynodename(std::string&& value) {
+  
+  secondarynodename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondarynodename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  secondarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondarynodename(const char* value,
+    size_t size) {
+  
+  secondarynodename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_secondarynodename() {
+  
+  return secondarynodename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_secondarynodename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+  return secondarynodename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_secondarynodename(std::string* secondarynodename) {
+  if (secondarynodename != nullptr) {
+    
+  } else {
+    
+  }
+  secondarynodename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), secondarynodename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.secondaryNodeName)
+}
+
+// string secondaryArrayName = 6;
+inline void StartHaReplicationRequest_Param::clear_secondaryarrayname() {
+  secondaryarrayname_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::secondaryarrayname() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+  return _internal_secondaryarrayname();
+}
+inline void StartHaReplicationRequest_Param::set_secondaryarrayname(const std::string& value) {
+  _internal_set_secondaryarrayname(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_secondaryarrayname() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+  return _internal_mutable_secondaryarrayname();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_secondaryarrayname() const {
+  return secondaryarrayname_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_secondaryarrayname(const std::string& value) {
+  
+  secondaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_secondaryarrayname(std::string&& value) {
+  
+  secondaryarrayname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+}
+inline void StartHaReplicationRequest_Param::set_secondaryarrayname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  secondaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+}
+inline void StartHaReplicationRequest_Param::set_secondaryarrayname(const char* value,
+    size_t size) {
+  
+  secondaryarrayname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_secondaryarrayname() {
+  
+  return secondaryarrayname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_secondaryarrayname() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+  return secondaryarrayname_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_secondaryarrayname(std::string* secondaryarrayname) {
+  if (secondaryarrayname != nullptr) {
+    
+  } else {
+    
+  }
+  secondaryarrayname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), secondaryarrayname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.secondaryArrayName)
+}
+
+// string secondaryVolumeName = 7;
+inline void StartHaReplicationRequest_Param::clear_secondaryvolumename() {
+  secondaryvolumename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::secondaryvolumename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+  return _internal_secondaryvolumename();
+}
+inline void StartHaReplicationRequest_Param::set_secondaryvolumename(const std::string& value) {
+  _internal_set_secondaryvolumename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_secondaryvolumename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+  return _internal_mutable_secondaryvolumename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_secondaryvolumename() const {
+  return secondaryvolumename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_secondaryvolumename(const std::string& value) {
+  
+  secondaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_secondaryvolumename(std::string&& value) {
+  
+  secondaryvolumename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondaryvolumename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  secondaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondaryvolumename(const char* value,
+    size_t size) {
+  
+  secondaryvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_secondaryvolumename() {
+  
+  return secondaryvolumename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_secondaryvolumename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+  return secondaryvolumename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_secondaryvolumename(std::string* secondaryvolumename) {
+  if (secondaryvolumename != nullptr) {
+    
+  } else {
+    
+  }
+  secondaryvolumename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), secondaryvolumename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.secondaryVolumeName)
+}
+
+// string secondaryWalVolumeName = 8;
+inline void StartHaReplicationRequest_Param::clear_secondarywalvolumename() {
+  secondarywalvolumename_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::secondarywalvolumename() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+  return _internal_secondarywalvolumename();
+}
+inline void StartHaReplicationRequest_Param::set_secondarywalvolumename(const std::string& value) {
+  _internal_set_secondarywalvolumename(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_secondarywalvolumename() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+  return _internal_mutable_secondarywalvolumename();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_secondarywalvolumename() const {
+  return secondarywalvolumename_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_secondarywalvolumename(const std::string& value) {
+  
+  secondarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_secondarywalvolumename(std::string&& value) {
+  
+  secondarywalvolumename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondarywalvolumename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  secondarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+}
+inline void StartHaReplicationRequest_Param::set_secondarywalvolumename(const char* value,
+    size_t size) {
+  
+  secondarywalvolumename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_secondarywalvolumename() {
+  
+  return secondarywalvolumename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_secondarywalvolumename() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+  return secondarywalvolumename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_secondarywalvolumename(std::string* secondarywalvolumename) {
+  if (secondarywalvolumename != nullptr) {
+    
+  } else {
+    
+  }
+  secondarywalvolumename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), secondarywalvolumename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.secondaryWalVolumeName)
+}
+
+// string stuats = 9;
+inline void StartHaReplicationRequest_Param::clear_stuats() {
+  stuats_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::stuats() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.stuats)
+  return _internal_stuats();
+}
+inline void StartHaReplicationRequest_Param::set_stuats(const std::string& value) {
+  _internal_set_stuats(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.stuats)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_stuats() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.stuats)
+  return _internal_mutable_stuats();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_stuats() const {
+  return stuats_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_stuats(const std::string& value) {
+  
+  stuats_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_stuats(std::string&& value) {
+  
+  stuats_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.stuats)
+}
+inline void StartHaReplicationRequest_Param::set_stuats(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  stuats_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.stuats)
+}
+inline void StartHaReplicationRequest_Param::set_stuats(const char* value,
+    size_t size) {
+  
+  stuats_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.stuats)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_stuats() {
+  
+  return stuats_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_stuats() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.stuats)
+  return stuats_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_stuats(std::string* stuats) {
+  if (stuats != nullptr) {
+    
+  } else {
+    
+  }
+  stuats_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), stuats,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.stuats)
+}
+
+// string timestamp = 10;
+inline void StartHaReplicationRequest_Param::clear_timestamp() {
+  timestamp_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest_Param::timestamp() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+  return _internal_timestamp();
+}
+inline void StartHaReplicationRequest_Param::set_timestamp(const std::string& value) {
+  _internal_set_timestamp(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+}
+inline std::string* StartHaReplicationRequest_Param::mutable_timestamp() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+  return _internal_mutable_timestamp();
+}
+inline const std::string& StartHaReplicationRequest_Param::_internal_timestamp() const {
+  return timestamp_.Get();
+}
+inline void StartHaReplicationRequest_Param::_internal_set_timestamp(const std::string& value) {
+  
+  timestamp_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_timestamp(std::string&& value) {
+  
+  timestamp_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+}
+inline void StartHaReplicationRequest_Param::set_timestamp(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  timestamp_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+}
+inline void StartHaReplicationRequest_Param::set_timestamp(const char* value,
+    size_t size) {
+  
+  timestamp_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+}
+inline std::string* StartHaReplicationRequest_Param::_internal_mutable_timestamp() {
+  
+  return timestamp_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest_Param::release_timestamp() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+  return timestamp_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest_Param::set_allocated_timestamp(std::string* timestamp) {
+  if (timestamp != nullptr) {
+    
+  } else {
+    
+  }
+  timestamp_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), timestamp,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.Param.timestamp)
+}
+
+// -------------------------------------------------------------------
+
+// StartHaReplicationRequest
+
+// string command = 1;
+inline void StartHaReplicationRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.command)
+  return _internal_command();
+}
+inline void StartHaReplicationRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.command)
+}
+inline std::string* StartHaReplicationRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StartHaReplicationRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void StartHaReplicationRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.command)
+}
+inline void StartHaReplicationRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.command)
+}
+inline void StartHaReplicationRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.command)
+}
+inline std::string* StartHaReplicationRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.command)
+}
+
+// string rid = 2;
+inline void StartHaReplicationRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.rid)
+  return _internal_rid();
+}
+inline void StartHaReplicationRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.rid)
+}
+inline std::string* StartHaReplicationRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StartHaReplicationRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StartHaReplicationRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.rid)
+}
+inline void StartHaReplicationRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.rid)
+}
+inline void StartHaReplicationRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.rid)
+}
+inline std::string* StartHaReplicationRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.rid)
+}
+
+// string requestor = 3;
+inline void StartHaReplicationRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.requestor)
+  return _internal_requestor();
+}
+inline void StartHaReplicationRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationRequest.requestor)
+}
+inline std::string* StartHaReplicationRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& StartHaReplicationRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void StartHaReplicationRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationRequest.requestor)
+}
+inline void StartHaReplicationRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationRequest.requestor)
+}
+inline void StartHaReplicationRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationRequest.requestor)
+}
+inline std::string* StartHaReplicationRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.requestor)
+}
+
+// .grpc_cli.StartHaReplicationRequest.Param param = 4;
+inline bool StartHaReplicationRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool StartHaReplicationRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void StartHaReplicationRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::StartHaReplicationRequest_Param& StartHaReplicationRequest::_internal_param() const {
+  const ::grpc_cli::StartHaReplicationRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::StartHaReplicationRequest_Param&>(
+      ::grpc_cli::_StartHaReplicationRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::StartHaReplicationRequest_Param& StartHaReplicationRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationRequest.param)
+  return _internal_param();
+}
+inline void StartHaReplicationRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::StartHaReplicationRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartHaReplicationRequest.param)
+}
+inline ::grpc_cli::StartHaReplicationRequest_Param* StartHaReplicationRequest::release_param() {
+  
+  ::grpc_cli::StartHaReplicationRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::StartHaReplicationRequest_Param* StartHaReplicationRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationRequest.param)
+  
+  ::grpc_cli::StartHaReplicationRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::StartHaReplicationRequest_Param* StartHaReplicationRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::StartHaReplicationRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::StartHaReplicationRequest_Param* StartHaReplicationRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationRequest.param)
+  return _internal_mutable_param();
+}
+inline void StartHaReplicationRequest::set_allocated_param(::grpc_cli::StartHaReplicationRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// StartHaReplicationResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool StartHaReplicationResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool StartHaReplicationResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void StartHaReplicationResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& StartHaReplicationResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& StartHaReplicationResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationResponse.Result.status)
+  return _internal_status();
+}
+inline void StartHaReplicationResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartHaReplicationResponse.Result.status)
+}
+inline ::grpc_cli::Status* StartHaReplicationResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* StartHaReplicationResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* StartHaReplicationResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* StartHaReplicationResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void StartHaReplicationResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// StartHaReplicationResponse
+
+// string command = 1;
+inline void StartHaReplicationResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationResponse.command)
+  return _internal_command();
+}
+inline void StartHaReplicationResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationResponse.command)
+}
+inline std::string* StartHaReplicationResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& StartHaReplicationResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void StartHaReplicationResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationResponse.command)
+}
+inline void StartHaReplicationResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationResponse.command)
+}
+inline void StartHaReplicationResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationResponse.command)
+}
+inline std::string* StartHaReplicationResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationResponse.command)
+}
+
+// string rid = 2;
+inline void StartHaReplicationResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& StartHaReplicationResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationResponse.rid)
+  return _internal_rid();
+}
+inline void StartHaReplicationResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.StartHaReplicationResponse.rid)
+}
+inline std::string* StartHaReplicationResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& StartHaReplicationResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void StartHaReplicationResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void StartHaReplicationResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.StartHaReplicationResponse.rid)
+}
+inline void StartHaReplicationResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.StartHaReplicationResponse.rid)
+}
+inline void StartHaReplicationResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.StartHaReplicationResponse.rid)
+}
+inline std::string* StartHaReplicationResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* StartHaReplicationResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartHaReplicationResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationResponse.rid)
+}
+
+// .grpc_cli.StartHaReplicationResponse.Result result = 3;
+inline bool StartHaReplicationResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool StartHaReplicationResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void StartHaReplicationResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::StartHaReplicationResponse_Result& StartHaReplicationResponse::_internal_result() const {
+  const ::grpc_cli::StartHaReplicationResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::StartHaReplicationResponse_Result&>(
+      ::grpc_cli::_StartHaReplicationResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::StartHaReplicationResponse_Result& StartHaReplicationResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationResponse.result)
+  return _internal_result();
+}
+inline void StartHaReplicationResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::StartHaReplicationResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartHaReplicationResponse.result)
+}
+inline ::grpc_cli::StartHaReplicationResponse_Result* StartHaReplicationResponse::release_result() {
+  
+  ::grpc_cli::StartHaReplicationResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::StartHaReplicationResponse_Result* StartHaReplicationResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationResponse.result)
+  
+  ::grpc_cli::StartHaReplicationResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::StartHaReplicationResponse_Result* StartHaReplicationResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::StartHaReplicationResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::StartHaReplicationResponse_Result* StartHaReplicationResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationResponse.result)
+  return _internal_mutable_result();
+}
+inline void StartHaReplicationResponse::set_allocated_result(::grpc_cli::StartHaReplicationResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool StartHaReplicationResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool StartHaReplicationResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void StartHaReplicationResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& StartHaReplicationResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& StartHaReplicationResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.StartHaReplicationResponse.info)
+  return _internal_info();
+}
+inline void StartHaReplicationResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.StartHaReplicationResponse.info)
+}
+inline ::grpc_cli::PosInfo* StartHaReplicationResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StartHaReplicationResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.StartHaReplicationResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* StartHaReplicationResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* StartHaReplicationResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.StartHaReplicationResponse.info)
+  return _internal_mutable_info();
+}
+inline void StartHaReplicationResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.StartHaReplicationResponse.info)
+}
+
+// -------------------------------------------------------------------
+
 // SetLogLevelRequest_Param
 
 // string level = 1;
@@ -47630,6 +51304,22 @@ inline void GetSmartLogResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
