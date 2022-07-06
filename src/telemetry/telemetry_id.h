@@ -67,6 +67,10 @@ static const std::string TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD = "writ
 static const std::string TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "write_host_rate_bytes_per_second_per_ssd";
 static const std::string TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "write_flush_rate_bytes_per_second_per_ssd";
 static const std::string TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "write_rebuild_rate_bytes_per_second_per_ssd";
+static const std::string TEL20024_READ_JOURNAL_IOPS_PER_SSD = "read_journal_iops_per_ssd";
+static const std::string TEL20025_READ_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "read_journal_rate_bytes_per_second_per_ssd";
+static const std::string TEL20026_WRITE_JOURNAL_IOPS_PER_SSD = "write_journal_iops_per_ssd";
+static const std::string TEL20027_WRITE_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "write_journal_rate_bytes_per_second_per_ssd";
 
 static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";
 static const std::string TEL30001_ALCT_ALCTX_PENDINGIO_CNT = "alct_allocctx_pendio_cnt";
