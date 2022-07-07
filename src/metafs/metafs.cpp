@@ -78,7 +78,7 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
-    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt);
+    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt, telemetryPublisher_);
     io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 

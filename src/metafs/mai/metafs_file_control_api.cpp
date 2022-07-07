@@ -38,33 +38,34 @@ namespace pos
 {
 /* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(void)
-: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr, nullptr)
+: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr, nullptr, nullptr)
 {
 }
 
 /* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, const bool isNormal,
     MetaStorageSubsystem* storage, MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
-    BitMap* bitmap)
+    BitMap* bitmap, TelemetryPublisher* tp)
 : arrayId(arrayId),
   isNormal(isNormal),
   storage(storage),
   mgmt(mgmt),
   volMgr(volMgr),
+  tp(tp),
   bitmap(bitmap)
 {
 }
 
 MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
-    MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr)
-: MetaFsFileControlApi(arrayId, false, storage, mgmt, volMgr, new BitMap(MetaFsConfig::MAX_VOLUME_CNT))
+    MetaFsManagementApi* mgmt, TelemetryPublisher* tp, MetaVolumeManager* volMgr)
+: MetaFsFileControlApi(arrayId, false, storage, mgmt, volMgr, new BitMap(MetaFsConfig::MAX_VOLUME_CNT), tp)
 {
     nameMapByfd.clear();
     idxMapByName.clear();
 
     if (!volMgr)
     {
-        this->volMgr = new MetaVolumeManager(arrayId, storage);
+        this->volMgr = new MetaVolumeManager(arrayId, storage, tp);
     }
 
     if (bitmap)

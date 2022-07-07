@@ -38,21 +38,21 @@
 namespace pos
 {
 MetaVolumeManager::MetaVolumeManager(const int arrayId,
-    MetaStorageSubsystem* metaStorage,
+    MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp,
     MetaVolumeHandler* _volHandler,
     MetaVolumeContainer* _volContainer)
 : volumeSpcfReqHandler{},
   globalRequestHandler{},
-  metaStorage(metaStorage)
+  volHandler(_volHandler),
+  volContainer(_volContainer),
+  metaStorage(metaStorage),
+  tp(tp)
 {
-    volHandler = _volHandler;
-    volContainer = _volContainer;
-
     if (nullptr == volContainer)
         volContainer = new MetaVolumeContainer(arrayId);
 
     if (nullptr == volHandler)
-        volHandler = new MetaVolumeHandler(volContainer);
+        volHandler = new MetaVolumeHandler(volContainer, tp);
 
     _InitRequestHandler();
 }

@@ -65,7 +65,7 @@ public:
         volHandler = new NiceMock<MockMetaVolumeHandler>(volContainer);
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
-        volumeMgr = new MetaVolumeManager(arrayId, mss, volHandler, volContainer);
+        volumeMgr = new MetaVolumeManager(arrayId, mss, nullptr, volHandler, volContainer);
     }
 
     virtual void
