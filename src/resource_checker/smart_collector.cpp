@@ -89,18 +89,15 @@ SmartCollector::PublishSmartDataToTelemetryAllCtrl(void)
     uint16_t lid = SPDK_NVME_LOG_HEALTH_INFORMATION;
     GetLogPageContext* smartLogPageContext = new GetLogPageContext(payload, lid);
 
-    vector<DeviceProperty> list = DeviceManagerSingleton::Instance()->ListDevs();
+    vector<DeviceProperty> list = deviceMgr->ListDevs();
     for (auto device : list)
     {
-        ctrlr = pos::DeviceManagerSingleton::Instance()->GetNvmeCtrlr(device.name);
+        ctrlr = deviceMgr->GetNvmeCtrlr(device.name);
         if (nullptr == ctrlr)
         {
             // NVRAM case. ListDevs() includes SSD and NVRAM. But GetNvmeCtrlr() return only SSD.
             continue;
         }
-
-        PhysicalBlkAddr addr;
-        addr.lba = INVALID_LBA;
 
         // re-use payload & smartLogPageContext
         UbioSmartPtr ubio(new Ubio((void*)smartLogPageContext, sizeof(struct spdk_nvme_health_information_page), 0 /*array index*/));
@@ -108,7 +105,6 @@ SmartCollector::PublishSmartDataToTelemetryAllCtrl(void)
         UblockSharedPtr targetDevice = deviceMgr->GetDev(dev);
 
         ubio->dir = UbioDir::GetLogPage;
-        ubio->SetPba(addr);
         ubio->SetUblock(targetDevice);
 
         int result = dispatcher->Submit(ubio, true);
