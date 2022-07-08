@@ -53,24 +53,24 @@ MetaVolumeHandler::~MetaVolumeHandler(void)
 POS_EVENT_ID
 MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    POS_EVENT_ID rc = HandleCheckFileExist(volType, reqMsg);
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
     do
     {
+        rc = HandleCheckFileExist(volType, reqMsg);
         if (POS_EVENT_ID::SUCCESS != rc)
         {
-            POS_TRACE_INFO((int)rc, "The volume is not found. volumeType: {}", (int)volType);
+            POS_TRACE_INFO((int)rc, "[MetaFile Control] The volume is not found. volumeType: {}", (int)volType);
             break;
         }
 
         FileDescriptorType fd = volContainer->LookupFileDescByName(*reqMsg.fileName);
         if (MetaFsCommonConst::INVALID_FD == fd)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_OPEN_FAILED,
-                "The file name is not found. fileName: {}, arrayId: {}, volumeType: {}",
+            rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+            POS_TRACE_ERROR((int)rc,
+                "[MetaFile Control] {} file is not found. arrayId: {}, volumeType: {}",
                 *reqMsg.fileName, reqMsg.arrayId, (int)volType);
-
-            rc = POS_EVENT_ID::MFS_FILE_OPEN_FAILED;
             break;
         }
 
@@ -79,13 +79,13 @@ MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileCon
         if (POS_EVENT_ID::SUCCESS == rc)
         {
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "{} file has been open. fd: {}, arrayId: {}, volumeType: {}",
+                "[MetaFile Control] {} file has been open. fd: {}, arrayId: {}, volumeType: {}",
                 *reqMsg.fileName, fd, reqMsg.arrayId, (int)volType);
         }
         else
         {
             POS_TRACE_ERROR((int)rc,
-                "{} file has been open twice. fd: {}, arrayId: {}, volumeType: {}",
+                "[MetaFile Control] {} file has been open twice. fd: {}, arrayId: {}, volumeType: {}",
                 *reqMsg.fileName, fd, reqMsg.arrayId, (int)volType);
             break;
         }
@@ -127,21 +127,20 @@ MetaVolumeHandler::HandleCloseFileReq(const MetaVolumeType volType, MetaFsFileCo
     {
         rc = POS_EVENT_ID::MFS_FILE_NOT_OPENED;
         POS_TRACE_ERROR((int)rc,
-            "The file is not open, fd: {}, arrayId: {}, volumeType: {}",
+            "[MetaFile Control] The file is not open, fd: {}, arrayId: {}, volumeType: {}",
+            reqMsg.fd, reqMsg.arrayId, (int)volType);
+    }
+    else
+    {
+        volContainer->RemoveFileFromActiveList(volType, reqMsg.fd);
+
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "[MetaFile Control] The file has been closed. fd: {}, arrayId: {}, volumeType: {}",
             reqMsg.fd, reqMsg.arrayId, (int)volType);
     }
 
     _PublishMetricConditionally(TEL40015_METAFS_FILE_CLOSE_REQUEST, POSMetricTypes::MT_COUNT,
         reqMsg.arrayId, volType, reqMsg.fileType, (POS_EVENT_ID::SUCCESS == rc));
-
-    if (POS_EVENT_ID::SUCCESS == rc)
-    {
-        volContainer->RemoveFileFromActiveList(volType, reqMsg.fd);
-
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "The file has been closed. fd: {}, arrayId: {}, volumeType: {}",
-            reqMsg.fd, reqMsg.arrayId, (int)volType);
-    }
 
     return rc;
 }
@@ -153,25 +152,24 @@ MetaVolumeHandler::HandleCreateFileReq(const MetaVolumeType volType, MetaFsFileC
 
     do
     {
-        if (!_CheckFileCreateReqSanity(volType, reqMsg))
+        rc = _CheckFileCreateReqSanity(volType, reqMsg);
+        if (POS_EVENT_ID::SUCCESS != rc)
         {
-            rc = POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
             break;
         }
 
         if (volContainer->CreateFile(volType, reqMsg))
         {
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "{} file has been created. byteSize: {}, arrayId: {}, volumeType: {}",
+                "[MetaFile Control] {} file has been created. byteSize: {}, arrayId: {}, volumeType: {}",
                 *reqMsg.fileName, reqMsg.fileByteSize, reqMsg.arrayId, (int)volType);
         }
         else
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED,
-                "Cannot create file inode due to I/O fail : \'{}\', reqType: {}, fd: {}, volumeType: {}",
-                *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
-
             rc = POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
+            POS_TRACE_ERROR((int)rc,
+                "[MetaFile Control] Cannot create file inode due to I/O fail : \'{}\', reqType: {}, fd: {}, volumeType: {}",
+                *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
             break;
         }
     } while (0);
@@ -189,36 +187,35 @@ MetaVolumeHandler::HandleDeleteFileReq(const MetaVolumeType volType, MetaFsFileC
 
     do
     {
-        if (POS_EVENT_ID::SUCCESS != HandleCheckFileExist(volType, reqMsg))
+        rc = HandleCheckFileExist(volType, reqMsg);
+        if (POS_EVENT_ID::SUCCESS != rc)
         {
-            rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
             break;
         }
 
         // delete fd in fileMgr
         if (!volContainer->TrimData(volType, reqMsg))
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_TRIM_FAILED,
-                "Trim operation has been failed.");
-
             rc = POS_EVENT_ID::MFS_FILE_TRIM_FAILED;
+            POS_TRACE_ERROR((int)rc,
+                "Trim operation for {} has been failed. arrayId:{}, volumeType: {}",
+                *reqMsg.fileName, reqMsg.arrayId, (int)volType);
             break;
         }
 
-        // delete fd in inodeMgr
+        // delete fd in inodeMgr, reqMsg.fd is not valid
         if (volContainer->DeleteFile(volType, reqMsg))
         {
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "{} file has been deleted. fd: {}, arrayId: {}, volumeType: {}",
-                *reqMsg.fileName, reqMsg.fd, reqMsg.arrayId, (int)volType);
+                "[MetaFile Control] {} file has been deleted. arrayId: {}, volumeType: {}",
+                *reqMsg.fileName, reqMsg.arrayId, (int)volType);
         }
         else
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED,
-                "Cannot delete file inode due to I/O fail : \'{}\', reqType: {}, fd: {}, volumeType: {}",
-                *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
-
             rc = POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
+            POS_TRACE_ERROR((int)rc,
+                "[MetaFile Control] Cannot delete file inode due to I/O fail : \'{}\', reqType: {}, volumeType: {}",
+                *reqMsg.fileName, reqMsg.reqType, (int)volType);
             break;
         }
     } while (0);
@@ -353,29 +350,31 @@ MetaVolumeHandler::HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqM
     return POS_EVENT_ID::SUCCESS;
 }
 
-bool
+POS_EVENT_ID
 MetaVolumeHandler::_CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+
     if (volContainer->IsGivenFileCreated(volType, *reqMsg.fileName))
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "{} file is already existed. arrayId: {}",
+        rc = POS_EVENT_ID::MFS_FILE_NAME_EXISTED;
+        POS_TRACE_INFO((int)rc, "{} file is already existed. arrayId: {}",
             *reqMsg.fileName, reqMsg.arrayId);
 
-        return false;
+        return rc;
     }
 
     const FileSizeType availableSpaceInVolume = volContainer->GetAvailableSpace(volType);
     if (availableSpaceInVolume < reqMsg.fileByteSize)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
+        rc = POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
+        POS_TRACE_INFO((int)rc,
             "The volume has not enough space to create file. request byteSize: {}, availableSpaceInVolume: {}",
             reqMsg.fileByteSize, availableSpaceInVolume);
-
-        return false;
+        return rc;
     }
 
-    return true;
+    return rc;
 }
 
 void

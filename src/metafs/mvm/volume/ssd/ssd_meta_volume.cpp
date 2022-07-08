@@ -63,7 +63,7 @@ SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
         return true;
     }
 
-    MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
     return false;
 }
