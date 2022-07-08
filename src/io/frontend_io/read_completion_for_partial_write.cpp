@@ -32,6 +32,7 @@
 
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 
+#include "Air.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/io_completer.h"
@@ -60,6 +61,8 @@ ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
     {
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayId());
     }
+
+    airlog("ProcessPartialWrite", "AIR_UserIo", GetEventType(), 1);
 }
 
 ReadCompletionForPartialWrite::~ReadCompletionForPartialWrite(void)

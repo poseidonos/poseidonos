@@ -90,6 +90,7 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   flowControl(inputFlowControl),
   arrayInfo(inputArrayInfo)
 {
+    airlog("RequestedUserWrite", "AIR_UserIo", GetEventType(), 1);
     if (nullptr == flowControl)
     {
         flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayInfo->GetName());

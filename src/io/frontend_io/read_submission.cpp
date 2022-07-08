@@ -34,6 +34,7 @@
 
 #include "src/io/frontend_io/read_submission.h"
 
+#include "Air.h"
 #include "spdk/event.h"
 #include "src/array/array.h"
 #include "src/array/device/array_device.h"
@@ -67,6 +68,7 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
     {
         translator = new Translator {volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
     }
+    airlog("RequestedUserRead", "AIR_UserIo", GetEventType(), 1);    
 }
 
 ReadSubmission::~ReadSubmission()

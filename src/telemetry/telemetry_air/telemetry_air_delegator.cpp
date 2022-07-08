@@ -326,7 +326,12 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                                           "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop",
                                           "Callback_Constructor", "Callback_Destructor",
                                           "Event_Constructor", "Event_Destructor",
-                                          "IOWorker_Submit", "IOWorker_Complete"};
+                                          "IOWorker_Submit", "IOWorker_Complete",
+                                          "RequestedUserRead", "RequestedUserWrite",
+                                          "RequestedUserAdminIo", "CompleteUserRead",
+                                          "CompleteUserWrite", "CompleteUserAdminIo",
+                                          "UserFlushProcess", "PartialWriteProcess",
+                                          "UserFailIo"};
                 std::string telemetryStrings[] = {TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS, TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS,
                                                   TEL130003_COUNT_OF_UBIO_CONSTRUCTORS, TEL130004_COUNT_OF_UBIO_DESTRUCTORS,
                                                   TEL130005_SUBMISSION_COUNT_OF_SSD_IOS, TEL130006_COMPLETION_COUNT_OF_SSD_IOS,
@@ -334,7 +339,12 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                                                   TEL130008_PUSHING_COUNT_OF_WORKER_COMMON_QUEUE, TEL130009_POPPING_COUNT_OF_WORKER_COMMON_QUEUE,
                                                   TEL130010_COUNT_OF_CALLBACK_CONSTRUCTORS, TEL130011_COUNT_OF_CALLBACK_DESTRUCTORS,
                                                   TEL130012_COUNT_OF_EVENT_CONSTRUCTORS, TEL130013_COUNT_OF_EVENT_DESTRUCTORS,
-                                                  TEL130014_SUBMISSION_COUNT_IN_IO_WORKER, TEL130015_COMPLETION_COUNT_IN_IO_WORKER};
+                                                  TEL130014_SUBMISSION_COUNT_IN_IO_WORKER, TEL130015_COMPLETION_COUNT_IN_IO_WORKER,
+                                                  TEL140001_COUNT_OF_REQUSTED_USER_READ, TEL140002_COUNT_OF_REQUSTED_USER_WRITE,
+                                                  TEL140003_COUNT_OF_REQUSTED_USER_ADMINIO, TEL140004_COUNT_OF_COMPLETE_USER_READ,
+                                                  TEL140005_COUNT_OF_COMPLETE_USER_WRITE, TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO,
+                                                  TEL140007_COUNT_OF_USER_FLUSH_PROCESS, TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS,
+                                                  TEL140009_COUNT_OF_USER_FAIL_IO};
                 int telemetryIndex = 0;
                 for (auto& elemString : ioRawCountNodeStrings)
                 {

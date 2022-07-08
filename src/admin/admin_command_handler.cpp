@@ -63,6 +63,8 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
 
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;
+
+    airlog("RequestedUserAdminIo", "AIR_UserIo", GetEventType(), 1);
 }
 
 AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
