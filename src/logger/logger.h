@@ -114,7 +114,7 @@ public:
                         fmt::format(
                             preferences.IsStrLoggingEnabled() ?
                             "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
-                            "\tNONE - {}, cause: NONE, solution: NONE, vairables: NONE",
+                            "\tNONE - {}, cause: NONE, solution: NONE, variables: NONE",
                         fmt), args...);
                 }
                 else
