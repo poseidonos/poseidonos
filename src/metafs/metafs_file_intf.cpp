@@ -208,12 +208,12 @@ MetaFsFileIntf::Create(uint64_t fileSize)
     POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, fileType, volumeType);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
+        return -(int)rc;
     }
 
     size = fileSize;
 
-    return EID(SUCCESS);
+    return (int)rc;
 }
 
 int
@@ -223,7 +223,7 @@ MetaFsFileIntf::Open(void)
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_OPEN_FAILED;
+        return -(int)rc;
     }
 
     return MetaFileIntf::Open();
@@ -236,7 +236,7 @@ MetaFsFileIntf::Close(void)
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_CLOSE_FAILED;
+        return -(int)rc;
     }
 
     return MetaFileIntf::Close();
@@ -257,10 +257,10 @@ MetaFsFileIntf::Delete(void)
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
+        return -(int)rc;
     }
 
-    return EID(SUCCESS);
+    return (int)rc;
 }
 
 uint64_t
