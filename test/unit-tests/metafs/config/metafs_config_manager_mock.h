@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -55,5 +55,6 @@ public:
     MOCK_METHOD(size_t, GetWrrCountJournal, (), (const));
     MOCK_METHOD(size_t, GetWrrCountMap, (), (const));
     MOCK_METHOD(size_t, GetWrrCountGeneral, (), (const));
+    MOCK_METHOD(std::vector<int>, GetWrrWeight, (), (const));
 };
 } // namespace pos

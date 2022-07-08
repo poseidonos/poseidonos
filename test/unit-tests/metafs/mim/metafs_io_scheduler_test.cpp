@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -100,10 +100,11 @@ public:
 
     virtual void SetUp(void)
     {
+        const std::vector<int> weight = {1, 1, 1, 1};
         interval = new MockMetaFsTimeInterval(1000);
         ON_CALL(*interval, CheckInterval).WillByDefault(Return(false));
         CPU_SET(0, &mioCoreSet);
-        scheduler = new MetaFsIoScheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr, interval);
+        scheduler = new MetaFsIoScheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr, interval, weight);
         scheduler->RegisterMetaIoWorkerForTest(&metaIoWorker);
     }
 

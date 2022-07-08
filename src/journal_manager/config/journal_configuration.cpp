@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,9 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   maxPartitionSize(UINT64_MAX),
   areReplayWbStripesInUserArea(false),
   debugEnabled(false),
+  intervalForMetric(0),
   configManager(configManager),
-  numLogGroups(2),
+  numLogGroups(DEFAULT_NUMBER_OF_LOG_GROUPS),
   logBufferSize(UINT64_MAX)
 {
     _ReadConfiguration();
@@ -111,6 +112,12 @@ bool
 JournalConfiguration::IsDebugEnabled(void)
 {
     return debugEnabled;
+}
+
+uint64_t
+JournalConfiguration::GetIntervalForMetric(void)
+{
+    return intervalForMetric;
 }
 
 bool
@@ -178,6 +185,8 @@ JournalConfiguration::_ReadConfiguration(void)
         debugEnabled = _IsDebugEnabled();
         logBufferSizeInConfig = _ReadLogBufferSize();
         rocksdbEnabled = _IsRocksdbEnabled();
+        intervalForMetric = _GetIntervalForMetric();
+        numLogGroups = _ReadNumLogGroup();
     }
     else
     {
@@ -224,6 +233,23 @@ JournalConfiguration::_IsDebugEnabled(void)
 }
 
 uint64_t
+JournalConfiguration::_GetIntervalForMetric(void)
+{
+    uint64_t interval = 0;
+    int ret = configManager->GetValue("journal", "interval_in_msec_for_metric",
+        static_cast<void*>(&interval), ConfigType::CONFIG_TYPE_UINT64);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "Interval is {}", interval);
+        return interval;
+    }
+
+    return 0;
+}
+
+uint64_t
 JournalConfiguration::_ReadLogBufferSize(void)
 {
     uint64_t size = 0;
@@ -238,6 +264,26 @@ JournalConfiguration::_ReadLogBufferSize(void)
         size = 0;
     }
     return size;
+}
+
+uint64_t
+JournalConfiguration::_ReadNumLogGroup(void)
+{
+    uint64_t count = 0;
+    int ret = configManager->GetValue("journal", "number_of_log_groups",
+        static_cast<void*>(&count), ConfigType::CONFIG_TYPE_UINT64);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "The number of log groups is {}", count);
+    }
+    else
+    {
+        count = DEFAULT_NUMBER_OF_LOG_GROUPS;
+    }
+
+    return count;
 }
 
 bool

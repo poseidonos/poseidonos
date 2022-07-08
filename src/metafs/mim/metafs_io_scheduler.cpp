@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,8 @@ namespace pos
 MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
     const int totalCoreCount, const std::string& threadName,
     const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
-    TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval)
+    TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval,
+    std::vector<int> weight)
 : MetaFsIoHandlerBase(threadId, coreId, threadName),
   TOTAL_CORE_COUNT(totalCoreCount),
   MIO_CORE_SET(mioCoreSet),
@@ -65,12 +66,15 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
   extentsCount_(0),
   currentExtent_(0),
   extents_(nullptr),
+  weight_(weight),
   issueCount_(),
   metricNameForStorage_()
 {
     metricNameForStorage_[0] = TEL40100_METAFS_SCHEDULER_ISSUE_COUNT_TO_SSD;
     metricNameForStorage_[1] = TEL40101_METAFS_SCHEDULER_ISSUE_COUNT_TO_NVRAM;
     metricNameForStorage_[2] = TEL40102_METAFS_SCHEDULER_ISSUE_COUNT_TO_JOURNAL_SSD;
+
+    ioSQ_.SetWeight(weight_);
 }
 
 MetaFsIoScheduler::~MetaFsIoScheduler(void)
@@ -245,7 +249,7 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 void
 MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    ioSQ_.Enqueue(reqMsg);
+    ioSQ_.Enqueue(reqMsg, reqMsg->GetFileType());
 }
 
 bool

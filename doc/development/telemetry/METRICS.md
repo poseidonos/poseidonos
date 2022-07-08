@@ -27,11 +27,18 @@
   - [_**write_host_rate_bytes_per_second_per_ssd**_](#write_host_rate_bytes_per_second_per_ssd)
   - [_**write_flush_rate_bytes_per_second_per_ssd**_](#write_flush_rate_bytes_per_second_per_ssd)
   - [_**write_rebuild_rate_bytes_per_second_per_ssd**_](#write_rebuild_rate_bytes_per_second_per_ssd)
+  - [_**read_journal_iops_per_ssd**_](#read_journal_iops_per_ssd)
+  - [_**read_journal_rate_bytes_per_second_per_ssd**_](#read_journal_rate_bytes_per_second_per_ssd)
+  - [_**write_journal_iops_per_ssd**_](#write_journal_iops_per_ssd)
+  - [_**write_journal_rate_bytes_per_second_per_ssd**_](#write_journal_rate_bytes_per_second_per_ssd)
 - [**Journal**](#journal)
   - [_**jrn_checkpoint**_](#jrn_checkpoint)
   - [_**jrn_log_group_reset_cnt**_](#jrn_log_group_reset_cnt)
   - [_**jrn_log_group_reset_done_cnt**_](#jrn_log_group_reset_done_cnt)
   - [_**jrn_load_log_group**_](#jrn_load_log_group)
+  - [_**jrn_log_count**_](#jrn_log_count)
+  - [_**jrn_log_done_count**_](#jrn_log_done_count)
+  - [_**jrn_log_write_time_average**_](#jrn_log_write_time_average)
 - [**MetaFs**](#metafs)
   - [_**normal_shutdown_npor**_](#normal_shutdown_npor)
   - [_**user_request**_](#user_request)
@@ -525,6 +532,70 @@ The rate(bytes/second) of flush type write in a specific SSD
 The rate(bytes/second) of rebuild type write in a specific SSD
 
 ---
+
+### _**read_journal_iops_per_ssd**_
+
+**ID**: 20024
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of journal type read in a specific SSD
+
+---
+
+### _**read_journal_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20025
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of journal type read in a specific SSD
+
+---
+
+### _**write_journal_iops_per_ssd**_
+
+**ID**: 20026
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The IOPS of journal type read in a specific SSD
+
+---
+
+### _**write_journal_rate_bytes_per_second_per_ssd**_
+
+**ID**: 20027
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+
+**Introduced**: v0.11.0
+
+The rate(bytes/second) of journal type read in a specific SSD
+
+---
 ## **Journal**
 
 Journal group contains the metrics of the Journal.
@@ -590,6 +661,54 @@ The count of log group reset done
 **Introduced**: v0.11.0
 
 Whether a log group is being loaded
+
+---
+
+### _**jrn_log_count**_
+
+**ID**: 36005
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of log issued
+
+---
+
+### _**jrn_log_done_count**_
+
+**ID**: 36006
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"group_id": Integer}
+
+**Introduced**: v0.11.0
+
+The count of log done
+
+---
+
+### _**jrn_log_write_time_average**_
+
+**ID**: 36007
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {}
+
+**Introduced**: v0.11.0
+
+Average of time spent from issue to done
 
 ---
 ## **MetaFs**

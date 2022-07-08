@@ -67,6 +67,10 @@ static const std::string TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD = "writ
 static const std::string TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "write_host_rate_bytes_per_second_per_ssd";
 static const std::string TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "write_flush_rate_bytes_per_second_per_ssd";
 static const std::string TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "write_rebuild_rate_bytes_per_second_per_ssd";
+static const std::string TEL20024_READ_JOURNAL_IOPS_PER_SSD = "read_journal_iops_per_ssd";
+static const std::string TEL20025_READ_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "read_journal_rate_bytes_per_second_per_ssd";
+static const std::string TEL20026_WRITE_JOURNAL_IOPS_PER_SSD = "write_journal_iops_per_ssd";
+static const std::string TEL20027_WRITE_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "write_journal_rate_bytes_per_second_per_ssd";
 
 static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";
 static const std::string TEL30001_ALCT_ALCTX_PENDINGIO_CNT = "alct_allocctx_pendio_cnt";
@@ -100,6 +104,9 @@ static const std::string TEL36001_JRN_CHECKPOINT = "jrn_checkpoint";
 static const std::string TEL36002_JRN_LOG_GROUP_RESET_CNT = "jrn_log_group_reset_cnt";
 static const std::string TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT = "jrn_log_group_reset_done_cnt";
 static const std::string TEL36004_JRN_LOAD_LOG_GROUP = "jrn_load_log_group";
+static const std::string TEL36005_JRN_LOG_COUNT = "jrn_log_count";
+static const std::string TEL36006_JRN_LOG_DONE_COUNT = "jrn_log_done_count";
+static const std::string TEL36007_JRN_LOG_WRITE_TIME_AVERAGE = "jrn_log_write_time_average";
 static const std::string TEL39999_JRN_ = "j_test_end";
 
 static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
