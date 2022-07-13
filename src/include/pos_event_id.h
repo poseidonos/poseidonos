@@ -767,6 +767,7 @@ enum class POS_EVENT_ID
     MFS_FILE_INACTIVATED,
     MFS_DATA_CORRUPTED,
     MFS_INVALID_CONFIG,
+    MFS_FILE_NAME_EXISTED,
 
     MFS_CRITICAL_START = 4400,
     MFS_RECOVERY_CATALOG_FAILED = MFS_CRITICAL_START,
@@ -1895,4 +1896,15 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::GC_GET_UNMAP_LSA,
             new PosEventInfoEntry("GC_GET_UNMAP_LSA",
                 "The current LSA map is in unmap state", "", "")},
+
+        {(int)POS_EVENT_ID::MFS_FILE_NAME_EXISTED,
+            new PosEventInfoEntry("MFS_FILE_NAME_EXISTED",
+                "The file name requested for creation has already existed.",
+                "The file name requested for creation has already existed.",
+                "Please change the name requested.")},
+        {(int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
+            new PosEventInfoEntry("MFS_META_VOLUME_NOT_ENOUGH_SPACE",
+                "The target meta volume does not have enough space.",
+                "The target meta volume is almost full.",
+                "")},
 };

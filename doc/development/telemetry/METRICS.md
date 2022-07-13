@@ -44,6 +44,10 @@
   - [_**user_request**_](#user_request)
   - [_**user_request_cnt**_](#user_request_cnt)
   - [_**user_request_publish_cnt_per_interval**_](#user_request_publish_cnt_per_interval)
+  - [_**meta_file_create_request**_](#meta_file_create_request)
+  - [_**meta_file_open_request**_](#meta_file_open_request)
+  - [_**meta_file_close_request**_](#meta_file_close_request)
+  - [_**meta_file_delete_request**_](#meta_file_delete_request)
   - [_**metafs_scheduler_issued_request_count_to_ssd**_](#metafs_scheduler_issued_request_count_to_ssd)
   - [_**metafs_scheduler_issued_request_count_to_nvram**_](#metafs_scheduler_issued_request_count_to_nvram)
   - [_**metafs_scheduler_issued_request_count_to_journal_ssd**_](#metafs_scheduler_issued_request_count_to_journal_ssd)
@@ -778,6 +782,70 @@ The count of reuqests from user modules.
 **Introduced**: v0.10.0
 
 The count of publishing metrics of metafs
+
+---
+
+### _**meta_file_create_request**_
+
+**ID**: 40013
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_type": Integer, "file_type": Integer, "result": String}
+
+**Introduced**: v0.10.0
+
+The count of creating meta file
+
+---
+
+### _**meta_file_open_request**_
+
+**ID**: 40014
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_type": Integer, "file_type": Integer, "result": String}
+
+**Introduced**: v0.10.0
+
+The count of openning meta file
+
+---
+
+### _**meta_file_close_request**_
+
+**ID**: 40015
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_type": Integer, "file_type": Integer, "result": String}
+
+**Introduced**: v0.10.0
+
+The count of closing meta file
+
+---
+
+### _**meta_file_delete_request**_
+
+**ID**: 40016
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_type": Integer, "file_type": Integer, "result": String}
+
+**Introduced**: v0.10.0
+
+The count of deleting meta file
 
 ---
 

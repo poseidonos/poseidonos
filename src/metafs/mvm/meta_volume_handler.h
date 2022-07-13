@@ -40,14 +40,17 @@
 #include "meta_volume_container.h"
 #include "src/metafs/common/metafs_common.h"
 #include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/telemetry/telemetry_client/pos_metric.h"
 
 namespace pos
 {
+class TelemetryPublisher;
+
 class MetaVolumeHandler
 {
 public:
     MetaVolumeHandler(void) = delete;
-    explicit MetaVolumeHandler(MetaVolumeContainer* volContainer);
+    explicit MetaVolumeHandler(MetaVolumeContainer* volContainer, TelemetryPublisher* tp = nullptr);
     virtual ~MetaVolumeHandler(void);
 
     virtual POS_EVENT_ID HandleOpenFileReq(const MetaVolumeType volType,
@@ -86,8 +89,12 @@ public:
     virtual POS_EVENT_ID HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqMsg);
 
 private:
-    bool _CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    POS_EVENT_ID _CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    void _PublishMetricConditionally(const std::string& name, const POSMetricTypes metricType,
+        const int arrayId, const MetaVolumeType volType, const MetaFileType fileType,
+        const bool requestResult);
 
     MetaVolumeContainer* volContainer;
+    TelemetryPublisher* tp;
 };
 } // namespace pos
