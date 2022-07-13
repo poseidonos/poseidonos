@@ -44,10 +44,11 @@ using namespace pos;
 RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> c,
     MemoryManager* mm)
 : ctx(move(c)),
-  mm(mm)
+  memMgr(mm)
 {
     if (ctx == nullptr)
     {
+        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to initialize rebuild, ctx is null");
         return;
     }
 
@@ -95,7 +96,7 @@ bool
 RebuildBehavior::_InitBuffers(void)
 {
     string owner = _GetClassName() + "_" + ctx->array;
-    bool ret = recovery->Init(mm, owner);
+    bool ret = recovery->Init(memMgr, owner);
     if (ret == false)
     {
         int logInterval = INIT_REBUILD_MAX_RETRY / 10;

@@ -66,7 +66,7 @@ protected:
     int initRebuildRetryCnt = 0;
 
 private:
-    MemoryManager* mm = nullptr;
+    MemoryManager* memMgr = nullptr;
 
 };
 } // namespace pos

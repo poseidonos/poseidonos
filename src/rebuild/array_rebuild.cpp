@@ -57,7 +57,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
         unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dev);
         if (ctx && factory != nullptr)
         {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "ArrayRebuild rebuildtype:{}",rebuildType);
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "ArrayRebuild rebuildtype:{}", rebuildType);
             ctx->rebuildType = rebuildType;
             ctx->isWT = isWT;
             ctx->array = arrayName;
