@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Air.h"
 #include "src/bio/volume_io.h"
 
 #include "src/array_mgmt/array_manager.h"
@@ -51,6 +52,7 @@ const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
 : VolumeIo(buffer, unitCount, arrayId, ArrayMgr())
 {
+    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt)
@@ -64,11 +66,13 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* ar
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
+    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
 : VolumeIo(volumeIo, ArrayMgr())
 {
+    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
@@ -82,10 +86,12 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
+    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::~VolumeIo(void)
 {
+    airlog("VolumeIo_Destructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIoSmartPtr

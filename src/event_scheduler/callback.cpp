@@ -75,6 +75,7 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
 {
     objectAddress = reinterpret_cast<uint64_t>(this);
     airlog("LAT_Callback", "AIR_NEW", type, objectAddress);
+    airlog("Callback_Constructor", "AIR_InternalIo", type, 1);
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
         returnAddress = __builtin_return_address(Callback::CALLER_FRAME);
@@ -94,6 +95,7 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
 Callback::~Callback(void)
 {
     airlog("LAT_Callback", "AIR_FREE", type, objectAddress);
+    airlog("Callback_Destructor", "AIR_InternalIo", type, 1);
     if (unlikely(executed == false))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;

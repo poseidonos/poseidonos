@@ -121,6 +121,23 @@
   - [_**read_rate_bytes_per_second_per_port**_](#read_rate_bytes_per_second_per_port)
   - [_**write_iops_per_port**_](#write_iops_per_port)
   - [_**write_rate_bytes_per_second_per_port**_](#write_rate_bytes_per_second_per_port)
+- [**IOCount**](#iocount)
+  - [_**count_of_volume_io_constructors**_](#count_of_volume_io_constructors)
+  - [_**count_of_volume_io_destructors**_](#count_of_volume_io_destructors)
+  - [_**count_of_ubio_constructors**_](#count_of_ubio_constructors)
+  - [_**count_of_ubio_destructors**_](#count_of_ubio_destructors)
+  - [_**submission_count_of_ssd_ios**_](#submission_count_of_ssd_ios)
+  - [_**completion_count_of_ssd_ios**_](#completion_count_of_ssd_ios)
+  - [_**pushing_count_of_event_queue**_](#pushing_count_of_event_queue)
+  - [_**pushing_count_of_worker_common_queue**_](#pushing_count_of_worker_common_queue)
+  - [_**popping_count_of_worker_common_queue**_](#popping_count_of_worker_common_queue)
+  - [_**count_of_callback_contructors**_](#count_of_callback_contructors)
+  - [_**count_of_callback_destructors**_](#count_of_callback_destructors)
+  - [_**count_of_event_contructors**_](#count_of_event_contructors)
+  - [_**count_of_event_destructors**_](#count_of_event_destructors)
+  - [_**submission_count_in_io_worker**_](#submission_count_in_io_worker)
+  - [_**completion_count_in_io_worker**_](#completion_count_in_io_worker)
+  
 ---
 ## **Common**
 
@@ -1904,3 +1921,251 @@ The IOPS of write in a port.
 **Introduced**: v0.10.0
 
 The rate(bytes/second) of write in a port.
+
+---
+## **IOCount**
+
+IO Count group contains the metrics for internal count related to IO E2E path
+
+---
+
+### _**count_of_volume_io_constructors**_
+
+**ID**: 130001
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of volume IO's constructors
+
+---
+
+### _**count_of_volume_io_destructors**_
+
+**ID**: 130002
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of volume IO's destructors
+
+---
+
+### _**count_of_ubio_constructors**_
+
+**ID**: 130003
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of ubio's constructors
+
+---
+
+### _**count_of_ubio_destructors**_
+
+**ID**: 130004
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of ubio's destructors
+
+---
+
+### _**submission_count_of_ssd_ios**_
+
+**ID**: 130005
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated submission count of ssd's IOs
+
+---
+
+### _**completion_count_of_ssd_ios**_
+
+**ID**: 130006
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of ssd's IOs
+
+---
+
+### _**pushing_count_of_event_queue**_
+
+**ID**: 130007
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated pushing count of each event queue located in event scheduler
+
+---
+
+### _**pushing_count_of_worker_common_queue**_
+
+**ID**: 130008
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated pushing count of worker common queue from event queue
+
+---
+
+### _**popping_count_of_worker_common_queue**_
+
+**ID**: 130009
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated popping count of worker common queue
+
+---
+
+### _**count_of_callback_contructors**_
+
+**ID**: 130010
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of callback constructors
+
+---
+
+### _**count_of_callback_detructors**_
+
+**ID**: 130011
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of callback destructors
+
+---
+
+
+### _**count_of_event_contructors**_
+
+**ID**: 130012
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of event constructors
+
+---
+
+### _**count_of_event_destructors**_
+
+**ID**: 130013
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated count of event destructors
+
+---
+
+### _**submission_count_in_io_worker**_
+
+**ID**: 130014
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated submission count of io worker
+
+---
+
+### _**completion_count_in_io_worker**_
+
+**ID**: 130015
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---

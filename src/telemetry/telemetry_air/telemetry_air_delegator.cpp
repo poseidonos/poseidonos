@@ -176,7 +176,10 @@ AddCommonMetric(POSMetricVector* posMetricVector,
     {
         posMetric.SetGaugeValue(value);
     }
-
+    else if (POSMetricTypes::MT_COUNT == type)
+    {
+        posMetric.SetCountValue(value);
+    }
     std::stringstream stream_thread_id;
     stream_thread_id << data["target_id"];
     posMetric.AddLabel("thread_id", stream_thread_id.str());
@@ -315,6 +318,43 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                         AddPerformanceMetric(posMetricVector, bwMetricId,
                             POSMetricTypes::MT_GAUGE, bw, obj, interval);
                     }
+                }
+                std::string ioRawCountNodeStrings[] = {"VolumeIo_Constructor", "VolumeIo_Destructor",
+                                          "Ubio_Constructor", "Ubio_Destructor",
+                                          "SSD_Submit", "SSD_Complete",
+                                          "EventQueue_Push",
+                                          "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop",
+                                          "Callback_Constructor", "Callback_Destructor",
+                                          "Event_Constructor", "Event_Destructor",
+                                          "IOWorker_Submit", "IOWorker_Complete"};
+                std::string telemetryStrings[] = {TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS, TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS,
+                                                  TEL130003_COUNT_OF_UBIO_CONSTRUCTORS, TEL130004_COUNT_OF_UBIO_DESTRUCTORS,
+                                                  TEL130005_SUBMISSION_COUNT_OF_SSD_IOS, TEL130006_COMPLETION_COUNT_OF_SSD_IOS,
+                                                  TEL130007_PUSHING_COUNT_OF_EVENT_QUEUE,
+                                                  TEL130008_PUSHING_COUNT_OF_WORKER_COMMON_QUEUE, TEL130009_POPPING_COUNT_OF_WORKER_COMMON_QUEUE,
+                                                  TEL130010_COUNT_OF_CALLBACK_CONSTRUCTORS, TEL130011_COUNT_OF_CALLBACK_DESTRUCTORS,
+                                                  TEL130012_COUNT_OF_EVENT_CONSTRUCTORS, TEL130013_COUNT_OF_EVENT_DESTRUCTORS,
+                                                  TEL130014_SUBMISSION_COUNT_IN_IO_WORKER, TEL130015_COMPLETION_COUNT_IN_IO_WORKER};
+                int telemetryIndex = 0;
+                for (auto& elemString : ioRawCountNodeStrings)
+                {
+                    if (data.HasKey(elemString))
+                    {
+                        auto& objs = data[elemString]["objs"];
+                        for (auto& obj_it : objs)
+                        {
+                            auto& obj = objs[obj_it.first];
+
+                            std::stringstream stream_count;
+                            stream_count << obj["cumulation"]["count"];
+                            int64_t count{0};
+                            stream_count >> count;
+
+                            AddCommonMetric(posMetricVector, telemetryStrings[telemetryIndex],
+                                POSMetricTypes::MT_COUNT, count, obj, interval);
+                        }
+                    }
+                    telemetryIndex++;
                 }
 
                 if (data.HasKey("PERF_PORT"))
@@ -620,7 +660,10 @@ TelemetryAirDelegator::RegisterAirEvent(void)
 {
     air_request_data(
         {"PERF_ARR_VOL", "PERF_PORT", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
-            "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO"},
+            "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO", "VolumeIo_Constructor", "VolumeIo_Destructor",
+            "Ubio_Constructor", "Ubio_Destructor", "SSD_Submit", "SSD_Complete", "EventQueue_Push",
+            "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop", "Callback_Constructor", "Callback_Destructor",
+            "Event_Constructor", "Event_Destructor", "IOWorker_Submit", "IOWorker_Complete"},
         std::move(dataHandler));
 }
 

@@ -181,4 +181,21 @@ static const std::string TEL120001_READ_IOPS_PER_PORT = "read_iops_per_port";
 static const std::string TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT = "read_rate_bytes_per_second_per_port";
 static const std::string TEL120011_WRITE_IOPS_PER_PORT = "write_iops_per_port";
 static const std::string TEL120012_WRITE_RATE_BYTES_PER_SECOND_PER_PORT = "write_rate_bytes_per_second_per_port";
+
+static const std::string TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS = "count_of_volume_io_constructors";
+static const std::string TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS = "count_of_volume_io_destructors";
+static const std::string TEL130003_COUNT_OF_UBIO_CONSTRUCTORS = "count_of_ubio_constructors";
+static const std::string TEL130004_COUNT_OF_UBIO_DESTRUCTORS = "count_of_ubio_destructors";
+static const std::string TEL130005_SUBMISSION_COUNT_OF_SSD_IOS = "submission_count_of_ssd_ios";
+static const std::string TEL130006_COMPLETION_COUNT_OF_SSD_IOS = "completion_count_of_ssd_ios";
+static const std::string TEL130007_PUSHING_COUNT_OF_EVENT_QUEUE = "pushing_count_of_event_queue";
+static const std::string TEL130008_PUSHING_COUNT_OF_WORKER_COMMON_QUEUE = "pushing_count_of_worker_common_queue";
+static const std::string TEL130009_POPPING_COUNT_OF_WORKER_COMMON_QUEUE = "popping_count_of_worker_common_queue";
+static const std::string TEL130010_COUNT_OF_CALLBACK_CONSTRUCTORS = "count_of_callback_contructors";
+static const std::string TEL130011_COUNT_OF_CALLBACK_DESTRUCTORS = "count_of_callback_destructors";
+static const std::string TEL130012_COUNT_OF_EVENT_CONSTRUCTORS = "count_of_event_contructors";
+static const std::string TEL130013_COUNT_OF_EVENT_DESTRUCTORS = "count_of_event_destructors";
+static const std::string TEL130014_SUBMISSION_COUNT_IN_IO_WORKER = "submission_count_in_io_worker";
+static const std::string TEL130015_COMPLETION_COUNT_IN_IO_WORKER = "completion_count_in_io_worker";
+
 } // namespace pos

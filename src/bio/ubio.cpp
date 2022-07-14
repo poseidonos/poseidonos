@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Air.h"
 #include "src/bio/ubio.h"
 
 #include <stdlib.h>
@@ -70,6 +71,7 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, int arrayID)
   arrayId(arrayID)
 {
     SetAsyncMode();
+    airlog("Ubio_Constructor", "AIR_InternalIo", GetEventType(), 1);
 }
 
 Ubio::Ubio(const Ubio& ubio)
@@ -87,12 +89,13 @@ Ubio::Ubio(const Ubio& ubio)
     dir = ubio.dir;
     SetAsyncMode();
     ubioPrivate = ubio.ubioPrivate;
-
     eventIoType = ubio.eventIoType;
+    airlog("Ubio_Constructor", "AIR_InternalIo", GetEventType(), 1);
 }
 
 Ubio::~Ubio(void)
 {
+    airlog("Ubio_Destructor", "AIR_InternalIo", GetEventType(), 1);
 }
 
 bool
