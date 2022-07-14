@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Air.h"
 #include "io_worker.h"
 
 #include <unistd.h>
@@ -126,6 +127,7 @@ void
 IOWorker::DecreaseCurrentOutstandingIoCount(int count)
 {
     currentOutstandingIOCount -= count;
+    airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), count);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -256,6 +258,7 @@ void
 IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
 {
     currentOutstandingIOCount++;
+    airlog("IOWorker_Submit", "AIR_InternalIo", static_cast<uint64_t>(id), 1);
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
     qosManager->HandleEventUbioSubmission(&ublockDeviceSubmission,
@@ -266,8 +269,10 @@ void
 IOWorker::_SubmitPendingIO(void)
 {
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
-    currentOutstandingIOCount -=
+    int completeCount =
         qosManager->IOWorkerPoller(id, &ublockDeviceSubmission);
+    currentOutstandingIOCount -= completeCount;
+    airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), completeCount);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -288,6 +293,7 @@ IOWorker::_CompleteCommand(void)
                     static_cast<uint32_t>(eventCount)))
             {
                 currentOutstandingIOCount -= eventCount;
+                airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), eventCount);
             }
             else
             {
@@ -343,7 +349,9 @@ IOWorker::_HandleDeviceOperation(void)
         case REMOVE:
         {
             deviceList.erase(device);
-            currentOutstandingIOCount -= device->Close();
+            uint32_t completeCount = device->Close();
+            currentOutstandingIOCount -= completeCount;
+            airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), completeCount);
             break;
         }
     }

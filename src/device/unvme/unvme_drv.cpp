@@ -88,6 +88,7 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
     {
         devCtx->DecreasePendingIO();
         airlog("CNT_PendingIO", "AIR_SSD", ssdId, -1);
+        airlog("SSD_Complete", "AIR_InternalIo", ssdId, 1);
         if (unlikely(ioCtx->IsAdminCommand()))
         {
             devCtx->DecAdminCommandCount();
@@ -315,6 +316,7 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
     ioCtx->ClearAsyncIOCompleted();
     deviceContext->IncreasePendingIO();
     airlog("CNT_PendingIO", "AIR_SSD", ssdId, 1);
+    airlog("SSD_Submit", "AIR_InternalIo", ssdId, 1);
 
     retValue = unvmeCmd->RequestIO(deviceContext, AsyncIOComplete, ioCtx);
     if (unlikely(-ENOMEM == retValue)) // Usually ENOMEM means the submissuion queue is full

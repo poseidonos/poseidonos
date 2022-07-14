@@ -118,6 +118,7 @@ BackendEventRatioPolicy::EnqueueEvent(EventSmartPtr input)
         }
         CheckAndSetQueueOccupancy(input->GetEventType());
     }
+    airlog("EventQueue_Push", "AIR_InternalIo", input->GetEventType(), 1);
 }
 
 std::queue<EventSmartPtr>
@@ -181,6 +182,7 @@ BackendEventRatioPolicy::DequeueWorkerEvent(void)
 
     EventSmartPtr event = workerCommonQueue.front();
     workerCommonQueue.pop();
+    airlog("WorkerCommonQueue_Pop", "AIR_InternalIo", event->GetEventType(), 1);
     return event;
 }
 
@@ -287,6 +289,7 @@ BackendEventRatioPolicy::Run(void)
         event = eventList.front();
         eventList.pop();
         currentEventCount[event->GetEventType()]--;
+        airlog("WorkerCommonQueue_Push", "AIR_InternalIo", event->GetEventType(), 1);
         workerCommonQueue.push(event);
     }
     workerQueueLock.unlock();
