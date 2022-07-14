@@ -30,53 +30,74 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/include/rebuild_state.h"
-#include "rebuild_behavior_factory.h"
-#include "src/array/rebuild/rebuild_progress.h"
-#include "src/array/rebuild/rebuild_context.h"
-
-#include <list>
-#include <mutex>
-#include <string>
-
-using namespace std;
+#include "recovery_base.h"
+#include "src/resource_manager/memory_manager.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class PartitionRebuild;
-class ArrayDevice;
-class RebuildTarget;
-
-class ArrayRebuild
+RecoveryBase::RecoveryBase(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt)
+: srcSize(srcSize), destSize(destSize), bufCnt(bufCnt)
 {
-public:
-    ArrayRebuild(void) {}
-    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dev,
-        RebuildComplete cb, list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-        RebuildTypeEnum rebuildType, bool isWT = false);
-    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
-        list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
-    virtual ~ArrayRebuild(void);
-    virtual void Start(void);
-    virtual void Discard(void);
-    virtual void Stop(void);
-    virtual RebuildState GetState(void);
-    virtual uint64_t GetProgress(void);
+}
 
-private:
-    void _RebuildNext(void);
-    void _RebuildDone(RebuildResult res);
-    void _RebuildCompleted(RebuildResult res);
-    string arrayName = "";
-    ArrayDevice* targetDev = nullptr;
-    RebuildState state = RebuildState::READY;
-    RebuildComplete rebuildComplete;
-    list<PartitionRebuild*> tasks;
-    RebuildProgress* progress = nullptr;
-    RebuildLogger* rebuildLogger = nullptr;
-    RebuildComplete rebuildDoneCb;
-    mutex mtx;
-};
+RecoveryBase::~RecoveryBase(void) 
+{
+    if (srcBuffer != nullptr)
+    {
+        if (srcBuffer->IsFull() == false)
+        {
+            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+                "Some buffers in srcBuffer were not returned but deleted.");
+        }
+        mm->DeleteBufferPool(srcBuffer);
+        srcBuffer = nullptr;
+    }
+    if (destBuffer != nullptr)
+    {
+        if (destBuffer->IsFull() == false)
+        {
+            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+                "Some buffers in destBuffer were not returned but deleted.");
+        }
+        mm->DeleteBufferPool(destBuffer);
+        destBuffer = nullptr;
+    }
+}
+
+bool
+RecoveryBase::Init(MemoryManager* mm, string owner)
+{
+    BufferInfo srcInfo = {
+        .owner = owner,
+        .size = srcSize,
+        .count = bufCnt};
+    srcBuffer = mm->CreateBufferPool(srcInfo);
+    if (srcBuffer == nullptr)
+    {
+        return false;
+    }
+
+    BufferInfo destInfo = {
+        .owner = owner,
+        .size = destSize,
+        .count = bufCnt};
+    destBuffer = mm->CreateBufferPool(destInfo);
+    if (destBuffer == nullptr)
+    {
+        mm->DeleteBufferPool(srcBuffer);
+        srcBuffer = nullptr;
+        return false;
+    }
+
+    this->mm = mm;
+    return true;
+}
+
+BufferPool*
+RecoveryBase::GetDestBuffer(void)
+{
+    return destBuffer;
+}
+
 } // namespace pos
