@@ -227,6 +227,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     uint32_t maxValidBlkCount = 32;
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlkCount));
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
+
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
         VirtualBlks blks = {
