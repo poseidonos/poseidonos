@@ -110,7 +110,6 @@ public:
     }
     virtual void SetUp(void)
     {
-        //rocksdb init 하는 부분 추가하기
         for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
         {
             for (auto& info : files[arrayId])
