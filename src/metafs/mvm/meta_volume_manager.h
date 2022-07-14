@@ -39,22 +39,25 @@
 
 #include <string>
 #include <utility>
-#include "src/metafs/storage/mss.h"
-#include "metafs_manager_base.h"
-#include "src/metafs/mvm/volume/file_descriptor_allocator.h"
-#include "src/metafs/mvm/volume/meta_volume.h"
-#include "src/metafs/mvm/volume/catalog_manager.h"
-#include "meta_volume_handler.h"
+
 #include "meta_volume_container.h"
-#include "src/metafs/mvm/volume/inode_manager.h"
+#include "meta_volume_handler.h"
 #include "metafs_common.h"
-#include "mk/ibof_config.h"
 #include "metafs_control_request.h"
+#include "metafs_manager_base.h"
+#include "mk/ibof_config.h"
 #include "nvram_meta_volume.h"
+#include "src/metafs/mvm/volume/catalog_manager.h"
+#include "src/metafs/mvm/volume/file_descriptor_allocator.h"
+#include "src/metafs/mvm/volume/inode_manager.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/storage/mss.h"
 #include "ssd_meta_volume.h"
 
 namespace pos
 {
+class TelemetryPublisher;
+
 using MetaVolSpcfReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 using GlobalMetaReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaFsFileControlRequest& reqMsg);
 
@@ -62,7 +65,7 @@ class MetaVolumeManager : public MetaFsManagerBase
 {
 public:
     MetaVolumeManager(const int arrayId, MetaStorageSubsystem* metaStorage,
-        MetaVolumeHandler* _volHandler = nullptr,
+        TelemetryPublisher* tp = nullptr, MetaVolumeHandler* _volHandler = nullptr,
         MetaVolumeContainer* _volContainer = nullptr);
     virtual ~MetaVolumeManager(void);
 
@@ -77,15 +80,15 @@ public:
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 
     virtual POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd,
-                MetaVolumeType volType);
+        MetaVolumeType volType);
     virtual POS_EVENT_ID GetFileSize(FileDescriptorType fd,
-                MetaVolumeType volType, FileSizeType& outFileByteSize);
+        MetaVolumeType volType, FileSizeType& outFileByteSize);
     virtual POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd,
-                MetaVolumeType volType, FileSizeType& outDataChunkSize);
+        MetaVolumeType volType, FileSizeType& outDataChunkSize);
     virtual POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd,
-                MetaVolumeType volType, MetaStorageType& outTargetMediaType);
+        MetaVolumeType volType, MetaStorageType& outTargetMediaType);
     virtual POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd,
-                MetaVolumeType volType, MetaLpnType& outFileBaseLpn);
+        MetaVolumeType volType, MetaLpnType& outFileBaseLpn);
     virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType volType);
 
 private:
@@ -110,5 +113,6 @@ private:
     MetaVolumeHandler* volHandler;
     MetaVolumeContainer* volContainer;
     MetaStorageSubsystem* metaStorage;
+    TelemetryPublisher* tp;
 };
 } // namespace pos

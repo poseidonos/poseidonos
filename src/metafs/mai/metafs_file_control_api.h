@@ -53,6 +53,8 @@
 
 namespace pos
 {
+class TelemetryPublisher;
+
 class MetaFsFileControlApi
 {
 public:
@@ -60,9 +62,11 @@ public:
     MetaFsFileControlApi(void);
     /* for test */
     MetaFsFileControlApi(const int arrayId, const bool isNormal, MetaStorageSubsystem* storage,
-        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr, BitMap* bitmap);
+        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr, BitMap* bitmap,
+        TelemetryPublisher* tp = nullptr);
     MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
-        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr = nullptr);
+        MetaFsManagementApi* mgmt, TelemetryPublisher* tp = nullptr,
+        MetaVolumeManager* volMgr = nullptr);
     virtual ~MetaFsFileControlApi(void);
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
@@ -116,6 +120,7 @@ private:
     MetaStorageSubsystem* storage;
     MetaFsManagementApi* mgmt;
     MetaVolumeManager* volMgr;
+    TelemetryPublisher* tp;
 
     BitMap* bitmap;
     // (pair<MetaVolumeType, fd>, fileName)
