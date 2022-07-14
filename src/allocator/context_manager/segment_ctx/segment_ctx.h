@@ -112,6 +112,10 @@ public:
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
+    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
+    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
+    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
+
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
 private:

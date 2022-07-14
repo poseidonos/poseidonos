@@ -43,11 +43,12 @@
 
 namespace pos
 {
-MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, ISegmentCtx* segmentCtx,
-    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IArrayInfo* arrayInfo)
+MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+    IContextManager* contextManager, IArrayInfo* arrayInfo)
 : vsaMap(vsaMap),
   stripeMap(stripeMap),
-  segmentCtx(segmentCtx),
+  segmentCtx(segmentCtx_),
   wbStripeAllocator(wbStripeAllocator),
   contextManager(contextManager),
   arrayInfo(arrayInfo)

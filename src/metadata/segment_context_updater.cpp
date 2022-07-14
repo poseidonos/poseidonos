@@ -36,10 +36,10 @@
 
 namespace pos
 {
-SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* context_, IVersionedSegmentContext* versionedContext_, const PartitionLogicalSize* sizeInfo)
+SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersionedSegmentContext* versionedContext_,
+    const PartitionLogicalSize* sizeInfo)
 : addrInfo(sizeInfo),
-  logGroupId(0),
-  activeContext(context_),
+  activeSegmentCtx(segmentCtx_),
   versionedContext(versionedContext_)
 {
 }
@@ -47,31 +47,44 @@ SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* context_, IVersionedSe
 void
 SegmentContextUpdater::ValidateBlks(VirtualBlks blks)
 {
-    activeContext->ValidateBlks(blks);
-
-    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
-    versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+    activeSegmentCtx->ValidateBlks(blks);
 }
 
 bool
 SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced)
 {
-    bool ret = activeContext->InvalidateBlks(blks, isForced);
-
-    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
-    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-
-    return ret;
+    return activeSegmentCtx->InvalidateBlks(blks, isForced);
 }
 
 bool
 SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
 {
-    bool ret = activeContext->UpdateOccupiedStripeCount(lsid);
+    return activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
+}
 
+void
+SegmentContextUpdater::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
+{
+    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
+    versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+
+    activeSegmentCtx->ValidateBlks(blks);
+}
+
+bool
+SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
+{
+    SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
+    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+
+    return activeSegmentCtx->InvalidateBlks(blks, isForced);
+}
+
+bool
+SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
+{
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
     versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
-
-    return ret;
+    return activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
 }
 } // namespace pos

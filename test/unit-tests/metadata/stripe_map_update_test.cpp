@@ -38,7 +38,6 @@ TEST(StripeMapUpdate, _DoSpecificJob_testIfMetadataUpdatedSuccessfully)
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
 
     EXPECT_CALL(stripeMap, SetLSA(vsid, userLsid, IN_USER_AREA)).Times(1);
-    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
 
     bool result = stripeMapUpdate.Execute();
     EXPECT_EQ(result, true);

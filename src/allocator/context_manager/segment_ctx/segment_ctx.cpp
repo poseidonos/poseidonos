@@ -835,4 +835,22 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
     }
 }
 
+void
+SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
+{
+    ValidateBlks(blks);
+}
+
+bool
+SegmentCtx::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
+{
+    return InvalidateBlks(blks, isForced);
+}
+
+bool
+SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
+{
+    return UpdateOccupiedStripeCount(lsid);
+}
+
 } // namespace pos

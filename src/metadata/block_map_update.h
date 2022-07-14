@@ -37,18 +37,19 @@
 #include "src/event_scheduler/callback.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/mapper/i_vsamap.h"
+#include "src/event_scheduler/meta_update_call_back.h"
 
 namespace pos
 {
 class VsaRangeMaker;
 
-class BlockMapUpdate : public Callback
+class BlockMapUpdate : public MetaUpdateCallback
 {
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator);
+        ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator);
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
+        ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
         VsaRangeMaker* vsaRangeMaker);
     virtual ~BlockMapUpdate(void);
 
@@ -60,7 +61,6 @@ private:
 
     VolumeIoSmartPtr volumeIo;
     IVSAMap* vsaMap;
-    ISegmentCtx* segmentCtx;
     IWBStripeAllocator* wbStripeAllocator;
     VsaRangeMaker* oldVsaRangeMaker;
 };

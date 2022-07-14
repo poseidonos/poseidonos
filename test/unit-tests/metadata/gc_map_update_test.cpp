@@ -72,18 +72,12 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
 
     ON_CALL(*stripe, GetUserLsid).WillByDefault(Return(userLsid));
     ON_CALL(*stripe, GetVsid).WillByDefault(Return(vsid));
-    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
 
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
     {
         VirtualBlks vsaRange = {it.vsa, 1};
         EXPECT_CALL(vsaMap, SetVSAsInternal(testVolumeId, it.rba, vsaRange)).Times(1);
     }
-
-    EXPECT_CALL(segmentCtx, InvalidateBlks).Times(1);
-    VirtualBlkAddr writeVsa = {vsid, 0};
-    VirtualBlks writeVsaRange = {writeVsa, validMapCnt};
-    EXPECT_CALL(segmentCtx, ValidateBlks(writeVsaRange)).Times(1);
 
     bool result = gcMapUpdate.Execute();
     EXPECT_EQ(result, true);
