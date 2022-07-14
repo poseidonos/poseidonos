@@ -59,7 +59,8 @@ TEST(SegmentContextUpdater, InvalidateBlks_testIfBothContextIsUpdatedProperly)
 }
 
 TEST(SegmentContextUpdater, UpdateOccupiedStripeCount_testIfBothContextIsUpdatedProperly)
-{ NiceMock<MockISegmentCtx> segmentCtx;
+{
+    NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIVersionedSegmentContext> versionedCtx;
     PartitionLogicalSize sizeInfo;
     sizeInfo.stripesPerSegment = 128;
