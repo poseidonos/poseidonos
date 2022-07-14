@@ -41,6 +41,7 @@
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/mapper/i_vsamap.h"
+#include "src/event_scheduler/meta_update_call_back.h"
 
 namespace pos
 {
@@ -51,12 +52,12 @@ class IContextManager;
 class ISegmentCtx;
 class IArrayInfo;
 
-class GcMapUpdate : public Callback
+class GcMapUpdate : public MetaUpdateCallback
 {
 public:
     GcMapUpdate(void);
     GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        ISegmentCtx* segmentCtx, IContextManager* contextManager,
+        ISegmentCtx* segmentCtx_, IContextManager* contextManager,
         IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
         std::map<SegmentId, uint32_t> invalidSegCnt);
     virtual ~GcMapUpdate(void);

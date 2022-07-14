@@ -34,23 +34,27 @@
 
 #include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
+#include "src/event_scheduler/meta_update_call_back.h"
 #include "src/mapper/i_stripemap.h"
 
 namespace pos
 {
 class Stripe;
 
-class StripeMapUpdate : public Callback
+class StripeMapUpdate : public MetaUpdateCallback
 {
 public:
-    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx);
+    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx_);
     virtual ~StripeMapUpdate(void);
+
+    virtual void ValidateBlks(VirtualBlks blks);
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid);
 
 private:
     virtual bool _DoSpecificJob(void) override;
 
     Stripe* stripe;
     IStripeMap* stripeMap;
-    ISegmentCtx* segmentCtx;
 };
 } // namespace pos

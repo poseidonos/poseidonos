@@ -42,8 +42,8 @@
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator)
-: BlockMapUpdate(volumeIo, vsaMap, segmentCtx, wbStripeAllocator,
+    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator)
+: BlockMapUpdate(volumeIo, vsaMap, segmentCtx_, wbStripeAllocator,
     new VsaRangeMaker(volumeIo->GetVolumeId(),
         ChangeSectorToBlock(volumeIo->GetSectorRba()),
         DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
@@ -51,12 +51,11 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
 }
 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
+    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
     VsaRangeMaker* vsaRangeMaker)
-: Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
+: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
     volumeIo(volumeIo),
     vsaMap(vsaMap),
-    segmentCtx(segmentCtx),
     wbStripeAllocator(wbStripeAllocator),
     oldVsaRangeMaker(vsaRangeMaker)
 {
@@ -91,14 +90,15 @@ BlockMapUpdate::_DoSpecificJob(void)
     {
         VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
         bool allowVictimSegRelease = false;
-        segmentCtx->InvalidateBlks(vsaRange, allowVictimSegRelease);
+        InvalidateBlks(vsaRange, allowVictimSegRelease);
 
         POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, POS_EVENT_ID::MAPPER_SUCCESS,
             "Invalidate rba {} vsid {}", ChangeSectorToBlock(volumeIo->GetSectorRba()), vsaRange.startVsa.stripeId);
     }
 
-    segmentCtx->ValidateBlks(targetVsaRange);
+    ValidateBlks(targetVsaRange);
 
+    POS_TRACE_TRACE(-1, "BlockMapUpdate::_DoSpecificJob, log group id : {}", this->GetLogGroupId());
     return true;
 }
 
@@ -135,4 +135,21 @@ BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
     return *foundStripe;
 }
 
+void
+BlockMapUpdate::ValidateBlks(VirtualBlks blks)
+{
+    MetaUpdateCallback::ValidateBlks(blks);
+}
+
+bool
+BlockMapUpdate::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    return MetaUpdateCallback::InvalidateBlks(blks, isForced);
+}
+
+bool
+BlockMapUpdate::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    return MetaUpdateCallback::UpdateOccupiedStripeCount(lsid);
+}
 } // namespace pos

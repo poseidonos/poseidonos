@@ -42,13 +42,13 @@
 namespace pos
 {
 GcMapUpdate::GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    ISegmentCtx* segmentCtx, IContextManager* contextManager,
+    ISegmentCtx* segmentCtx_, IContextManager* contextManager,
     IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
     std::map<SegmentId, uint32_t> invalidSegCnt)
-: Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
+: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
-  segmentCtx(segmentCtx),
+  segmentCtx(segmentCtx_),
   contextManager(contextManager),
   arrayInfo(arrayInfo),
   stripe(stripe),
@@ -72,7 +72,8 @@ GcMapUpdate::_DoSpecificJob(void)
 
     StripeId currentLsid = stripe->GetUserLsid();
     stripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
-    segmentCtx->UpdateOccupiedStripeCount(currentLsid);
+
+    MetaUpdateCallback::UpdateOccupiedStripeCount(currentLsid);
 
     uint32_t validCount = mapUpdateInfoList.blockMapUpdateList.size();
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
@@ -106,7 +107,7 @@ GcMapUpdate::_InvalidateBlock(void)
         VirtualBlks invalidVsaRange = {invalidVsa, invalidCnt};
 
         bool allowVictimSegRelease = true;
-        segmentCtx->InvalidateBlks(invalidVsaRange, allowVictimSegRelease);
+        MetaUpdateCallback::InvalidateBlks(invalidVsaRange, allowVictimSegRelease);
     }
 }
 
@@ -116,7 +117,7 @@ GcMapUpdate::_ValidateBlock(StripeId stripeId, uint32_t cnt)
     VirtualBlkAddr writeVsa = {stripeId, 0};
     VirtualBlks writeVsaRange = {writeVsa, cnt};
 
-    segmentCtx->ValidateBlks(writeVsaRange);
+    MetaUpdateCallback::ValidateBlks(writeVsaRange);
 }
 
 } // namespace pos

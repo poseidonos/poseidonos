@@ -42,18 +42,20 @@ class PartitionLogicalSize;
 class SegmentContextUpdater : public ISegmentCtx
 {
 public:
-    SegmentContextUpdater(ISegmentCtx* context_, IVersionedSegmentContext* versionedContext_, const PartitionLogicalSize* addrInfo_);
+    SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersionedSegmentContext* versionedContext_,
+        const PartitionLogicalSize* addrInfo_);
     virtual ~SegmentContextUpdater(void) = default;
 
-    virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+    virtual void ValidateBlks(VirtualBlks blks);
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid);
+    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
+    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
+    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
 
 private:
     const PartitionLogicalSize* addrInfo;
-
-    int logGroupId; // TODO (VSC) find log group ID for this update.....
-    ISegmentCtx* activeContext;
+    ISegmentCtx* activeSegmentCtx;
     IVersionedSegmentContext* versionedContext;
 };
 

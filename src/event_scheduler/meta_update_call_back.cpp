@@ -30,22 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "callback.h"
 
-#include "src/include/address_type.h"
+#include "Air.h"
+#include "callback.h"
+#include "meta_update_call_back.h"
 
 namespace pos
 {
-class ISegmentCtx
+
+MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
+    CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg,
+    EventScheduler* eventSchedulerArg)
+: Callback(isFrontEnd, type, weight, timeoutCheckerArg, eventSchedulerArg),
+    segmentCtx(segmentCtx_),
+    logGroupId(UINT32_MAX)
 {
-public:
-    virtual void ValidateBlks(VirtualBlks blks) = 0;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) = 0;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid) = 0;
+}
 
-    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId) = 0;
-    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId) = 0;
-    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId) = 0;
-};
+// LCOV_EXCL_START
+MetaUpdateCallback::~MetaUpdateCallback(void)
+{
+}
+// LCOV_EXCL_STOP
 
+void
+MetaUpdateCallback::SetLogGroupId(int groupId)
+{
+    logGroupId = groupId;
+}
+
+int
+MetaUpdateCallback::GetLogGroupId(void)
+{
+    return logGroupId;
+}
+
+void
+MetaUpdateCallback::ValidateBlks(VirtualBlks blks)
+{
+    segmentCtx->ValidateBlocksWithGroupId(blks, logGroupId);
+}
+
+bool
+MetaUpdateCallback::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    return segmentCtx->InvalidateBlocksWithGroupId(blks, isForced, logGroupId);
+}
+
+bool
+MetaUpdateCallback::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    return segmentCtx->UpdateStripeCount(lsid, logGroupId);
+}
 } // namespace pos

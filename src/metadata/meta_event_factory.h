@@ -51,8 +51,9 @@ class MetaEventFactory
 {
 public:
     MetaEventFactory(void) = default;
-    MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, ISegmentCtx* segmentCtx,
-        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IArrayInfo* arrayInfo);
+    MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+        IContextManager* contextManager, IArrayInfo* arrayInfo);
     virtual ~MetaEventFactory(void) = default;
 
     virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);

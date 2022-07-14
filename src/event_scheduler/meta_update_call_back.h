@@ -32,20 +32,33 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
+#include <atomic>
+#include <cstdint>
+#include <memory>
+#include "src/metadata/segment_context_updater.h"
 
 namespace pos
 {
-class ISegmentCtx
+class EventScheduler;
+class VirtualBlks;
+
+class MetaUpdateCallback : public Callback
 {
 public:
-    virtual void ValidateBlks(VirtualBlks blks) = 0;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) = 0;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid) = 0;
+    MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
+        CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
+        SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventscheduler = nullptr);
+    virtual ~MetaUpdateCallback(void);
 
-    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId) = 0;
-    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId) = 0;
-    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId) = 0;
+    virtual void SetLogGroupId(int groupId);
+    virtual int GetLogGroupId(void);
+
+    virtual void ValidateBlks(VirtualBlks blks);
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid);
+
+private:
+    ISegmentCtx* segmentCtx;
+    int logGroupId;
 };
-
 } // namespace pos
