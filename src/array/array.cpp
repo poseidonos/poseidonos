@@ -986,7 +986,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     thread t([arrRebuilder, arrName, arrId, target, cb, tasks, isWT]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets, isWT);
+        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets, RebuildTypeEnum::BASIC, isWT);
     });
 
     t.detach();
@@ -1021,7 +1021,7 @@ Array::ResumeRebuild(ArrayDevice* target)
     thread t([arrRebuilder, arrName, arrId, target, cb, tasks]()
     {
         list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets);
+        arrRebuilder->Rebuild(arrName, arrId, target, cb, targets, RebuildTypeEnum::BASIC);
     });
 
     t.detach();

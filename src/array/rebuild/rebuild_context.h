@@ -43,6 +43,7 @@
 #include "src/include/rebuild_state.h"
 #include "src/include/address_type.h"
 #include "src/include/raid_type.h"
+#include "src/include/rebuild_type.h"
 #include "src/include/partition_type.h"
 #include "src/logger/logger.h"
 
@@ -61,6 +62,7 @@ public:
     string array;
     PartitionType part = PartitionType::META_NVM;
     RaidType raidType;
+    RebuildTypeEnum rebuildType;
     uint32_t arrayIndex = 0;
     uint32_t faultIdx = 0;
     ArrayDevice* faultDev = nullptr;

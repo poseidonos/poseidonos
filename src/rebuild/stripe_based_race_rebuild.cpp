@@ -79,10 +79,10 @@ StripeBasedRaceRebuild::Init(void)
         bool ret = _InitBuffers();
         if (ret == false)
         {
-            if (initBufferRetryCnt >= INIT_REBUILD_BUFFER_MAX_RETRY)
+            if (initRebuildRetryCnt >= INIT_REBUILD_MAX_RETRY)
             {
                 POS_TRACE_ERROR(EID(REBUILD_INIT_FAILED), "part_type:{}, retried:{}",
-                    PARTITION_TYPE_STR[ctx->part], initBufferRetryCnt);
+                    PARTITION_TYPE_STR[ctx->part], initRebuildRetryCnt);
                 ctx->SetResult(RebuildState::FAIL);
                 return Read();
             }
@@ -102,15 +102,18 @@ StripeBasedRaceRebuild::Read(void)
 
     UpdateProgress(baseStripe);
 
+    uint32_t targetIndex = ctx->faultIdx;
+    ArrayDevice* targetDev = ctx->faultDev;
+
     if (baseStripe >= maxStripeId ||
         ctx->GetResult() >= RebuildState::CANCELLED)
     {
-        if (locker->ResetBusyLock(ctx->faultDev) == false)
+        if (locker->ResetBusyLock(targetDev) == false)
         {
             int logInterval = TRY_LOCK_MAX_RETRY / 10;
             if (resetLockRetryCnt % logInterval == 0)
             {
-                locker->WriteBusyLog(ctx->faultDev);
+                locker->WriteBusyLog(targetDev);
                 POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
                     "Partition {} rebuild done, but waiting lock release, retried:{}",
                     PARTITION_TYPE_STR[ctx->part], resetLockRetryCnt);
@@ -123,7 +126,7 @@ StripeBasedRaceRebuild::Read(void)
                 POS_TRACE_ERROR(EID(REBUILD_FORCED_RESET_LOCK), "part:{}, retried:{}",
                     PARTITION_TYPE_STR[ctx->part], resetLockRetryCnt);
                 bool forceReset = true;
-                locker->ResetBusyLock(ctx->faultDev, forceReset);
+                locker->ResetBusyLock(targetDev, forceReset);
                 resetLockRetryCnt = 0;
                 return true;
             }
@@ -169,15 +172,15 @@ StripeBasedRaceRebuild::Read(void)
 
     uint32_t currWorkload = to - from + 1;
 
-    if (locker->TryBusyLock(ctx->faultDev, from, to) == false)
+    if (locker->TryBusyLock(targetDev, from, to) == false)
     {
         int logInterval = TRY_LOCK_MAX_RETRY / 10;
         if (tryLockRetryCnt % logInterval == 0)
         {
-            locker->WriteBusyLog(ctx->faultDev);
+            locker->WriteBusyLog(targetDev);
             POS_TRACE_WARN(EID(REBUILD_TRY_LOCK_RETRY),
                 "Failed to acquire rebuild lock, array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
-                ctx->array, PARTITION_TYPE_STR[ctx->part], ctx->faultDev->GetName(), from, to, tryLockRetryCnt);
+                ctx->array, PARTITION_TYPE_STR[ctx->part], targetDev->GetName(), from, to, tryLockRetryCnt);
             int sleep = tryLockRetryCnt * 10;
             usleep(sleep);
         }
@@ -185,10 +188,10 @@ StripeBasedRaceRebuild::Read(void)
         tryLockRetryCnt++;
         if (tryLockRetryCnt >= TRY_LOCK_MAX_RETRY)
         {
-            locker->WriteBusyLog(ctx->faultDev);
+            locker->WriteBusyLog(targetDev);
             POS_TRACE_ERROR(EID(REBUILD_TRY_LOCK_FAILED),
                 "array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
-                ctx->array, PARTITION_TYPE_STR[ctx->part], ctx->faultDev->GetName(), from, to, tryLockRetryCnt);
+                ctx->array, PARTITION_TYPE_STR[ctx->part], targetDev->GetName(), from, to, tryLockRetryCnt);
             ctx->SetResult(RebuildState::FAIL);
             EventSmartPtr complete(new RebuildCompleted(this));
             complete->SetEventType(BackendEvent_MetadataRebuild);
@@ -206,21 +209,21 @@ StripeBasedRaceRebuild::Read(void)
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
-        void* buffer = recoverBuffers->TryGetBuffer();
+        void* buffer = recovery->GetDestBuffer()->TryGetBuffer();
         assert(buffer != nullptr);
 
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->arrayIndex));
         ubio->dir = UbioDir::Write;
         FtBlkAddr fta = {.stripeId = stripeId,
-            .offset = ctx->faultIdx * blkCnt};
+            .offset = targetIndex * blkCnt};
         PhysicalBlkAddr addr = ctx->translate(fta);
         ubio->SetPba(addr);
         CallbackSmartPtr callback(new UpdateDataHandler(stripeId, ubio, this));
         callback->SetEventType(BackendEvent_MetadataRebuild);
         ubio->SetEventType(BackendEvent_MetadataRebuild);
         ubio->SetCallback(callback);
-        RebuildRead rebuildRead;
-        int res = rebuildRead.Recover(ubio, rebuildReadBuffers);
+        
+        int res = recovery->Recover(ubio);
         if (res != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
@@ -229,7 +232,6 @@ StripeBasedRaceRebuild::Read(void)
             ctx->SetResult(RebuildState::FAIL);
         }
     }
-
     baseStripe += currWorkload;
     return true;
 }
@@ -260,8 +262,9 @@ bool StripeBasedRaceRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 
 bool StripeBasedRaceRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
-    locker->Unlock(ctx->faultDev, targetId);
-    recoverBuffers->ReturnBuffer(ubio->GetBuffer());
+    ArrayDevice* targetDev = ctx->faultDev;
+    locker->Unlock(targetDev, targetId);
+    recovery->GetDestBuffer()->ReturnBuffer(ubio->GetBuffer());
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)

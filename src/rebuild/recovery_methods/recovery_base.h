@@ -32,51 +32,30 @@
 
 #pragma once
 
-#include "src/include/rebuild_state.h"
-#include "rebuild_behavior_factory.h"
-#include "src/array/rebuild/rebuild_progress.h"
-#include "src/array/rebuild/rebuild_context.h"
-
-#include <list>
-#include <mutex>
-#include <string>
+#include "src/resource_manager/memory_manager.h"
+#include "src/resource_manager/buffer_pool.h"
+#include "src/bio/ubio.h"
 
 using namespace std;
 
 namespace pos
 {
-class PartitionRebuild;
-class ArrayDevice;
-class RebuildTarget;
 
-class ArrayRebuild
+class RecoveryBase
 {
 public:
-    ArrayRebuild(void) {}
-    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dev,
-        RebuildComplete cb, list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-        RebuildTypeEnum rebuildType, bool isWT = false);
-    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
-        list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
-    virtual ~ArrayRebuild(void);
-    virtual void Start(void);
-    virtual void Discard(void);
-    virtual void Stop(void);
-    virtual RebuildState GetState(void);
-    virtual uint64_t GetProgress(void);
+    RecoveryBase(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
+    virtual ~RecoveryBase(void);
+    virtual bool Init(MemoryManager* mm, string owner);
+    virtual int Recover(UbioSmartPtr ubio) = 0;
+    virtual BufferPool* GetDestBuffer(void);
 
-private:
-    void _RebuildNext(void);
-    void _RebuildDone(RebuildResult res);
-    void _RebuildCompleted(RebuildResult res);
-    string arrayName = "";
-    ArrayDevice* targetDev = nullptr;
-    RebuildState state = RebuildState::READY;
-    RebuildComplete rebuildComplete;
-    list<PartitionRebuild*> tasks;
-    RebuildProgress* progress = nullptr;
-    RebuildLogger* rebuildLogger = nullptr;
-    RebuildComplete rebuildDoneCb;
-    mutex mtx;
+protected:
+    MemoryManager* mm = nullptr;
+    BufferPool* srcBuffer = nullptr;
+    BufferPool* destBuffer = nullptr;
+    uint64_t srcSize = 0;
+    uint64_t destSize = 0;
+    uint32_t bufCnt = 0;
 };
 } // namespace pos

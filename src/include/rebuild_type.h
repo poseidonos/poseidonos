@@ -32,51 +32,50 @@
 
 #pragma once
 
-#include "src/include/rebuild_state.h"
-#include "rebuild_behavior_factory.h"
-#include "src/array/rebuild/rebuild_progress.h"
-#include "src/array/rebuild/rebuild_context.h"
-
-#include <list>
-#include <mutex>
 #include <string>
 
 using namespace std;
-
 namespace pos
 {
-class PartitionRebuild;
-class ArrayDevice;
-class RebuildTarget;
 
-class ArrayRebuild
+enum class RebuildTypeEnum
+{
+    BASIC,
+    QUICK,
+    TYPE_COUNT,
+};
+
+class RebuildType
 {
 public:
-    ArrayRebuild(void) {}
-    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dev,
-        RebuildComplete cb, list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-        RebuildTypeEnum rebuildType, bool isWT = false);
-    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
-        list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
-    virtual ~ArrayRebuild(void);
-    virtual void Start(void);
-    virtual void Discard(void);
-    virtual void Stop(void);
-    virtual RebuildState GetState(void);
-    virtual uint64_t GetProgress(void);
+    RebuildType(void) { val = RebuildTypeEnum::BASIC; }
+    RebuildType(RebuildTypeEnum t) : val(t) {}
+    RebuildType(string type)
+    {
+        val = RebuildTypeEnum::BASIC;
+        for (int i = 0; i < (int)RebuildTypeEnum::TYPE_COUNT; i++)
+        {
+            if (type == REBUILDTYPE_STR[i])
+            {
+                val = static_cast<RebuildTypeEnum>(i);
+                break;
+            }
+        }
+    }
+    operator RebuildTypeEnum(void) const { return val; }
+    bool operator == (const RebuildType t) const { return val == t.val; }
+    bool operator != (const RebuildType t) const { return val != t.val; }
+    bool operator == (const RebuildTypeEnum t) const { return val == t; }
+    bool operator != (const RebuildTypeEnum t) const { return val != t; }
+    string ToString(void) const { return REBUILDTYPE_STR[(int)val]; }
 
 private:
-    void _RebuildNext(void);
-    void _RebuildDone(RebuildResult res);
-    void _RebuildCompleted(RebuildResult res);
-    string arrayName = "";
-    ArrayDevice* targetDev = nullptr;
-    RebuildState state = RebuildState::READY;
-    RebuildComplete rebuildComplete;
-    list<PartitionRebuild*> tasks;
-    RebuildProgress* progress = nullptr;
-    RebuildLogger* rebuildLogger = nullptr;
-    RebuildComplete rebuildDoneCb;
-    mutex mtx;
+    RebuildTypeEnum val;
+    string REBUILDTYPE_STR[(int)RebuildTypeEnum::TYPE_COUNT] =
+    {
+        "BASIC",
+        "QUICK",
+    };
 };
+
 } // namespace pos
