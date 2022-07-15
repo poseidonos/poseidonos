@@ -156,6 +156,12 @@ service PosCli {
       		post: "/v1/smartlog"
     	};
 	}
+
+	rpc CreateSubsystem (CreateSubsystemRequest) returns (CreateSubsystemResponse) {
+		option (google.api.http) = {
+      		post: "/v1/createsubsystem"
+    	};
+	}
 }
 
 message Status {
@@ -901,6 +907,31 @@ message GetSmartLogResponse {
 	message Result {
 		Status status = 1;
 		SmartLog data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message CreateSubsystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string serialNumber = 2;
+		string modelNumber = 3;
+		uint32 maxNamespaces = 4;
+		bool allowAnyHost = 5;
+		bool anaReporting = 6;
+	}
+	Param param = 4;
+}
+
+message CreateSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
 	}
 	Result result = 3;
 	PosInfo info = 4;
