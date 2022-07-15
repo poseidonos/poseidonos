@@ -50,6 +50,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/ScanDevice",
   "/grpc_cli.PosCli/ListDevice",
   "/grpc_cli.PosCli/GetSmartLog",
+  "/grpc_cli.PosCli/CreateSubsystem",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -87,6 +88,7 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_ScanDevice_(PosCli_method_names[25], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ListDevice_(PosCli_method_names[26], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetSmartLog_(PosCli_method_names[27], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateSubsystem_(PosCli_method_names[28], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -733,6 +735,29 @@ void PosCli::Stub::experimental_async::GetSmartLog(::grpc::ClientContext* contex
   return result;
 }
 
+::grpc::Status PosCli::Stub::CreateSubsystem(::grpc::ClientContext* context, const ::grpc_cli::CreateSubsystemRequest& request, ::grpc_cli::CreateSubsystemResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::CreateSubsystemRequest, ::grpc_cli::CreateSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateSubsystem_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::CreateSubsystem(::grpc::ClientContext* context, const ::grpc_cli::CreateSubsystemRequest* request, ::grpc_cli::CreateSubsystemResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::CreateSubsystemRequest, ::grpc_cli::CreateSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateSubsystem_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::CreateSubsystem(::grpc::ClientContext* context, const ::grpc_cli::CreateSubsystemRequest* request, ::grpc_cli::CreateSubsystemResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateSubsystem_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateSubsystemResponse>* PosCli::Stub::PrepareAsyncCreateSubsystemRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateSubsystemRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::CreateSubsystemResponse, ::grpc_cli::CreateSubsystemRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateSubsystem_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateSubsystemResponse>* PosCli::Stub::AsyncCreateSubsystemRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateSubsystemRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCreateSubsystemRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -1014,6 +1039,16 @@ PosCli::Service::Service() {
              ::grpc_cli::GetSmartLogResponse* resp) {
                return service->GetSmartLog(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[28],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateSubsystemRequest, ::grpc_cli::CreateSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::CreateSubsystemRequest* req,
+             ::grpc_cli::CreateSubsystemResponse* resp) {
+               return service->CreateSubsystem(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -1209,6 +1244,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::GetSmartLog(::grpc::ServerContext* context, const ::grpc_cli::GetSmartLogRequest* request, ::grpc_cli::GetSmartLogResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::CreateSubsystem(::grpc::ServerContext* context, const ::grpc_cli::CreateSubsystemRequest* request, ::grpc_cli::CreateSubsystemResponse* response) {
   (void) context;
   (void) request;
   (void) response;

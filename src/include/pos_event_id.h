@@ -218,6 +218,9 @@ enum class POS_EVENT_ID
     VOL_EVENT_FAIL,
     VOL_EVENT_ROLLBACK_FAIL,
 
+    CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST,
+    CREATE_SUBSYSTEM_FAILURE,
+
     // --------------Mbr (2300)-----------------------
     MBR_START = 2300,
     MBR_ALLOCATE_MEMORY = MBR_START,
@@ -1796,7 +1799,12 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT,
             new PosEventInfoEntry("IONVMF_VOL_DELETE_TIMEOUT",
                 "Failed to delete volumes.", "A timeout has occured.", "Please report the errors.")},
-
+        {(int)POS_EVENT_ID::CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST,
+            new PosEventInfoEntry("CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST",
+                "Input subsystem already exists.", "", "")},
+        {(int)POS_EVENT_ID::CREATE_SUBSYSTEM_FAILURE,
+            new PosEventInfoEntry("CREATE_SUBSYSTEM_FAILURE",
+                "Failed to create a subsystem.", "", "")},
         {(int)POS_EVENT_ID::DEVICE_SCAN_FAILED,
             new PosEventInfoEntry("DEVICE_SCAN_FAILED",
                 "Failed to scan a device.", "", "")},
