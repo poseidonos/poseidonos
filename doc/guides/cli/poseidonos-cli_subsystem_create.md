@@ -12,8 +12,8 @@ Syntax:
 	[(--max-namespaces | -m) MaxNamespace] [(--allow-any-host | -o)] [(--ana-reporting | -r)]
 
 Example:
-	poseidonos-cli subsystem create --subnqn nqn.2019-04.ibof:subsystem1 
-	--serial-number IBOF00000000000001 --model-number IBOF_VOLUME_EXTENSION -m 256 -o
+	poseidonos-cli subsystem create --subnqn nqn.2019-04.pos:subsystem1 
+	--serial-number POS00000000000001 --model-number POS_VOLUME_EXTENSION -m 256 -o
     
 
 ```
@@ -23,13 +23,13 @@ poseidonos-cli subsystem create [flags]
 ### Options
 
 ```
-  -o, --allow-any-host         Allow any host to connect (don't enforce host NQN whitelist). Default : false
-  -r, --ana-reporting          Enable ANA reporting feature. Default : false
-  -h, --help                   help for create
-  -m, --max-namespaces int     Maximum number of namespaces allowed. Default : 256
-      --model-number string    Model Number of the subsystem to create. Default : POS_VOLUME_EXTENTION
-      --serial-number string   Serial Number of the subsystem to create. Default : POS00000000000000
-  -q, --subnqn string          NQN of the subsystem to create
+  -o, --allow-any-host          Allow any host to connect (don't enforce host NQN whitelist). Default : false
+  -r, --ana-reporting           Enable ANA reporting feature. Default : false
+  -h, --help                    help for create
+  -m, --max-namespaces uint32   Maximum number of namespaces allowed. Default : 256
+      --model-number string     Model Number of the subsystem to create. Default : POS_VOLUME_EXTENTION
+      --serial-number string    Serial Number of the subsystem to create. Default : POS00000000000000
+  -q, --subnqn string           NQN of the subsystem to create
 ```
 
 ### Options inherited from parent commands
