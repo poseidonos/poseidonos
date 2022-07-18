@@ -1,16 +1,17 @@
 package subsystemcmds
 
 import (
-	"encoding/json"
 	"os"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var DeleteSubsystemCmd = &cobra.Command{
@@ -39,25 +40,38 @@ Example:
 		}
 
 		var command = "DELETESUBSYSTEM"
-
-		param := messages.DeleteSubsystemParam{
-			SUBNQN: delete_subsystem_subnqn,
+		uuid := globals.GenerateUUID()
+		param := &pb.DeleteSubsystemRequest_Param{
+			Subnqn: delete_subsystem_subnqn,
 		}
 
-		uuid := globals.GenerateUUID()
+		req := &pb.DeleteSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		req := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
-		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendDeleteSubsystem(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
