@@ -635,3 +635,25 @@ func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error
 
 	return res, err
 }
+
+func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	defer cancel()
+
+	res, err := c.CreateSubsystem(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}

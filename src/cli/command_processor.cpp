@@ -1112,6 +1112,90 @@ CommandProcessor::_GetEventId(std::string eventName)
     return (pos::BackendEvent_Unknown);
 }
 
+grpc::Status
+CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* request, CreateSubsystemResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+    
+    const char* DEFAULT_SERIAL_NUMBER = "POS0000000000000";
+    const char* DEFAULT_MODEL_NUMBER = "POS_VOLUME_EXTENTION";
+    uint32_t DEFAULT_MAX_NAMESPACES = 256;
+
+    string subnqn = "";
+    std::string serialNumber = DEFAULT_SERIAL_NUMBER;
+    std::string modelNumber = DEFAULT_MODEL_NUMBER;
+    uint32_t maxNamespaces = DEFAULT_MAX_NAMESPACES;
+    bool allowAnyHost = false;
+    bool anaReporting = false;
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    if (command == "CREATESUBSYSTEMAUTO")
+    {
+        if (nullptr != target.FindSubsystem(subnqn))
+        {
+            POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), "subnqn:{}", subnqn);
+            _SetEventStatus(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        
+        string key("subsystem");
+        string number;
+        serialNumber = DEFAULT_SERIAL_NUMBER;
+        size_t found = subnqn.rfind(key);
+
+        if (found != string::npos)
+        {
+            size_t index = found + key.length();
+            number = subnqn.substr(index);
+            serialNumber += number;
+        }
+        allowAnyHost = true;
+    }
+    else if (command == "CREATESUBSYSTEM")
+    {
+        if (nullptr != target.FindSubsystem(subnqn))
+        {
+            POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), "subnqn:{}", subnqn);
+            _SetEventStatus(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+
+        subnqn = (request->param()).subnqn();
+        serialNumber = (request->param()).serialnumber();
+        modelNumber = (request->param()).modelnumber();
+        maxNamespaces = (request->param()).maxnamespaces();
+        allowAnyHost = (request->param()).allowanyhost();
+        anaReporting = (request->param()).anareporting();
+    }
+
+    auto ret = rpcClient.SubsystemCreate(
+        subnqn,
+        serialNumber,
+        modelNumber,
+        maxNamespaces,
+        allowAnyHost,
+        anaReporting);
+
+    if (ret.first != SUCCESS)
+    {
+        POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, spdkRpcMsg:{}", subnqn, ret.second);
+        _SetEventStatus(EID(CREATE_SUBSYSTEM_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {

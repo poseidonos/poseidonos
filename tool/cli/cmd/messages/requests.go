@@ -170,9 +170,9 @@ type CreateSubsystemParam struct {
 	SUBNQN        string `json:"name"`
 	SERIAL        string `json:"sn,omitempty"`
 	MODEL         string `json:"mn,omitempty"`
-	MAXNAMESPACES int    `json:"max_namespaces,omitempty"`
-	ALLOWANYHOST  bool   `json:"allow_any_host,omitempty"`
-	ANAREPORTING  bool   `json:"ana_reporting,omitempty"`
+	MAXNAMESPACES int    `json:"maxNamespaces,omitempty"`
+	ALLOWANYHOST  bool   `json:"allowAnyHost,omitempty"`
+	ANAREPORTING  bool   `json:"anaReporting,omitempty"`
 }
 
 type CreateSubsystemAutoParam struct {

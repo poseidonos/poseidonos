@@ -106,6 +106,8 @@ using grpc_cli::ListDeviceRequest;
 using grpc_cli::ListDeviceResponse;
 using grpc_cli::GetSmartLogRequest;
 using grpc_cli::GetSmartLogResponse;
+using grpc_cli::CreateSubsystemRequest;
+using grpc_cli::CreateSubsystemResponse;
 
 class CommandProcessor
 {
@@ -153,6 +155,9 @@ public:
     grpc::Status ExecuteScanDeviceCommand(const ScanDeviceRequest* request, ScanDeviceResponse* reply);
     grpc::Status ExecuteListDeviceCommand(const ListDeviceRequest* request, ListDeviceResponse* reply);
     grpc::Status ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, GetSmartLogResponse* reply);
+
+    // Subsystem Commands
+    grpc::Status ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* request, CreateSubsystemResponse* reply);
 
 private:
     bool _isPosTerminating;
