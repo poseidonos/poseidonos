@@ -396,6 +396,9 @@ AdminCompletion::_DoSpecificJob(void)
         ioContext.needPollingCount--;
     }
     io->complete_cb(io, POS_IO_STATUS_SUCCESS);
+
+    airlog("CompleteUserAdminIo", "AIR_UserIo", GetEventType(), 1);
+
     return true;
 }
 

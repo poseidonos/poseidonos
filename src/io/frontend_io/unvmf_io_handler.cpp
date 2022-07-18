@@ -36,6 +36,7 @@
 
 #include <vector>
 
+#include "Air.h"
 #include "spdk/pos.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
@@ -103,6 +104,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             {
                 AIO aio;
                 aio.SubmitFlush(*io);
+                airlog("UserFlushProcess", "AIR_UserIo", io->ioType, 1);
                 return POS_IO_STATUS_SUCCESS;
             }
             break;
@@ -148,6 +150,7 @@ UNVMfSubmitHandler(struct pos_io* io)
         if (nullptr != io && nullptr != io->complete_cb)
         {
             io->complete_cb(io, POS_IO_STATUS_FAIL);
+            airlog("UserFailIo", "AIR_UserIo", io->ioType, 1);
         }
     }
 
