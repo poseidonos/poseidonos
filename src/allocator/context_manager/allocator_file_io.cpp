@@ -40,7 +40,7 @@
 #include "src/metafs/metafs_file_intf.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/config/metafs_config_manager.h"
-#include "src/metafs/rocksdb_metafs_intf.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -59,7 +59,8 @@ AllocatorFileIo::AllocatorFileIo(int owner, IAllocatorFileIoClient* client_, All
   fileSize(0),
   numFilesReading(0),
   numFilesFlushing(0),
-  initialized(false)
+  initialized(false),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 
@@ -104,7 +105,7 @@ AllocatorFileIo::_CreateFile(void)
 {
     if (file == nullptr)
     {
-        if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+        if (rocksDbEnabled)
         {
             file = new RocksDBMetaFsIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
         }

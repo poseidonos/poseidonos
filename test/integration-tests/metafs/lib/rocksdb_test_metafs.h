@@ -31,6 +31,7 @@
  */
 
 #include <unistd.h>
+#include <experimental/filesystem>
 
 #include <algorithm>
 #include <atomic>
@@ -44,7 +45,7 @@
 
 #include "src/metafs/include/meta_volume_type.h"
 #include "src/metafs/include/metafs_aiocb_cxt.h"
-#include "src/metafs/rocksdb_metafs_intf.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 #include "test/integration-tests/metafs/lib/metafs_test_fixture.h"
 
 using namespace std;
@@ -72,7 +73,7 @@ public:
     ~BufferContext(void)
     {
         if (buffer_)
-            delete buffer_;
+            delete[] buffer_;
     }
     void* GetBuffer(void) const
     {
@@ -110,12 +111,13 @@ public:
     }
     virtual void SetUp(void)
     {
+        std::experimental::filesystem::create_directory("/etc/pos/POSRaid");
         for (int arrayId = 0; arrayId < MetaFsTestFixture::ARRAY_COUNT; ++arrayId)
         {
             for (auto& info : files[arrayId])
             {
                 RocksDBMetaFsIntf* rocksdbMetaFs = new RocksDBMetaFsIntf(info.second.fileName, arrayId, nullptr, nullptr, MetaFileType::Map, MetaVolumeType::SsdVolume);
-                std::string pathName = "/POSRaid/" + std::to_string(arrayId) + "_IntegrationRocksMeta";
+                std::string pathName = "/etc/pos/POSRaid/" + std::to_string(arrayId) + "_IntegrationRocksMeta";
                 int createDirStatus = rocksdbMetaFs->CreateDirectory(pathName);
                 ASSERT_EQ(createDirStatus, 0);
                 int createRocksMeta = rocksdbMetaFs->SetRocksMeta(pathName);

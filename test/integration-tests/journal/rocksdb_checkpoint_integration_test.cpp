@@ -30,7 +30,7 @@ RocksDBCheckpointIntegrationTest::RocksDBCheckpointIntegrationTest(void)
 void
 RocksDBCheckpointIntegrationTest::SetUp(void)
 {
-    std::string targetDirName = "/POSRaid/" + GetLogDirName() + "_RocksJournal";
+    std::string targetDirName = "/etc/pos/POSRaid/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(targetDirName);
     builder.SetRocksDBEnable(true);
 }

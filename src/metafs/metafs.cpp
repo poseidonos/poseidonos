@@ -33,6 +33,7 @@
 #include "metafs.h"
 
 #include <string>
+#include <experimental/filesystem>
 
 #include "src/include/array_config.h"
 #include "src/include/partition_type.h"
@@ -92,7 +93,19 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
         rocksdb::Options options;
         options.create_if_missing = true;
         // TODO(sang7.park) : get rocksdb directory location from config file
-        std::string metaRocksDir = "/POSRaid/";
+        std::string metaRocksDir = "/etc/pos/POSRaid/";
+        if (!std::experimental::filesystem::exists(metaRocksDir))
+        {
+            bool ret = std::experimental::filesystem::create_directory(metaRocksDir);
+            if (ret)
+            {
+                MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs create directory : {}", metaRocksDir);
+            }
+            else
+            {
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_FAILED, "RocksDB metafs create directory failed : {}", metaRocksDir);
+            }
+        }
         std::string pathName = metaRocksDir + arrayInfo->GetName() + "_RocksMeta";
         rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);
         fileDescriptorAllocator = new FileDescriptorAllocator();
