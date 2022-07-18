@@ -104,7 +104,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             {
                 AIO aio;
                 aio.SubmitFlush(*io);
-                airlog("UserFlush", "AIR_UserIo", static_cast<int>(io->ioType), 1);
+                airlog("UserFlushProcess", "AIR_UserIo", io->ioType, 1);
                 return POS_IO_STATUS_SUCCESS;
             }
             break;
