@@ -215,8 +215,8 @@ function collect_devices() {
 	ids+="|SPDK_PCI_CLASS_NVME"
 
 	local -gA nvme_d ioat_d idxd_d virtio_d vmd_d all_devices_d drivers_d nvme_0 nvme_1
-	nvme_0=$(nvme list-subsys | grep nvme0 | awk -F' ' '{print $4}')
-	nvme_1=$(nvme list-subsys | grep nvme1 | awk -F' ' '{print $4}')
+	nvme_0=$(nvme list-subsys | grep nvme0 | awk -F' ' '{print $4}' | head -1)
+	nvme_1=$(nvme list-subsys | grep nvme1 | awk -F' ' '{print $4}' | head -1)
 	while read -r _ dev_type dev_id; do
 		bdfs=(${pci_bus_cache["0x8086:$dev_id"]})
 		[[ $dev_type == *NVME* ]] && bdfs=(${pci_bus_cache["$dev_id"]})

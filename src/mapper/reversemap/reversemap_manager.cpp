@@ -45,7 +45,7 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/config/metafs_config_manager.h"
-#include "src/metafs/rocksdb_metafs_intf.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -60,7 +60,8 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, I
   iStripeMap(istripeMap),
   volumeManager(vol),
   addrInfo(addrInfo_),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 // LCOV_EXCL_START
@@ -95,7 +96,7 @@ ReverseMapManager::Init(void)
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
     {
-        if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+        if (rocksDbEnabled)
         {
             revMapWholefile = new RocksDBMetaFsIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
         }

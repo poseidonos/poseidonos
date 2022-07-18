@@ -123,6 +123,7 @@ private:
     int ioError;
     MapperAddressInfo* addrInfo;
     EventScheduler* eventScheduler;
+    bool rocksDbEnabled;
 };
 
 } // namespace pos

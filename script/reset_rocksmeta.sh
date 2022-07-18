@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# if device is busy, kill process
+fuser -ck /etc/pos/POSRaid
+
 # check md status
 mdadm --detail /dev/md9
 cat /proc/mdstat

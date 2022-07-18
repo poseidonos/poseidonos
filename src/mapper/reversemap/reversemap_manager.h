@@ -90,6 +90,7 @@ private:
     IVolumeInfoManager* volumeManager;
     MapperAddressInfo* addrInfo;
     TelemetryPublisher* telemetryPublisher;
+    bool rocksDbEnabled;
 };
 
 } // namespace pos

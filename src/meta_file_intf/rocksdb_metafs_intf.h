@@ -36,12 +36,12 @@
 #include <cstdint>
 #include <string>
 
+#include "rocksdb/db.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/meta_file_intf/meta_file_intf.h"
 #include "src/metafs/include/metafs_aiocb_cxt.h"
 #include "src/metafs/metafs.h"
 #include "src/metafs/mvm/volume/file_descriptor_allocator.h"
-#include "rocksdb/db.h"
 
 namespace pos
 {
@@ -51,13 +51,13 @@ class RocksDBMetaFsIntf : public MetaFileIntf
 {
 public:
     explicit RocksDBMetaFsIntf(const std::string fileName, const int arrayId,
-                const MetaFileType fileType = MetaFileType::Map,
-                const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        const MetaFileType fileType = MetaFileType::Map,
+        const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     // only for test
     explicit RocksDBMetaFsIntf(const std::string fileName, const int arrayId, MetaFs* metafs,
-                MetaFsConfigManager* configManager,
-                const MetaFileType fileType = MetaFileType::Map,
-                const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaFsConfigManager* configManager,
+        const MetaFileType fileType = MetaFileType::Map,
+        const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual ~RocksDBMetaFsIntf(void) override;
 
     virtual int Create(uint64_t fileSize) override;
@@ -79,7 +79,6 @@ public:
 protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
-
     MetaFs* metaFs;
     uint32_t blksPerStripe;
     MetaLpnType baseLpn;
@@ -87,11 +86,15 @@ protected:
     std::string pathName;
 
 private:
+    virtual int _AsyncIOWrite(AsyncMetaFileIoCtx* ctx);
+    virtual int _AsyncIORead(AsyncMetaFileIoCtx* ctx);
     rocksdb::DB* rocksMeta;
     FileDescriptorAllocator* fileDescriptorAllocator;
     inline std::string
     _MakeRocksDbKey(FileDescriptorType fd, FileOffsetType offset)
     {
+        // RocksDB key example
+        // if fd :1 , offset : 2 -> key == "0000000001_00000000000000000002"
         int fdMaxLen = 10;
         int offsetMaxLen = 20;
         int fdZeroSize = fdMaxLen - std::to_string(fd).size();
@@ -108,14 +111,17 @@ private:
     inline std::string
     _MakeRocksDbInodeKey(std::string fileName)
     {
-        std::string key =  "inode_" + fileName;
+        std::string key = "inode_" + fileName;
         return key;
     }
 
     inline std::string
     _MakeRocksDbInode(FileDescriptorType fd, uint64_t fileSize)
     {
-        std::string inode = std::to_string(fd) + "_" + std::to_string(fileSize);
+        int fdMaxLen = 10;
+        int fdZeroSize = fdMaxLen - std::to_string(fd).size();
+        std::string appendFdZero(fdZeroSize, '0');
+        std::string inode = appendFdZero + std::to_string(fd) + "_" + std::to_string(fileSize);
         return inode;
     }
 
@@ -123,8 +129,7 @@ private:
     _GetValueFromInode(std::string inode)
     {
         int stringLength = inode.size();
-        int pos = 0;
-        pos = inode.find('_');
+        int pos = inode.find('_');
         FileDescriptorType fd = atoi(inode.substr(0, pos).c_str());
         uint64_t size = atoll(inode.substr(pos + 1, stringLength).c_str());
         return {fd, size};
@@ -134,8 +139,7 @@ private:
     _GetOffsetFromKey(std::string key)
     {
         int stringLength = key.size();
-        int pos = 0;
-        pos = key.find('_');
+        int pos = key.find('_');
         uint64_t offset = atoll(key.substr(pos + 1, stringLength).c_str());
         return offset;
     }

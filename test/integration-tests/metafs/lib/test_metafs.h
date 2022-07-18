@@ -71,7 +71,7 @@ public:
     ~BufferContext(void)
     {
         if (buffer_)
-            delete buffer_;
+            delete[] buffer_;
     }
     void* GetBuffer(void) const
     {

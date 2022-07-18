@@ -6,9 +6,9 @@
 (
     echo n # Add new partition
     echo p # Primary partition
-    echo 1 # Partition number
-    echo   # First sector
-    echo   # Last sector
+    echo   # Partition number : use default
+    echo   # First sector : use default
+    echo   # Last sector : use default , sometimes select partition next line
     echo t # Change partition type
     echo fd # Change linux partition type to linux raid auto type
     echo w # Write changes
@@ -26,16 +26,16 @@
 ) | mkfs.ext4 /dev/md9
 
 # mount raid device to /raidDir
-mkdir /POSRaid
-mount /dev/md9 /POSRaid
+mkdir /etc/pos/POSRaid
+mount /dev/md9 /etc/pos/POSRaid
 
 # check raid device is mounted
-ls /POSRaid
+ls /etc/pos/POSRaid
 
 # check raid device 
 mdadm --detail /dev/md9
 
-echo "Directory /POSRaid is created and constructed RAID 1 with /dev/nvme0n1, /dev/nvme1n1"
+echo "Directory /etc/pos/POSRaid is created and constructed RAID 1 with /dev/nvme0n1, /dev/nvme1n1"
 
 # Add raid permanently
 
