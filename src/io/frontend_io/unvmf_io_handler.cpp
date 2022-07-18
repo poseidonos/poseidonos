@@ -150,10 +150,8 @@ UNVMfSubmitHandler(struct pos_io* io)
         if (nullptr != io && nullptr != io->complete_cb)
         {
             io->complete_cb(io, POS_IO_STATUS_FAIL);
+            airlog("UserFailIo", "AIR_UserIo", io->ioType, 1);
         }
-
-        airlog("UserFailIo", "AIR_UserIo", io->ioType, 1);
-
     }
 
     return POS_IO_STATUS_SUCCESS;
