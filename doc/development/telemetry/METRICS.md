@@ -141,6 +141,15 @@
   - [_**count_of_event_destructors**_](#count_of_event_destructors)
   - [_**submission_count_in_io_worker**_](#submission_count_in_io_worker)
   - [_**completion_count_in_io_worker**_](#completion_count_in_io_worker)
+  - [_**count_of_requested_user_read**_](#count_of_requested_user_read)
+  - [_**count_of_requested_user_write**_](#count_of_requested_user_write)
+  - [_**count_of_requested_user_adminio**_](#count_of_requested_user_adminio)
+  - [_**count_of_complete_user_read**_](#count_of_complete_user_read)
+  - [_**count_of_complete_user_write**_](#count_of_complete_user_write)
+  - [_**count_of_complete_user_adminio**_](#count_of_complete_user_adminio)
+  - [_**count_of_user_flush_process**_](#count_of_user_flush_process)
+  - [_**count_of_partial_write_process**_](#count_of_partial_write_process)
+  - [_**count_of_user_fail_io**_](#count_of_user_fail_io)
   
 ---
 ## **Common**

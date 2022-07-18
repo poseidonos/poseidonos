@@ -32,6 +32,7 @@
 
 #include "src/io/frontend_io/write_completion.h"
 
+#include "Air.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
@@ -100,6 +101,8 @@ WriteCompletion::_DoSpecificJob()
     }
 
     volumeIo = nullptr;
+
+    airlog("CompleteUserWrite", "AIR_UserIo", GetEventType(), 1);
 
     return executionSuccessful;
 }

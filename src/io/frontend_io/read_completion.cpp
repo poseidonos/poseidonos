@@ -32,6 +32,7 @@
 
 #include "src/io/frontend_io/read_completion.h"
 
+#include "Air.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
 #include "src/lib/block_alignment.h"
@@ -95,6 +96,8 @@ ReadCompletion::_DoSpecificJob(void)
     {
     }
     volumeIo = nullptr;
+    airlog("CompleteUserRead", "AIR_UserIo", GetEventType(), 1);
+
     return true;
 }
 
