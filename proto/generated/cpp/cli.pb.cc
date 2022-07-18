@@ -1916,8 +1916,62 @@ struct CreateSubsystemResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateSubsystemResponseDefaultTypeInternal _CreateSubsystemResponse_default_instance_;
+constexpr DeleteSubsystemRequest_Param::DeleteSubsystemRequest_Param(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : subnqn_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct DeleteSubsystemRequest_ParamDefaultTypeInternal {
+  constexpr DeleteSubsystemRequest_ParamDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DeleteSubsystemRequest_ParamDefaultTypeInternal() {}
+  union {
+    DeleteSubsystemRequest_Param _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeleteSubsystemRequest_ParamDefaultTypeInternal _DeleteSubsystemRequest_Param_default_instance_;
+constexpr DeleteSubsystemRequest::DeleteSubsystemRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , requestor_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , param_(nullptr){}
+struct DeleteSubsystemRequestDefaultTypeInternal {
+  constexpr DeleteSubsystemRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DeleteSubsystemRequestDefaultTypeInternal() {}
+  union {
+    DeleteSubsystemRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeleteSubsystemRequestDefaultTypeInternal _DeleteSubsystemRequest_default_instance_;
+constexpr DeleteSubsystemResponse_Result::DeleteSubsystemResponse_Result(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : status_(nullptr){}
+struct DeleteSubsystemResponse_ResultDefaultTypeInternal {
+  constexpr DeleteSubsystemResponse_ResultDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DeleteSubsystemResponse_ResultDefaultTypeInternal() {}
+  union {
+    DeleteSubsystemResponse_Result _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeleteSubsystemResponse_ResultDefaultTypeInternal _DeleteSubsystemResponse_Result_default_instance_;
+constexpr DeleteSubsystemResponse::DeleteSubsystemResponse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , result_(nullptr)
+  , info_(nullptr){}
+struct DeleteSubsystemResponseDefaultTypeInternal {
+  constexpr DeleteSubsystemResponseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DeleteSubsystemResponseDefaultTypeInternal() {}
+  union {
+    DeleteSubsystemResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeleteSubsystemResponseDefaultTypeInternal _DeleteSubsystemResponse_default_instance_;
 }  // namespace grpc_cli
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[133];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[137];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_cli_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_cli_2eproto = nullptr;
 
@@ -3030,6 +3084,36 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateSubsystemResponse, rid_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateSubsystemResponse, result_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateSubsystemResponse, info_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest_Param, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest_Param, subnqn_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest, requestor_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemRequest, param_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse_Result, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse_Result, status_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse, result_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::DeleteSubsystemResponse, info_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 10, sizeof(::grpc_cli::Status)},
@@ -3165,6 +3249,10 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1084, -1, sizeof(::grpc_cli::CreateSubsystemRequest)},
   { 1093, -1, sizeof(::grpc_cli::CreateSubsystemResponse_Result)},
   { 1099, -1, sizeof(::grpc_cli::CreateSubsystemResponse)},
+  { 1108, -1, sizeof(::grpc_cli::DeleteSubsystemRequest_Param)},
+  { 1114, -1, sizeof(::grpc_cli::DeleteSubsystemRequest)},
+  { 1123, -1, sizeof(::grpc_cli::DeleteSubsystemResponse_Result)},
+  { 1129, -1, sizeof(::grpc_cli::DeleteSubsystemResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -3301,6 +3389,10 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateSubsystemRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateSubsystemResponse_Result_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateSubsystemResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_DeleteSubsystemRequest_Param_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_DeleteSubsystemRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_DeleteSubsystemResponse_Result_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_DeleteSubsystemResponse_default_instance_),
 };
 
 const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -3651,90 +3743,101 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0228\n\006result\030\003 \001(\0132(.gr"
   "pc_cli.CreateSubsystemResponse.Result\022\037\n"
   "\004info\030\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result"
-  "\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status2\206\027\n\006P"
-  "osCli\022_\n\nSystemInfo\022\033.grpc_cli.SystemInf"
-  "oRequest\032\034.grpc_cli.SystemInfoResponse\"\026"
-  "\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSystemStop\022\033.g"
-  "rpc_cli.SystemStopRequest\032\034.grpc_cli.Sys"
-  "temStopResponse\"\026\202\323\344\223\002\020\022\016/v1/systemstop\022"
-  "}\n\021GetSystemProperty\022\".grpc_cli.GetSyste"
-  "mPropertyRequest\032#.grpc_cli.GetSystemPro"
-  "pertyResponse\"\037\202\323\344\223\002\031\022\027/v1/get_system_pr"
-  "operty\022\205\001\n\021SetSystemProperty\022\".grpc_cli."
-  "SetSystemPropertyRequest\032#.grpc_cli.SetS"
-  "ystemPropertyResponse\"\'\202\323\344\223\002!\022\037/v1/set_s"
-  "ystem_property/{level}\022p\n\016StartTelemetry"
-  "\022\037.grpc_cli.StartTelemetryRequest\032 .grpc"
-  "_cli.StartTelemetryResponse\"\033\202\323\344\223\002\025\022\023/v1"
-  "/start_telemetry\022l\n\rStopTelemetry\022\036.grpc"
-  "_cli.StopTelemetryRequest\032\037.grpc_cli.Sto"
-  "pTelemetryResponse\"\032\202\323\344\223\002\024\022\022/v1/stop_tel"
-  "emetry\022P\n\rResetEventWrr\022\036.grpc_cli.Reset"
-  "EventWrrRequest\032\037.grpc_cli.ResetEventWrr"
-  "Response\022A\n\010ResetMbr\022\031.grpc_cli.ResetMbr"
-  "Request\032\032.grpc_cli.ResetMbrResponse\022S\n\016S"
-  "topRebuilding\022\037.grpc_cli.StopRebuildingR"
-  "equest\032 .grpc_cli.StopRebuildingResponse"
-  "\022S\n\016UpdateEventWrr\022\037.grpc_cli.UpdateEven"
-  "tWrrRequest\032 .grpc_cli.UpdateEventWrrRes"
-  "ponse\022W\n\010AddSpare\022\031.grpc_cli.AddSpareReq"
-  "uest\032\032.grpc_cli.AddSpareResponse\"\024\202\323\344\223\002\016"
-  "\"\014/v1/addspare\022c\n\013RemoveSpare\022\034.grpc_cli"
-  ".RemoveSpareRequest\032\035.grpc_cli.RemoveSpa"
-  "reResponse\"\027\202\323\344\223\002\021\"\017/v1/removespare\022c\n\013C"
-  "reateArray\022\034.grpc_cli.CreateArrayRequest"
-  "\032\035.grpc_cli.CreateArrayResponse\"\027\202\323\344\223\002\021\""
-  "\017/v1/createarray\022s\n\017AutocreateArray\022 .gr"
-  "pc_cli.AutocreateArrayRequest\032!.grpc_cli"
-  ".AutocreateArrayResponse\"\033\202\323\344\223\002\025\"\023/v1/au"
-  "tocreatearray\022d\n\013DeleteArray\022\034.grpc_cli."
-  "DeleteArrayRequest\032\035.grpc_cli.DeleteArra"
-  "yResponse\"\030\202\323\344\223\002\022\"\020/v1/deletearray/\022_\n\nM"
-  "ountArray\022\033.grpc_cli.MountArrayRequest\032\034"
-  ".grpc_cli.MountArrayResponse\"\026\202\323\344\223\002\020\"\016/v"
-  "1/mountarray\022g\n\014UnmountArray\022\035.grpc_cli."
-  "UnmountArrayRequest\032\036.grpc_cli.UnmountAr"
-  "rayResponse\"\030\202\323\344\223\002\022\"\020/v1/unmountarray\022[\n"
-  "\tListArray\022\032.grpc_cli.ListArrayRequest\032\033"
-  ".grpc_cli.ListArrayResponse\"\025\202\323\344\223\002\017\"\r/v1"
-  "/listarray\022[\n\tArrayInfo\022\032.grpc_cli.Array"
-  "InfoRequest\032\033.grpc_cli.ArrayInfoResponse"
-  "\"\025\202\323\344\223\002\017\"\r/v1/arrayinfo\022w\n\020SetLogPrefere"
-  "nce\022!.grpc_cli.SetLogPreferenceRequest\032\""
-  ".grpc_cli.SetLogPreferenceResponse\"\034\202\323\344\223"
-  "\002\026\"\024/v1/setlogpreference\022c\n\013SetLogLevel\022"
-  "\034.grpc_cli.SetLogLevelRequest\032\035.grpc_cli"
-  ".SetLogLevelResponse\"\027\202\323\344\223\002\021\"\017/v1/setlog"
-  "level\022_\n\nLoggerInfo\022\033.grpc_cli.LoggerInf"
-  "oRequest\032\034.grpc_cli.LoggerInfoResponse\"\026"
-  "\202\323\344\223\002\020\"\016/v1/loggerinfo\022c\n\013GetLogLevel\022\034."
-  "grpc_cli.GetLogLevelRequest\032\035.grpc_cli.G"
-  "etLogLevelResponse\"\027\202\323\344\223\002\021\"\017/v1/getlogle"
-  "vel\022l\n\016ApplyLogFilter\022\037.grpc_cli.ApplyLo"
-  "gFilterRequest\032 .grpc_cli.ApplyLogFilter"
-  "Response\"\027\202\323\344\223\002\021\"\017/v1/applyfilter\022g\n\014Cre"
-  "ateDevice\022\035.grpc_cli.CreateDeviceRequest"
-  "\032\036.grpc_cli.CreateDeviceResponse\"\030\202\323\344\223\002\022"
-  "\"\020/v1/createdevice\022_\n\nScanDevice\022\033.grpc_"
-  "cli.ScanDeviceRequest\032\034.grpc_cli.ScanDev"
-  "iceResponse\"\026\202\323\344\223\002\020\"\016/v1/scandevice\022_\n\nL"
-  "istDevice\022\033.grpc_cli.ListDeviceRequest\032\034"
-  ".grpc_cli.ListDeviceResponse\"\026\202\323\344\223\002\020\"\016/v"
-  "1/listdevice\022`\n\013GetSmartLog\022\034.grpc_cli.G"
-  "etSmartLogRequest\032\035.grpc_cli.GetSmartLog"
-  "Response\"\024\202\323\344\223\002\016\"\014/v1/smartlog\022s\n\017Create"
-  "Subsystem\022 .grpc_cli.CreateSubsystemRequ"
-  "est\032!.grpc_cli.CreateSubsystemResponse\"\033"
-  "\202\323\344\223\002\025\"\023/v1/createsubsystemB\tZ\007cli/apib\006"
-  "proto3"
+  "\022 \n\006status\030\001 \001(\0132\020.grpc_cli.Status\"\231\001\n\026D"
+  "eleteSubsystemRequest\022\017\n\007command\030\001 \001(\t\022\013"
+  "\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\0225\n\005param\030"
+  "\004 \001(\0132&.grpc_cli.DeleteSubsystemRequest."
+  "Param\032\027\n\005Param\022\016\n\006subnqn\030\001 \001(\t\"\276\001\n\027Delet"
+  "eSubsystemResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003r"
+  "id\030\002 \001(\t\0228\n\006result\030\003 \001(\0132(.grpc_cli.Dele"
+  "teSubsystemResponse.Result\022\037\n\004info\030\004 \001(\013"
+  "2\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030"
+  "\001 \001(\0132\020.grpc_cli.Status2\373\027\n\006PosCli\022_\n\nSy"
+  "stemInfo\022\033.grpc_cli.SystemInfoRequest\032\034."
+  "grpc_cli.SystemInfoResponse\"\026\202\323\344\223\002\020\022\016/v1"
+  "/systeminfo\022_\n\nSystemStop\022\033.grpc_cli.Sys"
+  "temStopRequest\032\034.grpc_cli.SystemStopResp"
+  "onse\"\026\202\323\344\223\002\020\022\016/v1/systemstop\022}\n\021GetSyste"
+  "mProperty\022\".grpc_cli.GetSystemPropertyRe"
+  "quest\032#.grpc_cli.GetSystemPropertyRespon"
+  "se\"\037\202\323\344\223\002\031\022\027/v1/get_system_property\022\205\001\n\021"
+  "SetSystemProperty\022\".grpc_cli.SetSystemPr"
+  "opertyRequest\032#.grpc_cli.SetSystemProper"
+  "tyResponse\"\'\202\323\344\223\002!\022\037/v1/set_system_prope"
+  "rty/{level}\022p\n\016StartTelemetry\022\037.grpc_cli"
+  ".StartTelemetryRequest\032 .grpc_cli.StartT"
+  "elemetryResponse\"\033\202\323\344\223\002\025\022\023/v1/start_tele"
+  "metry\022l\n\rStopTelemetry\022\036.grpc_cli.StopTe"
+  "lemetryRequest\032\037.grpc_cli.StopTelemetryR"
+  "esponse\"\032\202\323\344\223\002\024\022\022/v1/stop_telemetry\022P\n\rR"
+  "esetEventWrr\022\036.grpc_cli.ResetEventWrrReq"
+  "uest\032\037.grpc_cli.ResetEventWrrResponse\022A\n"
+  "\010ResetMbr\022\031.grpc_cli.ResetMbrRequest\032\032.g"
+  "rpc_cli.ResetMbrResponse\022S\n\016StopRebuildi"
+  "ng\022\037.grpc_cli.StopRebuildingRequest\032 .gr"
+  "pc_cli.StopRebuildingResponse\022S\n\016UpdateE"
+  "ventWrr\022\037.grpc_cli.UpdateEventWrrRequest"
+  "\032 .grpc_cli.UpdateEventWrrResponse\022W\n\010Ad"
+  "dSpare\022\031.grpc_cli.AddSpareRequest\032\032.grpc"
+  "_cli.AddSpareResponse\"\024\202\323\344\223\002\016\"\014/v1/addsp"
+  "are\022c\n\013RemoveSpare\022\034.grpc_cli.RemoveSpar"
+  "eRequest\032\035.grpc_cli.RemoveSpareResponse\""
+  "\027\202\323\344\223\002\021\"\017/v1/removespare\022c\n\013CreateArray\022"
+  "\034.grpc_cli.CreateArrayRequest\032\035.grpc_cli"
+  ".CreateArrayResponse\"\027\202\323\344\223\002\021\"\017/v1/create"
+  "array\022s\n\017AutocreateArray\022 .grpc_cli.Auto"
+  "createArrayRequest\032!.grpc_cli.Autocreate"
+  "ArrayResponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearr"
+  "ay\022d\n\013DeleteArray\022\034.grpc_cli.DeleteArray"
+  "Request\032\035.grpc_cli.DeleteArrayResponse\"\030"
+  "\202\323\344\223\002\022\"\020/v1/deletearray/\022_\n\nMountArray\022\033"
+  ".grpc_cli.MountArrayRequest\032\034.grpc_cli.M"
+  "ountArrayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarra"
+  "y\022g\n\014UnmountArray\022\035.grpc_cli.UnmountArra"
+  "yRequest\032\036.grpc_cli.UnmountArrayResponse"
+  "\"\030\202\323\344\223\002\022\"\020/v1/unmountarray\022[\n\tListArray\022"
+  "\032.grpc_cli.ListArrayRequest\032\033.grpc_cli.L"
+  "istArrayResponse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022"
+  "[\n\tArrayInfo\022\032.grpc_cli.ArrayInfoRequest"
+  "\032\033.grpc_cli.ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/"
+  "v1/arrayinfo\022w\n\020SetLogPreference\022!.grpc_"
+  "cli.SetLogPreferenceRequest\032\".grpc_cli.S"
+  "etLogPreferenceResponse\"\034\202\323\344\223\002\026\"\024/v1/set"
+  "logpreference\022c\n\013SetLogLevel\022\034.grpc_cli."
+  "SetLogLevelRequest\032\035.grpc_cli.SetLogLeve"
+  "lResponse\"\027\202\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLo"
+  "ggerInfo\022\033.grpc_cli.LoggerInfoRequest\032\034."
+  "grpc_cli.LoggerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1"
+  "/loggerinfo\022c\n\013GetLogLevel\022\034.grpc_cli.Ge"
+  "tLogLevelRequest\032\035.grpc_cli.GetLogLevelR"
+  "esponse\"\027\202\323\344\223\002\021\"\017/v1/getloglevel\022l\n\016Appl"
+  "yLogFilter\022\037.grpc_cli.ApplyLogFilterRequ"
+  "est\032 .grpc_cli.ApplyLogFilterResponse\"\027\202"
+  "\323\344\223\002\021\"\017/v1/applyfilter\022g\n\014CreateDevice\022\035"
+  ".grpc_cli.CreateDeviceRequest\032\036.grpc_cli"
+  ".CreateDeviceResponse\"\030\202\323\344\223\002\022\"\020/v1/creat"
+  "edevice\022_\n\nScanDevice\022\033.grpc_cli.ScanDev"
+  "iceRequest\032\034.grpc_cli.ScanDeviceResponse"
+  "\"\026\202\323\344\223\002\020\"\016/v1/scandevice\022_\n\nListDevice\022\033"
+  ".grpc_cli.ListDeviceRequest\032\034.grpc_cli.L"
+  "istDeviceResponse\"\026\202\323\344\223\002\020\"\016/v1/listdevic"
+  "e\022`\n\013GetSmartLog\022\034.grpc_cli.GetSmartLogR"
+  "equest\032\035.grpc_cli.GetSmartLogResponse\"\024\202"
+  "\323\344\223\002\016\"\014/v1/smartlog\022s\n\017CreateSubsystem\022 "
+  ".grpc_cli.CreateSubsystemRequest\032!.grpc_"
+  "cli.CreateSubsystemResponse\"\033\202\323\344\223\002\025\"\023/v1"
+  "/createsubsystem\022s\n\017DeleteSubsystem\022 .gr"
+  "pc_cli.DeleteSubsystemRequest\032!.grpc_cli"
+  ".DeleteSubsystemResponse\"\033\202\323\344\223\002\025\"\023/v1/de"
+  "letesubsystemB\tZ\007cli/apib\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 16886, descriptor_table_protodef_cli_2eproto, "cli.proto", 
-  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 133,
+  false, false, 17352, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 137,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
 };
@@ -42295,6 +42398,1056 @@ void CreateSubsystemResponse::InternalSwap(CreateSubsystemResponse* other) {
 }
 
 
+// ===================================================================
+
+class DeleteSubsystemRequest_Param::_Internal {
+ public:
+};
+
+DeleteSubsystemRequest_Param::DeleteSubsystemRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.DeleteSubsystemRequest.Param)
+}
+DeleteSubsystemRequest_Param::DeleteSubsystemRequest_Param(const DeleteSubsystemRequest_Param& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  subnqn_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_subnqn().empty()) {
+    subnqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_subnqn(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.DeleteSubsystemRequest.Param)
+}
+
+void DeleteSubsystemRequest_Param::SharedCtor() {
+subnqn_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+DeleteSubsystemRequest_Param::~DeleteSubsystemRequest_Param() {
+  // @@protoc_insertion_point(destructor:grpc_cli.DeleteSubsystemRequest.Param)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DeleteSubsystemRequest_Param::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  subnqn_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void DeleteSubsystemRequest_Param::ArenaDtor(void* object) {
+  DeleteSubsystemRequest_Param* _this = reinterpret_cast< DeleteSubsystemRequest_Param* >(object);
+  (void)_this;
+}
+void DeleteSubsystemRequest_Param::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DeleteSubsystemRequest_Param::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void DeleteSubsystemRequest_Param::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.DeleteSubsystemRequest.Param)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  subnqn_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DeleteSubsystemRequest_Param::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string subnqn = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_subnqn();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemRequest.Param.subnqn"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DeleteSubsystemRequest_Param::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.DeleteSubsystemRequest.Param)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string subnqn = 1;
+  if (this->subnqn().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_subnqn().data(), static_cast<int>(this->_internal_subnqn().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemRequest.Param.subnqn");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_subnqn(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.DeleteSubsystemRequest.Param)
+  return target;
+}
+
+size_t DeleteSubsystemRequest_Param::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.DeleteSubsystemRequest.Param)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string subnqn = 1;
+  if (this->subnqn().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_subnqn());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DeleteSubsystemRequest_Param::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.DeleteSubsystemRequest.Param)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DeleteSubsystemRequest_Param* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeleteSubsystemRequest_Param>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.DeleteSubsystemRequest.Param)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.DeleteSubsystemRequest.Param)
+    MergeFrom(*source);
+  }
+}
+
+void DeleteSubsystemRequest_Param::MergeFrom(const DeleteSubsystemRequest_Param& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.DeleteSubsystemRequest.Param)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.subnqn().size() > 0) {
+    _internal_set_subnqn(from._internal_subnqn());
+  }
+}
+
+void DeleteSubsystemRequest_Param::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.DeleteSubsystemRequest.Param)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DeleteSubsystemRequest_Param::CopyFrom(const DeleteSubsystemRequest_Param& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.DeleteSubsystemRequest.Param)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DeleteSubsystemRequest_Param::IsInitialized() const {
+  return true;
+}
+
+void DeleteSubsystemRequest_Param::InternalSwap(DeleteSubsystemRequest_Param* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  subnqn_.Swap(&other->subnqn_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DeleteSubsystemRequest_Param::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class DeleteSubsystemRequest::_Internal {
+ public:
+  static const ::grpc_cli::DeleteSubsystemRequest_Param& param(const DeleteSubsystemRequest* msg);
+};
+
+const ::grpc_cli::DeleteSubsystemRequest_Param&
+DeleteSubsystemRequest::_Internal::param(const DeleteSubsystemRequest* msg) {
+  return *msg->param_;
+}
+DeleteSubsystemRequest::DeleteSubsystemRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.DeleteSubsystemRequest)
+}
+DeleteSubsystemRequest::DeleteSubsystemRequest(const DeleteSubsystemRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_requestor().empty()) {
+    requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_requestor(), 
+      GetArena());
+  }
+  if (from._internal_has_param()) {
+    param_ = new ::grpc_cli::DeleteSubsystemRequest_Param(*from.param_);
+  } else {
+    param_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.DeleteSubsystemRequest)
+}
+
+void DeleteSubsystemRequest::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+param_ = nullptr;
+}
+
+DeleteSubsystemRequest::~DeleteSubsystemRequest() {
+  // @@protoc_insertion_point(destructor:grpc_cli.DeleteSubsystemRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DeleteSubsystemRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  requestor_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete param_;
+}
+
+void DeleteSubsystemRequest::ArenaDtor(void* object) {
+  DeleteSubsystemRequest* _this = reinterpret_cast< DeleteSubsystemRequest* >(object);
+  (void)_this;
+}
+void DeleteSubsystemRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DeleteSubsystemRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void DeleteSubsystemRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.DeleteSubsystemRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  requestor_.ClearToEmpty();
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DeleteSubsystemRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemRequest.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemRequest.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string requestor = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_requestor();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemRequest.requestor"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.DeleteSubsystemRequest.Param param = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_param(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DeleteSubsystemRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.DeleteSubsystemRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemRequest.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemRequest.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_requestor().data(), static_cast<int>(this->_internal_requestor().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemRequest.requestor");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_requestor(), target);
+  }
+
+  // .grpc_cli.DeleteSubsystemRequest.Param param = 4;
+  if (this->has_param()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        4, _Internal::param(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.DeleteSubsystemRequest)
+  return target;
+}
+
+size_t DeleteSubsystemRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.DeleteSubsystemRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_requestor());
+  }
+
+  // .grpc_cli.DeleteSubsystemRequest.Param param = 4;
+  if (this->has_param()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *param_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DeleteSubsystemRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.DeleteSubsystemRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DeleteSubsystemRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeleteSubsystemRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.DeleteSubsystemRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.DeleteSubsystemRequest)
+    MergeFrom(*source);
+  }
+}
+
+void DeleteSubsystemRequest::MergeFrom(const DeleteSubsystemRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.DeleteSubsystemRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.requestor().size() > 0) {
+    _internal_set_requestor(from._internal_requestor());
+  }
+  if (from.has_param()) {
+    _internal_mutable_param()->::grpc_cli::DeleteSubsystemRequest_Param::MergeFrom(from._internal_param());
+  }
+}
+
+void DeleteSubsystemRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.DeleteSubsystemRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DeleteSubsystemRequest::CopyFrom(const DeleteSubsystemRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.DeleteSubsystemRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DeleteSubsystemRequest::IsInitialized() const {
+  return true;
+}
+
+void DeleteSubsystemRequest::InternalSwap(DeleteSubsystemRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  requestor_.Swap(&other->requestor_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(param_, other->param_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DeleteSubsystemRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class DeleteSubsystemResponse_Result::_Internal {
+ public:
+  static const ::grpc_cli::Status& status(const DeleteSubsystemResponse_Result* msg);
+};
+
+const ::grpc_cli::Status&
+DeleteSubsystemResponse_Result::_Internal::status(const DeleteSubsystemResponse_Result* msg) {
+  return *msg->status_;
+}
+DeleteSubsystemResponse_Result::DeleteSubsystemResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.DeleteSubsystemResponse.Result)
+}
+DeleteSubsystemResponse_Result::DeleteSubsystemResponse_Result(const DeleteSubsystemResponse_Result& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_status()) {
+    status_ = new ::grpc_cli::Status(*from.status_);
+  } else {
+    status_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.DeleteSubsystemResponse.Result)
+}
+
+void DeleteSubsystemResponse_Result::SharedCtor() {
+status_ = nullptr;
+}
+
+DeleteSubsystemResponse_Result::~DeleteSubsystemResponse_Result() {
+  // @@protoc_insertion_point(destructor:grpc_cli.DeleteSubsystemResponse.Result)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DeleteSubsystemResponse_Result::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete status_;
+}
+
+void DeleteSubsystemResponse_Result::ArenaDtor(void* object) {
+  DeleteSubsystemResponse_Result* _this = reinterpret_cast< DeleteSubsystemResponse_Result* >(object);
+  (void)_this;
+}
+void DeleteSubsystemResponse_Result::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DeleteSubsystemResponse_Result::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void DeleteSubsystemResponse_Result::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.DeleteSubsystemResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DeleteSubsystemResponse_Result::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .grpc_cli.Status status = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_status(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DeleteSubsystemResponse_Result::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.DeleteSubsystemResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::status(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.DeleteSubsystemResponse.Result)
+  return target;
+}
+
+size_t DeleteSubsystemResponse_Result::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.DeleteSubsystemResponse.Result)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *status_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DeleteSubsystemResponse_Result::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.DeleteSubsystemResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DeleteSubsystemResponse_Result* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeleteSubsystemResponse_Result>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.DeleteSubsystemResponse.Result)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.DeleteSubsystemResponse.Result)
+    MergeFrom(*source);
+  }
+}
+
+void DeleteSubsystemResponse_Result::MergeFrom(const DeleteSubsystemResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.DeleteSubsystemResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_status()) {
+    _internal_mutable_status()->::grpc_cli::Status::MergeFrom(from._internal_status());
+  }
+}
+
+void DeleteSubsystemResponse_Result::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.DeleteSubsystemResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DeleteSubsystemResponse_Result::CopyFrom(const DeleteSubsystemResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.DeleteSubsystemResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DeleteSubsystemResponse_Result::IsInitialized() const {
+  return true;
+}
+
+void DeleteSubsystemResponse_Result::InternalSwap(DeleteSubsystemResponse_Result* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(status_, other->status_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DeleteSubsystemResponse_Result::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class DeleteSubsystemResponse::_Internal {
+ public:
+  static const ::grpc_cli::DeleteSubsystemResponse_Result& result(const DeleteSubsystemResponse* msg);
+  static const ::grpc_cli::PosInfo& info(const DeleteSubsystemResponse* msg);
+};
+
+const ::grpc_cli::DeleteSubsystemResponse_Result&
+DeleteSubsystemResponse::_Internal::result(const DeleteSubsystemResponse* msg) {
+  return *msg->result_;
+}
+const ::grpc_cli::PosInfo&
+DeleteSubsystemResponse::_Internal::info(const DeleteSubsystemResponse* msg) {
+  return *msg->info_;
+}
+DeleteSubsystemResponse::DeleteSubsystemResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.DeleteSubsystemResponse)
+}
+DeleteSubsystemResponse::DeleteSubsystemResponse(const DeleteSubsystemResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  if (from._internal_has_result()) {
+    result_ = new ::grpc_cli::DeleteSubsystemResponse_Result(*from.result_);
+  } else {
+    result_ = nullptr;
+  }
+  if (from._internal_has_info()) {
+    info_ = new ::grpc_cli::PosInfo(*from.info_);
+  } else {
+    info_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.DeleteSubsystemResponse)
+}
+
+void DeleteSubsystemResponse::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&result_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&info_) -
+    reinterpret_cast<char*>(&result_)) + sizeof(info_));
+}
+
+DeleteSubsystemResponse::~DeleteSubsystemResponse() {
+  // @@protoc_insertion_point(destructor:grpc_cli.DeleteSubsystemResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DeleteSubsystemResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete result_;
+  if (this != internal_default_instance()) delete info_;
+}
+
+void DeleteSubsystemResponse::ArenaDtor(void* object) {
+  DeleteSubsystemResponse* _this = reinterpret_cast< DeleteSubsystemResponse* >(object);
+  (void)_this;
+}
+void DeleteSubsystemResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DeleteSubsystemResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void DeleteSubsystemResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.DeleteSubsystemResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DeleteSubsystemResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemResponse.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.DeleteSubsystemResponse.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.DeleteSubsystemResponse.Result result = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.PosInfo info = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_info(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DeleteSubsystemResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.DeleteSubsystemResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemResponse.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.DeleteSubsystemResponse.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // .grpc_cli.DeleteSubsystemResponse.Result result = 3;
+  if (this->has_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::result(this), target, stream);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        4, _Internal::info(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.DeleteSubsystemResponse)
+  return target;
+}
+
+size_t DeleteSubsystemResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.DeleteSubsystemResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // .grpc_cli.DeleteSubsystemResponse.Result result = 3;
+  if (this->has_result()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *result_);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *info_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DeleteSubsystemResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.DeleteSubsystemResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DeleteSubsystemResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeleteSubsystemResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.DeleteSubsystemResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.DeleteSubsystemResponse)
+    MergeFrom(*source);
+  }
+}
+
+void DeleteSubsystemResponse::MergeFrom(const DeleteSubsystemResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.DeleteSubsystemResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.has_result()) {
+    _internal_mutable_result()->::grpc_cli::DeleteSubsystemResponse_Result::MergeFrom(from._internal_result());
+  }
+  if (from.has_info()) {
+    _internal_mutable_info()->::grpc_cli::PosInfo::MergeFrom(from._internal_info());
+  }
+}
+
+void DeleteSubsystemResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.DeleteSubsystemResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DeleteSubsystemResponse::CopyFrom(const DeleteSubsystemResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.DeleteSubsystemResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DeleteSubsystemResponse::IsInitialized() const {
+  return true;
+}
+
+void DeleteSubsystemResponse::InternalSwap(DeleteSubsystemResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(DeleteSubsystemResponse, info_)
+      + sizeof(DeleteSubsystemResponse::info_)
+      - PROTOBUF_FIELD_OFFSET(DeleteSubsystemResponse, result_)>(
+          reinterpret_cast<char*>(&result_),
+          reinterpret_cast<char*>(&other->result_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DeleteSubsystemResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace grpc_cli
 PROTOBUF_NAMESPACE_OPEN
@@ -42696,6 +43849,18 @@ template<> PROTOBUF_NOINLINE ::grpc_cli::CreateSubsystemResponse_Result* Arena::
 }
 template<> PROTOBUF_NOINLINE ::grpc_cli::CreateSubsystemResponse* Arena::CreateMaybeMessage< ::grpc_cli::CreateSubsystemResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::CreateSubsystemResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::DeleteSubsystemRequest_Param* Arena::CreateMaybeMessage< ::grpc_cli::DeleteSubsystemRequest_Param >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::DeleteSubsystemRequest_Param >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::DeleteSubsystemRequest* Arena::CreateMaybeMessage< ::grpc_cli::DeleteSubsystemRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::DeleteSubsystemRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::DeleteSubsystemResponse_Result* Arena::CreateMaybeMessage< ::grpc_cli::DeleteSubsystemResponse_Result >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::DeleteSubsystemResponse_Result >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::DeleteSubsystemResponse* Arena::CreateMaybeMessage< ::grpc_cli::DeleteSubsystemResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::DeleteSubsystemResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

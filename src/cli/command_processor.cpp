@@ -1196,6 +1196,86 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* request, DeleteSubsystemResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string subnqn = (request->param()).subnqn();
+    if(subnqn == "")
+    {
+        POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_SUBNQN_NAME_NOT_SPECIFIED), "input_subnqn:{}", subnqn);
+        _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_SUBNQN_NAME_NOT_SPECIFIED), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    int ret = 0;
+    SpdkRpcClient rpcClient;
+    NvmfTarget* nvmfTarget = NvmfTargetSingleton::Instance();
+
+    if (nullptr == nvmfTarget->FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    vector<pair<int, string>> attachedVolList = nvmfTarget->GetAttachedVolumeList(subnqn);
+    map<string, vector<int>> volListPerArray;
+    for (auto& volInfo : attachedVolList)
+    {
+        volListPerArray[volInfo.second].push_back(volInfo.first);
+    }
+    for (auto& volList : volListPerArray)
+    {
+        string arrayName = volList.first;
+        IVolumeEventManager* volMgr =
+            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+        for (auto& volId : volList.second)
+        {
+            if (volMgr != nullptr)
+            {
+                string volName;
+                ret = volMgr->Unmount(volId);
+                if (ret == EID(DELETE_SUBSYSTEM_FAILURE_VOLUME_NOT_FOUND))
+                {
+                    POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_VOLUME_NOT_FOUND),
+                        "subnqn:{}, volume_id:{}, return_code:{}", subnqn, volId, ret);
+                    _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_VOLUME_NOT_FOUND), reply->mutable_result()->mutable_status());
+                    _SetPosInfo(reply->mutable_info());
+                    return grpc::Status::OK;
+                }
+                else if (ret != SUCCESS)
+                {
+                    POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_VOLUME_UNMOUNT_FAILURE),
+                        "subnqn:{}, volume_id:{}, return_code:{}", subnqn, volId, ret);
+                    _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_VOLUME_UNMOUNT_FAILURE), reply->mutable_result()->mutable_status());
+                    _SetPosInfo(reply->mutable_info());
+                    return grpc::Status::OK;
+                }
+            }
+        }
+    }
+
+    auto result = rpcClient.SubsystemDelete(subnqn);
+    if (result.first != SUCCESS)
+    {
+        POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_SPDK_FAILURE), "subnqn:{}, rpc_return:{}", subnqn, result.second);
+        _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {
