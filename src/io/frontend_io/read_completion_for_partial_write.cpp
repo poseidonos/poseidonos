@@ -62,7 +62,7 @@ ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayId());
     }
 
-    airlog("ProcessPartialWrite", "AIR_UserIo", GetEventType(), 1);
+    airlog("PartialWriteProcess", "AIR_UserIo", GetEventType(), 1);
 }
 
 ReadCompletionForPartialWrite::~ReadCompletionForPartialWrite(void)
