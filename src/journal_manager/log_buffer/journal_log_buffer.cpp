@@ -95,12 +95,13 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
         if (rocksDbEnabled)
         {
             logFile = new RocksDBMetaFsIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+            POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "RocksDBMetaFsIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}, this option is not recommended because of low performance. ", config->GetMetaVolumeToUse());
         }
         else
         {
             logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+            POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
         }
-        POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
     }
     return 0;
 }
