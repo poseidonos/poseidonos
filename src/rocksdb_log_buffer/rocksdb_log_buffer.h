@@ -98,7 +98,7 @@ private:
         int numDigits = std::to_string(config->GetLogBufferSize()).size();
         offset = offset % config->GetLogGroupSize();
         int zeroSize = numDigits - std::to_string(offset).size();
-        std::string appendZero(zeroSize,'0');
+        std::string appendZero(zeroSize, '0');
         std::string key = std::to_string(groupId) + appendZero + std::to_string(offset) + "Log";
         return key;
     }

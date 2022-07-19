@@ -32,6 +32,8 @@
 
 #include "create_map_flush_event.h"
 
+#include <utility>
+
 #include "src/mapper/map/map_io_handler.h"
 
 namespace pos

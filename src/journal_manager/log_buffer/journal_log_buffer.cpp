@@ -128,7 +128,6 @@ JournalLogBuffer::Dispose(void)
         delete logFile;
         logFile = nullptr;
     }
-
 }
 
 int

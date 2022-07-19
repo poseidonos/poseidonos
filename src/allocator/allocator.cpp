@@ -33,6 +33,7 @@
 #include "src/allocator/allocator.h"
 
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <string>
 

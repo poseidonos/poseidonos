@@ -37,6 +37,8 @@
 */
 #pragma once
 
+#include <string>
+
 #include "meta_volume_container.h"
 #include "src/metafs/common/metafs_common.h"
 #include "src/metafs/mvm/volume/meta_volume.h"
