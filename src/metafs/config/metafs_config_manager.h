@@ -35,6 +35,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "src/include/pos_event_id.h"
 #include "src/master_context/config_manager.h"

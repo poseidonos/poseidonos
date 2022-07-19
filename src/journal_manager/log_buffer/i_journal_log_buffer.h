@@ -50,7 +50,9 @@ class LogWriteContextFactory;
 class IJournalLogBuffer : public ILogGroupResetCompleted
 {
 public:
-    virtual ~IJournalLogBuffer(void){};
+    virtual ~IJournalLogBuffer(void)
+    {
+    }
     virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
         int arrayId, TelemetryPublisher* tp) = 0;
     virtual void InitDataBuffer(void) = 0;
@@ -73,6 +75,5 @@ public:
     virtual void LogGroupResetCompleted(int logGroupId) = 0;
 
     virtual bool DoesLogFileExist(void) = 0;
-
 };
 } // namespace pos

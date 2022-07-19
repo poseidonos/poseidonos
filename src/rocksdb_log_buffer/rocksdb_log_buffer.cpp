@@ -91,7 +91,7 @@ RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
 void
 RocksDBLogBuffer::InitDataBuffer(void)
 {
-    //nothing to do
+    // nothing to do
 }
 
 void
@@ -414,7 +414,7 @@ RocksDBLogBuffer::_CreateDirectory(void)
     return 0;
 }
 
-//TODO(sang7.park) : This method is supposed to be used when array is removed.
+// TODO(sang7.park) : This method is supposed to be used when array is removed.
 int
 RocksDBLogBuffer::_DeleteDirectory(void)
 {

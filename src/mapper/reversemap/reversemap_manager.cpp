@@ -30,15 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/include/metafs_service.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/mapper/reversemap/reversemap_manager.h"
-#include "src/meta_file_intf/mock_file_intf.h"
+
+#include <map>
+#include <string>
+#include <tuple>
+#include <utility>
+
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/meta_const.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
-#include <string>
 
 namespace pos
 {
@@ -70,7 +74,7 @@ ReverseMapManager::~ReverseMapManager(void)
     }
     if (revMapPacks != nullptr)
     {
-        delete [] revMapPacks;
+        delete[] revMapPacks;
         revMapPacks = nullptr;
     }
 }
@@ -97,7 +101,7 @@ ReverseMapManager::Init(void)
     if (revMapWholefile->DoesFileExist() == false)
     {
         POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-                        fileSizePerStripe, addrInfo->GetMaxVSID(), fileSizeWholeRevermap);
+            fileSizePerStripe, addrInfo->GetMaxVSID(), fileSizeWholeRevermap);
 
         int ret = revMapWholefile->Create(fileSizeWholeRevermap);
         if (ret != 0)
@@ -131,7 +135,7 @@ ReverseMapManager::Dispose(void)
     }
     if (revMapPacks != nullptr)
     {
-        delete [] revMapPacks;
+        delete[] revMapPacks;
         revMapPacks = nullptr;
     }
 }
@@ -253,7 +257,7 @@ ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum
 }
 
 int
-ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset,  uint64_t fileSize, char* buf)
+ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf)
 {
     if (fileLinux == nullptr)
     {

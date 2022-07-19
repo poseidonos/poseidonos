@@ -33,6 +33,7 @@
 #ifndef _INCLUDE_MSS_ONDISK_INCLUDE_H
 #define _INCLUDE_MSS_ONDISK_INCLUDE_H
 
+#include <list>
 #include <vector>
 
 #include "meta_async_cb_cxt.h"

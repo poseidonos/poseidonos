@@ -101,7 +101,7 @@ MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSe
     tp_ = tp;
     if (!tp_)
     {
-        tp_ = new TelemetryPublisher{"meta_scheduler"};
+        tp_ = new TelemetryPublisher {"meta_scheduler"};
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp_);
     }
 
