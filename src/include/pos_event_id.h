@@ -225,6 +225,8 @@ enum class POS_EVENT_ID
     DELETE_SUBSYSTEM_FAILURE_VOLUME_NOT_FOUND,
     DELETE_SUBSYSTEM_FAILURE_VOLUME_UNMOUNT_FAILURE,
     DELETE_SUBSYSTEM_FAILURE_SPDK_FAILURE,
+    ADD_LISTENER_FAILURE_NO_SUBNQN,
+    ADD_LISTENER_FAILURE_SPDK_FAILURE,
 
     // --------------Mbr (2300)-----------------------
     MBR_START = 2300,
@@ -1828,7 +1830,12 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::DEVICE_SCAN_FAILED,
             new PosEventInfoEntry("DEVICE_SCAN_FAILED",
                 "Failed to scan a device.", "", "")},
-
+        {(int)POS_EVENT_ID::ADD_LISTENER_FAILURE_NO_SUBNQN,
+            new PosEventInfoEntry("ADD_LISTENER_FAILURE_NO_SUBNQN",
+                "Failed to add a listener.", "Could not find the subsystem with the subnqn.", "")},
+        {(int)POS_EVENT_ID::ADD_LISTENER_FAILURE_SPDK_FAILURE,
+            new PosEventInfoEntry("ADD_LISTENER_FAILURE_SPDK_FAILURE",
+                "Failed to add a listener.", "An error occurred during RPC to SPDK.", "")},
 
         {(int)POS_EVENT_ID::TELEMETRY_START_FAILURE,
             new PosEventInfoEntry("TELEMETRY_START_FAILURE",

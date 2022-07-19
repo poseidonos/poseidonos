@@ -1,15 +1,15 @@
 package subsystemcmds
 
 import (
-	"encoding/json"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var AddListenerCmd = &cobra.Command{
@@ -28,28 +28,41 @@ Example:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "ADDLISTENER"
-
-		param := messages.AddListenerParam{
-			SUBNQN:             subsystem_addlistener_subnqn,
-			TRANSPORTTYPE:      subsystem_addlistener_trtype,
-			TARGETADDRESS:      subsystem_addlistener_traddr,
-			TRANSPORTSERVICEID: subsystem_addlistener_trsvcid,
+		uuid := globals.GenerateUUID()
+		param := &pb.AddListenerRequest_Param{
+			Subnqn:             subsystem_addlistener_subnqn,
+			TransportType:      subsystem_addlistener_trtype,
+			TargetAddress:      subsystem_addlistener_traddr,
+			TransportServiceId: subsystem_addlistener_trsvcid,
 		}
 
-		uuid := globals.GenerateUUID()
+		req := &pb.AddListenerRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		req := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
-		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendAddListener(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},

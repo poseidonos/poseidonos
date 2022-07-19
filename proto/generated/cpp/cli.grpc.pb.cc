@@ -52,6 +52,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/GetSmartLog",
   "/grpc_cli.PosCli/CreateSubsystem",
   "/grpc_cli.PosCli/DeleteSubsystem",
+  "/grpc_cli.PosCli/AddListener",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -91,6 +92,7 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_GetSmartLog_(PosCli_method_names[27], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_CreateSubsystem_(PosCli_method_names[28], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_DeleteSubsystem_(PosCli_method_names[29], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddListener_(PosCli_method_names[30], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -783,6 +785,29 @@ void PosCli::Stub::experimental_async::DeleteSubsystem(::grpc::ClientContext* co
   return result;
 }
 
+::grpc::Status PosCli::Stub::AddListener(::grpc::ClientContext* context, const ::grpc_cli::AddListenerRequest& request, ::grpc_cli::AddListenerResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::AddListenerRequest, ::grpc_cli::AddListenerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddListener_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::AddListener(::grpc::ClientContext* context, const ::grpc_cli::AddListenerRequest* request, ::grpc_cli::AddListenerResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::AddListenerRequest, ::grpc_cli::AddListenerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddListener_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::AddListener(::grpc::ClientContext* context, const ::grpc_cli::AddListenerRequest* request, ::grpc_cli::AddListenerResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddListener_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::AddListenerResponse>* PosCli::Stub::PrepareAsyncAddListenerRaw(::grpc::ClientContext* context, const ::grpc_cli::AddListenerRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::AddListenerResponse, ::grpc_cli::AddListenerRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddListener_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::AddListenerResponse>* PosCli::Stub::AsyncAddListenerRaw(::grpc::ClientContext* context, const ::grpc_cli::AddListenerRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddListenerRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -1084,6 +1109,16 @@ PosCli::Service::Service() {
              ::grpc_cli::DeleteSubsystemResponse* resp) {
                return service->DeleteSubsystem(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[30],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::AddListenerRequest, ::grpc_cli::AddListenerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::AddListenerRequest* req,
+             ::grpc_cli::AddListenerResponse* resp) {
+               return service->AddListener(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -1293,6 +1328,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::DeleteSubsystem(::grpc::ServerContext* context, const ::grpc_cli::DeleteSubsystemRequest* request, ::grpc_cli::DeleteSubsystemResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::AddListener(::grpc::ServerContext* context, const ::grpc_cli::AddListenerRequest* request, ::grpc_cli::AddListenerResponse* response) {
   (void) context;
   (void) request;
   (void) response;
