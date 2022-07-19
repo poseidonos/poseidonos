@@ -168,6 +168,12 @@ service PosCli {
       		post: "/v1/deletesubsystem"
     	};
 	}
+
+	rpc AddListener (AddListenerRequest) returns (AddListenerResponse) {
+		option (google.api.http) = {
+      		post: "/v1/addlistener"
+    	};
+	}
 }
 
 message Status {
@@ -954,6 +960,29 @@ message DeleteSubsystemRequest {
 }
 
 message DeleteSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message AddListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+	}
+	Param param = 4;
+}
+
+message AddListenerResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

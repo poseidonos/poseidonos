@@ -110,6 +110,8 @@ using grpc_cli::CreateSubsystemRequest;
 using grpc_cli::CreateSubsystemResponse;
 using grpc_cli::DeleteSubsystemRequest;
 using grpc_cli::DeleteSubsystemResponse;
+using grpc_cli::AddListenerRequest;
+using grpc_cli::AddListenerResponse;
 
 class CommandProcessor
 {
@@ -161,6 +163,7 @@ public:
     // Subsystem Commands
     grpc::Status ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* request, CreateSubsystemResponse* reply);
     grpc::Status ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* request, DeleteSubsystemResponse* reply);
+    grpc::Status ExecuteAddListenerCommand(const AddListenerRequest* request, AddListenerResponse* reply);
 
 private:
     bool _isPosTerminating;
