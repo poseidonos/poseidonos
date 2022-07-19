@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # You must run setup_env_rocksmeta.sh before running this script
+# /dev/nvme0n1 and /dev/nvme1n1 must not have any partition before. 
 
 # Make /dev/nvme0n1 to raid type
 (
@@ -14,7 +15,19 @@
     echo w # Write changes
 ) | fdisk /dev/nvme0n1
 
-# Construct RAID
+# Make /dev/nvme1n1 to raid type
+(
+    echo n # Add new partition
+    echo p # Primary partition
+    echo   # Partition number : use default
+    echo   # First sector : use default
+    echo   # Last sector : use default , sometimes select partition next line
+    echo t # Change partition type
+    echo fd # Change linux partition type to linux raid auto type
+    echo w # Write changes
+) | fdisk /dev/nvme1n1
+
+# Construct RAID 1 with /dev/nvme0n1 and /dev/nvme1n1
 
 (
     echo y # create array -> yes
