@@ -12,8 +12,8 @@ class MockIVolumeIoManager : public IVolumeIoManager
 {
 public:
     using IVolumeIoManager::IVolumeIoManager;
-    MOCK_METHOD(int, IncreasePendingIOCountIfNotZero, (int volId, VolumeStatus mounted, uint32_t ioCountToSubmit), (override));
-    MOCK_METHOD(int, DecreasePendingIOCount, (int volId, VolumeStatus mounted, uint32_t ioCountCompleted), (override));
+    MOCK_METHOD(int, IncreasePendingIOCountIfNotZero, (int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit), (override));
+    MOCK_METHOD(int, DecreasePendingIOCount, (int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted), (override));
 
 };
 

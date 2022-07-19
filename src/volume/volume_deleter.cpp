@@ -79,7 +79,7 @@ VolumeDeleter::Do(string name)
     {
         _CheckRequestValidity(name);
 
-        volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Unmounted);
+        volumeList.WaitUntilIdle(vol->ID, VolumeIoType::InternalIo);
 
         _SetVolumeEventBase(vol);
         _SetVolumeArrayInfo();

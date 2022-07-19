@@ -109,7 +109,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
     rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 
-    volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted);
+    volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo);
 
     gcStripeManager->SetFinished();
 

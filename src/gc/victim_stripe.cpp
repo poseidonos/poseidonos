@@ -179,7 +179,7 @@ VictimStripe::LoadValidBlock(void)
         if ((lsa.stripeId == myLsid) && (blockOffset == blkInfo.vsa.offset))
         {
             if (unlikely(EID(SUCCESS)
-                != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeStatus::Unmounted)))
+                != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeIoType::InternalIo)))
             {
                 break;
             }

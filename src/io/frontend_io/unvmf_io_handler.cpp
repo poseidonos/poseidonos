@@ -124,7 +124,7 @@ UNVMfSubmitHandler(struct pos_io* io)
 
         AIO aio;
         VolumeIoSmartPtr volumeIo = aio.CreateVolumeIo(*io);
-        if (unlikely(EID(SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(io->volume_id)))
+        if (unlikely(EID(SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(io->volume_id, static_cast<VolumeIoType>(io->ioType))))
         {
             IoCompleter ioCompleter(volumeIo);
             ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);

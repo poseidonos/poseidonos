@@ -128,7 +128,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlock_GetVsaRetry)
     // given
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
-    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo, 1)).WillRepeatedly(Return(0));
 
     // when loadValidBlock mapper return need retry then return false
     EXPECT_TRUE(victimStripe->LoadValidBlock() == false);
@@ -153,7 +153,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithValidAllBlocks)
 
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
-    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo, 1)).WillRepeatedly(Return(0));
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -310,7 +310,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithUnmapLsa)
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillOnce(Return(unMapLsa)).WillRepeatedly(Return(lsa));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 
-    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo, 1)).WillRepeatedly(Return(0));
 
     // when
     EXPECT_TRUE(victimStripe->LoadValidBlock() == true);
@@ -389,7 +389,7 @@ TEST_F(VictimStripeTestFixture, LoadValidBlockWithDeletedVolume)
 
     StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = TEST_SEGMENT_1_BASE_STRIPE_ID};
     EXPECT_CALL(*stripeMap, GetLSA(TEST_SEGMENT_1_BASE_STRIPE_ID)).WillRepeatedly(Return(lsa));
-    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted, 1)).WillRepeatedly(Return(2010));
+    EXPECT_CALL(*volumeManager, IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo, 1)).WillRepeatedly(Return(2010));
     victimStripe->Load(TEST_SEGMENT_1_BASE_STRIPE_ID, (reverseMapLoadCompletionPtr));
 
     // when

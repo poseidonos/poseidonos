@@ -179,7 +179,7 @@ AioCompletion::_SendUserCompletion(void)
         IVolumeIoManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayId());
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
-            volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());
+            volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId(), static_cast<VolumeIoType>(dir));
         }
     }
     volumeIo = nullptr;

@@ -45,8 +45,8 @@ class VolumeBase;
 class IVolumeIoManager
 {
 public:
-    virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) = 0;
-    virtual int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) = 0;
+    virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit = 1) = 0;
+    virtual int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) = 0;
 };
 
 } // namespace pos

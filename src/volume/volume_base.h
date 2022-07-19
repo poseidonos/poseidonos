@@ -66,6 +66,14 @@ enum VolumeReplicationMode
     MaxVolumeReplicatorStatus
 };
 
+enum VolumeIoType
+{
+    UserRead,
+    UserWrite,
+    InternalIo,
+    MaxVolumeIoTypeCnt
+};
+
 const uint32_t KIOPS = 1000;
 const uint32_t MIB_IN_BYTE = 1024 * 1024;
 const uint64_t MIN_IOPS_LIMIT = 10;

@@ -528,7 +528,7 @@ VolumeManager::_LoadVolumes(void)
 }
 
 int
-VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioCountToSubmit)
+VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
@@ -536,7 +536,7 @@ VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeSta
         POS_TRACE_WARN(EID(VOL_NOT_FOUND), "volId: {}", volId);
         return EID(VOL_NOT_FOUND);
     }
-    bool success = volumes.IncreasePendingIOCountIfNotZero(volId, volumeStatus, ioCountToSubmit);
+    bool success = volumes.IncreasePendingIOCountIfNotZero(volId, volumeIoType, ioCountToSubmit);
     if (success)
     {
         return EID(SUCCESS);
@@ -546,7 +546,7 @@ VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeSta
 }
 
 int
-VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCountCompleted)
+VolumeManager::DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
@@ -554,7 +554,7 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
         POS_TRACE_WARN(EID(VOL_NOT_FOUND), "vol_id: {}", volId);
         return EID(VOL_NOT_FOUND);
     }
-    volumes.DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
+    volumes.DecreasePendingIOCount(volId, volumeIoType, ioCountCompleted);
     return EID(SUCCESS);
 }
 
