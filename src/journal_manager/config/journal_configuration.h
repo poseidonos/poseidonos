@@ -110,7 +110,7 @@ private:
     LogBufferLayout bufferLayout;
 
     const uint64_t SIZE_MB = 1024 * 1024;
-    const uint64_t DEFAULT_NUMBER_OF_LOG_GROUPS = 2;
+    const static uint64_t DEFAULT_NUMBER_OF_LOG_GROUPS = 2;
 };
 
 } // namespace pos

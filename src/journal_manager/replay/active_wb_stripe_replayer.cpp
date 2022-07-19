@@ -43,7 +43,8 @@ ActiveWBStripeReplayer::ActiveWBStripeReplayer(PendingStripeList& pendingStripeL
 : pendingStripes(pendingStripeList),
   contextReplayer(nullptr),
   wbStripeAllocator(nullptr),
-  stripeMap(nullptr)
+  stripeMap(nullptr),
+  arrayInfo(nullptr)
 {
 }
 

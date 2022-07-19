@@ -57,6 +57,8 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   logBufferSizeInConfig(UINT64_MAX),
   metaPageSize(UINT64_MAX),
   maxPartitionSize(UINT64_MAX),
+  rocksdbEnabled(false),
+  metaVolumeToUse(),
   areReplayWbStripesInUserArea(false),
   debugEnabled(false),
   intervalForMetric(0),
