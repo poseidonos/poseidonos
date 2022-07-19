@@ -297,8 +297,9 @@ RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
     if (ret.ok())
     {
         POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET), "RocksDB logs in logGroupId {} is reset ", id);
-        callbackEvent->Execute();
-        return 0;
+        const bool result = callbackEvent->Execute();
+        POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET), "The result of the event is {}", result);
+        return EID(SUCCESS);
     }
     else
     {
