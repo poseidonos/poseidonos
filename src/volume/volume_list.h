@@ -62,7 +62,8 @@ public:
 
     bool IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioSubmissionCount = 1);
     void DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCompletionCount = 1);
-    void WaitUntilIdle(int volId, VolumeIoType volumeIoType);
+    void WaitUntilIdleInternalIo(int volId);
+    void WaitUntilIdleUserIo(int volId);
     bool CheckIdleAndSetZero(int volId, VolumeIoType volumeIoType);
     void InitializePendingIOCount(int volId, VolumeIoType volumeIoType);
 
