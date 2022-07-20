@@ -1321,6 +1321,65 @@ CommandProcessor::ExecuteAddListenerCommand(const AddListenerRequest* request, A
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    auto list = rpcClient.SubsystemList();
+    for (const auto& subsystem : list)
+    {
+        grpc_cli::Subsystem* subsystemListItem =
+            reply->mutable_result()->mutable_data()->add_subsystemlist();
+        subsystemListItem->set_subnqn(subsystem["nqn"].asString());
+        subsystemListItem->set_subtype(subsystem["subtype"].asString());
+        subsystemListItem->set_allowanyhost(subsystem["allow_any_host"].asInt());
+
+        for (const auto& address : subsystem["listen_addresses"])
+        {
+            grpc_cli::Subsystem_AddressInfo* addressInfoListItem = 
+                subsystemListItem->add_listenaddresses();
+            addressInfoListItem->set_transporttype(address["trtype"].asString());
+            addressInfoListItem->set_addressfamily(address["adrfam"].asString());
+            addressInfoListItem->set_targetaddress(address["traddr"].asString());
+            addressInfoListItem->set_transportserviceid(address["trsvcid"].asString());
+        }
+
+        for (const auto& host : subsystem["hosts"])
+        {
+            grpc_cli::Subsystem_Host* hostListItem =
+                subsystemListItem->add_hosts();
+            hostListItem->set_nqn(host["nqn"].asString());
+        }
+
+        if ("NVMe" == subsystem["subtype"].asString())
+        {
+            subsystemListItem->set_serialnumber(subsystem["serial_number"].asString());
+            subsystemListItem->set_modelnumber(subsystem["model_number"].asString());
+            subsystemListItem->set_maxnamespaces(subsystem["max_namespaces"].asInt());
+        }
+
+        for (const auto& ns : subsystem["namespaces"])
+        {
+            grpc_cli::Subsystem_Namespace* namespaceListItem = 
+                subsystemListItem->add_namspaces();
+            namespaceListItem->set_nsid(ns["nsid"].asInt());
+            namespaceListItem->set_bdevname(ns["bdev_name"].asString());
+            namespaceListItem->set_uuid(ns["uuid"].asString());
+        }
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {
