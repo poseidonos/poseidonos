@@ -30,17 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/stripe/stripe.h"
-#include "src/mapper/map_flushed_event.h"
-#include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/stripemap/stripemap_manager.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
+#include <memory>
 #include <string>
 #include <tuple>
+
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/stripe/stripe.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/mapper/address/mapper_address_info.h"
+#include "src/mapper/map_flushed_event.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -152,7 +154,6 @@ StripeMapManager::LoadStripeMapFile(void)
     return ret;
 }
 
-
 int
 StripeMapManager::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr cb)
 {
@@ -229,13 +230,15 @@ void
 StripeMapManager::WaitAllPendingIoDone(void)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
-    while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
+    while ((numWriteIssuedCount + numLoadIssuedCount) != 0)
+        ;
 }
 
 void
 StripeMapManager::WaitWritePendingIoDone(void)
 {
-    while ((addrInfo->IsUT() == false) && (numWriteIssuedCount != 0));
+    while ((addrInfo->IsUT() == false) && (numWriteIssuedCount != 0))
+        ;
 }
 
 StripeMapContent*
@@ -331,7 +334,8 @@ StripeMapManager::_MapLoadDone(int param)
 void
 StripeMapManager::_WaitLoadIoDone()
 {
-    while ((addrInfo->IsUT() == false) && (numLoadIssuedCount != 0));
+    while ((addrInfo->IsUT() == false) && (numLoadIssuedCount != 0))
+        ;
 }
 
 } // namespace pos

@@ -32,6 +32,8 @@
 
 #include "src/metafs/mvm/volume/inode_creator.h"
 
+#include <vector>
+
 #include "src/metafs/mvm/volume/inode_manager.h"
 
 namespace pos

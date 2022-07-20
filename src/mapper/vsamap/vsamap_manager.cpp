@@ -29,15 +29,17 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "src/mapper/vsamap/vsamap_manager.h"
+
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/mapper/map_flushed_event.h"
-#include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
-#include <string>
-#include <vector>
 
 namespace pos
 {
@@ -357,26 +359,30 @@ void
 VSAMapManager::WaitAllPendingIoDone(void)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
-    while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
+    while ((numWriteIssuedCount + numLoadIssuedCount) != 0)
+        ;
 }
 
 void
 VSAMapManager::WaitLoadPendingIoDone(void)
 {
-    while (numLoadIssuedCount != 0);
+    while (numLoadIssuedCount != 0)
+        ;
 }
 
 void
 VSAMapManager::WaitWritePendingIoDone(void)
 {
-    while (numWriteIssuedCount != 0);
+    while (numWriteIssuedCount != 0)
+        ;
 }
 
 void
 VSAMapManager::WaitVolumePendingIoDone(int volId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] WaitPendingIoDone Vol:{}, PendingWriteCnt:{}, PendingReadCnt:{}", volId, numWriteIssuedCount, numLoadIssuedCount);
-    while ((addrInfo->IsUT() == false) && ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE)));
+    while ((addrInfo->IsUT() == false) && ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE)))
+        ;
 }
 
 bool
@@ -571,7 +577,7 @@ VSAMapManager::_UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtua
         if (ret < 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::VSAMAP_SET_FAILURE, "[Mapper VSAMap] failed to update VSAMap Info, volumeId:{}  targetRba:{}  targetVsa.sid:{}  targetVsa.offset:{}",
-                            volumeId, targetRba, targetVsa.stripeId, targetVsa.offset);
+                volumeId, targetRba, targetVsa.stripeId, targetVsa.offset);
             break;
         }
     }

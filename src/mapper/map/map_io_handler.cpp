@@ -32,6 +32,8 @@
 
 #include "src/mapper/map/map_io_handler.h"
 
+#include <utility>
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
 #include "src/mapper/i_map_flush.h"

@@ -32,6 +32,8 @@
 
 #include "mio.h"
 
+#include <utility>
+
 #include "meta_volume_manager.h"
 #include "metafs_common.h"
 #include "metafs_config.h"
