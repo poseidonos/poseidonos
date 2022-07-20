@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# You must run setup_env_rocksmeta.sh before running this script
-# /dev/nvme0n1 and /dev/nvme1n1 must not have any partition before. 
+echo "This script is only for testing rocksdb metafs on local environment"
+echo "You can run this script in case only you do understand rocksmeta exactly"
+echo "To continue script, enter any key"
+read temp
 
+echo "You must run setup_env_rocksmeta.sh before running this script"
+echo "This script construct RAID 1 with device /dev/nvme0n1 and /dev/nvme1n1 which will be used as RocksDB Meta File System"
+
+
+# /dev/nvme0n1 and /dev/nvme1n1 must not have any partition before. 
 # Make /dev/nvme0n1 to raid type
 (
     echo n # Add new partition

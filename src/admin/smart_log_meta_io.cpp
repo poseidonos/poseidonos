@@ -53,10 +53,14 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
     if (rocksDbEnabled)
     {
         smartLogFile = new RocksDBMetaFsIntf(fileName, arrayId, MetaFileType::General);
+        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+            "RocksDBMetaFsIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
     }
     else
     {
         smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
+        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+            "MetaFsFileIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
     }
 }
 

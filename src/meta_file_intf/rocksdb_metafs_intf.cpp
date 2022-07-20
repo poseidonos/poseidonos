@@ -39,7 +39,6 @@
 #include <experimental/filesystem>
 
 #include "rocksdb/db.h"
-#include "rocksdb/merge_operator.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
@@ -136,7 +135,7 @@ RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     }
 
     ctx->ioDoneCheckCallback =
-        std::bind(&RocksDBMetaFsIntf::CheckIoDoneStatus, this, std::placeholders::_1);
+        std::bind(&RocksDBMetaFsIntf::ReleaseAsyncIoContext, this, std::placeholders::_1);
 
     if (ctx->opcode == MetaFsIoOpcode::Write)
     {
@@ -151,6 +150,13 @@ RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 
 int
 RocksDBMetaFsIntf::CheckIoDoneStatus(void* data)
+{
+    // nothing to do
+    return 0;
+}
+
+int
+RocksDBMetaFsIntf::ReleaseAsyncIoContext(void* data)
 {
     int error = EID(SUCCESS);
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
@@ -289,7 +295,6 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
     rocksdb::Status readRet = rocksMeta->Get(rocksdb::ReadOptions(), key, &readValue);
 
     // Read-And-Modify
-    // TODO(sang7.park) : have to change Read-And-Modify to use rocksdb merge operator
 
     // if readRet.ok(), there is existing value. 
     if (readRet.ok())

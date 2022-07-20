@@ -108,10 +108,14 @@ AllocatorFileIo::_CreateFile(void)
         if (rocksDbEnabled)
         {
             file = new RocksDBMetaFsIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::ALLOCATOR_FILE_IO_INITIALIZED,
+                "RocksDBMetaFsIntf for allocator file io has been initialized , fileName : {} , arrayId : {} ", client->GetFilename(), arrayId);
         }
         else
         {
             file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::ALLOCATOR_FILE_IO_INITIALIZED,
+                "MetaFsFileIntf for allocator file io has been initialized , fileName : {} , arrayId : {} ", client->GetFilename(), arrayId);
         }
     }
 }
