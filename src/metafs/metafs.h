@@ -91,6 +91,7 @@ private:
     POS_EVENT_ID _CreateMetaVolume(void);
     POS_EVENT_ID _OpenMetaVolume(void);
     POS_EVENT_ID _CloseMetaVolume(void);
+    POS_EVENT_ID _CreateRocksDBMetaFs(void);
 
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList);
     std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
