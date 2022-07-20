@@ -1367,7 +1367,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
         for (const auto& ns : subsystem["namespaces"])
         {
             grpc_cli::Subsystem_Namespace* namespaceListItem = 
-                subsystemListItem->add_namspaces();
+                subsystemListItem->add_namespaces();
             namespaceListItem->set_nsid(ns["nsid"].asInt());
             namespaceListItem->set_bdevname(ns["bdev_name"].asString());
             namespaceListItem->set_uuid(ns["uuid"].asString());
