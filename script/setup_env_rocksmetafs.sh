@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "This script is only for testing rocksdb metafs on local environment"
+echo "You can run this script in case only you do understand rocksmeta exactly"
+echo "To continue script, enter any key"
+read temp
+
+echo "This script exclude two nvme SSDs from being uio_pci_generic among all nvme SSDs, Two SSDs will be attached to linux kernel"
+echo "This Two NVMe SSDs will be used to construct RAID 1 for rocksdb metafs"
 # change working directory to where script exists
 cd $(dirname $0)
 

@@ -67,6 +67,7 @@ public:
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) override;
     virtual int CheckIoDoneStatus(void* data) override;
+    virtual int ReleaseAsyncIoContext(void* data);
 
     virtual int Open(void) override;
     virtual int Close(void) override;
