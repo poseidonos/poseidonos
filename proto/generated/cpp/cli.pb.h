@@ -27582,7 +27582,7 @@ class Subsystem PROTOBUF_FINAL :
   enum : int {
     kListenAddressesFieldNumber = 3,
     kHostsFieldNumber = 5,
-    kNamspacesFieldNumber = 9,
+    kNamespacesFieldNumber = 9,
     kSubnqnFieldNumber = 1,
     kSubtypeFieldNumber = 2,
     kSerialNumberFieldNumber = 6,
@@ -27626,23 +27626,23 @@ class Subsystem PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Host >&
       hosts() const;
 
-  // repeated .grpc_cli.Subsystem.Namespace namspaces = 9;
-  int namspaces_size() const;
+  // repeated .grpc_cli.Subsystem.Namespace namespaces = 9;
+  int namespaces_size() const;
   private:
-  int _internal_namspaces_size() const;
+  int _internal_namespaces_size() const;
   public:
-  void clear_namspaces();
-  ::grpc_cli::Subsystem_Namespace* mutable_namspaces(int index);
+  void clear_namespaces();
+  ::grpc_cli::Subsystem_Namespace* mutable_namespaces(int index);
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace >*
-      mutable_namspaces();
+      mutable_namespaces();
   private:
-  const ::grpc_cli::Subsystem_Namespace& _internal_namspaces(int index) const;
-  ::grpc_cli::Subsystem_Namespace* _internal_add_namspaces();
+  const ::grpc_cli::Subsystem_Namespace& _internal_namespaces(int index) const;
+  ::grpc_cli::Subsystem_Namespace* _internal_add_namespaces();
   public:
-  const ::grpc_cli::Subsystem_Namespace& namspaces(int index) const;
-  ::grpc_cli::Subsystem_Namespace* add_namspaces();
+  const ::grpc_cli::Subsystem_Namespace& namespaces(int index) const;
+  ::grpc_cli::Subsystem_Namespace* add_namespaces();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace >&
-      namspaces() const;
+      namespaces() const;
 
   // string subnqn = 1;
   void clear_subnqn();
@@ -27735,7 +27735,7 @@ class Subsystem PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_AddressInfo > listenaddresses_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Host > hosts_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace > namspaces_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace > namespaces_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subnqn_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subtype_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr serialnumber_;
@@ -59448,43 +59448,43 @@ inline void Subsystem::set_maxnamespaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.maxNamespaces)
 }
 
-// repeated .grpc_cli.Subsystem.Namespace namspaces = 9;
-inline int Subsystem::_internal_namspaces_size() const {
-  return namspaces_.size();
+// repeated .grpc_cli.Subsystem.Namespace namespaces = 9;
+inline int Subsystem::_internal_namespaces_size() const {
+  return namespaces_.size();
 }
-inline int Subsystem::namspaces_size() const {
-  return _internal_namspaces_size();
+inline int Subsystem::namespaces_size() const {
+  return _internal_namespaces_size();
 }
-inline void Subsystem::clear_namspaces() {
-  namspaces_.Clear();
+inline void Subsystem::clear_namespaces() {
+  namespaces_.Clear();
 }
-inline ::grpc_cli::Subsystem_Namespace* Subsystem::mutable_namspaces(int index) {
-  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.namspaces)
-  return namspaces_.Mutable(index);
+inline ::grpc_cli::Subsystem_Namespace* Subsystem::mutable_namespaces(int index) {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.namespaces)
+  return namespaces_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace >*
-Subsystem::mutable_namspaces() {
-  // @@protoc_insertion_point(field_mutable_list:grpc_cli.Subsystem.namspaces)
-  return &namspaces_;
+Subsystem::mutable_namespaces() {
+  // @@protoc_insertion_point(field_mutable_list:grpc_cli.Subsystem.namespaces)
+  return &namespaces_;
 }
-inline const ::grpc_cli::Subsystem_Namespace& Subsystem::_internal_namspaces(int index) const {
-  return namspaces_.Get(index);
+inline const ::grpc_cli::Subsystem_Namespace& Subsystem::_internal_namespaces(int index) const {
+  return namespaces_.Get(index);
 }
-inline const ::grpc_cli::Subsystem_Namespace& Subsystem::namspaces(int index) const {
-  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.namspaces)
-  return _internal_namspaces(index);
+inline const ::grpc_cli::Subsystem_Namespace& Subsystem::namespaces(int index) const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.namespaces)
+  return _internal_namespaces(index);
 }
-inline ::grpc_cli::Subsystem_Namespace* Subsystem::_internal_add_namspaces() {
-  return namspaces_.Add();
+inline ::grpc_cli::Subsystem_Namespace* Subsystem::_internal_add_namespaces() {
+  return namespaces_.Add();
 }
-inline ::grpc_cli::Subsystem_Namespace* Subsystem::add_namspaces() {
-  // @@protoc_insertion_point(field_add:grpc_cli.Subsystem.namspaces)
-  return _internal_add_namspaces();
+inline ::grpc_cli::Subsystem_Namespace* Subsystem::add_namespaces() {
+  // @@protoc_insertion_point(field_add:grpc_cli.Subsystem.namespaces)
+  return _internal_add_namespaces();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace >&
-Subsystem::namspaces() const {
-  // @@protoc_insertion_point(field_list:grpc_cli.Subsystem.namspaces)
-  return namspaces_;
+Subsystem::namespaces() const {
+  // @@protoc_insertion_point(field_list:grpc_cli.Subsystem.namespaces)
+  return namespaces_;
 }
 
 // -------------------------------------------------------------------

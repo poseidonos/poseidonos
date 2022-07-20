@@ -1021,7 +1021,7 @@ message Subsystem {
 		string bdevName = 2;
 		string uuid = 3;
 	}
-	repeated Namespace namspaces = 9;
+	repeated Namespace namespaces = 9;
 }
 
 message ListSubsystemRequest {
