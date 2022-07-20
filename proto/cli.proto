@@ -174,6 +174,12 @@ service PosCli {
       		post: "/v1/addlistener"
     	};
 	}
+
+	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listsubsystem"
+    	};
+	}
 }
 
 message Status {
@@ -987,6 +993,37 @@ message AddListenerResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ListSubsystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+	}
+	Param param = 4;
+}
+
+message ListSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message SubsystemList {
+			message Subsystem {
+				string subnqn = 1;
+				int32 numAddresses = 2;
+				string serialNumber = 3;
+				string modelNumber = 4;
+				int32 numNamespaces = 5;
+			}
+			repeated Subsystem subsystemList = 1;
+		}
+		SubsystemList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
