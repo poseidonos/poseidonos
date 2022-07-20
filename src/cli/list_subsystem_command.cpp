@@ -86,24 +86,24 @@ ListSubsystemCommand::Execute(json& doc, string rid)
         }
         JsonElement elem("");
         elem.SetAttribute(
-            JsonAttribute("nqn", "\"" + subsystem["nqn"].asString() + "\""));
+            JsonAttribute("subnqn", "\"" + subsystem["nqn"].asString() + "\""));
         elem.SetAttribute(
             JsonAttribute("subtype", "\"" + subsystem["subtype"].asString() + "\""));
         elem.SetAttribute(
-            JsonAttribute("allow_any_host", to_string(subsystem["allow_any_host"].asInt())));
+            JsonAttribute("allowAnyHost", to_string(subsystem["allow_any_host"].asInt())));
 
         JsonArray addressArray("listen_addresses");
         for (const auto& address : subsystem["listen_addresses"])
         {
             JsonElement elemAddr("");
             elemAddr.SetAttribute(
-                JsonAttribute("transport_type", "\"" + address["trtype"].asString() + "\""));
+                JsonAttribute("transportType", "\"" + address["trtype"].asString() + "\""));
             elemAddr.SetAttribute(
-                JsonAttribute("address_family", "\"" + address["adrfam"].asString() + "\""));
+                JsonAttribute("addressFamily", "\"" + address["adrfam"].asString() + "\""));
             elemAddr.SetAttribute(
-                JsonAttribute("target_address", "\"" + address["traddr"].asString() + "\""));
+                JsonAttribute("targetAddress", "\"" + address["traddr"].asString() + "\""));
             elemAddr.SetAttribute(
-                JsonAttribute("transport_service_id", "\"" + address["trsvcid"].asString() + "\""));
+                JsonAttribute("transportServiceId", "\"" + address["trsvcid"].asString() + "\""));
             addressArray.AddElement(elemAddr);
         }
         elem.SetArray(addressArray);
@@ -121,11 +121,11 @@ ListSubsystemCommand::Execute(json& doc, string rid)
         if ("NVMe" == subsystem["subtype"].asString())
         {
             elem.SetAttribute(
-                JsonAttribute("serial_number", "\"" + subsystem["serial_number"].asString() + "\""));
+                JsonAttribute("serialNumber", "\"" + subsystem["serial_number"].asString() + "\""));
             elem.SetAttribute(
-                JsonAttribute("model_number", "\"" + subsystem["model_number"].asString() + "\""));
+                JsonAttribute("modelNumber", "\"" + subsystem["model_number"].asString() + "\""));
             elem.SetAttribute(
-                JsonAttribute("max_namespaces", to_string(subsystem["max_namespaces"].asInt())));
+                JsonAttribute("maxNamespaces", to_string(subsystem["max_namespaces"].asInt())));
 
             JsonArray namespaceArray("namespaces");
             for (const auto& nameSpace : subsystem["namespaces"])
@@ -134,7 +134,7 @@ ListSubsystemCommand::Execute(json& doc, string rid)
                 elemNmsp.SetAttribute(
                     JsonAttribute("nsid", to_string(nameSpace["nsid"].asInt())));
                 elemNmsp.SetAttribute(
-                    JsonAttribute("bdev_name", "\"" + nameSpace["bdev_name"].asString() + "\""));
+                    JsonAttribute("bdevName", "\"" + nameSpace["bdev_name"].asString() + "\""));
                 elemNmsp.SetAttribute(
                     JsonAttribute("uuid", "\"" + nameSpace["uuid"].asString() + "\""));
                 namespaceArray.AddElement(elemNmsp);
