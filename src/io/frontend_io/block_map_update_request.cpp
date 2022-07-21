@@ -115,9 +115,7 @@ BlockMapUpdateRequest::_UpdateMeta(void)
         int result = metaUpdater->UpdateBlockMap(volumeIo, blockMapUpdateCompletionEvent);
         if (unlikely(result != 0))
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
-            POS_TRACE_ERROR(static_cast<int>(eventId),
-                "Write wraup failed at map update");
+            POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "Write wraup failed at map update ");
             return false;
         }
     }

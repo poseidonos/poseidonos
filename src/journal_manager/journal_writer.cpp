@@ -68,9 +68,12 @@ JournalWriter::Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWr
 int
 JournalWriter::_CanBeWritten(void)
 {
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_READY);
     if (status == nullptr)
     {
-        return (-1) * static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
+        eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
+        POS_TRACE_ERROR(eventId, "status is nullptr");
+        return (-1) * eventId;
     }
 
     int returnCode = 0;
@@ -81,12 +84,16 @@ JournalWriter::_CanBeWritten(void)
     }
     else if (currentStatus == JOURNAL_INVALID)
     {
-        returnCode = (-1) * static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
+        eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
+        returnCode = (-1) * eventId;
     }
     else if (currentStatus != JOURNALING)
     {
-        returnCode = static_cast<int>(POS_EVENT_ID::JOURNAL_NOT_READY);
+        eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_NOT_READY);
+        returnCode = eventId;
     }
+
+    POS_TRACE_INFO_CONDITIONALLY(&changeLogger, eventId, currentStatus, "");
 
     return returnCode;
 }

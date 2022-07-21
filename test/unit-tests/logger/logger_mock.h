@@ -20,4 +20,13 @@ public:
     using Reporter::Reporter;
 };
 
+template<typename StateT>
+class MockChangeLogger : public ChangeLogger<StateT>
+{
+public:
+    using ChangeLogger<StateT>::ChangeLogger;
+    MOCK_METHOD(void, LoggingStateChangeConditionally,
+        (spdlog::source_loc loc, spdlog::level::level_enum lvl, int id,
+            StateT currentState, std::string msg));
+};
 } // namespace pos
