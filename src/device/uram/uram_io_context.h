@@ -35,6 +35,7 @@
 #include "spdk/bdev.h"
 #include "src/device/base/io_context.h"
 #include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
+#include "src/device/uram/uram_drv.h"
 
 namespace pos
 {
@@ -57,6 +58,8 @@ public:
     virtual void AddRetryCount(void);
     virtual bool RequestRetry(spdk_bdev_io_wait_cb callbackFunc);
     virtual SpdkBdevCaller* GetBdevCaller(void);
+    virtual UramDrv* GetDriver(void) { return driver; }
+    virtual void SetDriver(UramDrv* drv) { driver = drv; }
 
 private:
     void _PrepareRetryContext(spdk_bdev_io_wait_cb callbackFunc);
@@ -65,5 +68,6 @@ private:
     uint32_t retryCnt;
     spdk_bdev_io_wait_entry retryCtx;
     SpdkBdevCaller* spdkBdevCaller;
+    UramDrv* driver = nullptr;
 };
 } // namespace pos

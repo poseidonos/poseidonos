@@ -40,7 +40,6 @@
 #include "src/device/base/device_driver.h"
 #include "src/device/unvme/unvme_cmd.h"
 #include "src/device/unvme/unvme_mgmt.h"
-#include "src/lib/singleton.h"
 
 struct spdk_nvme_qpair;
 namespace pos
@@ -61,36 +60,20 @@ public:
         SpdkNvmeCaller* spdkNvmeCaller = nullptr);
     ~UnvmeDrv(void) override;
     int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
-
     bool Open(DeviceContext* deviceContext) override;
     bool Close(DeviceContext* deviceContext) override;
-
     int CompleteIOs(DeviceContext* deviceContext) override;
     int CompleteErrors(DeviceContext* deviceContext) override;
-
     int SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio) override;
-
-    DeviceMonitor* GetDaemon(void);
-    int DeviceAttached(struct spdk_nvme_ns* ns, int num_devs,
-        const spdk_nvme_transport_id* trid);
-    int DeviceDetached(std::string sn);
+    DeviceMonitor* GetDaemon(void) override;
+    void DeviceAttached(struct spdk_nvme_ns* ns, int num_devs, const spdk_nvme_transport_id* trid);
+    void DeviceDetached(std::string sn);
 
 private:
-    int _RequestIO(UnvmeDeviceContext* deviceContext,
-        spdk_nvme_cmd_cb callbackFunc,
-        UnvmeIOContext* ioContext);
-
-    int _SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
-        UnvmeIOContext* ioCtx);
-
-    int _RequestWriteUncorrectable(UnvmeDeviceContext* deviceContext,
-        spdk_nvme_cmd_cb callbackFunc,
-        UnvmeIOContext* ioContext);
-
-    int _RequestDeallocate(UnvmeDeviceContext* deviceContext,
-        spdk_nvme_cmd_cb callbackFunc,
-        UnvmeIOContext* ioCtx);
-
+    int _RequestIO(UnvmeDeviceContext* deviceContext, spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioContext);
+    int _SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext, UnvmeIOContext* ioCtx);
+    int _RequestWriteUncorrectable(UnvmeDeviceContext* deviceContext, spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioContext);
+    int _RequestDeallocate(UnvmeDeviceContext* deviceContext, spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioCtx);
     int _CompleteIOs(DeviceContext* deviceContext, UnvmeIOContext* ioCtxToSkip);
 
     Nvme* nvmeSsd;
@@ -100,6 +83,4 @@ private:
 };
 
 const uint32_t UNVME_DRV_OUT_OF_MEMORY_RETRY_LIMIT = 10000000;
-
-using UnvmeDrvSingleton = Singleton<UnvmeDrv>;
 } // namespace pos

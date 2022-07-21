@@ -33,12 +33,12 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 
 #include "spdk/bdev.h"
 #include "src/device/base/device_driver.h"
 #include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 #include "src/spdk_wrapper/caller/spdk_thread_caller.h"
-#include "src/lib/singleton.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
@@ -77,6 +77,4 @@ private:
     SpdkThreadCaller* spdkThreadCaller;
     EventFrameworkApi* eventFrameworkApi;
 };
-
-using UramDrvSingleton = Singleton<UramDrv>;
 } // namespace pos

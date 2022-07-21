@@ -82,20 +82,21 @@ public:
     virtual int DetachDevice(DevUid sn);
     virtual int RemoveDevice(UblockSharedPtr dev);
     virtual struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
-
-
     virtual void HandleCompletedCommand(void);
-
     virtual int IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx);
     virtual void SetDeviceEventCallback(IDeviceEvent* event);
+    DeviceDriver* GetUnvmeDriver(void) { return unvmeDriver; }
+    DeviceDriver* GetUramDriver(void) { return uramDriver; }
+    void HandleSsdDestructionNotification(void);
 
 private:
-    void _InitDriver();
-    void _InitMonitor();
-    void _InitScan();
-    void _Rescan();
-    void _ClearDevices();
-    void _ClearMonitors();
+    void _InitDriver(void);
+    void _InitMonitor(void);
+    void _InitScan(void);
+    void _Rescan(void);
+    void _ClearDevices(void);
+    void _ClearMonitors(void);
+    void _ClearDrivers(void);
     int _DetachDeviceImpl(UblockSharedPtr dev);
     void _DetachDone(string devName);
     void _PrepareIOWorker(void);
@@ -116,6 +117,9 @@ private:
     SpdkNvmeCaller* spdkNvmeCaller;
     IDeviceEvent* deviceEvent = nullptr;
     IIODispatcher* ioDispatcher = nullptr;
+    DeviceDriver* uramDriver = nullptr;
+    DeviceDriver* unvmeDriver = nullptr;
+    bool waitSsdDestruction = false;
 };
 
 void DeviceDetachEventHandler(string sn);

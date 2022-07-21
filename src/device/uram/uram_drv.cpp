@@ -268,13 +268,15 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
     }
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     spdk_bdev_io_completion_cb callbackFunc;
-
     callbackFunc = &AsyncIOComplete;
-
+    ioCtx->SetDriver(this);
     retValue = _RequestIO(devCtx, callbackFunc, ioCtx);
     spdk_bdev_io_wait_cb retryFunc = [](void* arg) -> void {
         UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);
-        UramDrvSingleton::Instance()->SubmitIO(ioCtx);
+        if (ioCtx != nullptr)
+        {
+            ioCtx->GetDriver()->SubmitIO(ioCtx);
+        }
     };
 
     if (unlikely(-ENOMEM == retValue))

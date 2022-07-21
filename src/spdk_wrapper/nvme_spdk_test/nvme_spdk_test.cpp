@@ -154,8 +154,7 @@ test2_ctrl_reset(void)
 
     Nvme* nvmeSsd = new Nvme("Test");
     nvmeSsd->Pause();
-
-    UnvmeDrvSingleton::Instance()->DeviceDetached(targetDevice->GetSN());
+    DeviceManagerSingleton::Instance()->GetUnvmeDriver()->DeviceDetached(targetDevice->GetSN());
 
     while (nvmeSsd->IsPaused())
     {

@@ -110,23 +110,19 @@ enum class RetryType
     RETRY_TYPE_COUNT,
 };
 
+using SpdkAttachEvent = function<void(struct spdk_nvme_ns* ns, int num_devs, const spdk_nvme_transport_id* trid)>;
+using SpdkDetachEvent = function<void(string sn)>;
+
 class Nvme : public DeviceMonitor
 {
 public:
-    typedef void (*SpdkAttachEvent)(struct spdk_nvme_ns* ns, int num_devs,
-        const spdk_nvme_transport_id* trid);
-    typedef void (*SpdkDetachEvent)(string sn);
-
     virtual std::list<NsEntry*>* InitController(void);
-
     void Start(void) override;
     void Stop(void) override;
     void Pause(void) override;
     void Resume(void) override;
     bool IsPaused(void) override;
-
-    void
-    SetCallback(SpdkAttachEvent attach, SpdkDetachEvent detach)
+    void SetCallback(SpdkAttachEvent attach, SpdkDetachEvent detach)
     {
         attachCb = attach;
         detachCb = detach;

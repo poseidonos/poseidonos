@@ -358,6 +358,13 @@ TEST(UramDrv, SubmitIO_testIfRetryCallbackTriggerdProperly)
     devCtx.bdev_desc = nullptr;
     devCtx.bdev_io_channel = &channel;
     //NiceMock<MockUramIOContext>* mockIoCtx = new NiceMock<MockUramIOContext>();
+
+    NiceMock<MockSpdkBdevCaller>* mockBdevCaller =
+        new NiceMock<MockSpdkBdevCaller>();
+    EXPECT_CALL(*mockBdevCaller, SpdkBdevRead)
+        .WillOnce(Return(-ENOMEM));
+    UramDrv uramDrv(mockBdevCaller);
+
     NiceMock<MockUramIOContext> mockIoCtx;
     EXPECT_CALL(mockIoCtx, GetDeviceContext).WillOnce(Return(&devCtx));
     EXPECT_CALL(mockIoCtx, GetOpcode).WillOnce(Return(UbioDir::Read));
@@ -365,16 +372,11 @@ TEST(UramDrv, SubmitIO_testIfRetryCallbackTriggerdProperly)
     EXPECT_CALL(mockIoCtx, GetByteCount).WillOnce(Return(0));
     EXPECT_CALL(mockIoCtx, GetBuffer).WillOnce(nullptr);
     EXPECT_CALL(mockIoCtx, GetRetryCount).WillOnce(Return(0));
+    EXPECT_CALL(mockIoCtx, GetDriver).WillRepeatedly(Return(&uramDrv));
     EXPECT_CALL(mockIoCtx, RequestRetry).WillOnce([](spdk_bdev_io_wait_cb callbackFunc) {
         callbackFunc(nullptr);
         return true;
     });
-    NiceMock<MockSpdkBdevCaller>* mockBdevCaller =
-        new NiceMock<MockSpdkBdevCaller>();
-    EXPECT_CALL(*mockBdevCaller, SpdkBdevRead)
-        .WillOnce(Return(-ENOMEM));
-
-    UramDrv uramDrv(mockBdevCaller);
 
     // When
     int ret = uramDrv.SubmitIO(&mockIoCtx);

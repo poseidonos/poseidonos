@@ -36,6 +36,7 @@
 #include <future>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "i_io_dispatcher.h"
 #include "src/bio/ubio.h"
@@ -95,21 +96,23 @@ DeviceManager::~DeviceManager()
     {
         delete spdkNvmeCaller;
     }
+    _ClearDrivers();
 }
 
 void
-DeviceManager::_InitDriver()
+DeviceManager::_InitDriver(void)
 {
-    drivers.push_back(UnvmeDrvSingleton::Instance());
-    drivers.push_back(UramDrvSingleton::Instance());
+    unvmeDriver = new UnvmeDrv();
+    uramDriver = new UramDrv();
+    drivers.push_back(unvmeDriver);
+    drivers.push_back(uramDriver);
 }
 
 void
-DeviceManager::_InitMonitor()
+DeviceManager::_InitMonitor(void)
 {
-    UnvmeDrvSingleton::Instance()->SetDeviceEventCallback(DeviceAttachEventHandler, DeviceDetachEventHandler);
-
-    monitors.push_back(UnvmeDrvSingleton::Instance()->GetDaemon());
+    unvmeDriver->SetDeviceEventCallback(DeviceAttachEventHandler, DeviceDetachEventHandler);
+    monitors.push_back(unvmeDriver->GetDaemon());
 }
 
 void
@@ -157,7 +160,7 @@ DeviceManager::SetDeviceEventCallback(IDeviceEvent* event)
 
 // _ClearDevices() - DO NOT CALL EXCEPT DESTRUCTOR
 void
-DeviceManager::_ClearDevices()
+DeviceManager::_ClearDevices(void)
 {
     std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
     for (UblockSharedPtr dev : devices)
@@ -170,7 +173,7 @@ DeviceManager::_ClearDevices()
 }
 
 void
-DeviceManager::_ClearMonitors()
+DeviceManager::_ClearMonitors(void)
 {
     for (auto it = monitors.begin(); it != monitors.end(); it++)
     {
@@ -183,7 +186,17 @@ DeviceManager::_ClearMonitors()
 }
 
 void
-DeviceManager::_StartMonitoring()
+DeviceManager::_ClearDrivers(void)
+{
+    for (auto it = drivers.begin(); it != drivers.end(); it++)
+    {
+        delete *it;
+    }
+    drivers.clear();
+}
+
+void
+DeviceManager::_StartMonitoring(void)
 {
     POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_START_MONITOR,
         "Start Monitoring");
@@ -242,7 +255,7 @@ DeviceManager::ScanDevs(void)
 }
 
 void
-DeviceManager::_InitScan()
+DeviceManager::_InitScan(void)
 {
     POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_INIT_SCAN, "InitScan begin");
     for (size_t i = 0; i < drivers.size(); i++)
@@ -290,7 +303,11 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
     devices.erase(iter);
     if (type == DeviceType::SSD && ssd != nullptr)
     {
-        UnvmeDrvSingleton::Instance()->GetDaemon()->Resume();
+        waitSsdDestruction = true;
+        SsdDestructionNotification cb = bind(&DeviceManager::HandleSsdDestructionNotification, this);
+        ssd->SetDestructionCallback(cb);
+        POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_DETACH,
+                "Pending I/O removal operation of ssd is in progress and monitoring resume is suspended yet.");
     }
 
     POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV,
@@ -301,7 +318,7 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
 }
 
 void
-DeviceManager::_Rescan()
+DeviceManager::_Rescan(void)
 {
     // URAM RESCAN
     POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_RESCAN, "ReScan begin");
@@ -384,13 +401,13 @@ DeviceManager::GetDev(DeviceIdentifier& devID)
 }
 
 vector<UblockSharedPtr>
-DeviceManager::GetDevs()
+DeviceManager::GetDevs(void)
 {
     return devices;
 }
 
 vector<DeviceProperty>
-DeviceManager::ListDevs()
+DeviceManager::ListDevs(void)
 {
     std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
     vector<DeviceProperty> devs;
@@ -452,7 +469,7 @@ DeviceManager::DetachDevice(DevUid uid)
             {
                 // Device Manager can call DetachDevice for already removed Ublock Device.
                 // So, just resume the Daemon.
-                UnvmeDrvSingleton::Instance()->GetDaemon()->Resume();
+                unvmeDriver->GetDaemon()->Resume();
                 POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
                     "DetachDevice - unknown device or already detached: {}", uid.val);
                 return static_cast<int>(POS_EVENT_ID::DEVICEMGR_DETACH);
@@ -533,4 +550,15 @@ DeviceManager::HandleCompletedCommand(void)
     }
 }
 
+void
+DeviceManager::HandleSsdDestructionNotification(void)
+{
+    if (waitSsdDestruction == true)
+    {
+        waitSsdDestruction = false;
+         POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_DETACH,
+                "SSD removal operation has been cleared and monitoring resumes");
+        unvmeDriver->GetDaemon()->Resume();
+    }
+}
 } // namespace pos

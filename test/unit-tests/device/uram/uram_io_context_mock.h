@@ -39,6 +39,7 @@ public:
     MOCK_METHOD(void, IncOutOfMemoryRetryCount, (), (override));
     MOCK_METHOD(void, ClearOutOfMemoryRetryCount, (), (override));
     MOCK_METHOD(uint32_t, GetOutOfMemoryRetryCount, (), (override));
+    MOCK_METHOD(UramDrv*, GetDriver, (), (override));
 };
 
 } // namespace pos
