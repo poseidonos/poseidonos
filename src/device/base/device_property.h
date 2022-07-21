@@ -62,6 +62,7 @@ public:
     uint64_t size;
     std::string mn;
     std::string sn;
+    std::string fr;
     std::string bdf;
     int numa;
 };

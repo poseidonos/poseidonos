@@ -43,6 +43,8 @@
 
 using namespace pos;
 
+#define GENERAL_FIRMWARE "0"
+
 UnvmeSsd::UnvmeSsd(
     std::string name,
     uint64_t size,
@@ -55,13 +57,17 @@ UnvmeSsd::UnvmeSsd(
   driver(driverToUse),
   ns(namespaceToUse),
   spdkNvmeCaller(spdkNvmeCaller),
-  spdkEnvCaller(spdkEnvCaller)
+  spdkEnvCaller(spdkEnvCaller),
+  isSupportedExtendedSmart(false)
 {
     property->bdf = addr;
     property->type = DeviceType::SSD;
     property->mn = _GetMN();
     property->sn = _GetSN();
+    property->fr = _GetFR();
     property->numa = _GetNuma();
+
+    _ClassifyDevice(property);
 }
 
 // Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
@@ -115,6 +121,18 @@ UnvmeSsd::_GetSN()
 }
 
 std::string
+UnvmeSsd::_GetFR()
+{
+    spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(ns);
+    const struct spdk_nvme_ctrlr_data* cdata =
+        spdkNvmeCaller->SpdkNvmeCtrlrGetData(ctrlr);
+
+    char str[128];
+    snprintf(str, sizeof(cdata->fr) + 1, "%s", cdata->fr);
+    return std::string(str);
+}
+
+std::string
 UnvmeSsd::_GetMN()
 {
     spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(ns);
@@ -139,4 +157,14 @@ struct spdk_nvme_ns*
 UnvmeSsd::GetNs(void)
 {
     return ns;
+}
+
+void
+UnvmeSsd::_ClassifyDevice(DeviceProperty* property)
+{
+    if ((property->mn.find("SAMSUNG") != string::npos) &&
+        (property->fr.substr(5, 1) == GENERAL_FIRMWARE))
+    {
+        _SetSupportedExtSmart();
+    }
 }

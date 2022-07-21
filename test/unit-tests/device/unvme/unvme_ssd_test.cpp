@@ -23,7 +23,7 @@ TEST(UnvmeSsd, GetNs_testIfGetNsProperly)
     data.mn[0] = 0;
     data.sn[0] = 0;
     EXPECT_CALL(*mockSpdkNvmeCaller, SpdkNvmeCtrlrGetData)
-        .Times(2).WillRepeatedly(Return(&data));
+        .Times(3).WillRepeatedly(Return(&data));
     UnvmeSsd unvmeSsd(
         "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkEnvCaller);
 
@@ -46,7 +46,7 @@ TEST(UnvmeSsd, GetByteAddress_testIfGetByteAddressInUnvmeSsd)
     data.mn[0] = 0;
     data.sn[0] = 0;
     EXPECT_CALL(*mockSpdkNvmeCaller, SpdkNvmeCtrlrGetData)
-        .Times(2).WillRepeatedly(Return(&data));
+        .Times(3).WillRepeatedly(Return(&data));
     UnvmeSsd unvmeSsd(
         "", 0, nullptr, ns, "", mockSpdkNvmeCaller, mockSpdkEnvCaller);
 
