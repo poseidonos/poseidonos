@@ -167,7 +167,7 @@ ResourceChecker::Execute(void)
     }
 
     uint32_t availableMemorySizeInKByte = envChecker->GetAvailableMemorySize();
-    
+
     if (nullptr != publisher && nullptr != envChecker)
     {
         while (true)

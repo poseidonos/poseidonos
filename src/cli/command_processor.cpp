@@ -1107,7 +1107,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
 
     struct spdk_nvme_health_information_page payload = {};
     SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
-    SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr);
+    SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr, SmartReqId::NVME_HEALTH_INFO);
     
     if (ret != SmartReturnType::SUCCESS)
     {
@@ -1123,6 +1123,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+
     return grpc::Status::OK;
 }
 

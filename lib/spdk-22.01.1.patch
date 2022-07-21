@@ -92,6 +92,169 @@ index e0e2f3998..7c0ad3800 100644
  /**
   * This function returns the failed status of a given controller.
   *
+diff --git include/spdk/nvme_spec.h include/spdk/nvme_spec.h
+index de379318e..c289a376c 100644
+--- include/spdk/nvme_spec.h
++++ include/spdk/nvme_spec.h
+@@ -2848,7 +2848,14 @@ enum spdk_nvme_log_page {
+ 
+ 	/* 0xC0-0xFF - vendor specific */
+ 	SPDK_NVME_LOG_VENDOR_SPECIFIC_START	= 0xc0,
+-	SPDK_NVME_LOG_VENDOR_SPECIFIC_END	= 0xff,
++
++	/** Cloud Attribute Log (OCP Spec 1.0a) */
++	SPDK_NVME_LOG_OCP = SPDK_NVME_LOG_VENDOR_SPECIFIC_START,
++
++	/** Samsung Extended SMART loge */
++	SPDK_NVME_LOG_EXTENDED_SMART = 0xCA,
++
++	SPDK_NVME_LOG_VENDOR_SPECIFIC_END = 0xff,
+ };
+ 
+ #define spdk_nvme_log_page_is_vendor_specific(lid) ((lid) >= SPDK_NVME_LOG_VENDOR_SPECIFIC_START)
+@@ -3021,6 +3028,142 @@ struct spdk_nvme_sanitize_status_log_page {
+ };
+ SPDK_STATIC_ASSERT(sizeof(struct spdk_nvme_sanitize_status_log_page) == 512, "Incorrect size");
+ 
++/**
++ * Cloud Attribute Log Page (OCP Spec 1.0a)
++ */
++struct spdk_nvme_log_ocp_information_entry {
++    uint64_t    physical_media_units_written_l;
++    uint64_t    physical_media_units_written_u;
++    uint64_t    physical_media_units_read_l;
++    uint64_t    physical_media_units_read_u;
++    uint64_t    bad_user_nand_block_count;
++    uint64_t    bad_system_nand_block_count;
++    uint64_t    xor_recovery_count;
++    uint64_t    uncorrectable_read_error_count;
++    uint64_t    soft_ecc_error_count;
++    uint64_t    end_to_end_correction_counts;
++    struct {
++        uint64_t system_data_percent_used : 8;
++        uint64_t refresh_count : 56;
++    } refresh_info;
++
++    uint16_t    user_data_erase_count;
++    struct {
++        uint8_t number_of_thermal_throttling_events;
++        uint8_t current_throttling_status;
++    } thermal_throttling_info;
++
++    uint16_t    rsvd1;
++    uint32_t    rsvd2;
++    uint64_t    pcie_correctable_error_count;
++    uint32_t    incomplete_shutdowns;
++    uint32_t    rsvd3;
++    struct {
++        uint8_t percent_free_blocks;
++        uint8_t rsvd1[7];
++    } free_block_info;
++
++    struct {
++        uint16_t capacitor_health;
++        uint8_t rsvd1[6];
++    } capacitor_info;
++
++    uint64_t    unaligned_io;
++    uint64_t    security_version_number;
++    uint64_t    nuse;
++    uint64_t    plp_start_count[2];
++    uint64_t    endurance_estimate[2];
++    uint8_t     rsvd4[302];
++    uint16_t	log_page_version;
++    uint64_t	log_page_guid[2];
++};
++SPDK_STATIC_ASSERT(sizeof(struct spdk_nvme_log_ocp_information_entry) == 512, "Incorrect size");
++
++struct __attribute__((packed)) extended_smart_attribute {
++    uint8_t    attribute_id[3];
++    uint16_t   normalized_value;
++    uint8_t    current_value[7];
++};
++SPDK_STATIC_ASSERT(sizeof(struct extended_smart_attribute) == 12, "Incorrect size");
++
++struct __attribute__((packed)) extended_smart_attribute_wear_level {
++    uint8_t     attribute_id[3];
++    uint16_t    normalized_value;
++    uint8_t     rsvd1;
++    uint16_t	avg_pe_cycle;
++    uint16_t	max_pe_cycle;
++    uint16_t	min_pe_cycle;
++};
++SPDK_STATIC_ASSERT(sizeof(struct extended_smart_attribute_wear_level) == 12, "Incorrect size");
++
++struct __attribute__((packed)) extended_smart_attribute_thermal_throttle {
++    uint8_t     attribute_id[3];
++    uint16_t    normalized_value;
++    uint16_t    rsvd1;
++    uint32_t	event_count;
++    uint8_t     status;
++};
++SPDK_STATIC_ASSERT(sizeof(struct extended_smart_attribute_thermal_throttle) == 12, "Incorrect size");
++
++/**
++ * Samsung Extended SMART loge Page
++ */
++struct __attribute__((packed)) spdk_nvme_log_samsung_extended_information_entry {
++    struct extended_smart_attribute                     program_fail_count;
++    struct extended_smart_attribute                     erase_fail_count;
++    struct extended_smart_attribute_wear_level          wearlevel_count;
++    struct extended_smart_attribute                     e2e_error_count;
++    struct extended_smart_attribute                     crc_error_count;
++    struct extended_smart_attribute                     media_wearlevel_percentage;
++    struct extended_smart_attribute                     host_read_percentage;
++    struct extended_smart_attribute                     workload_timer;
++    struct extended_smart_attribute_thermal_throttle    thermal_throttle_info;
++    uint8_t     rsvd1[24];
++    struct extended_smart_attribute                     physical_written_count;
++    struct extended_smart_attribute                     host_written_count;
++    uint8_t     rsvd2[100];
++    uint32_t    lifetime_write_amplification_factor;
++    uint32_t    hour_write_amplification_factor;
++    uint64_t    lifetime_user_write_count[2];
++    uint64_t    lifetime_nand_write_count[2];
++    uint64_t    lifetime_user_read_count[2];
++    uint32_t    runtime_bad_block_count;
++    uint16_t    current_temperature;
++    uint16_t    capacitor_health;
++    uint32_t    unused_rsvd_block_count;
++    uint64_t    read_reclaim_count;
++    uint64_t    lifetime_uecc_count;
++    uint32_t    used_rsvd_block_count;
++    uint64_t    power_on_hour[2];
++    uint64_t    npo_count[2];
++    uint64_t    spo_count[2];
++    uint32_t    perf_indicator;
++    uint32_t    wear_level_count;
++    uint32_t    hw_error_type;
++    uint32_t    device_recovery_count;
++    uint32_t    core_sram_cecc_count;
++    uint32_t    core_sram_cecc_address;
++    uint32_t    buffer_sram_cecc_count;
++    uint32_t    buffer_sram_cecc_address;
++    uint32_t    dram_cecc_count;
++    uint64_t    dram_cecc_address;
++    uint32_t    dram_uecc_count;
++    uint64_t    dram_uecc_address;
++    uint32_t    data_path_error_count;
++    uint16_t    fw_update_success_count;
++    uint16_t    fw_update_fail_count;
++    uint32_t    highest_temperature;
++    uint32_t    lowest_temeperature;
++    uint64_t    soft_ecc_error_count;
++    uint64_t    reset_count;
++    uint64_t    trim_sector_count[2];
++    uint32_t    security_meta_erase_fail_count;
++    uint32_t    over_temperature_count;
++    uint32_t    under_temperature_count;
++    uint32_t    recovery_reset_count;
++};
++SPDK_STATIC_ASSERT(sizeof(struct spdk_nvme_log_samsung_extended_information_entry) == 512, "Incorrect size");
++
+ /**
+  * Asynchronous Event Type
+  */
 diff --git include/spdk/nvmf_transport.h include/spdk/nvmf_transport.h
 index ea93c14f3..7e07cd980 100644
 --- include/spdk/nvmf_transport.h
