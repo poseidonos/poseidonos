@@ -369,11 +369,11 @@ TEST(UramDrv, SubmitIO_testIfRetryCallbackTriggerdProperly)
         callbackFunc(nullptr);
         return true;
     });
+
     NiceMock<MockSpdkBdevCaller>* mockBdevCaller =
         new NiceMock<MockSpdkBdevCaller>();
     EXPECT_CALL(*mockBdevCaller, SpdkBdevRead)
         .WillOnce(Return(-ENOMEM));
-
     UramDrv uramDrv(mockBdevCaller);
 
     // When

@@ -33,6 +33,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 
 #include "spdk/bdev.h"
 #include "src/device/base/device_driver.h"

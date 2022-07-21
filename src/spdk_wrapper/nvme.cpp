@@ -63,8 +63,8 @@ std::list<NsEntry*> Nvme::namespaces;
 
 uint32_t ioSizeBytes = 4096;
 
-Nvme::SpdkAttachEvent Nvme::attachCb = nullptr;
-Nvme::SpdkDetachEvent Nvme::detachCb = nullptr;
+SpdkAttachEvent Nvme::attachCb = nullptr;
+SpdkDetachEvent Nvme::detachCb = nullptr;
 std::atomic<bool> Nvme::paused;
 std::atomic<bool> Nvme::triggerSpdkDetach;
 std::mutex Nvme::nvmeMutex;

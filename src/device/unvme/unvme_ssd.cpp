@@ -75,6 +75,10 @@ UnvmeSsd::~UnvmeSsd(void)
     {
         delete spdkEnvCaller;
     }
+    if (destuctionCallback != nullptr)
+    {
+        destuctionCallback();
+    }
 }
 // LCOV_EXCL_STOP
 

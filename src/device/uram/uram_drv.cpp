@@ -268,9 +268,7 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
     }
     UramDeviceContext* devCtx = ioCtx->GetDeviceContext();
     spdk_bdev_io_completion_cb callbackFunc;
-
     callbackFunc = &AsyncIOComplete;
-
     retValue = _RequestIO(devCtx, callbackFunc, ioCtx);
     spdk_bdev_io_wait_cb retryFunc = [](void* arg) -> void {
         UramIOContext* ioCtx = static_cast<UramIOContext*>(arg);

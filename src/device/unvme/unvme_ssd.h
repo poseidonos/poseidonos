@@ -35,6 +35,7 @@
 
 #include <cstdint>
 #include <string>
+#include <functional>
 
 #include "spdk/nvme.h"
 #include "src/device/base/ublock_device.h"
@@ -45,6 +46,7 @@ namespace pos
 {
 class DeviceContext;
 class UnvmeDrv;
+using SsdDestructionNotification = std::function<void(void)>;
 
 class UnvmeSsd : public UBlockDevice
 {
@@ -59,8 +61,8 @@ public:
     virtual ~UnvmeSsd() override;
 
     struct spdk_nvme_ns* GetNs(void);
-
     void DecreaseOutstandingAdminCount(void);
+    void SetDestructionCallback(SsdDestructionNotification cb) { destuctionCallback = cb; }
 
 private:
     DeviceContext* _AllocateDeviceContext(void) override;
@@ -70,6 +72,7 @@ private:
     std::string _GetMN();
     int _GetNuma();
 
+    SsdDestructionNotification destuctionCallback = nullptr;
     spdk_nvme_ns* ns;
     SpdkNvmeCaller* spdkNvmeCaller;
     SpdkEnvCaller* spdkEnvCaller;

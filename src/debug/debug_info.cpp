@@ -125,8 +125,8 @@ DebugInfo::Update(void)
     mapperService = MapperServiceSingleton::Instance();
     arrayManager = ArrayManagerSingleton::Instance();
     allocatorService = AllocatorServiceSingleton::Instance();
-    uramDrv = UramDrvSingleton::Instance();
-    unvmeDrv = UnvmeDrvSingleton::Instance();
+    uramDrv = static_cast<UramDrv*>(DeviceManagerSingleton::Instance()->GetUramDriver());
+    unvmeDrv = static_cast<UnvmeDrv*>(DeviceManagerSingleton::Instance()->GetUnvmeDriver());
     configManager = ConfigManagerSingleton::Instance();
     spdk = SpdkSingleton::Instance();
     rbaStateService = RBAStateServiceSingleton::Instance();

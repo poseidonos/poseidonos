@@ -102,10 +102,9 @@ TEST(UnvmeDrv, DeviceAttached_testIfAttachEventIsNull)
     UnvmeDrv unvmeDrv;
 
     // When
-    int ret = unvmeDrv.DeviceAttached(nullptr, 0, nullptr);
+    unvmeDrv.DeviceAttached(nullptr, 0, nullptr);
 
     // Then
-    EXPECT_EQ(ret, expectedEventId);
 }
 
 TEST(UnvmeDrv, DeviceDetached_testIfDetachEventIsNull)
@@ -115,10 +114,9 @@ TEST(UnvmeDrv, DeviceDetached_testIfDetachEventIsNull)
     UnvmeDrv unvmeDrv;
 
     // When
-    int ret = unvmeDrv.DeviceDetached("");
+    unvmeDrv.DeviceDetached("");
 
     // Then
-    EXPECT_EQ(ret, expectedEventId);
 }
 
 TEST(UnvmeDrv, CompleteErrors_testIfRetryCountIsNotZero)

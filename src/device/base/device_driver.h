@@ -41,6 +41,7 @@ namespace pos
 {
 class DeviceContext;
 class UBlockDevice;
+class DeviceMonitor;
 
 class DeviceDriver
 {
@@ -51,16 +52,14 @@ public:
     DeviceDriver(void);
     virtual ~DeviceDriver(void);
     virtual int ScanDevs(std::vector<UblockSharedPtr>* devs) = 0;
-
     virtual bool Open(DeviceContext* deviceContext) = 0;
     virtual bool Close(DeviceContext* deviceContext) = 0;
-
     virtual int SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio) = 0;
     virtual int CompleteIOs(DeviceContext* deviceContext) = 0;
     virtual int CompleteErrors(DeviceContext* deviceContext);
+    virtual DeviceMonitor* GetDaemon(void) { return nullptr; }
     std::string GetName(void);
-    void SetDeviceEventCallback(DeviceAttachEvent attach,
-        DeviceDetachEvent detach);
+    void SetDeviceEventCallback(DeviceAttachEvent attach, DeviceDetachEvent detach);
 
 protected:
     std::string name = "";

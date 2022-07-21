@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <utility>
+#include <functional>
 
 #include "Air.h"
 #include "spdk/thread.h"
@@ -195,26 +196,16 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
     }
 }
 
-static void
-SpdkDetachEventHandler(std::string sn)
-{
-    UnvmeDrvSingleton::Instance()->DeviceDetached(sn);
-}
-
-static void
-SpdkAttachEventHandler(struct spdk_nvme_ns* ns, int num_devs,
-    const spdk_nvme_transport_id* trid)
-{
-    UnvmeDrvSingleton::Instance()->DeviceAttached(ns, num_devs, trid);
-}
-
 UnvmeDrv::UnvmeDrv(UnvmeCmd* unvmeCmd, SpdkNvmeCaller* spdkNvmeCaller)
 : nvmeSsd(new Nvme("spdk_daemon")),
   unvmeCmd(unvmeCmd),
   spdkNvmeCaller(spdkNvmeCaller)
 {
     name = "UnvmeDrv";
-    nvmeSsd->SetCallback(SpdkAttachEventHandler, SpdkDetachEventHandler);
+    using namespace std::placeholders;
+    SpdkAttachEvent attachCb = std::bind(&UnvmeDrv::DeviceAttached, this, _1, _2, _3);
+    SpdkDetachEvent detachCb = std::bind(&UnvmeDrv::DeviceDetached, this, _1);
+    nvmeSsd->SetCallback(attachCb, detachCb);
     if (this->unvmeCmd == nullptr)
     {
         this->unvmeCmd = new UnvmeCmd();
@@ -247,26 +238,25 @@ UnvmeDrv::GetDaemon(void)
     return nvmeSsd;
 }
 
-int
+void
 UnvmeDrv::DeviceDetached(std::string sn)
 {
     if (nullptr == detach_event)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DETACH_NOTIFICATION_FAILED;
         POS_TRACE_ERROR(eventId, "Failed to notify uNVMe device detachment: Device name: {}", sn);
-        return (int)eventId;
     }
-    detach_event(sn);
-    return 0;
+    else
+    {
+        detach_event(sn);
+    }
 }
 
-int
+void
 UnvmeDrv::DeviceAttached(struct spdk_nvme_ns* ns, int nsid,
     const spdk_nvme_transport_id* trid)
 {
-    int ret = 0;
     std::string deviceName = DEVICE_NAME_PREFIX + std::to_string(nsid);
-
     if (nullptr != attach_event)
     {
         uint64_t diskSize = spdkNvmeCaller->SpdkNvmeNsGetSize(ns);
@@ -280,11 +270,9 @@ UnvmeDrv::DeviceAttached(struct spdk_nvme_ns* ns, int nsid,
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_ATTACH_NOTIFICATION_FAILED;
         POS_TRACE_ERROR(eventId, "Failed to notify uNVMe device attachment: Device name: {}", deviceName);
-        ret = (int)eventId;
     }
 
     nvmeSsd->Resume();
-    return ret;
 }
 
 int
@@ -488,5 +476,4 @@ UnvmeDrv::CompleteErrors(DeviceContext* deviceContext)
 
     return completionCount;
 }
-
 } // namespace pos
