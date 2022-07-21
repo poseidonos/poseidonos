@@ -89,7 +89,7 @@ VolumeList::Add(VolumeBase* volume)
     volume->ID = id;
     items[id] = volume;
     volCnt++;
-    InitializePendingIOCount(id, VolumeStatus::Unmounted);
+    InitializePendingIOCount(id, VolumeIoType::InternalIo);
     POS_TRACE_DEBUG(EID(SUCCESS), "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
     return EID(SUCCESS);
 }
@@ -103,7 +103,7 @@ VolumeList::Add(VolumeBase* volume, int id)
         volume->ID = id;
         items[id] = volume;
         volCnt++;
-        InitializePendingIOCount(id, VolumeStatus::Unmounted);
+        InitializePendingIOCount(id, VolumeIoType::InternalIo);
         POS_TRACE_DEBUG(EID(VOL_DEBUG_MSG), "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
         return EID(SUCCESS);
     }
@@ -203,9 +203,9 @@ VolumeList::Next(int& index)
 }
 
 void
-VolumeList::InitializePendingIOCount(int volId, VolumeStatus volumeStatus)
+VolumeList::InitializePendingIOCount(int volId, VolumeIoType volumeIoType)
 {
-    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t index = static_cast<uint32_t>(volumeIoType);
     pendingIOCount[volId][index] = 1;
     possibleIncreaseIOCount[volId][index] = true;
 }
@@ -215,9 +215,9 @@ VolumeList::InitializePendingIOCount(int volId, VolumeStatus volumeStatus)
 // because there is a possibility that calls in sequence of "WaitUntilIdle => IncreasePendingIOCountIfoNozero"
 
 bool
-VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioSubmissionCount)
+VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioSubmissionCount)
 {
-    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t index = static_cast<uint32_t>(volumeIoType);
     if (unlikely (possibleIncreaseIOCount[volId][index] == false))
     {
         return false;
@@ -245,9 +245,9 @@ VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus
 }
 
 void
-VolumeList::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCompletionCount)
+VolumeList::DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCompletionCount)
 {
-    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t index = static_cast<uint32_t>(volumeIoType);
     uint32_t oldPendingIOCount = pendingIOCount[volId][index].fetch_sub(ioCompletionCount,
         memory_order_relaxed);
     if (unlikely(oldPendingIOCount < ioCompletionCount))
@@ -261,9 +261,9 @@ VolumeList::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_
 }
 
 bool
-VolumeList::CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus)
+VolumeList::CheckIdleAndSetZero(int volId, VolumeIoType volumeIoType)
 {
-    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t index = static_cast<uint32_t>(volumeIoType);
     uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
     // If oldPendingIOCount is greater than 0
     // If oldPendingIOCount == 1, decrease and return idle as true.
@@ -279,10 +279,23 @@ VolumeList::CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus)
 }
 
 void
-VolumeList::WaitUntilIdle(int volId, VolumeStatus volumeStatus)
+VolumeList::WaitUntilIdleInternalIo(int volId)
 {
-    possibleIncreaseIOCount[volId][volumeStatus] = false;
-    while (false == CheckIdleAndSetZero(volId, volumeStatus))
+    VolumeIoType volumeIoType = VolumeIoType::InternalIo;
+    possibleIncreaseIOCount[volId][volumeIoType] = false;
+    while (false == CheckIdleAndSetZero(volId, volumeIoType))
+    {
+        usleep(1);
+    }
+}
+
+void
+VolumeList::WaitUntilIdleUserIo(int volId)
+{
+    possibleIncreaseIOCount[volId][VolumeIoType::UserRead] = false;
+    possibleIncreaseIOCount[volId][VolumeIoType::UserWrite] = false;
+    while ((false == CheckIdleAndSetZero(volId, VolumeIoType::UserRead))
+        && (false == CheckIdleAndSetZero(volId, VolumeIoType::UserWrite)))
     {
         usleep(1);
     }

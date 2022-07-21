@@ -93,8 +93,8 @@ public:
     std::string GetStatusStr(VolumeStatus status) override;
     int CancelVolumeReplay(int volId) override;
 
-    int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) override;
-    int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) override;
+    int IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit = 1) override;
+    int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) override;
     VolumeBase* GetVolume(int volId) override;
     std::string GetArrayName(void) override;
 

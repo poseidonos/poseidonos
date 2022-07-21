@@ -68,8 +68,8 @@ public:
     virtual VolumeList* GetVolumeList(void) = 0;
     virtual std::string GetStatusStr(VolumeStatus status) = 0;
 
-    virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) = 0;
-    virtual int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) = 0;
+    virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit = 1) = 0;
+    virtual int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) = 0;
     
     virtual VolumeBase* GetVolume(int volId) = 0;
     virtual std::string GetArrayName(void) = 0;

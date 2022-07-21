@@ -232,7 +232,7 @@ TEST_F(CopierReadCompletionTestFixture, Execute_testIfGcStripeManaerDecreaseRema
     // given gc stripe is not full
     EXPECT_CALL(*gcStripeManager, DecreaseRemainingAndCheckIsFull(testVolumeId, _)).WillOnce(Return(false));
 
-    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeStatus::Unmounted, partitionLogicalSize.blksPerChunk)).Times(1);
+    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeIoType::InternalIo, partitionLogicalSize.blksPerChunk)).Times(1);
     EXPECT_CALL(*meta, ReturnBuffer(testStripeId, buffer)).Times(1);
     EXPECT_CALL(*meta, SetDoneCopyBlks(partitionLogicalSize.blksPerChunk)).Times(1);
 
@@ -271,11 +271,11 @@ TEST_F(CopierReadCompletionTestFixture, Execute_testIfGcStripeManaerAllocatesWri
     EXPECT_CALL(*gcStripeManager, DecreaseRemainingAndCheckIsFull(testVolumeId, _)).WillOnce(Return(true));
 
     // given return success when volumemanager increase pending io
-    EXPECT_CALL(*inputVolumeManager, IncreasePendingIOCountIfNotZero(testVolumeId, VolumeStatus::Unmounted, 1)).WillOnce(Return(0));
+    EXPECT_CALL(*inputVolumeManager, IncreasePendingIOCountIfNotZero(testVolumeId, VolumeIoType::InternalIo, 1)).WillOnce(Return(0));
     EXPECT_CALL(*inputEventScheduler, EnqueueEvent(inputFlushEvent)).Times(1);
     EXPECT_CALL(*gcStripeManager, SetFlushed(testVolumeId)).Times(1);
 
-    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeStatus::Unmounted, partitionLogicalSize.blksPerChunk)).Times(1);
+    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeIoType::InternalIo, partitionLogicalSize.blksPerChunk)).Times(1);
     EXPECT_CALL(*meta, ReturnBuffer(testStripeId, buffer)).Times(1);
     EXPECT_CALL(*meta, SetDoneCopyBlks(partitionLogicalSize.blksPerChunk)).Times(1);
 
@@ -314,12 +314,12 @@ TEST_F(CopierReadCompletionTestFixture, Execute_testIfFaliedThatVolumeManagerInc
     // given using gc stripe is full
     EXPECT_CALL(*gcStripeManager, DecreaseRemainingAndCheckIsFull(testVolumeId, _)).WillOnce(Return(true));
     // given return fail when volumemanager increase pending io
-    EXPECT_CALL(*inputVolumeManager, IncreasePendingIOCountIfNotZero(testVolumeId, VolumeStatus::Unmounted, 1)).WillOnce(Return(2010));
+    EXPECT_CALL(*inputVolumeManager, IncreasePendingIOCountIfNotZero(testVolumeId, VolumeIoType::InternalIo, 1)).WillOnce(Return(2010));
     EXPECT_CALL(*gcStripeManager, SetFlushed(testVolumeId)).Times(1);
     EXPECT_CALL(*gcStripeManager, ReturnBuffer(dataBuffer)).Times(1);
     EXPECT_CALL(*gcStripeManager, SetFinished).Times(1);
 
-    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeStatus::Unmounted, partitionLogicalSize.blksPerChunk)).Times(1);
+    EXPECT_CALL(*inputVolumeManager, DecreasePendingIOCount(testVolumeId, VolumeIoType::InternalIo, partitionLogicalSize.blksPerChunk)).Times(1);
     EXPECT_CALL(*meta, ReturnBuffer(testStripeId, buffer)).Times(1);
     EXPECT_CALL(*meta, SetDoneCopyBlks(partitionLogicalSize.blksPerChunk)).Times(1);
 

@@ -124,7 +124,7 @@ CopierReadCompletion::_DoSpecificJob(void)
         if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
         {
             if (unlikely(EID(SUCCESS)
-                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted)))
+                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo)))
             {
                 gcStripeManager->SetFlushed(volId);
                 allocatedBlkInfoList->clear();
@@ -151,7 +151,7 @@ CopierReadCompletion::_DoSpecificJob(void)
         }
     }
 
-    volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted, blkCnt);
+    volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo, blkCnt);
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
     airlog("PERF_CopierRead", "AIR_READ", 0, BLOCK_SIZE * blkCnt);

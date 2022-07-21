@@ -60,11 +60,12 @@ public:
         return volCnt;
     }
 
-    bool IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioSubmissionCount = 1);
-    void DecreasePendingIOCount(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioCompletionCount = 1);
-    void WaitUntilIdle(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
-    bool CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
-    void InitializePendingIOCount(int volId, VolumeStatus volumeStatus);
+    bool IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioSubmissionCount = 1);
+    void DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCompletionCount = 1);
+    void WaitUntilIdleInternalIo(int volId);
+    void WaitUntilIdleUserIo(int volId);
+    bool CheckIdleAndSetZero(int volId, VolumeIoType volumeIoType);
+    void InitializePendingIOCount(int volId, VolumeIoType volumeIoType);
 
 private:
     int _NewID();
@@ -72,8 +73,8 @@ private:
     VolumeBase* items[MAX_VOLUME_COUNT];
     std::mutex listMutex;
 
-    std::atomic<bool> possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
-    std::atomic<uint32_t> pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
+    std::atomic<bool> possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeIoType::MaxVolumeIoTypeCnt)];
+    std::atomic<uint32_t> pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeIoType::MaxVolumeIoTypeCnt)];
 };
 
 } // namespace pos

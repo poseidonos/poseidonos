@@ -76,7 +76,7 @@ VolumeUnmounter::Do(string name)
     bool res = true;
     if (VolumeStatus::Unmounted != vol->GetStatus())
     {
-        volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
+        volumeList.WaitUntilIdleUserIo(vol->ID);
         _SetVolumeEventBase(vol);
         _SetVolumeEventPerf(vol);
         _SetVolumeArrayInfo();
