@@ -30,15 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/include/metafs_service.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/mapper/reversemap/reversemap_manager.h"
-#include "src/meta_file_intf/mock_file_intf.h"
+
+#include <map>
+#include <string>
+#include <tuple>
+#include <utility>
+
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/meta_const.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
-#include <string>
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -53,7 +60,8 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, I
   iStripeMap(istripeMap),
   volumeManager(vol),
   addrInfo(addrInfo_),
-  telemetryPublisher(tp)
+  telemetryPublisher(tp),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 // LCOV_EXCL_START
@@ -70,7 +78,7 @@ ReverseMapManager::~ReverseMapManager(void)
     }
     if (revMapPacks != nullptr)
     {
-        delete [] revMapPacks;
+        delete[] revMapPacks;
         revMapPacks = nullptr;
     }
 }
@@ -88,7 +96,18 @@ ReverseMapManager::Init(void)
     // Create MFS and Open the file for whole reverse map
     if (addrInfo->IsUT() == false)
     {
-        revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+        if (rocksDbEnabled)
+        {
+            revMapWholefile = new RocksDBMetaFsIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_INITIALIZED,
+                "RocksDBMetaFsIntf for reverse map has been initialized , fileName : {} , arrayId : {} ", "RevMapWhole", addrInfo->GetArrayId());
+        }
+        else
+        {
+            revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_INITIALIZED,
+                "MetaFsFileIntffor reverse map has been initialized , fileName : {} , arrayId : {} ", "RevMapWhole", addrInfo->GetArrayId());
+        }
     }
     else
     {
@@ -97,7 +116,7 @@ ReverseMapManager::Init(void)
     if (revMapWholefile->DoesFileExist() == false)
     {
         POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-                        fileSizePerStripe, addrInfo->GetMaxVSID(), fileSizeWholeRevermap);
+            fileSizePerStripe, addrInfo->GetMaxVSID(), fileSizeWholeRevermap);
 
         int ret = revMapWholefile->Create(fileSizeWholeRevermap);
         if (ret != 0)
@@ -131,7 +150,7 @@ ReverseMapManager::Dispose(void)
     }
     if (revMapPacks != nullptr)
     {
-        delete [] revMapPacks;
+        delete[] revMapPacks;
         revMapPacks = nullptr;
     }
 }
@@ -253,7 +272,7 @@ ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum
 }
 
 int
-ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset,  uint64_t fileSize, char* buf)
+ReverseMapManager::LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf)
 {
     if (fileLinux == nullptr)
     {

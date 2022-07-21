@@ -162,6 +162,24 @@ service PosCli {
       		post: "/v1/createsubsystem"
     	};
 	}
+
+	rpc DeleteSubsystem (DeleteSubsystemRequest) returns (DeleteSubsystemResponse) {
+		option (google.api.http) = {
+      		post: "/v1/deletesubsystem"
+    	};
+	}
+
+	rpc AddListener (AddListenerRequest) returns (AddListenerResponse) {
+		option (google.api.http) = {
+      		post: "/v1/addlistener"
+    	};
+	}
+
+	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
+		option (google.api.http) = {
+      		post: "/v1/listsubsystem"
+    	};
+	}
 }
 
 message Status {
@@ -932,6 +950,95 @@ message CreateSubsystemResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DeleteSubsystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+	}
+	Param param = 4;
+}
+
+message DeleteSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message AddListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+	}
+	Param param = 4;
+}
+
+message AddListenerResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Subsystem {
+	string subnqn = 1;
+	string subtype = 2;
+	message AddressInfo {
+		string transportType = 1;
+		string addressFamily = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+	}
+	repeated AddressInfo listenAddresses = 3;
+	int32 allowAnyHost = 4;
+	message Host {
+		string nqn = 1;
+	}
+	repeated Host hosts = 5;
+	string serialNumber = 6;
+	string modelNumber = 7;
+	int32 maxNamespaces = 8;
+	message Namespace {
+		int32 nsid = 1;
+		string bdevName = 2;
+		string uuid = 3;
+	}
+	repeated Namespace namespaces = 9;
+}
+
+message ListSubsystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message ListSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message SubsystemList {
+			repeated Subsystem subsystemList = 1;
+		}
+		SubsystemList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;

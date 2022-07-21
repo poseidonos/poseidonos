@@ -333,22 +333,22 @@ type ListSubsystemResData struct {
 }
 
 type Subsystem struct {
-	NQN             string        `json:"nqn"`
+	NQN             string        `json:"subnqn"`
 	SUBTYPE         string        `json:"subtype"`
-	LISTENADDRESSES []AddressInfo `json:"listen_addresses"`
-	ALLOWANYHOST    int           `json:"allow_any_host"`
+	LISTENADDRESSES []AddressInfo `json:"listenAddresses"`
+	ALLOWANYHOST    int           `json:"allowAnyHost"`
 	HOSTS           []Host        `json:"hosts"`
-	SERIAL          string        `json:"serial_number,omitempty"`
-	MODEL           string        `json:"model_number,omitempty"`
-	MAXNAMESPACES   int           `json:"max_namespaces,omitempty"`
+	SERIAL          string        `json:"serialNumber,omitempty"`
+	MODEL           string        `json:"modelNumber,omitempty"`
+	MAXNAMESPACES   int           `json:"maxNamespaces,omitempty"`
 	NAMESPACES      []Namespace   `json:"namespaces,omitempty"`
 }
 
 type AddressInfo struct {
-	TRANSPORTTYPE      string `json:"transport_type"`
-	ADDRESSFAMILY      string `json:"address_family"`
-	TARGETADDRESS      string `json:"target_address"`
-	TRANSPORTSERVICEID string `json:"transport_service_id"`
+	TRANSPORTTYPE      string `json:"transportType"`
+	ADDRESSFAMILY      string `json:"addressFamily"`
+	TARGETADDRESS      string `json:"targetAddress"`
+	TRANSPORTSERVICEID string `json:"transportServiceId"`
 }
 
 type Host struct {
@@ -357,6 +357,6 @@ type Host struct {
 
 type Namespace struct {
 	NSID     int    `json:"nsid"`
-	BDEVNAME string `json:"bdev_name,omitempty"`
+	BDEVNAME string `json:"bdevName,omitempty"`
 	UUID     string `json:"uuid,omitempty"`
 }

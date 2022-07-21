@@ -64,7 +64,7 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
 RocksDBLogBuffer::RocksDBLogBuffer(const std::string arrayName)
 : RocksDBLogBuffer()
 {
-    this->pathName = "/etc/pos/" + arrayName + "_RocksJournal";
+    this->pathName = "/etc/pos/POSRaid/" + arrayName + "_RocksJournal";
 }
 
 // LCOV_EXCL_START
@@ -91,7 +91,7 @@ RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
 void
 RocksDBLogBuffer::InitDataBuffer(void)
 {
-    //nothing to do
+    // nothing to do
 }
 
 void
@@ -297,8 +297,9 @@ RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
     if (ret.ok())
     {
         POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET), "RocksDB logs in logGroupId {} is reset ", id);
-        callbackEvent->Execute();
-        return 0;
+        const bool result = callbackEvent->Execute();
+        POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET), "The result of the event is {}", result);
+        return EID(SUCCESS);
     }
     else
     {
@@ -396,6 +397,15 @@ RocksDBLogBuffer::IsOpened(void)
 int
 RocksDBLogBuffer::_CreateDirectory(void)
 {
+    if (!std::experimental::filesystem::exists("/etc/pos/POSRaid"))
+    {
+        bool ret = std::experimental::filesystem::create_directory("/etc/pos/POSRaid");
+        if (ret != true)
+        {
+            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED), "RocksDB directory creation failed (path :{}) ", pathName);
+            return -1 * EID(ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED);
+        }
+    }
     if (std::experimental::filesystem::exists(pathName))
     {
         POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DIR_EXISTS), "RocksDB directory already exists (path :{}) ", pathName);
@@ -413,7 +423,7 @@ RocksDBLogBuffer::_CreateDirectory(void)
     return 0;
 }
 
-//TODO(sang7.park) : This method is supposed to be used when array is removed.
+// TODO(sang7.park) : This method is supposed to be used when array is removed.
 int
 RocksDBLogBuffer::_DeleteDirectory(void)
 {

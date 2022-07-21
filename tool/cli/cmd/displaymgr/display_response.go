@@ -445,12 +445,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		}
 
 	case "LISTSUBSYSTEM":
-		res := messages.ListSubsystemResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.ListSubsystemResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -474,14 +474,14 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"--------------")
 
 		// Data
-		for _, subsystem := range res.RESULT.DATA.SUBSYSTEMLIST {
+		for _, subsystem := range res.GetResult().GetData().GetSubsystemList() {
 			fmt.Fprintln(w,
-				subsystem.NQN+"\t"+
-					globals.FieldSeparator+subsystem.SUBTYPE+"\t"+
-					globals.FieldSeparator+strconv.Itoa(len(subsystem.LISTENADDRESSES))+"\t"+
-					globals.FieldSeparator+subsystem.SERIAL+"\t"+
-					globals.FieldSeparator+subsystem.MODEL+"\t"+
-					globals.FieldSeparator+strconv.Itoa(len(subsystem.NAMESPACES)))
+				subsystem.Subnqn+"\t"+
+					globals.FieldSeparator+subsystem.Subtype+"\t"+
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetListenAddresses()))+"\t"+
+					globals.FieldSeparator+subsystem.SerialNumber+"\t"+
+					globals.FieldSeparator+subsystem.ModelNumber+"\t"+
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces())))
 		}
 
 		w.Flush()

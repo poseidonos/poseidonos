@@ -32,6 +32,7 @@
 
 #include "test/unit-tests/utils/spdk_util.h"
 
+
 struct spdk_nvme_ns* BuildFakeNvmeNamespace(void)
 {
     // Initialize spdk_nvme_ctrlr's proc queue and mutex
@@ -43,8 +44,6 @@ struct spdk_nvme_ns* BuildFakeNvmeNamespace(void)
     // Initialize spdk_nvme_ns's reference to controller
     struct spdk_nvme_ns* fakeNamespace = new spdk_nvme_ns;
     fakeNamespace->ctrlr = fakeController;
-    fakeController->ns = fakeNamespace;
-
     struct spdk_pci_device devhandle;
     devhandle.socket_id = 1;
 

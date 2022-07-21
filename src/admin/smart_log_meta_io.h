@@ -111,5 +111,6 @@ private:
     int ioError = 0;
     SmartLogMgr* smartLogMgr;
     MetaIoDoneChecker* fileIoDone;
+    bool rocksDbEnabled;
 };
 } // namespace pos

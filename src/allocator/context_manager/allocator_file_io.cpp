@@ -38,6 +38,9 @@
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/meta_file_intf/meta_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -56,7 +59,8 @@ AllocatorFileIo::AllocatorFileIo(int owner, IAllocatorFileIoClient* client_, All
   fileSize(0),
   numFilesReading(0),
   numFilesFlushing(0),
-  initialized(false)
+  initialized(false),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 
@@ -101,7 +105,18 @@ AllocatorFileIo::_CreateFile(void)
 {
     if (file == nullptr)
     {
-        file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+        if (rocksDbEnabled)
+        {
+            file = new RocksDBMetaFsIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::ALLOCATOR_FILE_IO_INITIALIZED,
+                "RocksDBMetaFsIntf for allocator file io has been initialized , fileName : {} , arrayId : {} ", client->GetFilename(), arrayId);
+        }
+        else
+        {
+            file = new MetaFsFileIntf(client->GetFilename(), arrayId, MetaFileType::SpecialPurposeMap);
+            POS_TRACE_INFO((int)POS_EVENT_ID::ALLOCATOR_FILE_IO_INITIALIZED,
+                "MetaFsFileIntf for allocator file io has been initialized , fileName : {} , arrayId : {} ", client->GetFilename(), arrayId);
+        }
     }
 }
 

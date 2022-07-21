@@ -92,7 +92,8 @@ ContextReplayer::ReplayStripeAllocation(StripeId wbLsid, StripeId userLsid)
     allocatorCtx->AllocWbStripe(wbLsid);
 
     SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-    if (segmentCtx->GetSegmentState(segId) == SegmentState::FREE) {
+    if (segmentCtx->GetSegmentState(segId) == SegmentState::FREE)
+    {
         segmentCtx->AllocateSegment(segId);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
     }

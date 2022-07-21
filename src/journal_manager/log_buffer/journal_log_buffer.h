@@ -114,5 +114,6 @@ private:
     char* initializedDataBuffer;
 
     TelemetryPublisher* telemetryPublisher;
+    bool rocksDbEnabled;
 };
 } // namespace pos

@@ -32,6 +32,8 @@
 
 #include "log_write_handler.h"
 
+#include <string>
+
 #include "buffer_offset_allocator.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"

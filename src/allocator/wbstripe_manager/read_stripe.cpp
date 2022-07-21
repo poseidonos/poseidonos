@@ -32,6 +32,8 @@
 
 #include "src/allocator/wbstripe_manager/read_stripe.h"
 
+#include <list>
+
 #include "src/array/ft/buffer_entry.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"

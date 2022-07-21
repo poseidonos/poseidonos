@@ -6,6 +6,7 @@
 #include "test/unit-tests/device/uram/uram_io_context_mock.h"
 #include "test/unit-tests/spdk_wrapper/caller/spdk_bdev_caller_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
+#include "lib/spdk/lib/thread/thread_internal.h"
 
 using testing::_;
 using testing::NiceMock;

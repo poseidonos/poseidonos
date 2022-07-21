@@ -42,7 +42,9 @@
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
@@ -52,7 +54,8 @@ JournalLogBuffer::JournalLogBuffer(void)
   logBufferReadDone(0),
   logFile(nullptr),
   initializedDataBuffer(nullptr),
-  telemetryPublisher(nullptr)
+  telemetryPublisher(nullptr),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 
@@ -87,8 +90,18 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
 
     if (logFile == nullptr)
     {
-        logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
-        POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
+        // rocksDbEnabled case works when journal configuration "use_rocksdb" is false and metafs configuration "use_rocksdb" is true. 
+        // TODO(sang7.park) : but the performance of POS is too low with this case, so have to figure out it.
+        if (rocksDbEnabled)
+        {
+            logFile = new RocksDBMetaFsIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+            POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "RocksDBMetaFsIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}, this option is not recommended because of low performance. ", config->GetMetaVolumeToUse());
+        }
+        else
+        {
+            logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, MetaFileType::Journal, config->GetMetaVolumeToUse());
+            POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
+        }
     }
     return 0;
 }
@@ -128,7 +141,6 @@ JournalLogBuffer::Dispose(void)
         delete logFile;
         logFile = nullptr;
     }
-
 }
 
 int

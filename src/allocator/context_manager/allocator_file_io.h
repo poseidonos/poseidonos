@@ -108,6 +108,7 @@ private:
     std::atomic<int> numFilesFlushing;
 
     bool initialized;
+    bool rocksDbEnabled;
 };
 
 } // namespace pos

@@ -32,6 +32,8 @@
 
 #include "src/mapper/map/map_io_handler.h"
 
+#include <utility>
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
 #include "src/mapper/i_map_flush.h"
@@ -40,6 +42,9 @@
 #include "src/metafs/metafs_file_intf.h"
 #include "src/mapper/map/create_map_flush_event.h"
 #include "src/mapper/map/map_flush_event.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -56,7 +61,8 @@ MapIoHandler::MapIoHandler(MetaFileIntf* file_, Map* mapData, MapHeader* mapHead
   flushInProgress(false),
   ioError(0),
   addrInfo(addrInfo_),
-  eventScheduler(scheduler_)
+  eventScheduler(scheduler_),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 
@@ -76,7 +82,14 @@ MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize, MetaFileType fil
     if (addrInfo->IsUT() == false)
     {
         assert(file == nullptr);
-        file = new MetaFsFileIntf(fileName, addrInfo->GetArrayId(), fileType);
+        if(rocksDbEnabled)
+        {
+            file = new RocksDBMetaFsIntf(fileName, addrInfo->GetArrayId(), fileType);
+        }
+        else
+        {
+            file = new MetaFsFileIntf(fileName, addrInfo->GetArrayId(), fileType);
+        }
     }
     else
     {

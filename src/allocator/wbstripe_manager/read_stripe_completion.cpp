@@ -34,6 +34,8 @@
 
 #include <stdlib.h>
 
+#include <list>
+
 #include "src/include/meta_const.h"
 #include "src/logger/logger.h"
 

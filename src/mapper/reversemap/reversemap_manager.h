@@ -32,6 +32,9 @@
 
 #pragma once
 
+#include <map>
+#include <tuple>
+
 #include "src/array_models/interface/i_array_info.h"
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/i_reversemap.h"
@@ -87,6 +90,7 @@ private:
     IVolumeInfoManager* volumeManager;
     MapperAddressInfo* addrInfo;
     TelemetryPublisher* telemetryPublisher;
+    bool rocksDbEnabled;
 };
 
 } // namespace pos

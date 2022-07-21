@@ -132,7 +132,7 @@ test1_iotimeout_abort()
             sn = iter->GetSN();
 
             ctrlr = spdk_nvme_ns_get_ctrlr(ns);
-            spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 1,
+            spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 1, 1,
                 &Nvme::ControllerTimeoutCallback, nullptr);
 
             uint64_t size = 8 * 1024 / 512;
@@ -181,7 +181,7 @@ DiskIo(UblockSharedPtr dev, void* ctx)
         sn = dev->GetSN();
 
         ctrlr = spdk_nvme_ns_get_ctrlr(ns);
-        spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 0,
+        spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 0, 0,
             &Nvme::ControllerTimeoutCallback, nullptr);
 
         for (unsigned int i = 0; i < CALLBACK_COUNT; i++)

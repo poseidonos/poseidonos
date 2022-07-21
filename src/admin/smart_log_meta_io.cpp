@@ -35,6 +35,9 @@
 #include "src/admin/smart_log_mgr.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 
 namespace pos
 {
@@ -43,10 +46,22 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
   smartLogFile(nullptr),
   arrayId(arrayIndex),
   smartLogMgr(smartLogMgr),
-  fileIoDone(new MetaIoDoneChecker)
+  fileIoDone(new MetaIoDoneChecker),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
     fileName = "SmartLogPage.bin";
-    smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
+    if (rocksDbEnabled)
+    {
+        smartLogFile = new RocksDBMetaFsIntf(fileName, arrayId, MetaFileType::General);
+        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+            "RocksDBMetaFsIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
+    }
+    else
+    {
+        smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
+        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+            "MetaFsFileIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
+    }
 }
 
 SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, MetaFileIntf* metaFile, MetaIoDoneChecker* ioDone)
