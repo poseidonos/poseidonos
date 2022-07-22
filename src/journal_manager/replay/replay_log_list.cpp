@@ -89,10 +89,14 @@ ReplayLogList::IsEmpty(void)
 }
 
 void
-ReplayLogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
+ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
 {
     logGroups[seqNum].footer = footer;
     logGroups[seqNum].isFooterValid = true;
+    if (footer.resetedSequenceNumber != (uint32_t)-1)
+    {
+        logGroups.erase(footer.resetedSequenceNumber);
+    }
 }
 
 ReplayLogGroup

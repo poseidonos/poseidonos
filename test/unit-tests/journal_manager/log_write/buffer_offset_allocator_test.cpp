@@ -172,7 +172,7 @@ TEST(BufferOffsetAllocator, LogWriteCanceled_testWithAllocatedBuffer)
 
     EXPECT_CALL((*(MockLogGroupBufferStatus*)statusList[targetLogGroup]), LogFilled);
     EXPECT_CALL((*(MockLogGroupBufferStatus*)statusList[targetLogGroup]), TryToSetFull).WillOnce(Return(true));
-    EXPECT_CALL(releaser, AddToFullLogGroup(targetLogGroup));
+    EXPECT_CALL(releaser, AddToFullLogGroup(targetLogGroup, 0));
     allocator.LogWriteCanceled(targetLogGroup);
 
     DeleteMockLogGroupBufferStatus(allocator, statusList);

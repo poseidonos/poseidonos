@@ -65,7 +65,7 @@ LogList::IsEmpty(void)
 }
 
 void
-LogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
+LogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
 {
     // do nothing
 }

@@ -46,13 +46,17 @@ TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
     // Given
     int logGroupId = 0;
     NiceMock<MockJournalLogBuffer> logBuffer;
-    ResetLogGroup event(&logBuffer, logGroupId, nullptr);
+    LogGroupFooter footer;
+    uint64_t footerOffset = 0;
 
-    // Then
-    EXPECT_CALL(logBuffer, AsyncReset(logGroupId, _));
+    ResetLogGroup event(&logBuffer, logGroupId, footer, footerOffset, nullptr);
 
     // When
-    event.Execute();
+    EXPECT_CALL(logBuffer, InternalIo);
+    bool result = event.Execute();
+
+    // Then
+    EXPECT_EQ(result, true);
 }
 
 } // namespace pos
