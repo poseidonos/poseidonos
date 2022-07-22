@@ -35,9 +35,9 @@ void
 RocksDBLogBufferIntegrationTest::SetUp(void)
 {
     // remove rocksdb log files by removing temporary directory if exist
-    std::string targetDirName = "/etc/pos/POSRaid/" + GetLogDirName() + "_RocksJournal";
+    std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(targetDirName);
-    std::string SPORDirectory = "/etc/pos/POSRaid/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = rocksdbPath + "/SPOR" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(SPORDirectory);
 
     numLogsWritten = 0;
@@ -47,6 +47,7 @@ RocksDBLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetLogBufferSize).WillByDefault(Return(LOG_BUFFER_SIZE));
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(NUM_LOG_GROUPS));
+    ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
 
     factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks = new RocksDBLogBuffer(GetLogDirName());
@@ -67,12 +68,12 @@ RocksDBLogBufferIntegrationTest::TearDown(void)
     addedLogs.clear();
 
     // Teardown : remove rocksdb log files by removing temporary directory.
-    std::string targetDirName = "/etc/pos/POSRaid/" + GetLogDirName() + "_RocksJournal";
+    std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     int ret = std::experimental::filesystem::remove_all(targetDirName);
     EXPECT_TRUE(ret >= 1);
 
     // Remove SPOR directory
-    std::string SPORDirectory = "/etc/pos/POSRaid/SPOR" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = rocksdbPath + "/SPOR" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(SPORDirectory);
 
     journalRocks->Close();
@@ -271,24 +272,30 @@ RocksDBLogBufferIntegrationTest::SimulateSPOR(void)
 {
     // To Simulate SPOR, copy rocksdb data to another directory at any time which is similar to closing rocksdb abrubtly before closing db.
     std::string SPORDirName = "SPOR" + GetLogDirName();
-    std::string SPORDirectory = "/etc/pos/POSRaid/" + SPORDirName + "_RocksJournal";
-    std::string targetDirName = "/etc/pos/POSRaid/" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = rocksdbPath + "/" + SPORDirName + "_RocksJournal";
+    std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::copy(targetDirName, SPORDirectory);
 
     // Open abrubtly closed rocksDB (Copied rocksdb)
     delete journalRocks;
+    ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
+
     journalRocks = new RocksDBLogBuffer(SPORDirName);
-    _PrepareLogBuffer();
     journalRocks->Init(&config, &factory, 0, nullptr);
+    _PrepareLogBuffer();
 }
 
 TEST_F(RocksDBLogBufferIntegrationTest, CreateAndClose)
 {
     // Given : array name and When JournalRocks opened
     RocksDBLogBuffer journalRocks("OpenAndClose");
+    ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
+    journalRocks.Init(&config, &factory, 0, nullptr);
+
     uint64_t logBufferSize = LOG_BUFFER_SIZE;
     int createStatus = journalRocks.Create(logBufferSize);
-    std::string targetDirName = "/etc/pos/POSRaid/OpenAndClose_RocksJournal";
+    std::string targetDirName = rocksdbPath + "/OpenAndClose_RocksJournal";
     // Then : Directory is exist, open status is success (0) and isOpened variable is true
     EXPECT_EQ(std::experimental::filesystem::exists(targetDirName), true);
     EXPECT_EQ(createStatus, 0);
