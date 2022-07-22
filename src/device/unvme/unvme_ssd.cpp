@@ -70,6 +70,7 @@ UnvmeSsd::~UnvmeSsd(void)
 {
     if (isHotDetached == true)
     {
+        POS_TRACE_WARN(EID(DEVICEMGR_REMOVE_DEV), "Free SSD ctrlr {}({})", GetName(), GetSN());
         driver->SpdkDetach(ns);
     }
     if (spdkNvmeCaller != nullptr)
