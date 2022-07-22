@@ -37,6 +37,7 @@
 namespace pos
 {
 enum CheckpointStatus : int;
+struct LogGroupInfo;
 
 class ICheckpointStatus
 {

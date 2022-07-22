@@ -34,6 +34,7 @@
 
 #include "src/event_scheduler/event.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/log/log_group_footer.h"
 
 namespace pos
 {
@@ -43,13 +44,16 @@ class ResetLogGroup : public Event
 {
 public:
     ResetLogGroup(void) = default;
-    ResetLogGroup(IJournalLogBuffer* logBuffer, int groupId, EventSmartPtr callback);
+    ResetLogGroup(IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback);
 
     virtual bool Execute(void) override;
 
 private:
     IJournalLogBuffer* logBuffer;
     int logGroupId;
+    LogGroupFooter footer;
+    uint64_t footerOffset;
+    uint64_t sequenceNumber;
     EventSmartPtr callback;
 };
 } // namespace pos

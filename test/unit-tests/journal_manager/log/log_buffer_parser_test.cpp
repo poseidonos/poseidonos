@@ -244,6 +244,7 @@ TEST(LogBufferParser, GetLogs_testIfLogsAndLogBufferFooterAreParsed)
 
     LogGroupFooter footer;
     footer.lastCheckpointedSeginfoVersion = 13;
+    footer.isReseted = false;
 
     char* targetBuffer = (char*)logBuffer + currentOffset;
     memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));

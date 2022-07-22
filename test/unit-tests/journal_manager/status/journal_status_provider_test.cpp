@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/status/i_checkpoint_status_mock.h"
 #include "test/unit-tests/journal_manager/status/i_log_buffer_status_mock.h"
@@ -37,7 +38,9 @@ TEST(JournalStatusProvider, GetJournalStatus_testIfGetConfigElementSuccess)
     int logBufferSize = 1024;
     int sequenceNumber = 0;
     int flushingLogGroupId = -1;
-    std::list<int> fullLogGroups = {0, 1};
+    std::list<int> fullLogGroups;
+    fullLogGroups.push_back(0);
+    fullLogGroups.push_back(1);
 
     ON_CALL(config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroup));

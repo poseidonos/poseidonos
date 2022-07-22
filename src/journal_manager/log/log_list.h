@@ -49,7 +49,8 @@ public:
 
     virtual void AddLog(LogHandlerInterface* log);
     virtual bool IsEmpty(void);
-    virtual void SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer);
+    virtual void SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer);
+    virtual void EraseReplayLogGroup(uint32_t seqNum);
 
     std::list<LogHandlerInterface*> GetLogs(void);
 
