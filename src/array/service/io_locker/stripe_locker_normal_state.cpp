@@ -31,9 +31,10 @@
  */
 
 #include "stripe_locker_normal_state.h"
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+#include <sstream>
 
 namespace pos
 {
@@ -67,6 +68,18 @@ StripeLockerNormalState::Count(void)
 {
     unique_lock<mutex> lock(mtx);
     return workingSet.size();
+}
+
+void
+StripeLockerNormalState::WriteLog(void)
+{
+    stringstream ss;
+    for (auto item : workingSet)
+    {
+        ss << "(id:" << item.id << ", owner:" << item.owner << "), ";
+    }
+    POS_TRACE_WARN(EID(BUSY_LOCKER_WARN), "NormalLocker, cnt:{}, items:{}",
+        workingSet.size(), ss.str());
 }
 
 }; // namespace pos

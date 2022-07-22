@@ -71,6 +71,13 @@ StripeLockerBusyState::Count(void)
 }
 
 void
+StripeLockerBusyState::Clear(void)
+{
+    unique_lock<mutex> lock(mtx);
+    busySet.clear();
+}
+
+void
 StripeLockerBusyState::WriteLog(void)
 {
     stringstream ss;
