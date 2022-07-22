@@ -37,12 +37,13 @@
 namespace pos
 {
 enum CheckpointStatus : int;
+struct LogGroupInfo;
 
 class ICheckpointStatus
 {
 public:
     virtual int GetFlushingLogGroupId(void) = 0;
-    virtual std::list<int> GetFullLogGroups(void) = 0;
+    virtual std::list<LogGroupInfo> GetFullLogGroups(void) = 0;
     virtual CheckpointStatus GetStatus(void) = 0;
 };
 

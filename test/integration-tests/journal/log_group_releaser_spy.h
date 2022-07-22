@@ -62,7 +62,7 @@ public:
 
     // Metohds to inject protected member values for unit testing
     void
-    SetFullLogGroups(std::list<int> logGroups)
+    SetFullLogGroups(std::list<LogGroupInfo> logGroups)
     {
         fullLogGroup = logGroups;
     }

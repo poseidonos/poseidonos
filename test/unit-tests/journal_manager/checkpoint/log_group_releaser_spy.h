@@ -54,7 +54,7 @@ public:
     }
 
     void
-    SetFullLogGroups(std::list<int> logGroups)
+    SetFullLogGroups(std::list<LogGroupInfo> logGroups)
     {
         fullLogGroup = logGroups;
     }
