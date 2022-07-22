@@ -53,7 +53,7 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
     ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
     VsaRangeMaker* vsaRangeMaker)
-: Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
+: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
     volumeIo(volumeIo),
     vsaMap(vsaMap),
     segmentCtx(segmentCtx),
@@ -99,6 +99,7 @@ BlockMapUpdate::_DoSpecificJob(void)
 
     segmentCtx->ValidateBlks(targetVsaRange);
 
+    POS_TRACE_TRACE(-1, "BlockMapUpdate::_DoSpecificJob, log group id : {}", logGroupId);
     return true;
 }
 
@@ -134,5 +135,4 @@ BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
 
     return *foundStripe;
 }
-
 } // namespace pos

@@ -108,9 +108,9 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-    virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+    virtual void ValidateBlks(VirtualBlks blks, int groupId = UINT32_MAX) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease, int groupId = UINT32_MAX) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid, int groupId = UINT32_MAX) override;
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 

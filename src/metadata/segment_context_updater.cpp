@@ -45,32 +45,32 @@ SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* context_, IVersionedSe
 }
 
 void
-SegmentContextUpdater::ValidateBlks(VirtualBlks blks)
+SegmentContextUpdater::ValidateBlks(VirtualBlks blks, int groupId)
 {
     activeContext->ValidateBlks(blks);
 
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
-    versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+    versionedContext->IncreaseValidBlockCount(groupId, segmentId, blks.numBlks);
 }
 
 bool
-SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced)
+SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced, int groupId)
 {
     bool ret = activeContext->InvalidateBlks(blks, isForced);
 
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
-    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
+    versionedContext->DecreaseValidBlockCount(groupId, segmentId, blks.numBlks);
 
     return ret;
 }
 
 bool
-SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
+SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid, int groupId)
 {
     bool ret = activeContext->UpdateOccupiedStripeCount(lsid);
 
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
-    versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
+    versionedContext->IncreaseOccupiedStripeCount(groupId, segmentId);
 
     return ret;
 }
