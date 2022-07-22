@@ -93,7 +93,7 @@ JournalWriter::_CanBeWritten(void)
         returnCode = eventId;
     }
 
-    POS_TRACE_INFO_CONDITIONALLY(&changeLogger, eventId, currentStatus, "");
+    POS_TRACE_INFO_CONDITIONALLY(&changeLogger, eventId, currentStatus, "status changed");
 
     return returnCode;
 }

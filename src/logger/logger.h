@@ -330,7 +330,7 @@ public:
 
         if (logger_)
         {
-            logger_->Poslog(loc, lvl, id, msg + "current:{}, prev:{}, prev_count:{}", prev_, currentState, count_);
+            logger_->Poslog(loc, lvl, id, msg + " current_state:{}, prev_state:{}, prev_state_repeat_count:{} times", prev_, currentState, count_);
         }
         count_ = 0;
         prev_ = currentState;
