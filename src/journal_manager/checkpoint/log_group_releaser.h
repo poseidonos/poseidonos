@@ -78,7 +78,7 @@ public:
     virtual void AddToFullLogGroup(int groupId, uint32_t sequenceNumber);
 
     virtual int GetFlushingLogGroupId(void) override;
-    virtual std::list<LogGroupInfo> GetFullLogGroups(void) override;
+    virtual std::list<int> GetFullLogGroups(void) override;
     virtual CheckpointStatus GetStatus(void) override;
 
     virtual void LogGroupResetCompleted(int logGroupId) override;

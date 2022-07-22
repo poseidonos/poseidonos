@@ -13,7 +13,7 @@ class MockICheckpointStatus : public ICheckpointStatus
 public:
     using ICheckpointStatus::ICheckpointStatus;
     MOCK_METHOD(int, GetFlushingLogGroupId, (), (override));
-    MOCK_METHOD((std::list<LogGroupInfo>), GetFullLogGroups, (), (override));
+    MOCK_METHOD((std::list<int>), GetFullLogGroups, (), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));
 };
 

@@ -52,6 +52,7 @@ public:
     virtual bool IsEmpty(void) override;
     virtual void SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer) override;
 
+    virtual void EraseReplayLogGroup(uint32_t seqNum);
     virtual ReplayLogGroup PopReplayLogGroup(void);
     std::vector<ReplayLog>& GetDeletingLogs(void);
 

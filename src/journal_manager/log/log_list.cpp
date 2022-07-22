@@ -70,6 +70,12 @@ LogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
     // do nothing
 }
 
+void
+LogList::EraseReplayLogGroup(uint32_t seqNum)
+{
+    // do nothing
+}
+
 // This is for journal integration test
 std::list<LogHandlerInterface*>
 LogList::GetLogs(void)

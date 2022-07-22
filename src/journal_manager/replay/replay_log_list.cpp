@@ -99,6 +99,12 @@ ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
     }
 }
 
+void
+ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
+{
+    logGroups.erase(seqNum);
+}
+
 ReplayLogGroup
 ReplayLogList::PopReplayLogGroup(void)
 {

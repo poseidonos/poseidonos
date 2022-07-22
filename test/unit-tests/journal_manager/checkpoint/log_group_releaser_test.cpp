@@ -69,9 +69,14 @@ TEST(LogGroupReleaser, GetFullLogGroups_testIfExecutedSuccessfully)
 
     // When
     auto actual = releaser.GetFullLogGroups();
+    std::list<int> expect;
+    for (auto it: logGroups)
+    {
+        expect.push_back(it.logGroupId);
+    }
 
     // Then
-    EXPECT_EQ(actual, logGroups);
+    EXPECT_EQ(actual, expect);
 }
 
 TEST(LogGroupReleaser, GetStatus_testIfExecutedSuccessfully)
@@ -122,7 +127,7 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointStartedWhenThereIsNoFl
 
     // Then: Full log group list should not include log group 0,
     // and flushing log group id should be updated
-    EXPECT_NE(releaser.GetFullLogGroups().front().logGroupId, targetLogGroup);
+    EXPECT_NE(releaser.GetFullLogGroups().front(), targetLogGroup);
     EXPECT_EQ(releaser.GetFlushingLogGroupId(), targetLogGroup);
 }
 
