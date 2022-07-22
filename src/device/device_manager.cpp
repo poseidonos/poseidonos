@@ -290,6 +290,7 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
     devices.erase(iter);
     if (type == DeviceType::SSD && ssd != nullptr)
     {
+        ssd->SetHotDetached();
         UnvmeDrvSingleton::Instance()->GetDaemon()->Resume();
     }
 
