@@ -70,6 +70,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx, 0);
 
     // Start Test
+    int targetLogGroupId = 0;
     for (int i = 0; i < TEST_TRIAL; ++i)
     {
         int nanoSec = std::rand() % 100;
@@ -80,7 +81,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
                 .stripeId = 0,
                 .offset = 0},
             .numBlks = 1};
-        std::thread th2(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate, false);
+        std::thread th2(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate, false, targetLogGroupId);
         th1.join();
         th2.join();
 
@@ -89,7 +90,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
                 .stripeId = 3,
                 .offset = 0},
             .numBlks = 1};
-        std::thread th3(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate2, false);
+        std::thread th3(&SegmentCtx::InvalidateBlks, segmentCtx, blksToInvalidate2, false, targetLogGroupId);
         std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSec));
         std::thread th4(&SegmentCtx::GetRebuildTargetSegment, segmentCtx);
         th3.join();
@@ -227,6 +228,8 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     uint32_t maxValidBlkCount = 32;
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlkCount));
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
+
+    int targetLogGroupId = 0;
     for (SegmentId segId = 0; segId < numSegments; segId++)
     {
         VirtualBlks blks = {
@@ -234,14 +237,14 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
                 .stripeId = segId * STRIPE_PER_SEGMENT,
                 .offset = 0},
             .numBlks = maxValidBlkCount};
-        segmentCtx->ValidateBlks(blks);
+        segmentCtx->ValidateBlks(blks, targetLogGroupId);
     }
 
     // When : All stripes in each segment is occupied
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(STRIPE_PER_SEGMENT));
     for (StripeId lsid = 0; lsid < STRIPE_PER_SEGMENT * numSegments; lsid++)
     {
-        segmentCtx->UpdateOccupiedStripeCount(lsid);
+        segmentCtx->UpdateOccupiedStripeCount(lsid, targetLogGroupId);
     }
 
     // Then: State of occupied segments must be SSD
@@ -264,7 +267,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
             .numBlks = maxValidBlkCount,
         };
 
-        segmentCtx->InvalidateBlks(blks, false);
+        segmentCtx->InvalidateBlks(blks, false, targetLogGroupId);
     }
 
     // Then: State of overwritten segments must be FREE and occupied stripe count is zero

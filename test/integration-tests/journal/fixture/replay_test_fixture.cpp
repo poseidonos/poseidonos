@@ -71,7 +71,7 @@ ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksTo
         {
             VirtualBlks blk = _GetBlock(blks, offset);
             EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
-            EXPECT_CALL(*(allocator->GetISegmentCtxMock()), ValidateBlks(blk));
+            EXPECT_CALL(*(allocator->GetISegmentCtxMock()), ValidateBlks(blk, 0));
         }
     }
 }
@@ -131,7 +131,7 @@ ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
         for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks; blockOffset++)
         {
             VirtualBlks blks = _GetBlock((*vsa).second, blockOffset);
-            EXPECT_CALL(*(allocator->GetISegmentCtxMock()), InvalidateBlks(blks, true));
+            EXPECT_CALL(*(allocator->GetISegmentCtxMock()), InvalidateBlks(blks, true, 0));
         }
     }
 }

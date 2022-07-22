@@ -37,9 +37,11 @@ TEST(StripeMapUpdate, _DoSpecificJob_testIfMetadataUpdatedSuccessfully)
     ON_CALL(stripe, GetVsid).WillByDefault(Return(vsid));
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(userLsid));
 
+    int targetLogGroupId = 0;
     EXPECT_CALL(stripeMap, SetLSA(vsid, userLsid, IN_USER_AREA)).Times(1);
-    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
+    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid, targetLogGroupId)).Times(1);
 
+    stripeMapUpdate.UpdateLogGroupId(targetLogGroupId);
     bool result = stripeMapUpdate.Execute();
     EXPECT_EQ(result, true);
 }

@@ -33,10 +33,11 @@ TEST(SegmentContextUpdater, ValidateBlks_testIfBothContextIsUpdatedProperly)
         .startVsa = { .stripeId = 1000, .offset = 0 },
         .numBlks = 10};
 
-    EXPECT_CALL(segmentCtx, ValidateBlks(blks)).Times(1);
-    EXPECT_CALL(versionedCtx, IncreaseValidBlockCount(_, blks.startVsa.stripeId / sizeInfo.stripesPerSegment, blks.numBlks)).Times(1);
+    int targetLogGroupId = 0;
+    EXPECT_CALL(segmentCtx, ValidateBlks(blks, targetLogGroupId)).Times(1);
+    EXPECT_CALL(versionedCtx, IncreaseValidBlockCount(targetLogGroupId, blks.startVsa.stripeId / sizeInfo.stripesPerSegment, blks.numBlks)).Times(1);
 
-    updater.ValidateBlks(blks);
+    updater.ValidateBlks(blks, targetLogGroupId);
 }
 
 TEST(SegmentContextUpdater, InvalidateBlks_testIfBothContextIsUpdatedProperly)
@@ -52,10 +53,12 @@ TEST(SegmentContextUpdater, InvalidateBlks_testIfBothContextIsUpdatedProperly)
         .startVsa = { .stripeId = 1000, .offset = 0 },
         .numBlks = 10};
 
-    EXPECT_CALL(segmentCtx, InvalidateBlks(blks, true)).Times(1);
-    EXPECT_CALL(versionedCtx, DecreaseValidBlockCount(_, blks.startVsa.stripeId / sizeInfo.stripesPerSegment, blks.numBlks)).Times(1);
+    int targetLogGroupId = 0;
 
-    updater.InvalidateBlks(blks, true);
+    EXPECT_CALL(segmentCtx, InvalidateBlks(blks, true, targetLogGroupId)).Times(1);
+    EXPECT_CALL(versionedCtx, DecreaseValidBlockCount(targetLogGroupId, blks.startVsa.stripeId / sizeInfo.stripesPerSegment, blks.numBlks)).Times(1);
+
+    updater.InvalidateBlks(blks, true, targetLogGroupId);
 }
 
 TEST(SegmentContextUpdater, UpdateOccupiedStripeCount_testIfBothContextIsUpdatedProperly)
@@ -68,10 +71,11 @@ TEST(SegmentContextUpdater, UpdateOccupiedStripeCount_testIfBothContextIsUpdated
     SegmentContextUpdater updater(&segmentCtx, &versionedCtx, &sizeInfo);
 
     StripeId lsid = 2031;
-    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(lsid)).Times(1);
-    EXPECT_CALL(versionedCtx, IncreaseOccupiedStripeCount(_, lsid / sizeInfo.stripesPerSegment)).Times(1);
+    int targetLogGroupId = 0;
+    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(lsid, targetLogGroupId)).Times(1);
+    EXPECT_CALL(versionedCtx, IncreaseOccupiedStripeCount(targetLogGroupId, lsid / sizeInfo.stripesPerSegment)).Times(1);
 
-    updater.UpdateOccupiedStripeCount(lsid);
+    updater.UpdateOccupiedStripeCount(lsid, targetLogGroupId);
 }
 
 } // namespace pos

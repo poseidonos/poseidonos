@@ -70,9 +70,10 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
 
     GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 
+    int targetLogGroupId = 0;
     ON_CALL(*stripe, GetUserLsid).WillByDefault(Return(userLsid));
     ON_CALL(*stripe, GetVsid).WillByDefault(Return(vsid));
-    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid)).Times(1);
+    EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(userLsid, targetLogGroupId)).Times(1);
 
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
     {
@@ -83,8 +84,9 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
     EXPECT_CALL(segmentCtx, InvalidateBlks).Times(1);
     VirtualBlkAddr writeVsa = {vsid, 0};
     VirtualBlks writeVsaRange = {writeVsa, validMapCnt};
-    EXPECT_CALL(segmentCtx, ValidateBlks(writeVsaRange)).Times(1);
+    EXPECT_CALL(segmentCtx, ValidateBlks(writeVsaRange, targetLogGroupId)).Times(1);
 
+    gcMapUpdate.UpdateLogGroupId(targetLogGroupId);
     bool result = gcMapUpdate.Execute();
     EXPECT_EQ(result, true);
 }

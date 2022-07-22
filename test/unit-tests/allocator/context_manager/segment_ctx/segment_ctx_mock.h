@@ -45,9 +45,9 @@ public:
     MOCK_METHOD(bool, LoadRebuildList, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
     MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
-    MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
-    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
-    MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks, int logGroupId), (override));
+    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease, int logGroupId), (override));
+    MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid, int logGroupId), (override));
 };
 
 } // namespace pos
