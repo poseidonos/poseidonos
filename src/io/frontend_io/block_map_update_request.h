@@ -39,6 +39,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
 #include "src/io/frontend_io/write_completion.h"
+#include "src/logger/logger.h"
 #include "src/meta_service/i_meta_updater.h"
 
 namespace pos
@@ -65,6 +66,7 @@ private:
     CallbackSmartPtr blockMapUpdateCompletionEvent;
     IMetaUpdater* metaUpdater;
     EventScheduler* eventScheduler;
+    ChangeLogger<int> changeLogger;
 };
 
 } // namespace pos

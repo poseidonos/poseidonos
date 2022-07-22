@@ -417,6 +417,7 @@ enum class POS_EVENT_ID
     JOURNAL_NOT_READY = 3003,
     JOURNAL_ALREADY_EXIST = 3004,
     JOURNAL_INVALID = 3005,
+    JOURNAL_READY = 3006,
 
     // --------------Journal log buffer (3010)---------
     JOURNAL_LOG_BUFFER_CREATED = 3010,

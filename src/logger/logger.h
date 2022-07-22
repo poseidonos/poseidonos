@@ -33,6 +33,7 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
+#include <atomic>
 #include <iostream>
 #include <memory>
 #include <set>
@@ -298,4 +299,65 @@ reporter()
         reporter()                                                                                                \
             ->Poslog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__);     \
     }
+
+namespace pos
+{
+template<typename StateT>
+class ChangeLogger
+{
+public:
+    ChangeLogger(void)
+    : ChangeLogger(logger(), StateT())
+    {
+    }
+    ChangeLogger(Logger* logger, StateT initState)
+    : logger_(logger),
+      prev_(initState),
+      count_(0)
+    {
+    }
+    virtual ~ChangeLogger(void)
+    {
+    }
+    virtual void LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
+        int id, StateT currentState, std::string msg)
+    {
+        if (prev_ == currentState)
+        {
+            count_++;
+            return;
+        }
+
+        if (logger_)
+        {
+            logger_->Poslog(loc, lvl, id, msg + " current_state:{}, prev_state:{}, prev_state_repeat_count:{} times", prev_, currentState, count_);
+        }
+        count_ = 0;
+        prev_ = currentState;
+    }
+    virtual uint64_t GetCount(void)
+    {
+        return count_;
+    }
+
+private:
+    pos::Logger* logger_;
+    StateT prev_;
+    std::atomic<uint64_t> count_;
+};
+} // namespace pos
+
+#define POS_TRACE_DEBUG_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::debug, id, currentState, msg)
+#define POS_TRACE_WARN_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, id, currentState, msg)
+#define POS_TRACE_TRACE_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::trace, id, currentState, msg)
+#define POS_TRACE_INFO_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, id, currentState, msg)
+#define POS_TRACE_ERROR_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::err, id, currentState, msg)
+#define POS_TRACE_CRITICAL_CONDITIONALLY(instance, id, currentState, msg) \
+    (instance)->LoggingStateChangeConditionally(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::critical, id, currentState, msg)
+
 #endif // LOGGER_H_

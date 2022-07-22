@@ -33,7 +33,9 @@
 #pragma once
 
 #include "src/journal_manager/i_journal_writer.h"
+#include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/logger/logger.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
@@ -66,6 +68,7 @@ private:
     LogWriteContextFactory* logFactory;
     JournalEventFactory* eventFactory;
     JournalingStatus* status;
+    ChangeLogger<JournalManagerStatus> changeLogger;
 };
 
 } // namespace pos
