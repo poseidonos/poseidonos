@@ -135,6 +135,7 @@ CopierReadCompletion::_DoSpecificJob(void)
             }
             else
             {
+                airlog("InternalIoPendingCnt", "AIR_UserIo", volId, 1);
                 EventSmartPtr flushEvent;
                 if (nullptr == inputFlushEvent)
                 {
@@ -152,6 +153,7 @@ CopierReadCompletion::_DoSpecificJob(void)
     }
 
     volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo, blkCnt);
+    airlog("InternalIoPendingCnt", "AIR_UserIo", volId, -blkCnt);
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
     airlog("PERF_CopierRead", "AIR_READ", 0, BLOCK_SIZE * blkCnt);

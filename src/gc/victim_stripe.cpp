@@ -184,6 +184,7 @@ VictimStripe::LoadValidBlock(void)
                 break;
             }
 
+            airlog("InternalIoPendingCnt", "AIR_UserIo", blkInfo.volID, 1);
             blkInfoList.push_back(blkInfo);
             validBlockCnt++;
         }
