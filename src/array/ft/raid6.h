@@ -30,60 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef RAID6_H_
+#define RAID6_H_
 
-#include <string>
+#include "method.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/resource_manager/memory_manager.h"
 
-using namespace std;
+#include <list>
+#include <vector>
 namespace pos
 {
+class PartitionPhysicalSize;
+class RebuildBehavior;
+class BufferPool;
 
-enum class RaidTypeEnum
-{
-    NOT_SUPPORTED,
-    NONE,
-    RAID0,
-    RAID5,
-    RAID10,
-    RAID6,
-    TYPE_COUNT,
-};
-
-class RaidType
+class Raid6 : public Method
 {
 public:
-    RaidType(void) { val = RaidTypeEnum::NONE; }
-    RaidType(RaidTypeEnum t) : val(t) { }
-    RaidType(string type)
-    {
-        val = RaidTypeEnum::NOT_SUPPORTED;
-        for (int i = 0; i < (int)RaidTypeEnum::TYPE_COUNT; i++)
-        {
-            if (type == RAID_STR[i])
-            {
-                val = static_cast<RaidTypeEnum>(i);
-                break;
-            }
-        }
-    }
-    operator RaidTypeEnum(void) const { return val; }
-    bool operator == (const RaidType t) const { return val == t.val; }
-    bool operator != (const RaidType t) const { return val != t.val; }
-    bool operator == (const RaidTypeEnum t) const { return val == t; }
-    bool operator != (const RaidTypeEnum t) const { return val != t; }
-    string ToString(void) const { return RAID_STR[(int)val]; }
+    explicit Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
+    virtual ~Raid6();
+    virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
+        AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
+        MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
+    virtual void ClearParityPools();
+    virtual list<FtEntry> Translate(const LogicalEntry& le) override;
+    virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    vector<uint32_t> GetParityOffset(StripeId lsid) override;
+    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
+
+    // This function is for unit testing only
+    virtual int GetParityPoolSize();
 
 private:
-    RaidTypeEnum val;
-    string RAID_STR[(int)RaidTypeEnum::TYPE_COUNT] =
-    {
-        "NOT_SUPPORTED",
-        "NONE",
-        "RAID0",
-        "RAID5",
-        "RAID10",
-        "RAID6",
-    };
+    void _BindRecoverFunc(void);
+    void _RebuildData(void* dst, void* src, uint32_t size);
+    BufferEntry _AllocChunk();
+    void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
+    vector<BufferPool*> parityPools;
+    AffinityManager* affinityManager = nullptr;
+    MemoryManager* memoryManager = nullptr;
+    uint64_t parityBufferCntPerNuma = 0;
+
+    uint32_t chunkSize = 0;
+    uint32_t chunkCnt = 0;
+    uint32_t dataCnt = 0;
+    uint32_t parityCnt = 2;
+    unsigned char* encode_matrix = nullptr;
+    unsigned char* g_tbls = nullptr;
 };
 
 } // namespace pos
+#endif // RAID6_H_

@@ -46,6 +46,7 @@
 #include "src/array/ft/raid5.h"
 #include "src/array/ft/raid0.h"
 #include "src/array/ft/raid_none.h"
+#include "src/array/ft/raid6.h"
 #include "src/helper/calc/calc.h"
 
 namespace pos
@@ -220,6 +221,16 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
                 "Failed to alloc ParityPools for RAID5, request:{}", reqBuffersPerNuma);
         }
         method = raid5;
+    }
+    else if (raidType == RaidTypeEnum::RAID6)
+    {
+        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
+        uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
+        uint64_t maxGcStripes = 2048;
+        uint64_t parityCnt = 2;
+        uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
+        Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
+        method = raid6;
     }
     else if (raidType == RaidTypeEnum::NONE)
     {

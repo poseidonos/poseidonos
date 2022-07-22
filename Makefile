@@ -133,6 +133,7 @@ LDFLAGS += -lyaml-cpp
 LDFLAGS += -ltbb
 LDFLAGS += -lrocksdb
 LDFLAGS += -lstdc++fs
+LDFLAGS += -lisal
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli
