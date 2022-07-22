@@ -84,6 +84,7 @@ DeviceManager::DeviceManager(AffinityManager* affinityManager,
 : affinityManager(affinityManager),
   spdkNvmeCaller(spdkNvmeCaller)
 {
+    waitSsdDestruction = false;
     _InitDriver();
     _InitMonitor();
 }
@@ -478,8 +479,11 @@ DeviceManager::DetachDevice(DevUid uid)
             if (dev == nullptr)
             {
                 // Device Manager can call DetachDevice for already removed Ublock Device.
-                // So, just resume the Daemon.
-                unvmeDriver->GetDaemon()->Resume();
+                if (waitSsdDestruction == false)
+                {
+                    POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH, "monitoring resumes");
+                    unvmeDriver->GetDaemon()->Resume();
+                }
                 POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
                     "DetachDevice - unknown device or already detached: {}", uid.val);
                 return EID(DEVICEMGR_DETACH);
@@ -566,9 +570,14 @@ DeviceManager::HandleSsdDestructionNotification(void)
     if (waitSsdDestruction == true)
     {
         waitSsdDestruction = false;
-         POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
+        POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
                 "SSD removal operation has been cleared and monitoring resumes");
         unvmeDriver->GetDaemon()->Resume();
+    }
+    else
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::DEVICEMGR_DETACH,
+                "unhandled path");
     }
 }
 } // namespace pos

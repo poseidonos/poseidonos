@@ -119,7 +119,7 @@ private:
     IIODispatcher* ioDispatcher = nullptr;
     DeviceDriver* uramDriver = nullptr;
     DeviceDriver* unvmeDriver = nullptr;
-    bool waitSsdDestruction = false;
+    atomic<bool> waitSsdDestruction;
 };
 
 void DeviceDetachEventHandler(string sn);
