@@ -279,6 +279,11 @@ DeviceManager::_InitScan(void)
 int
 DeviceManager::RemoveDevice(UblockSharedPtr dev)
 {
+    string devName = "null";
+    if (dev != nullptr)
+    {
+        devName = dev->GetName();
+    }
     std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
     auto iter = find(devices.begin(), devices.end(), dev);
     if (iter == devices.end())
@@ -287,10 +292,9 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
             "device not found");
         return static_cast<int>(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV);
     }
-
-    UnvmeSsdSharedPtr ssd = nullptr;
-
     DeviceType type = (*iter)->GetType();
+    POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV, "Trying to remove device, name:{}, type:{}", devName, type);
+    UnvmeSsdSharedPtr ssd = nullptr;
     if (type == DeviceType::SSD)
     {
         ssd = dynamic_pointer_cast<UnvmeSsd>(dev);
@@ -300,17 +304,24 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
     ioDispatcher->RemoveDeviceForIOWorker(dev);
 
     devices.erase(iter);
-    if (type == DeviceType::SSD && ssd != nullptr)
+    if (type == DeviceType::SSD)
     {
-        waitSsdDestruction = true;
-        SsdDestructionNotification cb = bind(&DeviceManager::HandleSsdDestructionNotification, this);
-        ssd->SetDestructionCallback(cb);
-        POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_DETACH,
-                "Pending I/O removal operation of ssd is in progress and monitoring resume is suspended yet.");
+        if (ssd != nullptr)
+        {
+            waitSsdDestruction = true;
+            SsdDestructionNotification cb = bind(&DeviceManager::HandleSsdDestructionNotification, this);
+            ssd->SetDestructionCallback(cb);
+            POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
+                    "Pending I/O removal operation of ssd is in progress and monitoring resume is suspended yet.");
+        }
+        else
+        {
+            POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV, "Trying to remove ssd but ssd is already null, name:{}, type:{}", devName, type);
+        }
     }
 
     POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV,
-        "device removed successfully {}", dev->GetName());
+        "device removed successfully {}", devName);
     dev = nullptr;
 
     return 0;
@@ -471,7 +482,7 @@ DeviceManager::DetachDevice(DevUid uid)
                 unvmeDriver->GetDaemon()->Resume();
                 POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
                     "DetachDevice - unknown device or already detached: {}", uid.val);
-                return static_cast<int>(POS_EVENT_ID::DEVICEMGR_DETACH);
+                return EID(DEVICEMGR_DETACH);
             }
             ret = _DetachDeviceImpl(dev);
         }
@@ -555,7 +566,7 @@ DeviceManager::HandleSsdDestructionNotification(void)
     if (waitSsdDestruction == true)
     {
         waitSsdDestruction = false;
-         POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_DETACH,
+         POS_TRACE_WARN(POS_EVENT_ID::DEVICEMGR_DETACH,
                 "SSD removal operation has been cleared and monitoring resumes");
         unvmeDriver->GetDaemon()->Resume();
     }
